@@ -8,7 +8,8 @@ function serch() {
   else if(ser=="nil"){window.open("null.html");}
   else if(ser=="openprojectsource"){window.open("openprojectsource.html");}
   else if(ser=="skeletonparty"){window.open("skull-party!.html");}
-  else if(ser=="woowzsite1999"){window.open("site_woowz11_2.html");}
+  else if(ser=="woowzsite2003"){window.open("site_woowz11_2.html");}
+  else if(ser=="woowzsite1999"){window.open("index.html");}
   else if(ser=="woowzsite1997"){window.open("site_woowz11.html");}
   else if(ser=="list"){window.open("list.html");}
   else if(ser=="all"){window.open("list.html");}
@@ -22,6 +23,7 @@ function serch() {
   else if(ser=="bloodeye"){window.open("blood_eye_co.html");}
   else if(ser=="bloodeyenew"){window.open("blood_eye_co_new.html");}
   else if(ser=="forest"){window.open("forest.html");}
+  else if(ser==":d"){window.open("img.html");}
   else if(ser=="openprojectsourcedownload"){window.open("openprojectsource_download.html");}
   else if(ser=="")
   {
