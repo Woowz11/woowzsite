@@ -21,6 +21,7 @@ function serch() {
   else if(ser=="dexonmusic"){window.open("dexonmusic.html");}
   else if(ser=="bloodeye"){window.open("blood_eye_co.html");}
   else if(ser=="bloodeyenew"){window.open("blood_eye_co_new.html");}
+  else if(ser=="forest"){window.open("forest.html");}
   else if(ser=="openprojectsourcedownload"){window.open("openprojectsource_download.html");}
   else if(ser=="")
   {
