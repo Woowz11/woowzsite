@@ -15,6 +15,10 @@ function serch() {
   else if(ser=="all"){window.open("list.html");}
   else if(ser=="allsites"){window.open("list.html");}
   else if(ser=="allwebsites"){window.open("list.html");}
+  else if(ser=="list64"){window.open("list64.html");}
+  else if(ser=="all64"){window.open("list64.html");}
+  else if(ser=="allsites64"){window.open("list64.html");}
+  else if(ser=="allwebsites64"){window.open("list64.html");}
   else if(ser=="firstpage"){window.open("firstpage.html");}
   else if(ser=="firstsite"){window.open("firstpage.html");}
   else if(ser=="firstwebsite"){window.open("firstpage.html");}
@@ -24,6 +28,8 @@ function serch() {
   else if(ser=="bloodeyenew"){window.open("blood_eye_co_new.html");}
   else if(ser=="forest"){window.open("forest.html");}
   else if(ser==":d"){window.open("img.html");}
+  else if(ser=="eyes"){window.open("eyes.html");}
+  else if(ser=="sex"){window.open("xxx.html");}else if(ser=="porn"){window.open("xxx.html");}else if(ser=="xxx"){window.open("xxx.html");}else if(ser=="18+"){window.open("xxx.html");}
   else if(ser=="openprojectsourcedownload"){window.open("openprojectsource_download.html");}
   else if(ser=="")
   {

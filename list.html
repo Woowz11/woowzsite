@@ -1,7 +1,10 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>[-ALL-WEBSITES-]</title>
-<img src="source\welcome.gif"><p></p>
+
+<body onload="lodlist()">
+
+<center><img src="source\welcome.gif"><p></p>
 <font>All Websites!</font>
 <p></p>
 
@@ -10,6 +13,8 @@
 
 <script src="source\search.js">
 </script>
+<script src="source\loadlist.js">
+</script>
 
 <script>
 var input = document.getElementById("search");
@@ -17,53 +22,14 @@ input.addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
     event.preventDefault();
     document.getElementById("button_search").click();
+	
+	lodlist();
   }
 });
 </script>
 
 <p>-----------------------------</p>
 <a href="list.html">This website</a><p></p>
-<font>list, allsites, allwebsites</font>
-<p>-----------------------------</p>
-<a href="site_woowz11.html">Woowz Site 1997</a><p></p>
-<font>woowzsite1997</font>
-<p></p>
-<a href="index.html">Woowz Site 1999</a><p></p>
-<font>woowzsite1999</font>
-<p></p>
-<a href="site_woowz11_2.html">Woowz Site 2003</a><p></p>
-<font>woowzsite2003</font>
-<p>-----------------------------</p>
-<a href="null.html">Null Webite</a><p></p>
-<font>[Empty Symbol], null, nil</font>
-<p>-----------------------------</p>
-<a href="skull-party!.html">Skeleton Party!</a><p></p>
-<font>skeletonparty</font>
-<p>-----------------------------</p>
-<a href="test_site.html">Test Website</a><p></p>
-<font>test</font>
-<p>-----------------------------</p>
-<a href="openprojectsource.html">Open Project Source</a><p></p>
-<font>openprojectsource</font>
-<p></p>
-<a href="openprojectsource_download.html">Open Project Source: Download</a><p></p>
-<font>openprojectsourcedownload</font>
-<p>-----------------------------</p>
-<a href="firstpage.html">"First" Website</a><p></p>
-<font>firstpage, firstwebsite, firstsite</font>
-<p>-----------------------------</p>
-<a href="dexonmusic.html">Dexon Music Website</a><p></p>
-<font>dexon, dexonmusic</font>
-<p>-----------------------------</p>
-<a href="forest.html">The Forest</a><p></p>
-<font>forest</font>
-<p>-----------------------------</p>
-<a href="blood_eye_co.html">Blood Eye Website</a><p></p>
-<font>bloodeye</font>
-<p></p>
-<a href="blood_eye_co_new.html">New Blood Eye Website</a><p></p>
-<font>bloodeyenew</font>
-<p>-----------------------------</p>
-<a href="img.html">:D</a><p></p>
-<font>:D</font>
-<p>-----------------------------</p>
+<font>list, allsites, allwebsites, all</font><p></p>
+<p id="list"></p>
+</center>
