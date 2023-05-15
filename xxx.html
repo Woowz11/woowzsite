@@ -13,6 +13,7 @@ p{
 	color: red;
 }
 </style>
+<body id="body_take" onload="filterload()"></body>
 <link rel="icon" type="image/x-icon" href="source\xxx.ico">
 <center><font style="color: red; font-size: 200px;">NO!!!</font></center>
 <center><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"><img src="source\p.png"></center>
@@ -22,3 +23,13 @@ p{
 </audio><p></p>
 <p>Didn't find what you were looking for? Try here!</p>
 <a href="site_woowz11.html"><p class="link">!!CLICK!!</p></a>
+
+<center><img style="margin-top: 500%;" src="source\obsidian_bowl.png"></center>
+<center><font color="yellow" id="checkthis" class="bottomtext">Copyright &copy; PavkaLakarRightOrLeftIDKLeg</font></center>
+
+<script>
+function filterload(){
+var body = document.getElementById("body_take");
+body.style.filter = " blur("+range.value*10+"px);";
+}
+</script>

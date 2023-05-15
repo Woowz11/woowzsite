@@ -24,11 +24,15 @@ function serch() {
   else if(ser=="firstwebsite"){window.open("firstpage.html");}
   else if(ser=="dexon"){window.open("dexonmusic.html");}
   else if(ser=="dexonmusic"){window.open("dexonmusic.html");}
+  else if(ser=="dexonnew"){window.open("dexon.html");}
+  else if(ser=="dexonmusicnew"){window.open("dexon.html");}
   else if(ser=="bloodeye"){window.open("blood_eye_co.html");}
+  else if(ser=="bloodeyesystems"){window.open("blood_eye_co_systems.html");}
   else if(ser=="bloodeyenew"){window.open("blood_eye_co_new.html");}
   else if(ser=="forest"){window.open("forest.html");}
   else if(ser==":d"){window.open("img.html");}
   else if(ser=="eyes"){window.open("eyes.html");}
+  else if(ser=="quaere"){window.open("quaere.html");}
   else if(ser=="sex"){window.open("xxx.html");}else if(ser=="porn"){window.open("xxx.html");}else if(ser=="xxx"){window.open("xxx.html");}else if(ser=="18+"){window.open("xxx.html");}
   else if(ser=="openprojectsourcedownload"){window.open("openprojectsource_download.html");}
   else if(ser=="")
