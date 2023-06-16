@@ -41,6 +41,22 @@ table {
     color: black;
     border-spacing: 1px;
  }
+ 
+ html{
+       text-shadow: 0 0 0 black;
+       animation-duration: 0.0001s;
+       animation-name: textflicker;
+       animation-iteration-count: infinite;
+       animation-direction: alternate;
+ }
+ 
+@keyframes textflicker {
+  from {
+    text-shadow: 0 0 0 black;
+  }
+  to {
+    text-shadow: 2px 0 0 black;
+  }
 </style>
 
 <a href="blood_eye_co.html">
@@ -54,7 +70,7 @@ table {
 <table>
 <tr class="mar"><th class="mar">Icon</th><th class="mar" >Production info.</th><th class="mar">Properties</th><th class="mar">Reviews</th><th class="mar">Images</th></tr>
 
-<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system_3d.png" width="137" height="195"><p></p>Blood Eye System</th><th>1984</th><th>a</th><th>a</th><th>a</th></tr>
-<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system2_3d.png" width="137" height="195"><p></p>Blood Eye System II</th><th>1986</th><th>a</th><th>a</th><th>a</th></tr>
-<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system3_3d.png" width="137" height="195"><p></p>Blood Eye System 3</th><th>1989</th><th>a</th><th>a</th><th>a</th></tr>
+<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system_3d.png" width="137" height="195"><p></p>Blood Eye System</th><th>1984</th><th>a</th><th>a</th><th style="background-color: gray;"><img class="scale" src="source\bloodeyesystems\bloodeye_system_screen.png" width="269" height="224"></th></tr>
+<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system2_3d.png" width="137" height="195"><p></p>Blood Eye System II</th><th>1986</th><th>a</th><th>a</th><th style="background-color: gray;"><img class="scale" src="source\bloodeyesystems\bloodeye_system_2_screen.png" width="358" height="224"></th></tr>
+<tr><th><img class="scale" src="source\bloodeyesystems\bloodeye_system3_3d.png" width="137" height="195"><p></p>Blood Eye System 3</th><th>1989</th><th>a</th><th>a</th><th style="background-color: gray;">a</th></tr>
 </table>

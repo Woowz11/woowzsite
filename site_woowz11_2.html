@@ -9,25 +9,47 @@ body {
 .title{
 	margin-top: 10%;
 	margin-bottom: 2%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    pointer-events: none;
 }
 
-.bottomtext{
-	margin_top: 10%;
+input[type=text], select{
+  border: 1px solid #ccc;
+  <!--color: #E39A01;-->
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+input[type=text]{
+  color: #E39A01;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
 }
 
 .search{
-  cursor: pointer;
-  background-color: #FFD2B2;
+  cursor: text;
+  background-color: #FFFFFF;
 }
 
+.search_button{
+  cursor: pointer;
+  background-color: #E39A01;
+   padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+}
+
+a{
+ color: #E39A01;
+}
 .container {
   position: relative;
   text-align: center;
   color: white;
-}
-
-a{
-	background-color: white;
 }
 
 .centered {
@@ -39,19 +61,13 @@ a{
 </style>
 <center><img class="title" src="source/title4.png" width="960" height="128"></center>
 <p></p>
-<center><input type="text" class="search" placeholder="Введите название страницы..." size="50" id="search"></center>
+<center><input type="text" class="search" placeholder="Введите запрос" size="60" id="search"> <button class="search_button" type="button" id="button_search" onclick="serch()">&nbsp;&nbsp;Искать&nbsp;&nbsp;</button> </center>
 <p></p>
-<center><font class="title" style="font-size:15px;" color="white">Не знаете какой сайт набрать? Воспользуйтесь катологом сайтов! </font><a href="list.html">Link</a></center>
-<p></p>
-<center><button class="search" type="button" id="button_search" onclick="serch()">&nbsp;&nbsp;Перейти!&nbsp;&nbsp;</button></center>
-
-<center><img src="source\wowzsearch.gif"></center>
+<center><font class="title" style="font-size:20px; background-color: white;" color="black">Список сайтов: </font><a href="list.html" style="font-size:20px; background-color: white;">Список</a></center>
 <p></p>
 
-<center><div class="container">
-  <img src="source\background.png" height = "50" width="250">
-  <div class="centered"><font color="black" id="checkthis" class="bottomtext">&copy;2003 Woowz11</font></div>
-</div></center>
+<center><font style="font-size:20px; background-color: white;" color="black" id="checkthis">&copy;2003 Woowz11</font></center>
+
 
 <script src="source\search.js">
 </script>
@@ -59,9 +75,12 @@ a{
 <script>
 var input = document.getElementById("search");
 input.addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
+  if (event.key == "Enter") {
     event.preventDefault();
     document.getElementById("button_search").click();
+  }
+  else if (event.key == "Delete1") {
+    input.value = "";
   }
 });
 </script>

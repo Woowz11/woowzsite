@@ -1,3 +1,46 @@
-function lodlist() {
-  document.getElementById("list").innerHTML = '<p>-----------------------------</p><a href="quaere.html">Quaere Search</a><p></p><font>quaere</font><p>-----------------------------</p><a href="site_woowz11.html">Woowz Site 1997</a><p></p><font>woowzsite1997</font><p></p><a href="index.html">Woowz Site 1999</a><p></p><font>woowzsite1999</font><p></p><a href="site_woowz11_2.html">Woowz Site 2003</a><p></p><font>woowzsite2003</font><p>-----------------------------</p><a href="null.html">Null Webite</a><p></p><font>[Empty Symbol], null, nil</font><p>-----------------------------</p><a href="skull-party!.html">Skeleton Party!</a><p></p><font>skeletonparty</font><p>-----------------------------</p><a href="test_site.html">Test Website</a><p></p><font>test</font><p>-----------------------------</p><a href="openprojectsource.html">Open Project Source</a><p></p><font>openprojectsource</font><p></p><a href="openprojectsource_download.html">Open Project Source: Download</a><p></p><font>openprojectsourcedownload</font><p>-----------------------------</p><a href="firstpage.html">"First" Website</a><p></p><font>firstpage, firstwebsite, firstsite</font><p>-----------------------------</p><a href="dexon.html">Dexon Music Website</a><p></p><font>dexonnew, dexonmusicnew</font><p></p><a href="dexonmusic.html">Dexon Music Website [Banned!]</a><p></p><font>dexon, dexonmusic</font><p>-----------------------------</p><a href="forest.html">The Forest</a><p></p><font>forest</font><p>-----------------------------</p><a href="blood_eye_co.html">Blood Eye Website</a><p></p><font>bloodeye</font><p></p><a href="blood_eye_co_systems.html">Blood Eye Website (Systems)</a><p></p><font>bloodeyesystems</font><p></p><a href="blood_eye_co_new.html">New Blood Eye Website</a><p></p><font>bloodeyenew</font><p>-----------------------------</p><a href="img.html">:D</a><p></p><font>:D</font><p>-----------------------------</p>';
+const Site = {
+      href: "test_site",
+      name: "TestNullSite Name",
+      catalog: "TestNullSite Catalog",
+      hide: false,
+      tags: [
+        "TestNullSite"
+      ]
 }
+
+const new_html = "";
+const saved_category = "";
+function AddSite(site,new_html,saved_category)
+{
+	if(saved_category!=site.catalog){
+			new_html = new_html + "<p>-----------------------------</p>";
+			saved_category = site.catalog;
+	}
+	return [new_html + '<a href="' + site.href + '.html">' + site.name + '</a><p></p><font>' + String(site.tags).replace(",",", ") + '</font><p></p>',saved_category];
+}
+
+function lodlist(show_hide) {
+	var Sites = all_sites;
+	var saved_category = "";
+	var new_html = "";
+	
+	Sites.sort(function(a, b)
+	{
+		 if (a.name < b.name) {
+		return -1;
+		}
+		if (a.name > b.name) {
+		return 1;
+		}
+		return 0;
+		});
+	
+	Sites.forEach(function(site,i,arr){
+		if((!site.hide) || show_hide){
+		var result = AddSite(site,new_html,saved_category);
+		new_html = result[0];
+		saved_category = result[1];
+		}
+	});
+	document.getElementById("list").innerHTML = new_html;
+}   
