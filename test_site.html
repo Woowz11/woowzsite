@@ -1,4 +1,489 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
-<title>TESTSITE.html</title>
+<title>test_site.html</title>
 <link rel="icon" type="image/x-icon" href="source\test.ico">
+
+<style>
+body {
+  background-color: black;
+}
+
+.linkred:hover{
+	color: red;
+}
+
+.linkred2:hover{
+	background-color: red;
+}
+
+.buttontest:hover{
+	background-color: red;
+}
+.buttontest2:hover{
+	box-shadow: 0 12px 16px 0 rgba(255,0,0,0.24), 0 17px 50px 0 rgba(255,0,0,0.19);
+}
+
+.newbutton:hover{
+	background-color: gray;
+}
+</style>
+
+<p>Обычный текст</p>
+<p style="color: white;">Обычный текст (Белый)</p>
+<p style="color: red;">Обычный текст (Красный)</p>
+<p style="color: green;">Обычный текст (Зелёный)</p>
+<p style="color: blue;">Обычный текст (Синий)</p>
+
+<p style="background-color: gray;">Обычный текст + фон</p>
+<p style="background-color: gray; color: white;">Обычный текст (Белый) + фон</p>
+<p style="background-color: gray; color: red;">Обычный текст (Красный) + фон</p>
+<p style="background-color: gray; color: green;">Обычный текст (Зелёный) + фон</p>
+<p style="background-color: gray; color: blue;">Обычный текст (Синий) + фон</p>
+
+Обычный текст без всего!
+
+<p></p> <!-- <-----Пропуск! + Комментирование-->
+
+<font style="color: white;">Текст типа FONT</font>
+<p></p>
+<font style="background-color: gray; color: white;">Текст типа FONT + фон</font>
+<p></p>
+
+<center><font style="color: white;">Текст по середине</font></center>
+
+<font style="background-color: white; color: white;">Текст типа FONT + фон (Белый)</font>
+<p></p>
+<font style="background-color: red; color: white;">Текст типа FONT + фон (Красный)</font>
+<p></p>
+<font style="background-color: green; color: white;">Текст типа FONT + фон (Зелёный)</font>
+<p></p>
+<font style="background-color: blue; color: white;">Текст типа FONT + фон (Синий)</font>
+<p></p>
+
+<font style="color: white;"><b>Жирный текст</b></font>
+<p></p>
+<font style="color: white;"><i>Наклонный текст</i></font>
+<p></p>
+<font style="color: white;"><strike>Зачёркнутый текст</strike></font>
+<p></p>
+<font style="color: white;"><u>Текст с нижним подчёркиванием</u></font>
+<p></p>
+
+<font style="color: white; font-size: 1px;">Текст с размером 1px</font>
+<p></p>
+<font style="color: white; font-size: 5px;">Текст с размером 5px</font>
+<p></p>
+<font style="color: white; font-size: 10px;">Текст с размером 10px</font>
+<p></p>
+<font style="color: white; font-size: 20px;">Текст с размером 20px</font>
+<p></p>
+<font style="color: white; font-size: 30px;">Текст с размером 30px</font>
+<p></p>
+<font style="color: white; font-size: 40px;">Текст с размером 40px</font>
+<p></p>
+<font style="color: white; font-size: 50px;">Текст с размером 50px</font>
+<p></p>
+<font style="color: white; font-size: 100px;">Текст с размером 100px</font>
+<p></p>
+
+<font style="color: white;">Пропуск строки<br>с использованием br</font>
+<p></p>
+
+<nobr><font style="color: white;">Строка без переноса с использованием nobr, 1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</font></nobr>
+<p></p>
+
+<nobr><font style="color: white;">Текст с обычным шрифтом абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:verdana;">Текст с шрифтом "Verdana" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Courier New';">Текст с шрифтом "Courier New" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Algerian';">Текст с шрифтом "Algerian" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Arial Black';">Текст с шрифтом "Arial Black" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Brush Script Mt';">Текст с шрифтом "Brush Script Mt" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Impact';">Текст с шрифтом "Impact" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Wide Latin';">Текст с шрифтом "Wide Latin" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Playbill';">Текст с шрифтом "Playbill" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Segoe Print';">Текст с шрифтом "Segoe Print" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Matura Mt Script Capitals';">Текст с шрифтом "Matura Mt Script Capitals" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+<nobr><font style="color: white; font-family:'Marlett';">Текст с шрифтом "Marlett" абвгдеёжзийклмнопрстуфхцчшщъыьэюя АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !"@№#;$%^:&?*()[]{}-_=+\/|<>.,'`~</font></nobr>
+<p></p>
+
+<font style="color: white; line-height: 100px;">line-height,<br>изменяет высоту<br>между строк</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256)</font><p></p>
+<img src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (jpeg, 256x256)</font><p></p>
+<img src="source/test.jpg">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (gif, 480x267)</font><p></p>
+<img src="source/welcome.gif">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) со своим размером (512x128)</font><p></p>
+<img src="source/test.png" width="512px" height="128px">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) со своим размером (32x32)</font><p></p>
+<img src="source/test.png" width="32px" height="32px">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) со своим размером (1024x1024), можно заметить размытие</font><p></p>
+<img src="source/test.png" width="1024px" height="1024px">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) со своим размером (1024x1024), с image-rendering: pixelated</font><p></p>
+<img style="image-rendering: pixelated;" src="source/test.png" width="1024px" height="1024px">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с белым фоном</font><p></p>
+<img style="background-color:white;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с красным фоном</font><p></p>
+<img style="background-color:red;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Изображения в ряд</font><p></p>
+<img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px">
+<p></p>
+
+<font style="color: black; background-color: white;">Несколько изображений</font><p></p>
+<img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><p></p>
+<img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><p></p>
+<img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><p></p>
+<img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px"><img src="source/test.png" width="128px" height="128px">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с округлёнными краями 16px</font><p></p>
+<img style="border-radius: 16px;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с округлёнными краями 50%</font><p></p>
+<img style="border-radius: 50%;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с округлёнными краями 50% + фон</font><p></p>
+<img style="border-radius: 50%; background-color:white;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) в центре</font><p></p>
+<center><img src="source/test.png"></center>
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с прозрачностью 0.5</font><p></p>
+<img style="opacity: 0.5;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Обычное изображение (png, 256x256) с прозрачностью 0.05</font><p></p>
+<img style="opacity: 0.05;" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Разные фильтры с разными значениями</font><p></p>
+<font style="color: black; background-color: white;">Чёрно-белый фильтр (0%, 25%, 50%, 75%, 100%)</font><p></p>
+<img style="filter: grayscale(0%);" src="source/test.png"><img style="filter: grayscale(25%);" src="source/test.png"><img style="filter: grayscale(50%);" src="source/test.png"><img style="filter: grayscale(75%);" src="source/test.png"><img style="filter: grayscale(100%);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Блюр (0px, 2px, 4px, 10px, 50px)</font><p></p>
+<img style="filter: blur(0px);" src="source/test.png"><img style="filter: blur(2px);" src="source/test.png"><img style="filter: blur(4px);" src="source/test.png"><img style="filter: blur(10px);" src="source/test.png"><img style="filter: blur(50px);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Яркость (0%, 50%, 100%, 150%, 200%)</font><p></p>
+<img style="filter: brightness(0%);" src="source/test.png"><img style="filter: brightness(50%);" src="source/test.png"><img style="filter: brightness(100%);" src="source/test.png"><img style="filter: brightness(150%);" src="source/test.png"><img style="filter: brightness(200%);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Контрастность (0%, 50%, 100%, 150%, 200%)</font><p></p>
+<img style="filter: contrast(0%);" src="source/test.png"><img style="filter: contrast(50%);" src="source/test.png"><img style="filter: contrast(100%);" src="source/test.png"><img style="filter: contrast(150%);" src="source/test.png"><img style="filter: contrast(200%);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Поворот цвета (0deg, 90deg, 180deg, 270deg, 360deg)</font><p></p>
+<img style="filter: hue-rotate(0deg);" src="source/test.png"><img style="filter: hue-rotate(90deg);" src="source/test.png"><img style="filter: hue-rotate(180deg);" src="source/test.png"><img style="filter: hue-rotate(270deg);" src="source/test.png"><img style="filter: hue-rotate(360deg);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Инвертирование цвета (0%, 25%, 50%, 75%, 100%)</font><p></p>
+<img style="filter: invert(0%);" src="source/test.png"><img style="filter: invert(25%);" src="source/test.png"><img style="filter: invert(50%);" src="source/test.png"><img style="filter: invert(75%);" src="source/test.png"><img style="filter: invert(100%);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Инвертирование цвета 100% + Поворот цвета 180deg</font><p></p>
+<img style="filter: invert(100%) hue-rotate(180deg);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Насыщение (0, 1, 2.5, 6, 10)</font><p></p>
+<img style="filter: saturate(0);" src="source/test.png"><img style="filter: saturate(1);" src="source/test.png"><img style="filter: saturate(2.5);" src="source/test.png"><img style="filter: saturate(6);" src="source/test.png"><img style="filter: saturate(10);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Сепия (0%, 25%, 50%, 75%, 100%)</font><p></p>
+<img style="filter: sepia(0%);" src="source/test.png"><img style="filter: sepia(25%);" src="source/test.png"><img style="filter: sepia(50%);" src="source/test.png"><img style="filter: sepia(75%);" src="source/test.png"><img style="filter: sepia(100%);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Тень (8px 8px 10px white)</font><p></p>
+<img style="filter: drop-shadow(8px 8px 10px white);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Тень (64px 16px 0px red)</font><p></p>
+<img style="filter: drop-shadow(64px 16px 0px red);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Блюр на gif изображении</font><p></p>
+<img style="filter: blur(5px);" src="source/welcome.gif">
+<p></p>
+
+<font style="color: black; background-color: white;">Отзеркаливание по оси X</font><p></p>
+<img style="transform: scaleX(-1);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Отзеркаливание по оси Y</font><p></p>
+<img style="transform: scaleY(-1);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Отзеркаливание по оси X и Y</font><p></p>
+<img style="transform: scaleX(-1) scaleY(-1);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Увеличение размера изображение по оси X в 2 раза</font><p></p>
+<img style="transform: scaleX(2);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Уменьшение размера изображение по оси X в 2 раза</font><p></p>
+<img style="transform: scaleX(0.5);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Поворот изображения на 45 градусов</font><p></p>
+<img style="transform: rotateZ(45deg);" src="source/test.png">
+<p></p>
+<font style="color: black; background-color: white;">Перенос изображения вправо на 250px</font><p></p>
+<img style="transform: translateX(250px);" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Изображение с изображением на фоне</font><p></p>
+<img style="background: url('source/brick2.jpg');" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">Изображение с gif изображением на фоне</font><p></p>
+<img style="background: url('source/gif.gif');" src="source/test.png">
+<p></p>
+
+<font style="color: black; background-color: white;">gif Изображение с gif изображением на фоне</font><p></p>
+<img style="background: url('source/gif.gif');" src="source/welcome.gif">
+<p></p>
+
+<font style="color: black; background: url('source/test.png');">Текст с изображением на фоне</font><p></p>
+
+<font style="color: black; background: url('source/gif.gif');">Текст с gif изображением на фоне</font><p></p>
+
+<a href="#">Ссылка никуда не ведущая</a>
+<p></p>
+<a href="test_site.html">Ссылка на этот же сайт</a>
+<p></p>
+<a href="index.html">Ссылка на другой сайт</a>
+<p></p>
+<font style="color: black; background-color: white;">Ссылка в изображении</font><p></p>
+<a href="index.html"><img width="128px" height="128px" src="source/test.png"></a>
+<p></p>
+<a class="linkred" href="index.html">Ссылка, которая при наведении курсора мыши на неё краснеет</a>
+<p></p>
+<font style="color: black; background-color: white;">Ссылка в изображении, которое краснеет при наведении курсора мыши на него</font><p></p>
+<a href="index.html"><img class="linkred2" width="128px" height="128px" src="source/test.png"></a>
+<p></p>
+<a style="color: white; text-decoration: none;" href="index.html">Ссылка, стилизированная под обычный текст</a>
+<p></p>
+
+<font style="color: black; background-color: white;">Изменение курсора при наведении на изображение</font><p></p>
+<img style="cursor:wait;" width="128px" height="128px" src="source/test.png">
+<p></p>
+<font style="cursor:wait; color: white;">Изменение курсора при наведении на этот текст</font><p></p>
+<font style="color: black; background-color: white;">Список курсоров</font><p></p>
+<font style="cursor:default; color: white;">default</font><p></p>
+<font style="cursor:none; color: white;">none</font><p></p>
+<font style="cursor:context-menu; color: white;">context-menu</font><p></p>
+<font style="cursor:help; color: white;">help</font><p></p>
+<font style="cursor:pointer; color: white;">pointer</font><p></p>
+<font style="cursor:progress; color: white;">progress</font><p></p>
+<font style="cursor:wait; color: white;">wait</font><p></p>
+<font style="cursor:cell; color: white;">cell</font><p></p>
+<font style="cursor:crosshair; color: white;">crosshair</font><p></p>
+<font style="cursor:text; color: white;">text</font><p></p>
+<font style="cursor:vertical-text; color: white;">vertical-text</font><p></p>
+<font style="cursor:alias; color: white;">alias</font><p></p>
+<font style="cursor:copy; color: white;">copy</font><p></p>
+<font style="cursor:move; color: white;">move</font><p></p>
+<font style="cursor:no-drop; color: white;">no-drop</font><p></p>
+<font style="cursor:not-allowed; color: white;">not-allowed</font><p></p>
+<font style="cursor:grab; color: white;">grab</font><p></p>
+<font style="cursor:grabbing; color: white;">grabbing</font><p></p>
+<font style="cursor:all-scroll; color: white;">all-scroll</font><p></p>
+<font style="cursor:col-resize; color: white;">col-resize</font><p></p>
+<font style="cursor:row-resize; color: white;">row-resize</font><p></p>
+<font style="cursor:n-resize; color: white;">n-resize</font><p></p>
+<font style="cursor:e-resize; color: white;">e-resize</font><p></p>
+<font style="cursor:s-resize; color: white;">s-resize</font><p></p>
+<font style="cursor:w-resize; color: white;">w-resize</font><p></p>
+<font style="cursor:ne-resize; color: white;">ne-resize</font><p></p>
+<font style="cursor:nw-resize; color: white;">nw-resize</font><p></p>
+<font style="cursor:se-resize; color: white;">se-resize</font><p></p>
+<font style="cursor:sw-resize; color: white;">sw-resize</font><p></p>
+<font style="cursor:ew-resize; color: white;">ew-resize</font><p></p>
+<font style="cursor:ns-resize; color: white;">ns-resize</font><p></p>
+<font style="cursor:nesw-resize; color: white;">nesw-resize</font><p></p>
+<font style="cursor:nwse-resize; color: white;">nwse-resize</font><p></p>
+<font style="cursor:zoom-in; color: white;">zoom-in</font><p></p>
+<font style="cursor:zoom-out; color: white;">zoom-out</font><p></p>
+<font style="cursor:url('source/cur.cur'), auto; color: white;">Кастомный курсор</font><p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка</font><p></p>
+<button type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая красная кнопка</font><p></p>
+<button style="background-color: red;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с изображением на фоне</font><p></p>
+<button style="padding: 15px 32px; background: url('source/brick2.jpg');" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с gif изображением на фоне</font><p></p>
+<button style="padding: 15px 32px; background: url('source/gif.gif');" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка без границ</font><p></p>
+<button style="border: none;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с красным текстом</font><p></p>
+<button style="color: red;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с своим размером (15px, 32px)</font><p></p>
+<button style="padding: 15px 32px;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Кнопка с большим текстом</font><p></p>
+<button style="font-size: 32px;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с границами</font><p></p>
+<button style="padding: 15px 32px; border: 2px solid red;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с большими границами</font><p></p>
+<button style="padding: 15px 32px; border: 10px solid red;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с эффектом при наведении</font><p></p>
+<button style="padding: 15px 32px; border: 4px solid red;" class="buttontest" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с плавным эффектом при наведении</font><p></p>
+<button style="padding: 15px 32px; transition-duration: 0.4s; border: 4px solid red;" class="buttontest" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая кнопка с теневым эффектом при наведении</font><p></p>
+<button style="padding: 15px 32px; transition-duration: 0.4s; background-color: white; border: 4px solid red;" class="buttontest2" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Простая улучшенная кнопка</font><p></p>
+<button class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Кнопка</button>
+<p></p>
+
+<font style="color: black; background-color: white;">Изображение которое не легко скачать (Но возможно)</font><p></p>
+<img style="-webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" src="source/test.png">
+<p></p>
+
+<div style="position: relative;">
+  <img style="-webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" src="source/test.png">
+  <font style="position: absolute; top: 17px; left: 20px; color=white;">Bottom Left</font>
+</div>
+
+<center><p style="color: black; font-size: 20px; background-color: white;">Разные скрипты!</p></center><p></p>
+
+<font style="color: black; background-color: white;">Написание сообщения в консоль</font><p></p>
+<button onclick="script1()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<p></p>
+
+<font style="color: black; background-color: white;">Удаление текста</font><p></p>
+<button onclick="script2()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script2_object" style="color:white;">Этот текст удалиться при нажатии на кнопку</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Создание текста</font><p></p>
+<button onclick="script6()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script6_object" style="color:white;"></font>
+<p></p>
+
+<font style="color: black; background-color: white;">Замена текста</font><p></p>
+<button onclick="script3()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script3_object" style="color:white;">Этот текст измениться при нажатии на кнопку</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Изменение цвета текста</font><p></p>
+<button onclick="script4()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script4_object" style="color:white;">Этот текст измениться при нажатии на кнопку</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Изменение фона цвета текста</font><p></p>
+<button onclick="script5()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script5_object" style="color:white;">Этот текст измениться при нажатии на кнопку</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Случайные символы</font><p></p>
+<font id="script7_object" style="color:white;">случайные</font><p></p>
+<button onclick="script7()" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" type="button">Выполнить</button><p></p>
+<font id="script7_object2" style="color:white;">случайные</font>
+<p></p>
+
+<font style="color: black; background-color: white;">Открытие файла</font><p></p>
+<input type="file" id="script8_object2" style="display: none;" onchange="script8_2(this)"/>
+<input type="button" class="newbutton" style="padding: 13px 20px; border: none; font-size: 20px; cursor:pointer; transition-duration: 0.3s;" onclick="script8()" value="Выбрать"/><p/>
+<font id="script8_object" style="color:white;">Никакой файл не выбран!</font>
+<p></p>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	start();
+	setInterval(update,40);
+});
+function GetRandom(max){
+	return Math.floor(Math.random() * max)
+}
+const randSymbol = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNMйцукенгшщзфывапролдячсмитьЙЦУКЕНГШЩЗФЫВАПРОЛДЯЧСМИТЬхъжэбюХЪЖЭБЮ1234567890!ёЁ@#№;$%^:&?*()-_=+\/|[]{}'<>,.`~ ";
+function update(){
+	document.getElementById("script7_object").textContent= randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)];
+}
+function start(){
+		document.getElementById("script7_object2").textContent= randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)];
+}
+
+function script7() {
+	document.getElementById("script7_object2").textContent= randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)] + randSymbol[GetRandom(randSymbol.length)];
+}
+
+function script1() {
+	console.log("Hello world!");
+}
+
+function script2() {
+	if(document.getElementById("script2_object")!=null){
+	document.getElementById("script2_object").remove();
+}}
+
+function script6() {
+	document.getElementById("script6_object").innerHTML = "Created Text" + "<br>" + document.getElementById("script6_object").innerHTML;
+}
+
+function script3() {
+	document.getElementById("script3_object").textContent="Hello World!";
+}
+
+function script4() {
+	document.getElementById("script4_object").style.color = "red";
+}
+
+function script5() {
+	document.getElementById("script5_object").style.backgroundColor = "red";
+}
+
+function script8() {
+	document.getElementById('script8_object2').click();
+}
+function script8_2(input) {
+	document.getElementById("script8_object").textContent=input.files[0].name;
+}
+
+</script>
