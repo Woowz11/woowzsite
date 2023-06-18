@@ -36,7 +36,7 @@ function getrandomcolor()
 }
 
 function generatebackgroundElement(){
-	return 'background: url("source/' + randomimages[GetRandom(randomimages.length)] + '"); ' + (GetRandom(10)>2 ? "" : "background_attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
+	return 'background: url('+'"'+'source/' + randomimages[GetRandom(randomimages.length)].replace(" source ","") +'"'+'); ' + (GetRandom(10)>2 ? "" : "background_attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
 }
 
 function generatefilter(){
@@ -53,15 +53,26 @@ function createrandomimage(smol){
 	var height = GetRandom(370);
 	var imagerender = (GetRandom(10)>5 ? "" : "image-rendering: pixelated;")
 	var background = (GetRandom(10)>4 ? "" : generatebackgroundElement());
+	var havelink = (GetRandom(10)>4? false : true);
 	
-	return "<img alt='"+generaterandomtext()+"'; style='" + "z-index("+(GetRandom(1024)+(smol ? 1024 : 0))+");" + (GetRandom(10)>5?"":"position: absolute;") + (GetRandom(10)>1 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "" : (GetRandom(10)>5 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" + ">";
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'; "+">" : "")+"<img alt='"+generaterandomtext()+"'; style='" + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "z-index("+(GetRandom(1024)+(smol ? 1024 : 0))+");" + (GetRandom(10)>5?"":"position: absolute;") + (GetRandom(10)>1 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "" : (GetRandom(10)>5 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" + ">"+(havelink ? "</a>" : "" );
+}
+
+function generatescriptable(){
+	var result = "";
+	
+	if(true){
+		result = '<button style="'+(GetRandom(10)>1?"":"cursor:"+getrandomcursor()+"; ")+generatebackgroundElement()+'" type="button">'+createrandomtext()+'</button>';
+	}
+	
+	return result;
 }
 
 function generaterandomtext(){
 	var rand = GetRandom(6);
 	var result = words[GetRandom(words.length)];
 	for(var i = 0; i <=rand; i++){
-		result = result + " " + words[GetRandom(words.length)];
+		result = result + " " + (GetRandom(10)>1?words[GetRandom(words.length)]:words[GetRandom(words.length)].toUpperCase());
 	}
 	return result;
 }
@@ -70,13 +81,14 @@ function getrandomfontstyle(){
 	return fonts[GetRandom(fonts.length)];
 }
 
-function createrandomtext(){
+function createrandomtext(canlink){
 	var background = (GetRandom(10)>4 ? "" : generatebackgroundElement());
 	var bold = (GetRandom(10)>1 ? false : true);
 	var italic = (GetRandom(10)>1 ? false : true);
 	var strike = (GetRandom(10)>1 ? false : true);
 	var underline = (GetRandom(10)>1 ? false : true);
-	return "<font color="+getrandomcolor()+"; style='" + (GetRandom(10)>5?"":"position: absolute;") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>";
+	var havelink = (canlink ? (GetRandom(10)>1? false : true) : false);
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'>" : "")+"<font color="+getrandomcolor()+"; style='" + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + (GetRandom(10)>5?"":"position: absolute;") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>"+(havelink ? "</a>" : "" );
 }
 
 function randomstylebody(style){
@@ -88,22 +100,51 @@ function randomstylebody(style){
 	}
 }
 
+function generaterandommedia(){
+	var result = "";
+	
+	if(GetRandom(10)>3){
+		result = '  <audio '+(GetRandom(200)>1?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
+	}else{
+		result = '  <video controls name="media" '+(GetRandom(200)>1?"":"autoplay ")+' poster="source/'+randomimages[GetRandom(randomimages.length)]+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="source/'+videos[GetRandom(videos.length)]+'.mp4" type="video/mp4"></video>';
+	}
+	
+	return result;
+}
+
+function getrandomcursor(){
+	var cursors = [];
+	randomcursors.forEach(element => cursors.push("url("+'"'+"source/"+element+".cur"+'"'+"), auto"))
+	cursors = [...cursors, ...["default","none","context-menu","help","auto","pointer","progress","wait","cell","crosshair","text","vertical-text","alias","copy","move","no-drop","not-allowed","grab","grabbing","all-scroll","col_resize","row-resize","n-resize","e-resize","s-resize","w-resize","ne-resize","nw-resize","se-resize","sw-resize","ew-resize","ns-resize","nesw-resize","nwse-resize","zoom-in","zoom-out"]];
+	
+	return cursors[GetRandom(cursors.length)];
+}
+
 function createrandomhtml(){
 	var result = "";
 	
 	var rand = 250 + GetRandom(1000);
 	for (var i = 0; i <=rand; i++) {
-		var j = GetRandom(20);
-		if(j<18){result = result + createrandomimage((GetRandom(100)>2 ? false : true));}
-		else if(j==19){result = result + createrandomtext();}
+		var j = GetRandom(100);
+		if(j>30){result = result + createrandomimage((GetRandom(100)>2 ? false : true));}
+		else if(j>5){
+		
+		if(GetRandom(10)>0){
+		result = result + createrandomtext(true);
+		}else{result = result + generatescriptable();}
+		}
+		else {result = result + generaterandommedia();}
 		
 	}
 	
 	return result;
 }
-	const words = ["убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
+	const hrefs = ["blood_eye_co","blood_eye_co_new","blood_eye_co_systems","dexon","dexonmusic","eyes","firstpage","forest","img","index","list","null","openprojectsource","openprojectsource_download","quaere","random","site_woowz11","site_woowz11_2","skull-party!","test_site","xxx"];
+	const videos = ["specialforrandomsite/3DVideoDubstep - 382"];
+	const audios = ["babah","sun","forest","Schoolhouse_Trouble_Metal_Version","Pixelizer","doom"]
+	const words = ["забанили","тебя","что-бы","хочу","же","как","вчера","сегодня","завтра","гаррисмод","бомба",",","дичь","егэ","завтра","огэ","впр","собака","скинволкер","!","?","порно","вотабус","легальным","призедент","украины","украина","россия","ест","жрать","вкусно","убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
 	const fonts = ["Bookman","Apple Chancery","Marlett","Comic Sans MS","Arial","Helvetica","Verdana","Bradley Hand","Brush Script MT","Impact","cursive","Stencil Std","fantasy","Trattatello","Marker Felt","Chalkduster","Blippo","Jazz LET","Luminari","Snell Roundhand","URW Chancery L","Trebuchet MS","Gill Sans","American Typewriter","FreeMono","serif","OCR A Std","monospace","DejaVu Sans Mono","New Century Schoolbook","Courier","Noto Sans","Optima","Arial Narrow","Courier New","Andale Mono","sans-serif","Times","Didot","Georgia","Palatino"];
-	const randomimages = ["bloodeyesystems/bloodeye_system.png","bloodeyesystems/bloodeye_system2.png","bloodeyesystems/bloodeye_system3.png","bloodeyesystems/boxtexture.png","bloodeyesystems/boxtexture_3d.png","bloodeyesystems/bloodeye_system3_3d.png","bloodeyesystems/bloodeye_system_screen.png","bloodeyesystems/bloodeye_system2_3d.png","bloodeyesystems/bloodeye_system_3d.png","bloodeyesystems/bloodeye_system_2_screen.png","95.jpg","about.png","background.png","background_dexon.jpg","ban.png","bes1.png","bes2.png","bes3.png","bes4.png","bes5.png","ble_backgro.jpg","bloodeye.png","bloodeyeco_title.png","brick.jpg","brick2.jpg","brick3.jpg","dexonmusic.png","esqueleto.gif","eyes.png","forest.gif","fur.png","gif.gif","git.gif","git2.gif","gradient.jpg","hi.jpg","ice.jpg","line.jpg","null.gif","null_bug.gif","obsidian_bowl.png","openprojectbackground.jpg","openprojecttitle.png","p.png","p_back.png","par.png","pet.gif","pixel.png","s.gif","skeleto_message.jpg","sup.png","systems.png","systems.png","teh.png","test.jpg","test.png","title.png","title_smol.png","title2.png","title3.png","title4.png","vinil.gif","vis.png","welcome.gif","wowzsearch.gif","WqIqAQzOsgc.jpg"];
+	const randomimages = ["SPECIALERRORIMAGE","specialforrandomsite/ssasa.png","specialforrandomsite/IMG_20230618_013225.png","specialforrandomsite/0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE.gif","specialforrandomsite/catblyat.gif","specialforrandomsite/screams.gif","specialforrandomsite/who.gif","specialforrandomsite/who-are-you-cat.gif","specialforrandomsite/sleep.gif","bloodeyesystems/bloodeye_system.png","bloodeyesystems/bloodeye_system2.png","bloodeyesystems/bloodeye_system3.png","bloodeyesystems/boxtexture.png","bloodeyesystems/boxtexture_3d.png","bloodeyesystems/bloodeye_system3_3d.png","bloodeyesystems/bloodeye_system_screen.png","bloodeyesystems/bloodeye_system2_3d.png","bloodeyesystems/bloodeye_system_3d.png","bloodeyesystems/bloodeye_system_2_screen.png","95.jpg","about.png","background.png","background_dexon.jpg","ban.png","bes1.png","bes2.png","bes3.png","bes4.png","bes5.png","ble_backgro.jpg","bloodeye.png","bloodeyeco_title.png","brick.jpg","brick2.jpg","brick3.jpg","dexonmusic.png","esqueleto.gif","eyes.png","forest.gif","fur.png","gif.gif","git.gif","git2.gif","gradient.jpg","hi.jpg","ice.jpg","line.jpg","null.gif","null_bug.gif","obsidian_bowl.png","openprojectbackground.jpg","openprojecttitle.png","p.png","p_back.png","par.png","pet.gif","pixel.png","s.gif","skeleto_message.jpg","sup.png","systems.png","systems.png","teh.png","test.jpg","test.png","title.png","title_smol.png","title2.png","title3.png","title4.png","vinil.gif","vis.png","welcome.gif","wowzsearch.gif","WqIqAQzOsgc.jpg"];
 	const randomicons = ["search3","test","bloodeye_old","ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull"];
 	const randomcursors = ["cur","cur2","old","old2","block","veryold","m"];
 function randommake(){
@@ -115,9 +156,7 @@ function randommake(){
     document.head.appendChild(link);
 	}
 	link.href = "source/" + randomicons[GetRandom(randomicons.length)] + ".ico";
-	if(GetRandom(100)>10){
-	document.body.style.cursor = "url('source/"+randomcursors[GetRandom(randomcursors.length)]+".cur'), auto";
-	}
+	document.body.style.cursor = getrandomcursor();
 	document.getElementById("main").innerHTML = createrandomhtml();
 	
 	randomstylebody(document.body.style);
