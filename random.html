@@ -4,9 +4,6 @@
 <link rel="icon" type="image/x-icon" href="source\test.ico">
 
 <style>
-html {
-  height: 100%;
-}
 body {
     min-height: 100%;
     width: 100%;
@@ -15,6 +12,7 @@ body {
 	overflow-y: hidden;
 }
 html{
+	height: 100%;
     width: 100%;
     max-width: 100%;
 	overflow-x: hidden;
@@ -35,8 +33,33 @@ function getrandomcolor()
 	return "rgb("+GetRandom(256)+","+GetRandom(256)+","+GetRandom(256)+")";
 }
 
+function getrandomgradient(){
+	var color = getrandomcolor()+","+getrandomcolor();
+	var rand = GetRandom(11);
+	for(var i = 0; i < rand;i++){
+		color = color + "," + (GetRandom(10)>1?getrandomcolor():getrandomcolor()+" "+GetRandom(50)+"px");
+	}
+	var gradients = ["repeating-linear-gradient","conic-gradient","linear-gradient","radial-gradient"]
+	var result = gradients[GetRandom(gradients.length)]+"("+GetRandom(360)+"deg,"+color+","+"palegoldenrod "+GetRandom(100)+"%"+");";
+	
+	return result;
+}
+
+function getrandompicture(){
+	var result = 'url('+'"'+'source/' + randomimages[GetRandom(randomimages.length)].replace(" source ","") +'"'+');';
+	
+	if(GetRandom(10)<5){
+		var rand = GetRandom(5);
+		for(var i = 0; i < rand;i++){
+			result = getrandomgradient();
+		}
+	}
+	
+	return result;
+}
+
 function generatebackgroundElement(){
-	return 'background: url('+'"'+'source/' + randomimages[GetRandom(randomimages.length)].replace(" source ","") +'"'+'); ' + (GetRandom(10)>2 ? "" : "background_attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
+	return 'background: '+getrandompicture()+' ' + (GetRandom(10)>2 ? "" : "background_attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
 }
 
 function generatefilter(){
@@ -44,7 +67,7 @@ function generatefilter(){
 }
 
 function generatetransform(smol, onlysize){
-	return "transform:" + (GetRandom(10)>5 ? "" : "rotateZ("+GetRandom((onlysize ? 0 : 360))+"deg) ") + (GetRandom(10)>3 ? "" : "translateX("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "translateY("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "scaleX(" + (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5)) + ")" + (GetRandom(10)>3 ? "" : "scaleY("+ (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5)) +";";
+	return "transform:" + (GetRandom(10)>5 ? "" : "rotateZ("+GetRandom((onlysize ? 0 : 360))+"deg) ") + (GetRandom(10)>3 ? "" : "translateX("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "translateY("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "scaleX(" + (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5)+")") + (GetRandom(10)>3 ? "" : "scaleY("+ (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5) +")") +";";
 }
 
 function createrandomimage(smol){
@@ -55,14 +78,14 @@ function createrandomimage(smol){
 	var background = (GetRandom(10)>4 ? "" : generatebackgroundElement());
 	var havelink = (GetRandom(10)>4? false : true);
 	
-	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'; "+">" : "")+"<img alt='"+generaterandomtext()+"'; style='" + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "z-index("+(GetRandom(1024)+(smol ? 1024 : 0))+");" + (GetRandom(10)>5?"":"position: absolute;") + (GetRandom(10)>1 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "" : (GetRandom(10)>5 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" + ">"+(havelink ? "</a>" : "" );
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'; "+">" : "")+"<img alt='"+generaterandomtext()+"'; style='" + (GetRandom(10)>2?"":randomborder()) + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "z-index:"+(GetRandom(1024)+(smol ? 1024 : 0))+";" + (GetRandom(10)>5?"":"position: absolute;") + (GetRandom(10)>1 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "" : (GetRandom(10)>3 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px;") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" + ">"+(havelink ? "</a>" : "" );
 }
 
 function generatescriptable(){
 	var result = "";
 	
 	if(true){
-		result = '<button style="'+(GetRandom(10)>1?"":"cursor:"+getrandomcursor()+"; ")+generatebackgroundElement()+'" type="button">'+createrandomtext()+'</button>';
+		result = '<button style="'+(GetRandom(10)>2?"":randomborder())+(GetRandom(10)>1?"":"cursor:"+getrandomcursor()+"; ")+generatebackgroundElement()+'" type="button">'+createrandomtext()+'</button>';
 	}
 	
 	return result;
@@ -70,15 +93,25 @@ function generatescriptable(){
 
 function generaterandomtext(){
 	var rand = GetRandom(6);
-	var result = words[GetRandom(words.length)];
+	var result = "";
 	for(var i = 0; i <=rand; i++){
-		result = result + " " + (GetRandom(10)>1?words[GetRandom(words.length)]:words[GetRandom(words.length)].toUpperCase());
+		var word = (GetRandom(100)>5?words[GetRandom(words.length)]:generateRandomWord());
+		result = result + " " + (GetRandom(10)>1?word:word.toUpperCase());
 	}
 	return result;
 }
 
 function getrandomfontstyle(){
 	return fonts[GetRandom(fonts.length)];
+}
+
+function randomborder(){
+	var result = "";
+	var borderstype = ["dotted","dashed","solid","double","groove","ridge","inset","outset"];
+	
+	result = "border: "+GetRandom(30)+"px "+borderstype[GetRandom(borderstype.length)]+" "+getrandomcolor()+";";
+	
+	return result;
 }
 
 function createrandomtext(canlink){
@@ -88,12 +121,14 @@ function createrandomtext(canlink){
 	var strike = (GetRandom(10)>1 ? false : true);
 	var underline = (GetRandom(10)>1 ? false : true);
 	var havelink = (canlink ? (GetRandom(10)>1? false : true) : false);
-	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'>" : "")+"<font color="+getrandomcolor()+"; style='" + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + (GetRandom(10)>5?"":"position: absolute;") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>"+(havelink ? "</a>" : "" );
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'>" : "")+"<font color="+getrandomcolor()+"; style='" + (GetRandom(10)>2?"":randomborder()) +(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + (GetRandom(10)>5?"":"position: absolute;") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>"+(havelink ? "</a>" : "" );
 }
 
 function randomstylebody(style){
 	style.background = "url('source/" + randomimages[GetRandom(randomimages.length)] + "')";
 	style.backgroundColor = getrandomcolor();
+	if(GetRandom(10)>3){
+	style.backgroundImage = getrandomgradient().replace(";","");}
 	if(GetRandom(100)>70){
 	style.backgroundAttachment = "fixed";
 	style.backgroundSize = "100% 100%";
@@ -104,12 +139,23 @@ function generaterandommedia(){
 	var result = "";
 	
 	if(GetRandom(10)>3){
-		result = '  <audio '+(GetRandom(200)>1?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
+		result = '  <audio '+(GetRandom(150)>1?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
 	}else{
-		result = '  <video controls name="media" '+(GetRandom(200)>1?"":"autoplay ")+' poster="source/'+randomimages[GetRandom(randomimages.length)]+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="source/'+videos[GetRandom(videos.length)]+'.mp4" type="video/mp4"></video>';
+		result = '  <video controls name="media" '+(GetRandom(150)>1?"":"autoplay ")+' poster="source/'+randomimages[GetRandom(randomimages.length)]+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="source/'+videos[GetRandom(videos.length)]+'.mp4" type="video/mp4"></video>';
 	}
 	
 	return result;
+}
+
+function generateRandomWord(){
+	var word = "";
+	var symbols = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNMйцукенгшщзфывапролдячсмитьЙЦУКЕНГШЩЗФЫВАПРОЛДЯЧСМИТЬхъжэбюХЪЖЭБЮ1234567890!ёЁ@№;$%^:&?*()-_=+\/|[]{},.`~ ";
+	var rand = GetRandom(20)
+	for(var i = 0; i <=rand; i++){
+		word = word + symbols[GetRandom(symbols.length)];
+	}
+	
+	return word;
 }
 
 function getrandomcursor(){
@@ -139,14 +185,14 @@ function createrandomhtml(){
 	
 	return result;
 }
-	const hrefs = ["blood_eye_co","blood_eye_co_new","blood_eye_co_systems","dexon","dexonmusic","eyes","firstpage","forest","img","index","list","null","openprojectsource","openprojectsource_download","quaere","random","site_woowz11","site_woowz11_2","skull-party!","test_site","xxx"];
+	const hrefs = ["core","real-folder","blood_eye_co","blood_eye_co_new","blood_eye_co_systems","dexon","dexonmusic","eyes","firstpage","forest","img","index","list","null","openprojectsource","openprojectsource_download","quaere","random","site_woowz11","site_woowz11_2","skull-party!","test_site","xxx"];
 	const videos = ["specialforrandomsite/3DVideoDubstep - 382"];
-	const audios = ["babah","sun","forest","Schoolhouse_Trouble_Metal_Version","Pixelizer","doom"]
-	const words = ["забанили","тебя","что-бы","хочу","же","как","вчера","сегодня","завтра","гаррисмод","бомба",",","дичь","егэ","завтра","огэ","впр","собака","скинволкер","!","?","порно","вотабус","легальным","призедент","украины","украина","россия","ест","жрать","вкусно","убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
+	const audios = ["The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","babah","sun","forest","Schoolhouse_Trouble_Metal_Version","Pixelizer","doom"]
+	const words = ["<br>","забанили","тебя","что-бы","хочу","же","как","вчера","сегодня","завтра","гаррисмод","бомба",",","дичь","егэ","завтра","огэ","впр","собака","скинволкер","!","?","порно","вотабус","легальным","призедент","украины","украина","россия","ест","жрать","вкусно","убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
 	const fonts = ["Bookman","Apple Chancery","Marlett","Comic Sans MS","Arial","Helvetica","Verdana","Bradley Hand","Brush Script MT","Impact","cursive","Stencil Std","fantasy","Trattatello","Marker Felt","Chalkduster","Blippo","Jazz LET","Luminari","Snell Roundhand","URW Chancery L","Trebuchet MS","Gill Sans","American Typewriter","FreeMono","serif","OCR A Std","monospace","DejaVu Sans Mono","New Century Schoolbook","Courier","Noto Sans","Optima","Arial Narrow","Courier New","Andale Mono","sans-serif","Times","Didot","Georgia","Palatino"];
-	const randomimages = ["SPECIALERRORIMAGE","specialforrandomsite/ssasa.png","specialforrandomsite/IMG_20230618_013225.png","specialforrandomsite/0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE.gif","specialforrandomsite/catblyat.gif","specialforrandomsite/screams.gif","specialforrandomsite/who.gif","specialforrandomsite/who-are-you-cat.gif","specialforrandomsite/sleep.gif","bloodeyesystems/bloodeye_system.png","bloodeyesystems/bloodeye_system2.png","bloodeyesystems/bloodeye_system3.png","bloodeyesystems/boxtexture.png","bloodeyesystems/boxtexture_3d.png","bloodeyesystems/bloodeye_system3_3d.png","bloodeyesystems/bloodeye_system_screen.png","bloodeyesystems/bloodeye_system2_3d.png","bloodeyesystems/bloodeye_system_3d.png","bloodeyesystems/bloodeye_system_2_screen.png","95.jpg","about.png","background.png","background_dexon.jpg","ban.png","bes1.png","bes2.png","bes3.png","bes4.png","bes5.png","ble_backgro.jpg","bloodeye.png","bloodeyeco_title.png","brick.jpg","brick2.jpg","brick3.jpg","dexonmusic.png","esqueleto.gif","eyes.png","forest.gif","fur.png","gif.gif","git.gif","git2.gif","gradient.jpg","hi.jpg","ice.jpg","line.jpg","null.gif","null_bug.gif","obsidian_bowl.png","openprojectbackground.jpg","openprojecttitle.png","p.png","p_back.png","par.png","pet.gif","pixel.png","s.gif","skeleto_message.jpg","sup.png","systems.png","systems.png","teh.png","test.jpg","test.png","title.png","title_smol.png","title2.png","title3.png","title4.png","vinil.gif","vis.png","welcome.gif","wowzsearch.gif","WqIqAQzOsgc.jpg"];
-	const randomicons = ["search3","test","bloodeye_old","ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull"];
-	const randomcursors = ["cur","cur2","old","old2","block","veryold","m"];
+	const randomimages = ["rename.png","delete.png","smol_galka.png","copy_to.png","locate.png","icon3.png","icon2.png","copy.png","paste.png","icon1.png","zakrep.png","galka.png","info.png","files4.png","files3.png","files2.png","files1.png","CLOSETHIS3.png","CLOSETHIS2.png","CLOSETHIS.png","download.gif","WTR6.gif","tiles.jpg","SPECIALERRORIMAGE","specialforrandomsite/ssasa.png","specialforrandomsite/IMG_20230618_013225.png","specialforrandomsite/0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE.gif","specialforrandomsite/catblyat.gif","specialforrandomsite/screams.gif","specialforrandomsite/who.gif","specialforrandomsite/who-are-you-cat.gif","specialforrandomsite/sleep.gif","bloodeyesystems/bloodeye_system.png","bloodeyesystems/bloodeye_system2.png","bloodeyesystems/bloodeye_system3.png","bloodeyesystems/boxtexture.png","bloodeyesystems/boxtexture_3d.png","bloodeyesystems/bloodeye_system3_3d.png","bloodeyesystems/bloodeye_system_screen.png","bloodeyesystems/bloodeye_system2_3d.png","bloodeyesystems/bloodeye_system_3d.png","bloodeyesystems/bloodeye_system_2_screen.png","95.jpg","about.png","background.png","background_dexon.jpg","ban.png","bes1.png","bes2.png","bes3.png","bes4.png","bes5.png","ble_backgro.jpg","bloodeye.png","bloodeyeco_title.png","brick.jpg","brick2.jpg","brick3.jpg","dexonmusic.png","esqueleto.gif","eyes.png","forest.gif","fur.png","gif.gif","git.gif","git2.gif","gradient.jpg","hi.jpg","ice.jpg","line.jpg","null.gif","null_bug.gif","obsidian_bowl.png","openprojectbackground.jpg","openprojecttitle.png","p.png","p_back.png","par.png","pet.gif","pixel.png","s.gif","skeleto_message.jpg","sup.png","systems.png","systems.png","teh.png","test.jpg","test.png","title.png","title_smol.png","title2.png","title3.png","title4.png","vinil.gif","vis.png","welcome.gif","wowzsearch.gif","WqIqAQzOsgc.jpg"];
+	const randomicons = ["folder","idk","search3","test","bloodeye_old","ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull"];
+	const randomcursors = ["woowz","hand","cur","cur2","old","old2","block","veryold","m"];
 function randommake(){
 	
 	var link = document.querySelector("link[rel~='icon']");

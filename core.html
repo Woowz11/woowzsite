@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<link rel="icon" type="image/x-icon" href="source\idk.ico">
+
+<style>
+body {
+  background-image: url("source/tiles.jpg");
+  cursor:url('source/hand.cur'), auto;
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+html{
+    width: 100%;
+    max-width: 100%;
+	overflow-x: hidden;
+}
+
+.dontcopy{
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+
+.fullcenter{
+	padding: 50% 50%;
+}
+</style>
+
+<center><font class="fullcenter" style="background-image:url('source/download.gif'); color=black;">это конфети?</font></center>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	setInterval(update,40);
+});
+
+function GetRandom(max){
+	return Math.floor(Math.random() * max)
+}
+const names = ["<--- what this?","Рађ","█████████████","['name1','name2','name3']","ははは日本語","█ ◗ 🅺 ▬ ▚▚▘ █▬█ ▞▚ ▜▛ ▬ ❰ ██ 🆁 █☰ ","🄽🄾 🅃🄷🄴🅁🄴","𝕩𝕒❕ 𝕓𝕪𝕓з ℍ𝕖 д𝕠д𝕖л𝕒𝕖т эт𝕠❕❕❕","i̷ h̷e̷a̷r̷ y̷o̷u̷","¡ʍou ǝʇᴉs ǝsoʅɔ","🅣🅨🅟🅘🅒🅐🅛 ❜🅦🅔🅘🅡🅓🅒🅞🅡🅔❜ 🅦🅞🅡🅓🅢","core.html"];
+function update(){
+	document.title = names[GetRandom(names.length)]
+}
+</script>

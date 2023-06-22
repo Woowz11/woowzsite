@@ -27,6 +27,15 @@ var all_sites = [
       ]
     },
     {
+      "href": "core",
+      "name": "опхдслюи мюгбюмхе вепрхкю!!!!!",
+      "catalog": "cores",
+      "hide": false,
+      "tags": [
+        "опхдслюрэ"
+      ]
+    },
+    {
       "href": "list64",
       "name": '<font style="color: red;">All</font> Sites List',
       "catalog": "all_sites",
