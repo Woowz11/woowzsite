@@ -28,11 +28,11 @@ var all_sites = [
     },
     {
       "href": "core",
-      "name": "œ–»ƒ”Ã¿… Õ¿«¬¿Õ»≈ ◊≈–“»À¿!!!!!",
+      "name": "idk Core",
       "catalog": "cores",
       "hide": false,
       "tags": [
-        "œ–»ƒ”Ã¿“‹"
+        "core"
       ]
     },
     {
@@ -201,9 +201,54 @@ var all_sites = [
       "href": "random",
       "name": "Random?",
       "catalog": "test_site",
-      "hide": false,
+      "hide": true,
       "tags": [
         "random"
+      ]
+    },
+    {
+      "href": "real-folder",
+      "name": "Folder 'woowzsite'",
+      "catalog": "funny",
+      "hide": false,
+      "tags": [
+        "woowzsite","folder","realfolder"
+      ]
+    },
+    {
+      "href": "blank",
+      "name": "Blank",
+      "catalog": "test_site",
+      "hide": true,
+      "tags": [
+        "blank","empty"
+      ]
+    },
+    {
+      "href": "test-woowzmain",
+      "name": "Test woowz js",
+      "catalog": "test_site",
+      "hide": true,
+      "tags": [
+        "woowzjs","testwoowz","woowzmain"
+      ]
+    },
+    {
+      "href": "console",
+      "name": "Terminal",
+      "catalog": "test_site",
+      "hide": true,
+      "tags": [
+        "console","terminal"
+      ]
+    },
+    {
+      "href": "text-scripts",
+      "name": "Text Scripts",
+      "catalog": "funny",
+      "hide": false,
+      "tags": [
+        "text","textscripts","textscript"
       ]
     }
   ]

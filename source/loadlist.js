@@ -9,7 +9,6 @@ const Site = {
 }
 
 const new_html = "";
-const saved_category = "";
 function AddSite(site,new_html,saved_category)
 {
 	if(saved_category!=site.catalog){
@@ -26,14 +25,14 @@ function lodlist(show_hide) {
 	
 	Sites.sort(function(a, b)
 	{
-		 if (a.name < b.name) {
-		return -1;
+		if (a.catalog < b.catalog) {
+			return -1;
 		}
-		if (a.name > b.name) {
-		return 1;
+		if (a.catalog > b.catalog) {
+			return 1;
 		}
 		return 0;
-		});
+	});
 	
 	Sites.forEach(function(site,i,arr){
 		if((!site.hide) || show_hide){

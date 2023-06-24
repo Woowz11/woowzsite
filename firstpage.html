@@ -1,4 +1,32 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>FIRSTPAGE</title>
-<p>THIS <a href="firstpage.html">F</a>IRST <a href="site_woowz11_2.html">W</a>EB<a href="skull-party!.html">S</a>I<a href="test_site.html">T</a>E!</p>
+<link rel="icon" type="image/x-icon" href="source\gear.ico">
+<font>This is the very first site on the Wozerower Internet Network! This is a template for creators of other sites! This is the base! If this template is removed or destroyed, all sites will collapse!
+Now through this site passes information to <font id="sites">0</font> sites!</font>
+
+<hr>
+
+<ul>
+  <li><a href="blood_eye_co.html">BLOOD_EYE</a></li>
+  <li><a href="console.html">TERMINAL</a></li>
+  <li><a href="blank.html">BLANK</a></li>
+  <li><a href="text-scripts.html">TEXT_SCRIPTS</a></li>
+</ul>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function(){
+	update();
+	setInterval(update,5000);
+});
+
+function GetRandom(max){
+	return Math.floor(Math.random() * max)
+}
+
+function update(){
+	document.getElementById("sites").textContent = 30000+GetRandom(7000);
+}
+
+</script>

@@ -7,13 +7,18 @@
 <link rel="stylesheet" href="source/woowz/main.css">
 <!-- HTML сайта -->
 
+<style>
+html{
+	background: url("source/background_.png");
+}
+</style>
+
 <nobr><center><font>Переделывание текста в русскую речь</font><br>
 <div id="converttext_text_to_russianwords"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_russianwords()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
 
 <nobr><center style="margin-top: 50px;"><font>Шифратор 1</font><br>
 <font>Код: </font><input style="margin-top: 20px; width:200px;"><br>
 <div id="converttext_text_to_shifr1"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_shifr1()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
-
 
 <script>
 function changechecked(check){
@@ -88,7 +93,7 @@ function converttext_text_to_shifr1_function(text, alt, code){
 	for(var i = 0; i < alphavite.length; i++){
 		var sym = "";
 		if(alt){
-			var symbolcode = alphavite[i].charCodeAt(0);
+			var symbolcode = alphavite[i].charCodeAt(0); 
 			var sym1 = String.fromCharCode(Math.abs(symbolcode-(codefinal)));
 			var sym2 = String.fromCharCode(Math.abs(sym1.charCodeAt(0)+(codefinal))).charCodeAt(0);
 			sym = sym + String.fromCharCode(Math.abs(sym2-(codefinal)));
