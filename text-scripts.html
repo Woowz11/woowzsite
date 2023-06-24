@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<!-- Настройки сайта -->
+<title>Text Scripts</title>
+<link rel="icon" type="image/x-icon" href="source\a.ico">
+<script src="source/woowz/main.js"></script>
+<link rel="stylesheet" href="source/woowz/main.css">
+<!-- HTML сайта -->
+
+<nobr><center><font>Переделывание текста в русскую речь</font><br>
+<div id="converttext_text_to_russianwords"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_russianwords()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
+
+<nobr><center style="margin-top: 50px;"><font>Шифратор 1</font><br>
+<font>Код: </font><input style="margin-top: 20px; width:200px;"><br>
+<div id="converttext_text_to_shifr1"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_shifr1()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
+
+
+<script>
+function changechecked(check){
+	var arrow = check.parentElement.children[0];
+	var div1 = arrow.parentElement.parentElement.children[0].children[2];
+	var div2 = arrow.parentElement.parentElement.children[2].children[2];
+	if(check.checked){
+		arrow.textContent = "←";
+	}else{
+		arrow.textContent = "→";
+	}
+	div1.readOnly = !div1.readOnly;
+	div2.readOnly = !div2.readOnly;
+}
+function replaceAll_(first,second,alt,input){
+	var result = input;
+	result = result.replaceAll((alt?second:first),((!alt)?second:first));
+	result = result.replaceAll((alt?second.toUpperCase():first.toUpperCase()),((!alt)?second.toUpperCase():first.toUpperCase()));
+	return result
+}
+
+
+
+function converttext_text_to_russianwords_function(text, alt){
+	var result = text;
+	result = replaceAll_("ei'","й",alt,replaceAll_("sh","ш",alt,replaceAll_("iy","ы",alt,replaceAll_("w","в",alt,replaceAll_("h","аш",alt,result)))));
+	result = replaceAll_(" y"," игрек",alt,replaceAll_("="," равно ",alt,replaceAll_("^"," в степени ",alt,replaceAll_("0","ноль",alt,replaceAll_("1","один",alt,replaceAll_("2","два",alt,replaceAll_("3","три",alt,replaceAll_("4","четыре",alt,replaceAll_("5","пять",alt,replaceAll_("6","шесть",alt,replaceAll_("7","семь",alt,replaceAll_("8","восемь",alt,replaceAll_("9","девять",alt,replaceAll_("10","десять",alt,replaceAll_("11","одиннадцать",alt,replaceAll_("12","двенадцать",alt,result))))))))))))))));
+	result = replaceAll_("x","кс",alt,replaceAll_(" x"," икс",alt,replaceAll_("sole","сол",alt,replaceAll_("j","ж",alt,replaceAll_("ya","я",alt,result)))));
+	result = replaceAll_("i'y","ю",alt,replaceAll_("ch","ч",alt,replaceAll_("'","ь",alt,replaceAll_("eliv","елыв",alt,replaceAll_("ri","ры",alt,replaceAll_("ey","ей",alt,replaceAll_("a","а",alt,replaceAll_("b","б",alt,replaceAll_("r","р",alt,replaceAll_("c","к",alt,replaceAll_("d","д",alt,replaceAll_("k","к",alt,result))))))))))));
+	result = replaceAll_("che","ще",alt,replaceAll_("s","с",alt,replaceAll_("p","п",alt,replaceAll_("l","л",alt,replaceAll_("n","н",alt,replaceAll_("ce","це",alt,result))))));
+	result = replaceAll_("z","з",alt,replaceAll_("v","в",alt,replaceAll_("e","е",alt,replaceAll_("t","т",alt,replaceAll_("i","и",alt,result)))));
+	result = replaceAll_("g","г",alt,replaceAll_("u","у",alt,result));
+	
+	return result;
+}
+function converttext_text_to_russianwords(){
+	var all = document.getElementById("converttext_text_to_russianwords");
+	var alt = all.children[1].children[2].checked;
+	var input = all.children[(alt?2:0)].children[2];
+	var output = all.children[(alt?0:2)].children[2];
+	var result = converttext_text_to_russianwords_function(input.value,all.children[1].children[2].checked);
+	output.value = result;
+}
+
+function converttext_text_to_shifr1_function(text, alt, code){
+	var result = text;
+	
+	code = (code==""?" ":code);
+	
+	var code1 = code.length;
+	var code2 = ~~Number(code.replace(/[^\d]/g,""));
+	var code3 = Number(code2.toString(code1+2).replace(/[^\d]/g,code2.toString()[0]));
+	var code5 = code.replace(/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]/g,"").length;
+	var code4 = Number((code3^code1 - code2).toString().replace("-",(Number(code3.toString()[0])*Math.abs(Number(code1.toString()[0])-Number(code5.toString()[0]))).toString()));
+	var code7 = code.charCodeAt(0) + code.charCodeAt(code1-1);
+	var code6 = ((code1==1?code1+code2+code3+code4+code5:code1) + (code2==0?code1^code2+code3^code4+code5:code2) + (code3==0?code1-code2-code3-code4-code5:code3) + code5 + code4) ^ code7;
+	var code8 = 1;
+	for(var i = 0; i < code1; i++){
+		code8+= code.charCodeAt(i)^i;
+	}
+	var codefinal = (code1+code2+code3+code4+code5+code6+code7)*code8;
+	
+	var text1 = text.length;
+		
+	var speciallist = [];
+	var alphavite = [];
+	
+	for(var i = 0; i < text1; i++){
+		if(!alphavite.includes(text[i])){alphavite.push(text[i]);}
+	}
+	
+	for(var i = 0; i < alphavite.length; i++){
+		var sym = "";
+		if(alt){
+			var symbolcode = alphavite[i].charCodeAt(0);
+			var sym1 = String.fromCharCode(Math.abs(symbolcode-(codefinal)));
+			var sym2 = String.fromCharCode(Math.abs(sym1.charCodeAt(0)+(codefinal))).charCodeAt(0);
+			sym = sym + String.fromCharCode(Math.abs(sym2-(codefinal)));
+		}else{
+			var symbolcode = alphavite[i].charCodeAt(0);
+			sym = sym + String.fromCharCode(Math.abs(symbolcode+(codefinal)));
+		}
+		speciallist.push(sym);
+	}
+	
+	const newtextarray = arr => arr.map(letter => alphavite.indexOf(letter) >= 0 ? speciallist[alphavite.indexOf(letter)] : letter);
+	const newresult = str => newtextarray(str.split('')).join('');
+	result = newresult(text);
+	return result;
+}
+function converttext_text_to_shifr1(){
+	var all = document.getElementById("converttext_text_to_shifr1");
+	var alt = all.children[1].children[2].checked;
+	var input = all.children[(alt?2:0)].children[2];
+	var output = all.children[(alt?0:2)].children[2];
+	var result = converttext_text_to_shifr1_function(input.value,all.children[1].children[2].checked,all.parentElement.children[3].value);
+	output.value = result;
+}
+
+</script>
