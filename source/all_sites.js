@@ -9,6 +9,15 @@ var all_sites = [
       ]
     },
     {
+      "href": "w",
+      "name": "W.com",
+      "catalog": "funny",
+      "hide": false,
+      "tags": [
+        "w","wcom"
+      ]
+    },
+    {
       "href": "index",
       "name": "Woowz Site 1999",
       "catalog": "woowz_searches",
