@@ -19,6 +19,8 @@ html{
 <nobr><center style="margin-top: 50px;"><font>Конвертация русского текста в текст для модификаций Woowz11 в Garry's mod</font><br>
 <div id="converttext_text_to_garrysmod"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_garrysmod()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
 
+<nobr><center style="margin-top: 50px;"><font>Конвертация болгарского текста в Русский язык будущего для WRF</font><br>
+<div id="converttext_text_to_wrf"><div style="display:inline-block;"><center><font>Input</font></center><br><textarea cols="50" rows="10"></textarea></div><div style="display:inline-block;"><font style="font-size:40px;">→</font><br><input onchange="changechecked(this)" type="checkbox"><br><button onclick="converttext_text_to_wrf()">Convert</button></div><div style="display:inline-block;"><center><font>Output</font></center><br><textarea readonly cols="50" rows="10"></textarea></div></div></center></nobr><br>
 
 <nobr><center style="margin-top: 50px;"><font>Шифратор 1</font><br>
 <font>Код: </font><input style="margin-top: 20px; width:200px;"><br>
@@ -56,6 +58,75 @@ function converttext_text_to_russianwords_function(text, alt){
 	result = replaceAll_("z","з",alt,replaceAll_("v","в",alt,replaceAll_("e","е",alt,replaceAll_("t","т",alt,replaceAll_("i","и",alt,result)))));
 	result = replaceAll_("g","г",alt,replaceAll_("u","у",alt,result));
 	
+	return result;
+}
+
+function converttext_text_to_wrf_function(text, alt){
+	var result = text;
+
+	result = replaceAll_("а","а",alt,result);
+	result = replaceAll_("б","j",alt,result);
+	result = replaceAll_("в","в",alt,result);
+	result = replaceAll_("г","g",alt,result);
+	result = replaceAll_("д","d",alt,result);
+	result = replaceAll_("е","е",alt,result);
+	result = replaceAll_("ё","е'",alt,result);
+	result = replaceAll_("ж","s/",alt,result);
+	result = replaceAll_("з","з",alt,result);
+	result = replaceAll_("и","и",alt,result);
+	result = replaceAll_("й","и'",alt,result);
+	result = replaceAll_("к","к",alt,result);
+	result = replaceAll_("л","л",alt,result);
+	result = replaceAll_("м","м",alt,result);
+	result = replaceAll_("н","н",alt,result);
+	result = replaceAll_("о","о",alt,result);
+	result = replaceAll_("п","п",alt,result);
+	result = replaceAll_("р","р",alt,result);
+	result = replaceAll_("с","с",alt,result);
+	result = replaceAll_("т","t",alt,result);
+	result = replaceAll_("у","у",alt,result);
+	result = replaceAll_("ф","в'",alt,result);
+	result = replaceAll_("х","х",alt,result);
+	result = replaceAll_("ц","к'",alt,result);
+	result = replaceAll_("ч","с'",alt,result);
+	result = replaceAll_("ш","s\\",alt,result);
+	result = replaceAll_("щ","s'",alt,result);
+	result = replaceAll_("ъ","v",alt,result);
+	result = replaceAll_("ы","v''",alt,result);
+	result = replaceAll_("ь","v'",alt,result);
+	result = replaceAll_("э","э",alt,result);
+	result = replaceAll_("ю","у'",alt,result);
+	result = replaceAll_("я","я",alt,result);
+	
+	if(alt==true){
+	alt = false
+	result = replaceAll_("ǎ","a",alt,result);
+	result = replaceAll_("ǐ","b",alt,result);
+	result = replaceAll_("ǒ","c",alt,result);
+	result = replaceAll_("ǔ","d",alt,result);
+	result = replaceAll_("ǖ","e",alt,result);
+	result = replaceAll_("ǘ","f",alt,result);
+	result = replaceAll_("ǚ","g",alt,result);
+	result = replaceAll_("ǜ","h",alt,result);
+	result = replaceAll_("ǟ","i",alt,result);
+	result = replaceAll_("ǡ","j",alt,result);
+	result = replaceAll_("ǣ","k",alt,result);
+	result = replaceAll_("ǥ","l",alt,result);
+	result = replaceAll_("ǧ","m",alt,result);
+	result = replaceAll_("ǩ","n",alt,result);
+	result = replaceAll_("ǫ","o",alt,result);
+	result = replaceAll_("ǭ","p",alt,result);
+	result = replaceAll_("ǯ","q",alt,result);
+	result = replaceAll_("ǹ","r",alt,result);
+	result = replaceAll_("ǵ","s",alt,result);
+	result = replaceAll_("ǻ","t",alt,result);
+	result = replaceAll_("ǽ","u",alt,result);
+	result = replaceAll_("ǿ","v",alt,result);
+	result = replaceAll_("ȁ","w",alt,result);
+	result = replaceAll_("ȃ","x",alt,result);
+	result = replaceAll_("ȅ","y",alt,result);
+	result = replaceAll_("ȇ","z",alt,result);
+	}
 	return result;
 }
 
@@ -198,6 +269,15 @@ function converttext_text_to_garrysmod(){
 	var input = all.children[(alt?2:0)].children[2];
 	var output = all.children[(alt?0:2)].children[2];
 	var result = converttext_text_to_garrysmod_function(input.value,all.children[1].children[2].checked);
+	output.value = result;
+}
+
+function converttext_text_to_wrf(){
+	var all = document.getElementById("converttext_text_to_wrf");
+	var alt = all.children[1].children[2].checked;
+	var input = all.children[(alt?2:0)].children[2];
+	var output = all.children[(alt?0:2)].children[2];
+	var result = converttext_text_to_wrf_function(input.value,all.children[1].children[2].checked);
 	output.value = result;
 }
 
