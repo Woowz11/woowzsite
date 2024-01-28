@@ -11,12 +11,20 @@
 #log{
 	overflow-wrap: break-word;
 }
+
+font{
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+
 </style>
 
 <html id="main" style='background-color:#0A0A0A; background-image: url("source/microsoft_fly_simulator_epicepdiditonpps.png"); font-family: "Lucida Console"; color: white; font-size: 14px;'>
 <body onload="start();">
 	<br>
-	<font>> </font><textarea id="console_input" cols="60" rows="10" style="vertical-align: top; background:black; color:white; font-size: 15px; border: 0; padding: 0 0; outline-width: 0;" type="text">help</textarea> <button style="vertical-align: bottom;" onclick="button_run()">RUN</button> <button style="vertical-align: bottom; margin-left: 30px;" onclick="clear_log()">CLEAR</button> <font id="total_messages" style="vertical-align: bottom; margin-left: 30px;">0 Messages</font><br>
+	<font>> </font><input autofocus id="console_input" value="help" style="resize: horizontal; width:70%;height:auto !important; -webkit-user-select: none; -moz-user-select: none; vertical-align: top; background:black; color:white; font-size: 15px; border: 0; padding: 0 0; outline-width: 0;" type="text"></input> <button style="vertical-align: bottom; -webkit-user-select: none; -moz-user-select: none;" id="buttonrun" onclick="button_run()">RUN</button> <button id="buttonclear" style="vertical-align: bottom; margin-left: 30px; -webkit-user-select: none; -moz-user-select: none;" onclick="clear_log()">CLEAR</button> <font id="total_messages" style="vertical-align: bottom; margin-left: 30px;">0 Messages</font><br>
 
 	<font id="log"></font>
 </body>
@@ -188,6 +196,7 @@ function command_title(CA1){
 function math_func(m)
 {
 	try {
+		m = m.replaceAll("^","**");
 		mathresult = [m+"="+eval(m),"lime"];
 	} catch (e) {
 		mathresult = ["Математический пример ["+m+"] введён неверно!","red"];
@@ -267,7 +276,6 @@ function command_repeat(CA){
 	}
 	result_commandrepeat = getnumber(V1_repeat,["Команда ["+oldcommand+"] успешно повторена [{GETNUMBER}] раз!","lime"],true,0);
 	V2_repeat = getnumber(V2_repeat,null,false,0,false)[0];
-	console.log(V2_repeat);
 	
 	if(V2_repeat==0){
 
@@ -280,7 +288,7 @@ function command_repeat(CA){
 		if(repeat_command_started){
 		result_commandrepeat = [null,["Цикл уже запущен! (repeat)","red"]];
 		}else{repeat_command_started=true;
-		command_repeat_async(V2_repeat*1000,result_commandrepeat[0],["Команда ["+oldcommand+"] успешно повторена ["+result_commandrepeat[0]+"] раз с интервалом ["+V2_repeat+"] секунд!","lime"]);
+		command_repeat_async(V2_repeat*1000,result_commandrepeat[0],["Команда ["+oldcommand+"] успешно повторена ["+result_commandrepeat[0]+"] раз с интервалом [≈"+V2_repeat+"] секунд! (Это заняло [≈"+((result_commandrepeat[0]*V2_repeat)*6.7)+"] секунд)","lime"]);
 		result_commandrepeat = [null]}
 	}
 	
@@ -476,7 +484,7 @@ function EpicWord(tag){
 	if(tag.includes("math(")){
 		evalmathprimer = tag.match(/\((.*)\)/)[1];
 		try {
-			console.log(evalmathprimer);
+			evalmathprimer = evalmathprimer.replaceAll("^","**");
 			rt = eval(evalmathprimer);
 		} catch (e) {
 			return "{ERRORTAG(INVALID_MATH)}";
@@ -509,12 +517,6 @@ function EpicWords(array,returnarray){
 	result_EpicWords = "";
 	result_EpicWordsTag = "";
 	array.forEach((w,index) => {
-		//final_w = ((index+1)==array.length?"":" ");
-		//if(w[0]=="{" && (w.slice(-1)=="}")){
-		//	tag_result = EpicWord(w.replace("{","").replace("}",""));
-		//	result_EpicWords = result_EpicWords + tag_result + final_w;
-		//}else{result_EpicWords = result_EpicWords + w + final_w;}
-		
 		if(w=="{"){thisisatag=true;}
 		if(w=="}"){thisisatag=false; result_EpicWords = result_EpicWords + EpicWord(result_EpicWordsTag); result_EpicWordsTag = "";}
 		
@@ -531,7 +533,8 @@ function EpicWords(array,returnarray){
 	return result_EpicWords;
 }
 
-function split(command){
+function split(command,nousetag){
+	if(nousetag==null){nousetag=false;}
 	resultfull = [];
 	Quotes = false;
 	word = "";
@@ -547,7 +550,9 @@ function split(command){
 			if(c=="\""){
 				Quotes = !Quotes;
 				if(Quotes==false){
-					word = EpicWords(word.split(""),false);
+					if(!nousetag){
+						word = EpicWords(word.split(""),false);
+						}
 				}
 			}else{
 				word = word + c;
@@ -556,7 +561,7 @@ function split(command){
 		})
 	if(word!=""){resultfull.push(word);}
 	
-	return EpicWords(resultfull,true);
+	return (nousetag?resultfull:EpicWords(resultfull,true));
 }
 
 logid = 0;
@@ -603,7 +608,7 @@ function button_run() {
 	result_log = "";
 	result_color = "white";
 	const Command = document.getElementById("console_input").value;
-	const CA = split(Command);
+	const CA = split(Command,(Command.split(" ")[0].toLowerCase()=="html"));
 	command_return = command(CA,Command);
 	if(command_return!=null){
 		result_log = command_return[0].toString();
@@ -621,5 +626,12 @@ function start(){
 	window.addEventListener("mousemove",(event)=>{
 		mousePos = {x: event.clientX, y: event.clientY};
 	},true)
+	
+	document.getElementById("main").addEventListener("keypress", function(event) {
+	if (event.key == "Enter") {
+		event.preventDefault();
+		document.getElementById("buttonrun").click();
+	}
+	});
 }
 </script>
