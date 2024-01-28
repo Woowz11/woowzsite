@@ -1,3 +1,54 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
-<title>TESTSITE.html</title>
+<title>#WOOHACK#</title>
+
+<style>
+font{
+	font-family: cursive;
+	font-size: 150%;
+}
+
+a:link {
+  color: maroon;
+}
+
+a:visited {
+  color: maroon;
+}
+
+</style>
+
+<body style="margin-top: 5%; margin-left: 15%;" onload="randnomer();">
+	<font>ВАШ САЙТ БЫЛ ВЗЛОМАН ГРУПИРОВКОЙ "<b>WOOHACK</b>"!</font><br>
+	<font>ЕСЛИ ВЫ ХОТИТЕ ВОСТАНОВИТЬ ЭТОТ САЙТ ТО ОТПРАВЬТЕ НА НОМЕР </font><b><font id="telephone-nomer">0</font></b><font> - <b>500.000</b> РУБЛЕЙ!</font><br>
+	<font>ИЛИ ВСЕ ДАННЫЕ БУДУТ УДАЛЕНЫ!</font><br>
+	<br>
+	<font>ВАМ ДАЁТСЯ ВРЕМЯ ДО </font><b><font id="data">0</font></b><font>!</font><br>
+	<br>
+	<br>
+	<br>
+	<center><img style="margin-left: -13%; -webkit-user-select: none; -moz-user-select: none; user-select: none; pointer-events: none;" width="507px" height="380px" src="source/hacker.png"></center>
+	
+	<center><a href="firstpage.html" style="margin-left: -9%; position: absolute; bottom: 5px;">WOOHACK.COM</a></center><br>
+</body>
+
+<script>
+function getchar(){
+	return Math.floor(Math.random() * 9);
+}
+
+function addDays(date, days) {
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
+function randnomer(){
+	document.getElementById("telephone-nomer").innerHTML = "+7-"+getchar()+getchar()+getchar()+"-"+getchar()+getchar()+getchar()+"-"+getchar()+getchar()+"-"+getchar()+getchar();
+	var date = new Date();
+	now = addDays(date,6+Math.floor(Math.random() * 3));
+	days = now.getDate();
+	years = now.getFullYear().toString();
+	months = (now.getMonth()+1).toString();
+	document.getElementById("data").innerHTML = days+"."+months+"."+years;
+}
+</script>

@@ -18,6 +18,15 @@ var all_sites = [
       ]
     },
     {
+      "href": "3d",
+      "name": "3D WebGL Tutorial",
+      "catalog": "funny",
+      "hide": true,
+      "tags": [
+        "3d","webgl","3d webgl"
+      ]
+    },
+    {
       "href": "index",
       "name": "Woowz Site 1999",
       "catalog": "woowz_searches",
