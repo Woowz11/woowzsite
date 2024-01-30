@@ -4,15 +4,25 @@
 <link rel="icon" type="image/x-icon" href="source\folder.ico">
 
 <style>
+::selection {
+  opacity: 0;
+}
+
 body {
-  background: #202020;
-  cursor:url('source/woowz.cur'), auto;
+   background: #202020;
+   cursor:url('source/woowz.cur'), auto;
    margin: 0;
    padding: 0;
+   height: 100%;
+   min-height: 100% !important;
 }
 html{
    margin: 0;
    padding: 0;
+   height: 100%;
+   min-height: 100% !important;
+   overflow-x: hidden;
+   overflow-y: hidden;
 }
 
 img{
@@ -26,6 +36,8 @@ font{
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	user-select: none;
+	color:white;
+	font-size: 12px;
 }
 
 font{
@@ -52,8 +64,58 @@ font{
 	outline: 2px solid #406170;
 }
 
+.button_positionend{
+	outline: 1px solid #191919;
+}
+.button_positionend:hover{
+	background: #1B2931;
+	outline: 1px solid #227299;
+}
+
+.hovershow{
+	opacity: 0;
+}
+.hovershow:hover{
+	opacity: 1;
+}
+
 .button_top2_right:hover{
 	background: #4D4D4D;
+}
+
+.hz img{
+	opacity: 0;
+}
+
+.hz:hover img{
+	opacity: 1;
+}
+
+div.hz:hover{
+	background: #434343;
+}
+
+.button_top2_right_slow{
+    -webkit-transition: background 0.3s ease-in-out;
+    -moz-transition: background 0.3s ease-in-out;
+    -ms-transition: background 0.3s ease-in-out;
+    -o-transition: background 0.3s ease-in-out;
+}
+
+.button_top2_right_slow:hover{
+	background: #434343;
+}
+
+.button_toblue{
+    -webkit-transition: filter 0.2s ease-in-out;
+    -moz-transition: filter 0.2s ease-in-out;
+    -ms-transition: filter 0.2s ease-in-out;
+    -o-transition: filter 0.2s ease-in-out;
+	filter: saturate(0%) brightness(150%);
+}
+
+.button_toblue:hover{
+	filter: saturate(100%) brightness(100%);
 }
 
 .button_top2_left{
@@ -86,21 +148,21 @@ font{
 }
 </style>
 
-
+<body onload="OnLoad();">
 <div style="display:inline-block; background: #0A386B; height:30px; width: 100%;">
 	<div style="margin-top:3px; display:inline-block; line-height: 25px;" class="object">
 		<div style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
 		<div><img height=19px; src="source/files2.png"></div>
-		<div class="button_top_left" style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
 		<div class="button_top_left" style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files4.png"></center></div>
+		<div class="button_top_left" style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
 		<div class="button_top_left" style="width:11px; height:22px;"><center><img height=8px; style="margin-bottom:2px;margin-top:1px;" src="source/files1.png"></center></div>
 		<div><img height=19px; src="source/files2.png"></div>
 	</div>
 	<font style="color:white; margin-left:5px; font-size: 13px; vertical-align: 3px;">woowzsite</font>
 	<div class="object" style="display:inline-block; width:200px; float:right;">
-		<div class="button_top_left_and_center" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img style="margin-top:5px;" src="source/CLOSETHIS.png"></center></div>
+		<div class="button_top_left_and_center" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS.png"></center></div>
 		<div class="button_top_left_and_center" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img style="margin-top:5px;" src="source/CLOSETHIS2.png"></center></div>
-		<div class="button_top_right" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img style="margin-top:5px;" src="source/CLOSETHIS3.png"></center></div>
+		<div class="button_top_right" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS3.png"></center></div>
 	</div>
 </div>
 
@@ -116,20 +178,20 @@ font{
 	</div>
 </div>
 
-<div class="object" style="background: url('source/b2.png'); height:100px; width: 100%;">
+<div class="object" style="background: url('source/b2.png'); background-size: 100% 100%; height:110px; width: 100%;">
 	
-	<div style="height:100%; width: 120px;"><center><img style="margin-top:10px;" height="25px" src="source/zakrep.png"></center><br><center><font style="transform: translateY(-20px); margin-bottom:10px; display:block; font-size: 12px; color:#CCCCCC;">Закрепить на панели<br>быстрого доступа</font></center></div>
+	<div style="height:100%; width: 120px;"><center><img style="transform: translateY(-5px);" src="source/zakrep.png"></center><br><center><font style="transform: translateY(-20px); margin-bottom:10px; display:block; font-size: 12px; color:#CCCCCC;">Закрепить на панели<br>быстрого доступа</font></center></div>
 	
 	<div style="height:100%; width: 150px;"><center>
 		<div class="button_top2_right"><img style="margin-top:10px;" height="35px" src="source/copy.png"><br><font style="color:white; font-size: 12px;">Копировать</font></div>
 		<div style="width:70px;"><img style="margin-top:10px;" height="35px" src="source/paste.png"><br><font style="color:#CCCCCC; font-size: 12px;">Вставить</font></div>
-		<br><center><font style="color:#CCCCCC; font-size: 12px; margin-top:15px; display:block;">Буфер обмена</font></center>
+		<br><center><font style="color:#CCCCCC; font-size: 12px; margin-top:10px; display:block;">Буфер обмена</font></center>
 	</center></div>
 	
 	<div style="height:100%; width: 130px; transform: translateY(-15px);">
 		<div style="margin-top:7px;" class="button_top2_right"><img height="18px" src="source/icon1.png"><font style="color:white; font-size: 12px;">  Вырезать</font></div><br>
 		<div style="margin-top:7px;" class="button_top2_right"><img height="12px" src="source/icon2.png"><font style="color:white; font-size: 12px;">  Скопировать путь</font></div><br>
-		<div style="margin-top:7px;" ><img height="20px" src="source/icon3.png"><font style="color:#CCCCCC; font-size: 12px;">  Вставить ярлык</font></div><br>
+		<div style="margin-top:7px;" ><img height="19px" src="source/icon3.png"><font style="color:#CCCCCC; font-size: 12px;">  Вставить ярлык</font></div><br>
 	</div>
 	
 	<div><img style="" src="source/line.png"></div>
@@ -139,23 +201,196 @@ font{
 		<div class="button_top2_right"><center><img style="margin-top:10px;" height="33px" src="source/copy_to.png"><br><font style="color:white; font-size: 12px;">Копировать<br>в </font><img src="source/smol_galka.png"></center></div>
 		<div><img src="source/line2.png"></div>
 		<div class="button_top3_middle_delete">
-			<center><div style=" width:45px;" class="button_top3_middle_delete2"><center><img style="margin-top:10px" height="36px" src="source/delete.png"></center></div><br>
+			<center><div style=" width:45px;" class="button_top3_middle_delete2"><center><img style="margin-top:10px" height="26px" src="source/delete.png"></center></div><br>
 			<div class="button_top3_middle_delete2"><center><font style="font-size: 12px;color:white;">Удалить</font><br><img src="source/smol_galka.png"></center></div></center>
 		</div>
-		<div class="button_top2_right"><center><img style="margin-top:10px;" height="33px" src="source/rename.png"><br><font style="color:white; font-size: 12px;">Переименовать<br>&nbsp;</font></center></div>
+		<div class="button_top2_right"><center><img style="margin-top:10px;" height="27px" src="source/rename.png"><br><font style="color:white; font-size: 12px;">Переименовать<br>&nbsp;</font></center></div>
 		<br><center><font style="color:#CCCCCC; font-size: 12px; display:block;">Упорядочить</font></center>
+	</div>
+	
+	<div><img style="" src="source/line.png"></div>
+	
+	<div style="height:100%; width: 185px;">
+		<div style="margin-left: 2px;margin-right: 2px;padding-left: 8px;padding-right: 8px;" class="button_top2_right"><center><img style="margin-top:10px" height="30px" src="source/newfolder.png"><br><font style="color:white; font-size: 12px;">Новая<br>папка</center></font></div>
+		<div style="transform: translateY(-30px);" ><div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/createelement.png"><font style="color:white; font-size: 12px;"> Создать элемент <img src="source/smol_galka.png"></font></div><br>
+		<div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/easylocation.png"><font style="color:white; font-size: 12px;"> Простой доступ <img src="source/smol_galka.png"></font></div></div>
+		<br><center><font style="color:#CCCCCC; font-size: 12px; display:block;">Создать</font></center>
+	</div>
+	
+	<div><img style="" src="source/line.png"></div>
+	
+	<div style="height:100%; width: 140px;">
+		<div class="button_top3_middle_delete">
+			<center><div style=" width:45px; padding-right: 3px; padding-left: 3px;" class="button_top3_middle_delete2"><center><img style="transform: translateY(-5px); margin-top:10px" src="source/options.png"></center></div><br>
+			<div class="button_top3_middle_delete2"><center><font style="font-size: 12px;color:white;">Свойства</font><br><img src="source/smol_galka.png"></center></div></center>
+		</div>
+		<div style="transform: translateY(-8px); padding-left:7px;" ><div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/open.png"><font style="color:white; font-size: 12px;"> Открыть <img src="source/smol_galka.png"></font></div><br>
+		<div style="margin-top:7px;"><img height="16px" src="source/change.png"><font style="color:#CCCCCC; font-size: 12px;"> Изменить</font></div><br>
+		<div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/jyrnal.png"><font style="color:white; font-size: 12px;"> Журнал</font></div><br></div>
+		<br><center><font style="color:#CCCCCC; font-size: 12px; display:block;">Открыть</font></center>
+	</div>
+	
+	<div><img style="" src="source/line.png"></div>
+	
+	<div style="height:100%; width: 150px;">
+		<div style="transform: translateY(-8px); padding-left:7px;" ><div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/selectall.png"><font style="color:white; font-size: 12px;"> Выделить все</font></div><br>
+		<div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/selectdone.png"><font style="color:white; font-size: 12px;"> Снять выделение</font></div><br>
+		<div style="margin-top:7px;" class="button_top2_right"><img height="16px" src="source/selectdinverse.png"><font style="color:white; font-size: 12px;"> Обратить выделение</font></div><br></div>
+		<br><center><font style="color:#CCCCCC; font-size: 12px; display:block;">Выделить</font></center>
 	</div>
 	
 	<div><img style="" src="source/line.png"></div>
 	
 </div>
 
-<div class="object" style="background: #191919; height:40px; width: 100%;">
+<div class="object" style="background: #191919; height:35px; width: 100%;">
+	
+	<img src="source/arrowleft.png">
+	<img src="source/arrowright.png">
+	<img class="button_toblue" style="margin-bottom: 10px;" src="source/smolarrow_bottom.png">
+	<img class="button_top2_right_slow" style="margin-bottom: 4px; margin-left: 3px;" src="source/arrow_top.png">
+	<div style="outline: 1px solid #535353; transform: translateY(-11px); height: 60%; width: 73%;">
+		<div><center><img height=16px; style="margin-left: 5px; transform: translateY(2px);" src="source/files3.png"></center></div>
+		<div class="button_top2_right_slow"><center><img style="margin-left: 5px; transform: translateX(-2px) translateY(-2px);" src="source/smolarrow_right.png"></center></div>
+		
+		<div class="button_top2_right_slow">
+		<div style="transform:translateY(-1px);"><font style="margin-left: 5px;">Мой компьютер</font></div>
+		<div><center><img style="transform: translateY(1px);" src="source/hz2.png"></center></div>
+		<div><center><img style="margin-left: 5px; margin-right: 4px; transform: translateX(-2px) translateY(-2px);" src="source/smolarrow_right.png"></center></div>
+		</div>
+		
+		<div class="button_top2_right_slow">
+		<div style="transform:translateY(-1px);"><font style="margin-left: 5px;">Локальный диск (F:)</font></div>
+		<div><center><img style="transform: translateY(1px);" src="source/hz2.png"></center></div>
+		<div><center><img style="margin-left: 5px; margin-right: 4px; transform: translateX(-2px) translateY(-2px);" src="source/smolarrow_right.png"></center></div>
+		</div>
+		
+		<div class="button_top2_right_slow">
+		<div style="transform:translateY(-1px);"><font style="margin-left: 5px;">woowzsite</font></div>
+		<div><center><img style="transform: translateY(1px);" src="source/hz2.png"></center></div>
+		<div><center><img style="margin-left: 5px; margin-right: 4px; transform: translateX(-2px) translateY(-2px);" src="source/smolarrow_right.png"></center></div>
+		</div>
+		
+		<div style="float:right; margin-right:3px; margin-top:3px; width:20px; transition-duration: 0.2s;" class="button_positionend"><center><img style="height:12px;" src="source/position_end1.png"></center></div>
+		<div style="float:right; margin-right:3px; transition-duration: 0.2s;" class="button_positionend"><center><img style="" src="source/position_end.png"></center></div>
+
+	</div>
+
+	<div style="float:right; margin-right:8px; outline: 1px solid #535353; transform: translateY(40%); height: 60%; width: 19.5%;">
+		<div style="margin-left:5px; margin-top:3px;"><center><font style="color: #6D6D6D;">Поиск в: woowzsite</font></center></div>
+		<div style="float:right; margin-right:5px; margin-top:3px;"><center><img src="source/search.png"></center></div>
+	</div>
+	
+</div>
+
+<div style="background: #3E3E3E; height:32px; width: 100%;">
+	<div class="hovershow" style="position: absolute; z-index:1; transform: translateX(7px) translateY(6px);"><img src="source/windowpluginfolders_right.png"></div>
+	<div style="position: absolute; z-index:0; margin-top:2px; margin-left:2px;"><img src="source/windowpluginfolders.png"></div>
+	<div class="hovershow" style=" position: absolute; z-index:1; transform: translateX(89px) translateY(9px);"><img src="source/windowpluginfolders_left.png"></div>
+	<div style=" position: absolute; z-index:0; transform: translateX(110px) translateY(-2px);"><img src="source/plus.png"></div>
+	<div class="hovershow" style=" position: absolute; z-index:1; transform: translateX(110px) translateY(-2px);"><img src="source/plushover.png"></div>
+</div>
+
+<div class="object" style="height:calc(100% - 300px); width: 100%;">
+
+	<div class="object" style="background-image: url('source/left.png'); height:100%; width: 183px; transform: translateY(-37px);">
+		TEST
+	</div>
+	<div class="object" style="outline: 1px solid #FFFFFF; transform: translateX(1px) translateY(2px); height:calc(100% - 3px); width: calc(100% - 187px);">
+		
+		<div style="width:100%;">
+		<img style="position: absolute; z-index:1; transform: translateX(130px);" src="source/hz5.png">
+		<div class="hz" style="height:24px;"><div style="margin-left:20px; margin-right:200px; transform: translateY(-7px);"><font style="font-size:14px; color:#DEDEDE;">Имя</font></div><img src="source/hz4.png"></div><img src="source/hz3.png">
+		<div class="hz" style="height:24px;"><div style="margin-left:5px; margin-right:40px; transform: translateY(-7px);"><font style="font-size:13px; color:#DEDEDE;">Дата изменения</font></div><img src="source/hz4.png"></div><img src="source/hz3.png">
+		<div class="hz" style="height:24px;"><div style="margin-left:5px; margin-right:70px; transform: translateY(-7px);"><font style="font-size:14px; color:#DEDEDE;">Тип</font></div><img src="source/hz4.png"></div><img src="source/hz3.png">
+		<div class="hz" style="height:24px;"><div style="margin-left:5px; margin-right:30px; transform: translateY(-7px);"><font style="font-size:13px; color:#DEDEDE;">Размер</font></div><img src="source/hz4.png"></div><img src="source/hz3.png">
+		</div>
+		
+		<div id="folderfiles" style="display: grid; margin-left:20px; margin-top:10px;"></div>
+		
+	</div>
 
 </div>
 
+<div style="position: absolute; bottom: 0; width: 100%;">
 
+	<div class="object" style="background: #333333; height:23px; width: 100%;">
+		<div style="transform: translateX(15px) translateY(2px);"><font style="color:#DEDEDE">Элементов: 34 | Выбран 1 элемент | элемент: 10,6 КБ |</font></div>
+	</div>
 
+	<div class="object" style="background: #D7EBF1; height:40px; width: 100%;">
+
+	</div>
+</div>
+</body>
+
+<script>
+function OpenHref(href){
+	window.open(href,"_blank");
+}
+
+function LoadFiles(){
+	files = [
+	["file_spyfolder",".git","29.01.2024 0:10", "Папка с файлами", ""],
+	["file_folder","source","30.01.2024 16:15", "Папка с файлами", ""],
+	["file_chrome","3d.html","28.01.2024 17:56", "Chrome HTML Do...", "7 КБ"],
+	["file_chrome","blank.html","22.06.2023 22:27", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","blood_eye_co.html","15.05.2023 20:51", "Chrome HTML Do...", "3 КБ"],
+	["file_chrome","blood_eye_co_new.html","15.05.2023 8:19", "Chrome HTML Do...", "3 КБ"],
+	["file_chrome","blood_eye_co_systems.html","21.05.2023 19:01", "Chrome HTML Do...", "3 КБ"],
+	["file_chrome","console.html","28.01.2024 23:06", "Chrome HTML Do...", "21 КБ"],
+	["file_chrome","core.html","19.06.2023 23:236", "Chrome HTML Do...", "2 КБ"],
+	["file_chrome","dexon.html","28.01.2024 16:42", "Chrome HTML Do...", "2 КБ"],
+	["file_chrome","dexonmusic.html","17.06.2023 11:52", "Chrome HTML Do...", "10 КБ"],
+	["file_chrome","eyes.html","24.06.2023 18:44", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","firstpage.html","28.01.2024 18:14", "Chrome HTML Do...", "2 КБ"],
+	["file_chrome","forest.html","24.06.2023 18:38", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","img.html","24.06.2023 16:42", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","index.html","24.06.2023 18:11", "Chrome HTML Do...", "2 КБ"],
+	["file_chrome","list.html","17.06.2023 0:28", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","list64.html","17.06.2023 0:40", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","null.html","30.01.2024 12:39", "Chrome HTML Do...", "29 КБ"],
+	["file_chrome","openprojectsource.html","17.06.2023 18:48", "Chrome HTML Do...", "2 КБ"],
+	["file_chrome","openprojectsource_download.html","17.06.2023 18:48", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","quaere.html","09.05.2023 17:03", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","random.html","29.01.2024 0:38", "Chrome HTML Do...", "19 КБ"],
+	["file_txt","README.md","10.05.2023 19:00", 'Файл "MD"', "0 КБ"],
+	["file_chrome","real-folder.html","30.01.2024 13:24", "Chrome HTML Do...", "11 КБ"],
+	["file_chrome","site_woowz11.html","24.06.2023 18:11", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","site_woowz11_2.html","24.06.2023 18:11", "Chrome HTML Do...", "3 КБ"],
+	["file_chrome","skull-party!.html","23.06.2023 22:45", "Chrome HTML Do...", "19 КБ"],
+	["file_chrome","test_site.html","28.01.2024 16:35", "Chrome HTML Do...", "34 КБ"],
+	["file_chrome","test_woowzmain.html","22.06.2023 22:27", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","text-scripts.html","22.11.2023 14:17", "Chrome HTML Do...", "17 КБ"],
+	["file_chrome","w.html","11.08.2023 18:45", "Chrome HTML Do...", "1 КБ"],
+	["file_chrome","xxx.html","13.05.2023 17:30", "Chrome HTML Do...", "2 КБ"]
+	]
+	folder = document.getElementById("folderfiles");
+	
+	for(var i = 0; i < files.length; i++){
+		file = files[i];
+		file_icon = file[0];
+		file_name = file[1];
+		file_data = file[2];
+		file_type = file[3];
+		file_size = file[4];
+		
+		var SelectedFile = (file_name == "real-folder.html"?true:false);
+		var regex = new RegExp(".html","g");
+		var ThisHTML = (file_name.search(regex)!=-1?true:false);
+		
+		folder.innerHTML = folder.innerHTML + "<div><div "+(ThisHTML?"onclick='OpenHref("+'"'+file_name+'"'+");'":"")+" "+(SelectedFile?"style='width:622px; background:#777777; outline: 1px solid #3C3C3C; '":"class='button_top2_right' style='width:622px;'")+"><img style='margin-left:5px; margin-right:5px;' src='source/"+file_icon+".png'><font style='position: absolute;'>"+file_name+"</font><font style='position: absolute; transform: translateX(230px); color:#DEDEDE'>"+file_data+"</font><font style='position: absolute; transform: translateX(395px); color:#DEDEDE'>"+file_type+"</font><font style='position: absolute; transform: translateX(515px); color:#DEDEDE'>"+file_size+"</font></div></div>";
+	}
+}
+
+function OnLoad(){
+	LoadFiles();
+}
+
+function PressExit(){
+	window.open("","_self").close();
+}	
+</script>
 
 
 
