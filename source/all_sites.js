@@ -23,7 +23,43 @@ var all_sites = [
       "catalog": "funny",
       "hide": true,
       "tags": [
-        "3d","webgl","3d webgl"
+        "webgl","3d webgl"
+      ]
+    },
+    {
+      "href": "nointernet",
+      "name": "NO INTERNET",
+      "catalog": "funny",
+      "hide": true,
+      "tags": [
+        "nointernet","no internet","internet"
+      ]
+    },
+    {
+      "href": "ai/3d-sceene",
+      "name": "3D Sceene",
+      "catalog": "ai",
+      "hide": false,
+      "tags": [
+        "3d","3d sceene","cube","sphere","torus","cylinder","cone","pyramid"
+      ]
+    },
+    {
+      "href": "ai/random-images-galery",
+      "name": "Random Images Gallery",
+      "catalog": "ai",
+      "hide": false,
+      "tags": [
+        "gallery","galery","images","images galery","images gallery"
+      ]
+    },
+    {
+      "href": "alternative-cats",
+      "name": "Alternative Cats",
+      "catalog": "game",
+      "hide": false,
+      "tags": [
+        "alternative","cats","alternative cats","cat"
       ]
     },
     {

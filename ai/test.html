@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Магазин Gran's</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #fff;
+        }
+        
+        section {
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .product {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .product img {
+            width: 150px;
+            height: 150px;
+            margin-right: 20px;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product h3 {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+        
+        .product p {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+        
+        .product button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .product button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Магазин Gran's</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#">Главная</a></li>
+            <li><a href="#">Категории</a></li>
+            <li><a href="#">Корзина</a></li>
+        </ul>
+    </nav>
+    
+    <section>
+        <h2>Популярные Gran's</h2>
+        <div class="product">
+            <img src="https://example.com/gran1.jpg" alt="Gran 1">
+            <div>
+                <h3>Gran 1</h3>
+                <p>Описание Gran 1</p>
+                <p>Цена: $100</p>
+                <button>Добавить в корзину</button>
+                <button>Подробнее</button>
+            </div>
+        </div>
+        <div class="product">
+            <img src="https://example.com/gran2.jpg" alt="Gran 2">
+            <div>
+                <h3>Gran 2</h3>
+                <p>Описание Gran 2</p>
+                <p>Цена: $150</p>
+                <button>Добавить в корзину</button>
+                <button>Подробнее</button>
+            </div>
+        </div>
+        <div class="product">
+            <img src="https://example.com/gran3.jpg" alt="Gran 3">
+            <div>
+                <h3>Gran 3</h3>
+                <p>Описание Gran 3</p>
+                <p>Цена: $200</p>
+                <button>Добавить в корзину</button>
+                <button>Подробнее</button>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <p>&copy; 2022 Магазин Gran's. Все права защищены.</p>
+    </footer>
+</body>
+</html>

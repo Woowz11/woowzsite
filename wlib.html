@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>WLIB Libary</title>
+
+<style>
+html{
+   margin: 0;
+   padding: 0;
+   cursor: default;
+}
+
+body{
+   margin: 0;
+   padding: 0;
+}
+
+.scroll{
+	overflow: auto;
+}
+
+.button{
+	background-color: transparent;
+	border: none;
+	font-size: medium;
+	font-family: sans-serif;
+	cursor: pointer;
+}
+
+.button:hover{
+	color: red;
+}
+
+a{
+	color: #B5311C;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+a:hover{
+	text-decoration: #B5311C wavy underline;
+}
+
+</style>
+<html style="height:100%; background-image: url('source/paper.png');">
+	<body style="height:100%;" onload="f();">
+	<div style="height:100%; width:100%; display: table;">
+		<div style="height:100%; display: table-row;">
+			<div class="scroll" style="width: 20%; min-width: 265px; height: 50px; display: table-cell; overflow-y: auto; overflow-x: hidden; background-color:#E5C7C7; box-shadow: 3px 5px 15px rgba(0,0,0,0.5),3px -5px 15px rgba(0,0,0,0.5), 15px 0px 150px rgba(0,0,0,0.25);">
+				<font style="margin-left:30%; font-size:x-large;">WLIB Libary</font><br>
+				<div id="left" style="margin-left:10px; margin-top:20px;"></div>
+			</div>
+			<div style="display: table-cell; height:100%; background-color: transparent; overflow-y: auto; overflow-x: hidden;">
+				<div id="right" style="font-family: 'Trebuchet MS', sans-serif; text-shadow: 0px 2px 2px rgba(0,0,0,0.25); color:#333333;"></div>
+			</div>
+		</div>
+	</div>
+	</body>
+</html>
+
+<script src="source\wlib.js"></script>
+
+<script>
+function hideshow(id,text){
+	var x = document.getElementById(id+"d");
+	var y = document.getElementById(id+"f");
+	if (x.style.display === "none") {
+		x.style.display = "block";
+		y.innerHTML = text+" ▲";
+	} else {
+		x.style.display = "none";
+		y.innerHTML = text+" ▼";
+	}
+}
+
+function openlink(id){
+	var typ = typeof(id);
+	var id_ = 0;
+	if (typ=="string"){
+		for(var i=0; i<infofromid.length;i++){
+			if(infofromid[i][1]==id){id_=i;}
+		}
+	}else{id_ = id;}
+	var inf = infofromid[id_];
+	var htmlresult = "<br><font style='margin-left:30px;'>ОШИБКА! Текст для этого пунтка [\""+inf[0]+"\"] не был найден! Скорее всего ещё не добавлен...</font>";
+	
+	for(var i=0; i<infos.length;i++){
+		if(infos[i][0]==inf[1]){
+			htmlresult = infos[i][1];
+		}
+	}
+	
+	document.getElementById("right").innerHTML = htmlresult;
+}
+
+function f(){
+
+	var info = [
+		["Добро пожаловать!","welcome"],
+		[true,"Информация",[
+			["Что такое WLIB?","whatiswlib"],
+			["Зачем существует WLIB?","whycreate"],
+			["Ответы на другие вопросы..."],
+			["Задумки на будущее"],
+			[true,"Начало",[
+				["Создание модификации"],
+				["Конвертирование модификации для WLIB"],
+				["Главные файлы"],
+				["Иерархия"],
+				["Типы"]
+			]],
+		]],
+		[true,"Обновления",[
+			["Что нового?"],
+			["0.0.1"]
+		]],
+		["Тонкости программирования"],
+		[true,"Примеры",[
+			["test"]
+		]],
+		[true,"Шаблоны",[
+			["Префабы"],
+			["Материалы"],
+			["Патроны"],
+			["Партиклы"],
+			["Жидкости"]
+		]],
+		[true,"Ресурсы",[
+			["Спрайты/Текстуры"],
+			["Звуки"],
+			["Видео"],
+			["Документы"],
+			["3D"]
+		]],
+		[true,"Элементы",[
+			["[.witem] WItem"],
+			["[.wpre] WPrefab"],
+			["[.wpro] WProcedure"],
+			["[.wmap] WMap"],
+			["[.wmat] WMaterial"],
+			["[.wcat] WCartridge"],
+			["[.wpar] WParticle"],
+			["[.wliq] WLiquid"],
+			["[.wtool] WTool"],
+			["[.wpow] WPower"],
+			["[.wweath] WWeather"],
+			["[.wcus] WCustom"],
+			["[.wgas] WGas"],
+			["[.wfood] WFood"],
+			["[.wanim] WAnimation"]
+		]],
+		[true,"Функции",[
+			["test"]
+		]],
+		[true,"Статичное",[
+			["Math","math"],["Game","game"]
+		]],
+		[true,"Ошибки",[
+			["test"]
+		]]
+	]
+	
+	infofromid = [];
+	
+	var infoid = 0;
+	var categoryid = 0;
+	
+	function add(textinf,deep_,start){
+		var x = document.getElementById((start?"left":categoryid+"d"));
+		x.innerHTML = x.innerHTML + "<button class='button' style='margin-left: "+(deep_*10)+"px;' onclick='openlink("+infoid+");'><font>"+textinf[0]+"</font></button><br>";
+		
+		infofromid.push(textinf);
+		infoid++;
+	}
+	
+	function addcatalog(inf,id,deep_,start){
+		var basetext = (start?"left":(id-1)+"d");
+		var base = document.getElementById(basetext);
+		base.innerHTML = base.innerHTML+"<button class='button' style='margin-left: "+(deep_*10)+"px;' onclick='hideshow("+id+",\""+inf[1]+"\");'><font id='"+id+"f'>"+inf[1]+" ▼</font></button><div style='display: none;' id='"+id+"d'></div><br>";
+		for(var i = 0; i < inf[2].length; i++){
+			var inf_ = inf[2][i];
+			if(inf_[0]==true){
+				categoryid++;
+				addcatalog(inf_,categoryid,deep_+1);
+			}else{
+				add(inf_,deep_+1);
+			}
+		}
+	}
+	
+	for(var i = 0; i < info.length; i++){
+		var inf = info[i];
+		if(inf[0]==true){
+		addcatalog(inf,categoryid,0,true);
+		categoryid++;
+		}else{
+			add(inf,0,true);
+		}
+	}
+	
+	openlink(0);
+}
+</script>

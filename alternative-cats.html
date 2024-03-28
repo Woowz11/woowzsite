@@ -1,0 +1,315 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Alternative Cats</title>
+<link rel="icon" type="image/x-icon" href="source\cat.ico">
+
+<style>
+
+html{
+    background-color: black;
+    background: url("source/dark.png") no-repeat center center fixed;
+    color: white;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.catphotodiv{
+    flex: 1;
+}
+
+::selection {
+  opacity: 0;
+}
+
+font{
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: none;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background:url("source/concrete.png") no-repeat center/cover;
+    text-shadow: black 0px 10px 15px;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color: transparent;
+}
+
+br{
+    -webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+
+center{
+    -webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+img{
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+	user-select: none;
+}
+
+button{
+    background-image: url("source/concrete.png");
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    border-radius: 12px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    text-shadow: black 0px 10px 15px;
+    font-size: 2.6vh;
+    height: 4vh;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+	-moz-user-select: none;
+    box-shadow: 0px 20px 10px rgb(0, 0, 0);
+}
+
+button:hover{
+    color: white;
+    transform: scale(1.05);
+}
+
+button:active{
+    transform: scale(1) translateY(2px);
+    color: rgb(88, 88, 88);
+}
+
+label{
+    opacity: 0;
+}
+
+:checked + label {
+    opacity: 1;
+}
+</style>
+
+<html>
+    <body onload="LoadGame()" id="base">
+
+    </body>
+</html>
+
+<script>
+    const base = document.getElementById("base");
+    const GameVersion = "0";
+
+    const CatsBase = [
+
+        ["cat1",3],["cat2",3],["cat3",3],["cat4",3],["cat5",3],["cat6",3],["cat7",3],["cat8",3],["cat9",3],["cat10",3],["cat11",3],["cat12",3],
+        ["cat13",3],["cat14",3],["cat15",3]
+
+    ];
+
+    var cats = [];
+    var round = 0;
+    var totalalternatives = 0;
+    var totalnormals = 0;
+    var skippedalternatives = 0;
+    let milliseconds = 0;
+    let seconds = 0;
+    let minutes = 0;
+
+    let s_milliseconds = 0;
+    let s_seconds = 0;
+    let s_minutes = 0;
+
+    let timer;
+    var skippednormals = 0;
+    var maxround = 10;
+
+    var hardmode = false;
+
+    function SetDivStart(endgame){
+        clearInterval(timer);
+        timer = null;
+
+        var endresult = "";
+        if(endgame){
+            let millisecondsString = milliseconds < 10 ? '0' + milliseconds : milliseconds;
+            let secondsString = seconds < 10 ? '0' + seconds : seconds;
+            let minutesString = minutes < 10 ? '0' + minutes : minutes;
+
+            var time = minutes*60+seconds;
+            var hardtimeplus = 0;
+            if(hardmode){
+                hardtimeplus = 20;
+            }
+            var ocenka_ = 0;
+            if(time<(30+hardtimeplus)){
+                ocenka_ = 6;
+            }else if(time < (45+hardtimeplus)){
+                ocenka_ = 5;
+            }else if (time < (80+hardtimeplus)){
+                ocenka_ = 4;
+            }else{
+                ocenka_ = 3;
+            }
+
+            var oshibokprocent = Math.abs((skippedalternatives/totalalternatives)-1);
+            oshibokprocent = oshibokprocent * Math.abs((skippednormals/totalnormals)-1);
+
+            ocenka_ = Math.floor(ocenka_*oshibokprocent);
+            if(ocenka_<0){ocenka_ = 0;}
+
+            if((Math.abs((skippedalternatives/totalalternatives)-1))==0 && (Math.abs((skippednormals/totalnormals)-1))==0){
+                ocenka_ = 7;
+            }
+
+            /*             0   1   2   3   4   5   6  */
+            var ocenki = ["F","E","D","C","B","A","A+","You bastard!"];
+            var ocenka = ocenki[ocenka_];
+
+            endresult = `
+            <font style="font-size: 5vh;">`+ocenka+`</font><br><br>
+            <font>You skipped alternatives: `+skippedalternatives+`!</font><br>
+            <font>You destroyed the normal cats: `+skippednormals+`!</font><br>
+            <font>Time: `+minutesString+":"+secondsString+":"+millisecondsString+`!</font><br>
+            <br>`;
+        }
+        base.innerHTML = `
+           <center style="margin-top: 2vh;">
+              <font style="font-size: 10vh;">Alternative Cats</font><br>
+              <font style="font-size: 3vh;">By Woowz11</font><br>
+              <font style="font-size: 2vh;">Version `+GameVersion+`</font>
+
+              <div style="margin-top: 40vh;">
+                `+endresult+`
+
+                <button onclick="StartGame(true)" style="width: 30vh;">Start game</button><br><br>
+                <button onclick="StartGame(true,true)" style="width: 30vh;">Start "hard" game</button>
+               </div>
+           </center>
+        `;
+
+        milliseconds = 0;
+        seconds = 0;
+        minutes = 0;
+    }
+    function SetDivGame(count){
+        var result = 
+        `
+        <div style="display: flex; height: 80vh;">
+
+        `;
+
+        for(var i = 0; i < count; i++){
+            var catinfo = cats[i];
+            var randscale = Math.random()*0.15+1;
+            result = result + `
+            <div class="catphotodiv">
+                <center style="margin-top: 6vh;">
+                    <div style="position: relative; display: inline;"><input type="checkbox" style="display: none;" id="checkbox`+i+`"><label for="checkbox`+i+`"><img src="source/anomaly-cat.png" style="transform: scale(`+randscale+`); width: 45vh; height: 45vh;"></label><img src="`+catinfo["photo"]+`" style="transform: scale(`+randscale+`); z-index: -1; position: absolute; bottom: 3px; right: 0; width: 45vh; height: 45vh;"></div><br>
+                </center>
+            </div>
+            `;
+        }
+
+        result = result + `
+        </div>
+        <div style="height: 20vh;">
+            <center>
+                <font id="timer" style="font-size: 2vh;"></font><br>
+                <font style="font-size: 2vh;">Round `+round+`/10</font><br>
+                <font style="font-size: 2vh;">Select alternative cats</font><br>
+                <button onclick="ThatAllButton()" style="margin-top: 0; width: 20vh;">That all</button><br><br><br>
+                <button onclick="SetDivStart()" style="margin-top: 0; width: 15vh;">Restart</button>
+            </center>
+        </div>
+        `;
+        base.innerHTML = result;
+    }
+    function LoadGame(){
+        SetDivStart();
+    }
+
+    function updateTimer() {
+            milliseconds++;
+            if (milliseconds >= 60) {
+                milliseconds = 0;
+                seconds++;
+            }
+            if (seconds >= 60) {
+                seconds = 0;
+                minutes++;
+            }
+            let millisecondsString = milliseconds < 10 ? '0' + milliseconds : milliseconds;
+            let secondsString = seconds < 10 ? '0' + seconds : seconds;
+            let minutesString = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('timer').innerText = minutesString + ':' + secondsString + ":" + millisecondsString;
+        }
+
+    function StartGame(start,hard){
+        round = round + 1;
+        var endgame = false;
+        if(start){
+            hardmode = hard || false;
+            skippedalternatives = 0;
+            skippednormals = 0;
+            totalalternatives = 0;
+            totalnormals = 0;
+            timer = setInterval(updateTimer, 10);
+            round = 0;
+        }
+        if(round>maxround){
+            SetDivStart(true);
+            endgame = true;
+        }
+        if(!endgame){
+            var count = 2;
+            if(hardmode){
+                count = 4;
+            }
+            GenerateCats(count)
+            SetDivGame(count);
+        }
+    }
+
+    function GenerateCats(count){
+        cats = [];
+        var catscopy = CatsBase.slice();
+        for(var i = 0; i < count; i++){
+            var catid = Math.floor(Math.random() * catscopy.length);
+            var resultcat_ = catscopy[catid];
+            var catanomaly = (Math.random()>0.4);
+            var catanomalyid = "";
+            if(catanomaly){
+                catanomalyid = "_"+(Math.floor(Math.random() * (resultcat_[1]))+1);
+                totalalternatives = totalalternatives + 1;
+            }else{
+                totalnormals = totalnormals + 1;
+            }
+            var photo = resultcat_[0]+catanomalyid;
+            var resultcat = [];
+            resultcat["photo"] = "source/cats/"+photo+".png";
+            resultcat["anomaly"] = catanomaly;
+            cats.push(resultcat);
+            catscopy = catscopy.filter((_, index) => index !== catid);
+        }
+    }
+    function ThatAllButton(){
+        for(var i = 0; i < cats.length; i++){
+            var checkbox_ = document.getElementById("checkbox"+i);
+            var cat = cats[i];
+            var selected = checkbox_.checked;
+            if(cat["anomaly"] && !selected){
+                skippedalternatives = skippedalternatives + 1;
+            }
+
+            if(!cat["anomaly"] && selected){
+                skippednormals = skippednormals + 1;
+            }
+        }
+        StartGame();
+    }
+</script>
