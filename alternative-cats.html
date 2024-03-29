@@ -7,7 +7,7 @@
 
 html{
     background-color: black;
-    background: url("source/dark.png") no-repeat center center fixed;
+    background: url("source/dark.png");
     color: white;
 }
 
@@ -87,6 +87,7 @@ button:active{
 
 label{
     opacity: 0;
+    transition: opacity 0.2s;
 }
 
 :checked + label {
@@ -102,12 +103,12 @@ label{
 
 <script>
     const base = document.getElementById("base");
-    const GameVersion = "0";
+    const GameVersion = "1";
 
     const CatsBase = [
 
-        ["cat1",3],["cat2",3],["cat3",3],["cat4",3],["cat5",3],["cat6",3],["cat7",3],["cat8",3],["cat9",3],["cat10",3],["cat11",3],["cat12",3],
-        ["cat13",3],["cat14",3],["cat15",3]
+        ["cat1",4],["cat2",4],["cat3",4],["cat4",4],["cat5",4],["cat6",4],["cat7",4],["cat8",4],["cat9",4],["cat10",4],["cat11",4],["cat12",4],
+        ["cat13",4],["cat14",4],["cat15",4],["cat16",4]
 
     ];
 
@@ -130,6 +131,34 @@ label{
 
     var hardmode = false;
 
+    function SetDivStats(){
+        var count_cats = CatsBase.length;
+        var count_alternativies = 0;
+        for(var i = 0; i < CatsBase.length; i++){
+            var catinfo = CatsBase[i];
+            count_alternativies = count_alternativies + catinfo[1];
+        }
+        var count_total = count_cats+count_alternativies;
+        base.innerHTML = `
+            <center style="margin-top: 2vh;">
+                <font style="font-size: 10vh;">Game stats</font><br>
+                
+                <br>
+                <br>
+                <br>
+                <br>
+
+                <div>
+                    <font style="font-size: 3vh;">Cats: `+count_cats+`</font><br>
+                    <font style="font-size: 3vh;">Alternatives: `+count_alternativies+`</font><br>
+                    <font style="font-size: 3vh;">Total photos: `+count_total+`</font><br>
+                </div>
+
+                <button style="margin-top: 40vh;" onclick="LoadGame()">Back</button>
+            </center>
+        `;
+    }
+
     function SetDivStart(endgame){
         clearInterval(timer);
         timer = null;
@@ -143,7 +172,7 @@ label{
             var time = minutes*60+seconds;
             var hardtimeplus = 0;
             if(hardmode){
-                hardtimeplus = 20;
+                hardtimeplus = 30;
             }
             var ocenka_ = 0;
             if(time<(30+hardtimeplus)){
@@ -190,6 +219,8 @@ label{
                 <button onclick="StartGame(true,true)" style="width: 30vh;">Start "hard" game</button>
                </div>
            </center>
+           <br>
+           <button style="float: right; margin-top: `+(endgame?4:20)+`vh; margin-right: 15px;" onclick="SetDivStats()">Stats</button>
         `;
 
         milliseconds = 0;
@@ -207,9 +238,9 @@ label{
             var catinfo = cats[i];
             var randscale = Math.random()*0.15+1;
             result = result + `
-            <div class="catphotodiv">
+            <div style="margin-left: 5px;" class="catphotodiv">
                 <center style="margin-top: 6vh;">
-                    <div style="position: relative; display: inline;"><input type="checkbox" style="display: none;" id="checkbox`+i+`"><label for="checkbox`+i+`"><img src="source/anomaly-cat.png" style="transform: scale(`+randscale+`); width: 45vh; height: 45vh;"></label><img src="`+catinfo["photo"]+`" style="transform: scale(`+randscale+`); z-index: -1; position: absolute; bottom: 3px; right: 0; width: 45vh; height: 45vh;"></div><br>
+                    <div style="position: relative; display: inline;"><input type="checkbox" style="display: none;" id="checkbox`+i+`"><label for="checkbox`+i+`"><img src="source/anomaly-cat.png" style="cursor: pointer; transform: scale(`+randscale+`); width: 45vh; height: 45vh;"></label><img src="`+catinfo["photo"]+`" style="transform: scale(`+randscale+`); z-index: -1; position: absolute; bottom: 3px; right: 0; width: 45vh; height: 45vh; box-shadow: 0px 20px 10px rgb(0, 0, 0);"></div><br>
                 </center>
             </div>
             `;

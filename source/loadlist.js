@@ -12,7 +12,7 @@ const new_html = "";
 function AddSite(site,new_html,saved_category)
 {
 	if(saved_category!=site.catalog){
-			new_html = new_html + "<p>-----------------------------</p>";
+			new_html = new_html + "<p>---------------["+site.catalog+"]-------------</p>";
 			saved_category = site.catalog;
 	}
 	return [new_html + '<a href="' + site.href + '.html">' + site.name + '</a><p></p><font>' + String(site.tags).replace(",",", ") + '</font><p></p>',saved_category];
