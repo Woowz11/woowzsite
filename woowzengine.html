@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>WoowzEngine - Wiki</title>
+
+<style>
+  html{
+    margin: 0;
+  }
+  body{
+    margin: 0;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .header {
+    height: 20vh;
+    width: 100%;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+  .column {
+    flex: 1;
+    height: 80vh;
+  }
+</style>
+
+<html>
+  <body id="body" onload="generate()">
+
+  </body>
+</html>
+
+<script>
+
+  function generate(){
+    StartScreen();
+  }
+
+  const body = document.getElementById('body');
+  const engineversion = "0.0.1c";
+
+  function ButtonPress(id){
+    var html = "Not found ["+id+"] Maybe it hasn't been created yet!<br>Не найдено ["+id+"] Может быть ещё не создано!";
+    if(id in Pages){
+        html = Pages[id];
+    }
+    body.innerHTML = html;
+  }
+
+  function StartScreen(){
+    body.innerHTML = `
+
+    <div class="header">
+        <center><font>WoowzEngine Wiki</font><br>"`+engineversion+`"<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
+    </div>
+    <div class="footer">
+        <div id="c_other" class="column"></div>
+        <div id="c_func" class="column"></div>
+        <div id="c_errors" class="column"></div>
+    </div>
+    
+    `;
+
+    const c_o = document.getElementById('c_other');
+    const c_f = document.getElementById('c_func');
+    const c_e = document.getElementById('c_errors');
+
+    function TextToButton(text,id){
+      return "<button onclick=\"ButtonPress('"+id+"')\">"+text+"</button> ";
+    }
+
+    var s_o = "";
+    for (let i = 0; i < ColumnOther.length; i++) {
+      s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0]);
+    }
+    c_o.innerHTML = s_o;
+
+    var s_f = "";
+    for (let i = 0; i < ColumnFunctions.length; i++) {
+      s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0]);
+    }
+    c_f.innerHTML = s_f;
+
+    var s_e = "";
+    for (let i = 0; i < ColumnErrors.length; i++) {
+      s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnFunctions[i][0]);
+    }
+    c_e.innerHTML = s_e;
+  }
+
+  var ColumnOther = [
+    ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
+    ["games","Игры на WoowzEngine","Games on WoowzEngine"],
+    ["errors","Ошибки","Errors"],
+    ["license","Лицензия","License"],
+    ["gamecreate","Создание игры","Game creation"],
+    ["jsonengine","engine.json","engine.json"],
+    ["jsongame","game.json","game.json"],
+    ["savemode","Безопасный режим","Save mode"],
+  ]
+  var ColumnFunctions = [
+    ["CheckLua()"],["Wait()"],["Exit()"],["Print()"],["Warn()"],["Error()"],["Fatal()"],["PrintCustom()"],["Cycle()"],["Random()"],["Round()"],["HasDirectory()"],["ReadFile()"],["WriteFile()"],
+    ["CreateDirectory()"],["CreateFile()"],["RenameFile()"],["ReadJSON()"],["WriteJSON()"],["Abs()"],["Max()"],["Min()"],["Sqrt()"],["Log()"],["LogE()"],["Log10()"],["Sin()"],["Cos()"],
+    ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
+    ["Fma()"],["Mod()"],["Rem()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
+    ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],
+
+    ["Pi"],["Sqrt2"],["E"],["Log2E"],["Log10E"],["Ln2"],["Ln10"],["SourcePath"],["GamePath"],["EnginePath"],["EngineVersion"],["LogPath"],["Version"],["GameName"],["Author"],["SafeMode"],["ConsoleEnabled"],
+  ]
+  var ColumnErrors = [
+    ["0000"],
+    ["F0000"],["F0001"],["F0002"],
+    ["E0000"],["E0001"],["E0002"],["E0003"],["E0004"],["E0005"],["E0006"],["E0007"],
+    ["C0000"],["C0001"],["C0002"],["C0003"],["C0004"],["C0005"],["C0006"],["C0007"],["C0008"],["C0009"],["C0010"],["C0011"],["C0012"],["C0013"],["C0014"],["C0015"],["C0016"],["C0017"],["C0018"],["C0019"],["C0020"],["C0021"],["C0022"],
+    ["W0000"],["W0001"],["W0002"],["W0003"],["W0004"],["W0005"],
+    ["L0000"],["L0001"],["L0002"],["L0003"],["L0004"],["L0005"],["L0006"],["L0007"],["L0008"],["L0009"],["L0010"],["L0011"],["L0012"],
+    ["LW0000"],["LW0001"],["LW0002"],["LW0003"],["LW0004"],["LW0005"],["LW0006"],["LW0007"],["LW0008"],["LW0009"],["LW0010"],["LW0011"],["LW0012"],["LW0013"],["LW0014"],
+    ["GW"],["GE"],["GF"],["S"],["LUA"]
+  ]
+
+  var Pages = {
+
+    "woowzengine": [`
+    
+    <center>
+
+    <font>WoowzEngine</font><br><font>Программный/Игровой движок</font>
+
+    Использует в качестве программного кода Lua<br>
+
+    Сделан Woowz11<br>
+
+    Сейчас версия движка (`+engineversion+`)
+
+    </center>
+    `,``],
+
+    "games": [`
+    
+    <center>
+
+    Пока-что официальных игр на движке WoowzEngine нету.
+
+    </center>
+    `,``],
+
+    "errors": [`
+    На этом сайте есть список возможных ошибок с примерами их вызова, что-бы лучше понять за что они отвечают.<br>
+    Ошибки делятся на разные группы<br>
+    <ul>
+      <li>Без нумерации - Ошибка никуда не занесена</li>
+      <li>E   - Обычная ошибка в движке</li>
+      <li>C   - Фатальная ошибка в движке</li>
+      <li>W   - Предупреждение в движке</li>
+      <li>F   - Файловая ошибка (редкая и возможно в будущем будет удалена)</li>
+      <li>L   - Ошибка в Lua</li>
+      <li>LW  - Предупреждение в Lua</li>
+      <li>LUA - Ошибка Lua (в ваших скриптах)</li>
+      <li>S   - Ошибка GLFW</li>
+      <li>GE  - Ошибка которую вы создали и использовали Error()</li>
+      <li>GF  - Фатальная ошибка которую вы создали и использовали Fatal()</li>
+      <li>GW  - Предупреждение которую вы создали и использовали Warn()</li>
+    </ul>
+
+    Так же ошибки можно посмотреть в Log файлах по пути /woowzengine/log/...<br>
+    Так же существуют фатальные ошибки которые ломают даже Log файлы, так что будьте бдительны!
+    `,``],
+
+    "license": [`
+    Лицензия скоро будет указана...
+    `,``],
+    
+    "gamecreate": [`
+    <center>Туториал как создать игру/приложение на WoowzEngine</center><br>
+    *На данный момент*<br>
+    Нужно скачать файл woowzengine.exe<br>
+    Создать папку с вашим проектом<br>
+    Разместить туда woowzengine.exe<br>
+    Потом создать или найти/скачать файл run.bat<br>
+    Если создавать то внутри напечатать это:<br>
+    @echo off<br>
+    woowzengine.exe %~dp0<br>
+    pause<br>
+    Потом запустить woowzengine.exe<br>
+    И остальные файлы сгенерируются (woowzengine,game)<br>
+    <img src="source/woowzengine.png"><br>
+    Игровые скрипты находятся в папке game<br>
+    start.lua это скрипт который будет запускаться при запуске игры (в данный момент run.bat)<br>
+    `,``],
+
+    "jsonengine": [`
+    <ul>
+      <li>Console - bool - "true" - Отображение консоли при старте</li>
+      <li>SaveMode - bool - "true" - <button onclick="ButtonPress('savemode')">Безопасный режим</button></li>
+      <li>LogType - string - "log" - Формат файла лога</li>
+      <li>LogFormat - string - "%y-%mn-%d-%h-%m-%s" - Формат навзания лога (%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %w - день недели)</li>
+      <li>LogStyle - string - "%b[%s:%m:%h][%t] %c" - Формат текста в логе (%c - сообщение, %tt - база сообщения, %t - база сообщения (с отступами), %b - тип сообщения (* - print, ? - warning, ! - error, # - fatal) ,%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %w - день недели)</li>
+      <li>LogFatal - string - "-FATAL" - Когда у вас происходит фатальная ошибка, в конце названия лога приписывается это</li>
+    </ul>
+    `,``],
+
+    "jsongame": [`
+    <ul>
+      <li>Name - string - "Example Game" - Название вашей игры/приложения</li>
+      <li>Author - string - "Unknown" - Автор игры/приложения</li>
+      <li>Version - string - "0.0.0" - Версия вашей игры/приложения</li>
+    </ul>
+    `,``],
+
+    "savemode": [`
+    Безопасный режим (SaveMode) - Это режим который может запрещать некоторые функции в скриптах, или их разрешать в зависимости от того что в скрипте написано.<br>
+    <br>
+    Безопасный режим будет полезен тем, кто боиться запускать приложение от другого пользователя.<br>
+    Он отключает сильные функции например изменение, создание, удаление файлов, использование Cmd, использования .dll файлов и т.д.<br>
+    <br>
+    Включить/Выключить его можно в файле <button onclick="ButtonPress('jsonengine')">engine.json</button><br>
+    `,``],
+
+  }
+
+</script>

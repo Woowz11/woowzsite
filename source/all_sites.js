@@ -99,6 +99,15 @@ var all_sites = [
       ]
     },
     {
+      "href": "idontknowhownamethat",
+      "name": "SkyCom",
+      "catalog": "cores",
+      "hide": false,
+      "tags": [
+        "core"
+      ]
+    },
+    {
       "href": "list64",
       "name": '<font style="color: red;">All</font> Sites List',
       "catalog": "all_sites",
