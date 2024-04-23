@@ -1,35 +1,89 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
+<link rel="icon" type="image/x-icon" href="source/woowzengine.ico">
 <title>WoowzEngine - Wiki</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.min.css">
+
 <style>
+
+@font-face {
+    font-family: "Concrete";
+    src: url("source/concrete.otf") format('opentype');
+}
+
   html{
     margin: 0;
   }
   body{
     margin: 0;
-    font-family: 'Verdana', sans-serif;
-    font-size: 20px;
-    background-color: rgb(253, 227, 227);
+    font-family: "Verdana", sans-serif;
+    font-size: 22px;
+    background-image: url("source/concrete2.png");
+    background-blend-mode: multiply;
+    background-color: rgb(255,255,255);
     text-shadow: 0px 2px 5px currentColor;
+  }
+
+  .code{
+    background-color: rgb(30,30,30);
+    border: 1px solid rgb(51,51,51);
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgb(155,155,155);
+    text-shadow: 0 0 0;
+    font-size: 15px;
+    tab-size: 4;
   }
 
   button{
     all: unset;
     padding: 3px 3px;
     cursor: pointer;
-    color: brown;
-    font-family: 'Verdana', sans-serif;
-    background-color: rgb(255, 246, 246);
-    border: 1px solid brown;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgb(255, 246, 246);
+    background-image: url("source/metal.png");
+    background-attachment: fixed;
+    background-blend-mode: multiply;
+    font-family: "Verdana", sans-serif;
+    border-radius: 10px;
+    box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    border: 1px solid currentColor;
+    z-index: 2;
   }
 
   button:hover{
-    color: red;
+    background-color: rgb(117, 117, 117);
+    color: rgb(255, 255, 255);
     text-decoration: underline;
-    text-shadow: 0px 0px 20px red;
+    text-shadow: 0px 0px 15px rgb(255,255,255);
+  }
+
+  .greenbutton{
+    box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
+    background-color: rgb(255, 255, 255);
+    color: rgb(22,122,0);
+  }
+
+  .greenbutton:hover{
+    background-color: rgb(117, 117, 117);
+    color: rgb(9, 255, 0);
+    text-shadow: 0px 0px 15px rgb(9, 255, 0);
+  }
+
+  .redbutton{
+    box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
+    background-color: rgb(255, 255, 255);
+    color: rgb(122,0,8);
+  }
+
+  .redbutton:hover{
+    background-color: rgb(117, 117, 117);
+    color: rgb(255, 0, 0);
+    text-shadow: 0px 0px 15px rgb(255, 0, 0);
   }
 
   .container {
@@ -38,18 +92,33 @@
     align-items: center;
   }
   .header {
-    height: 20vh;
-    width: 100%;
+    background-image: url("source/concrete2.png");
+    background-blend-mode: multiply;
+    background-color: rgb(142,0,4);
+    color: rgb(255,255,255);
+  }
+  .whitebox{
+    background-image: url("source/concrete2.png");
+    background-blend-mode: multiply;
+    background-color: rgb(216, 216, 216);
+    color: rgb(0,0,0);
+  }
+  .greenbox{
+    background-image: url("source/concrete2.png");
+    background-blend-mode: multiply;
+    background-color: rgb(214,255,214);
+    color: rgb(22,122,0);
+  }
+  .redbox{
+    background-image: url("source/concrete2.png");
+    background-blend-mode: multiply;
+    background-color: rgb(255,214,214);
+    color: rgb(122,0,8);
   }
   .footer {
     display: flex;
     justify-content: space-around;
     width: 100%;
-  }
-  .column {
-    flex: 1;
-    height: 80vh;
-    margin: 10px;
   }
 </style>
 
@@ -68,31 +137,46 @@
   const body = document.getElementById('body');
   const engineversion = "0.0.1d";
 
-  function ButtonPress(id){
+  function ButtonPress(id,lastopen){
     var htmlstart = `
-    <div style="height: 15vh; width: 100%; background-color: rgb(255, 246, 246);">
+    <div class="header" style="height: 15vh; width: 100%;">
       <br><br>
-      <div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button></div>
-
+      <div style="margin-left: 50px;"><button onclick="`+(lastopen?"ButtonPress('"+lastopen+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button></div>
     </div><br>
     `;
-    var html = "Not found ["+id+"] Maybe it hasn't been created yet!<br>Не найдено ["+id+"] Может быть ещё не создано!";
+    var html = "<center>Не найдено [<font style='font-style: italic;'>"+id+"</font>] Может быть ещё не создано!<br><br>Not found [<font style='font-style: italic;'>"+id+"</font>] Maybe it hasn't been created yet!</center>";
     if(id in Pages){
         html = Pages[id][0];
     }
-    body.innerHTML = htmlstart+html;
+    body.innerHTML = htmlstart+html+"<br>";
+  }
+
+  function FunctionInfo(name,category,hasreturn,dangerous){
+    var info = `
+    <center><br>
+      <font style="font-size: 40px;">`+name+`()</font><br>
+      <br>
+      <font>•`+category+`•</font><br>
+      `+(hasreturn?"<font style='font-size: 15px;'>RETURNABLE</font>":"")+`<br>
+      `+(dangerous?"Эта функция не будет работать в <button onclick=\"ButtonPress('savemode','"+name+"()')\">безопасном режиме</button>!":"")+`
+      <br><br><hr><br>
+    </center><br>
+    <div style="margin-left: 20vw; width: 60vw; font-family: monospace;">
+    `;
+
+    return info;
   }
 
   function StartScreen(){
     body.innerHTML = `
 
-    <div class="header">
-        <center><br><font style="font-size: 30px;">WoowzEngine Wiki</font><br>`+engineversion+`<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
+    <div style="height: 20vh; width: 100%;" class="header">
+        <center><br><font style="font-family: 'Concrete', sans-serif; font-size: 40px;">WoowzEngine Wiki</font><br>`+engineversion+`<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
     </div>
     <div class="footer">
-        <div id="c_other" class="column"></div>
-        <div id="c_func" class="column"></div>
-        <div id="c_errors" class="column"></div>
+        <div class="whitebox" style="width: 270px; height: 100vh;"><div id="c_other"></div style="margin: 10px;"></div>
+        <div class="greenbox" style="width: calc( 100vw - 270px - 423px ); height: 100vh;"><div id="c_func" style="margin: 10px;"></div></div>
+        <div class="redbox" style="width: 423px; height: 100vh;"><div id="c_errors"></div style="margin: 10px;"></div>
     </div>
     
     `;
@@ -101,29 +185,29 @@
     const c_f = document.getElementById('c_func');
     const c_e = document.getElementById('c_errors');
 
-    function TextToButton(text,id,info){
+    function TextToButton(text,id,info,type){
       var char = info[0].charAt(0);
       if(char=="%"){
         return "<br><center>"+info[0].substring(1)+"</center><br>";
       }
-      return "<button onclick=\"ButtonPress('"+id+"')\">"+text+"</button> ";
+      return "<button onclick=\"ButtonPress('"+id+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?"greenbutton":"redbutton"))+"\">"+text+"</button> ";
     }
 
     var s_o = "";
     for (let i = 0; i < ColumnOther.length; i++) {
-      s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0],ColumnOther[i]);
+      s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0],ColumnOther[i],"o");
     }
     c_o.innerHTML = s_o;
 
     var s_f = "";
     for (let i = 0; i < ColumnFunctions.length; i++) {
-      s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0],ColumnFunctions[i]);
+      s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0],ColumnFunctions[i],"f");
     }
     c_f.innerHTML = s_f;
 
     var s_e = "";
     for (let i = 0; i < ColumnErrors.length; i++) {
-      s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnErrors[i][0],ColumnErrors[i]);
+      s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnErrors[i][0],ColumnErrors[i],"e");
     }
     c_e.innerHTML = s_e;
   }
@@ -139,11 +223,16 @@
     ["gamecreate","Создание игры","Game creation"],
     ["%О коде"],
 
+    ["structure","Структура","Structure"],
     ["jsonengine","engine.json","engine.json"],
     ["jsongame","game.json","game.json"],
     ["savemode","Безопасный режим","Save mode"],
     ["keys","Коды клавиш","Key codes"],
+    ["consolecolors","Цвета для консоли","Console colors"],
     ["%Остальное"],
+    ["devs","Разработчики","Developers"],
+    ["contact","Связь","Contact"],
+    ["links","Ссылки","Links"]
 
   ]
   var ColumnFunctions = [
@@ -154,14 +243,18 @@
     ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
     ["Fma()"],["Mod()"],["Rem()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
     ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],["Seed()"],["SetSeed()"],
-    ["GetWindowX()"],["GetWindowY()"],["SetWindowX()"],["SetWindowY()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["SetWindowScale()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
+    ["GetWindowSizeX()"],["GetWindowSizeY()"],["SetWindowSizeX()"],["SetWindowSizeY()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["SetWindowScale()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
     ["SetWindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
+    ["SetWindowScene()"],["GetSceneWindow()"],["RRandom()"],["GetWindowX"],["GetWindowY"],["SetWindowX"],["SetWindowY"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
     
     ["%Константы"],
 
     ["Pi"],["Sqrt2"],["E"],["Log2E"],["Log10E"],["Ln2"],["Ln10"],["SourcePath"],["GamePath"],["EnginePath"],["EngineVersion"],["LogPath"],["Version"],["GameName"],["Author"],["SafeMode"],["ConsoleEnabled"],
+    ["DebugMode"],["Infinity"],["Red"],["Green"],["Blue"],["Yellow"],["White"],["Black"],["Gray"],["Orange"],["Purple"],["Cyan"],["Transparent"],["Up"],["Down"],["Right"],["Left"],
 
     ["%Структуры"],
+
+    ["Vector2"],["Color"],["Scene"],["Sprite"],["Vertex"],
   ]
   var ColumnErrors = [
     ["%Ошибки движка"],
@@ -170,22 +263,22 @@
 
     ["F0000"],["F0001"],["F0002"],
 
-    ["E0000"],["E0001"],["E0002"],["E0003"],["E0004"],["E0005"],["E0006"],["E0007"],["E0008"],["E0009"],
+    ["E0000"],["E0001"],["E0002"],["E0003"],["E0004"],["E0005"],["E0006"],["E0007"],["E0008"],["E0009"],["E0010"],["E0011"],["E0012"],["E0013"],["E0014"],["E0015"],["E0016"],
 
     ["C0000"],["C0001"],["C0002"],["C0003"],["C0004"],["C0005"],["C0006"],["C0007"],["C0008"],["C0009"],["C0010"],["C0011"],["C0012"],["C0013"],["C0014"],["C0015"],["C0016"],["C0017"],["C0018"],["C0019"],["C0020"],["C0021"],
-    ["C0022"],["C0023"],
+    ["C0022"],["C0023"],["C0024"],
     
     ["W0000"],["W0001"],["W0002"],["W0003"],["W0004"],["W0005"],
 
     ["%Ошибки Lua"],
 
-    ["L0000"],["L0001"],["L0002"],["L0003"],["L0004"],["L0005"],["L0006"],["L0007"],["L0008"],["L0009"],["L0010"],["L0011"],["L0012"],["L0013"],["L0014"],
+    ["L0000"],["L0001"],["L0002"],["L0003"],["L0004"],["L0005"],["L0006"],["L0007"],["L0008"],["L0009"],["L0010"],["L0011"],["L0012"],["L0013"],["L0014"],["L0015"],["L0016"],["L0017"],["L0018"],
 
-    ["LW0000"],["LW0001"],["LW0002"],["LW0003"],["LW0004"],["LW0005"],["LW0006"],["LW0007"],["LW0008"],["LW0009"],["LW0010"],["LW0011"],["LW0012"],["LW0013"],["LW0014"],
+    ["LW0000"],["LW0001"],["LW0002"],["LW0003"],["LW0004"],["LW0005"],["LW0006"],["LW0007"],["LW0008"],["LW0009"],["LW0010"],["LW0011"],["LW0012"],["LW0013"],["LW0014"],["LW0015"],["LW0016"],["LW0017"],["LW0018"],["LW0019"],
 
     ["%Другое"],
 
-    ["GW"],["GE"],["GF"],["S"],["LUA"]
+    ["GW"],["GE"],["GF"],["S"],["LUA"],["SHADER"],["GLEW"],["OPENGL"]
   ]
 
   var Pages = {
@@ -255,7 +348,6 @@
     Если создавать то внутри напечатать это:<br>
     @echo off<br>
     woowzengine.exe %~dp0<br>
-    pause<br>
     Потом запустить woowzengine.exe<br>
     И остальные файлы сгенерируются (woowzengine,game)<br>
     <img src="source/woowzengine.png"><br>
@@ -267,7 +359,7 @@
     <br>
     <ul>
       <li>Console - bool - "true" - Отображение консоли при старте</li>
-      <li>SaveMode - bool - "true" - <button onclick="ButtonPress('savemode')">Безопасный режим</button></li>
+      <li>SaveMode - bool - "true" - <button onclick="ButtonPress('savemode','jsonengine')">Безопасный режим</button></li>
       <li>LogType - string - "log" - Формат файла лога</li>
       <li>LogFormat - string - "%y-%mn-%d-%h-%m-%s-%ms" - Формат навзания лога (%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %ms - миллисекунда, %w - день недели)</li>
       <li>LogStyle - string - "%b[%h:%m:%s:%ms][%t] %c" - Формат текста в логе (%c - сообщение, %tt - база сообщения, %t - база сообщения (с отступами), %b - тип сообщения (* - print, ? - warning, ! - error, # - fatal) ,%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %ms - миллисекунда, %w - день недели)</li>
@@ -291,7 +383,7 @@
     Безопасный режим будет полезен тем, кто боиться запускать приложение от другого пользователя.<br>
     Он отключает сильные функции например изменение, создание, удаление файлов, использование Cmd, использования .dll файлов и т.д.<br>
     <br>
-    Включить/Выключить его можно в файле <button onclick="ButtonPress('jsonengine')">engine.json</button><br>
+    Включить/Выключить его можно в файле <button onclick="ButtonPress('jsonengine','savemode')">engine.json</button><br>
     `,``],
 
     "keys": [`
@@ -315,22 +407,28 @@
 
 <h3>Специальные клавиши</h3>
 <li>341 - ctrl</li>
+<li>345 - ctrl2</li>
 <li>340 - shift</li>
+<li>344 - shift2</li>
 <li>280 - caps</li>
 <li>258 - tab</li>
 <li>96 - tilda</li>
 <li>256 - esc</li>
 <li>343 - win</li>
+<li>348 - applications</li>
 <li>342 - alt</li>
+<li>346 - alt2</li>
 <li>32 - space</li>
-<li>344 - shift2</li>
 <li>257 - enter</li>
 <li>259 - backspace</li>
 <li>45 - minus</li>
 <li>61 - plus</li>
 <li>92 - slash</li>
 <li>283 - printscreen</li>
+<li>281 - scrolllock</li>
+<li>284 - pausebreak</li>
 <li>260 - insert</li>
+<li>269 - end</li>
 <li>268 - home</li>
 <li>261 - delete</li>
 <li>266 - pageup</li>
@@ -409,8 +507,360 @@
 <h3>Остальное</h3>
 <li>-1 - notfound   (Эта клавиша не считывается)</li>
 <li>? - key_?   (Если вы получаете эту клавишу, напишите Woowz11 что-бы он её внёс в список)</li>
-    
-    `,``],
+
+`,``],
+
+
+"CheckLua()": [FunctionInfo("CheckLua","Отладка",false,false)+`
+Отладочная функция, проверяющая работоспособность Lua скрипта.<br><br>
+<pre class="code">
+--Пишет сообщение "Lua supported!" в консоль если работает
+CheckLua()
+</pre>
+`+"</div>"],
+
+"Wait()": [FunctionInfo("Wait","Потоки",false,false)+`
+Функция имеет два действия ><br>
+Остановка текущего потока на определённое кол-во миллисекунд.<br>
+<pre class="code">
+Print("Запуск скрипта")
+Wait(5000)
+Print("Это сообщение отправляется после 5 секунд с запуска")
+Wait(5000)
+Print("Это сообщение отправляется после 10 секунд с запуска")
+</pre>
+Вызов функции в отдельном потоке через определённое кол-во миллисекунд.<br>
+<pre class="code">
+Print("Запуск скрипта")
+Wait(5000,function()
+  Print("Это сообщение отправляется после 5 секунд с запуска, в отдельном потоке")
+end)
+Wait(2000,function()
+  Print("Это сообщение отправляется после 2 секунды с запуска, в отдельном потоке")
+end)
+</pre>
+`+"</div>"],
+
+"Exit()": [FunctionInfo("Exit","Системное",false,false)+`
+Функция закрывает игру/приложение.<br>
+<pre class="code">
+Print("Приложение закроется через 5 секунд!")
+Wait(5000)
+Exit()
+</pre>
+`+"</div>"],
+
+"Print()": [FunctionInfo("Print","Консоль",false,false)+`
+Отправляет сообщение в консоль.<br>
+<pre class="code">
+Print("Привет мир!")
+</pre>
+`+"</div>"],
+
+"Warn()": [FunctionInfo("Warn","Консоль",false,false)+`
+Отправляет предупреждение в консоль.<br>
+Так же можно указать для удобства код предупреждения. <button onclick='ButtonPress("GW","Warn()")'>GW</button><br>
+<pre class="code">
+Warn("Пример предупреждения с кодом GW0010",10)
+Warn("Пример предупреждения с кодом GW0000")
+Warn("Пример предупреждения с кодом GW2000",2000)
+</pre>
+`+"</div>"],
+
+"Error()": [FunctionInfo("Error","Консоль",false,false)+`
+Отправляет ошибку в консоль.<br>
+Так же можно указать для удобства код ошибки. <button onclick='ButtonPress("GE","Error()")'>GE</button><br>
+<pre class="code">
+Error("Пример ошибки с кодом GE0010",10)
+Error("Пример ошибки с кодом GE0000")
+Error("Пример ошибки с кодом GE2000",2000)
+</pre>
+`+"</div>"],
+
+"Fatal()": [FunctionInfo("Fatal","Консоль",false,false)+`
+Отправляет фатальную ошибку в консоль и закрывает игру с ошибкой.<br>
+Так же можно указать для удобства код фатальной ошибки. <button onclick='ButtonPress("GF","Fatal()")'>GF</button><br>
+<pre class="code">
+Fatal("Fatal error!",10)
+</pre>
+`+"</div>"],
+
+"PrintCustom()": [FunctionInfo("PrintCustom","Консоль",false,false)+`
+Отправляет сообщение в консоль с своими параметрами.<br>
+<li>Модуль сообщения</li>
+<li>Сам текст</li>
+<li>Первый символ</li>
+<li>Цвет сообщения <button onclick='ButtonPress("consolecolors","PrintCustom()")'>Список цветов</button></button></li>
+<pre class="code">
+PrintCustom("HELLO","Текст с модулем HELLO")
+PrintCustom("MODULE","Текст с начальным символом ^","^")
+PrintCustom("MODULE","Зелёный текст","",2)
+</pre>
+`+"</div>"],
+
+"Cycle()": [FunctionInfo("Cycle","Потоки",false,false)+`
+Функция создаёт постоянный цикл, который вызывает функцию каждые N миллисекунд.<br>
+<pre class="code">
+--Каждую секунду прибавляется 1 к i
+local i = 0
+Cycle(function()
+
+Print(i)
+i = i + 1
+
+end,1000)
+</pre>
+`+"</div>"],
+
+"Random()": [FunctionInfo("Random","Математика",true,false)+`
+Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("RRandom()","Random()")'>RRandom()</button>)<br>
+Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число от 0 до 1)<br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
+<pre class="code">
+--Каждый раз при запуске будет случайное число
+Print(Random())
+Print(Random())
+Print(Random())
+Print(Random(-1,1))
+Print(Random(-10,10))
+Print(Random(-100,100))
+Print(Random(1,2))
+Print(Random(0,0.1))
+</pre>
+`+"</div>"],
+
+"RRandom()": [FunctionInfo("RRandom","Математика",true,false)+`
+Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("Random()","RRandom()")'>Random()</button>)<br>
+Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число 0 или 1)<br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
+<pre class="code">
+--Каждый раз при запуске будет случайное число
+Print(RRandom())
+Print(RRandom())
+Print(RRandom())
+Print(RRandom(-1,1))
+Print(RRandom(-10,10))
+Print(RRandom(-100,100))
+Print(RRandom(1,2))
+</pre>
+`+"</div>"],
+
+"Round()": [FunctionInfo("Round","Математика",true,false)+`
+Функция округляет число. (Функция округляет к большему, такая же как и <button onclick='ButtonPress("Ceil()","Round()")'>Ceil()</button>)<br>
+<pre class="code">
+local i = 0
+Cycle(function()
+
+Print(Round(i).." ~ "..i)
+
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"Ceil()": [FunctionInfo("Ceil","Математика",true,false)+`
+Функция округляет число к большему. (Аналог <button onclick='ButtonPress("Round()","Ceil()")'>Round()</button>)<br>
+<pre class="code">
+local i = 0
+Cycle(function()
+
+Print(Ceil(i).." ~ "..i)
+
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"Floor()": [FunctionInfo("Floor","Математика",true,false)+`
+Функция округляет число к меньшему.<br>
+<pre class="code">
+local i = 0
+Cycle(function()
+
+Print(Floor(i).." ~ "..i)
+
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"HasDirectory()": [FunctionInfo("HasDirectory","Проводник",true,false)+`
+Функция проверяет наличие директории или файла по пути.<br>
+<pre class="code">
+--Проверяет существует ли папка ...\\game
+Print(HasDirectory(GamePath))
+--Проверяет существует ли файл start.lua в ...\\game
+Print(HasDirectory(GamePath.."/start.lua"))
+--Проверяет существует ли файл phantom_file.txt в ...\\game
+Print(HasDirectory(GamePath.."/phantom_file.txt"))
+</pre>
+`+"</div>"],
+
+"ReadFile()": [FunctionInfo("ReadFile","Проводник",true,false)+`
+Функция получает данные из файла по пути.<br>
+<pre class="code">
+--Получает данные из файла start.lua в ...\game
+Print(ReadFile(GamePath.."/start.lua"))
+--В консоль выведется этот скрипт (если вы написали скрипт в файле start.lua)
+</pre>
+`+"</div>"],
+
+"WriteFile()": [FunctionInfo("WriteFile","Проводник",false,true)+`
+Функция записывает новые данные в файл по пути.<br>
+<pre class="code">
+--Для примера заменяется текст в новом файле логе на "Привет мир!" (по пути ...\\woowzengine\\log)
+WriteFile(LogPath,"Привет мир!")
+</pre>
+Так же можно не заменять текст а добавлять в конец файла.<br>
+<pre class="code">
+--Для примера текст "Число (N)" добавляется в новой файл лога каждую секунду (по пути ...\woowzengine\log)
+local i = 0
+Cycle(function()
+
+WriteFile(LogPath,"Число ("..i..")",true)
+i = i + 1
+
+end,1000)
+</pre>
+`+"</div>"],
+
+"Abs()": [FunctionInfo("Abs","Математика",true,false)+`
+Функция возвращает абсолютное значение числа. (Убирает минус у числа)<br>
+<pre class="code">
+Print(-5)
+Print(Abs(-5))
+</pre>
+`+"</div>"],
+
+"Sin()": [FunctionInfo("Sin","Математика",true,false)+`
+Функция синуса.<br>
+Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
+Примеры чисел ><br>
+<li>0 = 0</li>
+<li>Pi/2 = 1</li>
+<li>Pi = 0</li>
+<li>Pi+Pi/2 = -1</li>
+<li>Pi*2 = 0</li>
+<pre class="code">
+Print(Sin(0))
+Print(Sin(1))
+Print(Sin(2))
+Print(Sin(3))
+Print(Sin(4))
+Print(Sin(5))
+
+Print(Sin(Pi/2))
+Print(Sin(Pi+Pi/2))
+Print(Sin(Pi*2))
+
+local i = 0
+Cycle(function()
+
+Print("Число от -1 до 1 : "..Sin(i))
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"Cos()": [FunctionInfo("Cos","Математика",true,false)+`
+Функция косинуса.<br>
+Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
+Тоже самое что Sin(N-Pi/2)<br>
+Примеры чисел ><br>
+<li>0 = 1</li>
+<li>Pi/2 = 0</li>
+<li>Pi = -1</li>
+<li>Pi+Pi/2 = 0</li>
+<li>Pi*2 = 1</li>
+<pre class="code">
+Print(Cos(0))
+Print(Cos(1))
+Print(Cos(2))
+Print(Cos(3))
+Print(Cos(4))
+Print(Cos(5))
+
+Print(Cos(Pi/2))
+Print(Cos(Pi+Pi/2))
+Print(Cos(Pi*2))
+
+local i = 0
+Cycle(function()
+
+Print("Число от -1 до 1 : "..Cos(i))
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"AbsSin()": [FunctionInfo("AbsSin","Математика",true,false)+`
+Функция абсолютного синуса.<br>
+Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
+Тоже самое что Abs(Sin(N))
+Примеры чисел ><br>
+<li>0 = 0</li>
+<li>Pi/2 = 1</li>
+<li>Pi = 0</li>
+<li>Pi+Pi/2 = 1</li>
+<li>Pi*2 = 0</li>
+<pre class="code">
+Print(AbsSin(0))
+Print(AbsSin(1))
+Print(AbsSin(2))
+Print(AbsSin(3))
+Print(AbsSin(4))
+Print(AbsSin(5))
+
+Print(AbsSin(Pi/2))
+Print(AbsSin(Pi+Pi/2))
+Print(AbsSin(Pi*2))
+
+local i = 0
+Cycle(function()
+
+Print("Число от 0 до 1 : "..AbsSin(i))
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
+
+"AbsCos()": [FunctionInfo("AbsCos","Математика",true,false)+`
+Функция абсолютного косинуса.<br>
+Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
+Тоже самое что Abs(Cos(N))
+Примеры чисел ><br>
+<li>0 = 1</li>
+<li>Pi/2 = 0</li>
+<li>Pi = 1</li>
+<li>Pi+Pi/2 = 0</li>
+<li>Pi*2 = 1</li>
+<pre class="code">
+Print(AbsCos(0))
+Print(AbsCos(1))
+Print(AbsCos(2))
+Print(AbsCos(3))
+Print(AbsCos(4))
+Print(AbsCos(5))
+
+Print(AbsCos(Pi/2))
+Print(AbsCos(Pi+Pi/2))
+Print(AbsCos(Pi*2))
+
+local i = 0
+Cycle(function()
+
+Print("Число от 0 до 1 : "..AbsCos(i))
+i = i + 0.1
+
+end,100)
+</pre>
+`+"</div>"],
 
   }
 
