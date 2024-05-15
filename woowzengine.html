@@ -3,15 +3,23 @@
 <link rel="icon" type="image/x-icon" href="source/woowzengine.ico">
 <title>WoowzEngine - Wiki</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.min.css">
-
 <style>
 
 @font-face {
     font-family: "Concrete";
     src: url("source/concrete.otf") format('opentype');
 }
+
+  ::selection{
+    color: rgb(255, 255, 255);
+    text-shadow: 0px 0px 10px red;
+  }
+
+  .code::selection, .codecomponent::selection{
+    color: currentColor;
+    background-color: rgb(38,79,120);
+    text-shadow: 0 0 0;
+  }
 
   html{
     margin: 0;
@@ -33,19 +41,22 @@
     padding: 10px;
     margin: 10px 0;
     font-family: 'Courier New', Courier, monospace;
-    color: rgb(155,155,155);
+    color: #DCDCDC;
     text-shadow: 0 0 0;
     font-size: 15px;
     tab-size: 4;
+    border-radius: 8px;
+  }
+
+  img{
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px black;
   }
 
   button{
     all: unset;
     padding: 3px 3px;
     cursor: pointer;
-    background-image: url("source/metal.png");
-    background-attachment: fixed;
-    background-blend-mode: multiply;
     font-family: "Verdana", sans-serif;
     border-radius: 10px;
     box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
@@ -53,6 +64,7 @@
     color: rgb(0, 0, 0);
     border: 1px solid currentColor;
     z-index: 2;
+    margin-left: 10px;
   }
 
   button:hover{
@@ -123,6 +135,9 @@
 </style>
 
 <html>
+  <link rel="stylesheet" href="source/luacode.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/lua/lua.min.js"></script>
   <body id="body" onload="generate()">
 
   </body>
@@ -135,20 +150,47 @@
   }
 
   const body = document.getElementById('body');
-  const engineversion = "0.0.1d";
+  const engineversion = "0.0.2";
 
-  function ButtonPress(id,lastopen){
+  function ButtonPress(id,lastopen,type){
+    if(lastopen==""){lastopen=null}
+    if(type==null){type="";}
+    var ids = Object.keys(Pages);
+    var index = ids.indexOf(id);
+    
+    var id_next = "";
+    var id_prev = "";
+
+    if(index < ids.length - 1){
+      id_next = ids[index+1];
+    }
+    
+    if(index > 0){
+      id_prev = ids[index-1];
+    }
+
     var htmlstart = `
-    <div class="header" style="height: 15vh; width: 100%;">
+    <div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":"142,0,4")+`);">
       <br><br>
-      <div style="margin-left: 50px;"><button onclick="`+(lastopen?"ButtonPress('"+lastopen+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button></div>
+      <div style="margin-left: 50px;"><button onclick="`+(lastopen?"ButtonPress('"+lastopen+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
+        `+(id_prev==""?"":"<button onclick='ButtonPress(\""+id_prev+"\",\""+id+"\")'>Прошлое</button>")+` `+
+        (id_next==""?"":"<button onclick='ButtonPress(\""+id_next+"\",\""+id+"\")'>Следущее</button>")+`
+      </div>
     </div><br>
     `;
-    var html = "<center>Не найдено [<font style='font-style: italic;'>"+id+"</font>] Может быть ещё не создано!<br><br>Not found [<font style='font-style: italic;'>"+id+"</font>] Maybe it hasn't been created yet!</center>";
+    var html = "<center>Не найдено [<font style='font-style: italic;'>"+id+"</font>]! Может быть ещё не создано!<br><br>Not found [<font style='font-style: italic;'>"+id+"</font>]! Maybe it hasn't been created yet!</center>";
     if(id in Pages){
         html = Pages[id][0];
     }
     body.innerHTML = htmlstart+html+"<br>";
+
+    document.querySelectorAll(".lua").forEach(function(lua){
+      var editor = CodeMirror.fromTextArea(lua, {
+        mode: "lua",
+        theme: "luacode",
+        readOnly: true
+      });
+    });
   }
 
   function FunctionInfo(name,category,hasreturn,dangerous){
@@ -166,17 +208,21 @@
 
     return info;
   }
+  var codecount = 0;
+  function GenerateCode(code){
+    return "<textarea class='lua' readonly>"+code+"</textarea>";
+  }
 
   function StartScreen(){
     body.innerHTML = `
 
-    <div style="height: 20vh; width: 100%;" class="header">
+    <div style="height: 22vh; width: 100%; cursor: default;" class="header">
         <center><br><font style="font-family: 'Concrete', sans-serif; font-size: 40px;">WoowzEngine Wiki</font><br>`+engineversion+`<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
     </div>
     <div class="footer">
-        <div class="whitebox" style="width: 270px; height: 100vh;"><div id="c_other"></div style="margin: 10px;"></div>
-        <div class="greenbox" style="width: calc( 100vw - 270px - 423px ); height: 100vh;"><div id="c_func" style="margin: 10px;"></div></div>
-        <div class="redbox" style="width: 423px; height: 100vh;"><div id="c_errors"></div style="margin: 10px;"></div>
+        <div class="whitebox" style="width: 280px; height: 200vh;"><div id="c_other"></div style="margin: 10px;"></div>
+        <div class="greenbox" style="width: calc( 100vw - 280px - 423px ); height: 200vh;"><div id="c_func" style="margin: 10px;"></div></div>
+        <div class="redbox" style="width: 423px; height: 200vh;"><div id="c_errors"></div style="margin: 10px;"></div>
     </div>
     
     `;
@@ -185,31 +231,36 @@
     const c_f = document.getElementById('c_func');
     const c_e = document.getElementById('c_errors');
 
+    var divstart = '<div>';
+    var divend = "</div>";
+
     function TextToButton(text,id,info,type){
       var char = info[0].charAt(0);
       if(char=="%"){
-        return "<br><center>"+info[0].substring(1)+"</center><br>";
+        return divend+"<br><center>"+info[0].substring(1)+"</center><br>"+divstart;
       }
-      return "<button onclick=\"ButtonPress('"+id+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?"greenbutton":"redbutton"))+"\">"+text+"</button> ";
+      return "<button onclick=\"ButtonPress('"+id+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?"greenbutton":"redbutton"))+"\">"+text+"</button> ";
     }
+
 
     var s_o = "";
     for (let i = 0; i < ColumnOther.length; i++) {
       s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0],ColumnOther[i],"o");
     }
-    c_o.innerHTML = s_o;
+    c_o.innerHTML = divstart+s_o+divend;
 
     var s_f = "";
     for (let i = 0; i < ColumnFunctions.length; i++) {
       s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0],ColumnFunctions[i],"f");
     }
-    c_f.innerHTML = s_f;
+    c_f.innerHTML = divstart+s_f+divend;
 
     var s_e = "";
     for (let i = 0; i < ColumnErrors.length; i++) {
       s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnErrors[i][0],ColumnErrors[i],"e");
     }
-    c_e.innerHTML = s_e;
+  
+    c_e.innerHTML = divstart+s_e+divend;
   }
 
   var ColumnOther = [
@@ -218,9 +269,11 @@
     ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
     ["games","Игры на WoowzEngine","Games on WoowzEngine"],
     ["license","Лицензия","License"],
+
     ["%Туториалы"],
 
     ["gamecreate","Создание игры","Game creation"],
+
     ["%О коде"],
 
     ["structure","Структура","Structure"],
@@ -229,7 +282,10 @@
     ["savemode","Безопасный режим","Save mode"],
     ["keys","Коды клавиш","Key codes"],
     ["consolecolors","Цвета для консоли","Console colors"],
+    ["errors","Ошибки","Errors"],
+
     ["%Остальное"],
+
     ["devs","Разработчики","Developers"],
     ["contact","Связь","Contact"],
     ["links","Ссылки","Links"]
@@ -243,9 +299,11 @@
     ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
     ["Fma()"],["Mod()"],["Rem()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
     ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],["Seed()"],["SetSeed()"],
-    ["GetWindowSizeX()"],["GetWindowSizeY()"],["SetWindowSizeX()"],["SetWindowSizeY()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["SetWindowScale()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
+    ["GetWindowSizeX()"],["GetWindowSizeY()"],["SetWindowSizeX()"],["SetWindowSizeY()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
     ["SetWindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
-    ["SetWindowScene()"],["GetSceneWindow()"],["RRandom()"],["GetWindowX"],["GetWindowY"],["SetWindowX"],["SetWindowY"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
+    ["SetWindowScene()"],["RRandom()"],["GetWindowX()"],["GetWindowY()"],["SetWindowX()"],["SetWindowY()"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
+    ["SetSceneBackgroundColor()"],["SetSpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["SetCameraZoom()"],["GetCameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
+    ["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],
     
     ["%Константы"],
 
@@ -254,7 +312,7 @@
 
     ["%Структуры"],
 
-    ["Vector2"],["Color"],["Scene"],["Sprite"],["Vertex"],
+    ["Vector2"],["Vector3"],["Vector4"],["Color"],["Vertex"],["Texture"],["Sound"],
   ]
   var ColumnErrors = [
     ["%Ошибки движка"],
@@ -266,9 +324,9 @@
     ["E0000"],["E0001"],["E0002"],["E0003"],["E0004"],["E0005"],["E0006"],["E0007"],["E0008"],["E0009"],["E0010"],["E0011"],["E0012"],["E0013"],["E0014"],["E0015"],["E0016"],
 
     ["C0000"],["C0001"],["C0002"],["C0003"],["C0004"],["C0005"],["C0006"],["C0007"],["C0008"],["C0009"],["C0010"],["C0011"],["C0012"],["C0013"],["C0014"],["C0015"],["C0016"],["C0017"],["C0018"],["C0019"],["C0020"],["C0021"],
-    ["C0022"],["C0023"],["C0024"],
+    ["C0022"],["C0023"],["C0024"],["C0025"],
     
-    ["W0000"],["W0001"],["W0002"],["W0003"],["W0004"],["W0005"],
+    ["W0000"],["W0001"],["W0002"],["W0003"],["W0004"],["W0005"],["W0006"],["W0007"],
 
     ["%Ошибки Lua"],
 
@@ -278,7 +336,7 @@
 
     ["%Другое"],
 
-    ["GW"],["GE"],["GF"],["S"],["LUA"],["SHADER"],["GLEW"],["OPENGL"]
+    ["GW"],["GE"],["GF"],["S"],["LUA"],["SHADER"],["OPENGL"]
   ]
 
   var Pages = {
@@ -288,11 +346,11 @@
     
     <center>
 
-    <font style="font-size: 30px;">WoowzEngine</font><br><br><font>Программный/Игровой движок</font>
+    <font style="font-size: 30px;">WoowzEngine</font><br><br><font>Программный/Игровой движок</font><br>
 
-    Использует в качестве программного кода Lua<br>
+    Использует в качестве программного кода Lua<br><br>
 
-    Сделан Woowz11<br>
+    Создан Woowz11<br>
 
     Сейчас версия движка (`+engineversion+`)
 
@@ -323,9 +381,9 @@
       <li>LW  - Предупреждение в Lua</li>
       <li>LUA - Ошибка Lua (в ваших скриптах)</li>
       <li>S   - Ошибка GLFW</li>
-      <li>GE  - Ошибка которую вы создали и использовали Error()</li>
-      <li>GF  - Фатальная ошибка которую вы создали и использовали Fatal()</li>
-      <li>GW  - Предупреждение которую вы создали и использовали Warn()</li>
+      <li>GE  - Ошибка которую вы создали и использовали <button onclick="ButtonPress('Error()','errors','f')">Error()</button></li>
+      <li>GF  - Фатальная ошибка которую вы создали и использовали <button onclick="ButtonPress('Fatal()','errors','f')">Fatal()</button></li>
+      <li>GW  - Предупреждение которую вы создали и использовали <button onclick="ButtonPress('Warn()','errors','f')">Warn()</button></li>
     </ul>
 
     Так же ошибки можно посмотреть в Log файлах по пути /woowzengine/log/...<br>
@@ -333,12 +391,14 @@
     `,``],
 
     "license": [`
-    <br>
+    <br><center>
     Лицензия скоро будет указана...
+    </center>
     `,``],
     
     "gamecreate": [`
     <br>
+    <div style="margin-left: 100px;">
     <center>Туториал как создать игру/приложение на WoowzEngine</center><br>
     *На данный момент*<br>
     Нужно скачать файл woowzengine.exe<br>
@@ -346,13 +406,15 @@
     Разместить туда woowzengine.exe<br>
     Потом создать или найти/скачать файл run.bat<br>
     Если создавать то внутри напечатать это:<br>
-    @echo off<br>
-    woowzengine.exe %~dp0<br>
+    <pre class="code">
+@echo off
+woowzengine.exe %~dp0</pre>
     Потом запустить woowzengine.exe<br>
-    И остальные файлы сгенерируются (woowzengine,game)<br>
+    И остальные файлы сгенерируются (woowzengine,game)<br><br>
     <img src="source/woowzengine.png"><br>
     Игровые скрипты находятся в папке game<br>
     start.lua это скрипт который будет запускаться при запуске игры (в данный момент run.bat)<br>
+    </div>
     `,``],
 
     "jsonengine": [`
@@ -388,11 +450,19 @@
 
     "keys": [`
     <br>
+    <div style="margin-left: 100px;">
 Список клавиш<br>
 <br>
 Номер - Название<br>
 <br>
     
+<h3>Мышка</h3>
+<li>1 - ЛКМ</li>
+<li>2 - ПКМ</li>
+<li>3 - Колёсико мыши</li>
+<li>4 - Нижняя кнопка</li>
+<li>5 - Верхняя кнопка</li>
+
 <h3>Цифры</h3>
 <li>49 - 1</li>
 <li>50 - 2</li>
@@ -455,18 +525,18 @@
 <li>331 - numslash</li>
 <li>332 - asterisk</li>
 <li>333 - numminus</li>
-<li>327 - num7</li>
-<li>328 - num8</li>
-<li>329 - num9</li>
-<li>334 - numplus</li>
-<li>324 - num4</li>
-<li>325 - num5</li>
-<li>326 - num6</li>
 <li>321 - num1</li>
 <li>322 - num2</li>
 <li>323 - num3</li>
-<li>335 - numenter</li>
+<li>324 - num4</li>
+<li>325 - num5</li>
+<li>326 - num6</li>
+<li>327 - num7</li>
+<li>328 - num8</li>
+<li>329 - num9</li>
 <li>320 - num0</li>
+<li>334 - numplus</li>
+<li>335 - numenter</li>
 <li>330 - numdelete</li>
 
 <h3>Буквы и знаки препинания</h3>
@@ -508,81 +578,90 @@
 <li>-1 - notfound   (Эта клавиша не считывается)</li>
 <li>? - key_?   (Если вы получаете эту клавишу, напишите Woowz11 что-бы он её внёс в список)</li>
 
+</div>
 `,``],
+
+"contact":[`
+<div style="margin-left: 100px;">
+  Способы связаться с Woowz11<br>
+  Discord: woowz11<br>
+</div>
+`],
 
 
 "CheckLua()": [FunctionInfo("CheckLua","Отладка",false,false)+`
-Отладочная функция, проверяющая работоспособность Lua скрипта.<br><br>
-<pre class="code">
+Отладочная функция, проверяющая работоспособность Lua скрипта.<br>
+Выводит сообщение в консоль если работает.<br>
+<pre class="code">`+GenerateCode(`
 --Пишет сообщение "Lua supported!" в консоль если работает
-CheckLua()
-</pre>
+CheckLua()`)+
+`</pre>
 `+"</div>"],
 
 "Wait()": [FunctionInfo("Wait","Потоки",false,false)+`
 Функция имеет два действия ><br>
 Остановка текущего потока на определённое кол-во миллисекунд.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print("Запуск скрипта")
 Wait(5000)
 Print("Это сообщение отправляется после 5 секунд с запуска")
 Wait(5000)
 Print("Это сообщение отправляется после 10 секунд с запуска")
-</pre>
+`)+`</pre>
 Вызов функции в отдельном потоке через определённое кол-во миллисекунд.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print("Запуск скрипта")
 Wait(5000,function()
   Print("Это сообщение отправляется после 5 секунд с запуска, в отдельном потоке")
 end)
 Wait(2000,function()
   Print("Это сообщение отправляется после 2 секунды с запуска, в отдельном потоке")
-end)
+end)`)+`
 </pre>
 `+"</div>"],
 
 "Exit()": [FunctionInfo("Exit","Системное",false,false)+`
 Функция закрывает игру/приложение.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print("Приложение закроется через 5 секунд!")
 Wait(5000)
 Exit()
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Print()": [FunctionInfo("Print","Консоль",false,false)+`
 Отправляет сообщение в консоль.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print("Привет мир!")
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Warn()": [FunctionInfo("Warn","Консоль",false,false)+`
 Отправляет предупреждение в консоль.<br>
 Так же можно указать для удобства код предупреждения. <button onclick='ButtonPress("GW","Warn()")'>GW</button><br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Warn("Пример предупреждения с кодом GW0010",10)
 Warn("Пример предупреждения с кодом GW0000")
 Warn("Пример предупреждения с кодом GW2000",2000)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Error()": [FunctionInfo("Error","Консоль",false,false)+`
 Отправляет ошибку в консоль.<br>
 Так же можно указать для удобства код ошибки. <button onclick='ButtonPress("GE","Error()")'>GE</button><br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Error("Пример ошибки с кодом GE0010",10)
 Error("Пример ошибки с кодом GE0000")
 Error("Пример ошибки с кодом GE2000",2000)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Fatal()": [FunctionInfo("Fatal","Консоль",false,false)+`
 Отправляет фатальную ошибку в консоль и закрывает игру с ошибкой.<br>
 Так же можно указать для удобства код фатальной ошибки. <button onclick='ButtonPress("GF","Fatal()")'>GF</button><br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Fatal("Fatal error!",10)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "PrintCustom()": [FunctionInfo("PrintCustom","Консоль",false,false)+`
@@ -591,16 +670,16 @@ Fatal("Fatal error!",10)
 <li>Сам текст</li>
 <li>Первый символ</li>
 <li>Цвет сообщения <button onclick='ButtonPress("consolecolors","PrintCustom()")'>Список цветов</button></button></li>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 PrintCustom("HELLO","Текст с модулем HELLO")
 PrintCustom("MODULE","Текст с начальным символом ^","^")
 PrintCustom("MODULE","Зелёный текст","",2)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Cycle()": [FunctionInfo("Cycle","Потоки",false,false)+`
 Функция создаёт постоянный цикл, который вызывает функцию каждые N миллисекунд.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Каждую секунду прибавляется 1 к i
 local i = 0
 Cycle(function()
@@ -609,14 +688,14 @@ Print(i)
 i = i + 1
 
 end,1000)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Random()": [FunctionInfo("Random","Математика",true,false)+`
 Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("RRandom()","Random()")'>RRandom()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число от 0 до 1)<br>
 И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Каждый раз при запуске будет случайное число
 Print(Random())
 Print(Random())
@@ -626,15 +705,15 @@ Print(Random(-10,10))
 Print(Random(-100,100))
 Print(Random(1,2))
 Print(Random(0,0.1))
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "RRandom()": [FunctionInfo("RRandom","Математика",true,false)+`
 Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("Random()","RRandom()")'>Random()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число 0 или 1)<br>
 И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
-<pre class="code">
---Каждый раз при запуске будет случайное число
+<pre class="code">`+GenerateCode(`
+--Каждый раз при запуске будет случайное целое число
 Print(RRandom())
 Print(RRandom())
 Print(RRandom())
@@ -642,12 +721,12 @@ Print(RRandom(-1,1))
 Print(RRandom(-10,10))
 Print(RRandom(-100,100))
 Print(RRandom(1,2))
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Round()": [FunctionInfo("Round","Математика",true,false)+`
 Функция округляет число. (Функция округляет к большему, такая же как и <button onclick='ButtonPress("Ceil()","Round()")'>Ceil()</button>)<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
 
@@ -656,12 +735,12 @@ Print(Round(i).." ~ "..i)
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Ceil()": [FunctionInfo("Ceil","Математика",true,false)+`
 Функция округляет число к большему. (Аналог <button onclick='ButtonPress("Round()","Ceil()")'>Round()</button>)<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
 
@@ -670,12 +749,12 @@ Print(Ceil(i).." ~ "..i)
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Floor()": [FunctionInfo("Floor","Математика",true,false)+`
 Функция округляет число к меньшему.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
 
@@ -684,38 +763,38 @@ Print(Floor(i).." ~ "..i)
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "HasDirectory()": [FunctionInfo("HasDirectory","Проводник",true,false)+`
 Функция проверяет наличие директории или файла по пути.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Проверяет существует ли папка ...\\game
 Print(HasDirectory(GamePath))
 --Проверяет существует ли файл start.lua в ...\\game
 Print(HasDirectory(GamePath.."/start.lua"))
 --Проверяет существует ли файл phantom_file.txt в ...\\game
 Print(HasDirectory(GamePath.."/phantom_file.txt"))
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "ReadFile()": [FunctionInfo("ReadFile","Проводник",true,false)+`
 Функция получает данные из файла по пути.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Получает данные из файла start.lua в ...\game
 Print(ReadFile(GamePath.."/start.lua"))
 --В консоль выведется этот скрипт (если вы написали скрипт в файле start.lua)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "WriteFile()": [FunctionInfo("WriteFile","Проводник",false,true)+`
 Функция записывает новые данные в файл по пути.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Для примера заменяется текст в новом файле логе на "Привет мир!" (по пути ...\\woowzengine\\log)
 WriteFile(LogPath,"Привет мир!")
-</pre>
+`)+`</pre>
 Так же можно не заменять текст а добавлять в конец файла.<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 --Для примера текст "Число (N)" добавляется в новой файл лога каждую секунду (по пути ...\woowzengine\log)
 local i = 0
 Cycle(function()
@@ -724,15 +803,15 @@ WriteFile(LogPath,"Число ("..i..")",true)
 i = i + 1
 
 end,1000)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Abs()": [FunctionInfo("Abs","Математика",true,false)+`
 Функция возвращает абсолютное значение числа. (Убирает минус у числа)<br>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print(-5)
 Print(Abs(-5))
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Sin()": [FunctionInfo("Sin","Математика",true,false)+`
@@ -744,7 +823,7 @@ Print(Abs(-5))
 <li>Pi = 0</li>
 <li>Pi+Pi/2 = -1</li>
 <li>Pi*2 = 0</li>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print(Sin(0))
 Print(Sin(1))
 Print(Sin(2))
@@ -763,7 +842,7 @@ Print("Число от -1 до 1 : "..Sin(i))
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "Cos()": [FunctionInfo("Cos","Математика",true,false)+`
@@ -776,7 +855,7 @@ end,100)
 <li>Pi = -1</li>
 <li>Pi+Pi/2 = 0</li>
 <li>Pi*2 = 1</li>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print(Cos(0))
 Print(Cos(1))
 Print(Cos(2))
@@ -795,7 +874,7 @@ Print("Число от -1 до 1 : "..Cos(i))
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "AbsSin()": [FunctionInfo("AbsSin","Математика",true,false)+`
@@ -808,7 +887,7 @@ end,100)
 <li>Pi = 0</li>
 <li>Pi+Pi/2 = 1</li>
 <li>Pi*2 = 0</li>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print(AbsSin(0))
 Print(AbsSin(1))
 Print(AbsSin(2))
@@ -827,7 +906,7 @@ Print("Число от 0 до 1 : "..AbsSin(i))
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
 
 "AbsCos()": [FunctionInfo("AbsCos","Математика",true,false)+`
@@ -840,7 +919,7 @@ end,100)
 <li>Pi = 1</li>
 <li>Pi+Pi/2 = 0</li>
 <li>Pi*2 = 1</li>
-<pre class="code">
+<pre class="code">`+GenerateCode(`
 Print(AbsCos(0))
 Print(AbsCos(1))
 Print(AbsCos(2))
@@ -859,8 +938,21 @@ Print("Число от 0 до 1 : "..AbsCos(i))
 i = i + 0.1
 
 end,100)
-</pre>
+`)+`</pre>
 `+"</div>"],
+
+"Sign()": [FunctionInfo("Sign","Математика",true,false)+`
+Функция возвращает знак числа.<br>
+Если число отрицательное то возращает -1, если положительное то 1.<br>
+<pre class="code">`+GenerateCode(`
+Print(Sign(1)) --Результат: 1
+Print(Sign(0)) --Результат: 1
+Print(Sign(2)) --Результат: 1
+Print(Sign(-1)) --Результат: -1
+Print(Sign(-0.1)) --Результат: -1
+`)+`</pre>
+`+"</div>"],
+
 
   }
 

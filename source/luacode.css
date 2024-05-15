@@ -1,0 +1,18 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css');
+
+.CodeMirror {
+    background: transparent;
+    color: #DCDCDC;
+    height: auto;
+}
+
+.CodeMirror-selected{
+    color: currentColor !important;
+    background-color: rgb(38,79,120) !important;
+}
+
+.cm-keyword { color: #D8A0DF; }
+.cm-variable,.cm-builtin { color: #569CD6; }
+.cm-number { color: #B5CEA8; }
+.cm-comment { color: #57A64A; }
+.cm-string { color: #D69D85; }
