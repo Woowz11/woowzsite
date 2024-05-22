@@ -104,7 +104,7 @@ var all_sites = [
       "catalog": "cores",
       "hide": false,
       "tags": [
-        "core"
+        "sky","skycome"
       ]
     },
     {
@@ -119,12 +119,12 @@ var all_sites = [
     },
     {
       "href": "quaere",
-      "name": "Quaere Search",
-      "catalog": "quaere",
+      "name": "Quare Search",
+      "catalog": "quare",
       "hide": false,
       "icon": "q",
       "tags": [
-        "quaere"
+        "quare"
       ]
     },
     {
