@@ -1,0 +1,43 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css');
+
+.CodeMirror.cm-s-glslcode {
+    background: transparent;
+    color: #000080;
+    height: auto;
+}
+
+.cm-s-glslcode .CodeMirror-selected{
+    color: currentColor !important;
+    background-color: #E8E8FF !important;
+}
+
+.cm-s-glslcode .cm-meta { color: #804000; }
+.cm-s-glslcode .cm-type { color: #8000FF; }
+.cm-s-glslcode .cm-operator { color: #000080; }
+.cm-s-glslcode .cm-keyword { color: #8000FF; }
+.cm-s-glslcode .cm-variable { color: #000000; }
+.cm-s-glslcode .cm-def { color: #000000; }
+.cm-s-glslcode .cm-builtin { color: #000000; }
+.cm-s-glslcode .cm-number { color: #FF8000; }
+.cm-s-glslcode .cm-comment { color: #008000; }
+.cm-s-glslcode .cm-string { color: #808080; }
+
+  .code-glsl{
+    background-color: #FFFFFF;
+    border: 1px solid #E4E4E4;
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    color: #000080;
+    text-shadow: 0 0 0;
+    font-size: 15px;
+    tab-size: 4;
+	  cursor: pointer;
+  }
+  
+  .code-glsl::selection{
+    color: currentColor !important;
+    background-color: #E8E8FF !important;
+    text-shadow: 0 0 0 !important;
+  }

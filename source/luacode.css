@@ -1,18 +1,44 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css');
 
-.CodeMirror {
+.CodeMirror.cm-s-luacode{
     background: transparent;
     color: #DCDCDC;
     height: auto;
 }
 
-.CodeMirror-selected{
+.cm-s-luacode .CodeMirror-selected{
     color: currentColor !important;
     background-color: rgb(38,79,120) !important;
 }
 
-.cm-keyword { color: #D8A0DF; }
-.cm-variable,.cm-builtin { color: #569CD6; }
-.cm-number { color: #B5CEA8; }
-.cm-comment { color: #57A64A; }
-.cm-string { color: #D69D85; }
+.cm-s-luacode .cm-meta { color: #DCDCDC; }
+.cm-s-luacode .cm-type { color: #DCDCDC; }
+.cm-s-luacode .cm-operator { color: #DCDCDC; }
+.cm-s-luacode .cm-keyword { color: #D8A0DF; }
+.cm-s-luacode .cm-variable { color: #569CD6; }
+.cm-s-luacode .cm-builtin { color: #569CD6; }
+.cm-s-glslcode .cm-def { color: #DCDCDC; }
+.cm-s-luacode .cm-number { color: #B5CEA8; }
+.cm-s-luacode .cm-comment { color: #57A64A; }
+.cm-s-luacode .cm-string { color: #D69D85; }
+
+  .code{
+    background-color: rgb(30,30,30) !important;
+    border: 1px solid rgb(51,51,51);
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    color: #DCDCDC;
+    text-shadow: 0 0 0;
+    font-size: 15px;
+    tab-size: 4;
+    border-radius: 8px;
+	  cursor: pointer;
+  }
+  
+  .code::selection{
+    color: currentColor !important;
+    background-color: rgb(38,79,120) !important;
+    text-shadow: 0 0 0 !important;
+  }

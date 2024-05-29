@@ -1,0 +1,382 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>WBackrooms Game</title>
+<link rel="icon" type="image/x-icon" href="source\test.ico">
+
+<style>
+html {
+  margin: 0;
+  background-color: black;
+  cursor: default;
+}
+
+body{
+  margin: 0;
+  overflow: hidden;
+}
+
+::selection {
+  background-color: transparent;
+  color: inherit;
+}
+
+font{
+  color: white;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
+  -o-user-drag: none;
+}
+
+.breath-image {
+  animation: breath 15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+
+.way img{
+  transition: 0.3s;
+  filter: brightness(0%);
+  transform: scale(1);
+}
+.way:hover img{
+  transition: 0.3s;
+  filter: brightness(100%);
+  transform: scale(1.25);
+}
+
+.blinking-image {
+  animation: blink 0.001s infinite;
+}
+
+@keyframes blink {
+  0% {
+    filter: contrast(100%) brightness(100%);
+  }
+  50% {
+    filter: contrast(102%) brightness(110%);
+  }
+  100% {
+    filter: contrast(100%) brightness(100%);
+  }
+}
+
+@keyframes breath {
+  0% {
+    top: 0;
+  }
+  50% {
+    top: -2vh;
+  }
+  100% {
+    top: 0;
+  }
+}
+
+</style>
+
+<script src="source/woowzbackrooms/levels.js"></script>
+
+<body onload="StartScene()"></body>
+  <audio id="sound-walk"><source src="source/woowzbackrooms/sounds/walk.mp3" type="audio/mpeg"></audio>
+  <audio id="sound-breath"><source src="source/woowzbackrooms/sounds/breath.mp3" type="audio/mpeg"></audio>
+
+  <div id="ambients">
+    <audio id="sound-ambient-level0"><source src="source/woowzbackrooms/sounds/level0.mp3" type="audio/mpeg"></audio>
+  </div>
+
+  <div id="body"></div>
+<script>
+  const body = document.getElementById("body");
+  const version = "0.0.0";
+  var debugmode = false;
+
+function StartScene(){
+
+body.innerHTML = `
+  <font>WBackrooms Game</font><br>
+  <font>Версия: `+version+`</font><br>
+  <input type="checkbox" id="debugmode"><font>Режим разработчика</font><br>
+  <button onclick="STARTGAME()">Начать игру</button>
+`;
+
+}
+
+/*ИГРОВАЯ ЗОНА*/
+var MapHistory = {};
+var NowLevel = "Unknown";
+var NowLevelID = 0;
+
+var HungerLevel = 0;
+var TrustLevel = 0;
+var MentalLevel = 0;
+var DamageLevel = 0;
+
+var arrows = 0;
+function LoadScene(info,levelid,id,arrowid,oldarrowid){
+  NowLevelID = levelid;
+  var newinfo = info;
+
+  if(!newinfo["previd"]){
+    newinfo["previd"] = oldarrowid;
+  }
+
+  var blinks = false;
+  var shadows = false;
+  var color;
+  var size;
+  var ways;
+
+  var ambient;
+  var ambient_volume;
+  for(const properties in info){
+    var value = info[properties];
+    if(properties=="blinks"){
+      blinks = value;
+    }else if(properties=="shadows"){
+      shadows = value;
+    }else if(properties=="ways"){
+      ways = value;
+    }else if(properties=="color"){
+      color = value;
+    }else if(properties=="ambient"){
+      ambient = value;
+    }else if(properties=="ambient-volume"){
+      ambient_volume = value;
+    }else if(properties=="size"){
+      size = value/4;
+    }
+  }
+  UpdateAmbient(ambient,ambient_volume);
+
+  var result = `
+
+  <div style="filter: contrast(`+color[0]+`%) brightness(`+color[1]+`%) saturate(`+color[2]+`%) hue-rotate(`+color[3]+`deg); transform: scale(`+(1+size)+`); width:100vw; height: 105vh; position: absolute;" id="background-parent"><img style="width: 100%; height: 100%; object-fit: fill; position: absolute;" id="background" src="source/woowzbackrooms/levels/`+levelid+`_`+id+`.png">Изображение не получилось загрузить! Проверьте интернет подключение</img></div>
+  
+  <div style="opacity:0.5; width:100vw; height: 100vh; position: absolute;" id="noise"><img style="width: 100%; height: 100%; object-fit: fill; position: absolute;" src="source/woowzbackrooms/noise.png"></img></div>
+
+  <div style="opacity:0; background-color:black; width:100vw; height: 100vh; position: absolute;" id="nextscene"></div>
+
+  `+(shadows?`
+  
+    <div style="opacity:0.5; width:100vw; height: 100vh; position: absolute;" id="vin"><img style="width: 100%; height: 100%; object-fit: fill; position: absolute;" src="source/woowzbackrooms/vin.png"></img></div>
+  
+  `:"");
+
+  function CreateArrow(arrowdata,backway,arrowid_){
+    var posx = arrowdata["pos"][0] + ((Math.round(size*10) * 15 * (1-((Math.sin(arrowdata["pos"][0] * Math.PI / 100)+1)/2))) * (arrowdata["pos"][0]>=50?1:-1));
+    var posy = arrowdata["pos"][1] + ((Math.round(size*10) * 15 * (1-((Math.sin(arrowdata["pos"][1] * Math.PI / 100)+1)/2))) * (arrowdata["pos"][1]>=50?1:-1));
+    var rot = arrowdata["rot"];
+
+    var buttonsize = 150 * ((posy)/100);
+    result = result + ` <button onclick="SetScene('`+(backway?"0_0":arrowdata["next"][Math.floor(Math.random() * arrowdata["next"].length)])+`',`+arrowid_+`,`+arrowid+`)" id="way" class="way" style="opacity: 0; transform: rotate(`+rot+`deg); background-color: transparent; border: none; padding: 0; position:absolute; left: calc( `+posx+`vw - `+buttonsize+`px / 2 ); top: calc( `+posy+`vh - `+buttonsize+`px / 2 );"><img style="width: `+buttonsize+`px; height: `+buttonsize+`px;" src="source/woowzbackrooms/arrow.png"></button> `;
+  }
+
+  for(const arrowdataid in ways){
+    if(ways[arrowdataid]["id"]){
+      CreateArrow(ways[arrowdataid],false,ways[arrowdataid]["id"]);
+    }else{
+      arrows++;
+      newinfo["ways"][arrowdataid]["id"] = arrows;
+      CreateArrow(ways[arrowdataid],false,arrows);
+    }
+  }
+
+  if(oldarrowid!=-1){
+    CreateArrow({"pos":[50,85],"rot":180},true,newinfo["previd"]);
+  }
+
+  result = result + (debugmode?`
+  <div style="position:absolute; bottom:0; right:0; margin: 10px;">
+    <font>LEVEL: `+levelid+`</font><br>
+    <font>PHOTOID: `+id+`</font><br>
+    <font>ID: `+arrowid+`</font><br>
+    <font>PREVID: `+oldarrowid+`</font><br>
+    <font>IMAGE: `+levelid+`_`+id+`.png</font><br>
+    <font id="mouse"></font><br>
+    <font>TOTAL: `+arrows+`</font><br>
+  </div>
+  `:"");
+
+  body.innerHTML = result;
+
+  const image = document.getElementById("background");
+  const imagediv = document.getElementById("background-parent");
+  if(!debugmode){imagediv.classList.add("breath-image");}
+
+  if(blinks){
+    image.classList.add("blinking-image");
+  }
+
+  MapHistory[arrowid] = [newinfo,levelid,id];
+}
+
+function random(){
+  var rand = 1;
+  if(Math.random()>0.5){
+    rand = -1;
+  }
+  return Math.random()*rand;
+}
+
+var ambients = {
+  0:{
+    0:{"id":"level0","volume":0.5}
+  }
+}
+
+function CreateScene(levelid, id, arrowid, oldarrowid){
+  if(MapHistory[arrowid]){
+    LoadScene(MapHistory[arrowid][0],MapHistory[arrowid][1],MapHistory[arrowid][2], arrowid, MapHistory[arrowid][0]["previd"])
+  }else{
+    var newlevel = JSON.parse(JSON.stringify(BACKROOMSLEVELS[levelid][id]));
+    newlevel["color"] = [100+Math.round(Math.random()*20), 100+Math.round(random()*20), 100+Math.round(random()*20), random()*5];
+    newlevel["ambient"] = ambients[levelid][Math.round(Math.random()*(Object.keys(ambients[levelid]).length-1))];
+    newlevel["ambient-volume"] = Math.random()*0.5+0.5;
+    newlevel["size"] = Math.random();
+    LoadScene(newlevel,levelid,id, arrowid, oldarrowid);
+  }
+}
+
+var sceneset = false;
+var scenechangewait = 0;
+var sceneset_after = false;
+var scenechangewait_after = 0;
+var scenechange_one;
+var scenechange_two;
+var scenechange_three;
+var scenechange_four;
+function SetScene(id,arrowid,oldarrowid){
+  if(!sceneset && !sceneset_after){
+    sceneset = true;
+    const id_ = id.split("_");
+    scenechange_one = parseInt(id_[0]);
+    scenechange_two = parseInt(id_[1]);
+    scenechange_three = arrowid;
+    scenechange_four = oldarrowid;
+    document.getElementById("sound-walk").play();
+  }
+}
+
+function UpdateAmbient(info,vol){
+  var id = info["id"];
+  var audio = document.getElementById("sound-ambient-"+id);
+  document.getElementById("ambients").querySelectorAll("[data-component]").forEach((audio_) => {
+    console.log(audio_);
+    if(audio_.id!=id){
+      if(!audio_.paused){
+        audio_.pause();
+      }
+    }
+  });
+
+  audio.volume = info["volume"] * vol;
+  if(audio.paused){
+    audio.play();
+  }
+}
+
+function LoadAmbientsAndMusic(){
+  var audio1 = document.getElementById("sound-ambient-level0");
+  audio1.volume = 1;
+  audio1.addEventListener("ended", function() {
+    this.currentTime = 0;
+    this.play();
+  });
+  audio1.play();
+}
+
+function STARTGAME(){
+  debugmode = document.getElementById("debugmode").checked;
+  var randomstartscene = true;
+  var startscene = 0;
+  if(randomstartscene){
+    startscene = Math.floor(Math.random() * 18);
+  }
+
+  var audio = document.getElementById("sound-breath");
+  audio.volume = 0.1;
+  audio.addEventListener("ended", function() {
+    this.currentTime = 0;
+    this.play();
+  });
+  audio.play();
+
+  LoadAmbientsAndMusic();
+
+  CreateScene(0,startscene,0,-1);
+}
+
+function calculateDistance(x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+var arrowseeingzone = 40;
+document.addEventListener('mousemove', function(event) {
+  var winx =  window.innerWidth;
+  var winy = window.innerHeight;
+  const cursorX = Math.round(event.clientX / winx * 100);
+  const cursorY = Math.round(event.clientY / winy * 100);
+  const container = document.getElementById("mouse");
+  if(container){
+    container.innerHTML = "MOUSE: ["+cursorX+" , "+cursorY+" ]";
+  }
+  const container2 = document.getElementById("background");
+  if(container2){
+    document.querySelectorAll("#way").forEach(way => {
+        var style = window.getComputedStyle(way);
+        var opancity = 0;
+        var wayx = parseFloat(style.left.replace(/px$/, "")) / winx * 100;
+        var wayy = parseFloat(style.top.replace(/px$/, "")) / winy * 100;
+        
+        var distance = calculateDistance(cursorX,cursorY,wayx,wayy);
+
+        opancity = 1-(Math.min(distance,30)/30);
+
+        way.style.opacity = opancity;
+    });
+  }
+});
+
+function update() {
+  const noisediv = document.getElementById("noise");
+  if(noisediv){
+    noisediv.style.height = Math.floor(140 + Math.random() * 20) + "vh";
+    noisediv.style.width = Math.floor(140 + Math.random() * 20) + "vw";
+    noisediv.style.transform = "translate("+Math.floor(Math.random() * -20)+"px,"+Math.floor(Math.random() * -20)+"px) scale("+(Math.random()>0.5?"1":"-1")+","+(Math.random()>0.5?"1":"-1")+")";
+    noisediv.style.opacity = Math.random() * 0.1;
+  }
+
+  if(sceneset){
+    const nextscenediv = document.getElementById("nextscene");
+    nextscenediv.style.opacity = scenechangewait;
+    scenechangewait+=0.05;
+    if(scenechangewait>=1){
+      CreateScene(scenechange_one,scenechange_two,scenechange_three,scenechange_four);
+      sceneset = false;
+      scenechangewait = 0;
+      sceneset_after = true;
+      scenechangewait_after = 1;
+    }
+  }
+  if(sceneset_after){
+    const nextscenediv = document.getElementById("nextscene");
+    nextscenediv.style.opacity = scenechangewait_after;
+    scenechangewait_after-=0.05;
+    if(scenechangewait_after<=0){
+      sceneset_after = false;
+      scenechangewait_after = 1;
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+
+</script>

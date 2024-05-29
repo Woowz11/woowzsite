@@ -15,12 +15,6 @@
     text-shadow: 0px 0px 10px red;
   }
 
-  .code::selection, .codecomponent::selection{
-    color: currentColor;
-    background-color: rgb(38,79,120);
-    text-shadow: 0 0 0;
-  }
-
   html{
     margin: 0;
   }
@@ -35,24 +29,28 @@
 	cursor: default;
   }
 
-  .code{
-    background-color: rgb(30,30,30);
-    border: 1px solid rgb(51,51,51);
-    display: block;
-    padding: 10px;
-    margin: 10px 0;
-    font-family: 'Courier New', Courier, monospace;
-    color: #DCDCDC;
-    text-shadow: 0 0 0;
-    font-size: 15px;
-    tab-size: 4;
-    border-radius: 8px;
-	cursor: pointer;
-  }
-
   img{
     border-radius: 8px;
     box-shadow: 0px 2px 5px black;
+    user-select: none;
+    -webkit-user-drag: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  a{
+    text-decoration: none;
+    color: rgb(122,0,8);
+    transition: 0.3s ease;
+    cursor: pointer;
+  }
+
+  a:hover{
+    color: red;
+  }
+
+  a::selection{
+    color: yellow;
   }
 
   button{
@@ -76,11 +74,11 @@
     text-shadow: 0px 0px 15px rgb(255,255,255);
   }
   
-   button:not(:hover){
+  button:not(:hover){
 		transition: color 1s;
-   }
+  }
 
-   .yellowbutton{
+  .yellowbutton{
     box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
     background-color: rgb(255, 255, 255);
     color: rgb(168,154,0);
@@ -91,7 +89,7 @@
     color: rgb(255, 233, 0);
     text-shadow: 0px 0px 15px rgb(255, 233, 0);
   }
-   
+
   .greenbutton{
     box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
     background-color: rgb(255, 255, 255);
@@ -156,8 +154,10 @@
   <script src="source/woowzengine/errors.js"></script>
 
   <link rel="stylesheet" href="source/luacode.css">
+  <link rel="stylesheet" href="source/glslcode.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/lua/lua.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/clike/clike.min.js"></script>
   <body id="body" onload="generate()">
 
   </body>
@@ -166,11 +166,99 @@
 <script>
 
   function generate(){
-    StartScreen();
+    var href = window.location.href;
+    
+    var parts = href.split("#");
+    var extrahref = "";
+    if(parts.length>1){
+      extrahref = parts[1].toLowerCase();
+      if(!Pages[extrahref]){
+        extrahref = parts[1].toUpperCase();
+      }
+    }
+
+    if(extrahref==""){
+      StartScreen();
+    }else{
+      ButtonPress(extrahref,"","o");
+    }
   }
 
   const body = document.getElementById('body');
-  const engineversion = "0.0.2c";
+  const engineversion = "0.0.2d";
+  const funnyimages = 28;
+  var funnyimagesdescription = {
+    0 :["2024-05-28","Сделал смешной шрифт когда добавлял функцию цвета для текста"],
+    1 :["2024-05-28","Шейдер изгибающий таким образом текст"],
+    2 :["2024-05-28",`Получился прикольный эффект изгибания текста с помощью шейдера<br></center><pre class="code-glsl">`+GenerateCode(`
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+uniform vec2 scale;
+uniform float charpos;
+uniform float stringlen;
+uniform float time;
+
+out vec2 TexCoord;
+
+void main()
+{
+  float pos = charpos/stringlen;
+  vec2 NewPosition = aPos.xy * scale * (pos*10);
+  gl_Position = vec4(vec2(NewPosition.x, NewPosition.y), 0, 1);
+  TexCoord = aTexCoord;
+}
+`,true)+`</pre>`],
+    3 :["2024-05-28","Увеличил отображение текстуры в шейдере текста"],
+    4 :["2024-05-28","Поломал отображение текстур с помощью шейдера"],
+    5 :["2024-05-28","С помощью высоты получилось сделать забор из текста"],
+    6 :["2024-05-28","Сломал отступы в тексте с помощью шейдера"],
+    7 :["2024-05-27","Моя первая попытка сделать текст с помощью FreeType, но не сложилось по этому оставил эту затею"],
+    8 :["2024-05-28","Первая попытка на новой системе шрифта написать слово \"Hello!\", но карта шрифта съехала"],
+    9 :["2024-05-27","Сделал таблицу спрайтов с разными эффектами"],
+    10:["2024-05-27","Сделал таблицу спрайтов с разными эффектами"],
+    11:["2024-05-26","Пытался исправить ошибку с рендерингом прозрачных пикселей, и случайно сделал такой эффект"],
+    12:["2024-05-27","Сделал таблицу спрайтов с разными эффектами"],
+    13:["2024-05-28","Случайно загрузил текстуры шрифта не в RGB а в RGBA (или наоборот не помню чесн.)"],
+    14:["2024-05-25","Сделал таблицу спрайтов с разными эффектами"],
+    15:["2024-05-26","Шейдер который разбил плитки"],
+    16:["2024-05-25","Сделал таблицу спрайтов с разными эффектами"],
+    17:["2024-05-26","Луч из иконок Питера Гриффина"],
+    18:["2024-05-26","Визуальный баг с прозрачностью, что видно что находится за окном (если приглядется на звёзды)"],
+    19:["2024-05-26","Шейдер который растянул плитки"],
+    20:["2024-05-21","Самая первая версия добавления текстур к спрайтам"],
+    21:["2024-05-25","Сделал таблицу спрайтов с разными эффектами"],
+    22:["2024-05-25","Рендер куча разной формы спрайтов"],
+    23:["2024-05-25","Вот что случиться если не полностью загрузить цвета в текстуру (в данном случае на половину)"],
+    24:["2024-05-20","Очень баганный старый рендер (честно не знаю будет ли сейчас так же)"],
+    25:["2024-04-13","Самая первая версия этого сайта"],
+    26:["2024-05-16","Эксперементы с консолью"],
+    27:["2024-05-25","Рисунок глаза сделаный с помощью скриптов и добавление поворотов спрайта"],
+    28:["2024-04-15","Вторая версия этого сайта"],
+  }
+
+  function CopyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+  }
+
+  function UpdateCode(){
+    document.querySelectorAll(".lua").forEach(function(lua){
+      var editor = CodeMirror.fromTextArea(lua, {
+        mode: "lua",
+        theme: "luacode",
+        readOnly: true
+      });
+    });
+
+    document.querySelectorAll(".glsl").forEach(function(glsl){
+      var editor = CodeMirror.fromTextArea(glsl, {
+        mode: "text/x-c",
+        theme: "glslcode",
+        readOnly: true
+      });
+    });
+  }
 
   function ButtonPress(id,lastopen,type){
     if(lastopen==""){lastopen=null}
@@ -193,8 +281,9 @@
     <div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":(type=="e"?"40,40,40":"142,0,4"))+`);">
       <br><br>
       <div style="margin-left: 50px;"><button onclick="`+(lastopen?"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
-        `+(id_prev==""?"":"<button onclick='ButtonPress(\""+id_prev+"\",\""+id+"\",\""+type+"\")'>Прошлое</button>")+` `+
-        (id_next==""?"":"<button onclick='ButtonPress(\""+id_next+"\",\""+id+"\",\""+type+"\")'>Следующее</button>")+`
+        `+(id_prev==""?"":"<button onclick='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\")'>Прошлое</button>")+` `+
+        (id_next==""?"":"<button onclick='ButtonPress(\""+id_next+"\",\"\",\""+type+"\")'>Следующее</button>")+`
+        <button onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
       </div>
     </div><br>
     `;
@@ -204,16 +293,19 @@
     }
     body.innerHTML = htmlstart+html+"<br>";
 
-    document.querySelectorAll(".lua").forEach(function(lua){
-      var editor = CodeMirror.fromTextArea(lua, {
-        mode: "lua",
-        theme: "luacode",
-        readOnly: true
-      });
-    });
+    UpdateCode();
   }
 
-  function FunctionInfo(name,category,hasreturn,dangerous){
+  function FunctionInfo(name,hasreturn,dangerous){
+    var category = "Остальное";
+    var keys = Object.keys(FunctionsTypes);
+    for(const key__ in keys){
+      var key_ = keys[key__];
+      var id = name.toLowerCase();
+      if(FunctionsTypes[key_].includes(id)){
+        category = key_;
+      }
+    }
     var info = `
     <center><br>
       <font style="font-size: 40px;">`+name+`()</font><br>
@@ -229,8 +321,72 @@
     return info;
   }
   var codecount = 0;
-  function GenerateCode(code){
-    return "<textarea class='lua' readonly>"+code+"</textarea>";
+  function GenerateCode(code, thatglsl){
+    if(thatglsl==null){thatglsl = false;}
+    return "<textarea class='"+(thatglsl?"glsl":"lua")+"' readonly>"+code.slice(0,-1)+"</textarea>";
+  }
+
+  var selectedimage = Math.round(Math.random()*funnyimages);
+  function NextImage(next){
+    var funnyimage = document.getElementById("funnyimage");
+    if(next){
+      selectedimage++;
+    }else{
+      selectedimage--;
+    }
+    if(selectedimage>funnyimages){
+      selectedimage=0;
+    }
+    if(selectedimage<0){
+      selectedimage=funnyimages;
+    }
+
+    const now = new Date();
+		const startenginedate = new Date(funnyimagesdescription[selectedimage][0]);
+		const startenginetime = now.getTime() - startenginedate.getTime();
+		const days = Math.floor(startenginetime/(1000 * 60 * 60 * 24));
+
+    funnyimage.src = "source/woowzengine/funny/"+selectedimage+".png";
+    const dateParts = funnyimagesdescription[selectedimage][0].split("-").reverse();
+    const formattedDate = dateParts.join("-");
+    document.getElementById("funnyimagedesc_days").innerHTML = formattedDate+" ("+days+" дней назад)";
+    document.getElementById("funnyimagedesc").innerHTML = "<center>"+funnyimagesdescription[selectedimage][1];
+
+    UpdateCode();
+  }
+
+  function OpenGalery(){
+    body.innerHTML = `
+		<div class="header" style="height: 15vh; width: 100%;">
+			<br><br>
+				<div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button>
+			</div>
+			</div><br>
+			<br>
+			<center><font style='font-size: 40px; font-family: monospace;'>Галерея</font></center><br>
+      <center><font style='font-family: monospace;'>Тут собраны различные смешные и странные фотографии во время разработки движка</font></center><br>
+      <center><font style='font-family: monospace;'>Методы представленые здесь уже могут быть не актуальны!</font></center>
+			<br>
+			<hr>
+			<br>
+
+      <center>
+        <div style="display: flex; justify-content: center;">
+          <a style="position: relative; font-size: 50px; width:100%;" onclick="NextImage(false)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8592;</font></a>
+          <div>
+            <img id="funnyimage" style="max-width: 80vw; max-height:80vh; height: auto;" src="source/woowzengine/funny/0.png" id="image">
+          </div>
+          <a style="position: relative; font-size: 50px; width:100%;" onclick="NextImage(true)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8594;</font></a>
+        </div>
+      </center>
+      <br>
+      <center><font style="font-size: 15px;" id="funnyimagedesc_days"></font></center><br>
+      <div style="margin-left: 20vw; width: 60vw;"><font id="funnyimagedesc"></font></div>
+      <br>
+      <hr>
+		`;
+
+    NextImage(true);
   }
 
   function OpenStats(){
@@ -250,15 +406,19 @@
 			<br>
 			<hr>
 			<br>
-			<div style="margin-left: 30vw; width: 40vw; font-family: monospace;">
+			<div style="margin-left: 42.75vw; width: 40vw; font-family: monospace;">
 			
-			Версия движка: `+engineversion+`<br>
-			Возраст движка: `+days+` дней<br>
-			Кол-во функций: `+Object.keys(functionstable).length+`<br>
-			Кол-во ошибок: `+Object.keys(ColumnErrors).length+`<br>
-			Кол-во страниц: `+Object.keys(Pages).length+`<br>
+			Версия движка&nbsp;&nbsp;&nbsp;: `+engineversion+`<br>
+			Возраст движка&nbsp;&nbsp;: `+days+` дней<br>
+			Кол-во функций&nbsp;&nbsp;: `+Object.keys(ColumnFunctionsFUNC).length+`<br>
+			Кол-во ошибок&nbsp;&nbsp;&nbsp;: `+Object.keys(ColumnErrors).length+`<br>
+			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+`<br>
+      Кол-во смеш.карт: `+funnyimages+`<br>
 			
 			</div>
+
+      <br>
+      <hr>
 		`;
   }
   
@@ -266,13 +426,14 @@
     body.innerHTML = `
 
     <div style="height: 22vh; width: 100%; cursor: default;" class="header">
-        <center><br><font style="font-family: 'Concrete', sans-serif; font-size: 40px;">WoowzEngine Wiki</font><br>`+engineversion+`<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
-		<button style="margin-left: calc( 100vw - 200px ); position: absolute; top: 20px;" onclick="OpenStats()">Статистика</button>
+      <center><br><font style="font-family: 'Concrete', sans-serif; font-size: 40px;">WoowzEngine Wiki</font><br>`+engineversion+`<br><br>English will be available soon!<br>Тестовый дизайн сайта</center>
+      <button style="margin-left: calc( 100vw - 200px ); position: absolute; top: 20px;" onclick="OpenStats()">Статистика</button>
+		  <button style="margin-left: calc( 100vw - 325px ); position: absolute; top: 20px;" onclick="OpenGalery()">Галерея</button>
     </div>
-    <div class="footer">
-        <div class="whitebox" style="width: 280px; height: 200vh;"><div id="c_other"></div style="margin: 10px;"></div>
-        <div class="greenbox" style="width: calc( 100vw - 280px - 460px ); height: 200vh;"><div id="c_func" style="margin: 10px;"></div></div>
-        <div class="redbox" style="width: 460px; height: 200vh;"><div id="c_errors"></div style="margin: 10px;"></div>
+    <div class="footer" style="height: 350vh;">
+        <div class="whitebox" style="width: 280px;"><div id="c_other"></div style="margin: 10px;"></div>
+        <div class="greenbox" style="width: calc( 100vw - 280px - 460px );"><div id="c_func" style="margin: 10px;"></div></div>
+        <div class="redbox" style="width: 460px;"><div id="c_errors"></div style="margin: 10px;"></div>
     </div>
     
     `;
@@ -289,13 +450,13 @@
       if(char=="%"){
         return divend+"<br><center>"+info[0].substring(1)+"</center><br>"+divstart;
       }
-	  var notfound = false;
-	  if(type=="f"){
-		if(!Pages[text]){
-			notfound = true;
+	var notfound = false;
+	if(type=="f"){
+		if(!Pages[text.toLowerCase()]){
+		notfound = true;
 		}
-	  }
-      return "<button onclick=\"ButtonPress('"+id+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
+	}
+      return "<button onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
     }
 
 
@@ -319,63 +480,118 @@
     c_e.innerHTML = divstart+s_e+divend;
   }
 
-  var ColumnOther = [
-    ["%Основное"],
+var ColumnOther = [
+  ["%Основное"],
 
-    ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
-    ["games","Игры на WoowzEngine","Games on WoowzEngine"],
-    ["license","Лицензия","License"],
+  ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
+  ["games","Игры на WoowzEngine","Games on WoowzEngine"],
+  ["license","Лицензия","License"],
 
-    ["%Туториалы"],
+  ["%Туториалы"],
 
-    ["gamecreate","Создание игры","Game creation"],
+  ["gamecreate","Создание игры","Game creation"],
 
-    ["%О коде"],
+  ["%О коде"],
 
-    ["structure","Структура","Structure"],
-    ["jsonengine","engine.json","engine.json"],
-    ["jsongame","game.json","game.json"],
-    ["savemode","Безопасный режим","Save mode"],
-    ["keys","Коды клавиш","Key codes"],
-    ["consolecolors","Цвета для консоли","Console colors"],
-    ["errors","Ошибки","Errors"],
+  ["structure","Структура","Structure"],
+  ["jsonsettings","settings.json","settings.json"],
+  ["jsonengine","engine.json","engine.json"],
+  ["jsongame","game.json","game.json"],
+  ["savemode","Безопасный режим","Save mode"],
+  ["keys","Коды клавиш","Key codes"],
+  ["shaders","Шейдеры","Shaders"],
+  ["fonts","Шрифты","Fonts"],
+  ["textcodes","Специальные символы текста","Special text characters"],
+  ["consolecolors","Цвета для консоли","Console colors"],
+  ["errors","Ошибки","Errors"],
 
-    ["%Остальное"],
+  ["%Остальное"],
 
-    ["devs","Разработчики","Developers"],
-    ["contact","Связь","Contact"],
-    ["links","Ссылки","Links"]
+  ["devs","Разработчики","Developers"],
+  ["contact","Связь","Contact"],
+  ["links","Ссылки","Links"]
 
-  ]
-  var ColumnFunctionsFUNC = [
+]
+var ColumnFunctionsFUNC = [
 	["CheckLua()"],["Wait()"],["Exit()"],["Print()"],["Warn()"],["Error()"],["Fatal()"],["PrintCustom()"],["PrintClear()"],["Cycle()"],["Random()"],["Round()"],["HasDirectory()"],["ReadFile()"],["WriteFile()"],
-    ["CreateDirectory()"],["CreateFile()"],["RenameFile()"],["ReadJSON()"],["WriteJSON()"],["Abs()"],["Max()"],["Min()"],["Sqrt()"],["Log()"],["LogE()"],["Log10()"],["Sin()"],["Cos()"],
-    ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
-    ["Fma()"],["Mod()"],["Rem()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
-    ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],["Seed()"],["SetSeed()"],
+  ["CreateDirectory()"],["CreateFile()"],["RenameFile()"],["ReadJSON()"],["WriteJSON()"],["Abs()"],["Max()"],["Min()"],["Sqrt()"],["Log()"],["LogE()"],["Log10()"],["Sin()"],["Cos()"],
+  ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
+  ["Fma()"],["Mod()"],["Rem()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
+  ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],["Seed()"],["SetSeed()"],
 	["GetWindowSize()"],["SetWindowSize()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
-    ["SetWindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
-    ["SetWindowScene()"],["RRandom()"],["GetWindowPosition()"],["SetWindowPosition()"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
-    ["SetSceneBackgroundColor()"],["SetSpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["SetCameraZoom()"],["GetCameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
-    ["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],["SetDiscordActivityTitle()"],["SetDiscordActivityDescription()"],
+  ["SetWindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
+  ["SetWindowScene()"],["RRandom()"],["GetWindowPosition()"],["SetWindowPosition()"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
+  ["SetSceneBackgroundColor()"],["SetSpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["SetCameraZoom()"],["GetCameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
+  ["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],["SetDiscordActivityTitle()"],["SetDiscordActivityDescription()"],
 	["GetUserName()"],["CheckInternet()"],["ToBool()"],["RunLua()"],["Repeat()"],["ProgramLaunched()"],["DiscordLaunched()"],["ProgramsLaunched()"],["StopProgram()"],["ExitPC()"],["PointOutsideWindow()"],["GetFilesFromDirectory()"],
 	["GetFileName()"],["GetFileType()"],["PrintFast()"],["SetSpriteSize()"],["SetSpriteLTCorner()"],["SetSpriteLBCorner()"],["SetSpriteRTCorner()"],["SetSpriteRBCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
 	["SetWindowTransparency()"],["GetWindowTransparency()"],["OpenFile()"],["HasFile()"],["OpenDirectory()"],["SetSpriteColor()"],["GetSpriteColor()"],["SetSpriteLayer()"],["GetSpriteLayer()"],["FRandom()"],["FRRandom()"],
 	["GetSprites()"],["NoWait()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["SetSpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],["GetSpriteSize()"],["GetSpritePosition()"],
 	["SetSpriteMirrorX()"],["SetSpriteMirrorY()"],["GetSpriteMirrorX()"],["GetSpriteMirrorY()"],["SetSpriteUVLTCorner()"],["SetSpriteUVLBCorner()"],["SetSpriteUVRTCorner()"],["SetSpriteUVRBCorner()"],["SetSpriteRotation()"],
 	["Lerp()"],["ToRad()"],["ToDeg()"],["GetSpriteRotation()"],["SetSpriteCenter()"],["GetSpriteCenter()"],["GetWindows()"],["GetWindow()"],["GetScene()"],["SetDesktopBackground()"],["GetVolume()"],["SetVolume()"],
-  ]
-  var ColumnFunctionsCONS = [
-	["Pi"],["Sqrt2"],["E"],["Log2E"],["Log10E"],["Ln2"],["Ln10"],["SourcePath"],["GamePath"],["EnginePath"],["EngineVersion"],["LogPath"],["Version"],["GameName"],["Author"],["SafeMode"],["ConsoleEnabled"],
-    ["DebugMode"],["Infinity"],["Red"],["Green"],["Blue"],["Yellow"],["White"],["Black"],["Gray"],["Orange"],["Purple"],["Cyan"],["Transparent"],["Up"],["Down"],["Right"],["Left"],
-  ]
-  var ColumnFunctionsSTRUCT = [
-	["Vector2"],["Vector3"],["Vector4"],["Color"],["Vertex"],["Texture"],["Sound"],
-  ]
-  var ColumnFunctions = []
-  var ColumnErrors = []
+  ["LoadTexture()"],["SetSpriteVisible()"],["GetSpriteVisible()"],["SetTextureBlur()"],["GetTextureColors()"],["SetConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["SetSpriteShader()"],["GetSpriteShader()"],
+  ["RemoveFile()"],["PlayBeep()"],["SetSpriteHeight()"],["GetSpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["SetTextPosition()"],
+  ["SetTextFont()"],["SetTextColor()"],["GetASCIIChar()"],["SetTextText()"],["SetTextHeight()"],
+]
+var FunctionsTypes = {
+  "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
+    "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","rem","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","seed","setseed"
+  ],
+  "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove"
 
-  var Pages = {
+  ],
+  "Окно":["createwindow","destroywindow","pointoutsidewindow","haswindow","getmouseposition","getmousewposition","getscene","setwindowscene","setwindowmain","worldtoscreen","screentoworld","setwindowtitle","getwindowposition",
+  "getwindows","getwindowsize","getwindowtransparency","mainwindow","setwindowautosize","setwindoweventclosed","setwindoweventkeyhold","setwindoweventkeypress","setwindoweventkeyrelease","setwindoweventmousehold",
+  "setwindoweventmousepress","setwindoweventmouserelease","pressedkeys","setwindowposition","setwindowresizable","setwindowsize","setwindowtransparency"
+
+  ],
+  "Спрайт":["createsprite","setspritecenter","setspriteshader","setspritelayer","setspriteheight","hassprite","getspritecenter","getspritecolor","getspriteheight","getspritelayer","getspritemirrorx","getspritemirrory","getspriteposition",
+  "getspriterotation","getspriteshader","getspritesize","getspritevisible","setspritecolor","setspritelbcorner","setspriteltcorner","setspritemirrorx","setspritemirrory","setspriteposition","setspriterbcorner","setspriterotation",
+  "setspritertcorner","setspritesize","setspritesizebytexture","setspritetexture","setspriteuvlbcorner","setspriteuvltcorner","setspriteuvrbcorner","setspriteuvrtcorner","setspritevisible"
+
+  ],
+  "Сцена":["createscene","getcamerazoom","getwindow","setcamerazoom","getcameraposition","setcameraposition","getsprites","setscenebackgroundcolor"
+
+  ],
+  "Текст":["createfont","createtext","settextcolor","settextfont","settexttext","settextheight","settextposition"
+
+  ],
+  "Текстура":["createtexture","loadtexture","writeimage","settextureblur","gettexturecolors","gettexturesize"
+
+  ],
+  "Потоки":["cycle","wait","cyclerender","getfps","setfpstarget","repeat","nowait","runlua"
+
+  ],
+  "Консоль":["fatal","error","print","printcustom","warn","printfast","printclear","setconsoletitle","seteventprint"
+
+  ],
+  "Системное":["exit","checkinternet","cmd","exitpc","setvolume","getvolume","playbeep","openlink","getlanguage","getsystemlanguage","getusername","setdesktopbackground","seteventclosed","stopprogram"
+
+  ],
+  "Проводник":["hasdirectory","readfile","writefile","createdirectory","createfile","getfilename","getfilesfromdirectory","getfiletype","openfile","opendirectory","removefile","hasfile","programlaunched","programslaunched",
+  "renamefile"
+
+  ],
+  "Отладка":["checklua","testfunction"
+
+  ],
+  "Остальное":["discordlaunched","getdiscordcurrentuser","getdiscorduserinfo","pairs","tobool","setdiscordactivitydescription","setdiscordactivitytitle","gettype","jsontable","readjson","require","writejson"
+
+  ],
+}
+var ColumnFunctionsCONS = [
+	["Pi"],["Sqrt2"],["E"],["Log2E"],["Log10E"],["Ln2"],["Ln10"],["SourcePath"],["GamePath"],["EnginePath"],["EngineVersion"],["LogPath"],["Version"],["GameName"],["Author"],["SafeMode"],["ConsoleEnabled"],
+  ["DebugMode"],["Infinity"],["Red"],["Green"],["Blue"],["Yellow"],["White"],["Black"],["Gray"],["Orange"],["Purple"],["Cyan"],["Transparent"],["Up"],["Down"],["Right"],["Left"],
+]
+var ColumnFunctionsSTRUCT = [
+	["Vector2"],["Vector3"],["Vector4"],["Color"],["Vertex"],["Sound"],
+]
+
+
+var ColumnFunctions = []
+var ColumnErrors = []
+
+var Pages = {
 
 	"consolecolors": [``],
 	
@@ -392,7 +608,17 @@
 
     Создан Woowz11<br>
 
-    Сейчас версия движка (`+engineversion+`)
+    Сейчас версия движка (`+engineversion+`)<br>
+    <br>
+    <button onclick="ButtonPress('license','woowzengine','o')">Лицензия</button><br>
+    <br>
+    <button onclick="ButtonPress('contact','woowzengine','o')">Связь</button><br>
+    <br>
+    <button onclick="ButtonPress('gamecreate','woowzengine','o')">Начало</button><br>
+    <br>
+    <button onclick="OpenStats()">Статистика</button><br>
+    <br>
+    Проект на GitHub: <a href="https://github.com/Woowz11/woowzengine">Woowz11/woowzengine</a><br>
 
     </center>
     `,``],
@@ -421,9 +647,9 @@
       <li>LW  - Предупреждение в Lua</li>
       <li>LUA - Ошибка Lua (в ваших скриптах)</li>
       <li>S   - Ошибка GLFW</li>
-      <li>GE  - Ошибка которую вы создали и использовали <button onclick="ButtonPress('Error()','errors','f')">Error()</button></li>
-      <li>GF  - Фатальная ошибка которую вы создали и использовали <button onclick="ButtonPress('Fatal()','errors','f')">Fatal()</button></li>
-      <li>GW  - Предупреждение которую вы создали и использовали <button onclick="ButtonPress('Warn()','errors','f')">Warn()</button></li>
+      <li>GE  - Ошибка которую вы создали и использовали <button onclick="ButtonPress('error()','errors','f')">Error()</button></li>
+      <li>GF  - Фатальная ошибка которую вы создали и использовали <button onclick="ButtonPress('fatal()','errors','f')">Fatal()</button></li>
+      <li>GW  - Предупреждение которую вы создали и использовали <button onclick="ButtonPress('warn()','errors','f')">Warn()</button></li>
     </ul>
 
     Так же ошибки можно посмотреть в Log файлах по пути /woowzengine/log/...<br>
@@ -432,7 +658,15 @@
 
     "license": [`
     <br><center>
-    Лицензия скоро будет указана...
+    <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0 DEED</a><br>
+    <br>
+    <a href="https://creativecommons.org/licenses/by-nd/4.0/"><img style="border-radius: 0;" decoding="async" loading="lazy" src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nd.png" width="117" height="41" alt="CC BY-ND 4.0"></a><br>
+    <br>
+    Запрещается воровоство/плагиатство движка.<br>
+    Разрешено сообщать об ошибках и предлагать новые функции на GitHub, но они могут быть не одобрены.<br>
+    Насчёт создания платного контента на WoowzEngine сообщать автору на расмотрение.<br>
+    <br>
+    Создание вредоностного ПО не рекомендуется.<br>
     </center>
     `,``],
     
@@ -440,7 +674,7 @@
     <br>
     <div style="margin-left: 100px;">
     <center>Туториал как создать игру/приложение на WoowzEngine</center><br>
-    <center>Переписываеться, если что спрашивать Woowz11</center><br>
+    <center>Переписывается, если что спрашивать Woowz11</center><br>
     </div>
     `,``],
 
@@ -616,7 +850,7 @@
 `],
 
 
-"CheckLua()": [FunctionInfo("CheckLua","Отладка",false,false)+`
+"checklua()": [FunctionInfo("CheckLua",false,false)+`
 Отладочная функция, проверяющая работоспособность Lua скрипта.<br>
 Выводит сообщение в консоль если работает.<br>
 <pre class="code">`+GenerateCode(`
@@ -625,7 +859,7 @@ CheckLua()`)+
 `</pre>
 `+"</div>"],
 
-"Wait()": [FunctionInfo("Wait","Потоки",false,false)+`
+"wait()": [FunctionInfo("Wait",false,false)+`
 Функция имеет два действия ><br>
 Остановка текущего потока на определённое кол-во миллисекунд.<br>
 <pre class="code">`+GenerateCode(`
@@ -647,7 +881,7 @@ end)`)+`
 </pre>
 `+"</div>"],
 
-"Exit()": [FunctionInfo("Exit","Системное",false,false)+`
+"exit()": [FunctionInfo("Exit",false,false)+`
 Функция закрывает игру/приложение.<br>
 <pre class="code">`+GenerateCode(`
 Print("Приложение закроется через 5 секунд!")
@@ -656,16 +890,16 @@ Exit()
 `)+`</pre>
 `+"</div>"],
 
-"Print()": [FunctionInfo("Print","Консоль",false,false)+`
+"print()": [FunctionInfo("Print",false,false)+`
 Отправляет сообщение в консоль.<br>
 <pre class="code">`+GenerateCode(`
 Print("Привет мир!")
 `)+`</pre>
 `+"</div>"],
 
-"Warn()": [FunctionInfo("Warn","Консоль",false,false)+`
+"warn()": [FunctionInfo("Warn",false,false)+`
 Отправляет предупреждение в консоль.<br>
-Так же можно указать для удобства код предупреждения. <button onclick='ButtonPress("GW","Warn()")'>GW</button><br>
+Так же можно указать для удобства код предупреждения. <button onclick='ButtonPress("GW","warn()")'>GW</button><br>
 <pre class="code">`+GenerateCode(`
 Warn("Пример предупреждения с кодом GW0010",10)
 Warn("Пример предупреждения с кодом GW0000")
@@ -673,9 +907,9 @@ Warn("Пример предупреждения с кодом GW2000",2000)
 `)+`</pre>
 `+"</div>"],
 
-"Error()": [FunctionInfo("Error","Консоль",false,false)+`
+"error()": [FunctionInfo("Error",false,false)+`
 Отправляет ошибку в консоль.<br>
-Так же можно указать для удобства код ошибки. <button onclick='ButtonPress("GE","Error()")'>GE</button><br>
+Так же можно указать для удобства код ошибки. <button onclick='ButtonPress("GE","error()")'>GE</button><br>
 <pre class="code">`+GenerateCode(`
 Error("Пример ошибки с кодом GE0010",10)
 Error("Пример ошибки с кодом GE0000")
@@ -683,20 +917,20 @@ Error("Пример ошибки с кодом GE2000",2000)
 `)+`</pre>
 `+"</div>"],
 
-"Fatal()": [FunctionInfo("Fatal","Консоль",false,false)+`
+"fatal()": [FunctionInfo("Fatal",false,false)+`
 Отправляет фатальную ошибку в консоль и закрывает игру с ошибкой.<br>
-Так же можно указать для удобства код фатальной ошибки. <button onclick='ButtonPress("GF","Fatal()")'>GF</button><br>
+Так же можно указать для удобства код фатальной ошибки. <button onclick='ButtonPress("GF","fatal()")'>GF</button><br>
 <pre class="code">`+GenerateCode(`
 Fatal("Fatal error!",10)
 `)+`</pre>
 `+"</div>"],
 
-"PrintCustom()": [FunctionInfo("PrintCustom","Консоль",false,false)+`
+"printcustom()": [FunctionInfo("PrintCustom",false,false)+`
 Отправляет сообщение в консоль с своими параметрами.<br>
 <li>Модуль сообщения</li>
 <li>Сам текст</li>
 <li>Первый символ</li>
-<li>Цвет сообщения <button onclick='ButtonPress("consolecolors","PrintCustom()")'>Список цветов</button></button></li>
+<li>Цвет сообщения <button onclick='ButtonPress("consolecolors","printcustom()")'>Список цветов</button></button></li>
 <pre class="code">`+GenerateCode(`
 PrintCustom("HELLO","Текст с модулем HELLO")
 PrintCustom("MODULE","Текст с начальным символом ^","^")
@@ -704,7 +938,7 @@ PrintCustom("MODULE","Зелёный текст","",2)
 `)+`</pre>
 `+"</div>"],
 
-"Cycle()": [FunctionInfo("Cycle","Потоки",false,false)+`
+"cycle()": [FunctionInfo("Cycle",false,false)+`
 Функция создаёт постоянный цикл, который вызывает функцию каждые N миллисекунд.<br>
 <pre class="code">`+GenerateCode(`
 --Каждую секунду прибавляется 1 к i
@@ -718,10 +952,10 @@ end,1000)
 `)+`</pre>
 `+"</div>"],
 
-"Random()": [FunctionInfo("Random","Математика",true,false)+`
-Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("RRandom()","Random()")'>RRandom()</button>)<br>
+"random()": [FunctionInfo("Random",true,false)+`
+Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("rrandom()","random()")'>RRandom()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число от 0 до 1)<br>
-И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
 <pre class="code">`+GenerateCode(`
 --Каждый раз при запуске будет случайное число
 Print(Random())
@@ -735,10 +969,10 @@ Print(Random(0,0.1))
 `)+`</pre>
 `+"</div>"],
 
-"RRandom()": [FunctionInfo("RRandom","Математика",true,false)+`
-Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("Random()","RRandom()")'>Random()</button>)<br>
+"rrandom()": [FunctionInfo("RRandom",true,false)+`
+Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("random()","rrandom()")'>Random()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число 0 или 1)<br>
-И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("SetSeed()","Random()")'>SetSeed()</button><br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
 <pre class="code">`+GenerateCode(`
 --Каждый раз при запуске будет случайное целое число
 Print(RRandom())
@@ -751,8 +985,8 @@ Print(RRandom(1,2))
 `)+`</pre>
 `+"</div>"],
 
-"Round()": [FunctionInfo("Round","Математика",true,false)+`
-Функция округляет число. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("Floor()","Round()")'>Floor()</button>)<br>
+"round()": [FunctionInfo("Round",true,false)+`
+Функция округляет число. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("floor()","round()")'>Floor()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -765,7 +999,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"Ceil()": [FunctionInfo("Ceil","Математика",true,false)+`
+"ceil()": [FunctionInfo("Ceil",true,false)+`
 Функция округляет число к большему.<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
@@ -779,8 +1013,8 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"Floor()": [FunctionInfo("Floor","Математика",true,false)+`
-Функция округляет число к меньшему. (Аналог <button onclick='ButtonPress("Round()","Ceil()")'>Round()</button>)<br>
+"floor()": [FunctionInfo("Floor",true,false)+`
+Функция округляет число к меньшему. (Аналог <button onclick='ButtonPress("round()","ceil()")'>Round()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -793,7 +1027,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"HasDirectory()": [FunctionInfo("HasDirectory","Проводник",true,false)+`
+"hasdirectory()": [FunctionInfo("HasDirectory",true,false)+`
 Функция проверяет наличие директории или файла по пути.<br>
 <pre class="code">`+GenerateCode(`
 --Проверяет существует ли папка ...\\game
@@ -805,7 +1039,7 @@ Print(HasDirectory(GamePath.."/phantom_file.txt"))
 `)+`</pre>
 `+"</div>"],
 
-"ReadFile()": [FunctionInfo("ReadFile","Проводник",true,false)+`
+"readfile()": [FunctionInfo("ReadFile",true,false)+`
 Функция получает данные из файла по пути.<br>
 <pre class="code">`+GenerateCode(`
 --Получает данные из файла start.lua в ...\game
@@ -814,7 +1048,7 @@ Print(ReadFile(GamePath.."/start.lua"))
 `)+`</pre>
 `+"</div>"],
 
-"WriteFile()": [FunctionInfo("WriteFile","Проводник",false,true)+`
+"writefile()": [FunctionInfo("WriteFile",false,true)+`
 Функция записывает новые данные в файл по пути.<br>
 <pre class="code">`+GenerateCode(`
 --Для примера заменяется текст в новом файле логе на "Привет мир!" (по пути ...\\woowzengine\\log)
@@ -833,7 +1067,7 @@ end,1000)
 `)+`</pre>
 `+"</div>"],
 
-"Abs()": [FunctionInfo("Abs","Математика",true,false)+`
+"abs()": [FunctionInfo("Abs",true,false)+`
 Функция возвращает абсолютное значение числа. (Убирает минус у числа)<br>
 <pre class="code">`+GenerateCode(`
 Print(-5)
@@ -841,7 +1075,7 @@ Print(Abs(-5))
 `)+`</pre>
 `+"</div>"],
 
-"Sin()": [FunctionInfo("Sin","Математика",true,false)+`
+"sin()": [FunctionInfo("Sin",true,false)+`
 Функция синуса.<br>
 Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
 Примеры чисел ><br>
@@ -872,7 +1106,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"Cos()": [FunctionInfo("Cos","Математика",true,false)+`
+"cos()": [FunctionInfo("Cos",true,false)+`
 Функция косинуса.<br>
 Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
 Тоже самое что Sin(N-Pi/2)<br>
@@ -904,7 +1138,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"AbsSin()": [FunctionInfo("AbsSin","Математика",true,false)+`
+"abssin()": [FunctionInfo("AbsSin",true,false)+`
 Функция абсолютного синуса.<br>
 Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
 Тоже самое что Abs(Sin(N))<br>
@@ -936,7 +1170,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"AbsCos()": [FunctionInfo("AbsCos","Математика",true,false)+`
+"abscos()": [FunctionInfo("AbsCos",true,false)+`
 Функция абсолютного косинуса.<br>
 Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
 Тоже самое что Abs(Cos(N))<br>
@@ -968,7 +1202,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"Sign()": [FunctionInfo("Sign","Математика",true,false)+`
+"sign()": [FunctionInfo("Sign",true,false)+`
 Функция возвращает знак числа.<br>
 Если число отрицательное то возращает -1, если положительное то 1.<br>
 <pre class="code">`+GenerateCode(`
@@ -980,7 +1214,7 @@ Print(Sign(-0.1)) --Результат: -1
 `)+`</pre>
 `+"</div>"],
 
-"Lerp()": [FunctionInfo("Lerp","Математика",true,false)+`
+"lerp()": [FunctionInfo("Lerp",true,false)+`
 Функция возвращает число между двумя числами используя интерполяцию.<br>
 Интерполяция должна быть числом от 0 до 1.<br>
 <pre class="code">`+GenerateCode(`
@@ -993,7 +1227,7 @@ Print(Lerp(Pi,-Pi,0.5))   --Результат: 0
 `)+`</pre>
 `+"</div>"],
 
-"DSin()": [FunctionInfo("DSin","Математика",true,false)+`
+"dsin()": [FunctionInfo("DSin",true,false)+`
 Функция положительного синуса.<br>
 Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
 Тоже самое что (Sin(N)+1)/2<br>
@@ -1025,7 +1259,7 @@ end,100)
 `)+`</pre>
 `+"</div>"],
 
-"DCos()": [FunctionInfo("DCos","Математика",true,false)+`
+"dcos()": [FunctionInfo("DCos",true,false)+`
 Функция положительного косинуса.<br>
 Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
 Тоже самое что (Sin(N)+1)/2<br>
@@ -1058,13 +1292,6 @@ end,100)
 `+"</div>"],
 
   }
-  
-  
-var functionstable = {};
-for(const key in ColumnFunctions){
-	var val = ColumnFunctions[key][0];
-	functionstable[val] = true;
-}
 
 function GenerateConsoleColors(){
 	var result = "<center>Цвета для консоли по числам</center><br>";
@@ -1102,45 +1329,46 @@ function GenerateConsoleColors(){
 }
 GenerateConsoleColors();
 
-function generateErrorGetButton(command,errorid,typ){
-
-	function Succes(com){
-		if(Pages[com]){
-				if(!Pages[com][0].includes("alredyhaserror")){
-					Pages[com][0] = Pages[com][0]+"<br><hr><center id='alredyhaserror'><font>Ошибки функции</font></center><br><center>";
-				}
-				Pages[com][0] = Pages[com][0]+"<button onclick='ButtonPress(\""+errorid+"\",\""+com+"\",\"e\")'>"+errorid+"</button>";
-			}
-			return "<button onclick='ButtonPress(\""+com+"\",\""+errorid+"\",\"f\")'>"+com+"</button>";
-	}
-
-	if(functionstable[command] && (!(typ=="E" || typ=="W" || typ=="C" || typ=="F"))){
-		var char = command.charAt(0);
-			return Succes(command);
-	}else{
-		if(command == "jsonengine" || command == "jsongame"){
-			return "<button onclick='ButtonPress(\""+command+"\",\""+errorid+"\",\"o\")'>"+(command=="jsonengine"?"engine.json":"game.json")+"</button>";
-		}else{
-			var char = command.charAt(0);
-			if(char=="!"){
-				return Succes(command.substring(1));
-			}else{
-				return "<font>"+command+" (Системное)</font>";
-			}
-		}
-	}
-}
-
 function SortFunctions(){
 	var newlist = [];
 	ColumnFunctionsFUNC.sort((a, b) => a[0].localeCompare(b[0], 'en', { sensitivity: 'base' }));
 	ColumnFunctionsCONS.sort((a, b) => a[0].localeCompare(b[0], 'en', { sensitivity: 'base' }));
 	ColumnFunctionsSTRUCT.sort((a, b) => a[0].localeCompare(b[0], 'en', { sensitivity: 'base' }));
 	
-	newlist.push(["%Функции"]);
-	for(const el in ColumnFunctionsFUNC){
-		newlist.push(ColumnFunctionsFUNC[el]);
+  var sortlistbycategories = {};
+  sortlistbycategories["В разработке"] = [];
+	for(const el_ in ColumnFunctionsFUNC){
+    var el = ColumnFunctionsFUNC[el_][0];
+    var key = "В разработке";
+    var keys = Object.keys(FunctionsTypes);
+    for(const key__ in keys){
+      var key_ = keys[key__];
+      var id = el.toLowerCase().replace(/[()]/g, "");
+      if(FunctionsTypes[key_].includes(id)){
+        key = key_;
+        if(!Object.keys(sortlistbycategories).includes(key)){
+          sortlistbycategories[key] = [];
+        }
+      }
+    }
+    sortlistbycategories[key].push(ColumnFunctionsFUNC[el_]);
 	}
+
+  var otladka = sortlistbycategories["Отладка"];
+  delete sortlistbycategories["Отладка"];
+  sortlistbycategories["Отладка"] = otladka;
+
+  var ostalnoe = sortlistbycategories["В разработке"];
+  delete sortlistbycategories["В разработке"];
+  sortlistbycategories["В разработке"] = ostalnoe;
+
+  for(const key in sortlistbycategories){
+    if(sortlistbycategories[key].length>0){newlist.push(["%"+key]);}
+    for(const el in sortlistbycategories[key]){
+      newlist.push(sortlistbycategories[key][el]);
+    }
+  }
+
 	newlist.push(["%Константы"]);
 	for(const el in ColumnFunctionsCONS){
 		newlist.push(ColumnFunctionsCONS[el]);
@@ -1153,6 +1381,41 @@ function SortFunctions(){
 }
 SortFunctions();
   
+
+var functionstable = {};
+for(const key in ColumnFunctions){
+	var val = ColumnFunctions[key][0];
+	functionstable[val.toLowerCase()] = true;
+}
+
+function generateErrorGetButton(command,errorid,typ){
+
+	function Succes(com){
+		if(Pages[com.toLowerCase()]){
+				if(!Pages[com.toLowerCase()][0].includes("alredyhaserror")){
+					Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<br><hr><center id='alredyhaserror'><font>Ошибки функции</font></center><br><center>";
+				}
+				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<button onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com+"\",\"e\")'>"+errorid+"</button>";
+			}
+			return "<button onclick='ButtonPress(\""+com.toLowerCase()+"\",\""+errorid.toUpperCase()+"\",\"f\")'>"+com+"</button>";
+	}
+
+	if(functionstable[command.toLowerCase()] && (!(typ=="E" || typ=="W" || typ=="C" || typ=="F"))){
+		return Succes(command);
+	}else{
+		if(command == "jsonengine" || command == "jsongame" || command == "jsonsettings"){
+			return "<button onclick='ButtonPress(\""+command+"\",\""+errorid.toUpperCase()+"\",\"o\")'>"+(command=="jsonengine"?"engine.json":(command=="jsongame"?"game.json":"settings.json"))+"</button>";
+		}else{
+			var char = command.charAt(0);
+			if(char=="!"){
+				return Succes(command.substring(1));
+			}else{
+				return "<font>"+command+" (Системное)</font>";
+			}
+		}
+	}
+}
+
 function generateErrorStartText(id,command,typ){
 	return `
 		<center>
