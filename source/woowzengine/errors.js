@@ -59,7 +59,7 @@ const ErrorsWoowzEngine = {
 		],
 		"0011":[
 			"Строка не может быть пустой",
-			"Characters()",
+			"Charcters()",
 			""
 		],
 		"0012":[
@@ -119,7 +119,7 @@ const ErrorsWoowzEngine = {
 		],
 		"0023":[
 			"Описание активности Discord должно содержать > 2 символов",
-			"SetDiscrodActivityDescription()",
+			"SetDiscordActivityDescription()",
 			""
 		],
 		"0024":[
@@ -300,7 +300,7 @@ const ErrorsWoowzEngine = {
 			""
 		],
 		"0017":[
-			"Такой спрайт уже есть на сцене",
+			"Такой спрайт уже есть на сцене "+old,
 			"",
 			""
 		],
@@ -453,7 +453,7 @@ const ErrorsWoowzEngine = {
 			""
 		],
 		"0008":[
-			"!",
+			""+old,
 			"",
 			""
 		],
@@ -658,6 +658,11 @@ const ErrorsWoowzEngine = {
 			"CreateFont()",
 			"",
 		],
+		"0039":[
+			"Не возможно конвертировать строку в число",
+			"StringToInt()",
+			""
+		]
 	},
 	F:{
 		"0000":[
