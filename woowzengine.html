@@ -3,12 +3,14 @@
 <link rel="icon" type="image/x-icon" href="source/woowzengine.ico">
 <title>WoowzEngine - Wiki</title>
 
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://woowz11.github.io/woowzsite/woowzengine.html" />
-<meta property="og:image" content="https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/woowzengine/og.png" />
-<meta property="og:site_name" content="WoowzEngine Official WIKI"/>
-<meta property="og:title" content="Википедия по WoowzEngine"/>
-<meta property="og:description" content=""/>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://woowz11.github.io/woowzsite/woowzengine.html">
+<meta property="og:image" content="https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/woowzengine/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<meta property="og:site_name" content="WoowzEngine Official WIKI">
+<meta property="og:title" content="Википедия по WoowzEngine">
+<meta property="og:description" content="">
 
 <style>
 
@@ -383,6 +385,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   }
 
   function ButtonPress(id,lastopen,type){
+	document.title = "WoowzEngine - #"+id;
     if(lastopen==""){lastopen=null}
     if(type==null){type="";}
     var ids = Object.keys(Pages);
@@ -419,18 +422,24 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   }
 
   function FunctionInfo(name,hasreturn,dangerous){
-    var category = "Остальное";
+	var thatgetset = false;
+	var name_ = name;
+	if(name.charAt(0)=='@'){
+		thatgetset = true;
+		name = name.slice(1);
+	}
+    var category = "Не найдено ['"+name.toLowerCase()+"']! Сообщите автору";
     var keys = Object.keys(FunctionsTypes);
     for(const key__ in keys){
       var key_ = keys[key__];
-      var id = name.toLowerCase();
+      var id = name_.toLowerCase();
       if(FunctionsTypes[key_].includes(id)){
         category = key_;
       }
     }
     var info = `
     <center><br>
-      <font style="font-size: 40px;">`+name+`()</font><br>
+      <font style="font-size: 40px;">`+(thatgetset?"Set"+name+"(), Get"+name:name)+`()</font><br>
       <br>
       <font>•`+category+`•</font><br>
       `+(hasreturn?"<font style='font-size: 15px;'>RETURNABLE</font>":"")+`<br>
@@ -465,6 +474,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
       selectedimage=funnyimages;
     }
 
+	document.title = "WoowzEngine - Gallery ("+selectedimage+"/"+funnyimages+")";
+	
     const now = new Date();
 		const startenginedate = new Date(funnyimagesdescription[funnyimagesids[selectedimage]][0]);
 		const startenginetime = now.getTime() - startenginedate.getTime();
@@ -514,6 +525,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   }
 
   function OpenStats(){
+		document.title = "WoowzEngine - Stats";
 		const now = new Date();
 		const startenginedate = new Date("2024-04-7");
 		const startenginetime = now.getTime() - startenginedate.getTime();
@@ -559,6 +571,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   }
   
   function StartScreen(){
+	document.title = "WoowzEngine - Wiki";
     body.innerHTML = `
 
     <div style="height: 22vh; width: 100%; cursor: default; padding-top: 3vh;" class="header">
@@ -578,23 +591,31 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     const c_f = document.getElementById('c_func');
     const c_e = document.getElementById('c_errors');
 
-    var divstart = "<div>";
-    var divend = "</div>";
+    var divstart = "<div><center>";
+    var divend = "</center></div>";
 
-    function TextToButton(text,id,info,type){
+    function TextToButton(text,id,info,type,alwaysgreen){
       var char = info[0].charAt(0);
       if(char=="%"){
-        return divend+"<br><center>"+info[0].substring(1)+"</center><br>"+divstart;
+        return divend+"<br><center><font style='font-size: 125%;'>"+info[0].substring(1)+"</font></center><br>"+divstart;
       }
 	  if(char=="!"){
         return divend+info[0].substring(1)+divstart;
       }
-	var notfound = false;
-	if(type=="f"){
-		if(!Pages[text.toLowerCase()]){
-		notfound = true;
+	  var getset = false;
+	  if(text.charAt(0)=="@"){
+		getset = true;
+      }
+		var notfound = false;
+		if(type=="f"){
+			if(!Pages[text.toLowerCase()] && !alwaysgreen){
+				notfound = true;
+			}
 		}
-	}
+		
+	  if(getset){
+		return "<button onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
+	  }
       return "<button onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
     }
 
@@ -658,28 +679,28 @@ var ColumnOther = [
 ]
 var ColumnFunctionsFUNC = [
 	["CheckLua()"],["Wait()"],["Exit()"],["Print()"],["Warn()"],["Error()"],["Fatal()"],["PrintCustom()"],["PrintClear()"],["Cycle()"],["Random()"],["Round()"],["HasDirectory()"],["ReadFile()"],["WriteFile()"],
-  ["CreateDirectory()"],["CreateFile()"],["RenameFile()"],["ReadJSON()"],["WriteJSON()"],["Abs()"],["Max()"],["Min()"],["Sqrt()"],["Log()"],["LogE()"],["Log10()"],["Sin()"],["Cos()"],
-  ["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
-  ["Fma()"],["Mod()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
-  ["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["SetWindowMain()"],["MainWindow()"],["Seed()"],["SetSeed()"],
-	["GetWindowSize()"],["SetWindowSize()"],["SetWindowTitle()"],["SetWindowAutoSize()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
-  ["SetWindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
-  ["SetWindowScene()"],["RRandom()"],["GetWindowPosition()"],["SetWindowPosition()"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
-  ["SetSceneBackgroundColor()"],["SetSpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["SetCameraZoom()"],["GetCameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
-  ["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],["SetDiscordActivityTitle()"],["SetDiscordActivityDescription()"],
+	["CreateDirectory()"],["CreateFile()"],["RenameFile()"],["ReadJSON()"],["WriteJSON()"],["Abs()"],["Max()"],["Min()"],["Sqrt()"],["Log()"],["LogE()"],["Log10()"],["Sin()"],["Cos()"],
+	["Floor()"],["Ceil()"],["Tan()"],["Sum()"],["Sub()"],["Mul()"],["Div()"],["Clamp()"],["ASin()"],["ACos()"],["ATan()"],["Cbrt()"],["Exp()"],["ExpM()"],["Fabs()"],["FDim()"],["Hypot()"],
+	["Fma()"],["Mod()"],["Require()"],["Pow()"],["HSin()"],["HCos()"],["HTan()"],["Trunc()"],["Modf()"],["HasString()"],["Replace()"],["Remove()"],["Charcters()"],["Uppercase()"],
+	["Lowercase()"],["Length()"],["SubStr()"],["ToNumber()"],["Cmd()"],["CreateWindow()"],["DestroyWindow()"],["HasWindow()"],["@WindowMain()"],["MainWindow()"],["@Seed()"],
+	["@WindowSize()"],["@WindowTitle()"],["@WindowAutoSize()"],["AbsSin()"],["AbsCos()"],["DSin()"],["DCos()"],
+	["@WindowResizable()"],["SetWindowEventClosed()"],["SetEventClosed()"],["SetWindowEventKeyPress()"],["SetWindowEventKeyRelease()"],["SetWindowEventKeyHold()"],["PressedKeys()"],
+	["@WindowScene()"],["RRandom()"],["@WindowPosition()"],["Frac()"],["JSONTable()"],["Pairs()"],["ToString()"],["GetType()"],["OpenLink()"],
+	["@SceneBackgroundColor()"],["@SpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["@CameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
+	["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],["SetDiscordActivityTitle()"],["SetDiscordActivityDescription()"],
 	["GetUserName()"],["CheckInternet()"],["ToBool()"],["RunLua()"],["Repeat()"],["ProgramLaunched()"],["DiscordLaunched()"],["ProgramsLaunched()"],["StopProgram()"],["ExitPC()"],["PointOutsideWindow()"],["GetFilesFromDirectory()"],
-	["GetFileName()"],["GetFileType()"],["PrintFast()"],["SetSpriteSize()"],["SetSpriteLTCorner()"],["SetSpriteLBCorner()"],["SetSpriteRTCorner()"],["SetSpriteRBCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
-	["SetWindowTransparency()"],["GetWindowTransparency()"],["OpenFile()"],["HasFile()"],["OpenDirectory()"],["SetSpriteColor()"],["GetSpriteColor()"],["SetSpriteLayer()"],["GetSpriteLayer()"],["FRandom()"],["FRRandom()"],
-	["GetSprites()"],["NoWait()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["SetSpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],["GetSpriteSize()"],["GetSpritePosition()"],
-	["SetSpriteMirrorX()"],["SetSpriteMirrorY()"],["GetSpriteMirrorX()"],["GetSpriteMirrorY()"],["SetSpriteUVLTCorner()"],["SetSpriteUVLBCorner()"],["SetSpriteUVRTCorner()"],["SetSpriteUVRBCorner()"],["SetSpriteRotation()"],
-	["Lerp()"],["ToRad()"],["ToDeg()"],["GetSpriteRotation()"],["SetSpriteCenter()"],["GetSpriteCenter()"],["GetWindows()"],["GetWindow()"],["GetScene()"],["SetDesktopBackground()"],["GetVolume()"],["SetVolume()"],
-  ["LoadTexture()"],["SetSpriteVisible()"],["GetSpriteVisible()"],["SetTextureBlur()"],["GetTextureColors()"],["SetConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["SetSpriteShader()"],["GetSpriteShader()"],
-  ["RemoveFile()"],["PlayBeep()"],["SetSpriteHeight()"],["GetSpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["SetTextPosition()"],
-  ["SetTextFont()"],["SetTextColor()"],["GetASCIIChar()"],["SetTextText()"],["SetTextHeight()"],["StringToColors()"],["ShowCursor()"],["Even()"]
+	["GetFileName()"],["GetFileType()"],["PrintFast()"],["@SpriteSize()"],["@SpriteLTCorner()"],["@SpriteLBCorner()"],["@SpriteRTCorner()"],["@SpriteRBCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
+	["@WindowTransparency()"],["OpenFile()"],["HasFile()"],["OpenDirectory()"],["@SpriteColor()"],["@SpriteLayer()"],["FRandom()"],["FRRandom()"],
+	["GetSprites()"],["NoWait()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["@SpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],
+	["@SpriteMirrorX()"],["@SpriteMirrorY()"],["@SpriteUVLTCorner()"],["@SpriteUVLBCorner()"],["@SpriteUVRTCorner()"],["@SpriteUVRBCorner()"],["@SpriteRotation()"],
+	["Lerp()"],["ToRad()"],["ToDeg()"],["@SpriteCenter()"],["GetWindows()"],["GetSceneWindow()"],["SetDesktopBackground()"],["@Volume()"],
+	["LoadTexture()"],["@SpriteVisible()"],["@TextureBlur()"],["GetTextureColors()"],["@ConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["@SpriteShader()"],
+	["RemoveFile()"],["PlayBeep()"],["@SpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["@TextPosition()"],
+	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"]
 ]
 var FunctionsTypes = {
   "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
-    "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","seed","setseed","even"
+    "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","@seed","even"
   ],
   "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove"
   ],
@@ -687,35 +708,35 @@ var FunctionsTypes = {
   "Таблица":["stringtocolors","pairs"
   ],
   
-  "Окно":["createwindow","destroywindow","pointoutsidewindow","haswindow","getmouseposition","getmousewposition","getscene","setwindowscene","setwindowmain","worldtoscreen","screentoworld","setwindowtitle","getwindowposition",
-  "getwindows","getwindowsize","getwindowtransparency","mainwindow","setwindowautosize","setwindoweventclosed","setwindoweventkeyhold","setwindoweventkeypress","setwindoweventkeyrelease","setwindoweventmousehold",
-  "setwindoweventmousepress","setwindoweventmouserelease","pressedkeys","setwindowposition","setwindowresizable","setwindowsize","setwindowtransparency"
+  "Окно":["createwindow","destroywindow","pointoutsidewindow","haswindow","getmouseposition","getmousewposition","@windowscene","@windowmain","worldtoscreen","screentoworld","@windowtitle",
+  "getwindows","mainwindow","@windowautosize","setwindoweventclosed","setwindoweventkeyhold","setwindoweventkeypress","setwindoweventkeyrelease","setwindoweventmousehold",
+  "setwindoweventmousepress","setwindoweventmouserelease","pressedkeys","@windowposition","@windowresizable","@windowsize","@windowtransparency"
   ],
   
-  "Курсор":["showcursor"
+  "Курсор":["@showcursor"
   ],
 
-  "Спрайт":["createsprite","setspritecenter","setspriteshader","setspritelayer","setspriteheight","hassprite","getspritecenter","getspritecolor","getspriteheight","getspritelayer","getspritemirrorx","getspritemirrory","getspriteposition",
-  "getspriterotation","getspriteshader","getspritesize","getspritevisible","setspritecolor","setspritelbcorner","setspriteltcorner","setspritemirrorx","setspritemirrory","setspriteposition","setspriterbcorner","setspriterotation",
-  "setspritertcorner","setspritesize","setspritesizebytexture","setspritetexture","setspriteuvlbcorner","setspriteuvltcorner","setspriteuvrbcorner","setspriteuvrtcorner","setspritevisible"
+  "Спрайт":["createsprite","@spritecenter","@spriteshader","@spritelayer","@spriteheight","hassprite","@spritecolor","@spritemirrorx","@spritemirrory","@spriteposition",
+  "@spriterotation","@spritesize","@spritevisible","@spritelbcorner","@spriteltcorner","@spriterbcorner",
+  "@spritertcorner","setspritesizebytexture","@spritetexture","@spriteuvlbcorner","@spriteuvltcorner","@spriteuvrbcorner","@spriteuvrtcorner"
   ],
   
-  "Сцена":["createscene","getcamerazoom","getwindow","setcamerazoom","getcameraposition","setcameraposition","getsprites","setscenebackgroundcolor"
+  "Сцена":["createscene","getscenewindow","@camerazoom","@cameraposition","getsprites","@scenebackgroundcolor"
   ],
   
-  "Текст":["createfont","createtext","settextcolor","settextfont","settexttext","settextheight","settextposition"
+  "Текст":["createfont","createtext","@textcolor","@textfont","@texttext","@textheight","@textposition","@textmono"
   ],
   
-  "Текстура":["createtexture","loadtexture","writeimage","settextureblur","gettexturecolors","gettexturesize"
+  "Текстура":["createtexture","loadtexture","writeimage","@textureblur","gettexturecolors","gettexturesize"
   ],
   
   "Потоки":["cycle","wait","cyclerender","getfps","setfpstarget","repeat","nowait","runlua"
   ],
   
-  "Консоль":["fatal","error","print","printcustom","warn","printfast","printclear","setconsoletitle","seteventprint"
+  "Консоль":["fatal","error","print","printcustom","warn","printfast","printclear","@consoletitle","seteventprint"
   ],
   
-  "Системное":["exit","checkinternet","cmd","exitpc","setvolume","getvolume","playbeep","openlink","getlanguage","getsystemlanguage","getusername","setdesktopbackground","seteventclosed","stopprogram"
+  "Системное":["exit","checkinternet","cmd","exitpc","@volume","playbeep","openlink","getlanguage","getsystemlanguage","getusername","setdesktopbackground","seteventclosed","stopprogram"
   ],
   
   "Проводник":["hasdirectory","readfile","writefile","createdirectory","createfile","getfilename","getfilesfromdirectory","getfiletype","openfile","opendirectory","removefile","hasfile","programlaunched","programslaunched",
@@ -1615,7 +1636,7 @@ SetWindowScene("window_2","scene_2")
 `)+`</pre>
 `+"</div>"],
 
-"setwindowscene()": [FunctionInfo("SetWindowScene",false,false)+`
+"@windowscene()": [FunctionInfo("@WindowScene",false,false)+`
 Функция установки сцены окну.<br>
 Этот код применяет сцену "scene" окну "window"<br>
 <pre class="code">`+GenerateCode(`
@@ -1647,7 +1668,7 @@ b = not b
 `)+`</pre>
 `+"</div>"],
 
-"setscenebackgroundcolor()": [FunctionInfo("SetSceneBackgroundColor",false,false)+`
+"@scenebackgroundcolor()": [FunctionInfo("@SceneBackgroundColor",false,false)+`
 Функция установки цвета заднего фона на сцене.<br>
 Этот код изменяет цвет заднего фона сцены "scene" на красный<br>
 <pre class="code">`+GenerateCode(`
