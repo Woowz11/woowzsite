@@ -438,7 +438,7 @@ const ErrorsWoowzEngine = {
 			""
 		],
 		"0001":[
-			"Файл sessioninfo был сломан, по этому был перезаписан",
+			"",
 			"",
 			""
 		],
@@ -682,6 +682,16 @@ const ErrorsWoowzEngine = {
 			"Не возможно конвертировать строку в число",
 			"StringToInt()",
 			""
+		],
+		"0040":[
+			"Неверная ширина текстуры шрифта",
+			"GenerateFont_()",
+			""
+		],
+		"0041":[
+			"Неверная высота текстуры шрифта",
+			"GenerateFont_()",
+			""
 		]
 	},
 	F:{
@@ -713,13 +723,13 @@ const ErrorsWoowzEngine = {
 			""
 		],
 		"0001":[
-			"Не найден файл sessioninfo",
-			"GetSessionInfo()",
+			"",
+			"",
 			""
 		],
 		"0002":[
-			"Файл sessioninfo сломан",
-			"GetSessionInfo()",
+			"",
+			"",
 			""
 		],
 		"0003":[
@@ -788,8 +798,8 @@ const ErrorsWoowzEngine = {
 			""
 		],
 		"0016":[
-			"Не найден файл sessioninfo",
-			"SetSessionInfo()",
+			"",
+			"",
 			""
 		],
 		"0017":[

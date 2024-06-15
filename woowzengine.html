@@ -99,6 +99,16 @@
 	transition: color 1s;
   }
 
+  .whitetd:hover font {
+	color: rgb(255,255,255);
+  }
+  .whitetd:hover{
+	background-color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+  .whitetd:not(:hover) font{
+	transition: color 1s;
+  }
+  
   .yellowbutton{
     box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
     background-color: rgb(255, 255, 255);
@@ -198,7 +208,7 @@
 	border: 2px solid currentColor;
   }
   
-  table tr:first-child {
+  table:not(.notitle) tr:first-child {
     background-color: color-mix(in srgb, currentColor 20%, transparent);
   }
 </style>
@@ -239,7 +249,7 @@
 
   const body = document.getElementById('body');
   
-  const engineversion = "0.0.2e";
+  const engineversion = "0.0.2f";
   var funnyimagesdescription = {
     0 :["2024-05-28","Сделал смешной шрифт когда добавлял функцию цвета для текста"],
     1 :["2024-05-28","Шейдер изгибающий таким образом текст"],
@@ -350,6 +360,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	34:["2024-05-15","Получившийся баг когда я делал сайт"],
 	35:["2024-05-14","Нарисовал скелета с помощью спрайтов, из-за рендера этой сцены было 5 фпс примерно"],
 	36:["2024-06-10","Случайно сломал сайт"],
+	37:["2024-06-13","Случайно сломал сайт"],
   }
   
   var funnyimagesids = {};
@@ -405,10 +416,10 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     var htmlstart = `
     <div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":(type=="e"?"40,40,40":"142,0,4"))+`);">
       <br><br>
-      <div style="margin-left: 50px;"><button onclick="`+(lastopen?"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
-        `+(id_prev==""?"":"<button onclick='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\")'>Прошлое</button>")+` `+
-        (id_next==""?"":"<button onclick='ButtonPress(\""+id_next+"\",\"\",\""+type+"\")'>Следующее</button>")+`
-        <button onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
+      <div style="margin-left: 50px;"><button `+(lastopen?"title='Вернуться на #"+lastopen+"'":"")+` onclick="`+(lastopen?"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
+        `+(id_prev==""?"":"<button title='Открыть #"+id_prev+"' onclick='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\")'>Прошлое</button>")+` `+
+        (id_next==""?"":"<button title='Открыть #"+id_next+"' onclick='ButtonPress(\""+id_next+"\",\"\",\""+type+"\")'>Следующее</button>")+`
+        <button title='Скопировать #`+id+`!' onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
       </div>
     </div><br>
     `;
@@ -507,11 +518,11 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 
       <center>
         <div style="display: flex; justify-content: center;">
-          <a style="position: relative; font-size: 50px; width:100%;" onclick="NextImage(false)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8592;</font></a>
+          <a style="position: relative; font-size: 50px; width:100%;" title="Прошлая картинка" onclick="NextImage(false)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8592;</font></a>
           <div>
             <img id="funnyimage" class="canzoom" style="max-width: 80vw; max-height:80vh; height: auto;" src="source/woowzengine/funny/0.png" onclick="this.classList.toggle('selected')">
           </div>
-          <a style="position: relative; font-size: 50px; width:100%;" onclick="NextImage(true)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8594;</font></a>
+          <a style="position: relative; font-size: 50px; width:100%;" title="Следущая картинка" onclick="NextImage(true)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8594;</font></a>
         </div>
       </center>
       <br>
@@ -531,6 +542,15 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		const startenginetime = now.getTime() - startenginedate.getTime();
 		const days = Math.floor(startenginetime/(1000 * 60 * 60 * 24));
   
+		var kolvofunc = 0;
+		for(let i = 0; i < Object.keys(ColumnFunctionsFUNC).length; i++){
+			var func = ColumnFunctionsFUNC[Object.keys(ColumnFunctionsFUNC)[i]][0];
+			kolvofunc++;
+			if(func[0]=='@'){
+				kolvofunc++;
+			}
+		}
+  
 		body.innerHTML = `
 		<div class="header" style="height: 15vh; width: 100%;">
 			<br><br>
@@ -546,7 +566,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			
 			Версия движка&nbsp;&nbsp;&nbsp;: `+engineversion+`<br>
 			Возраст движка&nbsp;&nbsp;: `+days+` дней<br>
-			Кол-во функций&nbsp;&nbsp;: `+Object.keys(ColumnFunctionsFUNC).length+`<br>
+			Кол-во функций&nbsp;&nbsp;: `+kolvofunc+`<br>
 			Кол-во ошибок&nbsp;&nbsp;&nbsp;: `+Object.keys(ColumnErrors).length+`<br>
 			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+`<br>
       Кол-во смеш.карт: `+funnyimages+`<br>
@@ -568,6 +588,51 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		<img src="source/woowzengine/colorbox_t.png" style="position: absolute; top: -27px; left: -5px; z-index: 1;">
 		<img src="source/woowzengine/colorbox.png" style="box-shadow: none; position: absolute; top: -27px; left: -5px; z-index: 2; filter: `+filter+`; opacity: `+a+`;">
 	</div>`;
+  }
+  
+  function GenerateSymbolsTable(){
+	const empty = "пусто"
+	var symbols = [
+	"не сущ. символ","не найд. символ","пробел","спец. символ",empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,
+	"0","1","2","3","4","5","6","7","8","9","+","-","=","(",")","_",
+	"*","/","|","\\","\"","#","%","&","<",">","^","[","]","{","}","~",
+	".",",",":",";","'","`","№","!","?","@","±","≤","≥","≈","∞","$",
+	"A","a","B","b","C","c","D","d","E","e","F","f","G","g","H","h",
+	"I","i","J","j","K","k","L","l","M","m","N","n","O","o","P","p",
+	"Q","q","R","r","S","s","T","t","U","u","V","v","W","w","X","x",
+	"Y","y","Z","z","©","®","™","√","≠","§","█","▓","▒","░","÷","¬",
+	"А","а","Б","б","В","в","Г","г","Д","д","Е","е","Ж","ж","З","з",
+	"И","и","Й","й","К","к","Л","л","М","м","Н","н","О","о","П","п",
+	"Р","р","С","с","Т","т","У","у","Ф","ф","Х","х","Ц","ц","Ч","ч",
+	"Ш","ш","Щ","щ","Ъ","ъ","Ы","ы","Ь","ь","Э","э","Ю","ю","Я","я",
+	"Ё","ё","€","₽","£","¥","←","→","↑","↓","∫","·","°","∾","∝","∅",
+	"⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹","⁺","⁻","⁼","⁽","⁾","∑",
+	"☺","☹","Æ","æ","¢","¯","¤","¦","¡","¿","«","»","ƒ","≡","✔","❌",
+	"☥","✝","卍","卐","◀","▶","▲","▼","⚠","☢","⚡","⚐","☮","☯","☭","○",
+	"∓","Δ","∀","〈","〉","⋮","⋯","∬","∥","∦","□","⊂","⊃","∩","∪","◦",
+	"‣","◼","◾","●","▞","Ω","α","β","γ","δ","θ","♥","★","♀","♂","♫",
+	"","","","","","","","","","","","","","","","",
+	];
+	var result = "<table class='notitle'><tr>";
+	var allsymbols = "";
+	var x = 0;
+	var y = 0;
+	for(let i = 0; i < symbols.length; i++){
+		result = result + `<td style='cursor: pointer; width:6.25%; text-shadow:none;' class='whitetd' title='Скопировать!' onclick='CopyToClipboard("`+symbols[i]+`")'><font><center>`+symbols[i]+`</center></font></td>`;
+		x++;
+		if(x>=16){
+			x = 0;
+			y++;
+			result = result + "</tr><tr>";
+		}
+		if(y!=0){
+			var symbol = symbols[i];
+			if(symbol!=empty && symbol!='"' && symbol!="'"){
+				allsymbols = allsymbols + symbol;
+			}
+		}
+	}
+	return result+`</tr></table><br><button title="Скопировать!" onclick="CopyToClipboard('`+allsymbols+`')">Скопировать все символы в линию</button>`;
   }
   
   function StartScreen(){
@@ -594,29 +659,43 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     var divstart = "<div><center>";
     var divend = "</center></div>";
 
-    function TextToButton(text,id,info,type,alwaysgreen){
-      var char = info[0].charAt(0);
-      if(char=="%"){
-        return divend+"<br><center><font style='font-size: 125%;'>"+info[0].substring(1)+"</font></center><br>"+divstart;
-      }
-	  if(char=="!"){
-        return divend+info[0].substring(1)+divstart;
-      }
-	  var getset = false;
-	  if(text.charAt(0)=="@"){
-		getset = true;
-      }
+    function TextToButton(text,id,info,type){
+		var char = info[0].charAt(0);
+		if(char=="%"){
+			return divend+"<br><center><font style='font-size: 125%;'>"+info[0].substring(1)+"</font></center><br>"+divstart;
+		}
+		if(char=="!"){
+			return divend+info[0].substring(1)+divstart;
+		}
+		var getset = false;
+		if(text.charAt(0)=="@"){
+			getset = true;
+		}
 		var notfound = false;
+		var title = "";
 		if(type=="f"){
-			if(!Pages[text.toLowerCase()] && !alwaysgreen){
+			if(!Pages[text.toLowerCase()]){
 				notfound = true;
+				title = "Функция ещё не документирована!";
+			}else{
+				if(Pages[text.toLowerCase()][1]){
+					title = Pages[text.toLowerCase()][1];
+				}else{
+					title = "Информация о функции ещё не записана!";
+				}
 			}
 		}
+		if(type=="e"){
+			var content = Pages[text.toUpperCase()][2];
+			if(content==""){content = "Пустая ошибка! Предупредите автора";}
+			if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
+			title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3]+" : ")+content;
+		}
 		
-	  if(getset){
-		return "<button onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
-	  }
-      return "<button onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
+		if(getset){
+			return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
+		}
+		return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
     }
 
 
@@ -689,20 +768,20 @@ var ColumnFunctionsFUNC = [
 	["@SceneBackgroundColor()"],["@SpritePosition()"],["CreateScene()"],["CreateSprite()"],["GetFPS()"],["CycleRender()"],["@CameraZoom()"],["GetMousePosition()"],["GetMouseWPosition()"],
 	["ScreenToWorld()"],["WorldToScreen()"],["SetWindowEventMousePress()"],["SetWindowEventMouseRelease()"],["SetWindowEventMouseHold()"],["Sign()"],["SetDiscordActivityTitle()"],["SetDiscordActivityDescription()"],
 	["GetUserName()"],["CheckInternet()"],["ToBool()"],["RunLua()"],["Repeat()"],["ProgramLaunched()"],["DiscordLaunched()"],["ProgramsLaunched()"],["StopProgram()"],["ExitPC()"],["PointOutsideWindow()"],["GetFilesFromDirectory()"],
-	["GetFileName()"],["GetFileType()"],["PrintFast()"],["@SpriteSize()"],["@SpriteLTCorner()"],["@SpriteLBCorner()"],["@SpriteRTCorner()"],["@SpriteRBCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
+	["GetFileName()"],["GetFileType()"],["PrintFast()"],["@SpriteSize()"],["@SpriteCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
 	["@WindowTransparency()"],["OpenFile()"],["HasFile()"],["OpenDirectory()"],["@SpriteColor()"],["@SpriteLayer()"],["FRandom()"],["FRRandom()"],
 	["GetSprites()"],["NoWait()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["@SpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],
-	["@SpriteMirrorX()"],["@SpriteMirrorY()"],["@SpriteUVLTCorner()"],["@SpriteUVLBCorner()"],["@SpriteUVRTCorner()"],["@SpriteUVRBCorner()"],["@SpriteRotation()"],
+	["@SpriteMirrorX()"],["@SpriteMirrorY()"],["@SpriteUVCorner()"],["@SpriteRotation()"],
 	["Lerp()"],["ToRad()"],["ToDeg()"],["@SpriteCenter()"],["GetWindows()"],["GetSceneWindow()"],["SetDesktopBackground()"],["@Volume()"],
 	["LoadTexture()"],["@SpriteVisible()"],["@TextureBlur()"],["GetTextureColors()"],["@ConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["@SpriteShader()"],
 	["RemoveFile()"],["PlayBeep()"],["@SpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["@TextPosition()"],
-	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"]
+	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"],["GetUnicodeChar()"]
 ]
 var FunctionsTypes = {
   "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
     "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","@seed","even"
   ],
-  "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove"
+  "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove","getunicodechar"
   ],
   
   "Таблица":["stringtocolors","pairs"
@@ -717,8 +796,8 @@ var FunctionsTypes = {
   ],
 
   "Спрайт":["createsprite","@spritecenter","@spriteshader","@spritelayer","@spriteheight","hassprite","@spritecolor","@spritemirrorx","@spritemirrory","@spriteposition",
-  "@spriterotation","@spritesize","@spritevisible","@spritelbcorner","@spriteltcorner","@spriterbcorner",
-  "@spritertcorner","setspritesizebytexture","@spritetexture","@spriteuvlbcorner","@spriteuvltcorner","@spriteuvrbcorner","@spriteuvrtcorner"
+  "@spriterotation","@spritesize","@spritevisible","@spritecorner",
+  "setspritesizebytexture","@spritetexture","@spriteuvcorner"
   ],
   
   "Сцена":["createscene","getscenewindow","@camerazoom","@cameraposition","getsprites","@scenebackgroundcolor"
@@ -783,6 +862,15 @@ var Pages = {
 	"consolecolors": [``],
 	
 	"devs": [`<center>WoowzEngine сделал Woowz11<br>Сайт сделал Woowz11</center>`],
+	
+	"fonts": [`<div style="margin-left: 100px; margin-right: 100px;"><center>Шрифты<br>
+	Шрифт это текстура содержащая в себе текстуры символов<br>
+	В движке всегда есть шрифт default, от него не избавиться<br>
+	Шрифты должны быть длиной чётные на 16 и высотой чётные к длине (что-бы символы были квадратными), но любой высоты (Лишние символы будут обрезаться и их не будет)<br>
+	<br>
+	Таблица символов в шрифте<br>
+	`+GenerateSymbolsTable()+`
+	</center></div>`],
   
     "woowzengine": [`
     <br>
@@ -1153,7 +1241,7 @@ TexCoord - Позиция пикселя на текстуре<br>
 --Пишет сообщение "Lua supported!" в консоль если работает
 CheckLua()
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Проверка поддержки Lua"],
 
 "wait()": [FunctionInfo("Wait",false,false)+`
 Функция имеет два действия ><br>
@@ -1175,7 +1263,7 @@ Wait(2000,function()
   Print("Это сообщение отправляется после 2 секунды с запуска, в отдельном потоке")
 end)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Ожидание"],
 
 "exit()": [FunctionInfo("Exit",false,false)+`
 Функция закрывает игру/приложение.<br>
@@ -1184,14 +1272,14 @@ Print("Приложение закроется через 5 секунд!")
 Wait(5000)
 Exit()
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Закрывает приложение"],
 
 "print()": [FunctionInfo("Print",false,false)+`
 Отправляет сообщение в консоль.<br>
 <pre class="code">`+GenerateCode(`
 Print("Привет мир!")
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет сообщение в консоль"],
 
 "warn()": [FunctionInfo("Warn",false,false)+`
 Отправляет предупреждение в консоль.<br>
@@ -1201,7 +1289,7 @@ Warn("Пример предупреждения с кодом GW0010",10)
 Warn("Пример предупреждения с кодом GW0000")
 Warn("Пример предупреждения с кодом GW2000",2000)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет предупреждение в консоль"],
 
 "error()": [FunctionInfo("Error",false,false)+`
 Отправляет ошибку в консоль.<br>
@@ -1211,7 +1299,7 @@ Error("Пример ошибки с кодом GE0010",10)
 Error("Пример ошибки с кодом GE0000")
 Error("Пример ошибки с кодом GE2000",2000)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет ошибку в консоль"],
 
 "fatal()": [FunctionInfo("Fatal",false,false)+`
 Отправляет фатальную ошибку в консоль и закрывает игру с ошибкой.<br>
@@ -1219,7 +1307,7 @@ Error("Пример ошибки с кодом GE2000",2000)
 <pre class="code">`+GenerateCode(`
 Fatal("Fatal error!",10)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет фатальную ошибку в консоль"],
 
 "printcustom()": [FunctionInfo("PrintCustom",false,false)+`
 Отправляет сообщение в консоль с своими параметрами.<br>
@@ -1232,7 +1320,7 @@ PrintCustom("HELLO","Текст с модулем HELLO")
 PrintCustom("MODULE","Текст с начальным символом ^","^")
 PrintCustom("MODULE","Зелёный текст","",2)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет сообщение в консоль со своими настройками"],
 
 "cycle()": [FunctionInfo("Cycle",false,false)+`
 Функция создаёт постоянный цикл, который вызывает функцию каждые N миллисекунд.<br>
@@ -1246,7 +1334,7 @@ i = i + 1
 
 end,1000)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Цикличная функция"],
 
 "random()": [FunctionInfo("Random",true,false)+`
 Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("rrandom()","random()")'>RRandom()</button>)<br>
@@ -1263,7 +1351,7 @@ Print(Random(-100,100))
 Print(Random(1,2))
 Print(Random(0,0.1))
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Случайное число"],
 
 "rrandom()": [FunctionInfo("RRandom",true,false)+`
 Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("random()","rrandom()")'>Random()</button>)<br>
@@ -1279,7 +1367,7 @@ Print(RRandom(-10,10))
 Print(RRandom(-100,100))
 Print(RRandom(1,2))
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Округлённое случайное число"],
 
 "round()": [FunctionInfo("Round",true,false)+`
 Функция округляет число. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("floor()","round()")'>Floor()</button>)<br>
@@ -1294,7 +1382,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("f6edz2juyu")+`
-`+"</div>"],
+`+"</div>","Округление"],
 
 "ceil()": [FunctionInfo("Ceil",true,false)+`
 Функция округляет число к большему.<br>
@@ -1309,7 +1397,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("x2qh0htuoh")+`
-`+"</div>"],
+`+"</div>","Округление в большую сторону"],
 
 "floor()": [FunctionInfo("Floor",true,false)+`
 Функция округляет число к меньшему. (Аналог <button onclick='ButtonPress("round()","floor()")'>Round()</button> <button onclick='ButtonPress("trunc()","floor()")'>Trunc()</button>)<br>
@@ -1324,7 +1412,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("f6edz2juyu")+`
-`+"</div>"],
+`+"</div>","Округление в меньшую сторону"],
 
 "hasdirectory()": [FunctionInfo("HasDirectory",true,false)+`
 Функция проверяет наличие директории или файла по пути.<br>
@@ -1336,7 +1424,7 @@ Print(HasDirectory(GamePath.."/start.lua"))
 --Проверяет существует ли файл phantom_file.txt в ...\\game
 Print(HasDirectory(GamePath.."/phantom_file.txt"))
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Проверить директорию или файл на наличие"],
 
 "readfile()": [FunctionInfo("ReadFile",true,false)+`
 Функция получает данные из файла по пути.<br>
@@ -1345,7 +1433,7 @@ Print(HasDirectory(GamePath.."/phantom_file.txt"))
 Print(ReadFile(GamePath.."/start.lua"))
 --В консоль выведется этот скрипт (если вы написали скрипт в файле start.lua)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Прочитать данные из файла"],
 
 "writefile()": [FunctionInfo("WriteFile",false,true)+`
 Функция записывает новые данные в файл по пути.<br>
@@ -1364,7 +1452,7 @@ i = i + 1
 
 end,1000)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Записать данные в файл"],
 
 "abs()": [FunctionInfo("Abs",true,false)+`
 Функция возвращает абсолютное значение числа. (Убирает минус у числа) (Аналог <button onclick='ButtonPress("fabs()","abs()")'>Fabs()</button>)<br>
@@ -1373,7 +1461,7 @@ Print(-5)      -- -5
 Print(Abs(-5)) -- 5
 `)+`</pre>
 `+CreateDesmos("b7oo84fseq")+`
-`+"</div>"],
+`+"</div>","Делает число положительным"],
 
 "sin()": [FunctionInfo("Sin",true,false)+`
 Функция синуса.<br>
@@ -1404,7 +1492,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("djcctdjefk")+`
-`+"</div>"],
+`+"</div>","Синус"],
 
 "cos()": [FunctionInfo("Cos",true,false)+`
 Функция косинуса.<br>
@@ -1436,7 +1524,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("bdnlhyyzne")+`
-`+"</div>"],
+`+"</div>","Косинус"],
 
 "abssin()": [FunctionInfo("AbsSin",true,false)+`
 Функция абсолютного синуса.<br>
@@ -1468,7 +1556,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("sq0sc0yeit")+`
-`+"</div>"],
+`+"</div>","Абсолютный синус"],
 
 "abscos()": [FunctionInfo("AbsCos",true,false)+`
 Функция абсолютного косинуса.<br>
@@ -1500,7 +1588,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("2tta0t0tvu")+`
-`+"</div>"],
+`+"</div>","Абсолютный косинус"],
 
 "sign()": [FunctionInfo("Sign",true,false)+`
 Функция возвращает знак числа.<br>
@@ -1513,7 +1601,7 @@ Print(Sign(-1))   -- -1
 Print(Sign(-0.1)) -- -1
 `)+`</pre>
 `+CreateDesmos("knrzw4qbqm")+`
-`+"</div>"],
+`+"</div>","Знак числа"],
 
 "lerp()": [FunctionInfo("Lerp",true,false)+`
 Функция возвращает число между двумя числами используя интерполяцию.<br>
@@ -1526,7 +1614,7 @@ Print(Lerp(1,0,0))        -- 1
 Print(Lerp(-100,26,0.36)) -- -54.639999389648438
 Print(Lerp(Pi,-Pi,0.5))   -- 0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Интерполяция"],
 
 "dsin()": [FunctionInfo("DSin",true,false)+`
 Функция положительного синуса.<br>
@@ -1558,7 +1646,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("wdopvs384i")+`
-`+"</div>"],
+`+"</div>","Положительный синус"],
 
 "dcos()": [FunctionInfo("DCos",true,false)+`
 Функция положительного косинуса.<br>
@@ -1590,7 +1678,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("zpihzpv2rr")+`
-`+"</div>"],
+`+"</div>","Положительный косинус"],
 
 "createwindow()": [FunctionInfo("CreateWindow",false,false)+`
 Функция создания окна.<br>
@@ -1610,7 +1698,7 @@ CreateWindow("window","New window with size 600x600!",600,600)
 CreateWindow("window_1","Window 1")
 CreateWindow("window_2","Window 2")
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Создаёт окно"],
 
 "createscene()": [FunctionInfo("CreateScene",false,false)+`
 Функция создания сцены.<br>
@@ -1634,7 +1722,7 @@ CreateScene("scene_2")
 SetSceneBackgroundColor("scene_2",Blue)
 SetWindowScene("window_2","scene_2")
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Создаёт сцену"],
 
 "@windowscene()": [FunctionInfo("@WindowScene",false,false)+`
 Функция установки сцены окну.<br>
@@ -1666,7 +1754,7 @@ b = not b
 
  end,1000)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Изменить сцену у окна"],
 
 "@scenebackgroundcolor()": [FunctionInfo("@SceneBackgroundColor",false,false)+`
 Функция установки цвета заднего фона на сцене.<br>
@@ -1694,7 +1782,7 @@ SetWindowScene("window","scene")
 
 CycleRender(function() SetSceneBackgroundColor("scene",Color.new(255,0,0,Round(DSin(ActiveTime()/10)*255))) end)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Изменить цвет заднего фона сцены"],
 
 "tonumber()": [FunctionInfo("ToNumber",false,false)+`
 Функция превращает строку в число.<br>
@@ -1726,7 +1814,7 @@ Print(GetType(str).." | "..str) --string | word
 str = ToNumber(str,5)
 Print(GetType(str).." | "..str) --number | 5.0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Превращает строку в число"],
 
 "checkinternet()": [FunctionInfo("CheckInternet",true,false)+`
 Функция узнаёт, есть ли у пользователя интернет подключение.<br>
@@ -1734,12 +1822,12 @@ Print(GetType(str).." | "..str) --number | 5.0
 <pre class="code">`+GenerateCode(`
 Print(CheckInternet()) --true
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Проверка подключения интернета"],
 
 "testfunction()": [FunctionInfo("TestFunction",false,true)+`
 Эта функция используется только автором движка!<br>
 Она в каждую версию может иметь разную функцию, её лучше не использовать!<br>
-`+"</div>"],
+`+"</div>","Тестовая функция"],
 
 "max()": [FunctionInfo("Max",true,false)+`
 Функция берёт самое больше число из двух.<br>
@@ -1748,7 +1836,7 @@ Print(Max(5,   -5)) -- 5.0
 Print(Max(-5,   0)) -- 0.0
 Print(Max(-5.1,-5)) -- -5.0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Максимальное число из двух"],
 
 "min()": [FunctionInfo("Min",true,false)+`
 Функция берёт самое маленькое число из двух.<br>
@@ -1757,7 +1845,7 @@ Print(Min(5,   -5)) -- -5.0
 Print(Min(-5,   0)) -- -5.0
 Print(Min(-5.1,-5)) -- -5.1
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Минимальное число из двух"],
 
 "clamp()": [FunctionInfo("Clamp",true,false)+`
 Функция берёт число не выходящее за пределы минимального и максимального.<br>
@@ -1767,7 +1855,7 @@ Print(Clamp(5,  -5,10)) -- 5
 Print(Clamp(-10,-5,10)) -- -5
 Print(Clamp(20, -5,10)) -- 10
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Обрезка числа по лимитам"],
 
 "fma()": [FunctionInfo("Fma",true,false)+`
 Тоже самое что (X * Y + Z) = Fma(X,Y,Z)<br>
@@ -1777,7 +1865,7 @@ Print(Fma(2,2,0.25))    -- 4.25
 Print(Fma(3,3,10.1111)) -- 19.1111
 Print(Fma(2,3,-1))      -- 5
 `)+`</pre>
-`+"</div>"],
+`+"</div>","X*Y+Z"],
 
 "mod()": [FunctionInfo("Mod",true,false)+`
 Функция берёт остаток от деления.<br>
@@ -1787,7 +1875,7 @@ Print(Mod(7.3, 2.9)) -- 1.5
 Print(Mod(15.5,2.2)) -- 0.1
 Print(Mod(6,     2)) -- 0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Остаток от деления"],
 
 "modf()": [FunctionInfo("Modf",true,false)+`
 Функция получает дробное число и целое из числа.<br>
@@ -1797,7 +1885,7 @@ local num = 15.723
 local f,i = Modf(num)
 Print(i.." | "..f) -- 15.0 | 0.723
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Целая и дробная часть числа"],
 
 "frac()": [FunctionInfo("Frac",true,false)+`
 Функция берёт дробную часть числа.<br>
@@ -1807,7 +1895,7 @@ Print(Frac(1.52))  -- 0.52
 Print(Frac(-1.52)) -- -0.52
 `)+`</pre>
 `+CreateDesmos("k7f3fvsrex")+`
-`+"</div>"],
+`+"</div>","Дробная часть числа"],
 
 "trunc()": [FunctionInfo("Trunc",true,false)+`
 Функция берёт целую часть числа. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("floor()","trunc()")'>Floor()</button>)<br>
@@ -1822,7 +1910,7 @@ i = i + 0.1
 end,100)
 `)+`</pre>
 `+CreateDesmos("f6edz2juyu")+`
-`+"</div>"],
+`+"</div>","Целая часть числа"],
 
 "sum()": [FunctionInfo("Sum",true,false)+`
 Функция выполняет сложение.<br>
@@ -1833,7 +1921,7 @@ Print(Sum(1,10)) -- 11
 Print(Sum(1,-1)) -- 0
 Print(Sum(0,5))  -- 5
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Сложение"],
 
 "sub()": [FunctionInfo("Sub",true,false)+`
 Функция выполняет вычитание.<br>
@@ -1844,7 +1932,7 @@ Print(Sub(1,10)) -- -9
 Print(Sub(1,-1)) -- 2
 Print(Sub(0,5))  -- -5
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Вычетание"],
 
 "mul()": [FunctionInfo("Mul",true,false)+`
 Функция выполняет умножение.<br>
@@ -1855,7 +1943,7 @@ Print(Mul(1,10)) -- 10
 Print(Mul(1,-1)) -- -1
 Print(Mul(0,5))  -- 0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Умножение"],
 
 "div()": [FunctionInfo("Div",true,false)+`
 Функция выполняет деление.<br>
@@ -1866,7 +1954,7 @@ Print(Div(1,10)) -- 0.1
 Print(Div(1,-1)) -- -1
 Print(Div(0,5))  -- 0
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Деление"],
 
 "getasciichar()": [FunctionInfo("GetASCIIChar",true,false)+`
 Функция получает символ из таблицы ASCII.<br>
@@ -1876,7 +1964,7 @@ for i=0,127 do
 end
 `)+`</pre>
 <center><img style='box-shadow: none' src='source/woowzengine/ascii.png'></center>
-`+"</div>"],
+`+"</div>","Получание ASCII символа"],
 
 "pow()": [FunctionInfo("Pow",true,false)+`
 Функция возводит в степень число.<br>
@@ -1889,7 +1977,7 @@ Print(Pow(5,3))   -- 125
 Print(Pow(5,1.5)) -- 11.180339813232422
 Print(Pow(5,-1))  -- 0.2
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Возведение в степень"],
 
 "sqrt()": [FunctionInfo("Sqrt",true,false)+`
 Функция получает квадратный корень числа.<br>
@@ -1901,7 +1989,7 @@ Print(Sqrt(49))  -- 7
 Print(Sqrt(100)) -- 10
 `)+`</pre>
 `+CreateDesmos("bjvfp4qebp")+`
-`+"</div>"],
+`+"</div>","Квадратный корень"],
 
 "cbrt()": [FunctionInfo("Cbrt",true,false)+`
 Функция получает кубический корень числа.<br>
@@ -1913,7 +2001,7 @@ Print(Cbrt(-8))  -- -2
 Print(Cbrt(-27)) -- -3
 `)+`</pre>
 `+CreateDesmos("yytvbs93ur")+`
-`+"</div>"],
+`+"</div>","Кубический корень"],
 
 "even()": [FunctionInfo("Even",true,false)+`
 Функция проверяет, число чётное или нет.<br>
@@ -1924,7 +2012,7 @@ Print(Even(3))   -- false
 Print(Even(2,3)) -- false
 Print(Even(3,3)) -- true
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Получение чётности числа"],
 
 "fabs()": [FunctionInfo("Fabs",true,false)+`
 Функция получает модуль числа. (Аналог <button onclick='ButtonPress("abs()","fabs()")'>Abs()</button>)<br>
@@ -1933,7 +2021,7 @@ Print(-5)       -- -5
 Print(Fabs(-5)) -- 5
 `)+`</pre>
 `+CreateDesmos("b7oo84fseq")+`
-`+"</div>"],
+`+"</div>","Модуль числа"],
 
 "torad()": [FunctionInfo("ToRad",true,false)+`
 Функция превращает градусы в радианы.<br>
@@ -1944,7 +2032,7 @@ Print(ToRad(45)) -- 0.785398185253143
 Print(ToRad(90)) -- 1.570796370506287
 `)+`</pre>
 `+CreateDesmos("duk4jvvvaz")+`
-`+"</div>"],
+`+"</div>","Превращает градусы в радианы"],
 
 "todeg()": [FunctionInfo("ToDeg",true,false)+`
 Функция превращает радианы в градусы.<br>
@@ -1955,7 +2043,7 @@ Print(ToDeg(Pi/2)) -- 90
 Print(ToDeg(Pi))   -- 180
 `)+`</pre>
 `+CreateDesmos("krkyt4p8ng")+`
-`+"</div>"],
+`+"</div>","Превращает радианы в градусы"],
 
 "tan()": [FunctionInfo("Tan",true,false)+`
 Функция тангенса.<br>
@@ -1973,7 +2061,7 @@ Print(Tan(ToRad(45)))
 Print(Tan(ToRad(60)))
 `)+`</pre>
 `+CreateDesmos("utqcusmklk")+`
-`+"</div>"],
+`+"</div>","Тангенс"],
 
 "hypot()": [FunctionInfo("Hypot",true,false)+`
 Функция получает гипотенузу из двух чисел (катетов).<br>
@@ -1982,7 +2070,7 @@ Print(Tan(ToRad(60)))
 Print(Hypot(3,4)) -- 5
 `)+`</pre>
 `+CreateDesmos("6gbnqo24rh")+`
-`+"</div>"],
+`+"</div>","Получение гипотенузы из катетов"],
 
 "log()": [FunctionInfo("Log",true,false)+`
 Функция логарифма.<br>
@@ -1992,7 +2080,7 @@ Print(Log(49,7))  -- 2
 Print(Log(1/5,5)) -- -1
 `)+`</pre>
 `+CreateDesmos("vzvwf2bdfu")+`
-`+"</div>"],
+`+"</div>","Логарифм"],
 
 "printclear()": [FunctionInfo("PrintClear",false,false)+`
 Отправляет сообщение в консоль но без начала.<br>
@@ -2000,7 +2088,7 @@ Print(Log(1/5,5)) -- -1
 PrintClear("Этот текст отобразится в консоли и в логах, но он без начала")
 PrintClear("Этот текст красный",4)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет сообщение в консоль без информации"],
 
 "printfast()": [FunctionInfo("PrintFast",false,false)+`
 Отправляет сообщение в консоль но без начала. (Не отправляет сообщение в логи, из-за чего работает быстрее чем остальные)<br>
@@ -2008,7 +2096,7 @@ PrintClear("Этот текст красный",4)
 PrintFast("Этот текст отобразится в консоли, но он без начала")
 PrintFast("Этот текст красный",4)
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Отправляет сообщение в консоль без логов"],
 
 "createsprite()": [FunctionInfo("CreateSprite",false,false)+`
 Функция создания спрайта.<br>
@@ -2022,7 +2110,7 @@ SetWindowScene("window","scene")
 
 CreateSprite("sprite","scene")
 `)+`</pre>
-`+"</div>"],
+`+"</div>","Создаёт спрайт"],
 
   }
 
@@ -2111,7 +2199,7 @@ function SortFunctions(){
 	
 	newlist.push(["!<table><tr><td>Переменная</td><td>Тип</td><td>Значение</td></tr>"])
 	for(const el in ColumnFunctionsCONS){
-		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+"</font></td><td>"+ColumnFunctionsCONS[el][1]+"</td><td>"+ColumnFunctionsCONS[el][2]+"</td></tr>"]);
+		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+"</font></td><td>"+ColumnFunctionsCONS[el][1]+"</td><td>"+ColumnFunctionsCONS[el][2]+"</td></tr>"]);
 	}
 	newlist.push(["!</table>"])
 	
@@ -2181,7 +2269,7 @@ function generateErrors(){
 				ColumnErrors.push([fullerrorid]);
 				var errorinfo = errorlist[errorid];
 				var errortext = generateErrorStartText(fullerrorid,errorinfo[1],errortype)+"<center><font style='width: 60vw; font-family: monospace;'>"+(errorinfo[0]==""?"Пустая ошибка! Тут была ошибка, но она была удалена, возможно в будущем тут будет другая":errorinfo[0])+"</font></center><hr>";
-				Pages[fullerrorid] = [errortext,""];
+				Pages[fullerrorid] = [errortext,"",errorinfo[0],errorinfo[1]];
 			}
 		}
 	}
