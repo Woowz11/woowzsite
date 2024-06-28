@@ -249,7 +249,7 @@
 
   const body = document.getElementById('body');
   
-  const engineversion = "0.0.2f";
+  const engineversion = "0.0.3";
   var funnyimagesdescription = {
     0 :["2024-05-28","Сделал смешной шрифт когда добавлял функцию цвета для текста"],
     1 :["2024-05-28","Шейдер изгибающий таким образом текст"],
@@ -361,6 +361,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	35:["2024-05-14","Нарисовал скелета с помощью спрайтов, из-за рендера этой сцены было 5 фпс примерно"],
 	36:["2024-06-10","Случайно сломал сайт"],
 	37:["2024-06-13","Случайно сломал сайт"],
+	38:["2024-06-26","Вызвался синий экран смерти когда добавлял ImGui к своему движку"],
+	39:["2024-06-25","Первые попытки добавить ImGui в свой движок"],
   }
   
   var funnyimagesids = {};
@@ -453,8 +455,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
       <font style="font-size: 40px;">`+(thatgetset?"Set"+name+"(), Get"+name:name)+`()</font><br>
       <br>
       <font>•`+category+`•</font><br>
-      `+(hasreturn?"<font style='font-size: 15px;'>RETURNABLE</font>":"")+`<br>
-      `+(dangerous?"Эта функция не будет работать в <button onclick=\"ButtonPress('savemode','"+name+"()')\">безопасном режиме</button>!":"")+`
+      `+(thatgetset?"Get: <font style='font-size: 15px;'>RETURNABLE</font>":(hasreturn?"<font style='font-size: 15px;'>RETURNABLE</font>":""))+`<br>
+      `+(dangerous?"Эта функция не будет работать в <button onclick=\"ButtonPress('savemode','"+name.toLowerCase()+"()')\">безопасном режиме</button>!":"")+`
       <br><br><hr><br>
     </center><br>
     <div style="margin-left: 20vw; width: 60vw; font-family: monospace;">
@@ -565,8 +567,9 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			<div style="margin-left: 42.75vw; width: 40vw; font-family: monospace;">
 			
 			Версия движка&nbsp;&nbsp;&nbsp;: `+engineversion+`<br>
-			Возраст движка&nbsp;&nbsp;: `+days+` дней<br>
+			Возраст движка&nbsp;&nbsp;: `+days+` дней (≈`+(Math.floor((days/30)*10)/10)+` месяца)<br>
 			Кол-во функций&nbsp;&nbsp;: `+kolvofunc+`<br>
+			Кол-во категорий: `+Object.keys(FunctionsTypes).length+`<br>
 			Кол-во ошибок&nbsp;&nbsp;&nbsp;: `+Object.keys(ColumnErrors).length+`<br>
 			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+`<br>
       Кол-во смеш.карт: `+funnyimages+`<br>
@@ -591,34 +594,34 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   }
   
   function GenerateSymbolsTable(){
-	const empty = "пусто"
+	const empty = ["пусто","Это пустая ячейка, она не имеет смысла"]
 	var symbols = [
-	"не сущ. символ","не найд. символ","пробел","спец. символ",empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,
-	"0","1","2","3","4","5","6","7","8","9","+","-","=","(",")","_",
-	"*","/","|","\\","\"","#","%","&","<",">","^","[","]","{","}","~",
-	".",",",":",";","'","`","№","!","?","@","±","≤","≥","≈","∞","$",
-	"A","a","B","b","C","c","D","d","E","e","F","f","G","g","H","h",
-	"I","i","J","j","K","k","L","l","M","m","N","n","O","o","P","p",
-	"Q","q","R","r","S","s","T","t","U","u","V","v","W","w","X","x",
-	"Y","y","Z","z","©","®","™","√","≠","§","█","▓","▒","░","÷","¬",
-	"А","а","Б","б","В","в","Г","г","Д","д","Е","е","Ж","ж","З","з",
-	"И","и","Й","й","К","к","Л","л","М","м","Н","н","О","о","П","п",
-	"Р","р","С","с","Т","т","У","у","Ф","ф","Х","х","Ц","ц","Ч","ч",
-	"Ш","ш","Щ","щ","Ъ","ъ","Ы","ы","Ь","ь","Э","э","Ю","ю","Я","я",
-	"Ё","ё","€","₽","£","¥","←","→","↑","↓","∫","·","°","∾","∝","∅",
-	"⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹","⁺","⁻","⁼","⁽","⁾","∑",
-	"☺","☹","Æ","æ","¢","¯","¤","¦","¡","¿","«","»","ƒ","≡","✔","❌",
-	"☥","✝","卍","卐","◀","▶","▲","▼","⚠","☢","⚡","⚐","☮","☯","☭","○",
-	"∓","Δ","∀","〈","〉","⋮","⋯","∬","∥","∦","□","⊂","⊃","∩","∪","◦",
-	"‣","◼","◾","●","▞","Ω","α","β","γ","δ","θ","♥","★","♀","♂","♫",
-	"","","","","","","","","","","","","","","","",
+	["не сущ. символ","Этот символ не существует в этой таблице"],["не найд. символ","Этот символ не найден в текстуре шрифта"],["пробел","Пробел"],["спец. символ","Пока-что ничего не обозначает, возможно в будущем"],empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,
+	["0","Ноль"],["1","Один"],["2","Два"],["3","Три"],["4","Четыре"],["5","Пять"],["6","Шесть"],["7","Семь"],["8","Восемь"],["9","Девять"],["+","Плюс"],["-","Минус"],["=","Равно"],["(","Открывающаяся скобка"],[")","Закрывающаяся скобка"],["_","Нижнее подчёркивание"],
+	["*","Звёздочка"],["/","Косая черта"],["|","Вертикальная черта"],["\\","Обратная косая черта"],["\"","Кавычки"],["#","Решётка"],["%","Процент"],["&","Амперсанд (And)"],["<","Меньше"],[">","Больше"],["^","Циркумфлекс"],["[","Открывающаяся квадратная скобка"],["]","Закрывающаяся квадратная скобка"],["{","Открывающаяся фигурная скобка"],["}","Закрывающаяся фигурная скобка"],["~","Тильда"],
+	[".","Точка"],[",","Запятая"],[":","Двоедочие"],[";","Точка с запятой"],["'","Одиночная кавычка"],["`","Апостроф"],["№","Номер"],["!","Восклицательный знак"],["?","Вопросительный знак"],["@","Знак \"Собака\""],["±","Плюс-Минус"],["≤","Меньше или равно"],["≥","Больше или равно"],["≈","Примерно"],["∞","Бесконечность"],["$","Доллар"],
+	["A","A"],["a","a"],["B","B"],["b","b"],["C","C"],["c","c"],["D","D"],["d","d"],["E","E"],["e","e"],["F","F"],["f","f"],["G","G"],["g","g"],["H","H"],["h","h"],
+	["I","I"],["i","i"],["J","J"],["j","j"],["K","K"],["k","k"],["L","L"],["l","l"],["M","M"],["m","m"],["N","N"],["n","n"],["O","O"],["o","o"],["P","P"],["p","p"],
+	["Q","Q"],["q","q"],["R","R"],["r","r"],["S","S"],["s","s"],["T","T"],["t","t"],["U","U"],["u","u"],["V","V"],["v","v"],["W","W"],["w","w"],["X","X"],["x","x"],
+	["Y","Y"],["y","y"],["Z","Z"],["z","z"],["©","Знак авторского права"],["®","Зарегистрированный товарный знак"],["™","Торговая марка"],["√","Корень"],["≠","Не равно"],["§","Параграф"],["█","Полный блок (Блок 100%)"],["▓","Блок 75%"],["▒","Блок 50%"],["░","Блок 25%"],["÷","Делить"],["¬","Знак не"],
+	["А","А"],["а","а"],["Б","Б"],["б","б"],["В","В"],["в","в"],["Г","Г"],["г","г"],["Д","Д"],["д","д"],["Е","Е"],["е","е"],["Ж","Ж"],["ж","ж"],["З","З"],["з","з"],
+	["И","И"],["и","и"],["Й","Й"],["й","й"],["К","К"],["к","к"],["Л","Л"],["л","л"],["М","М"],["м","м"],["Н","Н"],["н","н"],["О","О"],["о","о"],["П","П"],["п","п"],
+	["Р","Р"],["р","р"],["С","С"],["с","с"],["Т","Т"],["т","т"],["У","У"],["у","у"],["Ф","Ф"],["ф","ф"],["Х","Х"],["х","х"],["Ц","Ц"],["ц","ц"],["Ч","Ч"],["ч","ч"],
+	["Ш","Ш"],["ш","ш"],["Щ","Щ"],["щ","щ"],["Ъ","Ъ"],["ъ","ъ"],["Ы","Ы"],["ы","ы"],["Ь","Ь"],["ь","ь"],["Э","Э"],["э","э"],["Ю","Ю"],["ю","ю"],["Я","Я"],["я","я"],
+	["Ё","Ё"],["ё","ё"],["€","Евро"],["₽","Рубль"],["£","Фунт"],["¥","Иен"],["←","Стрелочка ввлево"],["→","Стрелочка вправо"],["↑","Стрелочка вверх"],["↓","Стрелочка ввниз"],["∫","Интеграл"],["·","Интерпункт"],["°","Градус"],["∾","Повёрнутая буква s"],["∝","Пропорционально"],["∅","Пустое множество"],
+	["⁰","Ноль в степени"],["¹","Один в степени"],["²","Два в степени"],["³","Три в степени"],["⁴","Четыре в степени"],["⁵","Пять в степени"],["⁶","Шесть в степени"],["⁷","Семь в степени"],["⁸","Восемь в степени"],["⁹","Девять в степени"],["⁺","Плюс в степени"],["⁻","Минус в степени"],["⁼","Равно в степени"],["⁽","Открывающаяся скобка в степени"],["⁾","Закрывающаяся скобка в степени"],["∑","Сумма"],
+	["☺","Улыбающееся лицо"],["☹","Грусное лицо"],["Æ","Æ"],["æ","æ"],["¢","Цент"],["¯","Верхнее подчёркивание"],["¤","Знак валюты"],["¦","Изломанная вертикальная черта"],["¡","Перевёрнутый восклицательный знак"],["¿","Перевёрнутый вопросительный знак"],["«","Открывающаяся ёлочка"],["»","Закрывающаяся ёлочка"],["ƒ","Функция"],["≡","Тождественно равно"],["✔","Галочка"],["❌","Крестик"],
+	["☥","Анх"],["✝","Христьянский крест"],["卍","Свастика"],["卐","Отзеркаленная свастика"],["◀","Треугольник ввлево"],["▶","Треугольник вправо"],["▲","Треугольник"],["▼","Треугольник ввниз"],["⚠","Предупреждение"],["☢","Радиация"],["⚡","Молния"],["⚐","Белый флаг"],["☮","Символ мира"],["☯","Инь-Янь"],["☭","Серб и молот"],["○","Полый круг"],
+	["∓","Минус-Плюс"],["Δ","Дельта"],["∀","Знак для всех"],["〈","Открывающаяся угольная скобка"],["〉","Закрывающаяся угольная скобка"],["⋮","Вертикальное многоточие"],["⋯","Многоточие"],["∬","Двойной интеграл"],["∥","Параллельно"],["∦","Не параллельно"],["□","Полый квадрат"],["⊂","Подмножество"],["⊃","Надмножество"],["∩","Пересечение"],["∪","Объединение"],["◦","Полый интерпункт"],
+	["‣","Треугольний маркер списка"],["◼","Квадрат"],["◾","Маленький квадрат"],["●","Круг"],["▞","Шахматная доска"],["Ω","Омега"],["α","Альфа"],["β","Бета"],["γ","Гамма"],["δ","Дельта"],["θ","Тета"],["♥","Сердце"],["★","Звезда"],["♀","Знак венеры"],["♂","Знак марса"],["♫","Нота"],
+	["₣","Франк"],["ε","Епсилон"],["π","Пи"],["▌","Прямоугольник слева"],["▐","Прямоугольник справа"],["▀","Прямоугольник сверху"],["▄","Прямоугольник снизу"],["▖","Квадрат снизу слева"],["▗","Квадрат снизу справа"],["▘","Квадрат сверху слева"],["▝","Квадрат сверху справа"],["▙","Пустой квадрат сверху справа"],["▟","Пустой квадрат сверху слева"],["▛","Пустой квадрат снизу справа"],["▜","Пустой квадрат снизу слева"],["✉","Письмо"],
 	];
 	var result = "<table class='notitle'><tr>";
 	var allsymbols = "";
 	var x = 0;
 	var y = 0;
 	for(let i = 0; i < symbols.length; i++){
-		result = result + `<td style='cursor: pointer; width:6.25%; text-shadow:none;' class='whitetd' title='Скопировать!' onclick='CopyToClipboard("`+symbols[i]+`")'><font><center>`+symbols[i]+`</center></font></td>`;
+		result = result + `<td style='cursor: pointer; width:6.25%; text-shadow:none;' class='whitetd' title='`+(symbols[i][0]=="" || symbols[i][1]==""?"":"Скопировать [ "+symbols[i][1]+" ]")+`' onclick='CopyToClipboard("`+symbols[i][0]+`")'><font style='`+(symbols[i][1]==""?"color:RGB(255,0,0);":"")+`'><center>`+symbols[i][0]+`</center></font></td>`;
 		x++;
 		if(x>=16){
 			x = 0;
@@ -626,8 +629,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			result = result + "</tr><tr>";
 		}
 		if(y!=0){
-			var symbol = symbols[i];
-			if(symbol!=empty && symbol!='"' && symbol!="'"){
+			var symbol = symbols[i][0];
+			if(symbol!=empty[0] && symbol!='"' && symbol!="'" && symbol!=""){
 				allsymbols = allsymbols + symbol;
 			}
 		}
@@ -770,18 +773,19 @@ var ColumnFunctionsFUNC = [
 	["GetUserName()"],["CheckInternet()"],["ToBool()"],["RunLua()"],["Repeat()"],["ProgramLaunched()"],["DiscordLaunched()"],["ProgramsLaunched()"],["StopProgram()"],["ExitPC()"],["PointOutsideWindow()"],["GetFilesFromDirectory()"],
 	["GetFileName()"],["GetFileType()"],["PrintFast()"],["@SpriteSize()"],["@SpriteCorner()"],["SetFPSTarget()"],["SetEventPrint()"],
 	["@WindowTransparency()"],["OpenFile()"],["HasFile()"],["OpenDirectory()"],["@SpriteColor()"],["@SpriteLayer()"],["FRandom()"],["FRRandom()"],
-	["GetSprites()"],["NoWait()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["@SpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],
+	["GetSprites()"],["NewThread()"],["GetLanguage()"],["GetSystemLanguage()"],["HasSprite()"],["@SpriteTexture()"],["SetSpriteSizeByTexture()"],["GetTextureSize()"],
 	["@SpriteMirrorX()"],["@SpriteMirrorY()"],["@SpriteUVCorner()"],["@SpriteRotation()"],
 	["Lerp()"],["ToRad()"],["ToDeg()"],["@SpriteCenter()"],["GetWindows()"],["GetSceneWindow()"],["SetDesktopBackground()"],["@Volume()"],
 	["LoadTexture()"],["@SpriteVisible()"],["@TextureBlur()"],["GetTextureColors()"],["@ConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["@SpriteShader()"],
 	["RemoveFile()"],["PlayBeep()"],["@SpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["@TextPosition()"],
-	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"],["GetUnicodeChar()"]
+	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"],["GetUnicodeChar()"],
+	["MessageBox()"],["GetEngineChar()"],["@WindowImGui()"],["CreateImGuiWindow()"],["CreateImGuiElement()"],["@ImGuiElementText()"],["@ImGuiElementColor()"],["SetImGuiElementEvent()"],["RandomColor()"]
 ]
 var FunctionsTypes = {
   "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
     "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","@seed","even"
   ],
-  "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove","getunicodechar"
+  "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove","getunicodechar","getenginechar"
   ],
   
   "Таблица":["stringtocolors","pairs"
@@ -809,13 +813,13 @@ var FunctionsTypes = {
   "Текстура":["createtexture","loadtexture","writeimage","@textureblur","gettexturecolors","gettexturesize"
   ],
   
-  "Потоки":["cycle","wait","cyclerender","getfps","setfpstarget","repeat","nowait","runlua"
+  "Потоки":["cycle","wait","cyclerender","getfps","setfpstarget","repeat","newthread","runlua"
   ],
   
   "Консоль":["fatal","error","print","printcustom","warn","printfast","printclear","@consoletitle","seteventprint"
   ],
   
-  "Системное":["exit","checkinternet","cmd","exitpc","@volume","playbeep","openlink","getlanguage","getsystemlanguage","getusername","setdesktopbackground","seteventclosed","stopprogram"
+  "Системное":["exit","checkinternet","cmd","exitpc","@volume","playbeep","openlink","getlanguage","getsystemlanguage","getusername","setdesktopbackground","seteventclosed","stopprogram","messagebox"
   ],
   
   "Проводник":["hasdirectory","readfile","writefile","createdirectory","createfile","getfilename","getfilesfromdirectory","getfiletype","openfile","opendirectory","removefile","hasfile","programlaunched","programslaunched",
@@ -825,7 +829,13 @@ var FunctionsTypes = {
   "Отладка":["checklua","testfunction"
   ],
   
-  "Остальное":["discordlaunched","getdiscordcurrentuser","getdiscorduserinfo","tobool","setdiscordactivitydescription","setdiscordactivitytitle","gettype","jsontable","readjson","require","writejson"
+  "Остальное":["tobool","gettype","jsontable","readjson","require","writejson","randomcolor"
+  ],
+  
+  "Discord":["discordlaunched","getdiscordcurrentuser","getdiscorduserinfo","setdiscordactivitytitle","setdiscordactivitydescription"
+  ],
+  
+  "ImGui":["@windowimgui","createimguiwindow","createimguielement","@imguielementtext","@imguielementcolor","setimguielementevent",
   ],
 }
 var ColumnFunctionsCONS = [
@@ -847,7 +857,7 @@ var ColumnFunctionsCONS = [
     ["Transparent","Color",ColorBox("none",0)                                                                                      +" Color.new(0,0,0,0)"],
 	["ErrorColor","Color",ColorBox("invert(22%) sepia(96%) saturate(4375%) hue-rotate(293deg) brightness(111%) contrast(132%)",254)+" Color.new(255,0,255,254)"],
 	["Up","Vector2","Vector2.new(0,1)"],["Down","Vector2","Vector2.new(0,-1)"],["Right","Vector2","Vector2.new(1,0)"],["Left","Vector2","Vector2.new(-1,0)"],
-    ["Front","Vector3","Vector3.new(0,0,1)"],["Back","Vector3","Vector3.new(0,0,-1)"],["StringMax","number","[Максимальный размер строки]"]
+    ["Front","Vector3","Vector3.new(0,0,1)"],["Back","Vector3","Vector3.new(0,0,-1)"],["StringMax","number","[Максимальный размер строки]"],["EngineChars","number","[Кол-во символов в шрифте]"]
 ]
 var ColumnFunctionsSTRUCT = [
 	["Vector2"],["Vector3"],["Vector4"],["Color"],["Vertex"],["Sound"],
@@ -1784,7 +1794,7 @@ CycleRender(function() SetSceneBackgroundColor("scene",Color.new(255,0,0,Round(D
 `)+`</pre>
 `+"</div>","Изменить цвет заднего фона сцены"],
 
-"tonumber()": [FunctionInfo("ToNumber",false,false)+`
+"tonumber()": [FunctionInfo("ToNumber",true,false)+`
 Функция превращает строку в число.<br>
 Этот код превращает строку "5" в число 5<br>
 <pre class="code">`+GenerateCode(`
@@ -1824,7 +1834,7 @@ Print(CheckInternet()) --true
 `)+`</pre>
 `+"</div>","Проверка подключения интернета"],
 
-"testfunction()": [FunctionInfo("TestFunction",false,true)+`
+"testfunction()": [FunctionInfo("TestFunction",true,true)+`
 Эта функция используется только автором движка!<br>
 Она в каждую версию может иметь разную функцию, её лучше не использовать!<br>
 `+"</div>","Тестовая функция"],
@@ -2175,13 +2185,17 @@ function SortFunctions(){
     sortlistbycategories[key].push(ColumnFunctionsFUNC[el_]);
 	}
 
+  var ostalnoe = sortlistbycategories["Остальное"];
+  delete sortlistbycategories["Остальное"];
+  sortlistbycategories["Остальное"] = ostalnoe;
+
   var otladka = sortlistbycategories["Отладка"];
   delete sortlistbycategories["Отладка"];
   sortlistbycategories["Отладка"] = otladka;
 
-  var ostalnoe = sortlistbycategories["В разработке"];
+  var indev = sortlistbycategories["В разработке"];
   delete sortlistbycategories["В разработке"];
-  sortlistbycategories["В разработке"] = ostalnoe;
+  sortlistbycategories["В разработке"] = indev;
 
   for(const key in sortlistbycategories){
     if(sortlistbycategories[key].length>0){newlist.push(["%"+key]);}
@@ -2199,7 +2213,13 @@ function SortFunctions(){
 	
 	newlist.push(["!<table><tr><td>Переменная</td><td>Тип</td><td>Значение</td></tr>"])
 	for(const el in ColumnFunctionsCONS){
-		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+"</font></td><td>"+ColumnFunctionsCONS[el][1]+"</td><td>"+ColumnFunctionsCONS[el][2]+"</td></tr>"]);
+		var thatfullconstant = (ColumnFunctionsCONS[el][2].charAt(0) != '[');
+		var copytothat = ColumnFunctionsCONS[el][2];
+		if(copytothat.includes("Color.new")){
+			var splitresult = copytothat.split(' ');
+			copytothat = splitresult[splitresult.length - 1];
+		}
+		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+"</font></td><td>"+ColumnFunctionsCONS[el][1]+"</td><td "+(thatfullconstant?"style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+copytothat+"')\"":"")+"><font>"+ColumnFunctionsCONS[el][2]+"</font></td></tr>"]);
 	}
 	newlist.push(["!</table>"])
 	
