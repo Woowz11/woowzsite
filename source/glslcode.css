@@ -33,7 +33,6 @@
     text-shadow: 0 0 0;
     font-size: 15px;
     tab-size: 4;
-	  cursor: pointer;
   }
   
   .code-glsl::selection{

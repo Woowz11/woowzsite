@@ -143,6 +143,17 @@
   .greentd:not(:hover) font{
 	transition: color 1s;
   }
+  
+  .blacktd:hover font {
+	color: rgb(255,255,255);
+	text-decoration: underline;
+  }
+  .blacktd:hover{
+	background-color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+  .blacktd:not(:hover) font{
+	transition: color 1s;
+  }
 
   .redbutton{
     box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
@@ -154,6 +165,18 @@
     background-color: rgb(117, 117, 117);
     color: rgb(255, 0, 0);
     text-shadow: 0px 0px 15px rgb(255, 0, 0);
+  }
+  
+  .blackbutton{
+    box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
+    background-color: rgb(100,100,100);
+    color: rgb(200,200,200);
+  }
+
+  .blackbutton:hover{
+    background-color: rgb(50,50,50);
+    color: rgb(255, 255, 255);
+    text-shadow: 0px 0px 15px rgb(255, 255, 255);
   }
 
   .container {
@@ -375,8 +398,13 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	funnyimagesids[i] = funnyimagesrand[i];
   }
 
-  function CopyToClipboard(text) {
-    navigator.clipboard.writeText(text);
+  async function CopyToClipboard(text) {
+	console.log("Copy ["+text+"]");
+    try {
+		await navigator.clipboard.writeText(text.replace(/@/g,'"').replace(/&/g,'`'));
+	} catch (error) {
+		console.error(error.message);
+    }
   }
 
   function UpdateCode(){
@@ -467,7 +495,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
   var codecount = 0;
   function GenerateCode(code, thatglsl){
     if(thatglsl==null){thatglsl = false;}
-    return "<textarea class='"+(thatglsl?"glsl":"lua")+"' readonly>"+code.slice(0,-1)+"</textarea>";
+	var text = code.slice(1).slice(0,-1).replace(/"/g,'@');
+    return `<div style="position: relative;"><textarea class='`+(thatglsl?"glsl":"lua")+`' readonly>`+code.slice(1).slice(0,-1)+`</textarea><button style='position: absolute; top: 0; right: 32px;' title='Скопировать!' onclick="CopyToClipboard(\``+text+`\`)">C</button><button style='position: absolute; top: 0; right: 0;' title='Скопировать для Discord!' onclick="CopyToClipboard(\``+"&&&"+(thatglsl?"glsl":"lua")+"\n"+text+"\n&&&"+`\`)">CD</button></div>`;
   }
 
   var funnyimages = Object.keys(funnyimagesdescription).length-1;
@@ -688,9 +717,10 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 				}
 			}
 		}
+		var emptyerror = false;
 		if(type=="e"){
 			var content = Pages[text.toUpperCase()][2];
-			if(content==""){content = "Пустая ошибка! Предупредите автора";}
+			if(content==""){content = "Пустая ошибка! Предупредите автора"; emptyerror = true;}
 			if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
 			title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3]+" : ")+content;
 		}
@@ -698,7 +728,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		if(getset){
 			return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
 		}
-		return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+text+"</button> ";
+		return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?(id.toLowerCase() in Pages?"whitebutton":"blackbutton"):(type=="f"?(notfound?"yellowbutton":"greenbutton"):(emptyerror?"blackbutton":(title.includes("Является устаревшим")?"yellowbutton":"redbutton"))))+"\">"+text+"</button> ";
     }
 
 
@@ -747,6 +777,7 @@ var ColumnOther = [
   ["textcodes","Специальные символы текста","Special text characters"],
   ["consolecolors","Цвета для консоли","Console colors"],
   ["errors","Ошибки","Errors"],
+  ["convert","Конвертация","Converts"],
 
   ["%Остальное"],
 
@@ -1134,6 +1165,143 @@ var Pages = {
 </div>
 `],
 
+"convert":[`
+<div style="margin-left: 100px; margin-right: 100px;">
+  Способы конвертирования переменных в другие типы<br>
+  Что-бы узнать тип переменной можно использовать <button onclick="ButtonPress('gettype()','convert','f')">GetType()</button><br>
+  <br>
+  * - Значит что эта конвертация ещё не полностью придусматривается в функциях движка (может вызвать ошибки если ввести неверный тип)<br>
+  <hr>
+  <b>Конвертация в строку (string)</b><br>
+  <br>
+  Функция: <button onclick="ButtonPress('tostring()','convert','f')">ToString()</button><br>
+  <br>
+  <b>Number -> String:</b><br>
+  0 -> "0"<br>
+  0.5 -> "0.5"<br>
+  -1 -> "-1"<br>
+  -2.641 -> "-2.641"<br>
+  Infinity -> "2147483647"<br>
+  <br>
+  <b>Bool -> String:</b><br>
+  true -> "true"<br>
+  false -> "false"<br>
+  <br>
+  <b>Nil -> String:</b><br>
+  nil -> "nil" или второе значение функции<br>
+  <br>
+  <b>String -> String:</b><br>
+  "string" -> "string"<br>
+  <br>
+  <b>Vector2 -> String:</b><br>
+  Up -> "Vector2(0,1)"<br>
+  <br>
+  <b>Vector3 -> String:</b><br>
+  Front -> "Vector3(0, 0, 1)"<br>
+  <br>
+  <b>Vector4 -> String:</b><br>
+  Vector4.new(1,0,1,0) -> "Vector4(1, 0, 1, 0)"<br>
+  <br>
+  <b>Color -> String:</b><br>
+  Red -> "Color(255, 0, 0, 255)"<br>
+  <br>
+  <b>Other -> String:</b><br>
+  ? -> "Value type [?]"<br>
+  <br>
+  <hr>
+  <b>Конвертация в число (number)*</b><br>
+  <br>
+  Функция: <button onclick="ButtonPress('tonumber()','convert','f')">ToNumber()</button><br>
+  <br>
+  <b>Number -> Number:</b><br>
+  0 -> 0<br>
+  -1 -> -1<br>
+  <br>
+  <b>Bool -> Number:</b><br>
+  true -> 1<br>
+  false -> 0<br>
+  <br>
+  <b>Nil -> Number:</b><br>
+  nil -> 0 или второе значение функции<br>
+  <br>
+  <b>String -> Number:</b><br>
+  "string" -> -1<br>
+  "0.5" -> 0.5<br>
+  "-1" -> -1<br>
+  "-2.641" -> -2.641<br>
+  <br>
+  <b>Other -> Number:</b><br>
+  ? -> 0<br>
+  <br>
+  <hr>
+  <b>Конвертация в логическое значение (boolean)</b><br>
+  <br>
+  Функция: <button onclick="ButtonPress('tobool()','convert','f')">ToBool()</button><br>
+  <br>
+  <b>Number -> Bool:</b><br>
+  0 -> false<br>
+  1 -> true<br>
+  2 -> false<br>
+  0.5 -> false<br>
+  <br>
+  <b>Bool -> Bool:</b><br>
+  true -> true<br>
+  false -> false<br>
+  <br>
+  <b>Nil -> Bool:</b><br>
+  nil -> false или второе значение функции<br>
+  <br>
+  <b>String -> Bool:</b><br>
+  "string" -> false<br>
+  "true" -> true<br>
+  "yes" -> true<br>
+  "1" -> true<br>
+  "y" -> true<br>
+  "t" -> true<br>
+  "+" -> true<br>
+  "ok" -> true<br>
+  "okay" -> true<br>
+  "ок" -> true<br>
+  "окей" -> true<br>
+  "да" -> true<br>
+  "д" -> true<br>
+  "правда" -> true<br>
+  "plus" -> true<br>
+  "плюс" -> true<br>
+  "один" -> true<br>
+  "one" -> true<br>
+  "конечно" -> true<br>
+  "согласен" -> true<br>
+  "принять" -> true<br>
+  "принимаю" -> true<br>
+  "угу" -> true<br>
+  "on" -> true<br>
+  "o" -> true<br>
+  "1." -> true<br>
+  "1.0" -> true<br>
+  "1.00" -> true<br>
+  "1.000" -> true<br>
+  "1.0000" -> true<br>
+  "1," -> true<br>
+  "1,0" -> true<br>
+  "1,00" -> true<br>
+  "1,000" -> true<br>
+  "1,0000" -> true<br>
+  "✔" -> true<br>
+  <br>
+  <b>Other -> Bool:</b><br>
+  ? -> false<br>
+  <br>
+  <hr>
+  <b>Конвертация в цвет (Color)</b><br>
+  <br>
+  Функция: ещё не создана<br>
+  <br>
+  ...<br>
+  <hr>
+</div>
+`],
+
 "desmos": [`
 <center><iframe src="https://www.desmos.com/calculator" width="95%" height="800px" style="border: 1px solid #ccc" frameborder=0></iframe></center>
 `],
@@ -1147,6 +1315,9 @@ var Pages = {
 Шейдер (*.f (fragment)) отвечает за внешний вид объекта, Шейдер (*.v (vertex)) отвечает за геометрию объекта<br>
 <br>
 Если при создании нового шейдера какого-то одного из компонентов не будет, то будет браться за основу default шейдер, т.е если вы создали шейдер test.v но без test.f, то будет использоваться test.v и default.f<br>
+<br>
+Версия OpenGL 4.6<br>
+Версия шейдеров 330<br>
 <br>
 default.f
 <pre class="code-glsl">`+GenerateCode(`
@@ -1195,48 +1366,48 @@ TexCoord - Позиция пикселя на текстуре<br>
         <td>Описание</td>
     </tr>
     <tr>
-        <td>sprite</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('sprite')\"><font>sprite</font></td>
         <td>sampler2D</td>
         <td>Основная текстура объекта</td>
     </tr>
     <tr>
-        <td>color</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('color')\"><font>color</font></td>
         <td>vec4</td>
         <td>Основной установленый цвет объекта</td>
     </tr>
     <tr>
-        <td>scale</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('scale')\"><font>scale</font></td>
         <td>vec2</td>
         <td>Специальный размер устанавливающий верные размеры объекту по масштабу и т.д.</td>
     </tr>
 	<tr>
-        <td>height</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('height')\"><font>height</font></td>
         <td>float</td>
         <td>Высота объекта</td>
     </tr>
 	<tr>
-        <td>time</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('time')\"><font>time</font></td>
         <td>float</td>
         <td>Время прошедшее после запуска приложения, тоже самое что ActiveTime()</td>
     </tr>
 	<tr>
-        <td>random</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('random')\"><font>random</font></td>
         <td>float</td>
         <td>Случайное число от 0 до 1 каждый кадр</td>
     </tr>
 	<tr>
-        <td>zoom</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('zoom')\"><font>zoom</font></td>
         <td>float</td>
         <td>Число приближения камеры на сцене где объект</td>
     </tr>
 	<tr>
-        <td>stringlen</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('stringlen')\"><font>stringlen</font></td>
         <td>float</td>
         <td>(Только у текста) Получает размер строки</td>
     </tr>
 	</tr>
 	    <tr>
-        <td>charpos</td>
+        <td style='cursor: pointer;' class='blacktd' title='Скопировать!' onclick=\"CopyToClipboard('charpos')\"><font>charpos</font></td>
         <td>float</td>
         <td>(Только у текста) Получает позицию текущего символа в строке</td>
     </tr>
@@ -1701,7 +1872,7 @@ CreateWindow("window","New window title!")
 `)+`</pre>
 Этот код создаёт новое окно с квадратным размером 600 пикселей<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","New window with size 600x600!",600,600)
+CreateWindow("window","Новое окно с размером 600x600",600,600)
 `)+`</pre>
 Этот код создаёт два окна, "window_1" и "window_2"
 <pre class="code">`+GenerateCode(`
@@ -1716,18 +1887,18 @@ CreateWindow("window_2","Window 2")
 Так же нужно указывать уникальное айди сцены.<br>
 Этот код создаёт новую сцену "scene" и применяет её окну "window"<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with scene")
+CreateWindow("window","Окно со сценой")
 CreateScene("scene")
 SetWindowScene("window","scene")
 `)+`</pre>
 Этот код создаёт два новых окна "window_1" и "window_2" со сценами "scene_1" и "scene_2", где "scene_1" красная а другая синяя<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window_1","Window 1 with scene 1")
+CreateWindow("window_1","Window 1 + scene 1")
 CreateScene("scene_1")
 SetSceneBackgroundColor("scene_1",Red)
 SetWindowScene("window_1","scene_1")
 
-CreateWindow("window_2","Window 2 with scene 2")
+CreateWindow("window_2","Window 2 + scene 2")
 CreateScene("scene_2")
 SetSceneBackgroundColor("scene_2",Blue)
 SetWindowScene("window_2","scene_2")
@@ -1738,13 +1909,13 @@ SetWindowScene("window_2","scene_2")
 Функция установки сцены окну.<br>
 Этот код применяет сцену "scene" окну "window"<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with scene")
+CreateWindow("window","Окно со сценой")
 CreateScene("scene")
 SetWindowScene("window","scene")
 `)+`</pre>
 Этот код меняет каждую секунду сцену у окна "window" с "scene_1" на "scene_2" и т.д<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with RED/BLUE scene")
+CreateWindow("window","Красно/Синее окно")
 
 CreateScene("scene_1")
 SetSceneBackgroundColor("scene_1",Red)
@@ -1770,14 +1941,14 @@ b = not b
 Функция установки цвета заднего фона на сцене.<br>
 Этот код изменяет цвет заднего фона сцены "scene" на красный<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with red scene")
+CreateWindow("window","Красное окно")
 CreateScene("scene")
 SetWindowScene("window","scene")
 SetSceneBackgroundColor("scene",Color.new(255,0,0))
 `)+`</pre>
 Этот код делает сцену мигающего цвета, с чёрного на белый и т.д.<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with blinking scene")
+CreateWindow("window","Мигающее окно")
 CreateScene("scene")
 SetWindowScene("window","scene")
 
@@ -1786,7 +1957,7 @@ CycleRender(function() c = Round(DSin(ActiveTime()/10)*255) SetSceneBackgroundCo
 `)+`</pre>
 Этот код делает сцену мигающего цвета, с красного на прозрачный и т.д.<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with blinking transparency red scene")
+CreateWindow("window","Окно мигающее с красного на прозрачный")
 CreateScene("scene")
 SetWindowScene("window","scene")
 
@@ -2114,7 +2285,7 @@ PrintFast("Этот текст красный",4)
 Так же нужно указывать уникальное айди сцены.<br>
 Этот код создаёт новый спрайт "sprite" и добавляет его на сцену "scene"<br>
 <pre class="code">`+GenerateCode(`
-CreateWindow("window","Window with sprite")
+CreateWindow("window","Окно со спрайтом")
 CreateScene("scene")
 SetWindowScene("window","scene")
 
@@ -2234,14 +2405,19 @@ for(const key in ColumnFunctions){
 	functionstable[val.toLowerCase()] = true;
 }
 
-function generateErrorGetButton(command,errorid,typ){
+function generateErrorGetButton(command,errorid,typ,content){
 
 	function Succes(com){
 		if(Pages[com.toLowerCase()]){
 				if(!Pages[com.toLowerCase()][0].includes("alredyhaserror")){
 					Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<br><hr><center id='alredyhaserror'><font>Ошибки функции</font></center><br><center>";
 				}
-				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<button style='margin-bottom: 30px;' onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
+				
+				if(content==""){content = "Пустая ошибка! Предупредите автора";}
+				if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
+				var title = content;
+				
+				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<button title='"+title+"' style='margin-bottom: 30px;' onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
 			}
 			return "<button onclick='ButtonPress(\""+com.toLowerCase()+"\",\""+errorid.toUpperCase()+"\",\"f\")'>"+com+"</button>";
 	}
@@ -2262,12 +2438,12 @@ function generateErrorGetButton(command,errorid,typ){
 	}
 }
 
-function generateErrorStartText(id,command,typ){
+function generateErrorStartText(id,command,typ,content){
 	return `
 		<center>
 		<br>
 		<font style="font-size: 40px;">`+id+`</font>
-		`+(command==""?"":("<br>"+generateErrorGetButton(command,id,typ)))+`
+		`+(command==""?"":("<br>"+generateErrorGetButton(command,id,typ,content)))+`
 		<br>
 		<br>
 		</center>
@@ -2288,7 +2464,7 @@ function generateErrors(){
 				var fullerrorid = (errortype=="OTHER"?"":errortype)+errorid;
 				ColumnErrors.push([fullerrorid]);
 				var errorinfo = errorlist[errorid];
-				var errortext = generateErrorStartText(fullerrorid,errorinfo[1],errortype)+"<center><font style='width: 60vw; font-family: monospace;'>"+(errorinfo[0]==""?"Пустая ошибка! Тут была ошибка, но она была удалена, возможно в будущем тут будет другая":errorinfo[0])+"</font></center><hr>";
+				var errortext = generateErrorStartText(fullerrorid,errorinfo[1],errortype,errorinfo[0])+"<center><font style='width: 60vw; font-family: monospace;'>"+(errorinfo[0]==""?"Пустая ошибка! Тут была ошибка, но она была удалена, возможно в будущем тут будет другая":errorinfo[0])+"</font></center><hr>";
 				Pages[fullerrorid] = [errortext,"",errorinfo[0],errorinfo[1]];
 			}
 		}

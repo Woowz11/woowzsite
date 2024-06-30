@@ -34,7 +34,6 @@
     font-size: 15px;
     tab-size: 4;
     border-radius: 8px;
-	  cursor: pointer;
   }
   
   .code::selection{
