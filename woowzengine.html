@@ -74,6 +74,23 @@
   a::selection{
     color: yellow;
   }
+  
+  a.yellow{
+    text-decoration: none;
+    color: yellow;
+    transition: 0.3s ease;
+    cursor: pointer;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  a.yellow:hover{
+    color: white;
+	text-shadow: 0px 2px 5px rgb(150,130,0);
+  }
+
+  a.yellow::selection{
+    color: yellow;
+  }
 
   button{
     all: unset;
@@ -268,6 +285,9 @@
     }else{
       ButtonPress(extrahref,"","o");
     }
+	setTimeout(function () {
+        window.scrollTo(0, 0);
+    },1);
   }
 
   const body = document.getElementById('body');
@@ -386,6 +406,9 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	37:["2024-06-13","Случайно сломал сайт"],
 	38:["2024-06-26","Вызвался синий экран смерти когда добавлял ImGui к своему движку"],
 	39:["2024-06-25","Первые попытки добавить ImGui в свой движок"],
+	40:["2024-07-01","Сгенерированный мой сайт во вкладке ID's"],
+	41:["2024-07-02","Криво работающие input в ImGui"],
+	42:["2024-07-03","Очередной баг на сайте получившийся случайно"],
   }
   
   var funnyimagesids = {};
@@ -446,7 +469,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     var htmlstart = `
     <div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":(type=="e"?"40,40,40":"142,0,4"))+`);">
       <br><br>
-      <div style="margin-left: 50px;"><button `+(lastopen?"title='Вернуться на #"+lastopen+"'":"")+` onclick="`+(lastopen?"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')":"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
+      <div style="margin-left: 50px;"><button `+(lastopen?(lastopen=="#IDS#"?`title="Вернуться на ID's"`:"title='Вернуться на #"+lastopen+"'"):"")+` onclick="`+(lastopen?(lastopen == "#IDS#"?"OpenIDs()":"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')"):"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
         `+(id_prev==""?"":"<button title='Открыть #"+id_prev+"' onclick='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\")'>Прошлое</button>")+` `+
         (id_next==""?"":"<button title='Открыть #"+id_next+"' onclick='ButtonPress(\""+id_next+"\",\"\",\""+type+"\")'>Следующее</button>")+`
         <button title='Скопировать #`+id+`!' onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
@@ -499,6 +522,353 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     return `<div style="position: relative;"><textarea class='`+(thatglsl?"glsl":"lua")+`' readonly>`+code.slice(1).slice(0,-1)+`</textarea><button style='position: absolute; top: 0; right: 32px;' title='Скопировать!' onclick="CopyToClipboard(\``+text+`\`)">C</button><button style='position: absolute; top: 0; right: 0;' title='Скопировать для Discord!' onclick="CopyToClipboard(\``+"&&&"+(thatglsl?"glsl":"lua")+"\n"+text+"\n&&&"+`\`)">CD</button></div>`;
   }
 
+	function OpenIDs(){
+	document.title = "WoowzEngine - ID's";
+	
+	list = {};
+	
+	function GetFuncTitle(key){
+		var notfound = false;
+		var title = "";
+		if(!Pages[key.toLowerCase()]){
+			notfound = true;
+			title = "Функция ещё не документирована!";
+		}else{
+			if(Pages[key.toLowerCase()][1]){
+				title = Pages[key.toLowerCase()][1];
+			}else{
+				title = "Информация о функции ещё не записана!";
+			}
+		}
+		return [title,notfound];
+	}
+	
+	function GetErrorTitle(key){
+		var emptyerror = false;
+		var content_ = Pages[key.toUpperCase()][2];
+		if(content_==""){content_ = "Пустая ошибка! Предупредите автора"; emptyerror = true;}
+		if(content_.includes("savemode")){content_ = "Функция не может быть запущена в безопасном режиме";}
+		var func = "";
+		if(Pages[key.toUpperCase()][3]!=""){
+			func = Pages[key.toUpperCase()][3].replace(/!/g, '');
+		}
+		return [(func==""?"":func+" : ")+content_,emptyerror,func];
+	}
+	
+	for (let key in Pages){
+		var type = "o";
+		if(key.includes("()")){
+			type = "f";
+		}
+		if(/[A-Z]/.test(key)){
+			type = "e";
+		}
+		if(key == "0000"){
+			type = "e";
+		}
+		
+		var content = Pages[key][0];
+		var lowcontent = content.toLowerCase();
+		var extra = "";
+		var extra2 = "";
+		if(type=="e"){
+			if(content.includes("savemode")){
+				extra = extra + ",safemode";
+			}
+			if(content.includes("Является устаревшим")){
+				extra = extra + ",old";
+			}
+			if(lowcontent.includes("с таким айди уже существует")||lowcontent.includes("уже есть на сцене")){
+				extra = extra + ",alrex";
+			}
+			if(lowcontent.includes("не может быть пустой")){
+				extra = extra + ",emptstr";
+			}
+			if(lowcontent.includes("входные данные одинаковые")){
+				extra = extra + ",indical";
+			}
+			if(lowcontent.includes("не найден") || lowcontent.includes("не была найден") || lowcontent.includes("не было найден") || lowcontent.includes("не был найден")){
+				if(lowcontent.includes("не найдена функция")){
+					extra = extra + ",nofunc";
+				}else{
+					extra = extra + ",notfound";
+				}
+			}
+			if(lowcontent.includes("сломан")){
+				extra = extra + ",broken";
+			}
+			if(lowcontent.includes("интернет")){
+				extra = extra + ",nointernet";
+			}
+			if(lowcontent.includes("за рамки")||lowcontent.includes("быть >")||lowcontent.includes("быть <")||lowcontent.includes("быть =")||lowcontent.includes("больше")||lowcontent.includes("меньше")){
+				extra = extra + ",math";
+			}
+			if((lowcontent.includes("не получилось") || lowcontent.includes("ошибка при") || lowcontent.includes("не возможно")) && !extra.includes("alrex")){
+				extra = extra + ",operationbroke";
+			}
+			if(lowcontent.includes("с windows")){
+				extra = extra + ",nobywin";
+			}
+		}
+		
+		var func = "";
+		if(type=="f"){
+			var startIndex = content.indexOf('•') + 1;
+			var endIndex = content.indexOf('•', startIndex);
+			extra = content.substring(startIndex, endIndex);
+			
+			if(lowcontent.includes("<pre ")){
+				extra2 = extra2 + ",hascode";
+			}
+			if(lowcontent.includes("www.desmos.com")){
+				extra2 = extra2 + ",graf";
+			}
+
+			func = [];
+			var startIndex = content.indexOf("???");
+			while (startIndex !== -1) {
+				var endIndex = content.indexOf("???", startIndex + "???".length);
+				if (endIndex !== -1) {
+					var word = content.substring(startIndex + "???".length, endIndex);
+					func.push([word.trim(),GetErrorTitle(word.trim())[0]]);
+				}
+				startIndex = content.indexOf("???", endIndex + "???".length);
+			}
+
+		}
+		
+		if(type=="o"){
+			if(lowcontent.includes("<pre ")){
+				extra = "hascode";
+			}
+		}
+		
+		var notfound = false;
+		var title = "";
+		if(type=="f"){
+			var r = GetFuncTitle(key);
+			title = r[0];
+			notfound = r[1];
+		}
+		var emptyerror = false;
+		if(type=="e"){
+			var r = GetErrorTitle(key);
+			title = r[0];
+			func = r[2];
+			emptyerror = r[1];
+			if(emptyerror){
+				extra = extra + ",empty";
+			}
+		}
+		
+		list[key] = [type,extra,title,func,extra2];
+	}
+	
+	var num = 1;
+	var numo = 1;
+	var numf = 1;
+	var nume = 1;
+	function g0(){
+		var result = "";
+		
+		var notfirst = false;
+		for (let key in list) {
+			var altnum = num;
+			var alr = false;
+			if(num <= 9){
+				altnum = altnum+"<font style='color:transparent; text-shadow: 0px 0px 0px transparent; user-select: none;'>00</font>";
+				alr = true;
+			}
+			if(num <= 99 && !alr){
+				altnum = altnum+"<font style='color:transparent; text-shadow: 0px 0px 0px transparent; user-select: none;'>0</font>";
+			}
+			result = result + (notfirst?"<br>":"") + altnum + " <font style='color:rgba("+(list[key][0]=="o"?"128,0,0":(list[key][0]=="f"?"0,128,0":"80,80,80"))+",0.5);'>(" + (list[key][0]=="o"?numo:(list[key][0]=="f"?numf:nume)) + ")</font>";
+			notfirst = true;
+			num++;
+			(list[key][0]=="o"?numo++:(list[key][0]=="f"?numf++:nume++));
+		}
+		
+		return result;
+	}
+	
+	function g(){
+		var result = "";
+		
+		var notfirst = false;
+		for (let key in list) {
+			result = result + (notfirst?"<br>":"") + `<button title="Скопировать #`+key+`!" onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+key+`')" style="margin-left:-25px; margin-top:2px; position:absolute; width: 10px; height: 10px;"><div style="font-size: 14px; position:absolute; margin-top:-12px; margin-left:-1px;">C</div></button>` + `<a `+(list[key][2]==""?"":`title="`+list[key][2]+`"`)+` onclick="ButtonPress('`+key+`','#IDS#','`+list[key][0]+`')">` + key + "</a>";
+			notfirst = true;
+		}
+		
+		return result;
+	}
+	
+	function g2(){
+		var result = "";
+		
+		var notfirst = false;
+		for (let key in Pages) {
+			result = result + (notfirst?"<br>":"") + (list[key][0]=="o"?"Остальное":(list[key][0]=="f"?"Функция":"Ошибка")) + "<font style='opacity:0.5;'>";
+			
+			if(list[key][0] == "e"){
+				if(list[key][1].includes("safemode")){
+					result = result + ` <a class="yellow" onclick="ButtonPress('savemode','#IDS#','o')">(SafeMode)</a>`;
+				}
+				if(list[key][1].includes("empty")){
+					result = result + " <font style='color:rgb(122,0,8);'>(Пустая)</font>";
+				}
+				if(list[key][1].includes("old")){
+					result = result + " <font style='color:rgb(122,0,8);'>(Устаревшая)</font>";
+				}
+				if(list[key][1].includes("nofunc")){
+					result = result + " (Не найдена функция)";
+				}
+				if(list[key][1].includes("alrex")){
+					result = result + " (Уже существует такой ID)";
+				}
+				if(list[key][1].includes("emptstr")){
+					result = result + " (Пустая строка)";
+				}
+				if(list[key][1].includes("indical")){
+					result = result + " (Одинаковые переменные)";
+				}
+				if(list[key][1].includes("notfound")){
+					result = result + " (Не найдено)";
+				}
+				if(list[key][1].includes("broken")){
+					result = result + " (Сломано)";
+				}
+				if(list[key][1].includes("nointernet")){
+					result = result + " (Отсутсвует интернет)";
+				}
+				if(list[key][1].includes("math")){
+					result = result + " (Неверная величина)";
+				}
+				if(list[key][1].includes("operationbroke")){
+					result = result + " (Не получилось)";
+				}
+				if(list[key][1].includes("nobywin")){
+					result = result + " (Не прошёл совместимость)";
+				}
+			}
+			
+			if(list[key][0] == "f"){
+				result = result + " ("+list[key][1]+")";
+				if(!list[key][4].includes("hascode")){
+					result = result + " (Без примера)";
+				}
+				if(list[key][4].includes("graf")){
+					result = result + " (Г)";
+				}
+			}
+			
+			if(list[key][0] == "o"){
+				if(list[key][1].includes("hascode")){
+					result = result + " (Есть код)";
+				}
+			}
+			
+			notfirst = true;
+			
+			result = result + "</font>";
+		}
+		
+		return result;
+	}
+	
+	function g3(){
+		var result = "";
+		
+		var notfirst = false;
+		for (let key in Pages) {
+			result = result + (notfirst?"<br>":"") + "";
+			
+			if (list[key][0]=="e"){
+				var func = list[key][3];
+				var id = func.toLowerCase();
+				
+				var found = false;
+				if(id in Pages){
+					found = true;
+				}else{
+					var testid = id.replace(/set|get/g, '@');
+					if(testid in functionstable){
+						id = testid;
+					}
+				}
+				
+				if(found){
+					func = `<a title="`+GetFuncTitle(id)[0]+`" onclick="ButtonPress('`+id+`','#IDS#','f')">`+func+"</a>";
+				}
+				else{
+					if(id in functionstable && id.includes("()")){
+						func = `<a class="yellow" title="`+GetFuncTitle(id)[0]+`" onclick="ButtonPress('`+id+`','#IDS#','f')">`+func+"</a>";
+					}
+				}
+				
+				if(id == "jsongame"){
+					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Game File</a>`;
+				}
+				if(id == "jsonengine"){
+					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Engine File</a>`;
+				}
+				if(id == "jsonsettings"){
+					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Settings File</a>`;
+				}
+				
+				result = result + func;
+			}
+			
+			if (list[key][0]=="f"){
+				for(var i = 0; i < list[key][3].length; i++){
+					var func = list[key][3][i];
+					result = result + `<a title="`+func[1]+`" onclick="ButtonPress('`+func[0]+`','#IDS#','e')">` + func[0] + `</a> `;
+				}
+			}
+			
+			
+			notfirst = true;
+		}
+		
+		return result;
+	}
+	
+	function g4(){
+		var result = "";
+		
+		var IidkWhatAddSoooo = ["omagad","ок","сколько тут слов?","а вы ждёте блуд рав?","это что ещё такое?!","<- это говно не рекомендую","🚽","чё за секретки","это полный пиздец","вувз энджин никогда не выйдет!",`<audio style="margin-top:0px; position: absolute; height: 23px; width: 300px;" controls><source src="source/doom.mp3" type="audio/mpeg"></audio>`];
+		var notfirst = false;
+		for (let key in Pages) {
+			result = result + (notfirst?"<br>":"");
+			notfirst = true;
+			
+			if(Math.random()*1000>999){
+				result = result + IidkWhatAddSoooo[Math.floor(Math.random()*IidkWhatAddSoooo.length)];
+			}
+		}
+		
+		return result;
+	}
+	
+	var lineheight = 1.75;
+	var blackprocent = 10;
+    body.innerHTML = `
+		<div class="header" style="height: 15vh; width: 100%;">
+			<br><br>
+			<div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button>
+			</div>
+		</div><br>
+		<div style="display: flex; background: repeating-linear-gradient(0deg, color-mix(in srgb, black `+blackprocent+`%, transparent) 0, color-mix(in srgb, black `+blackprocent+`%, transparent) `+lineheight+`ch, transparent `+lineheight+`ch, transparent `+(lineheight*2)+`ch);">
+			<div style="margin-left: 1vw; width: 10vw; white-space: nowrap; line-height: `+lineheight+`ch;">`+g0()+`</div>
+			<div style="margin-left: 3vw; width: 20vw; white-space: nowrap; line-height: `+lineheight+`ch;">`+g()+`</div>
+			<div style="margin-left: 4vw; width: 20vw; white-space: nowrap; line-height: `+lineheight+`ch;">`+g2()+`</div>
+			<div style="margin-left: 4vw; width: 20vw; white-space: nowrap; line-height: `+lineheight+`ch;">`+g3()+`</div>
+			<div style="margin-left: 4vw; width: 20vw; white-space: nowrap; line-height: `+lineheight+`ch;">`+g4()+`</div>
+		</div>
+		<br>
+		`;
+  }
+
   var funnyimages = Object.keys(funnyimagesdescription).length-1;
   var selectedimage = Math.round(Math.random()*funnyimages);
   function NextImage(next){
@@ -519,11 +889,22 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	document.title = "WoowzEngine - Gallery ("+selectedimage+"/"+funnyimages+")";
 	
     const now = new Date();
-		const startenginedate = new Date(funnyimagesdescription[funnyimagesids[selectedimage]][0]);
-		const startenginetime = now.getTime() - startenginedate.getTime();
-		const days = Math.floor(startenginetime/(1000 * 60 * 60 * 24));
+	const startenginedate = new Date(funnyimagesdescription[funnyimagesids[selectedimage]][0]);
+	const startenginetime = now.getTime() - startenginedate.getTime();
+	const days = Math.floor(startenginetime/(1000 * 60 * 60 * 24));
 
     funnyimage.src = "source/woowzengine/funny/"+funnyimagesids[selectedimage]+".png";
+	funnyimage.onclick = function() {
+		window.open(funnyimage.src);
+		/*var win = window.open("","_blank");
+		var d = win.document;
+		d.write(`
+		<body style="margin: 0px; height: 100%; background-color: rgb(14, 14, 14);">
+			<img style="display: block;-webkit-user-select: none;margin: auto;background-color: hsl(0, 0%, 90%);transition: background-color 300ms;" src="source/woowzengine/funny/`+funnyimagesids[selectedimage]+`.png">
+		</body>
+		`);
+		d.title = "Изображение #"+selectedimage;*/
+	};
     const dateParts = funnyimagesdescription[funnyimagesids[selectedimage]][0].split("-").reverse();
     const formattedDate = dateParts.join("-");
     document.getElementById("funnyimagedesc_days").innerHTML = formattedDate+" ("+days+" дней назад)";
@@ -551,7 +932,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
         <div style="display: flex; justify-content: center;">
           <a style="position: relative; font-size: 50px; width:100%;" title="Прошлая картинка" onclick="NextImage(false)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8592;</font></a>
           <div>
-            <img id="funnyimage" class="canzoom" style="max-width: 80vw; max-height:80vh; height: auto;" src="source/woowzengine/funny/0.png" onclick="this.classList.toggle('selected')">
+            <img id="funnyimage" class="canzoom" style="max-width: 80vw; max-height:80vh; height: auto;" src="source/woowzengine/funny/0.png">
           </div>
           <a style="position: relative; font-size: 50px; width:100%;" title="Следущая картинка" onclick="NextImage(true)"><font style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);">&#8594;</font></a>
         </div>
@@ -600,8 +981,9 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			Кол-во функций&nbsp;&nbsp;: `+kolvofunc+`<br>
 			Кол-во категорий: `+Object.keys(FunctionsTypes).length+`<br>
 			Кол-во ошибок&nbsp;&nbsp;&nbsp;: `+Object.keys(ColumnErrors).length+`<br>
-			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+`<br>
-      Кол-во смеш.карт: `+funnyimages+`<br>
+			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+" ("+((Math.floor((Object.keys(Pages).length/(Object.keys(ColumnOther).length+Object.keys(kolvofunc+ColumnErrors).length))*10000))/100)+"%)"+`<br>
+			Кол-во зап. стр.: `+Object.keys(ColumnOther).length+" + "+kolvofunc+" + "+Object.keys(ColumnErrors).length+" = "+(Object.keys(ColumnOther).length+Object.keys(kolvofunc+ColumnErrors).length)+`<br>
+			Кол-во смеш.карт: `+funnyimages+`<br>
 			
 			</div>
 
@@ -644,6 +1026,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	["∓","Минус-Плюс"],["Δ","Дельта"],["∀","Знак для всех"],["〈","Открывающаяся угольная скобка"],["〉","Закрывающаяся угольная скобка"],["⋮","Вертикальное многоточие"],["⋯","Многоточие"],["∬","Двойной интеграл"],["∥","Параллельно"],["∦","Не параллельно"],["□","Полый квадрат"],["⊂","Подмножество"],["⊃","Надмножество"],["∩","Пересечение"],["∪","Объединение"],["◦","Полый интерпункт"],
 	["‣","Треугольний маркер списка"],["◼","Квадрат"],["◾","Маленький квадрат"],["●","Круг"],["▞","Шахматная доска"],["Ω","Омега"],["α","Альфа"],["β","Бета"],["γ","Гамма"],["δ","Дельта"],["θ","Тета"],["♥","Сердце"],["★","Звезда"],["♀","Знак венеры"],["♂","Знак марса"],["♫","Нота"],
 	["₣","Франк"],["ε","Епсилон"],["π","Пи"],["▌","Прямоугольник слева"],["▐","Прямоугольник справа"],["▀","Прямоугольник сверху"],["▄","Прямоугольник снизу"],["▖","Квадрат снизу слева"],["▗","Квадрат снизу справа"],["▘","Квадрат сверху слева"],["▝","Квадрат сверху справа"],["▙","Пустой квадрат сверху справа"],["▟","Пустой квадрат сверху слева"],["▛","Пустой квадрат снизу справа"],["▜","Пустой квадрат снизу слева"],["✉","Письмо"],
+	["×","Умножение"],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],["",""],
 	];
 	var result = "<table class='notitle'><tr>";
 	var allsymbols = "";
@@ -675,13 +1058,15 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		<center><font style="font-family: 'Concrete', sans-serif; font-size: 5vh;">WoowzEngine Wiki</font><font style="font-size: 2.5vh;"><br>`+engineversion+`</font><div style="margin-top:0;" /><font style="font-size: 1.5vh;">Официальный сайт</font><div style="margin-top:2vh;" /><font style="font-size: 2.5vh;">English version of wiki will be added soon! </font></center>
 		<button style="margin-left: calc( 100vw - 200px ); position: absolute; top: 20px;" onclick="OpenStats()">Статистика</button>
 		<button style="margin-left: calc( 100vw - 325px ); position: absolute; top: 20px;" onclick="OpenGalery()">Галерея</button>
+		<button style="margin-left: calc( 100vw - 400px ); position: absolute; top: 20px;" onclick="OpenIDs()">ID's</button>
     </div>
     <div class="footer" style="height: auto;">
         <div class="whitebox" style="flex:30;"><div style="padding: 10px;" id="c_other"></div></div>
         <div class="greenbox" style="flex:100;"><div style="padding: 10px;" id="c_func"></div></div>
         <div class="redbox" style="flex:40;"><center><div style="padding: 10px;" id="c_errors"></div></center></div>
     </div>
-    
+    <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;Возможно в будущем тут будут новости обновлений...<br>&nbsp;
     `;
 
     const c_o = document.getElementById('c_other');
@@ -722,7 +1107,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			var content = Pages[text.toUpperCase()][2];
 			if(content==""){content = "Пустая ошибка! Предупредите автора"; emptyerror = true;}
 			if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
-			title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3]+" : ")+content;
+			title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3].replace(/!/g, '')+" : ")+content;
 		}
 		
 		if(getset){
@@ -757,11 +1142,21 @@ var ColumnOther = [
 
   ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
   ["games","Игры на WoowzEngine","Games on WoowzEngine"],
+  ["questions","Ответ на вопросы","-"],
   ["license","Лицензия","License"],
 
+  ["%Движок"],
+  
+  ["versions","Версии + Скачать","Versions + Download"],
+  ["history","История","History"],
+  ["engine_vnytrenosti","Состав движка","-"],
+  ["compile","Компиляция","Compile"],
+  
   ["%Туториалы"],
 
-  ["gamecreate","Создание игры","Game creation"],
+  ["install","Установка","-"],
+  ["gamecreate","Создание простого приложения","-"],
+  ["libs","Полезные библиотеки","-"],
 
   ["%О коде"],
 
@@ -772,12 +1167,11 @@ var ColumnOther = [
   ["savemode","Безопасный режим","Save mode"],
   ["keys","Коды клавиш","Key codes"],
   ["textures","Текстуры","Textures"],
-  ["shaders","Шейдеры","Shaders"],
-  ["fonts","Шрифты","Fonts"],
-  ["textcodes","Специальные символы текста","Special text characters"],
   ["consolecolors","Цвета для консоли","Console colors"],
   ["errors","Ошибки","Errors"],
   ["convert","Конвертация","Converts"],
+  ["shaders","Шейдеры","Shaders"],["fonts","Шрифты","Fonts"],
+  ["textcodes","Специальные команды текста","Special text commands"],
 
   ["%Остальное"],
 
@@ -788,6 +1182,7 @@ var ColumnOther = [
   ["%Инструменты"],
   
   ["desmos","Построить график","Draw a graph"],
+  ["sceneeditor","Редактор сцены","-"],
 
 ]
 var ColumnFunctionsFUNC = [
@@ -810,7 +1205,8 @@ var ColumnFunctionsFUNC = [
 	["LoadTexture()"],["@SpriteVisible()"],["@TextureBlur()"],["GetTextureColors()"],["@ConsoleTitle()"],["CreateTexture()"],["WriteImage()"],["@SpriteShader()"],
 	["RemoveFile()"],["PlayBeep()"],["@SpriteHeight()"],["TestFunction()"],["GetDiscordUserInfo()"],["GetDiscordCurrentUser()"],["CreateText()"],["CreateFont()"],["@TextPosition()"],
 	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"],["GetUnicodeChar()"],
-	["MessageBox()"],["GetEngineChar()"],["@WindowImGui()"],["CreateImGuiWindow()"],["CreateImGuiElement()"],["@ImGuiElementText()"],["@ImGuiElementColor()"],["SetImGuiElementEvent()"],["RandomColor()"]
+	["MessageBox()"],["GetEngineChar()"],["@WindowImGui()"],["CreateImGuiWindow()"],["CreateImGuiElement()"],["@ImGuiElementText()"],["@ImGuiElementColor()"],["SetImGuiElementEvent()"],["RandomColor()"],
+	["@ImGuiElementPoint()"],["@ImGuiElementStringValue()"],["@ImGuiElementConnect()"],["@ImGuiElementToollip()"],["@ImGuiFontScale()"],["@ImGuiWindowVsibile()"],["@ImGuiElementValue()"],
 ]
 var FunctionsTypes = {
   "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
@@ -866,7 +1262,8 @@ var FunctionsTypes = {
   "Discord":["discordlaunched","getdiscordcurrentuser","getdiscorduserinfo","setdiscordactivitytitle","setdiscordactivitydescription"
   ],
   
-  "ImGui":["@windowimgui","createimguiwindow","createimguielement","@imguielementtext","@imguielementcolor","setimguielementevent",
+  "ImGui":["@windowimgui","createimguiwindow","createimguielement","@imguielementtext","@imguielementcolor","setimguielementevent","@imguielementpoint","@imguielementstringvalue","@imguielementconnect",
+  "@imguielementtoollip","@imguifontscale","@imguiwindowvsibile","@imguielementvalue",
   ],
 }
 var ColumnFunctionsCONS = [
@@ -888,7 +1285,10 @@ var ColumnFunctionsCONS = [
     ["Transparent","Color",ColorBox("none",0)                                                                                      +" Color.new(0,0,0,0)"],
 	["ErrorColor","Color",ColorBox("invert(22%) sepia(96%) saturate(4375%) hue-rotate(293deg) brightness(111%) contrast(132%)",254)+" Color.new(255,0,255,254)"],
 	["Up","Vector2","Vector2.new(0,1)"],["Down","Vector2","Vector2.new(0,-1)"],["Right","Vector2","Vector2.new(1,0)"],["Left","Vector2","Vector2.new(-1,0)"],
-    ["Front","Vector3","Vector3.new(0,0,1)"],["Back","Vector3","Vector3.new(0,0,-1)"],["StringMax","number","[Максимальный размер строки]"],["EngineChars","number","[Кол-во символов в шрифте]"]
+    ["Front","Vector3","Vector3.new(0,0,1)"],["Back","Vector3","Vector3.new(0,0,-1)"],["StringMax","number","[Максимальный размер строки]"],["EngineChars","number","[Кол-во символов в шрифте]"],
+	["Vector2Zero","Vector2","Vector2.new(0,0)"],["Vector2One","Vector2","Vector2.new(1,1)"],
+	["Vector3Zero","Vector3","Vector3.new(0,0,0)"],["Vector3One","Vector3","Vector3.new(1,1,1)"],
+	["Vector4Zero","Vector4","Vector4.new(0,0,0,0)"],["Vector4One","Vector4","Vector4.new(1,1,1,1)"],
 ]
 var ColumnFunctionsSTRUCT = [
 	["Vector2"],["Vector3"],["Vector4"],["Color"],["Vertex"],["Sound"],
@@ -2417,7 +2817,7 @@ function generateErrorGetButton(command,errorid,typ,content){
 				if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
 				var title = content;
 				
-				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<button title='"+title+"' style='margin-bottom: 30px;' onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
+				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<font style='margin-left:-1000vw; text-shadow: 0px 0px 0px transparent; user-select: none; position: absolute; color:transparent;'>???"+errorid.toUpperCase()+"???</font><button title='"+title+"' style='margin-bottom: 30px;' onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
 			}
 			return "<button onclick='ButtonPress(\""+com.toLowerCase()+"\",\""+errorid.toUpperCase()+"\",\"f\")'>"+com+"</button>";
 	}

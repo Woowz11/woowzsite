@@ -1,0 +1,250 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>� Text Styles Editor �</title>
+<link rel="icon" type="image/x-icon" href="source\idk.ico">
+
+<style>
+ts::selection{
+	background-color: transparent;
+}
+
+font::selection{
+	background-color: transparent;
+}
+
+body {
+
+}
+</style>
+
+<body>
+	<div style="margin-top: 10vh; width: 80vw; margin-left: 10vw;">
+	<textarea type="text" id="input" style="width: 100%; height: 20vh; resize: vertical; white-space: nowrap;">
+	
+[color:red]Красный текст[\]
+[scale:32]Большой текст[\]
+       [sizex:2]Широкий текст[\]
+[spacing:{sin(time/100)+0.5}]Размер между строк + использование времени[\]
+[flipx]Отзеркаленный текст[\]
+[flipy]Тоже отзеркаленный текст[\]
+[b]Жирный текст[\]
+[i]Курсивный текст[\]
+[s]Зачёркнутый текст[\]
+[u]Подчёркнутый текст[\]
+[cursor:pointer]Меняет курсор[\]
+[title:Привет!]Наведите курсор сюда[\]
+[posx:{rand/5}]Меняет растояние + использование рандома[\]
+
+
+
+
+[rot:{time}]Вращающиеся текст[\]
+
+
+
+
+
+[posy:{sin(time/50)}]W[\][posy:{sin((time-10)/50)}]A[\][posy:{sin((time-20)/50)}]V[\][posy:{sin((time-30)/50)}]E[\] [posy:{sin((time-40)/50)}]T[\][posy:{sin((time-50)/50)}]E[\][posy:{sin((time-60)/50)}]X[\][posy:{sin((time-70)/50)}]T[\]
+
+[scale:100][layer:1][ss][sizex:0.7][rot:45]|[\][ss][rot:-45]|[\][\][posx:-0.28em][font:arial][size:0.5][flipx]г[\][\][\][\][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[\][\][\][\][\][\]
+[ss][posx:0.02em][posy:-0.6em][size:1.6]□[\][posx:-0.6em]□[posy:0.1em][posx:-0.585em][size:0.8]+[\][\][\][\][\][\][\]
+[blur:3px][color:gray][posy:-1.3em][flipy][ss][sizex:0.7][rot:45]|[\][ss][rot:-45]|[\][\][posx:-0.28em][font:arial][size:0.5][flipx]г[\][\][\][\][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[\][\][\][\][\][\]
+[ss][posx:0.02em][posy:-0.6em][size:1.6]□[\][posx:-0.6em]□[posy:0.1em][posx:-0.585em][size:0.8]+[\][\][\][\][\][\][\][\][\][\][\]
+
+[scale:100][layer:10][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[\][\][\][\][posx:-0.8em][size:0.4][rot:90]:-)[\][\][\][\]
+[b][posx:0.06em][posy:-0.45em]/|\[\][\]
+[posx:0.165em][posy:-0.7em]/\[\][\][\][\]
+[layer:5][posy:-3.4em][color:rgb(150,150,150)][blur:3px][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[\][\][\][\][posx:-0.8em][size:0.4][rot:90]:-)[\][\][\][\]
+[b][posx:0.06em][posy:-0.45em]/|\[\][\]
+[posx:0.165em][posy:-0.7em]/\[\][\][\][\][\][\][\][\]
+
+[sizey:{1+(rand/10)}][sizex:{1+(rand/10)}][size:{1+(rand/10)}][scale:{round((rand)+100)}][rot:{round((rand-0.5)*2)}]тряска[\][\][\][\][\]
+	
+	</textarea>
+	<br><button>Справка</button> 0.0.1
+	<br><br><br><br><br><br>
+	<div style="background-color: rgb(240,240,240);"><font id="result" style="white-space: pre-wrap; display: inline-block; cursor: default;"></font></div>
+	</div>
+</body>
+
+<script>
+	var text = document.getElementById("input");
+	var resulttext = document.getElementById("result");
+	
+	var numbers = ["0","1","2","3","4","5","6","7","8","9"];
+	
+	var time = 0
+	function GetNum(val){
+		var parts = val.match(/\{([^}]+)\}(.*)/);
+		if (parts) {
+			var calculation = parts[1].toLowerCase();
+			var unit = parts[2];
+			
+			calculation = calculation.replace("pi",3.141592654)
+			calculation = calculation.replace("time",time)
+			calculation = calculation.replace("rand",Math.random())
+			
+			var math = calculation.replace(/(?!(sin|cos|abs|max|min|floor|ceil|round))[^\w+\-*/,().\s]/g, "");
+			math = math.replace("sin","Math.sin");
+			math = math.replace("cos","Math.cos");
+			math = math.replace("abs","Math.abs");
+			math = math.replace("max","Math.max");
+			math = math.replace("min","Math.min");
+			math = math.replace("floor","Math.floor");
+			math = math.replace("ceil","Math.ceil");
+			math = math.replace("round","Math.round");
+			
+			try{
+				calculation = eval(math);
+			}catch (error){
+				console.log("EVAL ERROR ("+math+") -> "+error);
+				return val;
+			}
+			return calculation+unit;
+		} else {
+			return val;
+		}
+	}
+	
+	function ValGetSize(val, addifnil){
+		if(val==null || val==""){
+			return "16px";
+		}
+		val = GetNum(val);
+		if(addifnil==null){addifnil="";}
+		if(numbers.includes(val.charAt(val.length-1))){
+			return val+addifnil;
+		}
+		return val;
+	}
+	
+	function TextUpdate(){
+		var t = input.value.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;&nbsp;");
+		
+		var parts = t.split("[");
+		t = ""
+		
+		for (var i = 0; i < parts.length; i++) {
+			t = t + (i!=0?"[":"")
+		
+			var t2 = parts[i]
+			
+			var parts2 = t2.split("]");
+			var cv = parts2[0].split(":");
+			var command = cv[0].toLowerCase();
+			cv.shift();
+			cv.splice(0,0,cv[0]);
+			var val = cv[0];
+			
+			var addthis = parts2[0];
+			var findcommand = true;
+			
+			if(command=="\\"){
+				addthis = "</ts>";
+			}
+			else if(command=="color"){ /*Меняет цвет*/
+				addthis = `<ts style="color:`+val+`;">`;
+			}
+			else if(command=="scale"){ /*Меняет размер*/
+				addthis = `<ts style="font-size: `+ValGetSize(val,"px")+`;">`;
+			}
+			else if(command=="spacing"){ /*Меняет дистанцию между символами*/
+				addthis = `<ts style="letter-spacing: `+ValGetSize(val,"em")+`;">`;
+			}
+			else if(command=="font"){ /*Меняет шрифт*/
+				addthis = `<ts style="font-family:`+val+`;">`;
+			}
+			else if(command=="bg-color"){ /*Меняет цвет заднего фона*/
+				addthis = `<ts style="background-color:`+val+`;">`;
+			}
+			else if(command=="rot"){ /*Повернуть*/
+				addthis = `<ts style="display: inline-block; transform: rotate(`+ValGetSize(val,"deg")+`);">`;
+			}
+			else if(command=="sizex"){ /*Размер по X*/
+				addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`);">`;
+			}
+			else if(command=="sizey"){ /*Размер по Y*/
+				addthis = `<ts style="display: inline-block; transform: scaleY(`+ValGetSize(val,"")+`);">`;
+			}
+			else if(command=="size"){ /*Размер*/
+				addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`) scaleY(`+ValGetSize(val,"")+`);">`;
+			}
+			else if(command=="height"){ /*Высота между строк*/
+				addthis = `<ts style="line-height: `+ValGetSize(val)+`;">`;
+			}
+			else if(command=="flipx"){ /*Отзеркалить по X*/
+				addthis = `<ts style="display: inline-block; transform: scaleX(-1);">`;
+			}
+			else if(command=="flipy"){ /*Отзеркалить по Y*/
+				addthis = `<ts style="display: inline-block; transform: scaleY(-1);">`;
+			}
+			else if(command=="b"){ /*Сделать жирным текст*/
+				addthis = `<ts style="font-weight: bold;">`;
+			}
+			else if(command=="i"){ /*Сделать текст наклонным*/
+				addthis = `<ts style="font-style: italic;">`;
+			}
+			else if(command=="u"){ /*Сделать текст подчёркнутым*/
+				addthis = `<ts style="text-decoration: underline;">`;
+			}
+			else if(command=="s"){ /*Сделать текст зачёркнутым*/
+				addthis = `<ts style="text-decoration: line-through;">`;
+			}
+			else if(command=="cursor"){ /*Изменить курсор при наведении*/
+				addthis = `<ts style="cursor: `+val+`;">`;
+			}
+			else if(command=="title"){ /*Добавить подсказку при наведении*/
+				addthis = `<ts title="`+val+`">`;
+			}
+			else if(command=="toright"){ /*Сделать справа*/
+				addthis = `<ts style="float: right;">`;
+			}
+			else if(command=="posx"){ /*Позиция по X*/
+				addthis = `<ts style="margin-left: `+ValGetSize(val,"em")+`;">`;
+			}
+			else if(command=="posy"){ /*Позиция по Y*/
+				addthis = `<ts style="display: inline-block; transform: translateY(`+ValGetSize(val,"em")+`);">`;
+			}
+			else if(command=="layer"){ /*Слой*/
+				addthis = `<ts style="position: relative; z-index: `+ValGetSize(val,"")+`;">`;
+			}
+			else if(command=="blur"){ /*Размытие*/
+				addthis = `<ts style="filter: blur(`+ValGetSize(val,"px")+`);">`;
+			}
+			else if(command=="ss"){ /*Сделать маленький пробел*/
+				addthis = `&nbsp;`;
+			}
+			else if(command=="ls"){ /*Сделать длинный пробел*/
+				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+			}
+			else if(command=="ls2"){ /*Сделать длинный пробел x2*/
+				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+			}
+			else if(command=="ls4"){ /*Сделать длинный пробел x4*/
+				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+			}
+			else if(command=="ls8"){ /*Сделать длинный пробел x8*/
+				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+			}
+			
+			if (addthis == parts2[0]){
+				findcommand = false;
+			}else{
+				t = t.slice(0,-1);
+			}
+			
+			for (var j = 1; j < parts2.length; j++) {
+				addthis = addthis + (j!=0&&!findcommand?"]":"") + parts2[j];
+			}
+			
+			t = t + addthis;
+		}
+		
+		resulttext.innerHTML = t;
+		
+		time++;
+		requestAnimationFrame(TextUpdate);
+	}
+	requestAnimationFrame(TextUpdate);
+	
+</script>
