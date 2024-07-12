@@ -327,8 +327,8 @@ var all_sites = [
     {
       "href": "console",
       "name": "Terminal",
-      "catalog": "test_site",
-      "hide": true,
+      "catalog": "tools",
+      "hide": false,
       "icon": "terminal",
       "tags": [
         "console","terminal"
@@ -337,11 +337,21 @@ var all_sites = [
     {
       "href": "text-scripts",
       "name": "Text Scripts",
-      "catalog": "funny",
+      "catalog": "tools",
       "hide": false,
       "icon": "a",
       "tags": [
-        "text","textscripts","textscript"
+        "textscripts","textscript"
+      ]
+    },
+	{
+      "href": "textstyles",
+      "name": "Text Styles Editor",
+      "catalog": "tools",
+      "hide": false,
+      "icon": "text",
+      "tags": [
+        "text","textstyle","textstyles"
       ]
     }
   ]

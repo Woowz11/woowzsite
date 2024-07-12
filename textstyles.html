@@ -1,80 +1,297 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>� Text Styles Editor �</title>
-<link rel="icon" type="image/x-icon" href="source\idk.ico">
+<link rel="icon" type="image/x-icon" href="source\text.ico">
 
 <style>
-ts::selection{
-	background-color: transparent;
-}
-
-font::selection{
-	background-color: transparent;
+html{
+	background: url("source/background_.png");
 }
 
 body {
 
 }
+
+font-result::selection{
+	background-color: transparent;
+}
 </style>
 
-<body>
-	<div style="margin-top: 10vh; width: 80vw; margin-left: 10vw;">
-	<textarea type="text" id="input" style="width: 100%; height: 20vh; resize: vertical; white-space: nowrap;">
-	
-[color:red]Красный текст[\]
-[scale:32]Большой текст[\]
-       [sizex:2]Широкий текст[\]
-[spacing:{sin(time/100)+0.5}]Размер между строк + использование времени[\]
-[flipx]Отзеркаленный текст[\]
-[flipy]Тоже отзеркаленный текст[\]
-[b]Жирный текст[\]
-[i]Курсивный текст[\]
-[s]Зачёркнутый текст[\]
-[u]Подчёркнутый текст[\]
-[cursor:pointer]Меняет курсор[\]
-[title:Привет!]Наведите курсор сюда[\]
-[posx:{rand/5}]Меняет растояние + использование рандома[\]
-
-
-
-
-[rot:{time}]Вращающиеся текст[\]
-
-
-
-
-
-[posy:{sin(time/50)}]W[\][posy:{sin((time-10)/50)}]A[\][posy:{sin((time-20)/50)}]V[\][posy:{sin((time-30)/50)}]E[\] [posy:{sin((time-40)/50)}]T[\][posy:{sin((time-50)/50)}]E[\][posy:{sin((time-60)/50)}]X[\][posy:{sin((time-70)/50)}]T[\]
-
-[scale:100][layer:1][ss][sizex:0.7][rot:45]|[\][ss][rot:-45]|[\][\][posx:-0.28em][font:arial][size:0.5][flipx]г[\][\][\][\][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[\][\][\][\][\][\]
-[ss][posx:0.02em][posy:-0.6em][size:1.6]□[\][posx:-0.6em]□[posy:0.1em][posx:-0.585em][size:0.8]+[\][\][\][\][\][\][\]
-[blur:3px][color:gray][posy:-1.3em][flipy][ss][sizex:0.7][rot:45]|[\][ss][rot:-45]|[\][\][posx:-0.28em][font:arial][size:0.5][flipx]г[\][\][\][\][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[\][\][\][\][\][\]
-[ss][posx:0.02em][posy:-0.6em][size:1.6]□[\][posx:-0.6em]□[posy:0.1em][posx:-0.585em][size:0.8]+[\][\][\][\][\][\][\][\][\][\][\]
-
-[scale:100][layer:10][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[\][\][\][\][posx:-0.8em][size:0.4][rot:90]:-)[\][\][\][\]
-[b][posx:0.06em][posy:-0.45em]/|\[\][\]
-[posx:0.165em][posy:-0.7em]/\[\][\][\][\]
-[layer:5][posy:-3.4em][color:rgb(150,150,150)][blur:3px][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[\][\][\][\][posx:-0.8em][size:0.4][rot:90]:-)[\][\][\][\]
-[b][posx:0.06em][posy:-0.45em]/|\[\][\]
-[posx:0.165em][posy:-0.7em]/\[\][\][\][\][\][\][\][\]
-
-[sizey:{1+(rand/10)}][sizex:{1+(rand/10)}][size:{1+(rand/10)}][scale:{round((rand)+100)}][rot:{round((rand-0.5)*2)}]тряска[\][\][\][\][\]
-	
-	</textarea>
-	<br><button>Справка</button> 0.0.1
-	<br><br><br><br><br><br>
-	<div style="background-color: rgb(240,240,240);"><font id="result" style="white-space: pre-wrap; display: inline-block; cursor: default;"></font></div>
-	</div>
+<body onload="OpenMain()">
+	<div id="main"></div>
 </body>
 
 <script>
-	var text = document.getElementById("input");
-	var resulttext = document.getElementById("result");
+	async function CopyToClipboard(text) {
+	console.log("Copy ["+text+"]");
+    try {
+		await navigator.clipboard.writeText(text);
+	} catch (error) {
+		console.error(error.message);
+    }
+  }
+
+	var body = document.getElementById("main")
+	var spravkaopen = false;
+	var loaded = false;
 	
 	var numbers = ["0","1","2","3","4","5","6","7","8","9"];
 	
 	var time = 0
+	
+	var savedtext = "";
+	
+	var exampleids = 0;
+	function GenerateExample(command, hasvalue, desc, example){
+		exampleids++;
+		return `<div style="height:30vh;">
+			<div style="display: inline-block; width:40%; height:100%;">
+				<font style="font-size:200%;">`+command+`</font><br>
+				`+(hasvalue?"<font>Принимает переменную</font>":"")+`<button style="float: right;" onclick="CopyToClipboard(\``+example+`\`);">COPY</button><button style="float: right;" onclick="document.getElementById('textarea`+exampleids+`').value = \``+example+`\`;">RESET</button><br><hr>
+				<font>`+desc+`</font>
+			</div>
+			<div style="display: inline-block; width:59%; height:100%; float: right;">
+				<div style="display: inline-block; width: 49%; height: 100%; float: left;"><textarea id="textarea`+exampleids+`" type="text" id="input" spellcheck="false" style="width: 100%; height: 100%; resize: none; white-space: nowrap;">`+example+`</textarea></div>
+				<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result`+exampleids+`" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
+			</div>
+		</div><br>`;
+	}
+	
+	var arts = ` [rotate:45]|[/] [flipy]_[/] [flipx][rotate:45]|[/][/]
+|     |
+[flipy] [rotate:45]|[/] [flipy]_[/] [flipx][rotate:45]|[/][/][/]
+
+   [rotate:45]|[/] [flipx][rotate:45]|[/][/]
+ [rotate:45]|[/]_____[flipx][rotate:45]|[/][/]
+
+
+ [scale:50][sizex:1.2][rot:45]O[/][/][sizex:1.2][posx:-0.66em][rot:-45]O[/][/][/][/]
+
+ [scale:50][flipy][posx:0.3em]R[/][posx:-1em][flipx]R[/][/][posx:-0.43em][posy:-0.43em][sizey:1.4][sizex:1.5]_[/][/][/][/][/][posx:-0.5em][posy:-0.43em][sizey:1.4][sizex:1.7]_[/][/][/][/][/]
+
+[scale:50][layer:1]Woowz11[/]
+[blur:2px][color:gray][posy:-0.5em][flipy]Woowz11[/][/][/][/][/]
+
+[scale:70][layer:10][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[/][/][/][/][posx:-0.8em][size:0.4][rot:90]:-)[/][/][/][/]
+[b][posx:0.06em][posy:-0.45em]/|\\[/][/]
+[posx:0.165em][posy:-0.7em]/\\[/][/][/][/]
+[layer:5][posy:-3.4em][color:rgb(150,150,150)][blur:3px][posx:0.26em][sizex:1.3][sizey:1.3][rot:90][font:arial]o[/][/][/][/][posx:-0.8em][size:0.4][rot:90]:-)[/][/][/][/]
+[b][posx:0.06em][posy:-0.45em]/|\\[/][/]
+[posx:0.165em][posy:-0.7em]/\\[/][/][/][/][/][/][/][/]
+
+[scale:100][ss][sizex:0.7][rot:45]|[/][ss][rot:-45]|[/][/][posx:-0.28em][font:arial][size:0.5][flipx]г[/][/][/][/][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[/][/][/][/][/][/]
+[ss][posx:0.02em][posy:-0.6em][size:1.6]□[/][posx:-0.6em][sizex:0.8][sizey:0.35][posx:0.05][posy:0.3][bg-color:yellow][div] [/][/][/][/][/][/][posx:-0.55][layer:1]□[/][posy:0.1em][posx:-0.585em][size:0.8]+[/][/][/][/][/][/][/][/]
+
+[scale:50][posy:{sin(time/50)}]W[/][posy:{sin((time-10)/50)}]A[/][posy:{sin((time-20)/50)}]V[/][posy:{sin((time-30)/50)}]E[/] [posy:{sin((time-40)/50)}]T[/][posy:{sin((time-50)/50)}]E[/][posy:{sin((time-60)/50)}]X[/][posy:{sin((time-70)/50)}]T[/][/]`;
+	
+	function OpenSpravka(){
+		exampleids = 0;
+		spravkaopen = true;
+		savedtext = document.getElementById("input").value;
+		main.innerHTML = 
+`<div style="margin-top: 10vh; width: 80vw; margin-left: 10vw;"><button onclick="OpenMain()">Назад</button><br><br>
+`+GenerateExample("color",true,"Изменяет цвет текста",`[color:red]Красный текст[/]
+[color:green]Зелёный текст[/]
+[color:blue]Синий текст[/]
+[color:rgb(255,128,0)]Оранжевый текст[/]
+[color:rgba(0,0,0,0.5)]Полупрозрачный текст[/]
+[color:#FF00FF]Фиолетовый текст[/]
+
+[color:rgb(255,0,0)]█[/][color:rgb(255,128,0)]█[/][color:rgb(255,255,0)]█[/][color:rgb(0,255,0)]█[/][color:rgb(0,128,255)]█[/][color:rgb(0,0,255)]█[/][color:rgb(255,0,255)]█[/]`)+`
+`+GenerateExample("bg-color",true,"Изменяет цвет заднего фона",`[bg-color:red]Красный задний фон[/]
+[bg-color:green]Зелёный задний фон[/]
+[bg-color:blue]Синий задний фон[/]
+[bg-color:white]Белый задний фон[/]
+[bg-color:rgb(255,128,0)]Оранжевый задний фон[/]
+[bg-color:rgba(0,0,0,0.2)]Полупрозрачный задний фон[/]
+[bg-color:#FF00FF]Фиолетовый задний фон[/]
+[bg-color:black][color:lime]Зелёный текст на чёрном фоне[/][/]
+[bg-color:black]Скрытый текст[/]
+
+Пустой цвет → [bg-color:rgb(255,0,0)] [/][bg-color:rgb(0,255,0)] [/][bg-color:rgb(0,0,255)] [/]
+[bg-color:red][scale:30]ABC[/][/]
+[scale:30][bg-color:red]ABC[/][/]`)+`
+`+GenerateExample("scale",true,"Изменяет размер текста",`[scale:16]Обычный размер[/]
+[scale:8]Маленький размер[/]
+[scale:32]Большой размер[/]
+[scale:100]💎[/]
+
+[scale:{(dsin(time/50)+1)*20}]Меняющий размер текст[/]`)+`
+`+GenerateExample("font",true,"Изменяет шрифт текста",`[font:arial]Arial: 0123 ABCD АБВГ !@#$[/]
+[font:serif]Serif: 0123 ABCD АБВГ !@#$[/]
+[font:monospace]Monospace: 0123 ABCD АБВГ !@#$[/]
+[font:cursive]Cursive: 0123 ABCD АБВГ !@#$[/]
+[font:fantasy]Fantasy: 0123 ABCD АБВГ !@#$[/]
+[font:math]Math: 0123 ABCD АБВГ !@#$[/]
+[font:system-ui]System-UI: 0123 ABCD АБВГ !@#$[/]`)+`
+`+GenerateExample("spacing | spa",true,"Изменяет отступ между буквами",`[spacing:0]Обычный текст[/]
+[spacing:0.2]Текст с небольшими отступами[/]
+[spacing:0.5]Текст с большими отступами[/]
+[spacing:-0.5]Все символы в одной строке[/]
+[spacing:{rand/50}]Случайный отступ, и чем дальше тем больше тряска[/]
+[spa:4.8]Отступ[/]`)+`
+`+GenerateExample("rotation | rotate | rot",true,"Изменяет поворот текста",`[rot:0]0°[/]
+
+[rot:90]90°[/]
+
+[rot:180]180°[/]
+
+[rot:270]270°[/]
+
+[rot:360]360°[/]
+
+    [scale:50][rot:{time*10}]/[/][/]   [py:-0.75]← вентилятор[/]`)+`
+`+GenerateExample("size",true,"Изменяет графический размер текста",`[size:1]Обычный текст[/]
+
+          [size:2]Текст в 2 раза больше[/]
+
+[size:0.5]Текст в 2 раза меньше[/]`)+`
+`+GenerateExample("sizex | sx",true,"Изменяет ширину текста",`[sizex:1]Обычный текст[/]
+       [sizex:2]Широкий текст[/]`)+`
+`+GenerateExample("sizey | sy",true,"Изменяет высоту текста",`[sizey:1]Обычный текст[/]
+
+[sizey:2]Высокий текст[/]`)+`
+`+GenerateExample("posx | px",true,"Изменяет позицию текста по горизонтали текста",`Текст 1 [posx:10][color:blue]Текст 2[/][/]
+Текст 1 [posx:-4][color:red]Текст 2[/][/]`)+`
+`+GenerateExample("posy | py",true,"Изменяет позицию текста по вертикали текста",`Текст 1 [posy:10][color:blue]Текст 2[/][/]
+Текст 1 [posy:-1.1][color:red]Текст 2[/][/]`)+`
+`+GenerateExample("layer | pz",true,"Изменяет порядок отображения элемента (слои)",`[color:red]█[/][color:blue][posy:0.5][posx:-0.35]█[/][/][/] 0:0
+
+[layer:1][color:red]█[/][/][color:blue][posy:0.5][posx:-0.35]█[/][/][/] 1:0
+
+[layer:1][color:red]█[/][/][layer:2][color:blue][posy:0.5][posx:-0.35]█[/][/][/][/] 1:2
+
+[layer:1][color:red]█[/][/][layer:{round(dsin(time/10))}][color:blue][posy:0.5][posx:-0.35]█[/][/][/][/] 1:[{round(dsin(time/10))}]`)+`
+`+GenerateExample("height",true,"Изменяет отступы между строками",`[height:3]█ - height:3
+█ - height:3
+█ - height:3[/]
+[height:1.5]█ - height:1.5
+█ - height:1.5
+█ - height:1.5[/]`)+`
+`+GenerateExample("flipx | flip",false,"Отзеркаливает элемент по вертикали",`Обычный текст
+[flipx]Отзеркаленный текст[/]`)+`
+`+GenerateExample("flipy",false,"Отзеркаливает элемент по горизонтали",`Обычный текст
+[flipy]Отзеркаленный текст[/]`)+`
+`+GenerateExample("b",false,"Делает текст жирным",`Обычный текст
+[b]Жирный текст[/]`)+`
+`+GenerateExample("i",false,"Делает текст курсивным",`Обычный текст
+[i]Курсивный текст[/]`)+`
+`+GenerateExample("s",false,"Делает текст зачёркнутым",`Обычный текст
+[s]Зачёркнутый текст[/]`)+`
+`+GenerateExample("u",false,"Делает текст подчёркнутым",`Обычный текст
+[u]Подчёркнутый текст[/]`)+`
+`+GenerateExample("toright",false,"?",`В РАЗРАБОТКЕ`)+`
+`+GenerateExample("cursor",true,"Изменяет тип курсора при наведении на элемент",`[cursor:auto]Дефолтный курсор[/]
+[cursor:default]Обычный курсор[/]
+[cursor:none]Пустой курсор[/]
+[cursor:pointer]Указательный курсор[/]
+[cursor:text]Текстовой курсор[/]
+[cursor:vertical-text]Вертикальный текстовой курсор[/]
+[cursor:move]Двигающий курсор[/]
+[cursor:grab]Рука курсор[/]
+[cursor:grabbing]Захвативший курсор[/]
+[cursor:progress]Прогресс курсор[/]
+[cursor:wait]Ожидающий курсор[/]
+[cursor:not-allowed]Заблокированный курсор[/]
+[cursor:help]Помогающий курсор[/]
+[cursor:zoom-in]Приближающий курсор[/]
+[cursor:zoom-out]Отдаляющий курсор[/]`)+`
+`+GenerateExample("title",true,"Добавляет подсказку элементу",`[title:Это подсказка!]Наведите сюда курсор и подождите[/]`)+`
+`+GenerateExample("blur",true,"Добавляет размытие элементу",`Обычный текст
+[blur:1]Размытый текст[/]
+[blur:5]Сильно размытый текст[/]
+
+  [blur:{dsin(time/50)*20}][scale:50]🍎[/][/]`)+`
+`+GenerateExample("ss",false,"Это короткий пробел",`Это обычные пробелы → █ █ █ █ █
+Это ss пробелы →       █[ss]█[ss]█[ss]█[ss]█`)+`
+`+GenerateExample("ls",true,"Это пробел со своим размером",`Это обычные пробелы → █ █ █ █ █
+Это ls:1 пробелы →      █[ls:1]█[ls:1]█[ls:1]█[ls:1]█
+Это ls:2 пробелы →      █[ls:2]█[ls:2]█[ls:2]█[ls:2]█
+Это ls:4 пробелы →      █[ls:4]█[ls:4]█[ls:4]█[ls:4]█`)+`
+`+GenerateExample("lower | low",false,"Делает текст строчными буквами",`[lower]ДЕЛАЕТ ТЕКСТ СТРОЧНЫМИ БУКВАМИ
+АБВ ABC 123[/]`)+`
+`+GenerateExample("upper | up",false,"Делает текст заглвными буквами",`[upper]делает текст заглавными буквами
+абв abc 123[/]`)+`
+`+GenerateExample("line",false,"Убирает переход между новыми строками",`[line]Убирает
+переход
+между
+новыми
+строками[/]`)+`
+`+GenerateExample("div",false,"?",`В РАЗРАБОТКЕ`)+`
+`+GenerateExample("show-space | s-space",false,"Показывает положение пробелов",`Текст показывающий пример show-space тега
+[show-space]Текст показывающий пример show-space тега[/]
+
+[show-space]   abc   
+[ss]a[ss]a[ss]a[ss]a[ss]a[ss]a[ss]a
+[ls:9][/]`)+`
+`+GenerateExample("show-newline | s-newline",false,"Показывает положение переходов на новые строки",`[show-newline]Этот
+тег
+show-newline
+показывает
+где находятся
+переходы на
+новые строки[/]
+
+[show-newline][line]Так же
+работает с
+line
+тегом[/][/]`)+`
+<br>
+<center><font style="font-scale:200%;">Различные арты</font></center><br><br>
+<div style="display: inline-block; width:100%; height:50vh;">
+	<div style="display: inline-block; width: 49%; height: 100%; float: left;"><textarea id="textarea-art" type="text" id="input" spellcheck="false" style="width: 100%; height: 100%; resize: none; white-space: nowrap;">`+arts+`</textarea></div>
+	<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result-art" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
+</div>
+
+</div>`;
+	}
+	
+	function UpdateSpravka(){
+		for(var i = 1; i <= exampleids; i++){
+			var textarea = document.getElementById("textarea"+i);
+			var result = document.getElementById("result"+i);
+			TextUpdate(result,textarea.value);
+		}
+		TextUpdate(document.getElementById("result-art"),document.getElementById("textarea-art").value);
+	}
+	
+	function OpenMain(){
+		spravkaopen = false;
+		main.innerHTML = 
+`<br><center><font style="font-size:200%;">� Text Styles Editor �</font></center><br>
+<div style="margin-top: 5vh; width: 80vw; margin-left: 10vw;">
+<textarea type="text" id="input" spellcheck="false" style="width: 100%; height: 20vh; resize: vertical; white-space: nowrap;">`+savedtext+`</textarea>
+<br><button onclick="OpenSpravka()">Справка</button><input type="checkbox" id="stopupdate"><label for="stopupdate">Остановить обновление</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font>0.0.2</font>
+<br><br><br><br><br><br>
+<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em;"><font id="result" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div>
+</div>`;
+		loaded = true;
+	}
+	
+	function ToNum(str,def,thatfloat){
+		if(def==null){def=1;}
+		if(thatfloat==null){thatfloat=false;}
+		var result = def;
+		if(thatfloat){
+			result = parseFloat(str);
+		}else{
+			result = parseInt(str);
+		}
+		if(isNaN(result)){
+			result = def;
+		}
+		return result;
+	}
+	
+	function MathDSin(v){
+		return (Math.sin(v)+1)/2;
+	}
+	function MathDCos(v){
+		return (Math.cos(v)+1)/2;
+	}
+	
 	function GetNum(val){
+		if (val === undefined){return val;}
 		var parts = val.match(/\{([^}]+)\}(.*)/);
 		if (parts) {
 			var calculation = parts[1].toLowerCase();
@@ -84,7 +301,9 @@ body {
 			calculation = calculation.replace("time",time)
 			calculation = calculation.replace("rand",Math.random())
 			
-			var math = calculation.replace(/(?!(sin|cos|abs|max|min|floor|ceil|round))[^\w+\-*/,().\s]/g, "");
+			var math = calculation.replace(/(?!(sin|cos|abs|max|min|floor|ceil|round|dsin|dcos))[^\w+\-*/,().\s]/g, "");
+			math = math.replace("dsin","MathDSin");
+			math = math.replace("dcos","MathDCos");
 			math = math.replace("sin","Math.sin");
 			math = math.replace("cos","Math.cos");
 			math = math.replace("abs","Math.abs");
@@ -118,133 +337,210 @@ body {
 		return val;
 	}
 	
-	function TextUpdate(){
-		var t = input.value.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;&nbsp;");
+	function TextUpdate(CONTAINER,TEXT){
+		var t = TEXT.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;&nbsp;").replace(/\n/g,"<br>");
 		
 		var parts = t.split("[");
 		t = ""
 		
 		for (var i = 0; i < parts.length; i++) {
-			t = t + (i!=0?"[":"")
-		
-			var t2 = parts[i]
+			if(i != 0){
+				t = t + (i!=0?"[":"");
 			
-			var parts2 = t2.split("]");
-			var cv = parts2[0].split(":");
-			var command = cv[0].toLowerCase();
-			cv.shift();
-			cv.splice(0,0,cv[0]);
-			var val = cv[0];
-			
-			var addthis = parts2[0];
-			var findcommand = true;
-			
-			if(command=="\\"){
-				addthis = "</ts>";
-			}
-			else if(command=="color"){ /*Меняет цвет*/
-				addthis = `<ts style="color:`+val+`;">`;
-			}
-			else if(command=="scale"){ /*Меняет размер*/
-				addthis = `<ts style="font-size: `+ValGetSize(val,"px")+`;">`;
-			}
-			else if(command=="spacing"){ /*Меняет дистанцию между символами*/
-				addthis = `<ts style="letter-spacing: `+ValGetSize(val,"em")+`;">`;
-			}
-			else if(command=="font"){ /*Меняет шрифт*/
-				addthis = `<ts style="font-family:`+val+`;">`;
-			}
-			else if(command=="bg-color"){ /*Меняет цвет заднего фона*/
-				addthis = `<ts style="background-color:`+val+`;">`;
-			}
-			else if(command=="rot"){ /*Повернуть*/
-				addthis = `<ts style="display: inline-block; transform: rotate(`+ValGetSize(val,"deg")+`);">`;
-			}
-			else if(command=="sizex"){ /*Размер по X*/
-				addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`);">`;
-			}
-			else if(command=="sizey"){ /*Размер по Y*/
-				addthis = `<ts style="display: inline-block; transform: scaleY(`+ValGetSize(val,"")+`);">`;
-			}
-			else if(command=="size"){ /*Размер*/
-				addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`) scaleY(`+ValGetSize(val,"")+`);">`;
-			}
-			else if(command=="height"){ /*Высота между строк*/
-				addthis = `<ts style="line-height: `+ValGetSize(val)+`;">`;
-			}
-			else if(command=="flipx"){ /*Отзеркалить по X*/
-				addthis = `<ts style="display: inline-block; transform: scaleX(-1);">`;
-			}
-			else if(command=="flipy"){ /*Отзеркалить по Y*/
-				addthis = `<ts style="display: inline-block; transform: scaleY(-1);">`;
-			}
-			else if(command=="b"){ /*Сделать жирным текст*/
-				addthis = `<ts style="font-weight: bold;">`;
-			}
-			else if(command=="i"){ /*Сделать текст наклонным*/
-				addthis = `<ts style="font-style: italic;">`;
-			}
-			else if(command=="u"){ /*Сделать текст подчёркнутым*/
-				addthis = `<ts style="text-decoration: underline;">`;
-			}
-			else if(command=="s"){ /*Сделать текст зачёркнутым*/
-				addthis = `<ts style="text-decoration: line-through;">`;
-			}
-			else if(command=="cursor"){ /*Изменить курсор при наведении*/
-				addthis = `<ts style="cursor: `+val+`;">`;
-			}
-			else if(command=="title"){ /*Добавить подсказку при наведении*/
-				addthis = `<ts title="`+val+`">`;
-			}
-			else if(command=="toright"){ /*Сделать справа*/
-				addthis = `<ts style="float: right;">`;
-			}
-			else if(command=="posx"){ /*Позиция по X*/
-				addthis = `<ts style="margin-left: `+ValGetSize(val,"em")+`;">`;
-			}
-			else if(command=="posy"){ /*Позиция по Y*/
-				addthis = `<ts style="display: inline-block; transform: translateY(`+ValGetSize(val,"em")+`);">`;
-			}
-			else if(command=="layer"){ /*Слой*/
-				addthis = `<ts style="position: relative; z-index: `+ValGetSize(val,"")+`;">`;
-			}
-			else if(command=="blur"){ /*Размытие*/
-				addthis = `<ts style="filter: blur(`+ValGetSize(val,"px")+`);">`;
-			}
-			else if(command=="ss"){ /*Сделать маленький пробел*/
-				addthis = `&nbsp;`;
-			}
-			else if(command=="ls"){ /*Сделать длинный пробел*/
-				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-			}
-			else if(command=="ls2"){ /*Сделать длинный пробел x2*/
-				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-			}
-			else if(command=="ls4"){ /*Сделать длинный пробел x4*/
-				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-			}
-			else if(command=="ls8"){ /*Сделать длинный пробел x8*/
-				addthis = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-			}
-			
-			if (addthis == parts2[0]){
-				findcommand = false;
+				var t2 = parts[i];
+				
+				var parts2 = t2.split("]");
+				var cv = parts2[0].split(":");
+				var command = cv[0].toLowerCase();
+				cv.shift();
+				cv.splice(0,0,cv[0]);
+				var val = cv[0];
+				
+				var addthis = parts2[0];
+				var findcommand = true;
+				
+				if(command=="\\"||command=="/"){
+					addthis = "</ts>";
+				}
+				else if(command=="show-space"||command=="s-space"){ /*Показывает пробелы*/
+					addthis = `<ts id="show-space">`;
+				}
+				else if(command=="show-newline"||command=="s-newline"){ /*Показывает на следущие строки*/
+					addthis = `<ts id="show-newline">`;
+				}
+				else if(command=="line"){ /*Уберает следущие строки, делает в линию*/
+					addthis = `<ts id="line">`;
+				}
+				else if(command=="lower"||command=="low"){ /*Делает текст низким*/
+					addthis = `<ts id="lower">`;
+				}
+				else if(command=="upper"||command=="up"){ /*Делает текст высоким*/
+					addthis = `<ts id="upper">`;
+				}
+				else if(command=="color"){ /*Меняет цвет*/
+					addthis = `<ts style="color:`+val+`;">`;
+				}
+				else if(command=="scale"){ /*Меняет размер*/
+					addthis = `<ts style="font-size: `+ValGetSize(val,"px")+`;">`;
+				}
+				else if(command=="spacing"||command=="spa"){ /*Меняет дистанцию между символами*/
+					addthis = `<ts style="letter-spacing: `+ValGetSize(val,"em")+`;">`;
+				}
+				else if(command=="font"){ /*Меняет шрифт*/
+					addthis = `<ts style="font-family:`+val+`;">`;
+				}
+				else if(command=="bg-color"){ /*Меняет цвет заднего фона*/
+					addthis = `<ts style="background-color:`+val+`;">`;
+				}
+				else if(command=="div"){ /*Помещает в блок*/
+					addthis = `<ts style="display: inline-block;">`;
+				}
+				else if(command=="rotation"||command=="rotate"||command=="rot"){ /*Повернуть*/
+					addthis = `<ts style="display: inline-block; transform: rotate(`+ValGetSize(val,"deg")+`);">`;
+				}
+				else if(command=="sizex"||command=="sx"){ /*Размер по X*/
+					addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`);">`;
+				}
+				else if(command=="sizey"||command=="sy"){ /*Размер по Y*/
+					addthis = `<ts style="display: inline-block; transform: scaleY(`+ValGetSize(val,"")+`);">`;
+				}
+				else if(command=="size"){ /*Размер*/
+					addthis = `<ts style="display: inline-block; transform: scaleX(`+ValGetSize(val,"")+`) scaleY(`+ValGetSize(val,"")+`);">`;
+				}
+				else if(command=="height"){ /*Высота между строк*/
+					addthis = `<ts style="line-height: `+ValGetSize(val)+`;">`;
+				}
+				else if(command=="flipx"||command=="flip"){ /*Отзеркалить по X*/
+					addthis = `<ts style="display: inline-block; transform: scaleX(-1);">`;
+				}
+				else if(command=="flipy"){ /*Отзеркалить по Y*/
+					addthis = `<ts style="display: inline-block; transform: scaleY(-1);">`;
+				}
+				else if(command=="b"){ /*Сделать жирным текст*/
+					addthis = `<ts style="font-weight: bold;">`;
+				}
+				else if(command=="i"){ /*Сделать текст наклонным*/
+					addthis = `<ts style="font-style: italic;">`;
+				}
+				else if(command=="u"){ /*Сделать текст подчёркнутым*/
+					addthis = `<ts style="text-decoration: underline;">`;
+				}
+				else if(command=="s"){ /*Сделать текст зачёркнутым*/
+					addthis = `<ts style="text-decoration: line-through;">`;
+				}
+				else if(command=="cursor"){ /*Изменить курсор при наведении*/
+					addthis = `<ts style="cursor: `+val+`;">`;
+				}
+				else if(command=="title"){ /*Добавить подсказку при наведении*/
+					addthis = `<ts title="`+val+`">`;
+				}
+				else if(command=="toright"){ /*Сделать справа*/
+					addthis = `<ts style="float: right;">`;
+				}
+				else if(command=="posx"||command=="px"){ /*Позиция по X*/
+					addthis = `<ts style="margin-left: `+ValGetSize(val,"em")+`;">`;
+				}
+				else if(command=="posy"||command=="py"){ /*Позиция по Y*/
+					addthis = `<ts style="display: inline-block; transform: translateY(`+ValGetSize(val,"em")+`);">`;
+				}
+				else if(command=="layer"||command=="pz"){ /*Слой*/
+					addthis = `<ts style="position: relative; z-index: `+ValGetSize(val,"")+`;">`;
+				}
+				else if(command=="blur"){ /*Размытие*/
+					addthis = `<ts style="filter: blur(`+ValGetSize(val,"px")+`);">`;
+				}
+				else if(command=="ss"){ /*Сделать маленький пробел*/
+					addthis = `&nbsp;`;
+				}
+				else if(command=="ls"){ /*Сделать длинный пробел*/
+					var num = Math.abs(ToNum(GetNum(val)))
+					addthis="";
+					for (var i_ = 0; i_ < num; i_++) {
+						addthis = addthis+"&nbsp;&nbsp";
+					}
+				}
+				else{
+					if(command.charAt(0)=="{"&&command.charAt(command.length-1)=="}"){
+						addthis = GetNum(command);
+					}else{
+						findcommand = false;
+					}
+				}
+				
+				if(findcommand){
+					t = t.slice(0,-1);
+				}
+				
+				for (var j = 1; j < parts2.length; j++) {
+					addthis = addthis + (j!=1||!findcommand?"]":"") + parts2[j];
+				}
+				
+				t = t + addthis;
 			}else{
-				t = t.slice(0,-1);
+				t = parts[i];
 			}
-			
-			for (var j = 1; j < parts2.length; j++) {
-				addthis = addthis + (j!=0&&!findcommand?"]":"") + parts2[j];
-			}
-			
-			t = t + addthis;
 		}
 		
+		var resulttext = CONTAINER;
 		resulttext.innerHTML = t;
 		
-		time++;
-		requestAnimationFrame(TextUpdate);
+		var elements = resulttext.querySelectorAll("*");
+		for(var i = 0; i < elements.length; i++){
+			var e = elements[i];
+			var content = e.innerHTML;
+			var id = e.id;
+			if(id=="show-newline"){
+				e.innerHTML = content.replace(/<br>/g,"→<br>");
+			}else if(id=="lower"){
+				e.innerHTML = content.toLowerCase();
+			}else if(id=="upper"){
+				content = content.replace(/&nbsp;/g,"ꬥ")
+				content = content.replace(/&lt;/g,"ꬨ")
+				content = content.replace(/&gt;/g,"ꬆ")
+				content = content.toUpperCase();
+				content = content.replace(/ꬥ/g,"&nbsp;")
+				content = content.replace(/ꬨ/g,"&lt;")
+				e.innerHTML = content.replace(/ꬆ/g,"&gt;")
+			}
+		}
+		
+		elements = resulttext.querySelectorAll("*");
+		for(var i = 0; i < elements.length; i++){
+			var e = elements[i];
+			var content = e.innerHTML;
+			var id = e.id;
+			if(id=="line"){
+				e.innerHTML = content.replace(/<br>/g,"&nbsp;&nbsp;");
+			}
+		}
+		
+		elements = resulttext.querySelectorAll("*");
+		for(var i = 0; i < elements.length; i++){
+			var e = elements[i];
+			var content = e.innerHTML;
+			var id = e.id;
+			if(id=="show-space"){
+				e.innerHTML = content.replace(/&nbsp;/g," ̱");
+			}
+		}
 	}
-	requestAnimationFrame(TextUpdate);
+	
+	function Update(){
+		if(loaded){
+		
+			if(!spravkaopen){
+				if(!document.getElementById("stopupdate").checked){
+					TextUpdate(document.getElementById("result"),document.getElementById("input").value);
+				}
+			}else{
+				UpdateSpravka();
+			}
+			
+			time++;
+		}
+		requestAnimationFrame(Update);
+	}
+	
+	requestAnimationFrame(Update);
 	
 </script>

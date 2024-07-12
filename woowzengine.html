@@ -35,7 +35,7 @@
     background-image: url("source/concrete2.png");
     background-blend-mode: multiply;
     background-color: rgb(255,255,255);
-    text-shadow: 0px 2px 5px currentColor;
+    text-shadow: 0px 2px 5px color-mix(in srgb, currentColor 70%, transparent);
 	cursor: default;
   }
 
@@ -982,7 +982,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			Кол-во категорий: `+Object.keys(FunctionsTypes).length+`<br>
 			Кол-во ошибок&nbsp;&nbsp;&nbsp;: `+Object.keys(ColumnErrors).length+`<br>
 			Кол-во страниц&nbsp;&nbsp;: `+Object.keys(Pages).length+" ("+((Math.floor((Object.keys(Pages).length/(Object.keys(ColumnOther).length+Object.keys(kolvofunc+ColumnErrors).length))*10000))/100)+"%)"+`<br>
-			Кол-во зап. стр.: `+Object.keys(ColumnOther).length+" + "+kolvofunc+" + "+Object.keys(ColumnErrors).length+" = "+(Object.keys(ColumnOther).length+Object.keys(kolvofunc+ColumnErrors).length)+`<br>
+			Кол-во всег.стр.: `+Object.keys(ColumnOther).length+" + "+kolvofunc+" + "+Object.keys(ColumnErrors).length+" = "+(Object.keys(ColumnOther).length+Object.keys(kolvofunc+ColumnErrors).length)+`<br>
 			Кол-во смеш.карт: `+funnyimages+`<br>
 			
 			</div>
@@ -1344,7 +1344,9 @@ var Pages = {
     
     <center>
 
-    Пока-что официальных игр на движке WoowzEngine нету.
+    Пока-что официальных игр на движке WoowzEngine нету.<br>
+	<br>
+	Редактор сцен WoowzEngine в процессе разработки...<br>
 
     </center>
     `,``],
