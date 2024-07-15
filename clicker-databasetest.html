@@ -6,27 +6,46 @@
 <style>
 body {
 	background-image: url("source/background_.png");
+	text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
 	cursor: default;
 }
 
 ::selection{
 	background-color: transparent;
+	text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
 }
 </style>
 
 <body>
-    <div style="position: fixed; top: 40%; left: 47%; transform: translate(-50%, -50%);"><center><p style="font-size:50px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);" id="text">?</p>
-    <br>
-    <button title="+1" id="clickButton" style="transform: scale(1.5); cursor: pointer;">+</button></center></div>
+    <div style="position: fixed; top: 40%; left: 47%; transform: translate(-50%, -50%);"><center>
+
+		<p style="font-size:50px;" id="text">?</p>
+		<br>
+		<button title="+1" id="clickButton" style="transform: scale(1.5); cursor: pointer;">+</button>
+
+		<br><br><br>
+
+		<p style="font-size:50px;" id="text2">?</p>
+		<br>
+		<button title="-1" id="clickButtonMINUS" style="transform: scale(1.5); cursor: pointer;">-</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title="+1" id="clickButtonPLUS" style="transform: scale(1.5); cursor: pointer;">+</button>
+	
+	</center></div>
 </body>
 
 <script type="module">
 
 import { SaveData, LoadData } from "./woowzsite-private/database.js";
 
+var click_1 = 0;
+var click_2 = 0;
+
+
 LoadData("clicker-databasetest").then((data) => {
     if (data) {
-		document.getElementById("text").textContent = data.click;
+		click_1 = data.click;
+		document.getElementById("text").textContent = click_1;
+		click_2 = data.click2;
+		document.getElementById("text2").textContent = click_2;
     }
 });
 
@@ -36,13 +55,56 @@ function Click() {
 		waiting = true;
 		LoadData("clicker-databasetest").then((data) => {
 			if (data) {
-				document.getElementById("text").textContent = data.click+1;
-				SaveData("clicker-databasetest",{click: data.click+1});
+				click_1 = data.click+1;
+				document.getElementById("text").textContent = click_1;
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
 			}
 		});
 		waiting = false;
 	}
 }
 document.getElementById("clickButton").addEventListener("click", Click);
+
+function ClickPLUS() {
+	if(document.getElementById("text2").textContent!="?"&&!waiting){
+		waiting = true;
+		LoadData("clicker-databasetest").then((data) => {
+			if (data) {
+				click_2 = data.click2+1;
+				document.getElementById("text2").textContent = click_2;
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
+			}
+		});
+		waiting = false;
+	}
+}
+document.getElementById("clickButtonPLUS").addEventListener("click", ClickPLUS);
+function ClickMIN() {
+	if(document.getElementById("text2").textContent!="?"&&!waiting){
+		waiting = true;
+		LoadData("clicker-databasetest").then((data) => {
+			if (data) {
+				click_2 = data.click2-1;
+				document.getElementById("text2").textContent = click_2;
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
+			}
+		});
+		waiting = false;
+	}
+}
+document.getElementById("clickButtonMINUS").addEventListener("click", ClickMIN);
+
+function Update(){
+	LoadData("clicker-databasetest").then((data) => {
+		if (data) {
+			click_1 = data.click;
+			document.getElementById("text").textContent = click_1;
+			click_2 = data.click2;
+			document.getElementById("text2").textContent = click_2;
+		}
+	});
+}
+
+setInterval(Update, 3000);
 
 </script>
