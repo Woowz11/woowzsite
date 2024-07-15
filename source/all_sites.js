@@ -306,6 +306,16 @@ var all_sites = [
       ]
     },
     {
+      "href": "clicker-databasetest",
+      "name": "Clicker Database Test",
+      "catalog": "funny",
+      "hide": false,
+      "icon": "click",
+      "tags": [
+        "clicker","database"
+      ]
+    },
+    {
       "href": "blank",
       "name": "Blank",
       "catalog": "test_site",
@@ -344,7 +354,7 @@ var all_sites = [
         "textscripts","textscript"
       ]
     },
-	{
+    {
       "href": "textstyles",
       "name": "Text Styles Editor",
       "catalog": "tools",
