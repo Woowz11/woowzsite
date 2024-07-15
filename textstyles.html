@@ -12,7 +12,7 @@ body {
 
 }
 
-font-result::selection{
+:not(textarea)::selection{
 	background-color: transparent;
 }
 </style>
@@ -52,7 +52,7 @@ font-result::selection{
 			</div>
 			<div style="display: inline-block; width:59%; height:100%; float: right;">
 				<div style="display: inline-block; width: 49%; height: 100%; float: left;"><textarea id="textarea`+exampleids+`" type="text" id="input" spellcheck="false" style="width: 100%; height: 100%; resize: none; white-space: nowrap;">`+example+`</textarea></div>
-				<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result`+exampleids+`" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
+				<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result`+exampleids+`" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
 			</div>
 		</div><br>`;
 	}
@@ -80,7 +80,7 @@ font-result::selection{
 [posx:0.165em][posy:-0.7em]/\\[/][/][/][/][/][/][/][/]
 
 [scale:100][ss][sizex:0.7][rot:45]|[/][ss][rot:-45]|[/][/][posx:-0.28em][font:arial][size:0.5][flipx]г[/][/][/][/][posy:0.1em][posx:-0.72em][size:0.6]○[posy:0.19em][size:0.9][posx:-0.58em]*[/][/][/][/][/][/]
-[ss][posx:0.02em][posy:-0.6em][size:1.6]□[/][posx:-0.6em][sizex:0.8][sizey:0.35][posx:0.05][posy:0.3][bg-color:yellow][div] [/][/][/][/][/][/][posx:-0.55][layer:1]□[/][posy:0.1em][posx:-0.585em][size:0.8]+[/][/][/][/][/][/][/][/]
+[ss][posx:0.02em][posy:-0.6em][size:1.6]□[/][posx:-0.6em][sizex:0.8][sizey:0.35][posx:0.05][posy:0.3][bg-color:yellow] [/][/][/][/][/][posx:-0.55][layer:1]□[/][posy:0.1em][posx:-0.585em][size:0.8]+[/][/][/][/][/][/][/][/]
 
 [scale:50][posy:{sin(time/50)}]W[/][posy:{sin((time-10)/50)}]A[/][posy:{sin((time-20)/50)}]V[/][posy:{sin((time-30)/50)}]E[/] [posy:{sin((time-40)/50)}]T[/][posy:{sin((time-50)/50)}]E[/][posy:{sin((time-60)/50)}]X[/][posy:{sin((time-70)/50)}]T[/][/]`;
 	
@@ -180,7 +180,6 @@ font-result::selection{
 [s]Зачёркнутый текст[/]`)+`
 `+GenerateExample("u",false,"Делает текст подчёркнутым",`Обычный текст
 [u]Подчёркнутый текст[/]`)+`
-`+GenerateExample("toright",false,"?",`В РАЗРАБОТКЕ`)+`
 `+GenerateExample("cursor",true,"Изменяет тип курсора при наведении на элемент",`[cursor:auto]Дефолтный курсор[/]
 [cursor:default]Обычный курсор[/]
 [cursor:none]Пустой курсор[/]
@@ -217,7 +216,15 @@ font-result::selection{
 между
 новыми
 строками[/]`)+`
-`+GenerateExample("div",false,"?",`В РАЗРАБОТКЕ`)+`
+`+GenerateExample("char",true,"Конвертирует число в Unicode символ",`[char:48] [char:49] [char:50] [char:51] [char:52] [char:53] [char:54] [char:55] [char:56] [char:57]
+
+[char:{dmsin(time/200)*128}] ← ASCII таблица
+
+[char:{dmsin(time/400)*256}] ← Расширенная ASCII таблица
+
+[char:{time/3}] ← Unicode таблица`)+`
+`+GenerateExample("r",false,"Берёт случайный ASCII символ",`[r][r][r][r][r][r][r][r][r][r]`)+`
+`+GenerateExample("rr",false,"Берёт случайный Unicode символ",`[rr][rr][rr][rr][rr][rr][rr][rr][rr][rr]`)+`
 `+GenerateExample("show-space | s-space",false,"Показывает положение пробелов",`Текст показывающий пример show-space тега
 [show-space]Текст показывающий пример show-space тега[/]
 
@@ -240,7 +247,7 @@ line
 <center><font style="font-scale:200%;">Различные арты</font></center><br><br>
 <div style="display: inline-block; width:100%; height:50vh;">
 	<div style="display: inline-block; width: 49%; height: 100%; float: left;"><textarea id="textarea-art" type="text" id="input" spellcheck="false" style="width: 100%; height: 100%; resize: none; white-space: nowrap;">`+arts+`</textarea></div>
-	<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result-art" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
+	<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em; width:49%; height:100%; display: inline-block; float: right;"><div style="overflow: auto; width:100%; height:100%;"><font id="result-art" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div></div>
 </div>
 
 </div>`;
@@ -263,9 +270,13 @@ line
 <textarea type="text" id="input" spellcheck="false" style="width: 100%; height: 20vh; resize: vertical; white-space: nowrap;">`+savedtext+`</textarea>
 <br><button onclick="OpenSpravka()">Справка</button><input type="checkbox" id="stopupdate"><label for="stopupdate">Остановить обновление</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font>0.0.2</font>
 <br><br><br><br><br><br>
-<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em;"><font id="result" class="font-result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div>
+<div style="background-color: rgba(0,0,0,0.05); border-radius: 1em;"><font id="result" style="white-space: nowrap; display: inline-block; cursor: default;"></font></div>
 </div>`;
 		loaded = true;
+	}
+	
+	function Random(min,max){
+		return Math.round(Math.random()*(max-min)+min);
 	}
 	
 	function ToNum(str,def,thatfloat){
@@ -289,6 +300,18 @@ line
 	function MathDCos(v){
 		return (Math.cos(v)+1)/2;
 	}
+	function MathMSin(x){
+		return (Math.abs(Math.abs(((Math.PI/2-x) / 2) % Math.PI) / (Math.PI / 2) - 1)-0.5)*2;
+	}
+	function MathMCos(x){
+		return (Math.abs(Math.abs((x / 2) % Math.PI) / (Math.PI / 2) - 1)-0.5)*2;
+	}
+	function MathDMSin(x){
+		return Math.abs(Math.abs(((Math.PI/2-x) / 2) % Math.PI) / (Math.PI / 2) - 1);
+	}
+	function MathDMCos(x){
+		return Math.abs(Math.abs((x / 2) % Math.PI) / (Math.PI / 2) - 1);
+	}
 	
 	function GetNum(val){
 		if (val === undefined){return val;}
@@ -297,21 +320,27 @@ line
 			var calculation = parts[1].toLowerCase();
 			var unit = parts[2];
 			
-			calculation = calculation.replace("pi",3.141592654)
-			calculation = calculation.replace("time",time)
-			calculation = calculation.replace("rand",Math.random())
+			calculation = calculation.replace(/pi/g,3.141592654)
+			calculation = calculation.replace(/time/g,time)
+			calculation = calculation.replace(/rand/g, function() {
+				return Math.random();
+			});
 			
 			var math = calculation.replace(/(?!(sin|cos|abs|max|min|floor|ceil|round|dsin|dcos))[^\w+\-*/,().\s]/g, "");
-			math = math.replace("dsin","MathDSin");
-			math = math.replace("dcos","MathDCos");
-			math = math.replace("sin","Math.sin");
-			math = math.replace("cos","Math.cos");
-			math = math.replace("abs","Math.abs");
-			math = math.replace("max","Math.max");
-			math = math.replace("min","Math.min");
-			math = math.replace("floor","Math.floor");
-			math = math.replace("ceil","Math.ceil");
-			math = math.replace("round","Math.round");
+			math = math.replace(/dmsin/g,"MathDMSin");
+			math = math.replace(/dmcos/g,"MathDMCos");
+			math = math.replace(/msin/g,"MathMSin");
+			math = math.replace(/mcos/g,"MathMCos");
+			math = math.replace(/dsin/g,"MathDSin");
+			math = math.replace(/dcos/g,"MathDCos");
+			math = math.replace(/sin/g,"Math.sin");
+			math = math.replace(/cos/g,"Math.cos");
+			math = math.replace(/abs/g,"Math.abs");
+			math = math.replace(/max/g,"Math.max");
+			math = math.replace(/min/g,"Math.min");
+			math = math.replace(/floor/g,"Math.floor");
+			math = math.replace(/ceil/g,"Math.ceil");
+			math = math.replace(/round/g,"Math.round");
 			
 			try{
 				calculation = eval(math);
@@ -339,6 +368,14 @@ line
 	
 	function TextUpdate(CONTAINER,TEXT){
 		var t = TEXT.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;&nbsp;").replace(/\n/g,"<br>");
+		
+		t = t.replace(/\[(r|R){1,2}\]/g, function(match) {
+			if (match === "[r]") {
+				return String.fromCharCode(Random(33, 126));
+			} else {
+				return String.fromCharCode(Random(33, 96000));
+			}
+		});
 		
 		var parts = t.split("[");
 		t = ""
@@ -392,9 +429,6 @@ line
 				else if(command=="bg-color"){ /*Меняет цвет заднего фона*/
 					addthis = `<ts style="background-color:`+val+`;">`;
 				}
-				else if(command=="div"){ /*Помещает в блок*/
-					addthis = `<ts style="display: inline-block;">`;
-				}
 				else if(command=="rotation"||command=="rotate"||command=="rot"){ /*Повернуть*/
 					addthis = `<ts style="display: inline-block; transform: rotate(`+ValGetSize(val,"deg")+`);">`;
 				}
@@ -434,9 +468,6 @@ line
 				else if(command=="title"){ /*Добавить подсказку при наведении*/
 					addthis = `<ts title="`+val+`">`;
 				}
-				else if(command=="toright"){ /*Сделать справа*/
-					addthis = `<ts style="float: right;">`;
-				}
 				else if(command=="posx"||command=="px"){ /*Позиция по X*/
 					addthis = `<ts style="margin-left: `+ValGetSize(val,"em")+`;">`;
 				}
@@ -453,11 +484,15 @@ line
 					addthis = `&nbsp;`;
 				}
 				else if(command=="ls"){ /*Сделать длинный пробел*/
-					var num = Math.abs(ToNum(GetNum(val)))
+					var num = Math.abs(ToNum(GetNum(val)));
 					addthis="";
 					for (var i_ = 0; i_ < num; i_++) {
 						addthis = addthis+"&nbsp;&nbsp";
 					}
+				}
+				else if(command=="char"){ /*Получить символ по числу*/
+					var num = ToNum(GetNum(val));
+					addthis=String.fromCharCode(num);
 				}
 				else{
 					if(command.charAt(0)=="{"&&command.charAt(command.length-1)=="}"){

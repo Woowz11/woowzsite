@@ -1,0 +1,2 @@
+Обновить субмодули
+git submodule update --recursive --remote

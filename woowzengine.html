@@ -1207,10 +1207,11 @@ var ColumnFunctionsFUNC = [
 	["@TextFont()"],["@TextColor()"],["GetASCIIChar()"],["@TextText()"],["@TextHeight()"],["StringToColors()"],["@ShowCursor()"],["Even()"],["@TextMono()"],["GetUnicodeChar()"],
 	["MessageBox()"],["GetEngineChar()"],["@WindowImGui()"],["CreateImGuiWindow()"],["CreateImGuiElement()"],["@ImGuiElementText()"],["@ImGuiElementColor()"],["SetImGuiElementEvent()"],["RandomColor()"],
 	["@ImGuiElementPoint()"],["@ImGuiElementStringValue()"],["@ImGuiElementConnect()"],["@ImGuiElementToollip()"],["@ImGuiFontScale()"],["@ImGuiWindowVsibile()"],["@ImGuiElementValue()"],
+	["MSin()"],["MCos()"],["DMSin()"],["DMCos()"],
 ]
 var FunctionsTypes = {
   "Математика":["abs","abscos","ceil","cos","dcos","dsin","floor","random","round","rrandom","sin","sign","abssin","lerp","acos","asin","atan","cbrt","clamp","div","exp","expm","fabs","fdim","fma","frac","frandom","frrandom",
-    "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","@seed","even"
+    "htan","hypot","mod","max","min","modf","mul","log","log10","loge","hcos","hsin","sub","sum","tan","todeg","sqrt","torad","trunc","pow","tonumber","@seed","even","msin","mcos","dmsin","dmcos"
   ],
   "Строка":["charcters","getasciichar","length","tostring","uppercase","lowercase","substr","replace","hasstring","remove","getunicodechar","getenginechar"
   ],
@@ -2694,6 +2695,8 @@ SetWindowScene("window","scene")
 CreateSprite("sprite","scene")
 `)+`</pre>
 `+"</div>","Создаёт спрайт"],
+
+"msin()": [FunctionInfo("MSin",true,false)+"см textstyles, там эта функция "+CreateDesmos("ks1v1aqerp"),"?"],
 
   }
 

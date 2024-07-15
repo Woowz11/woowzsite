@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Clicker</title>
+<link rel="icon" type="image/x-png" href="source/click.png">
+
+<style>
+body {
+	background-image: url("source/background_.png");
+	cursor: default;
+}
+
+::selection{
+	background-color: transparent;
+}
+</style>
+
+<body>
+    <div style="position: fixed; top: 40%; left: 47%; transform: translate(-50%, -50%);"><center><p style="font-size:50px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);" id="text">?</p>
+    <br>
+    <button title="+1" id="clickButton" style="transform: scale(1.5); cursor: pointer;">+</button></center></div>
+</body>
+
+<script type="module">
+
+import { SaveData, LoadData } from "./woowzsite-private/database.js";
+
+LoadData("clicker-databasetest").then((data) => {
+    if (data) {
+		document.getElementById("text").textContent = data.click;
+    }
+});
+
+var waiting = false;
+function Click() {
+	if(document.getElementById("text").textContent!="?"&&!waiting){
+		waiting = true;
+		LoadData("clicker-databasetest").then((data) => {
+			if (data) {
+				document.getElementById("text").textContent = data.click+1;
+				SaveData("clicker-databasetest",{click: data.click+1});
+			}
+		});
+		waiting = false;
+	}
+}
+document.getElementById("clickButton").addEventListener("click", Click);
+
+</script>
