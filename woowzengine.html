@@ -448,41 +448,49 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     });
   }
 
-  function ButtonPress(id,lastopen,type){
-	document.title = "WoowzEngine - #"+id;
-    if(lastopen==""){lastopen=null}
-    if(type==null){type="";}
-    var ids = Object.keys(Pages);
-    var index = ids.indexOf(id);
+  function ButtonPress(id,lastopen,type,event){
+	var middlemouse = event!=null;
+	if(middlemouse){
+		middlemouse = event.which == 2 || event.button == 1;
+	}
+    if (middlemouse) {
+        window.open("https://woowz11.github.io/woowzsite/woowzengine.html#"+id,"_blank");
+    }else{
+		document.title = "WoowzEngine - #"+id;
+		if(lastopen==""){lastopen=null}
+		if(type==null){type="";}
+		var ids = Object.keys(Pages);
+		var index = ids.indexOf(id);
     
-    var id_next = "";
-    var id_prev = "";
+		var id_next = "";
+		var id_prev = "";
 
-    if(index < ids.length - 1){
-      id_next = ids[index+1];
-    }
+		if(index < ids.length - 1){
+			id_next = ids[index+1];
+		}
     
-    if(index > 0){
-      id_prev = ids[index-1];
-    }
+		if(index > 0){
+			id_prev = ids[index-1];
+		}
 
-    var htmlstart = `
-    <div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":(type=="e"?"40,40,40":"142,0,4"))+`);">
-      <br><br>
-      <div style="margin-left: 50px;"><button `+(lastopen?(lastopen=="#IDS#"?`title="Вернуться на ID's"`:"title='Вернуться на #"+lastopen+"'"):"")+` onclick="`+(lastopen?(lastopen == "#IDS#"?"OpenIDs()":"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')"):"StartScreen()")+`">`+(lastopen?"Обратно":"На главную")+`</button>
-        `+(id_prev==""?"":"<button title='Открыть #"+id_prev+"' onclick='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\")'>Прошлое</button>")+` `+
-        (id_next==""?"":"<button title='Открыть #"+id_next+"' onclick='ButtonPress(\""+id_next+"\",\"\",\""+type+"\")'>Следующее</button>")+`
-        <button title='Скопировать #`+id+`!' onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
-      </div>
-    </div><br>
-    `;
-    var html = "<center>Не найдено [<font style='font-style: italic;'>"+id+"</font>]! Может быть ещё не создано!<br><br>Not found [<font style='font-style: italic;'>"+id+"</font>]! Maybe it hasn't been created!</center>";
-    if(id in Pages){
-        html = Pages[id][0];
-    }
-    body.innerHTML = htmlstart+html+"<br>";
+		var htmlstart = `
+		<div class="header" style="height: 15vh; width: 100%; background-color: rgb(`+(type=="f"?"45,142,0":(type=="e"?"40,40,40":"142,0,4"))+`);">
+		<br><br>
+		<div style="margin-left: 50px;"><button `+(lastopen?(lastopen=="#IDS#"?`title="Вернуться на ID's"`:"title='Вернуться на #"+lastopen+"'"):"")+` onmousedown="`+(lastopen?(lastopen == "#IDS#"?"OpenIDs()":"ButtonPress('"+lastopen+"','','"+(lastopen?type:"")+"')"):"StartScreen(event)")+`">`+(lastopen?"Обратно":"На главную")+`</button>
+			`+(id_prev==""?"":"<button title='Открыть #"+id_prev+"' onmousedown='ButtonPress(\""+id_prev+"\",\"\",\""+type+"\",event)'>Прошлое</button>")+` `+
+			(id_next==""?"":"<button title='Открыть #"+id_next+"' onmousedown='ButtonPress(\""+id_next+"\",\"\",\""+type+"\",event)'>Следующее</button>")+`
+			<button title='Скопировать #`+id+`!' onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+id+`')">Скопировать ссылку</button>
+		</div>
+		</div><br>
+		`;
+		var html = "<center>Не найдено [<font style='font-style: italic;'>"+id+"</font>]! Может быть ещё не создано!<br><br>Not found [<font style='font-style: italic;'>"+id+"</font>]! Maybe it hasn't been created!</center>";
+		if(id in Pages){
+			html = Pages[id][0];
+		}
+		body.innerHTML = htmlstart+html+"<br>";
 
-    UpdateCode();
+		UpdateCode();
+	}
   }
 
   function FunctionInfo(name,hasreturn,dangerous){
@@ -507,7 +515,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
       <br>
       <font>•`+category+`•</font><br>
       `+(thatgetset?"Get: <font style='font-size: 15px;'>RETURNABLE</font>":(hasreturn?"<font style='font-size: 15px;'>RETURNABLE</font>":""))+`<br>
-      `+(dangerous?"Эта функция не будет работать в <button onclick=\"ButtonPress('savemode','"+name.toLowerCase()+"()')\">безопасном режиме</button>!":"")+`
+      `+(dangerous?"Эта функция не будет работать в <button onclick=\"ButtonPress('savemode','"+name.toLowerCase()+"()','o',event)\">безопасном режиме</button>!":"")+`
       <br><br><hr><br>
     </center><br>
     <div style="margin-left: 20vw; width: 60vw; font-family: monospace;">
@@ -696,7 +704,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		
 		var notfirst = false;
 		for (let key in list) {
-			result = result + (notfirst?"<br>":"") + `<button title="Скопировать #`+key+`!" onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+key+`')" style="margin-left:-25px; margin-top:2px; position:absolute; width: 10px; height: 10px;"><div style="font-size: 14px; position:absolute; margin-top:-12px; margin-left:-1px;">C</div></button>` + `<a `+(list[key][2]==""?"":`title="`+list[key][2]+`"`)+` onclick="ButtonPress('`+key+`','#IDS#','`+list[key][0]+`')">` + key + "</a>";
+			result = result + (notfirst?"<br>":"") + `<button title="Скопировать #`+key+`!" onclick="CopyToClipboard('https://woowz11.github.io/woowzsite/woowzengine.html#`+key+`')" style="margin-left:-25px; margin-top:2px; position:absolute; width: 10px; height: 10px;"><div style="font-size: 14px; position:absolute; margin-top:-12px; margin-left:-1px;">C</div></button>` + `<a `+(list[key][2]==""?"":`title="`+list[key][2]+`"`)+` onmousedown="ButtonPress('`+key+`','#IDS#','`+list[key][0]+`',event)">` + key + "</a>";
 			notfirst = true;
 		}
 		
@@ -712,7 +720,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			
 			if(list[key][0] == "e"){
 				if(list[key][1].includes("safemode")){
-					result = result + ` <a class="yellow" onclick="ButtonPress('savemode','#IDS#','o')">(SafeMode)</a>`;
+					result = result + ` <a class="yellow" onmousedown="ButtonPress('savemode','#IDS#','o',event)">(SafeMode)</a>`;
 				}
 				if(list[key][1].includes("empty")){
 					result = result + " <font style='color:rgb(122,0,8);'>(Пустая)</font>";
@@ -798,22 +806,22 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 				}
 				
 				if(found){
-					func = `<a title="`+GetFuncTitle(id)[0]+`" onclick="ButtonPress('`+id+`','#IDS#','f')">`+func+"</a>";
+					func = `<a title="`+GetFuncTitle(id)[0]+`" onmousedown="ButtonPress('`+id+`','#IDS#','f',event)">`+func+"</a>";
 				}
 				else{
 					if(id in functionstable && id.includes("()")){
-						func = `<a class="yellow" title="`+GetFuncTitle(id)[0]+`" onclick="ButtonPress('`+id+`','#IDS#','f')">`+func+"</a>";
+						func = `<a class="yellow" title="`+GetFuncTitle(id)[0]+`" onmousedown="ButtonPress('`+id+`','#IDS#','f',event)">`+func+"</a>";
 					}
 				}
 				
 				if(id == "jsongame"){
-					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Game File</a>`;
+					func = `<a onmousedown="ButtonPress('`+id+`','#IDS#','o',event)">JSON Game File</a>`;
 				}
 				if(id == "jsonengine"){
-					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Engine File</a>`;
+					func = `<a onmousedown="ButtonPress('`+id+`','#IDS#','o',event)">JSON Engine File</a>`;
 				}
 				if(id == "jsonsettings"){
-					func = `<a onclick="ButtonPress('`+id+`','#IDS#','o')">JSON Settings File</a>`;
+					func = `<a onmousedown="ButtonPress('`+id+`','#IDS#','o',event)">JSON Settings File</a>`;
 				}
 				
 				result = result + func;
@@ -822,7 +830,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			if (list[key][0]=="f"){
 				for(var i = 0; i < list[key][3].length; i++){
 					var func = list[key][3][i];
-					result = result + `<a title="`+func[1]+`" onclick="ButtonPress('`+func[0]+`','#IDS#','e')">` + func[0] + `</a> `;
+					result = result + `<a title="`+func[1]+`" onmousedown="ButtonPress('`+func[0]+`','#IDS#','e',event)">` + func[0] + `</a> `;
 				}
 			}
 			
@@ -855,7 +863,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     body.innerHTML = `
 		<div class="header" style="height: 15vh; width: 100%;">
 			<br><br>
-			<div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button>
+			<div style="margin-left: 50px;"><button onmousedown="StartScreen(event)">На главную</button>
 			</div>
 		</div><br>
 		<div style="display: flex; background: repeating-linear-gradient(0deg, color-mix(in srgb, black `+blackprocent+`%, transparent) 0, color-mix(in srgb, black `+blackprocent+`%, transparent) `+lineheight+`ch, transparent `+lineheight+`ch, transparent `+(lineheight*2)+`ch);">
@@ -896,14 +904,6 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     funnyimage.src = "source/woowzengine/funny/"+funnyimagesids[selectedimage]+".png";
 	funnyimage.onclick = function() {
 		window.open(funnyimage.src);
-		/*var win = window.open("","_blank");
-		var d = win.document;
-		d.write(`
-		<body style="margin: 0px; height: 100%; background-color: rgb(14, 14, 14);">
-			<img style="display: block;-webkit-user-select: none;margin: auto;background-color: hsl(0, 0%, 90%);transition: background-color 300ms;" src="source/woowzengine/funny/`+funnyimagesids[selectedimage]+`.png">
-		</body>
-		`);
-		d.title = "Изображение #"+selectedimage;*/
 	};
     const dateParts = funnyimagesdescription[funnyimagesids[selectedimage]][0].split("-").reverse();
     const formattedDate = dateParts.join("-");
@@ -917,7 +917,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     body.innerHTML = `
 		<div class="header" style="height: 15vh; width: 100%;">
 			<br><br>
-				<div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button>
+				<div style="margin-left: 50px;"><button onmousedown="StartScreen(event)">На главную</button>
 			</div>
 			</div><br>
 			<br>
@@ -966,7 +966,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		body.innerHTML = `
 		<div class="header" style="height: 15vh; width: 100%;">
 			<br><br>
-				<div style="margin-left: 50px;"><button onclick="StartScreen()">На главную</button>
+				<div style="margin-left: 50px;"><button onmousedown="StartScreen(event)">На главную</button>
 			</div>
 			</div><br>
 			<br>
@@ -1050,92 +1050,99 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	return result+`</tr></table><br><button title="Скопировать!" onclick="CopyToClipboard('`+allsymbols+`')">Скопировать все символы в линию</button>`;
   }
   
-  function StartScreen(){
-	document.title = "WoowzEngine - Wiki";
-    body.innerHTML = `
+function StartScreen(event){
+	var middlemouse = event!=null;
+	if(middlemouse){
+		middlemouse = event.which == 2 || event.button == 1;
+	}
+    if (middlemouse) {
+        window.open("https://woowz11.github.io/woowzsite/woowzengine.html","_blank");
+    }else{
+		document.title = "WoowzEngine - Wiki";
+		body.innerHTML = `
 
-    <div style="height: 22vh; width: 100%; cursor: default; padding-top: 3vh;" class="header">
-		<center><font style="font-family: 'Concrete', sans-serif; font-size: 5vh;">WoowzEngine Wiki</font><font style="font-size: 2.5vh;"><br>`+engineversion+`</font><div style="margin-top:0;" /><font style="font-size: 1.5vh;">Официальный сайт</font><div style="margin-top:2vh;" /><font style="font-size: 2.5vh;">English version of wiki will be added soon! </font></center>
-		<button style="margin-left: calc( 100vw - 200px ); position: absolute; top: 20px;" onclick="OpenStats()">Статистика</button>
-		<button style="margin-left: calc( 100vw - 325px ); position: absolute; top: 20px;" onclick="OpenGalery()">Галерея</button>
-		<button style="margin-left: calc( 100vw - 400px ); position: absolute; top: 20px;" onclick="OpenIDs()">ID's</button>
-    </div>
-    <div class="footer" style="height: auto;">
-        <div class="whitebox" style="flex:30;"><div style="padding: 10px;" id="c_other"></div></div>
-        <div class="greenbox" style="flex:100;"><div style="padding: 10px;" id="c_func"></div></div>
-        <div class="redbox" style="flex:40;"><center><div style="padding: 10px;" id="c_errors"></div></center></div>
-    </div>
-    <br>
-	&nbsp;&nbsp;&nbsp;&nbsp;Возможно в будущем тут будут новости обновлений...<br>&nbsp;
-    `;
+		<div style="height: 22vh; width: 100%; cursor: default; padding-top: 3vh;" class="header">
+			<center><font style="font-family: 'Concrete', sans-serif; font-size: 5vh;">WoowzEngine Wiki</font><font style="font-size: 2.5vh;"><br>`+engineversion+`</font><div style="margin-top:0;" /><font style="font-size: 1.5vh;">Официальный сайт</font><div style="margin-top:2vh;" /><font style="font-size: 2.5vh;">English version of wiki will be added soon! </font></center>
+			<button style="margin-left: calc( 100vw - 200px ); position: absolute; top: 20px;" onclick="OpenStats()">Статистика</button>
+			<button style="margin-left: calc( 100vw - 325px ); position: absolute; top: 20px;" onclick="OpenGalery()">Галерея</button>
+			<button style="margin-left: calc( 100vw - 400px ); position: absolute; top: 20px;" onclick="OpenIDs()">ID's</button>
+		</div>
+		<div class="footer" style="height: auto;">
+			<div class="whitebox" style="flex:30;"><div style="padding: 10px;" id="c_other"></div></div>
+			<div class="greenbox" style="flex:100;"><div style="padding: 10px;" id="c_func"></div></div>
+			<div class="redbox" style="flex:40;"><center><div style="padding: 10px;" id="c_errors"></div></center></div>
+		</div>
+		<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;Возможно в будущем тут будут новости обновлений...<br>&nbsp;
+		`;
 
-    const c_o = document.getElementById('c_other');
-    const c_f = document.getElementById('c_func');
-    const c_e = document.getElementById('c_errors');
+		const c_o = document.getElementById('c_other');
+		const c_f = document.getElementById('c_func');
+		const c_e = document.getElementById('c_errors');
 
-    var divstart = "<div><center>";
-    var divend = "</center></div>";
+		var divstart = "<div><center>";
+		var divend = "</center></div>";
 
-    function TextToButton(text,id,info,type){
-		var char = info[0].charAt(0);
-		if(char=="%"){
-			return divend+"<br><center><font style='font-size: 125%;'>"+info[0].substring(1)+"</font></center><br>"+divstart;
-		}
-		if(char=="!"){
-			return divend+info[0].substring(1)+divstart;
-		}
-		var getset = false;
-		if(text.charAt(0)=="@"){
-			getset = true;
-		}
-		var notfound = false;
-		var title = "";
-		if(type=="f"){
-			if(!Pages[text.toLowerCase()]){
-				notfound = true;
-				title = "Функция ещё не документирована!";
-			}else{
-				if(Pages[text.toLowerCase()][1]){
-					title = Pages[text.toLowerCase()][1];
+		function TextToButton(text,id,info,type){
+			var char = info[0].charAt(0);
+			if(char=="%"){
+				return divend+"<br><center><font style='font-size: 125%;'>"+info[0].substring(1)+"</font></center><br>"+divstart;
+			}
+			if(char=="!"){
+				return divend+info[0].substring(1)+divstart;
+			}
+			var getset = false;
+			if(text.charAt(0)=="@"){
+				getset = true;
+			}
+			var notfound = false;
+			var title = "";
+			if(type=="f"){
+				if(!Pages[text.toLowerCase()]){
+					notfound = true;
+					title = "Функция ещё не документирована!";
 				}else{
-					title = "Информация о функции ещё не записана!";
+					if(Pages[text.toLowerCase()][1]){
+						title = Pages[text.toLowerCase()][1];
+					}else{
+						title = "Информация о функции ещё не записана!";
+					}
 				}
 			}
-		}
-		var emptyerror = false;
-		if(type=="e"){
-			var content = Pages[text.toUpperCase()][2];
-			if(content==""){content = "Пустая ошибка! Предупредите автора"; emptyerror = true;}
-			if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
-			title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3].replace(/!/g, '')+" : ")+content;
+			var emptyerror = false;
+			if(type=="e"){
+				var content = Pages[text.toUpperCase()][2];
+				if(content==""){content = "Пустая ошибка! Предупредите автора"; emptyerror = true;}
+				if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
+				title = (Pages[text.toUpperCase()][3]==""?"":Pages[text.toUpperCase()][3].replace(/!/g, '')+" : ")+content;
+			}
+			
+			if(getset){
+				return "<button "+(title!=""?"title='"+title+"'":"")+" onmousedown=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"',event)\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
+			}
+			return "<button "+(title!=""?"title='"+title+"'":"")+" onmousedown=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"',event)\" class=\""+(type=="o"?(id.toLowerCase() in Pages?"whitebutton":"blackbutton"):(type=="f"?(notfound?"yellowbutton":"greenbutton"):(emptyerror?"blackbutton":(title.includes("Является устаревшим")?"yellowbutton":"redbutton"))))+"\">"+text+"</button> ";
 		}
 		
-		if(getset){
-			return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?"whitebutton":(type=="f"?(notfound?"yellowbutton":"greenbutton"):"redbutton"))+"\">"+"Get/Set"+text.substring(1)+"</button> ";
+		var s_o = "";
+		for (let i = 0; i < ColumnOther.length; i++) {
+		  s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0],ColumnOther[i],"o");
 		}
-		return "<button "+(title!=""?"title='"+title+"'":"")+" onclick=\"ButtonPress('"+(type=="e"?id.toUpperCase():id.toLowerCase())+"','','"+type+"')\" class=\""+(type=="o"?(id.toLowerCase() in Pages?"whitebutton":"blackbutton"):(type=="f"?(notfound?"yellowbutton":"greenbutton"):(emptyerror?"blackbutton":(title.includes("Является устаревшим")?"yellowbutton":"redbutton"))))+"\">"+text+"</button> ";
-    }
+		c_o.innerHTML = divstart+s_o+divend;
 
+		var s_f = "";
+		for (let i = 0; i < ColumnFunctions.length; i++) {
+		  s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0],ColumnFunctions[i],"f");
+		}
+		c_f.innerHTML = divstart+s_f+divend;
 
-    var s_o = "";
-    for (let i = 0; i < ColumnOther.length; i++) {
-      s_o = s_o + TextToButton(ColumnOther[i][1],ColumnOther[i][0],ColumnOther[i],"o");
-    }
-    c_o.innerHTML = divstart+s_o+divend;
-
-    var s_f = "";
-    for (let i = 0; i < ColumnFunctions.length; i++) {
-      s_f = s_f + TextToButton(ColumnFunctions[i][0],ColumnFunctions[i][0],ColumnFunctions[i],"f");
-    }
-    c_f.innerHTML = divstart+s_f+divend;
-
-    var s_e = "";
-    for (let i = 0; i < ColumnErrors.length; i++) {
-      s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnErrors[i][0],ColumnErrors[i],"e");
-    }
-  
-    c_e.innerHTML = divstart+s_e+divend;
-  }
+		var s_e = "";
+		for (let i = 0; i < ColumnErrors.length; i++) {
+		  s_e = s_e + TextToButton(ColumnErrors[i][0],ColumnErrors[i][0],ColumnErrors[i],"e");
+		}
+	  
+		c_e.innerHTML = divstart+s_e+divend;
+	}
+}
 
 var ColumnOther = [
   ["%Основное"],
@@ -1271,7 +1278,7 @@ var ColumnFunctionsCONS = [
 	["Pi","number","3.14159265358979323846"],["Sqrt2","number","1.41421356237309504880"],["E","number","2.71828182845904523536"],["Log2E","number","1.44269504088896340736"],["Log10E","number","0.434294481903251827651"],
 	["Ln2","number","0.693147180559945309417"],["Ln10","number","2.30258509299404568402"],["EarthGravity","number","9.80665"],["SourcePath","string","[Путь до woowzengine.exe]"],
 	["GamePath","string","[Путь до папки game]"],["EnginePath","string","[Путь до папки woowzengine]"],["EngineVersion","string","[Версия движка]"],["LogPath","string","[Путь до папки logs]"],["Version","string","[Версия игры]"],
-	["GameName","string","[Название игры]"],["Author","string","[Имя разработчика игры]"],["SafeMode","bool","[Включен ли SafeMode?]"],["ConsoleEnabled","bool","[Влючена ли консоль?]"],
+	["GameName","string","[Название игры]"],["Author","string","[Имя разработчика игры]"],["EngineAuthor","string","Woowz11"],["SafeMode","bool","[Включен ли SafeMode?]"],["ConsoleEnabled","bool","[Влючена ли консоль?]"],
     ["DebugMode","bool","[Включен ли отладочный режим?]"],["Infinity","number","[Максимальное число]"],
 	["Red","Color",ColorBox("invert(17%) sepia(94%) saturate(4667%) hue-rotate(354deg) brightness(88%) contrast(132%)",255)        +" Color.new(255,0,0,255)"],
 	["Orange","Color",ColorBox("invert(49%) sepia(43%) saturate(2693%) hue-rotate(3deg) brightness(106%) contrast(104%)",255)      +" Color.new(255,128,0,255)"],
@@ -1327,13 +1334,13 @@ var Pages = {
 
     Сейчас версия движка (`+engineversion+`)<br>
     <br>
-    <button onclick="ButtonPress('license','woowzengine','o')">Лицензия</button><br>
+    <button onmousedown="ButtonPress('license','woowzengine','o')">Лицензия</button><br>
     <br>
-    <button onclick="ButtonPress('contact','woowzengine','o')">Связь</button><br>
+    <button onmousedown="ButtonPress('contact','woowzengine','o')">Связь</button><br>
     <br>
-    <button onclick="ButtonPress('gamecreate','woowzengine','o')">Начало</button><br>
+    <button onmousedown="ButtonPress('gamecreate','woowzengine','o')">Начало</button><br>
     <br>
-    <button onclick="OpenStats()">Статистика</button><br>
+    <button onmousedown="OpenStats()">Статистика</button><br>
     <br>
     Проект на GitHub: <a href="https://github.com/Woowz11/woowzengine">Woowz11/woowzengine</a><br>
 
@@ -1366,9 +1373,9 @@ var Pages = {
       <li>LW  - Предупреждение в Lua</li>
       <li>LUA - Ошибка Lua (в ваших скриптах)</li>
       <li>S   - Ошибка GLFW</li>
-      <li>GE  - Ошибка которую вы создали и использовали <button onclick="ButtonPress('error()','errors','f')">Error()</button></li>
-      <li>GF  - Фатальная ошибка которую вы создали и использовали <button onclick="ButtonPress('fatal()','errors','f')">Fatal()</button></li>
-      <li>GW  - Предупреждение которую вы создали и использовали <button onclick="ButtonPress('warn()','errors','f')">Warn()</button></li>
+      <li>GE  - Ошибка которую вы создали и использовали <button onmousedown="ButtonPress('error()','errors','f')">Error()</button></li>
+      <li>GF  - Фатальная ошибка которую вы создали и использовали <button onmousedown="ButtonPress('fatal()','errors','f')">Fatal()</button></li>
+      <li>GW  - Предупреждение которую вы создали и использовали <button onmousedown="ButtonPress('warn()','errors','f')">Warn()</button></li>
     </ul>
 
     Так же ошибки можно посмотреть в Log файлах по пути /woowzengine/log/...<br>
@@ -1401,7 +1408,7 @@ var Pages = {
     <br>
     <ul>
       <li>Console - bool - "true" - Отображение консоли при старте</li>
-      <li>SaveMode - bool - "true" - <button onclick="ButtonPress('savemode','jsonengine')">Безопасный режим</button></li>
+      <li>SaveMode - bool - "true" - <button onmousedown="ButtonPress('savemode','jsonengine')">Безопасный режим</button></li>
       <li>LogType - string - "log" - Формат файла лога</li>
       <li>LogFormat - string - "%y-%mn-%d-%h-%m-%s-%ms" - Формат навзания лога (%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %ms - миллисекунда, %w - день недели)</li>
       <li>LogStyle - string - "%b[%h:%m:%s:%ms][%t] %c" - Формат текста в логе (%c - сообщение, %tt - база сообщения, %t - база сообщения (с отступами), %b - тип сообщения (* - print, ? - warning, ! - error, # - fatal) ,%y - год, %mn - месяц, %d - день, %h - час, %m - минута, %s - секунда, %ms - миллисекунда, %w - день недели)</li>
@@ -1425,7 +1432,7 @@ var Pages = {
     Безопасный режим будет полезен тем, кто боиться запускать приложение от другого пользователя.<br>
     Он отключает сильные функции например изменение, создание, удаление файлов, использование Cmd, использования .dll файлов и т.д.<br>
     <br>
-    Включить/Выключить его можно в файле <button onclick="ButtonPress('jsonengine','savemode')">engine.json</button><br>
+    Включить/Выключить его можно в файле <button onmousedown="ButtonPress('jsonengine','savemode')">engine.json</button><br>
     `,``],
 
     "keys": [`
@@ -1571,13 +1578,13 @@ var Pages = {
 "convert":[`
 <div style="margin-left: 100px; margin-right: 100px;">
   Способы конвертирования переменных в другие типы<br>
-  Что-бы узнать тип переменной можно использовать <button onclick="ButtonPress('gettype()','convert','f')">GetType()</button><br>
+  Что-бы узнать тип переменной можно использовать <button onmousedown="ButtonPress('gettype()','convert','f')">GetType()</button><br>
   <br>
   * - Значит что эта конвертация ещё не полностью придусматривается в функциях движка (может вызвать ошибки если ввести неверный тип)<br>
   <hr>
   <b>Конвертация в строку (string)</b><br>
   <br>
-  Функция: <button onclick="ButtonPress('tostring()','convert','f')">ToString()</button><br>
+  Функция: <button onmousedown="ButtonPress('tostring()','convert','f')">ToString()</button><br>
   <br>
   <b>Number -> String:</b><br>
   0 -> "0"<br>
@@ -1614,7 +1621,7 @@ var Pages = {
   <hr>
   <b>Конвертация в число (number)*</b><br>
   <br>
-  Функция: <button onclick="ButtonPress('tonumber()','convert','f')">ToNumber()</button><br>
+  Функция: <button onmousedown="ButtonPress('tonumber()','convert','f')">ToNumber()</button><br>
   <br>
   <b>Number -> Number:</b><br>
   0 -> 0<br>
@@ -1639,7 +1646,7 @@ var Pages = {
   <hr>
   <b>Конвертация в логическое значение (boolean)</b><br>
   <br>
-  Функция: <button onclick="ButtonPress('tobool()','convert','f')">ToBool()</button><br>
+  Функция: <button onmousedown="ButtonPress('tobool()','convert','f')">ToBool()</button><br>
   <br>
   <b>Number -> Bool:</b><br>
   0 -> false<br>
@@ -1867,7 +1874,7 @@ Print("Привет мир!")
 
 "warn()": [FunctionInfo("Warn",false,false)+`
 Отправляет предупреждение в консоль.<br>
-Так же можно указать для удобства код предупреждения. <button onclick='ButtonPress("GW","warn()")'>GW</button><br>
+Так же можно указать для удобства код предупреждения. <button onmousedown='ButtonPress("GW","warn()")'>GW</button><br>
 <pre class="code">`+GenerateCode(`
 Warn("Пример предупреждения с кодом GW0010",10)
 Warn("Пример предупреждения с кодом GW0000")
@@ -1877,7 +1884,7 @@ Warn("Пример предупреждения с кодом GW2000",2000)
 
 "error()": [FunctionInfo("Error",false,false)+`
 Отправляет ошибку в консоль.<br>
-Так же можно указать для удобства код ошибки. <button onclick='ButtonPress("GE","error()")'>GE</button><br>
+Так же можно указать для удобства код ошибки. <button onmousedown='ButtonPress("GE","error()")'>GE</button><br>
 <pre class="code">`+GenerateCode(`
 Error("Пример ошибки с кодом GE0010",10)
 Error("Пример ошибки с кодом GE0000")
@@ -1887,7 +1894,7 @@ Error("Пример ошибки с кодом GE2000",2000)
 
 "fatal()": [FunctionInfo("Fatal",false,false)+`
 Отправляет фатальную ошибку в консоль и закрывает игру с ошибкой.<br>
-Так же можно указать для удобства код фатальной ошибки. <button onclick='ButtonPress("GF","fatal()")'>GF</button><br>
+Так же можно указать для удобства код фатальной ошибки. <button onmousedown='ButtonPress("GF","fatal()")'>GF</button><br>
 <pre class="code">`+GenerateCode(`
 Fatal("Fatal error!",10)
 `)+`</pre>
@@ -1898,7 +1905,7 @@ Fatal("Fatal error!",10)
 <li>Модуль сообщения</li>
 <li>Сам текст</li>
 <li>Первый символ</li>
-<li>Цвет сообщения <button onclick='ButtonPress("consolecolors","printcustom()")'>Список цветов</button></button></li>
+<li>Цвет сообщения <button onmousedown='ButtonPress("consolecolors","printcustom()")'>Список цветов</button></button></li>
 <pre class="code">`+GenerateCode(`
 PrintCustom("HELLO","Текст с модулем HELLO")
 PrintCustom("MODULE","Текст с начальным символом ^","^")
@@ -1921,9 +1928,9 @@ end,1000)
 `+"</div>","Цикличная функция"],
 
 "random()": [FunctionInfo("Random",true,false)+`
-Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onclick='ButtonPress("rrandom()","random()")'>RRandom()</button>)<br>
+Функция возвращает случайное дробное число. (Если нужно целое то используйте <button onmousedown='ButtonPress("rrandom()","random()")'>RRandom()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число от 0 до 1)<br>
-И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onmousedown='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
 <pre class="code">`+GenerateCode(`
 --Каждый раз при запуске будет случайное число
 Print(Random())
@@ -1938,9 +1945,9 @@ Print(Random(0,0.1))
 `+"</div>","Случайное число"],
 
 "rrandom()": [FunctionInfo("RRandom",true,false)+`
-Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onclick='ButtonPress("random()","rrandom()")'>Random()</button>)<br>
+Функция возвращает случайное целое число. (Если нужно дробное то используйте <button onmousedown='ButtonPress("random()","rrandom()")'>Random()</button>)<br>
 Так же можно установить минимум и максимум. (Не обязательно, если не установить то будет случайное число 0 или 1)<br>
-И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onclick='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
+И ещё функция использует систему сидов, так что можно изменить сид что-бы добиться одинаковых результатов. <button onmousedown='ButtonPress("setseed()","random()")'>SetSeed()</button><br>
 <pre class="code">`+GenerateCode(`
 --Каждый раз при запуске будет случайное целое число
 Print(RRandom())
@@ -1954,7 +1961,7 @@ Print(RRandom(1,2))
 `+"</div>","Округлённое случайное число"],
 
 "round()": [FunctionInfo("Round",true,false)+`
-Функция округляет число. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("floor()","round()")'>Floor()</button>)<br>
+Функция округляет число. (Функция округляет к меньшему, такая же как и <button onmousedown='ButtonPress("floor()","round()")'>Floor()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -1984,7 +1991,7 @@ end,100)
 `+"</div>","Округление в большую сторону"],
 
 "floor()": [FunctionInfo("Floor",true,false)+`
-Функция округляет число к меньшему. (Аналог <button onclick='ButtonPress("round()","floor()")'>Round()</button> <button onclick='ButtonPress("trunc()","floor()")'>Trunc()</button>)<br>
+Функция округляет число к меньшему. (Аналог <button onmousedown='ButtonPress("round()","floor()")'>Round()</button> <button onmousedown='ButtonPress("trunc()","floor()")'>Trunc()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -2039,7 +2046,7 @@ end,1000)
 `+"</div>","Записать данные в файл"],
 
 "abs()": [FunctionInfo("Abs",true,false)+`
-Функция возвращает абсолютное значение числа. (Убирает минус у числа) (Аналог <button onclick='ButtonPress("fabs()","abs()")'>Fabs()</button>)<br>
+Функция возвращает абсолютное значение числа. (Убирает минус у числа) (Аналог <button onmousedown='ButtonPress("fabs()","abs()")'>Fabs()</button>)<br>
 <pre class="code">`+GenerateCode(`
 Print(-5)      -- -5
 Print(Abs(-5)) -- 5
@@ -2463,7 +2470,7 @@ Print(Mod(6,     2)) -- 0
 
 "modf()": [FunctionInfo("Modf",true,false)+`
 Функция получает дробное число и целое из числа.<br>
-Можно так же использовать <button onclick='ButtonPress("frac()","modf()")'>Frac()</button> и <button onclick='ButtonPress("trunc()","modf()")'>Trunc()</button><br>
+Можно так же использовать <button onmousedown='ButtonPress("frac()","modf()")'>Frac()</button> и <button onmousedown='ButtonPress("trunc()","modf()")'>Trunc()</button><br>
 <pre class="code">`+GenerateCode(`
 local num = 15.723
 local f,i = Modf(num)
@@ -2482,7 +2489,7 @@ Print(Frac(-1.52)) -- -0.52
 `+"</div>","Дробная часть числа"],
 
 "trunc()": [FunctionInfo("Trunc",true,false)+`
-Функция берёт целую часть числа. (Функция округляет к меньшему, такая же как и <button onclick='ButtonPress("floor()","trunc()")'>Floor()</button>)<br>
+Функция берёт целую часть числа. (Функция округляет к меньшему, такая же как и <button onmousedown='ButtonPress("floor()","trunc()")'>Floor()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -2599,7 +2606,7 @@ Print(Even(3,3)) -- true
 `+"</div>","Получение чётности числа"],
 
 "fabs()": [FunctionInfo("Fabs",true,false)+`
-Функция получает модуль числа. (Аналог <button onclick='ButtonPress("abs()","fabs()")'>Abs()</button>)<br>
+Функция получает модуль числа. (Аналог <button onmousedown='ButtonPress("abs()","fabs()")'>Abs()</button>)<br>
 <pre class="code">`+GenerateCode(`
 Print(-5)       -- -5
 Print(Fabs(-5)) -- 5
@@ -2822,16 +2829,16 @@ function generateErrorGetButton(command,errorid,typ,content){
 				if(content.includes("savemode")){content = "Функция не может быть запущена в безопасном режиме";}
 				var title = content;
 				
-				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<font style='margin-left:-1000vw; text-shadow: 0px 0px 0px transparent; user-select: none; position: absolute; color:transparent;'>???"+errorid.toUpperCase()+"???</font><button title='"+title+"' style='margin-bottom: 30px;' onclick='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
+				Pages[com.toLowerCase()][0] = Pages[com.toLowerCase()][0]+"<font style='margin-left:-1000vw; text-shadow: 0px 0px 0px transparent; user-select: none; position: absolute; color:transparent;'>???"+errorid.toUpperCase()+"???</font><button title='"+title+"' style='margin-bottom: 30px;' onmousedown='ButtonPress(\""+errorid.toUpperCase()+"\",\""+com.toLowerCase()+"\",\"e\")'>"+errorid+"</button>";
 			}
-			return "<button onclick='ButtonPress(\""+com.toLowerCase()+"\",\""+errorid.toUpperCase()+"\",\"f\")'>"+com+"</button>";
+			return "<button onmousedown='(\""+com.toLowerCase()+"\",\""+errorid.toUpperCase()+"\",\"f\")'>"+com+"</button>";
 	}
 
 	if(functionstable[command.toLowerCase()] && (!(typ=="E" || typ=="W" || typ=="C" || typ=="F"))){
 		return Succes(command);
 	}else{
 		if(command == "jsonengine" || command == "jsongame" || command == "jsonsettings"){
-			return "<button onclick='ButtonPress(\""+command+"\",\""+errorid.toUpperCase()+"\",\"o\")'>"+(command=="jsonengine"?"engine.json":(command=="jsongame"?"game.json":"settings.json"))+"</button>";
+			return "<button onmousedown='ButtonPress(\""+command+"\",\""+errorid.toUpperCase()+"\",\"o\")'>"+(command=="jsonengine"?"engine.json":(command=="jsongame"?"game.json":"settings.json"))+"</button>";
 		}else{
 			var char = command.charAt(0);
 			if(char=="!"){

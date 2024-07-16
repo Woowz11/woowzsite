@@ -25,7 +25,11 @@ body {
 
 		<br><br><br>
 
-		<p style="font-size:50px;" id="text2">?</p>
+		<div style="display: flex; justify-content: space-between; align-items: center;">
+			<p id="text2" style="font-size:50px;">?</p>
+			<p id="text2_min" style="position: absolute; right: 4em; font-size:50px; color:gray;">-?</p>
+			<p id="text2_max" style="position: absolute; left: 4em; font-size:50px; color:gray;">+?</p>
+		</div>
 		<br>
 		<button title="-1" id="clickButtonMINUS" style="transform: scale(1.5); cursor: pointer;">-</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title="+1" id="clickButtonPLUS" style="transform: scale(1.5); cursor: pointer;">+</button>
 	
@@ -38,6 +42,8 @@ import { SaveData, LoadData } from "./woowzsite-private/database.js";
 
 var click_1 = 0;
 var click_2 = 0;
+var click_2_min = 0;
+var click_2_max = 0;
 
 
 LoadData("clicker-databasetest").then((data) => {
@@ -46,6 +52,10 @@ LoadData("clicker-databasetest").then((data) => {
 		document.getElementById("text").textContent = click_1;
 		click_2 = data.click2;
 		document.getElementById("text2").textContent = click_2;
+		click_2_min = data.click2_Min;
+		document.getElementById("text2_min").textContent = click_2_min;
+		click_2_max = data.click2_Max;
+		document.getElementById("text2_max").textContent = click_2_max;
     }
 });
 
@@ -57,7 +67,7 @@ function Click() {
 			if (data) {
 				click_1 = data.click+1;
 				document.getElementById("text").textContent = click_1;
-				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2, click2_Max: click_2_max, click2_Min: click_2_min});
 			}
 		});
 		waiting = false;
@@ -72,7 +82,11 @@ function ClickPLUS() {
 			if (data) {
 				click_2 = data.click2+1;
 				document.getElementById("text2").textContent = click_2;
-				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
+				if(click_2>click_2_max){
+					click_2_max = click_2;
+					document.getElementById("text2_max").textContent = click_2_max;
+				}
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2, click2_Max: click_2_max, click2_Min: click_2_min});
 			}
 		});
 		waiting = false;
@@ -86,7 +100,11 @@ function ClickMIN() {
 			if (data) {
 				click_2 = data.click2-1;
 				document.getElementById("text2").textContent = click_2;
-				SaveData("clicker-databasetest",{click: click_1, click2: click_2});
+				if(click_2<click_2_min){
+					click_2_min = click_2;
+					document.getElementById("text2_min").textContent = click_2_min;
+				}
+				SaveData("clicker-databasetest",{click: click_1, click2: click_2, click2_Max: click_2_max, click2_Min: click_2_min});
 			}
 		});
 		waiting = false;
@@ -101,6 +119,10 @@ function Update(){
 			document.getElementById("text").textContent = click_1;
 			click_2 = data.click2;
 			document.getElementById("text2").textContent = click_2;
+			click_2_min = data.click2_Min;
+			document.getElementById("text2_min").textContent = click_2_min;
+			click_2_max = data.click2_Max;
+			document.getElementById("text2_max").textContent = click_2_max;
 		}
 	});
 }
