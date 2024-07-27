@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>&nbsp;</title>
+<link rel="icon" type="image/x-icon" href="../source/dead.ico">
+
+<style>
+html{
+	background-color: black;
+	text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+	user-select: none;
+}
+
+::selection {
+    background-color: transparent;
+}
+
+a{
+	text-decoration: none;
+}
+
+a:hover{
+	color: white !important;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black !important;
+	background-image: url("source/button.png");
+	background-size: 100% 100%;
+}
+</style>
+
+<body>
+<div style="top:7vh; position: fixed; margin-left:50%; transform: translate(-50%,0);"><font style="font-size:500%; white-space: nowrap;" id="title">CORE WIKI</font></div><br>
+<hr style="margin-top: 25vh;">
+<div style="background-color:rgba(0,0,0,0.5); height:65vh; border-radius: 30px;">
+	<div style="margin: 10px; display: flex; flex-wrap: wrap; flex-direction: row;" id="there"></div>
+</div>
+<hr>
+<font>BY WOOWZ11</font><font style="float:right;">0.0.1 - 17.07.2024</font>
+</body>
+
+<script>
+var title = "&nbsp;";
+var randtitles = ["ℂ𝕆ℝ𝔼 𝕎𝕀𝕂𝕀","CORE WIKI","ЯДРО ВИКИ","𝘾𝙊𝙍𝙀 𝙒𝙄𝙆𝙄","𝒞𝒪ℛℰ 𝒲ℐ𝒦ℐ","𝕮𝕺𝕽𝕰 𝖂𝕴𝕶𝕴","ᏟᏫᎡᎬ ᎳᏆᏦᏆ","🅲🅾🆁🅴 🆆🅸🅺🅸","ᙅOᖇᙓ ᙎꙆКꙆ","🅒🅞🅡🅔 🅦🅘🅚🅘","匚口尺乇 山工长工","IꓘIM ƎꓤOꓛ"];
+if(Math.random()>0.8){
+	title = randtitles[Math.floor(Math.random() * randtitles.length)];
+}else{
+	title = "CORE WIKI";
+}
+var randsymbols = ["☠","#","%","&","@","?","*","💡","🧠","🦷","𒄆","🍄","🌼","🕷️","🔮","🧱","⛱️","🩸","💊","⚰️","🚬","🔌","☣️","☢️","🔞","⛔","🚸","🎗️","꧁","❤","❃","⚝","🕸","","🙂"];
+
+var title_event1 = Math.random()>0.9;
+var title_event2 = Math.random()>0.8;
+
+var title_element = document.getElementById("title");
+
+var symb = randsymbols[Math.floor(Math.random() * randsymbols.length)];
+document.title = symb+title+symb;
+function randomTitle(){
+	if(title_event1){
+		document.title = Math.random();
+	}else{
+		if(title_event2){
+			var symb = randsymbols[Math.floor(Math.random() * randsymbols.length)];
+			document.title = symb+title+symb;
+		}
+	}
+	title_element.textContent = document.title;
+}
+setInterval(randomTitle, 200);
+
+var randombg = ["source/text_scroll.gif","source/rainbow_gold.gif","source/hampsters.gif","source/error.gif","source/red_tiles.gif","source/red.gif","source/idk.gif","source/happy.gif","source/cat-gift.gif","source/bg.gif","source/int.gif","source/smoking-skull.gif","source/stars.gif","source/bg.png","../source/tiles.jpg","../source/ble_backgro.jpg","../source/background_dexon.jpg","../source/brick3.jpg","../source/brick.jpg","../source/brick2.jpg","../source/openprojectbackground.jpg","../source/bg.png"];
+document.documentElement.style.backgroundImage = "url('" + randombg[Math.floor(Math.random() * randombg.length)] + "')";
+
+var therelinks = document.getElementById("there");
+var links = [
+["Dreamcore","black",["🍄","👁️"]],
+["Liminal Space","#FFD800",["🟨","🕳️"]],
+["Nostalgia Minecraft","#8E8E8E",["⛏","💎"]],
+["Nostalgia Roblox","#CC0C15",["🧰","⚔️"]],
+["Webcore","#74A7CC",["🌐","📧"]],
+["Analog Horror","#350200",["📼","👁️‍🗨️"]],
+["Frutiger Aero","#54EBFF",["🐬","🧊"]],
+["Cyberpunk","#2B1C77",["🌑","🧪"]],
+["Gothic","#444442",["⚰","🛏️"]],
+["Cybercore","#B7B7B7",["⚙","🔩"]],
+["Vaporwave","#F255FF",["🎹","🗿"]],
+["Traumacore","#881EA0",["💉","💜"]],
+["Space","#07000F",["🌌","🌟"]],
+["Medieval","#7d796d",["🏹","🤺"]],
+];
+
+for (let i = links.length - 1; i > 0; i--) {
+	const j = Math.floor(Math.random() * (i + 1));
+	[links[i], links[j]] = [links[j], links[i]];
+}
+
+var result = "";
+for(var i = 0; i < links.length; i++){
+	var linkdata = links[i];
+	result = result + `<a style="font-size: 200%; margin-bottom: 5px; list-style-type: none; color: `+linkdata[1]+`;" href="#"><b>`+linkdata[2][Math.floor(Math.random()*linkdata[2].length)]+"&nbsp;"+linkdata[0]+`</b></a>&nbsp;&nbsp;`;
+}
+
+therelinks.innerHTML = result;
+
+</script>

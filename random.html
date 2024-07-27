@@ -9,8 +9,14 @@
     src: url("source/concrete.otf") format('opentype');
 }
 
+img, font, audio, video, button {
+    position: absolute;
+}
+button > font {
+    position: static;
+}
+
 body {
-    max-width: 100vw;
     overflow-x: hidden;
 	overflow-y: hidden;
 }
@@ -21,6 +27,16 @@ body {
 <p id="main"></p>
 
 <script>
+function getrandomimage(){
+	var result = "";
+	if(Math.random()>0.3){
+		result = "source/"+randomimages[GetRandom(randomimages.length)];
+	}else{
+		result = "core-wiki/source/"+randomimages_corewiki[GetRandom(randomimages_corewiki.length)];
+	}
+	return result;
+}
+
 function GetRandom(max,itfloat){
 	if(itfloat==null){itfloat=false;}
 	return (itfloat?(Math.random() * max):Math.floor(Math.random() * max));
@@ -44,7 +60,7 @@ function getrandomgradient(){
 }
 
 function getrandompicture(){
-	var result = 'url('+'"'+'source/' + randomimages[GetRandom(randomimages.length)].replace(" source ","") +'"'+');';
+	var result = 'url("' + getrandomimage() +'");';
 	
 	if(GetRandom(10)<5){
 		var rand = GetRandom(5);
@@ -57,7 +73,12 @@ function getrandompicture(){
 }
 
 function generatebackgroundElement(){
-	return 'background: '+getrandompicture()+' ' + (GetRandom(10)>2 ? "" : "background_attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
+	var bg = 'url("' + getrandomimage() +'")';
+	var r = GetRandom(10);
+	for(var i = 0; i<r; i++){
+		bg = bg + ', url("' + getrandomimage() +'")';
+	}
+	return 'background-image:'+bg+'; ' + (GetRandom(10)>2 ? "" : "background-attachment: fixed;") + (GetRandom(10)>8 ? "" : 'background-color: '+ getrandomcolor() + ';'); 
 }
 
 function generatefilter(){
@@ -65,25 +86,29 @@ function generatefilter(){
 }
 
 function generatetransform(smol, onlysize){
-	return "transform:" + (GetRandom(10)>5 ? "" : "rotateZ("+GetRandom((onlysize ? 0 : 360))+"deg) ") + (GetRandom(10)>3 ? "" : "translateX("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "translateY("+GetRandom(500)+"px) ") + (GetRandom(10)>3 ? "" : "scaleX(" + (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5)+")") + (GetRandom(10)>3 ? "" : "scaleY("+ (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5) +")") +";";
+	return "transform:" + (GetRandom(10)>5 ? "" : "rotateZ("+GetRandom((onlysize ? 0 : 360))+"deg) ") + "translateX("+(GetRandom(100)-50)+"vw)" + (GetRandom(10)>3 ? "" : "scaleX(" + (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5)+")") + (GetRandom(10)>3 ? "" : "scaleY("+ (smol ? GetRandom(10)/10-0.5 : GetRandom(50)/10-2.5) +")") +";";
 }
 
 function createrandomimage(smol){
-	var src = 'src="source/'+randomimages[GetRandom(randomimages.length)]+'"'
+	var src = 'src="'+getrandomimage()+'"'
 	var width = GetRandom(smol?200:1000);
 	var height = GetRandom(smol?200:1000);
 	var imagerender = (GetRandom(10)>5 ? "" : "image-rendering: pixelated;")
 	var background = (GetRandom(10)>4 ? "" : generatebackgroundElement());
 	var havelink = (GetRandom(10)>6);
 	
-	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"' "+">" : "")+"<img "+(GetRandom(10)>1?"":"class='"+animations[GetRandom(animations.length)]+"'")+" alt='"+generaterandomtext()+"' style='" + (GetRandom(10)>2?"":randomborder()) + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "z-index:"+(GetRandom(-1024)+(smol ? 1024 : 0))+";" + (GetRandom(10)>5?"":"position: absolute;") + (GetRandom(10)>3 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "" : (GetRandom(10)>3 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px;") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" +">"+(havelink ? "</a>" : "" );
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"' "+">" : "")+"<img "+(GetRandom(10)>1?"":"class='"+animations[GetRandom(animations.length)]+"'")+" alt='"+generaterandomtext()+"' style='margin-top:"+GetRandom(5000)+"vh; " + (GetRandom(100)>50?"":"float: right;") + (GetRandom(10)>2?"":randomborder()) + (GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "z-index:"+(GetRandom(-1024)+(smol ? 1024 : 0))+";" + (GetRandom(10)>3 ? "-webkit-user-select: none; -moz-user-select: none; user-select: none;" : "") + (GetRandom(10)>5 ? "" : generatefilter()) + (GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(smol, true) : generatetransform(smol, false))) + (GetRandom(10)>1 ? "" : "opacity: " + GetRandom(100)/100 + ";") + (GetRandom(10)>3 ? "" : "border-radius: "+GetRandom(512)+"px;") + background + imagerender + "' " + src + "width='"+width+"px'" + "height='"+height+"px'" +">"+(havelink ? "</a>" : "" );
+}
+
+function createuiimage(){
+	return `<img id="scroll" style="position: absolute; z-index: 1000;" src="`+getrandomimage()+`">`;
 }
 
 function generatescriptable(){
 	var result = "";
 	
 	if(true){
-		result = '<button style="'+(GetRandom(10)>2?"":randomborder())+(GetRandom(10)>1?"":"cursor:"+getrandomcursor()+"; ")+generatebackgroundElement()+'" type="button">'+createrandomtext()+'</button>';
+		result = '<button style="'+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+'margin-top:'+GetRandom(5000)+'vh;'+(GetRandom(10)>2?"":randomborder())+(GetRandom(10)>1?"":"cursor:"+getrandomcursor()+"; ")+generatebackgroundElement()+'" type="button">'+createrandomtext(false)+'</button>';
 	}
 	
 	return result;
@@ -119,17 +144,13 @@ function createrandomtext(canlink){
 	var strike = (GetRandom(10)>1 ? false : true);
 	var underline = (GetRandom(10)>1 ? false : true);
 	var havelink = (canlink ? (GetRandom(10)>1? false : true) : false);
-	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='z-index:1024;"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'>" : "")+"<font "+(GetRandom(10)>1?"":"class='"+animations[GetRandom(animations.length)]+"'")+" color="+getrandomcolor()+"; style='" + (GetRandom(10)>3?"":generatetransform(false, false)) + (GetRandom(10)>2?"":randomborder()) +(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + ("position: absolute;") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>"+(havelink ? "</a>" : "" );
+	return (havelink ? "<a href='"+hrefs[GetRandom(hrefs.length)]+".html' style='z-index:1024;"+(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ")+"'>" : "")+"<font "+(GetRandom(10)>1?"":"class='"+animations[GetRandom(animations.length)]+"'")+" color="+getrandomcolor()+"; style=' margin-top:"+GetRandom(5000)+"vh;" + (GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false))) + (GetRandom(10)>2?"":randomborder()) +(GetRandom(10)>7?"":"cursor:"+getrandomcursor()+"; ") + "font-family:"+getrandomfontstyle()+";" + "font-size: "+ (GetRandom(1000)/10) +"px;" + background + "'>"+(bold ? "<b>" : "")+(italic ? "<i>" : "")+(strike ? "<strike>" : "")+(underline ? "<u>" : "")+generaterandomtext()+(underline ? "</u>" : "")+(strike ? "</strike>" : "")+(italic ? "</i>" : "")+(bold ? "</b>" : "")+"</font>"+(havelink ? "</a>" : "" );
 }
 
 function randomstylebody(style){
-	style.background = "url('source/" + randomimages[GetRandom(randomimages.length)] + "')";
-	style.backgroundColor = getrandomcolor();
-	if(GetRandom(10)>3){
-	style.backgroundImage = getrandomgradient().replace(";","");}
 	if(GetRandom(100)>70){
-	style.backgroundAttachment = "fixed";
-	style.backgroundSize = "100% 100%";
+		style.backgroundAttachment = "fixed";
+		style.backgroundSize = "100% 100%";
 	}
 }
 
@@ -137,9 +158,9 @@ function generaterandommedia(){
 	var result = "";
 	
 	if(GetRandom(10)>3){
-		result = '<audio style="z-index:1024; position:absolute; '+(GetRandom(10)>3?"":generatetransform(false, false))+'" '+(GetRandom(150)>5?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
+		result = '<audio style="margin-top:'+GetRandom(5000)+'vh; z-index:1024; '+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+'" '+(GetRandom(150)>5?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
 	}else{
-		result = '<video style="z-index:1024; position:absolute; '+(GetRandom(10)>3?"":generatetransform(false, false))+'" controls name="media" '+(GetRandom(150)>5?"":"autoplay ")+' poster="source/'+randomimages[GetRandom(randomimages.length)]+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="source/'+videos[GetRandom(videos.length)]+'.mp4" type="video/mp4"></video>';
+		result = '<video style="margin-top:'+GetRandom(5000)+'vh; z-index:1024; '+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+'" controls name="media" '+(GetRandom(150)>5?"":"autoplay ")+' poster="'+getrandomimage()+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="source/'+videos[GetRandom(videos.length)]+'.mp4" type="video/mp4"></video>';
 	}
 	
 	return result;
@@ -175,7 +196,7 @@ function generateRandomEmojes(){
 
 function getrandomcursor(){
 	var cursors = [];
-	randomcursors.forEach(element => cursors.push("url("+'"'+"source/"+element+".cur"+'"'+"), auto"))
+	randomcursors.forEach(element => cursors.push("url(`"+"source/"+element+".cur"+"`), auto"))
 	cursors = [...cursors, ...["default","none","context-menu","help","auto","pointer","progress","wait","cell","crosshair","text","vertical-text","alias","copy","move","no-drop","not-allowed","grab","grabbing","all-scroll","col_resize","row-resize","n-resize","e-resize","s-resize","w-resize","ne-resize","nw-resize","se-resize","sw-resize","ew-resize","ns-resize","nesw-resize","nwse-resize","zoom-in","zoom-out"]];
 	
 	return cursors[GetRandom(cursors.length)];
@@ -190,7 +211,9 @@ function randomcssstyle(){
 		["filter: blur(-100px);","filter: blur(100px);"],
 		["filter: hue-rotate(0deg);","filter: hue-rotate(36000deg);"],
 		["filter: invert(0%);","filter: invert(10000%);"],
-		["transform: skew(0deg,0deg);","transform: skew(1000deg,1000deg);"]
+		["transform: skew(0deg,0deg);","transform: skew(1000deg,1000deg);"],
+		["transform: rotate(0deg);","transform: rotate(1deg);"],
+		["transform: translateY(0px);","transform: translateY(10px);"]
 	];
 	var randomevents = (GetRandom(100)>70?true:false);
 	var randomevent = GetRandom(epicrandomevents.length);
@@ -202,16 +225,26 @@ function randomcssstyle(){
 	var veryepicevents = (GetRandom(100)>80?true:false);
 	var veryepiceventsid = GetRandom(veryepicrandomevents.length);
 	
+	var bg = "url('" + getrandomimage() + "')";
+	var r = GetRandom(10);
+	for(var i = 0; i<r; i++){
+		bg = bg + ", url('" + getrandomimage() + "')";
+	}
+	if(GetRandom(10)>8){
+		bg = getrandomgradient().replace(";","");
+	}
+	
 	result = result + `
 	
-	html{
-		height: `+(50+GetRandom(100))+`%;
-		width: `+(50+GetRandom(100))+`%;
-		max-width: `+(50+GetRandom(100))+`%;
-		transform: translateX(`+GetRandom(50)+`%);
+	html{	
+		background-image: `+bg+`;;
+		background-position: center;
+		background-size: `+GetRandom(200)+`%;
+		background-color: `+getrandomcolor()+`;
+	
 		overflow-x: hidden;
-		
-		animation-duration: `+ (randomevents?GetRandom(20,true):GetRandom(300,true))+`s;
+		overflow-y: auto;
+		animation-duration: `+ (randomevents?(GetRandom(100)>80?GetRandom(0.01,true):GetRandom(20,true)):GetRandom(300,true))+`s;
 		animation-name: html1;
 		animation-iteration-count: infinite;
 		animation-direction: alternate;
@@ -386,32 +419,50 @@ result = result + `
 }
 
 function createrandomhtml(){
-	var result = "";
+	var result = `<div style="flex-direction: row; white-space: wrap;">`;
 	
 	randomcssstyle();
 	var rand = 250 + GetRandom(1000);
 	for (var i = 0; i <=rand; i++) {
 		var j = GetRandom(100);
-		if(j>30){result = result + createrandomimage((GetRandom(100)>2 ? false : true));}
-		else if(j>5){
-		
-		if(GetRandom(10)>0){
-		result = result + createrandomtext(true);
-		}else{result = result + generatescriptable();}
+		if(j>30){
+			result = result + createrandomimage((GetRandom(100)>2 ? false : true));
 		}
-		else {result = result + generaterandommedia();}
-		
+		else if(j>5){
+			if(GetRandom(10)>0){
+				result = result + createrandomtext(true);
+			}else{
+				result = result + generatescriptable();
+			}
+		}else{
+			result = result + generaterandommedia()
+		}	
+	}
+	rand = GetRandom(10);
+	for(var i = 0; i <=rand; i++){
+		result = result + createuiimage();
 	}
 	
-	return result;
+	window.addEventListener('scroll', function() {
+	   /*let elements = document.querySelectorAll('scroll');
+
+		elements.forEach(function(element) {
+			let scrollTop = window.scrollY;
+			
+			element.style.top = scrollTop + 'px';
+		});*/
+	});
+	
+	return result+"</div>";
 }
 	const animations = ["anim1","anim2","anim3","anim4","anim5","anim6","anim7","anim8"];
 	const hrefs = ["woowzbackrooms","ai/random-images-galery","ai/3d-sceene","alternative-cats","nointernet","3d","w","console","blank","text-scripts","core","real-folder","blood_eye_co","blood_eye_co_new","blood_eye_co_systems","dexon","dexonmusic","eyes","firstpage","forest","img","index","list","null","openprojectsource","openprojectsource_download","quaere","random","site_woowz11","site_woowz11_2","skull-party!","test_site","xxx"];
 	const videos = ["specialforrandomsite/Download20","specialforrandomsite/Видео Папка","specialforrandomsite/day","specialforrandomsite/30513769.230000094_SPOILER_memphirs5a532a","specialforrandomsite/3DVideoDubstep - 382"];
 	const audios = ["woowzbackrooms/sounds/breath","woowzbackrooms/sounds/level0","woowzbackrooms/sounds/walk","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","babah","sun","forest","Schoolhouse_Trouble_Metal_Version","Pixelizer","doom"]
-	const words = ["гидро-педро-метро","морж","сок","у","тебя","дома","цезий","плутон","нептуний","уран","гачимучи","выигрыш","победа","геолокация","координаты","пердёж","цена","негра","за","много","мало","весит","цветное","серое","канализация","воняет","левокумское","самара","нерехта","бетон","цемент","камень","рублей","500","долларов","загрузка","🚽","туалет","унитаз","бутылка","документ","алкаш","капец","не","найдено","аэс","автомобиль","мод","папка","кодит","программист","моды","модинг","сишарп","лайфай","вайфай","они","он","охуел","охуеть","пиздец","еба","нахуй","ебать","мыло","альтернатив","доппельгангер","кот","философия","извините","пардон","золото","бензин","ЭТОТ-САЙТ-БУДЕТ-ЗАБЛОКИРОВАН-ЧЕРЕЗ-5-МИНУТ","пидары","пидор","блять","сука","илюминаты","хойка","умер","курить","блок","найдено","правда","фейк","дей","нейро","илон-маск","нано","атомная","ядерная","чернобль","сверсекретная","cum","папка","тюрьма","мистер-бист","ютуб","есть","любит","майнкрафт","роблокс","дискорд","мясо","ховлер","пикчес","рубли","рубль","сперма","хуй","марихуана","мет","убийца","героин","книга","бункер","взрывы","взрыв","террорист","теракт","телефон","номер","курва","америка","китай","европа","ООН","ирак","иран","казахстан","белорусь","сша","украли","новости","нефть","блендер","хак","циркум-флекс","волгоград","стим","моргенштерн","разработка","секретная","джобайден","цвета","макака","инфустация","бубонная","майкрасофт","технологии","негроид","омагад","здохли","семён","он","мама","биткоин","бизнес","доллар","попал","бекрумс","в","я","шоке","гитлер","гатлер","понять","шмаль","фурри","умрите","пацан","понять","слить","💀","шмель","ты","woowz","lol","tommorow","self","your","now","eye","blood","hate","hi","hitler","kill","yes","no","i","sex","понос","бесплатно","платно","скажу","вам","зайду","пустите","ООН","зима","мрак","что",".","?","!",",","окно","ВУВЗ-ИДИ-ТЫ-К-ЧЁРТУ-ЗА-ЭТОТ-САЙТ","сайфай","в","сдох","здох","дром","дексон","нечто","ужас","страшилка","пугалка","пиздец","верю","не","ага","багач","сша","америка","<br>","забанили","тебя","что-бы","хочу","же","как","вчера","сегодня","завтра","гаррисмод","бомба",",","дичь","егэ","завтра","огэ","впр","собака","скинволкер","!","?","порно","вотабус","легальным","призедент","украины","украина","россия","ест","жрать","вкусно","убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
+	const words = ["шуруп","сообщение","mail","got","idiot","java","python","c#","cpp","lua","фотон","солнце","немцы","сок","жвачка","курица","петух","трамп","байден","обама","вино","бакал","байкал","мазут","копро","гидро-педро-метро","морж","сок","у","тебя","дома","цезий","плутон","нептуний","уран","гачимучи","выигрыш","победа","геолокация","координаты","пердёж","цена","негра","за","много","мало","весит","цветное","серое","канализация","воняет","левокумское","самара","нерехта","бетон","цемент","камень","рублей","500","долларов","загрузка","🚽","туалет","унитаз","бутылка","документ","алкаш","капец","не","найдено","аэс","автомобиль","мод","папка","кодит","программист","моды","модинг","сишарп","лайфай","вайфай","они","он","охуел","охуеть","пиздец","еба","нахуй","ебать","мыло","альтернатив","доппельгангер","кот","философия","извините","пардон","золото","бензин","ЭТОТ-САЙТ-БУДЕТ-ЗАБЛОКИРОВАН-ЧЕРЕЗ-5-МИНУТ","пидары","пидор","блять","сука","илюминаты","хойка","умер","курить","блок","найдено","правда","фейк","дей","нейро","илон-маск","нано","атомная","ядерная","чернобль","сверсекретная","cum","папка","тюрьма","мистер-бист","ютуб","есть","любит","майнкрафт","роблокс","дискорд","мясо","ховлер","пикчес","рубли","рубль","сперма","хуй","марихуана","мет","убийца","героин","книга","бункер","взрывы","взрыв","террорист","теракт","телефон","номер","курва","америка","китай","европа","ООН","ирак","иран","казахстан","белорусь","сша","украли","новости","нефть","блендер","хак","циркум-флекс","волгоград","стим","моргенштерн","разработка","секретная","джобайден","цвета","макака","инфустация","бубонная","майкрасофт","технологии","негроид","омагад","здохли","семён","он","мама","биткоин","бизнес","доллар","попал","бекрумс","в","я","шоке","гитлер","гатлер","понять","шмаль","фурри","умрите","пацан","понять","слить","💀","шмель","ты","woowz","lol","tommorow","self","your","now","eye","blood","hate","hi","hitler","kill","yes","no","i","sex","понос","бесплатно","платно","скажу","вам","зайду","пустите","ООН","зима","мрак","что",".","?","!",",","окно","ВУВЗ-ИДИ-ТЫ-К-ЧЁРТУ-ЗА-ЭТОТ-САЙТ","сайфай","в","сдох","здох","дром","дексон","нечто","ужас","страшилка","пугалка","пиздец","верю","не","ага","багач","сша","америка","<br>","забанили","тебя","что-бы","хочу","же","как","вчера","сегодня","завтра","гаррисмод","бомба",",","дичь","егэ","завтра","огэ","впр","собака","скинволкер","!","?","порно","вотабус","легальным","призедент","украины","украина","россия","ест","жрать","вкусно","убить","человек","ребёнок","подвале","детей","людей","есть","ты","я","ослеп","ненавижу","расчленить","смерть","вувз","не","верит","в","этот","беспредел","и","считает","что","это","фейк","реально","а","вы","согласны","ли","со","мною","или","нет","да","павел","секс"]
 	const fonts = ["Concrete","Bookman","Apple Chancery","Marlett","Comic Sans MS","Arial","Helvetica","Verdana","Bradley Hand","Brush Script MT","Impact","cursive","Stencil Std","fantasy","Trattatello","Marker Felt","Chalkduster","Blippo","Jazz LET","Luminari","Snell Roundhand","URW Chancery L","Trebuchet MS","Gill Sans","American Typewriter","FreeMono","serif","OCR A Std","monospace","DejaVu Sans Mono","New Century Schoolbook","Courier","Noto Sans","Optima","Arial Narrow","Courier New","Andale Mono","sans-serif","Times","Didot","Georgia","Palatino"];
 	const randomimages = ["click.png","woowzengine/og.png","woowzengine/colorbox_t.png","woowzengine/ascii.png","woowzengine/funny/42.png","woowzengine/funny/41.png","woowzengine/funny/40.png","woowzengine/funny/39.png","woowzengine/funny/38.png","woowzengine/funny/37.png","woowzengine/funny/36.png","woowzengine/funny/35.png","woowzengine/funny/34.png","woowzengine/funny/33.png","woowzengine/funny/32.png","woowzengine/funny/31.png","woowzengine/funny/30.png","woowzengine/funny/30.png","woowzengine/funny/29.png","woowzengine/funny/0.png","woowzengine/funny/1.png","woowzengine/funny/2.png","woowzengine/funny/3.png","woowzengine/funny/4.png","woowzengine/funny/5.png","woowzengine/funny/6.png","woowzengine/funny/7.png","woowzengine/funny/8.png","woowzengine/funny/9.png","woowzengine/funny/10.png","woowzengine/funny/11.png","woowzengine/funny/12.png","woowzengine/funny/13.png","woowzengine/funny/14.png","woowzengine/funny/15.png","woowzengine/funny/16.png","woowzengine/funny/17.png","woowzengine/funny/18.png","woowzengine/funny/19.png","woowzengine/funny/20.png","woowzengine/funny/21.png","woowzengine/funny/22.png","woowzengine/funny/23.png","woowzengine/funny/24.png","woowzengine/funny/25.png","woowzengine/funny/26.png","woowzengine/funny/27.png","woowzengine/funny/28.png","woowzbackrooms/levels/0_7.png","woowzbackrooms/arrow.png","woowzbackrooms/noise.png","woowzbackrooms/vin.png","metal.png","concrete2.png","woowzengine.png","bg.png","lupa.png","quare.png","cats/cat16_5.png","cats/cat15_5.png","cats/cat14_5.png","cats/cat13_5.png","cats/cat12_5.png","cats/cat11_5.png","cats/cat10_5.png","cats/cat9_5.png","cats/cat8_5.png","cats/cat7_5.png","cats/cat6_5.png","cats/cat5_5.png","cats/cat4_5.png","cats/cat3_5.png","cats/cat2_5.png","cats/cat1_5.png","cats/cat18_5.png","cats/cat18_4.png","cats/cat18_3.png","cats/cat18_2.png","cats/cat18_1.png","cats/cat18.png","cats/cat17_5.png","cats/cat17_4.png","cats/cat17_3.png","cats/cat17_2.png","cats/cat17_1.png","cats/cat17.png","cats/cat16_4.png","cats/cat16_3.png","cats/cat16_2.png","cats/cat16_1.png","cats/cat16.png","cats/cat15_4.png","cats/cat14_4.png","cats/cat13_4.png","cats/cat12_4.png","cats/cat11_4.png","cats/cat10_4.png","cats/cat9_4.png","cats/cat8_4.png","cats/cat7_4.png","cats/cat6_4.png","cats/cat5_4.png","cats/cat4_4.png","cats/cat3_4.png","cats/cat2_4.png","cats/cat1_4.png","cats/cat15_3.png","cats/cat15_2.png","cats/cat15_1.png","cats/cat15.png","cats/cat14_3.png","cats/cat14_2.png","cats/cat14_1.png","cats/cat14.png","cats/cat13_3.png","cats/cat13_2.png","cats/cat13_1.png","cats/cat13.png","cats/cat12_3.png","cats/cat12_2.png","cats/cat12_1.png","cats/cat12.png","cats/cat11_3.png","cats/cat11_2.png","cats/cat11_1.png","cats/cat11.png","cats/cat10_3.png","cats/cat10_2.png","cats/cat10_1.png","cats/cat9_3.png","cats/cat9_2.png","cats/cat9_1.png","cats/cat9.png","cats/cat8_3.png","cats/cat8_2.png","cats/cat8_1.png","cats/cat8.png","cats/cat7_3.png","cats/cat7_2.png","cats/cat7_1.png","cats/cat7.png","cats/cat6_3.png","cats/cat6_2.png","cats/cat6_1.png","cats/cat6.png","cats/cat5_3.png","cats/cat5_2.png","cats/cat5_1.png","cats/cat5.png","cats/cat4_3.png","cats/cat4_2.png","cats/cat4_1.png","cats/cat4.png","cats/cat3_3.png","cats/cat3_2.png","cats/cat3_1.png","cats/cat3.png","cats/cat2_3.png","cats/cat2_2.png","cats/cat2_1.png","cats/cat2.png","cats/cat1_3.png","cats/cat1_2.png","cats/cat1_1.png","cats/cat1.png","anomaly-cat.png","no-cat.png","concrete.png","dark.png","error-image.png","sky.png","paper.png","nointernet.png","specialforrandomsite/10056771.889999975_image.png","specialforrandomsite/9311797.164999995_image.png","specialforrandomsite/Pngpng.png","file_folder.png","file_txt.png","file_chrome.png","file_spyfolder.png","hz5.png","hz4.png","hz3.png","plushover.png","plus.png","windowpluginfolders_right.png","windowpluginfolders_left.png","windowpluginfolders.png","left.png","hz2.png","position_end1.png","search.png","position_end.png","smolarrow_right.png","arrow_top.png","smolarrow_bottom.png","arrowright.png","arrowleft.png","selectdinverse.png","selectdone.png","selectall.png","jyrnal.png","change.png","open.png","options.png","easylocation.png","createelement.png","newfolder.png","bloodraw/dirt.png","bloodraw/logo.png","microsoft_fly_simulator_epicepdiditonpps.png","hacker.png","specialforrandomsite/image.png","specialforrandomsite/Sequence_01_1.gif","specialforrandomsite/bye.gif","error.png","specialforrandomsite/orange-cat.gif","image.png","wcom.png","specialforrandomsite/test-aubergine.png","background_.png","noway!!!.png","rename.png","delete.png","smol_galka.png","copy_to.png","locate.png","icon3.png","icon2.png","copy.png","paste.png","icon1.png","zakrep.png","galka.png","info.png","files4.png","files3.png","files2.png","files1.png","CLOSETHIS3.png","CLOSETHIS2.png","CLOSETHIS.png","download.gif","WTR6.gif","tiles.jpg","SPECIALERRORIMAGE","specialforrandomsite/ssasa.png","specialforrandomsite/IMG_20230618_013225.png","specialforrandomsite/0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE.gif","specialforrandomsite/catblyat.gif","specialforrandomsite/screams.gif","specialforrandomsite/who.gif","specialforrandomsite/who-are-you-cat.gif","specialforrandomsite/sleep.gif","bloodeyesystems/bloodeye_system.png","bloodeyesystems/bloodeye_system2.png","bloodeyesystems/bloodeye_system3.png","bloodeyesystems/boxtexture.png","bloodeyesystems/boxtexture_3d.png","bloodeyesystems/bloodeye_system3_3d.png","bloodeyesystems/bloodeye_system_screen.png","bloodeyesystems/bloodeye_system2_3d.png","bloodeyesystems/bloodeye_system_3d.png","bloodeyesystems/bloodeye_system_2_screen.png","95.jpg","about.png","background.png","background_dexon.jpg","ban.png","bes1.png","bes2.png","bes3.png","bes4.png","bes5.png","ble_backgro.jpg","bloodeye.png","bloodeyeco_title.png","brick.jpg","brick2.jpg","brick3.jpg","dexonmusic.png","esqueleto.gif","eyes.png","forest.gif","fur.png","gif.gif","git.gif","git2.gif","gradient.jpg","hi.jpg","ice.jpg","line.jpg","null.gif","null_bug.gif","obsidian_bowl.png","openprojectbackground.jpg","openprojecttitle.png","p.png","p_back.png","par.png","pet.gif","pixel.png","s.gif","skeleto_message.jpg","sup.png","systems.png","systems.png","teh.png","test.jpg","test.png","title.png","title_smol.png","title2.png","title3.png","title4.png","vinil.gif","vis.png","welcome.gif","wowzsearch.gif","WqIqAQzOsgc.jpg"];
+	const randomimages_corewiki = ["teeth.png","teeth.gif","guitar.gif","teeth_sphere.gif","bingus.gif","cat_skateboard.gif","dark_eye.gif","husky.png","godzilla.gif","sea.gif","monky.gif","dark_eye_pyramid.gif","cave.jpg","centipede.gif","windows_cockroach.gif","teeth_sphere2.gif","nails.gif","house_centipede.gif","centipede_face.gif","washing_maching.gif","chrome_mans.gif","teeth_weel.gif","live_metal.gif","gummy_simulation.gif","going_to_hell.gif","moon.gif","ametist.gif","robot.gif","robot_music.gif","spider_crab.png","worm.gif","liminal.jpg","stairs.jpg","monster.gif","beer.png","seastar.gif","bg.gif","bg.png","int.gif","smoking-skull.gif","stars.gif","cat-gift.gif","wave.gif","happy.gif","face.gif","movie.gif","flame.gif","star.gif","3demail21.gif","email6.gif","cd-rom.gif","police.gif","grapher.gif","updated.gif","trash.gif","mail.gif","back.gif","spotting.gif","smallerskull.gif","target.gif","rotglobe.gif","scrollmail.gif","atom1.gif","new1.gif","envelope.gif","smiling.gif","mac.gif","button.png","200w.gif","idk.gif","red.gif","red_tiles.gif","error.gif","you_are_an_idiot.gif","teddy.gif","roses.gif","yes.gif","internet_party.gif","got_mail.gif","cat.gif","kiri.gif","cat_gallery.jpg","cat_smoking.jpg","dancing_cat.gif","hand.gif","pc.gif","pyramid.gif","acid.gif","console.gif","cyclon.gif","radar.gif","fish.gif","flowers.gif","spider-password.gif","windows_95_error.gif","sickness.gif","set_water.gif","dream.gif","pyramids2.gif","spiralition.gif","under_construction.gif","hampsters.gif","so_long.jpg","screw.gif","dice.png","dice_white.gif","basement.gif","ants.png","bubbles.gif","bath_oil_pearls.png","phones.gif","ball.gif","speker.gif","equalizer.gif","siren.gif","sword.gif","horse.gif","text_scroll.gif","rainbow_gold.gif","emerald.gif","donut.gif"];
 	const randomicons = ["click","text","woowzengine","q","cat","cube","ai-galery","none","bloodraw/iconblock","dead","wcom","gear","a","terminal","cssjs","blank","folder","idk","search3","test","bloodeye_old","ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull"];
 	const randomcursors = ["roblox","hit","cursor","woowz","hand","cur","cur2","old","old2","block","veryold","m"];
 function randommake(){
@@ -427,7 +478,7 @@ function randommake(){
 	document.getElementById("main").innerHTML = createrandomhtml();
 	
 	setTimeout(function () {
-        window.scrollTo(Math.random()*Math.max(document.body.scrollHeight, document.documentElement.scrollHeight), Math.random()*Math.max(document.body.scrollHeight, document.documentElement.scrollHeight));
+        window.scrollTo(0, Math.random()*Math.max(document.body.scrollHeight, document.documentElement.scrollHeight));
     },1);
 	
 	randomstylebody(document.body.style);
