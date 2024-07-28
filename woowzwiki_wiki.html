@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="woowzwiki/base.js"></script>
+<script>
+
+var style = {
+
+}
+var info = {
+	Name: "Woowzwiki",
+	Author: "Woowz11",
+	Style: style,
+	StartPage: "hello"
+}
+
+var list = [
+	["base","Основы",{Open:true}],["ownwiki","Создание своей вики",{}],["question","Вопросы",{}],["lib","Библиотека",{}],["values","Переменные",{}],["v_info","Wiki Info",{}],["v_style_info","Style Info",{}],["v_category_info","Category Info",{}]
+]
+info["List"] = list
+
+var pages = {
+
+"hello": ["base","Добро пожаловать!",{},
+`добро пожаловать на сервер нексус рп`],
+
+
+"q_firstpageempty": ["question","Почему начальная страница пустая?",{},
+`я чё ебу`],
+
+
+"lib_wwcreatewiki": ["lib","WWCreateWiki()",{},
+`текст`],
+"lib_wwget": ["lib","WWGet()",{},
+`текст`],
+"lib_wwopenpage": ["lib","WWOpenPage()",{},
+`текст`],
+"lib_wwopencategory": ["lib","WWOpenCategory()",{},
+`текст`],
+"lib_wwversion": ["lib","WWVersion",{},
+`текст`],
+"lib_wwauthor": ["lib","WWAuthor",{},
+`текст`],
+"lib_wwlink": ["lib","WWLink",{},
+`текст`],
+"lib_wwlocallink": ["lib","WWLocalLink",{},
+`текст`],
+
+
+"v_info_name": ["v_info","Name",{},
+`текст`],
+"v_info_author": ["v_info","Author",{},
+`текст`],
+"v_info_list": ["v_info","List",{},
+`текст`],
+"v_info_pages": ["v_info","Pages",{},
+`текст`],
+"v_info_startpage": ["v_info","StartPage",{},
+`текст`],
+
+
+"v_style_info_background": ["v_style_info","Background",{},
+`текст`],
+"v_style_info_farground": ["v_style_info","Farground",{},
+`текст`],
+
+
+"v_category_info_open": ["v_category_info","Open",{},
+`текст`],
+
+}
+info["Pages"] = pages
+
+WWCreateWiki(info)
+
+</script>

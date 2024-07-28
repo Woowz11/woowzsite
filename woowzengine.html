@@ -282,6 +282,12 @@
 
     if(extrahref==""){
       StartScreen();
+	}else if(extrahref.toLowerCase()=="id"||extrahref.toLowerCase()=="ids"){
+		OpenIDs();
+	}else if(extrahref.toLowerCase()=="gallery"){
+		OpenGalery();
+	}else if(extrahref.toLowerCase()=="stats"){
+		OpenStats();
     }else{
       ButtonPress(extrahref,"","o");
     }
@@ -448,10 +454,18 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
     });
   }
 
+  var oldscrolly = 0;
   function ButtonPress(id,lastopen,type,event){
+	setTimeout(function () {
+		oldscrolly = window.scrollY;
+        window.scrollTo(0, 0);
+    },1);
 	var middlemouse = event!=null;
 	if(middlemouse){
-		middlemouse = event.which == 2 || event.button == 1;
+		middlemouse = event.which == 2;
+		if(event.which == 3){
+			return
+		}
 	}
     if (middlemouse) {
         window.open("https://woowz11.github.io/woowzsite/woowzengine.html#"+id,"_blank");
@@ -523,19 +537,8 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 
     return info;
   }
-  var codecount = 0;
-  function GenerateCode(code, thatglsl){
-    if(thatglsl==null){thatglsl = false;}
-	var text = code.slice(1).slice(0,-1).replace(/"/g,'@');
-    return `<div style="position: relative;"><textarea class='`+(thatglsl?"glsl":"lua")+`' readonly>`+code.slice(1).slice(0,-1)+`</textarea><button style='position: absolute; top: 0; right: 32px;' title='Скопировать!' onclick="CopyToClipboard(\``+text+`\`)">C</button><button style='position: absolute; top: 0; right: 0;' title='Скопировать для Discord!' onclick="CopyToClipboard(\``+"&&&"+(thatglsl?"glsl":"lua")+"\n"+text+"\n&&&"+`\`)">CD</button></div>`;
-  }
-
-	function OpenIDs(){
-	document.title = "WoowzEngine - ID's";
-	
-	list = {};
-	
-	function GetFuncTitle(key){
+  
+  	function GetFuncTitle(key){
 		var notfound = false;
 		var title = "";
 		if(!Pages[key.toLowerCase()]){
@@ -562,6 +565,18 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 		}
 		return [(func==""?"":func+" : ")+content_,emptyerror,func];
 	}
+  
+  var codecount = 0;
+  function GenerateCode(code, thatglsl){
+    if(thatglsl==null){thatglsl = false;}
+	var text = code.slice(1).slice(0,-1).replace(/"/g,'@');
+    return `<div style="position: relative;"><textarea class='`+(thatglsl?"glsl":"lua")+`' readonly>`+code.slice(1).slice(0,-1)+`</textarea><button style='position: absolute; top: 0; right: 32px;' title='Скопировать!' onclick="CopyToClipboard(\``+text+`\`)">C</button><button style='position: absolute; top: 0; right: 0;' title='Скопировать для Discord!' onclick="CopyToClipboard(\``+"&&&"+(thatglsl?"glsl":"lua")+"\n"+text+"\n&&&"+`\`)">CD</button></div>`;
+  }
+
+	function OpenIDs(){
+	document.title = "WoowzEngine - ID's";
+	
+	list = {};
 	
 	for (let key in Pages){
 		var type = "o";
@@ -611,7 +626,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			if(lowcontent.includes("за рамки")||lowcontent.includes("быть >")||lowcontent.includes("быть <")||lowcontent.includes("быть =")||lowcontent.includes("больше")||lowcontent.includes("меньше")){
 				extra = extra + ",math";
 			}
-			if((lowcontent.includes("не получилось") || lowcontent.includes("ошибка при") || lowcontent.includes("не возможно")) && !extra.includes("alrex")){
+			if((lowcontent.includes("не получилось") || lowcontent.includes("нельзя") || lowcontent.includes("ошибка при") || lowcontent.includes("не возможно")) && !extra.includes("alrex")){
 				extra = extra + ",operationbroke";
 			}
 			if(lowcontent.includes("с windows")){
@@ -844,7 +859,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	function g4(){
 		var result = "";
 		
-		var IidkWhatAddSoooo = ["omagad","ок","сколько тут слов?","а вы ждёте блуд рав?","это что ещё такое?!","<- это говно не рекомендую","🚽","чё за секретки","это полный пиздец","вувз энджин никогда не выйдет!",`<audio style="margin-top:0px; position: absolute; height: 23px; width: 300px;" controls><source src="source/doom.mp3" type="audio/mpeg"></audio>`];
+		var IidkWhatAddSoooo = ["omagad","ок","сколько тут слов?","а вы ждёте блуд рав?","это что ещё такое?!","<- это говно не рекомендую","🚽","чё за секретки","это полный пиздец","вувз энджин никогда не выйдет!",`<audio style="margin-top:0px; position: absolute; height: 23px; width: 300px;" controls><source src="source/doom.mp3" type="audio/mpeg"></audio>`,"🐓","а вы видели woowzwiki?","копро",`<img style="position: absolute; height: 5em; width: auto; box-shadow: none;" src="core-wiki/source/spider_crab.png">`,`<img style="position: absolute; height: 5em; width: auto; box-shadow: none;" src="core-wiki/source/dark_eye_pyramid.gif">`,`<img style="position: absolute; height: 5em; width: auto; box-shadow: none;" src="core-wiki/source/windows_cockroach.gif">`,`<img style="position: absolute; height: 5em; width: auto; box-shadow: none;" src="core-wiki/source/cat.gif">`,`<img style="position: absolute; height: 5em; width: auto; box-shadow: none;" src="core-wiki/source/200w.gif">`,`<img style="position: absolute; height: 1em; width: auto; box-shadow: none;" src="core-wiki/source/screw.gif">`,];
 		var notfirst = false;
 		for (let key in Pages) {
 			result = result + (notfirst?"<br>":"");
@@ -1141,7 +1156,297 @@ function StartScreen(event){
 		}
 	  
 		c_e.innerHTML = divstart+s_e+divend;
+		setTimeout(function () {
+			window.scrollTo(0, oldscrolly);
+		},1);
 	}
+}
+
+function GetAllFunctionsList(){
+var functions=`
+	lua.set_function("CheckLua", &l_CheckLua);
+	lua.set_function("Wait", &l_Wait);
+	lua.set_function("Exit", &l_Exit);
+	lua.set_function("PrintCustom", &l_PrintCustom);
+	lua.set_function("Print", &l_Print);
+	lua.set_function("Warn", &l_Warn);
+	lua.set_function("Error", &l_Error);
+	lua.set_function("Fatal", &l_Fatal);
+	lua.set_function("PrintClear", &l_PrintClear);
+	lua.set_function("Cycle", &l_Cycle);
+	lua.set_function("Random", &l_Random);
+	lua.set_function("Round", &l_Round);
+	lua.set_function("HasDirectory", &l_HasDirectory);
+	lua.set_function("ReadFile", &l_ReadFile);
+	lua.set_function("WriteFile", &l_WriteFile);
+	lua.set_function("CreateDirectory", &l_CreateDirectory);
+	lua.set_function("CreateFile", &l_CreateFile);
+	lua.set_function("RenameFile", &l_RenameFile);
+	lua.set_function("ReadJSON", &l_ReadJSON);
+	lua.set_function("WriteJSON", &l_WriteJSON);
+	lua.set_function("Abs", &l_Abs);
+	lua.set_function("Min", &l_Min);
+	lua.set_function("Max", &l_Max);
+	lua.set_function("Sqrt", &l_Sqrt);
+	lua.set_function("Log", &l_Log);
+	lua.set_function("LogE", &l_LogE);
+	lua.set_function("Log10", &l_Log10);
+	lua.set_function("Sin", &l_Sin);
+	lua.set_function("Cos", &l_Cos);
+	lua.set_function("Floor", &l_Floor);
+	lua.set_function("Ceil", &l_Ceil);
+	lua.set_function("Tan", &l_Tan);
+	lua.set_function("Sum", &l_Sum);
+	lua.set_function("Sub", &l_Sub);
+	lua.set_function("Mul", &l_Mul);
+	lua.set_function("Div", &l_Div);
+	lua.set_function("Clamp", &l_Clamp);
+	lua.set_function("ASin", &l_ASin);
+	lua.set_function("ACos", &l_ACos);
+	lua.set_function("ATan", &l_ATan);
+	lua.set_function("Cbrt", &l_Cbrt);
+	lua.set_function("Exp", &l_Exp);
+	lua.set_function("ExpM", &l_ExpM);
+	lua.set_function("Fabs", &l_Fabs);
+	lua.set_function("FDim", &l_FDim);
+	lua.set_function("Hypot", &l_Hypot);
+	lua.set_function("Fma", &l_Fma);
+	lua.set_function("Mod", &l_Mod);
+	lua.set_function("HSin", &l_HSin);
+	lua.set_function("HCos", &l_HCos);
+	lua.set_function("HTan", &l_HTan);
+	lua.set_function("Trunc", &l_Trunc);
+	lua.set_function("Modf", &l_Modf);
+	lua.set_function("HasString", &l_HasString);
+	lua.set_function("Replace", &l_Replace);
+	lua.set_function("Remove", &l_Remove);
+	lua.set_function("Charcters", &l_Charcters);
+	lua.set_function("Uppercase", &l_Uppercase);
+	lua.set_function("Lowercase", &l_Lowercase);
+	lua.set_function("Length", &l_Length);
+	lua.set_function("SubStr", &l_SubStr);
+	lua.set_function("ToNumber", &l_ToNumber);
+	lua.set_function("Cmd", &l_Cmd);
+	lua.set_function("CreateWindow", &l_CreateWindow);
+	lua.set_function("DestroyWindow", &l_DestroyWindow);
+	lua.set_function("HasWindow", &l_HasWindow);
+	lua.set_function("SetWindowMain", &l_SetWindowMain);
+	lua.set_function("GetMainWindow", &l_MainWindow);
+	lua.set_function("GetSeed", &l_Seed);
+	lua.set_function("SetSeed", &l_SetSeed);
+	lua.set_function("GetWindowSize", &l_GetWindowSize);
+	lua.set_function("SetWindowSize", &l_SetWindowSize);
+	lua.set_function("SetWindowTitle", &l_SetWindowTitle);
+	lua.set_function("SetWindowAutoScale", &l_SetWindowAutoScale);
+	lua.set_function("AbsSin", &l_AbsSin);
+	lua.set_function("AbsCos", &l_AbsCos);
+	lua.set_function("DSin", &l_DSin);
+	lua.set_function("DCos", &l_DCos);
+	lua.set_function("SetWindowResizable", &l_SetWindowResizable);
+	lua.set_function("SetWindowEventClosed", &l_SetWindowEventClosed);
+	lua.set_function("SetEventClosed", &l_SetEventClosed);
+	lua.set_function("SetWindowEventKeyPress", &l_SetWindowEventKeyPress);
+	lua.set_function("SetWindowEventKeyRelease", &l_SetWindowEventKeyRelease);
+	lua.set_function("SetWindowEventKeyHold", &l_SetWindowEventKeyHold);
+	lua.set_function("PressedKeys", &l_PressedKeys);
+	lua.set_function("RRandom", &l_RRandom);
+	lua.set_function("GetWindowPosition", &l_GetWindowPosition);
+	lua.set_function("SetWindowPosition", &l_SetWindowPosition);
+	lua.set_function("Frac", &l_Frac);
+	lua.set_function("JSONTable", &l_JSONTable);
+	lua.set_function("Pairs", &l_Pairs);
+	lua.set_function("ToString", &l_ToString);
+	lua.set_function("GetType", &l_GetType);
+	lua.set_function("OpenLink", &l_OpenLink);
+	lua.set_function("ActiveTime", &l_ActiveTime);
+	lua.set_function("SetCameraPosition", &l_SetCameraPosition);
+	lua.set_function("GetCameraPosition", &l_GetCameraPosition);
+	lua.set_function("SetSpritePosition", &l_SetSpritePosition);
+	lua.set_function("CreateScene", &l_CreateScene);
+	lua.set_function("SetSceneBackgroundColor", &l_SetSceneBackgroundColor);
+	lua.set_function("SetWindowScene", &l_SetSceneWindow);
+	lua.set_function("CreateSprite", &l_CreateSprite);
+	lua.set_function("GetFPS", &l_GetFPS);
+	lua.set_function("CycleRender", &l_CycleRender);
+	lua.set_function("SetCameraZoom", &l_SetCameraZoom);
+	lua.set_function("GetCameraZoom", &l_GetCameraZoom);
+	lua.set_function("GetMousePosition", &l_GetMousePosition);
+	lua.set_function("GetMouseWPosition", &l_GetMouseWPosition);
+	lua.set_function("ScreenToWorld", &l_ScreenToWorld);
+	lua.set_function("WorldToScreen", &l_WorldToScreen);
+	lua.set_function("SetWindowEventMousePress", &l_SetWindowEventMousePress);
+	lua.set_function("SetWindowEventMouseRelease", &l_SetWindowEventMouseRelease);
+	lua.set_function("SetWindowEventMouseHold", &l_SetWindowEventMouseHold);
+	lua.set_function("Sign", &l_Sign);
+	lua.set_function("SetDiscordActivityTitle", &l_SetDiscordActivityTitle);
+	lua.set_function("SetDiscordActivityDescription", &l_SetDiscordActivityDescription);
+	lua.set_function("GetUserName", &l_GetUserName);
+	lua.set_function("CheckInternet", &l_CheckInternet);
+	lua.set_function("ToBool", &l_ToBool);
+	lua.set_function("RunLua", &l_RunLua);
+	lua.set_function("Repeat", &l_Repeat);
+	lua.set_function("ProgramLaunched", &l_ProgramLaunched);
+	lua.set_function("DiscordLaunched", &l_DiscordLaunched);
+	lua.set_function("ProgramsLaunched", &l_ProgramsLaunched);
+	lua.set_function("StopProgram", &l_StopProgram);
+	lua.set_function("ExitPC", &l_ExitPC);
+	lua.set_function("PointOutsideWindow", &l_PointOutsideWindow);
+	lua.set_function("GetFilesFromDirectory", &l_GetFilesFromDirectory);
+	lua.set_function("GetFileName", &l_GetFileName);
+	lua.set_function("GetFileType", &l_GetFileType);
+	lua.set_function("PrintFast", &l_PrintFast);
+	lua.set_function("SetSpriteSize", &l_SetSpriteSize);
+	lua.set_function("SetSpriteCorner", &l_SetSpriteCorner);
+	lua.set_function("SetFPSTarget", &l_SetFPSTarget);
+	lua.set_function("SetEventPrint", &l_SetEventPrint);
+	lua.set_function("SetWindowTransparency", &l_SetWindowTransparency);
+	lua.set_function("GetWindowTransparency", &l_GetWindowTransparency);
+	lua.set_function("OpenFile", &l_OpenFile);
+	lua.set_function("HasFile", &l_HasDirectory);
+	lua.set_function("OpenDirectory", &l_OpenFile);
+	lua.set_function("SetSpriteColor", &l_SetSpriteColor);
+	lua.set_function("GetSpriteColor", &l_GetSpriteColor);
+	lua.set_function("SetSpriteLayer", &l_SetSpriteLayer);
+	lua.set_function("GetSpriteLayer", &l_GetSpriteLayer);
+	lua.set_function("FRandom", &l_FRandom);
+	lua.set_function("FRRandom", &l_FRRandom);
+	lua.set_function("GetSprites", &l_GetSprites);
+	lua.set_function("NewThread", &l_NoWait);
+	lua.set_function("GetLanguage", &l_GetLanguage);
+	lua.set_function("GetSystemLanguage", &l_GetSystemLanguage);
+	lua.set_function("HasSprite", &l_HasSprite);
+	lua.set_function("SetSpriteTexture", &l_SetSpriteTexture);
+	lua.set_function("SetSpriteSizeByTexture", &l_SetSpriteSizeByTexture);
+	lua.set_function("GetTextureSize", &l_GetTextureSize);
+	lua.set_function("GetSpriteSize", &l_GetSpriteSize);
+	lua.set_function("GetSpritePosition", &l_GetSpritePosition);
+	lua.set_function("SetSpriteMirrorX", &l_SetSpriteMirrorX);
+	lua.set_function("SetSpriteMirrorY", &l_SetSpriteMirrorY);
+	lua.set_function("GetSpriteMirrorX", &l_GetSpriteMirrorX);
+	lua.set_function("GetSpriteMirrorY", &l_GetSpriteMirrorY);
+	lua.set_function("SetSpriteUVCorner", &l_SetSpriteUVCorner);
+	lua.set_function("SetSpriteRotation", &l_SetSpriteOrientation);
+	lua.set_function("Lerp", &l_Lerp);
+	lua.set_function("ToRad", &l_ToRad);
+	lua.set_function("ToDeg", &l_ToDeg);
+	lua.set_function("GetSpriteRotation", &l_GetSpriteRotation);
+	lua.set_function("SetSpriteCenter", &l_SetSpriteCenter);
+	lua.set_function("GetSpriteCenter", &l_GetSpriteCenter);
+	lua.set_function("GetWindows", &l_GetWindows);
+	lua.set_function("GetSceneWindow", &l_GetWindow);
+	lua.set_function("GetWindowScene", &l_GetScene);
+	lua.set_function("SetDesktopBackground", &l_SetDesktopBackground);
+	lua.set_function("GetVolume", &l_GetVolume);
+	lua.set_function("SetVolume", &l_SetVolume);
+	lua.set_function("LoadTexture", &l_LoadTexture);
+	lua.set_function("SetSpriteVisible", &l_SetSpriteVisible);
+	lua.set_function("GetSpriteVisible", &l_GetSpriteVisible);
+	lua.set_function("SetTextureBlur", &l_SetTextureBlur);
+	lua.set_function("GetTextureColors", &l_GetTextureColors);
+	lua.set_function("SetConsoleTitle", &l_SetConsoleTitle);
+	lua.set_function("CreateTexture", &l_CreateTexture);
+	lua.set_function("WriteImage", &l_WriteImage);
+	lua.set_function("SetSpriteShader", &l_SetSpriteShader);
+	lua.set_function("SetSpriteHeight", &l_SetSpriteHeight);
+	lua.set_function("Pow", &l_Pow);
+	lua.set_function("RemoveFile", &l_RemoveFile);
+	lua.set_function("PlayBeep", &l_PlayBeep);
+	lua.set_function("GetSpriteShader", &l_GetSpriteShader);
+	lua.set_function("GetSpriteHeight", &l_GetSpriteHeight);
+	lua.set_function("TestFunction", &l_TestFunction);
+	lua.set_function("GetDiscordUserInfo", &l_GetDiscordUserInfo);
+	lua.set_function("GetDiscordCurrentUser", &l_GetDiscordCurrentUser);
+	lua.set_function("CreateText", &l_CreateText);
+	lua.set_function("CreateFont", &l_CreateFont);
+	lua.set_function("SetTextPosition", &l_SetTextPosition);
+	lua.set_function("SetTextFont", &l_SetTextFont);
+	lua.set_function("SetTextColor", &l_SetTextColor);
+	lua.set_function("GetASCIIChar", &l_GetASCIIChar);
+	lua.set_function("SetTextText", &l_SetTextText);
+	lua.set_function("SetTextHeight", &l_SetTextHeight);
+	lua.set_function("StringToColors", &l_StringToColors);
+	lua.set_function("SetShowCursor", &l_ShowCursor);
+	lua.set_function("Even", &l_Even);
+	lua.set_function("SetTextMono", &l_SetTextMono);
+	lua.set_function("GetShowCursor", &l_GetShowCursor);
+	lua.set_function("GetTextMono", &l_GetTextMono);
+	lua.set_function("GetTextText", &l_GetTextText);
+	lua.set_function("GetTextHeight", &l_GetTextHeight);
+	lua.set_function("GetTextPosition", &l_GetTextPosition);
+	lua.set_function("GetTextFont", &l_GetTextFont);
+	lua.set_function("GetTextColor", &l_GetTextColor);
+	lua.set_function("GetSpriteUVCorner", &l_GetSpriteCorner);
+	lua.set_function("GetSpriteCorner", &l_GetSpriteCorner);
+	lua.set_function("GetUnicodeChar", &l_GetUnicodeChar);
+	lua.set_function("GetEngineChar", &l_GetEngineChar);
+	lua.set_function("MessageBox", &l_MessageBox);
+	lua.set_function("SetWindowImGui", &l_SetWindowImGui);
+	lua.set_function("CreateImGuiWindow", &l_CreateImGuiWindow);
+	lua.set_function("CreateImGuiElement", &l_CreateImGuiElement);
+	lua.set_function("SetImGuiElementText", &l_SetImGuiElementText);
+	lua.set_function("SetImGuiElementColor", &l_SetImGuiElementColor);
+	lua.set_function("RandomColor", &l_RandomColor);
+	lua.set_function("SetImGuiElementEvent", &l_SetImGuiElementEvent);
+
+	lua.set_function("SetImGuiElementPoint", &l_SetImGuiElementPoint);
+	lua.set_function("SetImGuiElementStringValue", &l_SetImGuiElementStringValue);
+	lua.set_function("SetImGuiElementConnect", &l_SetImGuiElementConnect);
+	lua.set_function("SetImGuiElementTooltip", &l_SetImGuiElementTooltip);
+	lua.set_function("SetImGuiFontScale", &l_SetImGuiFontSize);
+	lua.set_function("SetImGuiWindowVisible", &l_SetImGuiWindowVisible);
+	lua.set_function("SetImGuiElementValue", &l_SetImGuiElementValue);
+	lua.set_function("GetImGuiElementValue", &l_GetImGuiElementValue);
+
+	lua.set_function("GetWindowTitle", &l_WIP);
+	lua.set_function("GetWindowAutoScale", &l_WIP);
+	lua.set_function("GetWindowResizable", &l_WIP);
+	lua.set_function("GetTextureBlur", &l_WIP);
+	lua.set_function("GetSceneBackgroundColor", &l_WIP);
+	lua.set_function("GetWindowImGui", &l_WIP);
+	lua.set_function("GetImGuiElementText", &l_WIP);
+	lua.set_function("GetImGuiElementColor", &l_WIP);
+	lua.set_function("GetImGuiElementPoint", &l_WIP);
+	lua.set_function("GetImGuiElementStringValue", &l_WIP);
+	lua.set_function("GetImGuiElementConnect", &l_WIP);
+	lua.set_function("GetImGuiElementTooltip", &l_WIP);
+	lua.set_function("GetImGuiFontScale", &l_WIP);
+	lua.set_function("GetImGuiWindowVisible", &l_WIP);
+
+	lua.set_function("RemoveMagicalNumber", &l_RemoveMagicalNumber);
+	lua.set_function("MSin", &l_MSin);
+	lua.set_function("DMSin", &l_DMSin);
+	lua.set_function("MCos", &l_MCos);
+	lua.set_function("DMCos", &l_DMCos);
+`
+
+var functions_ = functions.split('\n');
+var result = `<div style="column-count: 3; list-style-type: none; padding: 0;">`
+for(var i = 0; i < functions_.length; i++){
+	var fullfunc = functions_[i];
+	var func = fullfunc.match(/"([^"]*)"/g)
+	if (func && func.length >= 1) {
+		func = func[0].slice(1,-1);
+		var funcid = func.toLowerCase()+"()";
+		var found = false;
+		if(funcid in Pages){
+			found = true;
+		}else{
+			//console.error("FUNCTION ('"+func+"') ['"+funcid+"'] NOT FOUND!")
+			
+			if(funcid.includes("set")||funcid.includes("get")){
+				var func_ = funcid.replace(/set|get/g,"@");
+				if(func_ in Pages){
+					funcid = func_;
+					found = true;
+				}
+			}
+		}
+
+		var wip = fullfunc.includes("&l_WIP");
+		result = result + `<li><font style="opacity:0.5;">(`+(i+1)+`)</font> <a title="`+GetFuncTitle(funcid)[0]+`" `+(found?"":`class="yellow"`)+` onmousedown="ButtonPress('`+funcid+`','allfunctions','f',event)">`+func+`</a>`+(wip?` <font style="opacity:0.5;">(WIP)</font>`:``)+`</li>`;
+	}
+}
+return result+`</div>`;
 }
 
 var ColumnOther = [
@@ -1149,7 +1454,7 @@ var ColumnOther = [
 
   ["woowzengine","Что такое WoowzEngine?","What is WoowzEngine?"],
   ["games","Игры на WoowzEngine","Games on WoowzEngine"],
-  ["questions","Ответ на вопросы","-"],
+  ["questions","Ответы на вопросы","-"],
   ["license","Лицензия","License"],
 
   ["%Движок"],
@@ -1179,6 +1484,7 @@ var ColumnOther = [
   ["convert","Конвертация","Converts"],
   ["shaders","Шейдеры","Shaders"],["fonts","Шрифты","Fonts"],
   ["textcodes","Специальные команды текста","Special text commands"],
+  ["allfunctions","Список всех функций","?"],
 
   ["%Остальное"],
 
@@ -1717,7 +2023,7 @@ var Pages = {
 `],
 
 "shaders":[`
-<div style="margin-left: 100px;">
+<div style="margin-left: 100px; margin-right: 100px;">
 В WoowzEngine используется OpenGL, тем самым в нём можно делать свои шейдеры.<br>
 Ссылки на функции шейдеров: <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/index.php">New Document</a> & <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/">Old Document</a> (<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/indexflat.php">Alt.</a>) & <a href="https://www.khronos.org/opengl/wiki/Category:Core_API_Reference">Wiki</a><br>
 <br>
@@ -1726,8 +2032,8 @@ var Pages = {
 <br>
 Если при создании нового шейдера какого-то одного из компонентов не будет, то будет браться за основу default шейдер, т.е если вы создали шейдер test.v но без test.f, то будет использоваться test.v и default.f<br>
 <br>
-Версия OpenGL 4.6<br>
-Версия шейдеров 330<br>
+Версия OpenGL: 4.6<br>
+Версия шейдеров: 330<br>
 <br>
 default.f
 <pre class="code-glsl">`+GenerateCode(`
@@ -1824,6 +2130,8 @@ TexCoord - Позиция пикселя на текстуре<br>
 </table>
 </center>
 `],
+
+"allfunctions": [`<div style="margin-left: 100px; margin-right: 100px;">Тут собран список всех зарегестрированных функцйий в движке:<br><br>`],
 
 "checklua()": [FunctionInfo("CheckLua",false,false)+`
 Отладочная функция, проверяющая работоспособность Lua скрипта.<br>
@@ -2884,5 +3192,7 @@ function generateErrors(){
 	
 }
 generateErrors()
+
+Pages["allfunctions"] = [Pages["allfunctions"][0]+GetAllFunctionsList()+"</div>"]
 
 </script>

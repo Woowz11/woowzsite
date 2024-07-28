@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>LocalStorage Test</title>
+<link rel="icon" type="image/x-icon" href="source\none.ico">
+
+<input id="input" type="text" value="Example"><button onclick="save()">SAVE</button>
+<p id="result">Example</p>
+
+<script>
+var loadedtext = localStorage.getItem("test")
+if (loadedtext != null){
+	document.getElementById("input").value = loadedtext
+	document.getElementById("result").textContent = loadedtext
+}
+function save(){
+	var text = document.getElementById("input").value
+	document.getElementById("result").textContent = text
+	localStorage.setItem("test",text)
+}
+</script>
