@@ -55,9 +55,9 @@ var pages = {
 Википедия и сам мод находятся в альфе и разрабатываются!<br>
 <br>
 Ссылка на библиотеку: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3297762978&tscn=1722152757">SteamWorkshop</a><br>
-ССылка на ванильное оружие: <a href="#">SteamWorkshop</a><br>
+ССылка на ванильное оружие: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3298838904">SteamWorkshop</a><br>
 <br>
-Версия библиотеки: 0.0.2 Alpha
+Версия библиотеки: 0.0.3 Alpha
 `],
 
 "example_mod": ["example","Пример добавления модификации",{},
@@ -246,6 +246,8 @@ end`])],
 "cv_funny_weapons"         : ["cvars","wm_funny_weapons",{},CVarInfo("funny_weapons","bool","1",null,true,`Отображать шуточные оружия в спавменю?`)],
 "cv_extendeddesc"          : ["cvars","wm_extendeddesc",{},CVarInfo("extendeddesc","bool","0",null,true,`Сделать описание оружий более чётким и понятным?`)],
 "cv_takeweapons"           : ["cvars","wm_takeweapons",{},CVarInfo("takeweapons","bool","1",null,false,`Разрешить поднимать WM оружие?`)],
+"cv_npccanuse"             : ["cvars","wm_npccanuse",{},CVarInfo("npccanuse","bool","1",null,false,`Разрешить NPC использовать оружие?`)],
+"cv_npcweapons"            : ["cvars","wm_npcweapons",{},CVarInfo("npcweapons","bool","1",null,true,`Добавить оружие в "выбор оружия" при спавне NPC?`)],
 "cv_canblock"              : ["cvars","wm_canblock",{},CVarInfo("canblock","bool","0",null,false,`Включить блок? (эксперементальная функция)`)],
 "cv_distancescale"         : ["cvars","wm_distancescale",{},CVarInfo("distancescale","float","1",false,false,`Умножает на растояние с которого можно достать оружием`)],
 "cv_attackwaitscale"       : ["cvars","wm_attackwaitscale",{},CVarInfo("attackwaitscale","float","1",false,false,`Умножает ожидание между ударами`)],
@@ -273,7 +275,7 @@ end`])],
 "cv_funny_shock"           : ["cvars","wm_funny_shock",{},CVarInfo("funny_shock","bool","0",null,false,`Бить током объекты при ударах?`)],
 "cv_randomnames"           : ["cvars","wm_randomnames",{},CVarInfo("randomnames","bool","0",null,true,`Рандомизировать имена оружий и скрыть иконки?`)],
 "cv_randomdecals"          : ["cvars","wm_randomdecals",{},CVarInfo("randomdecals","bool","0",null,false,`Рандомизировать декали?`)],
-"cv_debug_livetime"        : ["cvars","wm_debug_livetime",{},CVarInfo("debug_livetime","float","3",false,false,`Сколько по времени будут отображаться отладочные элементы?`)],
+"cv_debug_livetime"        : ["cvars","wm_debug_livetime",{},CVarInfo("debug_livetime","float","10",false,false,`Сколько секунд будут отображаться отладочные элементы?`)],
 "cv_debug_weapons"         : ["cvars","wm_debug_weapons",{},CVarInfo("debug_weapons","bool","0",null,true,`Загрузить отладочное оружие?`)],
 "cv_showhit"               : ["cvars","wm_showhit",{},CVarInfo("showhit","bool","0",null,false,`Отображать лучи при ударах? (нужно включить developer 1)`)],
 "cv_showdamage"            : ["cvars","wm_showdamage",{},CVarInfo("showdamage","bool","0",null,false,`Отображать отладочные сообщения об уроне? (нужно включить developer 1)`)],
