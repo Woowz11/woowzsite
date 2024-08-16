@@ -1047,6 +1047,7 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 	var allsymbols = "";
 	var x = 0;
 	var y = 0;
+	var count = 0;
 	for(let i = 0; i < symbols.length; i++){
 		result = result + `<td style='cursor: pointer; width:6.25%; text-shadow:none;' class='whitetd' title='`+(symbols[i][0]=="" || symbols[i][1]==""?"":"Скопировать [ "+symbols[i][1]+" ]")+`' onclick='CopyToClipboard("`+symbols[i][0]+`")'><font style='`+(symbols[i][1]==""?"color:RGB(255,0,0);":"")+`'><center>`+symbols[i][0]+`</center></font></td>`;
 		x++;
@@ -1059,10 +1060,11 @@ scene_green:SetBackgroundColor(Color.new(0,255,0))
 			var symbol = symbols[i][0];
 			if(symbol!=empty[0] && symbol!='"' && symbol!="'" && symbol!=""){
 				allsymbols = allsymbols + symbol;
+				count++;
 			}
 		}
 	}
-	return result+`</tr></table><br><button title="Скопировать!" onclick="CopyToClipboard('`+allsymbols+`')">Скопировать все символы в линию</button>`;
+	return result+`</tr></table><br><button title="Скопировать!" onclick="CopyToClipboard('`+allsymbols+`')">Скопировать все символы в линию</button><br><br>Всего символов: `+count+`/`+(y*16)+`<br><br>Идеи для остальных символов можете предлагать`;
   }
   
 function StartScreen(event){
@@ -1596,7 +1598,8 @@ var ColumnFunctionsCONS = [
 	["White","Color",ColorBox("invert(100%) sepia(7%) saturate(300%) hue-rotate(85deg) brightness(110%) contrast(100%)",255)       +" Color.new(255,255,255,255)"],
 	["Gray","Color",ColorBox("invert(52%) sepia(0%) saturate(1652%) hue-rotate(216deg) brightness(96%) contrast(89%)",255)         +" Color.new(128,128,128,255)"],
 	["Black","Color",ColorBox("none",255)                                                                                          +" Color.new(0,0,0,255)"],
-    ["Transparent","Color",ColorBox("none",0)                                                                                      +" Color.new(0,0,0,0)"],
+    ["Transparent","Color",ColorBox("none",0)                                                                                      +" Color.new(255,255,255,0)"],
+	["TrueTransparent","Color",ColorBox("none",0)                                                                                  +" Color.new(0,0,0,0)"],
 	["ErrorColor","Color",ColorBox("invert(22%) sepia(96%) saturate(4375%) hue-rotate(293deg) brightness(111%) contrast(132%)",254)+" Color.new(255,0,255,254)"],
 	["Up","Vector2","Vector2.new(0,1)"],["Down","Vector2","Vector2.new(0,-1)"],["Right","Vector2","Vector2.new(1,0)"],["Left","Vector2","Vector2.new(-1,0)"],
     ["Front","Vector3","Vector3.new(0,0,1)"],["Back","Vector3","Vector3.new(0,0,-1)"],["StringMax","number","[Максимальный размер строки]"],["EngineChars","number","[Кол-во символов в шрифте]"],
@@ -2131,7 +2134,7 @@ TexCoord - Позиция пикселя на текстуре<br>
 </center>
 `],
 
-"allfunctions": [`<div style="margin-left: 100px; margin-right: 100px;">Тут собран список всех зарегестрированных функцйий в движке:<br><br>`],
+"allfunctions": [`<div style="margin-left: 100px; margin-right: 100px;">Тут собран список всех зарегестрированных функций в движке:<br><br>`],
 
 "checklua()": [FunctionInfo("CheckLua",false,false)+`
 Отладочная функция, проверяющая работоспособность Lua скрипта.<br>
@@ -2269,7 +2272,8 @@ Print(RRandom(1,2))
 `+"</div>","Округлённое случайное число"],
 
 "round()": [FunctionInfo("Round",true,false)+`
-Функция округляет число. (Функция округляет к меньшему, такая же как и <button onmousedown='ButtonPress("floor()","round()")'>Floor()</button>)<br>
+Функция округляет число к меньшему и большему.<br>
+Если меньше .5 то к меньшему, если больше или равно .5 то к большему<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -2280,7 +2284,7 @@ i = i + 0.1
 
 end,100)
 `)+`</pre>
-`+CreateDesmos("f6edz2juyu")+`
+`+CreateDesmos("pcrthhdqoa")+`
 `+"</div>","Округление"],
 
 "ceil()": [FunctionInfo("Ceil",true,false)+`
@@ -2299,7 +2303,7 @@ end,100)
 `+"</div>","Округление в большую сторону"],
 
 "floor()": [FunctionInfo("Floor",true,false)+`
-Функция округляет число к меньшему. (Аналог <button onmousedown='ButtonPress("round()","floor()")'>Round()</button> <button onmousedown='ButtonPress("trunc()","floor()")'>Trunc()</button>)<br>
+Функция округляет число к меньшему. (Аналог <button onmousedown='ButtonPress("trunc()","floor()")'>Trunc()</button>)<br>
 <pre class="code">`+GenerateCode(`
 local i = 0
 Cycle(function()
@@ -2385,8 +2389,8 @@ Print(Sin(Pi*2))    -- 0
 local i = 0
 Cycle(function()
 
-Print("Число от -1 до 1 : "..Sin(i))
-i = i + 0.1
+Print("Sin("..i..") = "..Sin(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2417,8 +2421,8 @@ Print(Cos(Pi*2))    -- 1
 local i = 0
 Cycle(function()
 
-Print("Число от -1 до 1 : "..Cos(i))
-i = i + 0.1
+Print("Cos("..i..") = "..Cos(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2449,8 +2453,8 @@ Print(AbsSin(Pi*2))    -- 0
 local i = 0
 Cycle(function()
 
-Print("Число от 0 до 1 : "..AbsSin(i))
-i = i + 0.1
+Print("AbsSin("..i..") = "..AbsSin(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2481,8 +2485,8 @@ Print(AbsCos(Pi*2))    -- 1
 local i = 0
 Cycle(function()
 
-Print("Число от 0 до 1 : "..AbsCos(i))
-i = i + 0.1
+Print("AbsCos("..i..") = "..AbsCos(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2491,7 +2495,7 @@ end,100)
 
 "sign()": [FunctionInfo("Sign",true,false)+`
 Функция возвращает знак числа.<br>
-Если число отрицательное то возращает -1, если положительное то 1.<br>
+Если число отрицательное то возращает -1, если положительное или 0 то 1.<br>
 <pre class="code">`+GenerateCode(`
 Print(Sign(1))    -- 1
 Print(Sign(0))    -- 1
@@ -2499,7 +2503,7 @@ Print(Sign(2))    -- 1
 Print(Sign(-1))   -- -1
 Print(Sign(-0.1)) -- -1
 `)+`</pre>
-`+CreateDesmos("knrzw4qbqm")+`
+`+CreateDesmos("g2tgvdaq4m")+`
 `+"</div>","Знак числа"],
 
 "lerp()": [FunctionInfo("Lerp",true,false)+`
@@ -2539,8 +2543,8 @@ Print(DSin(Pi*2))    -- 0.5
 local i = 0
 Cycle(function()
 
-Print("Число от 0 до 1 : "..DSin(i))
-i = i + 0.1
+Print("DSin("..i..") = "..DSin(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2571,8 +2575,8 @@ Print(DCos(Pi*2))    -- 1
 local i = 0
 Cycle(function()
 
-Print("Число от 0 до 1 : "..DCos(i))
-i = i + 0.1
+Print("DCos("..i..") = "..DCos(i))
+i = i + FRRandom(1,10)/100
 
 end,100)
 `)+`</pre>
@@ -2857,6 +2861,7 @@ Print(Div(0,5))  -- 0
 
 "getasciichar()": [FunctionInfo("GetASCIIChar",true,false)+`
 Функция получает символ из таблицы ASCII.<br>
+Если число превысит лимит, то пойдёт по кругу<br>
 <pre class="code">`+GenerateCode(`
 for i=0,127 do
 	Print(GetASCIIChar(i))
@@ -3011,7 +3016,127 @@ CreateSprite("sprite","scene")
 `)+`</pre>
 `+"</div>","Создаёт спрайт"],
 
-"msin()": [FunctionInfo("MSin",true,false)+"см textstyles, там эта функция "+CreateDesmos("ks1v1aqerp"),"?"],
+"msin()": [FunctionInfo("MSin",true,false)+`
+Функция синуса с одинаковой скоростью.<br>
+Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
+Такой же как синус, но с одинаковой скоростью.<br>
+Тоже самое что (Abs((Mod(((Pi/2)-N)/2,Pi)/(Pi/2))-1)-0.5)*2<br>
+<pre class="code">`+GenerateCode(`
+Print(MSin(0)) -- 0
+Print(MSin(1)) -- ≈0.6
+Print(MSin(2)) -- ≈0.7
+Print(MSin(3)) -- ≈0.1
+Print(MSin(4)) -- ≈-0.5
+Print(MSin(5)) -- ≈-0.8
+
+Print(MSin(Pi/2))    -- 1
+Print(MSin(Pi+Pi/2)) -- -1
+Print(MSin(Pi*2))    -- 0
+
+local i = 0
+Cycle(function()
+
+Print("MSin("..i..") = "..MSin(i))
+i = i + FRRandom(1,10)/100
+
+end,100)
+`)+`</pre>
+`+CreateDesmos("mu3sdwhdml")+`
+`+"</div>","Синус с одинаковой скоростью"],
+
+"mcos()": [FunctionInfo("MCos",true,false)+`
+Функция косинуса с одинаковой скоростью.<br>
+Возвращает число от -1 до 1 в зависимости от получаемого числа.<br>
+Такой же как косинус, но с одинаковой скоростью.<br>
+Тоже самое что (Abs((Mod(N/2,Pi)/(Pi/2))-1)-0.5)*2<br>
+<pre class="code">`+GenerateCode(`
+Print(MCos(0)) -- 1
+Print(MCos(1)) -- ≈0.3
+Print(MCos(2)) -- ≈-0.2
+Print(MCos(3)) -- ≈-0.9
+Print(MCos(4)) -- ≈-0.4
+Print(MCos(5)) -- ≈0.1
+
+Print(MCos(Pi/2))    -- 0
+Print(MCos(Pi+Pi/2)) -- 0
+Print(MCos(Pi*2))    -- 1
+
+local i = 0
+Cycle(function()
+
+Print("MCos("..i..") = "..MCos(i))
+i = i + FRRandom(1,10)/100
+
+end,100)
+`)+`</pre>
+`+CreateDesmos("rjk4zgrgx7")+`
+`+"</div>","Косинус с одинаковой скоростью"],
+
+"dmsin()": [FunctionInfo("DMSin",true,false)+`
+Функция положительного синуса с одинаковой скоростью.<br>
+Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
+Такой же как синус, но с одинаковой скоростью.<br>
+Тоже самое что Abs((Mod(((Pi/2)-N)/2,Pi)/(Pi/2))-1)<br>
+<pre class="code">`+GenerateCode(`
+Print(DMSin(0)) -- 0.5
+Print(DMSin(1)) -- ≈0.8
+Print(DMSin(2)) -- ≈0.9
+Print(DMSin(3)) -- ≈0.5
+Print(DMSin(4)) -- ≈0.2
+Print(DMSin(5)) -- ≈0.1
+
+Print(DMSin(Pi/2))    -- 1
+Print(DMSin(Pi+Pi/2)) -- 0
+Print(DMSin(Pi*2))    -- 0.5
+
+local i = 0
+Cycle(function()
+
+Print("DMSin("..i..") = "..DMSin(i))
+i = i + FRRandom(1,10)/100
+
+end,100)
+`)+`</pre>
+`+CreateDesmos("dgpazuf46v")+`
+`+"</div>","Положительный синус с одинаковой скоростью"],
+
+"dmcos()": [FunctionInfo("DMCos",true,false)+`
+Функция положительного косинуса с одинаковой скоростью.<br>
+Возвращает число от 0 до 1 в зависимости от получаемого числа.<br>
+Такой же как косинус, но с одинаковой скоростью.<br>
+Тоже самое что Abs((Mod(N/2,Pi)/(Pi/2))-1)<br>
+<pre class="code">`+GenerateCode(`
+Print(DMCos(0)) -- 1
+Print(DMCos(1)) -- ≈0.6
+Print(DMCos(2)) -- ≈0.3
+Print(DMCos(3)) -- ≈0
+Print(DMCos(4)) -- ≈0.3
+Print(DMCos(5)) -- ≈0.6
+
+Print(DMCos(Pi/2))    -- 0.5
+Print(DMCos(Pi+Pi/2)) -- 0.5
+Print(DMCos(Pi*2))    -- 1
+
+local i = 0
+Cycle(function()
+
+Print("DMCos("..i..") = "..DMCos(i))
+i = i + FRRandom(1,10)/100
+
+end,100)
+`)+`</pre>
+`+CreateDesmos("ldzdtgmbh2")+`
+`+"</div>","Положительный косинус с одинаковой скоростью"],
+
+"getenginechar()": [FunctionInfo("GetEngineChar",true,false)+`
+Функция получает символ из таблицы <button onmousedown='ButtonPress("fonts","getenginechar()")'>символов в шрифте</button><br>
+Если число превысит лимит, то пойдёт по кругу<br>
+<pre class="code">`+GenerateCode(`
+for i=16,EngineChars do
+	Print(GetEngineChar(i))
+end
+`)+`</pre>
+`+"</div>","Получание символа из шрифта"],
 
   }
 
