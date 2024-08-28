@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Забор</title>
+<link rel="icon" type="image/x-icon" href="source/ops.ico">
+
+<style>
+@font-face {
+    font-family: "Inkverse";
+    src: url("source/inkverse.ttf") format('opentype');
+}
+@font-face {
+    font-family: "Topor";
+    src: url("source/topor.otf") format('opentype');
+}
+
+html{
+	color:white;
+	background:url("source/fence-bg.png");
+    background-size: auto 100%;
+    background-repeat: repeat-x;
+    background-attachment: fixed;
+	cursor:default;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+::selection {
+	background-color: transparent;
+}
+
+body{
+	margin: 0px;
+	scrollbar-width: 0;
+    -ms-overflow-style: none;
+}
+</style>
+
+<body>
+	<center>
+	<div style="background:url('source/fence.png'); background-size: 100% auto; background-repeat: repeat-y; width:55vw; height: 100%; min-height: 100vh;">
+		<center>
+		<div style="width:40vw;">
+			<div style="background:url('source/fence2.png'); background-size: 100% 100%; background-repeat: no-repeat; width:58vw; transform: translateX(-9vw); filter: drop-shadow(0px 10px 10px rgba(0, 0, 0, 1));">
+				<font style="font-family:Topor; font-size:3vw; font-weight: bold;">Забор</font><br><br><textarea id="input" style="width:65%; height:10vh; font-size:2vw; resize: none; font-family:Inkverse;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="textareaOneLine(this)"></textarea><br><br><button id="print" style="">Наколякать</button><br><br>&nbsp;
+			</div><br>
+			<div id="fence" style="word-wrap: break-word;"></div>
+		</div>
+		</center>
+	</div>
+	</center>
+</body>
+
+<script>
+var accesskeys = ['a', 'b', 'c', 'd', 'f', 'e', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+'A', 'B', 'C', 'D', 'F', 'E', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я',
+'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я',
+'0','1','2','3','4','5','6','7','8','9','.',',',':',';','!','?','*','#','/','\\','(',')','{','}','[',']','_','-','+','<','>','^','&','%','|','"','@','№','~','`','\'','=',
+'$','®','©','€','£','¥','¢','§','™','₽','∞',' '];
+function textareaOneLine(el){
+	const maxLength = 100;
+    const filteredValue = el.value.split('').filter(char => accesskeys.includes(char)).join('');
+    if (filteredValue.length > maxLength) {
+        el.value = filteredValue.slice(0, maxLength);
+    } else {
+        el.value = filteredValue;
+    }
+}
+</script>
+
+<script type="module">
+//import { SaveData, LoadData } from "./woowzsite-private/database.js";
+import { Recaptcha } from "./woowzsite-private/recaptcha.js";
+var fence = document.getElementById("fence")
+
+function loadmessage(text){/*how to use fuckin double mix-blend-mode: overlay;*/
+	var texthtmlsingl = `<div style="font-size:2vw; font-family:Inkverse;"><font>`+text+`</font></div>`
+	var texthtml = `<div>`+texthtmlsingl+`</div><br>`
+	fence.innerHTML = texthtml+fence.innerHTML
+}
+
+function ButtonPress(){
+	var message = document.getElementById("input").value.replace(/</g,'&lt;').replace(/>/g,'&gt;')
+	if(message.trim() != ""){
+		loadmessage(message)
+		document.getElementById("input").value = ""
+	}
+	Recaptcha(function(){console.log("ураа!!!")},function(er){console.log("ошибка!!! "+er)});
+}
+document.getElementById("print").addEventListener("click", ButtonPress);
+
+</script>

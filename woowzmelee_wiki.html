@@ -280,7 +280,7 @@ function(rayresult,owner,dont)<br>
 		end<br>
 	end<br>
 end`])],
-"wi_hitafterfunction": ["weapon_info","HitAfterFunction()",{},WeaponInfo("HitAfterFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч не наносячим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (после основной функции)",[
+"wi_hitafterfunction": ["weapon_info","HitAfterFunction()",{},WeaponInfo("HitAfterFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч не наносящим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (после основной функции)",[
 `function(rayresult,owner,dont)<br>
 	if not dont and rayresult.Hit and math.random()>0.1 then<br>
 		local effectInfo = EffectData()<br>
