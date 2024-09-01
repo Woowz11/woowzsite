@@ -363,5 +363,25 @@ var all_sites = [
       "tags": [
         "text","textstyle","textstyles"
       ]
+    },
+	{
+      "href": "woowzsite_files",
+      "name": "Woowzsite Files",
+      "catalog": "tools",
+      "hide": true,
+      "icon": "folder",
+      "tags": [
+        "files","images","gifs","icons"
+      ]
+    },
+		{
+      "href": "woowz_friends_tierlist",
+      "name": "Woowz Friends Tierlist",
+      "catalog": "funny",
+      "hide": true,
+      "icon": "woowz11",
+      "tags": [
+        "woowz11","friends","discord"
+      ]
     }
   ]

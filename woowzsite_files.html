@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Woowzsites Files</title>
+<link rel="icon" type="image/x-icon" href="source/folder.ico">
+
+<style>
+html{
+	background-color:rgb(50,50,50);
+	cursor:default;
+}
+
+.background-image-div{}
+
+.image{
+	image-rendering: pixelated;
+}
+
+.div-image{
+	background-image:url('source/transparent.png');
+}
+
+button{
+	cursor:pointer;
+}
+
+select{
+	cursor:pointer;
+}
+</style>
+
+<body>
+	<div class="background-image-div" style="margin:0px;">
+		<div style="background-color:rgba(0,0,0,0.2);">
+			<font style="font-size:5em; color:white;">Woowzsites Files</font><br>
+			<font style="color:white;">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
+				<option value="source/transparent.png">Светлый</option>
+				<option value="source/transparent-dark.png">Тёмный</option>
+				<option value="source/transparent-red.png">Красный</option>
+				<option value="source/transparent-green.png">Зелёный</option>
+				<option value="source/transparent-blue.png">Синий</option>
+				<option value="source/transparent-yellow.png">Жёлтый</option>
+				<option value="source/white.png">Чистый белый</option>
+				<option value="source/black.png">Чистый чёрный</option>
+				<option value="source/invisible.png">Прозрачный</option>
+			</select> <button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button>
+			<input type="checkbox" id="checkbox" name="checkbox" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"><label for="checkbox" style="color:white;">Сделать изображения размытыми</label>
+			<hr></div>
+		<div id="explorer"></div>
+	</div>
+</body>
+
+<script src="source/source.js"></script>
+<script>
+	var explorer = document.getElementById("explorer")
+	var starttime = {};
+	var types = {
+		"idk": "<p style='color:red;'>UNKNOWN</p>",
+		"png": "PNG",
+		"jpg": "JPEG",
+		"gif": "GIF",
+		"ico": "ICON",
+	}
+	
+	async function CopyToClipboard(text) {
+		console.log("Copy ["+text+"]");
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch (error) {
+			console.error(error.message);
+		}
+	}
+	
+	function ChangeIcon(newicon){
+		var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+		link.type = 'image/x-icon';
+		link.rel = 'shortcut icon';
+		link.href = newicon;
+		document.head.appendChild(link);
+	}
+	
+	function ChangeStyle(clas,styl){
+		var styleElement = document.createElement('style');
+		styleElement.innerHTML = `
+			.${clas} {
+				${styl}
+			}
+		`;
+
+		document.head.appendChild(styleElement);
+	}
+	
+	function GenerateTable(text,tabl){
+		var result = `<font style="font-size:5em; color:white;">${text}</font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
+		for(let src of tabl){
+			var img = new Image();
+			img.onload = function(){
+				var x = this.width;
+				var y = this.height;
+				var time = new Date().getTime() - starttime[src];
+				var type = "idk"
+				if(src.includes(".png")){type="png"}
+				if(src.includes(".jpg")){type="jpg"}
+				if(src.includes(".gif")){type="gif"}
+				if(src.includes(".ico")){type="ico"}
+				document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();" style="background-size: auto; background-repeat: repeat; cursor:pointer; min-height:300px; height:350px; padding: 10px; display:flex; justify-content: center; align-items: center;">
+				<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">
+				</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>${x}x${y}`+(x==y?" ⬜":"")+`<br>${time}ms<br>`+
+				((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">SetBG</button><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">SetBG2</button>`:``)+
+				((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">SetICO</button>`:``)
+				+`</div></div></div>`)
+				
+				var parentElement = document.getElementById(text);
+				var childElements = Array.from(parentElement.querySelectorAll('.grid-element'));
+
+				childElements.sort(function(a, b){
+					return a.id.localeCompare(b.id);
+				});
+
+				childElements.forEach(function(child){
+					parentElement.appendChild(child);
+				});
+			}
+			img.onerror=function(){
+				document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
+				<img class="image" style="width:100%; height:100%;" src="source/onerror.png">
+				</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (<p style='color:red;'>ERROR</p>)</div></div></div>`)
+			}
+			starttime[src] = new Date().getTime();
+			img.src = src;
+		}
+		result = result + `</div><br>`
+		explorer.innerHTML = explorer.innerHTML + result
+	}
+	
+	GenerateTable("source/*.png",WoowzsiteSourceImagesPNG);
+	GenerateTable("source/*.jpg",WoowzsiteSourceImagesJPG);
+	GenerateTable("source/*.gif",WoowzsiteSourceImagesGIF);
+	GenerateTable("source/*.ico",WoowzsiteSourceIcons);
+	GenerateTable("source/specialforrandomsite/*",WoowzsiteSourceRandomSite);
+	GenerateTable("core-wiki/source/*",WoowzsiteSourceCore);
+	GenerateTable("source/woowzbackrooms/*",WoowzsiteSourceBackrooms);
+	GenerateTable("source/woowzengine/*",WoowzsiteSourceWoowzengine);
+	GenerateTable("source/discordavatars/*",WoowzsiteSourceDiscordAvatars);
+	GenerateTable("source/cats/*.png",WoowzsiteSourceCats);
+	GenerateTable("source/bloodeyesystems/*.png",WoowzsiteSourceBloodeyeSystems);
+	GenerateTable("source/wldbackroomsgame/*.png",WoowzsiteSourceWldouiBackrooms);
+	GenerateTable("source/bloodraw/*",WoowzsiteSourceBloodraw);
+</script>
