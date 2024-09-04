@@ -1,0 +1,44 @@
+<!-- Сайт следует лицензии WoowzsiteConstruction -->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Шаблонная часть для WoowzsiteConstruction -->
+		<meta charset="utf-8">
+		<script src='../lib/lib.js'></script>
+		<script src='../woowzsiteconstruction/base.js'></script>
+		<!-- ----------------------------------------- -->
+	</head>
+</html>
+
+<script>
+
+WoowzsiteConstructionProject = {
+	"Name":"Примерный проект",
+	"Version":"3.2.1",
+	"Author":"Марио"
+}
+
+var SiteInfo = {
+
+"HeadInformation":{
+	"Title":"Omaagad",
+	"Icon":"../source/cat.ico"
+},
+
+"Style":{
+	"Background":"lightgray"
+},
+
+};
+
+SiteInfo = CreateDocument(SiteInfo);
+Create("Main",null,"Panel",{});
+Create("g",null,"sgl",{});
+
+Create("g1",null,"test",{});
+Create("g2",null,"<br>",{});
+Create("g3",null,"hmmm",{});
+Create("g4","g3","что!",{});
+
+CompileSiteConstruction();
+</script>

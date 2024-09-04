@@ -9,6 +9,19 @@ html{
 	cursor:default;
 }
 
+::selection{
+    background-color: transparent;
+}
+
+.src::selection{
+	background-color: rgb(100,100,255);
+	color: white;
+}
+
+.custom-cursor{
+	cursor:auto;
+}
+
 .background-image-div{}
 
 .image{
@@ -29,9 +42,9 @@ select{
 </style>
 
 <body>
-	<div class="background-image-div" style="margin:0px;">
+	<div class="background-image-div custom-cursor" style="margin:0px;">
 		<div style="background-color:rgba(0,0,0,0.2);">
-			<font style="font-size:5em; color:white;">Woowzsites Files</font><br>
+			<font style="font-size:5em; color:white; padding-left:10px;"><img style="image-rendering: pixelated; height:0.65em;" src="source/newfolder.png"> Woowzsites Files</font><br>
 			<font style="color:white;">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
 				<option value="source/transparent.png">Светлый</option>
 				<option value="source/transparent-dark.png">Тёмный</option>
@@ -42,9 +55,12 @@ select{
 				<option value="source/white.png">Чистый белый</option>
 				<option value="source/black.png">Чистый чёрный</option>
 				<option value="source/invisible.png">Прозрачный</option>
-			</select> <button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button>
+			</select> 
+			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button> 
+			<button onclick="ChangeStyle('custom-cursor',`cursor:auto;`)">Сбросить курсор</button>
 			<input type="checkbox" id="checkbox" name="checkbox" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"><label for="checkbox" style="color:white;">Сделать изображения размытыми</label>
 			<hr></div>
+		<font style="font-size:5em; color:white;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>%</font>
 		<div id="explorer"></div>
 	</div>
 </body>
@@ -54,11 +70,13 @@ select{
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
 	var types = {
-		"idk": "<p style='color:red;'>UNKNOWN</p>",
+		"idk": "<font style='color:red;'>UNKNOWN</font>",
 		"png": "PNG",
 		"jpg": "JPEG",
 		"gif": "GIF",
 		"ico": "ICON",
+		"cur": "CURSOR",
+		"mp4": "VIDEO",
 	}
 	
 	async function CopyToClipboard(text) {
@@ -89,46 +107,109 @@ select{
 		document.head.appendChild(styleElement);
 	}
 	
+	var counts = {}
+	var fullcounts = [0,0]
 	function GenerateTable(text,tabl){
-		var result = `<font style="font-size:5em; color:white;">${text}</font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
-		for(let src of tabl){
-			var img = new Image();
-			img.onload = function(){
-				var x = this.width;
-				var y = this.height;
-				var time = new Date().getTime() - starttime[src];
-				var type = "idk"
-				if(src.includes(".png")){type="png"}
-				if(src.includes(".jpg")){type="jpg"}
-				if(src.includes(".gif")){type="gif"}
-				if(src.includes(".ico")){type="ico"}
-				document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();" style="background-size: auto; background-repeat: repeat; cursor:pointer; min-height:300px; height:350px; padding: 10px; display:flex; justify-content: center; align-items: center;">
-				<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">
-				</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>${x}x${y}`+(x==y?" ⬜":"")+`<br>${time}ms<br>`+
-				((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">SetBG</button><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">SetBG2</button>`:``)+
-				((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">SetICO</button>`:``)
-				+`</div></div></div>`)
+		counts[text] = [tabl.length,0];
+		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
+		document.getElementById("total-all").innerHTML = fullcounts[0];
+		var result = `<font style="font-size:5em; color:white;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
+		
+		function LoadSource(that,src,text,type){
+			var type = "idk"
+			if(src.includes(".png")){type="png"}
+			if(src.includes(".jpg")){type="jpg"}
+			if(src.includes(".gif")){type="gif"}
+			if(src.includes(".ico")){type="ico"}
+			if(src.includes(".cur")){type="cur"}
+			if(src.includes(".mp4")){type="mp4"}
+		
+			var x = that.width;
+			var y = that.height;
+			var time = new Date().getTime() - starttime[src];
+			var time_col = "black";
+			if(time>1000){time_col="green";}
+			if(time>200){time_col="orange";}
+			if(time>3000){time_col="red";}
+			if(time>4000){time_col="magenta";}
+			if(time>5000){time_col="white; background-color:black";}
+			if(time>50000){time_col="yellow; background-color:black";}
+			if(time>100000){time_col="orange; background-color:black";}
+			if(time>200000){time_col="red; background-color:black";}
+			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" `+(type!="mp4"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` min-height:300px; height:350px; `+(type!="mp4"?"padding: 10px;":"background-image:url('source/black.png');")+` display:flex; justify-content: center; align-items: center;">
+			`+(type=="mp4"?
+			`<video style="width:100%; height:100%; object-fit: fill;" controls><source src="${src}#t=0.1" type="video/mp4"></video>`
+			:
+			`<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
+			)+`
+			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>
+			`+(type=="mp4"?"":`${x}x${y}`+(x==y?" ⬜":"")+`<br>`)+`
+			<font style="color:${time_col};">${time}</font>ms<br>`+
+			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">SetBG</button><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">SetBG2</button>`:``)+
+			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">SetICO</button>`:``)+
+			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">SetCUR</button>`:``)
+			+`</div></div></div>`)
+			var c = counts[text][1]+1;
+			counts[text] = [counts[text][0],c]
+			document.getElementById(text+"-loaded").innerHTML = c
+			document.getElementById(text+"-proc").innerHTML = Math.floor((c/counts[text][0])*10000)/100
+			if(c >= counts[text][0]){document.getElementById(text+"-img").innerHTML=""}
 				
-				var parentElement = document.getElementById(text);
-				var childElements = Array.from(parentElement.querySelectorAll('.grid-element'));
+			fullcounts = [fullcounts[0],fullcounts[1]+1];
+			document.getElementById("total-loading").innerHTML = fullcounts[1];
+			document.getElementById("total-proc").innerHTML = Math.floor((fullcounts[1]/fullcounts[0])*10000)/100;
+				
+			var parentElement = document.getElementById(text);
+			var childElements = Array.from(parentElement.querySelectorAll('.grid-element'));
 
-				childElements.sort(function(a, b){
-					return a.id.localeCompare(b.id);
-				});
+			childElements.sort(function(a, b){
+				return a.id.localeCompare(b.id);
+			});
 
-				childElements.forEach(function(child){
-					parentElement.appendChild(child);
-				});
-			}
-			img.onerror=function(){
-				document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
-				<img class="image" style="width:100%; height:100%;" src="source/onerror.png">
-				</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (<p style='color:red;'>ERROR</p>)</div></div></div>`)
-			}
-			starttime[src] = new Date().getTime();
-			img.src = src;
+			childElements.forEach(function(child){
+				parentElement.appendChild(child);
+			});
 		}
+		function OnError(src,text){
+			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
+			<img class="image" style="width:100%; height:100%;" src="source/onerror.png">
+			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (<font style='color:red;'>ERROR</font>)</div></div></div>`)
+		}
+		
+		for(let src of tabl){
+			starttime[src] = new Date().getTime();
+			
+			var type = "idk"
+			if(src.includes(".png")){type="png"}
+			if(src.includes(".jpg")){type="jpg"}
+			if(src.includes(".gif")){type="gif"}
+			if(src.includes(".ico")){type="ico"}
+			if(src.includes(".cur")){type="cur"}
+			if(src.includes(".mp4")){type="mp4"}
+
+			if(type=="mp4"){
+				var video = document.createElement('video');
+				video.onloadedmetadata = function() { LoadSource(video,src,text); };
+				video.onerror = function() { OnError(src,text); };
+				video.src = src;
+			}else{
+				var img = new Image();
+				img.onload = function(){ LoadSource(img,src,text); }
+				img.onerror = function(){ OnError(src,text); }
+				img.src = src;
+			}
+		}
+		
 		result = result + `</div><br>`
+		explorer.innerHTML = explorer.innerHTML + result
+	}
+	function GenerateTableCustom(text,tabl,codefirst,code,codelast){
+		tabl.sort();
+		var result = `<font style="font-size:5em; color:white;">${text}</font><br>`+codefirst
+		for(var src of tabl){
+			result = result + code.replace(/{s}/g, src.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+		}
+		result = result + codelast + `<br>`
 		explorer.innerHTML = explorer.innerHTML + result
 	}
 	
@@ -136,6 +217,7 @@ select{
 	GenerateTable("source/*.jpg",WoowzsiteSourceImagesJPG);
 	GenerateTable("source/*.gif",WoowzsiteSourceImagesGIF);
 	GenerateTable("source/*.ico",WoowzsiteSourceIcons);
+	GenerateTable("source/*.cur",WoowzsiteSourceCursors);
 	GenerateTable("source/specialforrandomsite/*",WoowzsiteSourceRandomSite);
 	GenerateTable("core-wiki/source/*",WoowzsiteSourceCore);
 	GenerateTable("source/woowzbackrooms/*",WoowzsiteSourceBackrooms);
@@ -145,4 +227,6 @@ select{
 	GenerateTable("source/bloodeyesystems/*.png",WoowzsiteSourceBloodeyeSystems);
 	GenerateTable("source/wldbackroomsgame/*.png",WoowzsiteSourceWldouiBackrooms);
 	GenerateTable("source/bloodraw/*",WoowzsiteSourceBloodraw);
+	GenerateTable("source/*.mp4",WoowzsiteSourceVideos);
+	GenerateTableCustom("Слова",WoowzsiteWords,`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);
 </script>
