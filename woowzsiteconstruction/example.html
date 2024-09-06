@@ -21,24 +21,23 @@ WoowzsiteConstructionProject = {
 var SiteInfo = {
 
 "HeadInformation":{
-	"Title":"Omaagad",
+	"Title":"Примерный проект",
 	"Icon":"../source/cat.ico"
 },
 
-"Style":{
-	"Background":"lightgray"
-},
+"Style":`
+html{
+	background-color:lightgray;
+}
+`,
+
+"StartPage":`
+<font style="color:red;">HELLO!!!</font>
+`
 
 };
 
 SiteInfo = CreateDocument(SiteInfo);
-Create("Main",null,"Panel",{});
-Create("g",null,"sgl",{});
-
-Create("g1",null,"test",{});
-Create("g2",null,"<br>",{});
-Create("g3",null,"hmmm",{});
-Create("g4","g3","что!",{});
 
 CompileSiteConstruction();
 </script>

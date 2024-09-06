@@ -1,94 +1,60 @@
+<!-- Сайт следует лицензии WoowzsiteConstruction & Woowzwiki -->
 <!DOCTYPE HTML>
-<meta charset="utf-8">
-<script src="woowzwiki/base.js"></script>
+<html>
+	<head>
+		<!-- Шаблонная часть для WoowzsiteConstruction & Woowzwiki -->
+		<meta charset="utf-8">
+		<script src='lib/lib.js'></script>
+		<script src='woowzsiteconstruction/base.js'></script>
+		<script src='woowzwiki/base.js'></script>
+		<!-- ----------------------------------------- -->
+	</head>
+</html>
+
 <script>
-
-function WeaponInfo(name,def,type,info,example){
-	var examples = ""
-	for(var i = 0; i < example.length; i++){
-		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
-		examples = examples + `<font>`+name.replace(/\(\)/g,"")+` = `+e+`</font><br><br>`
-	}
-	return `<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`<br><br><hr><br><font>Пример</font></center><br><br>`+examples+``
-}
-
-function AddonInfo(name,def,type,info,mandatory){
-	return `<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br>`+(mandatory==true?"Эту переменную обязательно нужно указать!":"Это не обязательная переменная")+`<br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`</center>`
-}
-
-function ErrorInfo(error,info){
-	return `<center><br><font style="font-size:2em;">Ошибка `+error+`</font><br><br><font>`+info+`</font></center>`
-}
-
-function CVarInfo(cvar,type,def,canminus,needrestart,info){
-	return `<center><br><font style="font-size:2em;">wm_`+cvar+`</font><br><br><font>`+type+`</font><br><br>`+(type!="bool"&&canminus==false?"Число не может быть отрицательным!<br><br>":"")+(needrestart==true?"Что-бы применилось нужно перезапустить карту!<br><br>":"")+`<hr><br><font>Дефолтное значение</font><br><br>`+(type=="bool"?(def=="1"?"1 (Да)":"0 (Нет)"):def)+`<br><br><hr><br>`+info+`</center>`
-}
-
-function LibInfo(name,type,info,example){
-	var examples = ""
-	for(var i = 0; i < example.length; i++){
-		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
-		examples = examples + `<font>WMLib.`+e+`</font><br><br>`
-	}
-	return `<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><br><hr><br><font>Пример</font></center><br><br>`+examples+``
-}
-
-function HookInfo(hook,type,info,def){
-	return `<center><br><font style="font-size:2em;">WM_`+hook+`</font><br><br><font>`+type+`</font><br><br><hr><br>`+info+`<br><br><hr><br><font>hook.Add("WM_`+hook+`","wm_example",`+def+`)</font></center>`
-}
-
-var style = {
-
-}
 var info = {
-	Name: "WoowzMelee",
+	Name: "Woowzwiki",
+	Version: "0.0.0",
 	Author: "Woowz11",
-	Style: style,
-	StartPage: "hello"
+	Icon: "source/wm_category.ico",
+	StartPage: "startpage"
 }
 
-var list = [
-	["base","Основа",{Open: true}],["example","Примеры",{}],["weapon_info","Информация оружия",{}],["addon_info","Информация мода",{}],["errors","Ошибки",{}],["cvars","CVars",{}],["lib","Библиотека",{}],["hooks","Крюки",{}]
-]
-info["List"] = list
+WWSetInfo(info);
+WWAddPage("startpage",null,"Добро пожаловать!",{"Page":
+`Добро пожаловать на википедию по WoowzMelee!
+Википедия и сам мод находятся в альфе и разрабатываются!
 
-var pages = {
+Ссылка на библиотеку: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3297762978">SteamWorkshop</a>
+ССылка на ванильное оружие: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3298838904">SteamWorkshop</a>
 
-"hello": ["base","Добро пожаловать!",{},
-`Добро пожаловать на википедию по WoowzMelee!<br>
-Википедия и сам мод находятся в альфе и разрабатываются!<br>
-<br>
-Ссылка на библиотеку: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3297762978">SteamWorkshop</a><br>
-ССылка на ванильное оружие: <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3298838904">SteamWorkshop</a><br>
-<br>
-Репозиторий: <a href="https://github.com/Woowz11/woowz-melee">GitHub</a><br>
-<br>
+Репозиторий: <a href="https://github.com/Woowz11/woowz-melee">GitHub</a>
+
 Лицензия: <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0 DEED</a>
-<br>
-Версия библиотеки: 0.0.5 Alpha
-`],
 
-"example_mod": ["example","Пример добавления модификации",{},
-`Нужно создать файл скрипта модификации, например "wmlib_load.lua", в папку lua/autorun, и вписать туда это<br><br>
-AddCSLuaFile()<br>
-if WMLib then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMod("ваш айди мода",{Name = "Название вашего мода", Author = "Ваш никнейм"})<br>
-end<br>
-`],
+Версия библиотеки: 0.0.5 Alpha`});
 
-"example_weapon": ["example","Пример добавления оружия",{},
-`Нужно создать файл скрипта оружия, например "wm_example_weapon.lua", в папку weapons, и вписать туда это<br><br>
-AddCSLuaFile()<br>
-if WMLib then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;local Info = {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name = "Примерное оружие"<br>
-&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMelee(SWEP,Info,"ваш айди мода")<br>
-end<br>
-`],
+WWAddTitle("examples",null,"Примеры",{})
+WWAddPage("example_mod","examples","Пример добавления модификации",{"Page":`Нужно создать файл скрипта модификации, например "wmlib_load.lua", в папку lua/autorun, и вписать туда это
 
-"example_weapon_crowbar": ["example","Пример \"Crowbar\"",{},
-`Пример оружия "Crowbar"<br>
+AddCSLuaFile()
+if WMLib then
+&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMod("ваш айди мода",{Name = "Название вашего мода", Author = "Ваш никнейм"})
+end`});
+
+WWAddPage("example_weapon","examples","Пример добавления оружия",{"Page":`Нужно создать файл скрипта оружия, например "wm_example_weapon.lua", в папку weapons, и вписать туда это
+
+AddCSLuaFile()
+if WMLib then
+&nbsp;&nbsp;&nbsp;&nbsp;local Info = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name = "Примерное оружие"
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMelee(SWEP,Info,"ваш айди мода")
+end`});
+
+WWAddTitle("examples_weapons","examples","Примеры оружий",{})
+WWAddPage("example_weapon_crowbar","examples_weapons","Crowbar",{"Page":`Пример оружия "Crowbar"
+
 AddCSLuaFile()
 if WMLib then
 	local Info = {
@@ -126,10 +92,10 @@ if WMLib then
 	}
 	WMLib.CreateMelee(SWEP,Info,"vanilla")
 end
-`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;").replace(/\n/g,"<br>")],
+`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")});
 
-"example_weapon_mace": ["example","Пример \"Mace\"",{},
-`Пример оружия "Mace"<br>
+WWAddPage("example_weapon_mace","examples_weapons","Mace",{"Page":`Пример оружия "Mace"
+
 AddCSLuaFile()
 if WMLib then
 	local Info = {
@@ -194,267 +160,300 @@ if WMLib then
 	}
 	WMLib.CreateMelee(SWEP,Info,"vanilla")
 end
-`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;").replace(/\n/g,"<br>")],
+`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")});
 
-"wi_name"          : ["weapon_info","Name",{},WeaponInfo("Name",`"#wm.weapon.newweapon"`,"string (можно перевести)","Содержит название оружия",[`"Crowbar"`,`"Knife"`,`"Baseball Bat"`,`"#wm.weapon.mace"`])],
-"wi_category"      : ["weapon_info","Category",{},WeaponInfo("Category",`"Woowz Melee"`,"string","Содержит категорию в которую нужно добавить оружие, если ничего не указывать будет дефолтная категория",[`"New Category"`,`"Test Category"`])],
-"wi_customauthor"  : ["weapon_info","CustomAuthor",{},WeaponInfo("CustomAuthor",`""`,"string","Указывает автора оружия, если не указывать, то будет указан автор модификации (не библиотеки)",[`"Anonymous"`])],
-"wi_hide"          : ["weapon_info","Hide",{},WeaponInfo("Hide",`false`,"bool","Скрывает оружие, оно не будет отображаться в меню спавна<br>Будет всё равно отображаться если включить wm_debug_weapons",[`true`])],
-"wi_icon"          : ["weapon_info","Icon",{},WeaponInfo("Icon",`"icons/wm_empty.png"`,"string (material)","Указывает иконку оружию в спавнменю",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])],
-"wi_selectionicon" : ["weapon_info","SelectionIcon",{},WeaponInfo("SelectionIcon",`"icons/wm_empty_i.png"`,"string (material)","Указывает иконку оружию в хотбаре",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])],
-"wi_killicon"      : ["weapon_info","KillIcon",{},WeaponInfo("KillIcon",`"icons/wm_empty_k.png"`,"string (material)","Указывает иконку при убийстве оружием",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])],
-"wi_material"      : ["weapon_info","Material",{},WeaponInfo("Material",`77 (MAT_METAL)`,"int (<a href='https://wiki.facepunch.com/gmod/Enums/MAT'>MAT</a>)","Определяет из какого материала сделано оружие (отвечает только за звуки и частитцы)",[`MAT_CONCRETE`,`MAT_WOOD`,`MAT_PLASTIC`,`MAT_FLESH`])],
-"wi_vmodel"        : ["weapon_info","VModel",{},WeaponInfo("VModel",`"models/weapons/c_crowbar.mdl"`,"string (model)","Устанавливает модель оружия от первого лица",[`"models/weapons/c_stunstick.mdl"`])],
-"wi_vmodelpos"     : ["weapon_info","VModelPos",{},WeaponInfo("VModelPos",`Vector(0,0,0)`,"Vector","Устанавливает offset позицию оружия от первого лица",[`Vector(-6,-4.5,1.5)`])],
-"wi_vmodelrot"     : ["weapon_info","VModelRot",{},WeaponInfo("VModelRot",`Angle(0,0,0)`,"Angle","Устанавливает offset поворот оружия от первого лица",[`Angle(5,5,-1)`])],
-"wi_vmodelbones"   : ["weapon_info","VModelBones",{},WeaponInfo("VModelBones",`{}`,"table {[string (название кости)] = table {Vector (позиция), Angle (поворот), Vector (размер), bool (динамическое)}}","Устанавливает offset для костей в вьюмодельки<br>Предпоследний Vector отвечает за размер кости, по дефолту Vector(1,1,1), если установить Vector(0,0,0) то моделька не будет рендерится,<br>а если отрицательное то нормали инвертируются<br>Последний bool отвечает за то, будет ли кость двигаться с физикой или нет",[`{["RW_Weapon"] = {Vector(0,1.5,0),Angle(0,0,0),Vector(1,1,0.25),true}}`])],
-"wi_vmodelelements": ["weapon_info","VModelElements",{},WeaponInfo("VModelElements",`{}`,"table { table {string (model), string (название кости), Vector (позиция), Angle (поворот), Vector (размер)}}","Устанавливает дополнительные модельки в рендер вьюмодельки",[`{
+WWAddTitle("weaponinfos",null,"Информация оружия",{})
+function WeaponInfo(name,def,type,info,example){
+	var examples = ""
+	for(var i = 0; i < example.length; i++){
+		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
+		examples = examples + `<font>`+name.replace(/\(\)/g,"")+` = `+e+`</font><br><br>`
+	}
+	WWAddPage("wi_"+name,(name.includes("()")?"weaponinfos_func":"weaponinfos"),name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`<br><br><hr><br><font>Пример</font></center><br><br>`+examples)})
+}
+WeaponInfo("Name",`"#wm.weapon.newweapon"`,"string (можно перевести)","Содержит название оружия",[`"Crowbar"`,`"Knife"`,`"Baseball Bat"`,`"#wm.weapon.mace"`])
+WeaponInfo("Category",`"Woowz Melee"`,"string","Содержит категорию в которую нужно добавить оружие, если ничего не указывать будет дефолтная категория",[`"New Category"`,`"Test Category"`])
+WeaponInfo("CustomAuthor",`""`,"string","Указывает автора оружия, если не указывать, то будет указан автор модификации (не библиотеки)",[`"Anonymous"`])
+WeaponInfo("Hide",`false`,"bool","Скрывает оружие, оно не будет отображаться в меню спавна<br>Будет всё равно отображаться если включить wm_debug_weapons",[`true`])
+WeaponInfo("Icon",`"icons/wm_empty.png"`,"string (material)","Указывает иконку оружию в спавнменю",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])
+WeaponInfo("SelectionIcon",`"icons/wm_empty_i.png"`,"string (material)","Указывает иконку оружию в хотбаре",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])
+WeaponInfo("KillIcon",`"icons/wm_empty_k.png"`,"string (material)","Указывает иконку при убийстве оружием",[`"icons/wm_debug.png"`,`"icon32/tool.png"`])
+WeaponInfo("Material",`77 (MAT_METAL)`,"int (<a href='https://wiki.facepunch.com/gmod/Enums/MAT'>MAT</a>)","Определяет из какого материала сделано оружие (отвечает только за звуки и частитцы)",[`MAT_CONCRETE`,`MAT_WOOD`,`MAT_PLASTIC`,`MAT_FLESH`])
+WeaponInfo("VModel",`"models/weapons/c_crowbar.mdl"`,"string (model)","Устанавливает модель оружия от первого лица",[`"models/weapons/c_stunstick.mdl"`])
+WeaponInfo("VModelPos",`Vector(0,0,0)`,"Vector","Устанавливает offset позицию оружия от первого лица",[`Vector(-6,-4.5,1.5)`])
+WeaponInfo("VModelRot",`Angle(0,0,0)`,"Angle","Устанавливает offset поворот оружия от первого лица",[`Angle(5,5,-1)`])
+WeaponInfo("VModelBones",`{}`,"table {[string (название кости)] = table {Vector (позиция), Angle (поворот), Vector (размер), bool (динамическое)}}","Устанавливает offset для костей в вьюмодельки<br>Предпоследний Vector отвечает за размер кости, по дефолту Vector(1,1,1), если установить Vector(0,0,0) то моделька не будет рендерится,<br>а если отрицательное то нормали инвертируются<br>Последний bool отвечает за то, будет ли кость двигаться с физикой или нет",[`{["RW_Weapon"] = {Vector(0,1.5,0),Angle(0,0,0),Vector(1,1,0.25),true}}`])
+WeaponInfo("VModelElements",`{}`,"table { table {string (model), string (название кости), Vector (позиция), Angle (поворот), Vector (размер)}}","Устанавливает дополнительные модельки в рендер вьюмодельки",[`{
 	{"models/props_interiors/pot02a.mdl","ValveBiped.Bip01_R_Hand",Vector(2.75,-0.25,-5),Angle(0,170,-90),Vector(0.9,0.9,0.9)},
 	{"models/Gibs/HGIBS.mdl","ValveBiped.Bip01_R_Hand",Vector(2.75,-1,-10),Angle(0,170,-90),Vector(0.9,0.9,0.9)},
 	{"models/props_junk/sawblade001a.mdl","ValveBiped.Bip01_R_Hand",Vector(2.75,-0.2,-10),Angle(0,170,-90),Vector(0.3,0.3,0.3)},
 	{"models/props_junk/sawblade001a.mdl","ValveBiped.Bip01_R_Hand",Vector(2.75,1,-10),Angle(0,170,-90),Vector(0.3,0.3,0.3)}
-}`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;").replace(/\n/g,"<br>")])],
-"wi_fov"           : ["weapon_info","FOV",{},WeaponInfo("FOV",`80`,"float","Устанавливает FOV оружия от первого лица",[`70`,`100`,`95`])],
-"wi_wmodel"        : ["weapon_info","WModel",{},WeaponInfo("WModel",`"models/weapons/w_crowbar.mdl"`,"string (model)","Устанавливает модель оружия от 3-го лица",[`"models/weapons/w_stunbaton.mdl"`])],
-"wi_wmodelpos"     : ["weapon_info","WModelPos",{},WeaponInfo("WModelPos",`Vector(0,0,0)`,"Vector","Устанавливает offset позиции модели оружия от 3-го лица",[`Vector(3.4,-1,-3)`])],
-"wi_wmodelrot"     : ["weapon_info","WModelRot",{},WeaponInfo("WModelRot",`Angle(0,0,0)`,"Angle","Устанавливает offset поворота модели оружия от 3-го лица",[`Angle(180,150,10)`])],
-"wi_wmodelsize"    : ["weapon_info","WModelSize",{},WeaponInfo("WModelSize",`Vector(1,1,1)`,"Vector","Устанавливает размер модели оружия от 3-го лица",[`Vector(1,2,1)`,`Vector(3,3,3)`])],
-"wi_wmodelvisible" : ["weapon_info","WModelVisible",{},WeaponInfo("WModelVisible",`true`,"bool","Указывает, надо ли рендерить оружие от 3-го лица",[`false`])],
-"wi_hold": ["weapon_info","Hold",{},WeaponInfo("Hold",`"melee"`,"string (<a href='https://wiki.facepunch.com/gmod/Hold_Types'>hold</a>)","Указывает какую анимацию проигрывать когда игрок держит оружие в руках от 3-го лица",[`"melee2"`,`"knife"`,`"fist"`])],
-"wi_rays": ["weapon_info","Rays",{},WeaponInfo("Rays",`{{Angle(0,0,0),0}}`,"table {table {Angle, float}}","Устанавливает в какую позицию бить (лучи ударов)<br>Так же оно идёт слева на право, если нужно что-бы шло справа на лево, то сделайте значения по X негативными<br>Первое значение луч поворота относительно от камеры, второе значение задержка перед созданием (у первого луча нету задержки)",[`{{Angle(-10,-5,0),0},{Angle(0,0,0),0.05},{Angle(10,5,0),0.05}}`,`{{Angle(-50,-30,0),0},{Angle(0,0,0),0.03},{Angle(50,30,0),0.03}}`,`{{Angle(0,-10,0),0},{Angle(0,0,0),0},{Angle(0,10,0),0}}`,`{{Angle(0,-20,0),0},{Angle(0,0,0),0.025},{Angle(0,20,0),0.025},{Angle(10,-20,0),0},{Angle(10,0,0),0.025},{Angle(10,20,0),0.025}}`])],
-"wi_raysdetails": ["weapon_info","RaysDetails",{},WeaponInfo("RaysDetails",`1`,"int","Устанавливает детализацию ударов, чем больше значение, тем больше лагает и тем больше шанс попасть по тонкому объекту",[`4`,`6`])],
-"wi_onlyoneray": ["weapon_info","OnlyOneRay",{},WeaponInfo("OnlyOneRay",`false`,"bool","Если установить true, то будет произведён только один удар, а не удары по всем созданым лучам (не считая промежуточных)",[`true`])],
-"wi_animationhit": ["weapon_info","AnimationHit",{},WeaponInfo("AnimationHit",`{"Misscenter1","Misscenter2"}`,"table {string (animation)}","Указывает какую анимацию проигрывать при атаке<br>Выбирает случайную из списка",[`{"Hitcenter1","Hitcenter2","Hitcenter3"}`])],
-"wi_animationhitend": ["weapon_info","AnimationHitEnd",{},WeaponInfo("AnimationHitEnd",`""`,"string (animation)","Указывает какую анимацию проигрывать после анимации атаки (для некоторых оружий)<br>Если не указывать то анимации не будет",[`"Hitcenter1"`])],
-"wi_animationhitendscale": ["weapon_info","AnimationHitEndScale",{},WeaponInfo("AnimationHitEndScale",`1`,"float","Указывает на сколько раньше или позже начать анимацию после анимации атаки",[`0.75`,`1.25`])],
-"wi_animationdraw": ["weapon_info","AnimationDraw",{},WeaponInfo("AnimationDraw",`"Draw"`,"string (animation)","Указывает какую анимацию проигрывать при доставании оружия<br>Если указать \"\" то никакой анимации не будет",[`"Hitcenter1"`])],
-"wi_animationidle": ["weapon_info","AnimationIdle",{},WeaponInfo("AnimationIdle",`""`,"string (animation)","Указывает какую анимацию проигрывать при бейздействии",[`"Idle01"`,`"Hitcenter1"`])],
-"wi_animationinspect": ["weapon_info","AnimationInspect",{},WeaponInfo("AnimationInspect",`""`,"table {string (animation)}","Указывает анимации при осмотре оружия (на R)<br>Выбирается случайная анимация из списка",[`{"Hitcenter1","Hitcenter2","Hitcenter3"}`])],
-"wi_hitsounds": ["weapon_info","HitSounds",{},WeaponInfo("HitSounds",`""`,"table {string (sound)}","Указывает какие дополнительно звуки издавать при ударах",[`{"phx/hmetal1.wav","phx/hmetal2.wav","phx/hmetal3.wav"}`,`{"garrysmod/save_load1.wav"}`])],
-"wi_drawsound": ["weapon_info","DrawSound",{},WeaponInfo("DrawSound",`""`,"table {string (sound),float}","Указывает какой звук проигрывать при доставании оружия<br>Число обозначает скорость звука",[`{"garrysmod/save_load1.wav",1}`])],
-"wi_attackwait": ["weapon_info","AttackWait",{},WeaponInfo("AttackWait",`Vector(1,0,0)`,"Vector","Указывает задержку между взмахами<br>Первое число базовая задержка в секундах<br>Второе и третье число это случайное число миллисекунд добавляющихся к базовой задержке",[`Vector(1,-50,0)`,`Vector(1,0,50)`])],
-"wi_attackhitwait": ["weapon_info","AttackHitWait",{},WeaponInfo("AttackHitWait",`0`,"float","Указывает задержку между взмахом и ударом, сколько должно пройти секунд что-бы появился эффект удара после взмаха",[`0.3`,`1`])],
-"wi_attackdistance": ["weapon_info","AttackDistance",{},WeaponInfo("AttackDistance",`70`,"float","Указывает расстояние через каторое будет детектиться удары",[`50`,`60`,`80`,`90`,`100`])],
-"wi_damage": ["weapon_info","Damage",{},WeaponInfo("Damage",`Vector(10,10)`,"Vector","Указывает какой урон будет наноситься сущностям и игрокам<br>Берётся случайное число от первого до второго (включительно)<br>Игрок: 100<br>Кляйнер: 8<br>Робот-собака: 999<br>Комбайн солдат: 50<br>Комбайн элита: 70<br>Метрокоп: 40<br>Зомби: 50",[`Vector(10,30) --Труба`,`Vector(30,60) --Пожарный топор`,`Vector(10,20) --Кулаки`,`Vector(20,60) --Гвоздодёр`])],
-"wi_damageprop": ["weapon_info","DamageProp",{},WeaponInfo("DamageProp",`Vector(0,0)`,"Vector","Указывает какой урон будет наноситься пропам<br>Берётся случайное число от первого до второго (включительно)<br>Шкаф: 130<br>Стол: 50<br>Взывоопасная бочка: 20<br>Арбуз: 3<br>Бутылка: 5<br>Ящик: 30<br>Разбиваемое окно: 10",[`Vector(5,20) --Труба`,`Vector(40,60) --Пожарный топор`,`Vector(0,1) --Кулаки`,`Vector(5,30) --Гвоздодёр`])],
-"wi_idlescale": ["weapon_info","IdleScale",{},WeaponInfo("IdleScale",`1`,"float","Умножает силу покачивания оружия при бейздействии",[`2`,`0`,`0.5`])],
-"wi_swayscale": ["weapon_info","SwayScale",{},WeaponInfo("SwayScale",`3`,"float","Отвечает за силу покачивания оружия при движении камеры",[`2`,`0`,`6`])],
-"wi_bobbingscale": ["weapon_info","BobbingScale",{},WeaponInfo("BobbingScale",`3`,"float","Отвечает за силу покачивания оружия при ходьбе",[`2`,`0`,`6`])],
-"wi_dontdecals": ["weapon_info","DontDecals",{},WeaponInfo("DontDecals",`false`,"bool","Указывает, надо ли создавать декали при ударах",[`true`])],
-"wi_swingsounds": ["weapon_info","SwingSounds",{},WeaponInfo("SwingSounds",`WMLib.SoundsSwing["Heavy"] --Тяжёлое оружие`,"table {string (sound)}","Указывает какие звуки проигрывать при взмахе<br>Если указать \"empty\" то звука не будет",[`WMLib.SoundsSwing["Light"] --Лёгкое оружие`,`WMLib.SoundsSwing["HeavySharp"] --Тяжёлое острое оружие`,`WMLib.SoundsSwing["LightSharp"] --Лёгкое острое оружие`,`{"garrysmod/save_load1.wav"} --Кастомный звук`,`"empty" --Без звука`])],
-"wi_kickscale": ["weapon_info","KickScale",{},WeaponInfo("KickScale",`1`,"float","Умножает силу откидывания пропов и сущностей при ударах",[`0`,`2`])],
-"wi_inertiascale": ["weapon_info","InertiaScale",{},WeaponInfo("InertiaScale",`1`,"float","Умножает силу инерции при взмахе",[`0`,`2`,`-1`])],
-"wi_punchangle": ["weapon_info","PunchAngle",{},WeaponInfo("PunchAngle",`Angle(10,0,0)`,"Angle","Указывает покачивание камеры при взмахе в градусах",[`Angle(0,10,0)`,`Angle(1,5,0)`,`Angle(0,0,0)`])],
-"wi_watersplashsize": ["weapon_info","WaterSplashSize",{},WeaponInfo("WaterSplashSize",`nil`,"float","Ставит размер всплеска при ударе об воду<br>Если поставить nil то это число будет вычисляться автоматически",[`5`])],
-"wi_swingwait" : ["weapon_info","SwingWait",{},WeaponInfo("SwingWait",`0`,"float","Указывает задержку в секундах, прежде чем вызвать звук взмаха",[`0.25`,`0.5`,`0.75`,`1`])],
-"wi_funny"     : ["weapon_info","Funny",{},WeaponInfo("Funny",`false`,"bool","Указывает, является ли оружие шуточным",[`true`])],
-"wi_sharp"     : ["weapon_info","Sharp",{},WeaponInfo("Sharp",`false`,"bool","Указывает, является ли оружие режущим",[`true`])],
-"wi_heavy"     : ["weapon_info","Heavy",{},WeaponInfo("Heavy",`false`,"bool","Указывает, является ли оружие тяжёлым<br>Влияет на то, будет ли это оружие снимать блок противника",[`true`])],
-"wi_autoblock" : ["weapon_info","AutoBlock",{},WeaponInfo("AutoBlock",`false`,"bool","Указывает, является ли оружие с автоматическим блоком",[`true`])],
-"wi_blockpos"  : ["weapon_info","BlockPos",{},WeaponInfo("BlockPos",`Vector(0,0,0)`,"Vector","Указывает offset по позиции оружия от первого лица когда игрок блокирует",[`Vector(0,0,5)`,`Vector(0,3,-5)`,`Vector(10,0,-25)`])],
-"wi_blockrot"  : ["weapon_info","BlockRot",{},WeaponInfo("BlockRot",`Angle(0,0,-45)`,"Angle","Указывает offset по повороту оружия от первого лица когда игрок блокирует",[`Angle(0,0,-30)`,`Angle(-80,0,0)`])],
-"wi_blockwait" : ["weapon_info","BlockWait",{},WeaponInfo("BlockWait",`1`,"float","Указывает скорость приминения offset оружия от первого лица когда игрок блокирует",[`0.5`,`0.75`,`1.25`])],
-"wi_blockpower": ["weapon_info","BlockPower",{},WeaponInfo("BlockPower",`0.25`,"float","Указывает на сколько надо умножать получаемый урон если игрок блокирует удар",[`0`,`0.125`,`2 --усилит урон в 2 раза`])],
-"wi_wblockpos" : ["weapon_info","WBlockPos",{},WeaponInfo("WBlockPos",`Vector(0,0,0)`,"Vector","Указывает offset по позиции оружия от 3-го лица когда игрок блокирует",[`Vector(0,-3,0)`])],
-"wi_wblockrot" : ["weapon_info","WBlockRot",{},WeaponInfo("WBlockRot",`Angle(0,0,-80)`,"Angle","Указывает offset по повороту оружия от 3-го лица когда игрок блокирует",[`Angle(0,30,-45)`])],
-"wi_blockhold" : ["weapon_info","BlockHold",{},WeaponInfo("BlockHold",`"melee2"`,"string (<a href='https://wiki.facepunch.com/gmod/Hold_Types'>hold</a>)","Указывает какую анимацию проигрывать когда игрок блокирует от 3-го лица",[`"camera"`])],
+}`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;").replace(/\n/g,"<br>")])
+WeaponInfo("FOV",`80`,"float","Устанавливает FOV оружия от первого лица",[`70`,`100`,`95`])
+WeaponInfo("WModel",`"models/weapons/w_crowbar.mdl"`,"string (model)","Устанавливает модель оружия от 3-го лица",[`"models/weapons/w_stunbaton.mdl"`])
+WeaponInfo("WModelPos",`Vector(0,0,0)`,"Vector","Устанавливает offset позиции модели оружия от 3-го лица",[`Vector(3.4,-1,-3)`])
+WeaponInfo("WModelRot",`Angle(0,0,0)`,"Angle","Устанавливает offset поворота модели оружия от 3-го лица",[`Angle(180,150,10)`])
+WeaponInfo("WModelSize",`Vector(1,1,1)`,"Vector","Устанавливает размер модели оружия от 3-го лица",[`Vector(1,2,1)`,`Vector(3,3,3)`])
+WeaponInfo("WModelVisible",`true`,"bool","Указывает, надо ли рендерить оружие от 3-го лица",[`false`])
+WeaponInfo("Hold",`"melee"`,"string (<a href='https://wiki.facepunch.com/gmod/Hold_Types'>hold</a>)","Указывает какую анимацию проигрывать когда игрок держит оружие в руках от 3-го лица",[`"melee2"`,`"knife"`,`"fist"`])
+WeaponInfo("Rays",`{{Angle(0,0,0),0}}`,"table {table {Angle, float}}","Устанавливает в какую позицию бить (лучи ударов)<br>Так же оно идёт слева на право, если нужно что-бы шло справа на лево, то сделайте значения по X негативными<br>Первое значение луч поворота относительно от камеры, второе значение задержка перед созданием (у первого луча нету задержки)",[`{{Angle(-10,-5,0),0},{Angle(0,0,0),0.05},{Angle(10,5,0),0.05}}`,`{{Angle(-50,-30,0),0},{Angle(0,0,0),0.03},{Angle(50,30,0),0.03}}`,`{{Angle(0,-10,0),0},{Angle(0,0,0),0},{Angle(0,10,0),0}}`,`{{Angle(0,-20,0),0},{Angle(0,0,0),0.025},{Angle(0,20,0),0.025},{Angle(10,-20,0),0},{Angle(10,0,0),0.025},{Angle(10,20,0),0.025}}`])
+WeaponInfo("RaysDetails",`1`,"int","Устанавливает детализацию ударов, чем больше значение, тем больше лагает и тем больше шанс попасть по тонкому объекту",[`4`,`6`])
+WeaponInfo("OnlyOneRay",`false`,"bool","Если установить true, то будет произведён только один удар, а не удары по всем созданым лучам (не считая промежуточных)",[`true`])
+WeaponInfo("AnimationHit",`{"Misscenter1","Misscenter2"}`,"table {string (animation)}","Указывает какую анимацию проигрывать при атаке<br>Выбирает случайную из списка",[`{"Hitcenter1","Hitcenter2","Hitcenter3"}`])
+WeaponInfo("AnimationHitEnd",`""`,"string (animation)","Указывает какую анимацию проигрывать после анимации атаки (для некоторых оружий)<br>Если не указывать то анимации не будет",[`"Hitcenter1"`])
+WeaponInfo("AnimationHitEndScale",`1`,"float","Указывает на сколько раньше или позже начать анимацию после анимации атаки",[`0.75`,`1.25`])
+WeaponInfo("AnimationDraw",`"Draw"`,"string (animation)","Указывает какую анимацию проигрывать при доставании оружия<br>Если указать \"\" то никакой анимации не будет",[`"Hitcenter1"`])
+WeaponInfo("AnimationIdle",`""`,"string (animation)","Указывает какую анимацию проигрывать при бейздействии",[`"Idle01"`,`"Hitcenter1"`])
+WeaponInfo("AnimationInspect",`""`,"table {string (animation)}","Указывает анимации при осмотре оружия (на R)<br>Выбирается случайная анимация из списка",[`{"Hitcenter1","Hitcenter2","Hitcenter3"}`])
+WeaponInfo("HitSounds",`""`,"table {string (sound)}","Указывает какие дополнительно звуки издавать при ударах",[`{"phx/hmetal1.wav","phx/hmetal2.wav","phx/hmetal3.wav"}`,`{"garrysmod/save_load1.wav"}`])
+WeaponInfo("DrawSound",`""`,"table {string (sound),float}","Указывает какой звук проигрывать при доставании оружия<br>Число обозначает скорость звука",[`{"garrysmod/save_load1.wav",1}`])
+WeaponInfo("AttackWait",`Vector(1,0,0)`,"Vector","Указывает задержку между взмахами<br>Первое число базовая задержка в секундах<br>Второе и третье число это случайное число миллисекунд добавляющихся к базовой задержке",[`Vector(1,-50,0)`,`Vector(1,0,50)`])
+WeaponInfo("AttackHitWait",`0`,"float","Указывает задержку между взмахом и ударом, сколько должно пройти секунд что-бы появился эффект удара после взмаха",[`0.3`,`1`])
+WeaponInfo("AttackDistance",`70`,"float","Указывает расстояние через каторое будет детектиться удары",[`50`,`60`,`80`,`90`,`100`])
+WeaponInfo("Damage",`Vector(10,10)`,"Vector","Указывает какой урон будет наноситься сущностям и игрокам<br>Берётся случайное число от первого до второго (включительно)<br>Игрок: 100<br>Кляйнер: 8<br>Робот-собака: 999<br>Комбайн солдат: 50<br>Комбайн элита: 70<br>Метрокоп: 40<br>Зомби: 50",[`Vector(10,30) --Труба`,`Vector(30,60) --Пожарный топор`,`Vector(10,20) --Кулаки`,`Vector(20,60) --Гвоздодёр`])
+WeaponInfo("DamageProp",`Vector(0,0)`,"Vector","Указывает какой урон будет наноситься пропам<br>Берётся случайное число от первого до второго (включительно)<br>Шкаф: 130<br>Стол: 50<br>Взывоопасная бочка: 20<br>Арбуз: 3<br>Бутылка: 5<br>Ящик: 30<br>Разбиваемое окно: 10",[`Vector(5,20) --Труба`,`Vector(40,60) --Пожарный топор`,`Vector(0,1) --Кулаки`,`Vector(5,30) --Гвоздодёр`])
+WeaponInfo("IdleScale",`1`,"float","Умножает силу покачивания оружия при бейздействии",[`2`,`0`,`0.5`])
+WeaponInfo("SwayScale",`3`,"float","Отвечает за силу покачивания оружия при движении камеры",[`2`,`0`,`6`])
+WeaponInfo("BobbingScale",`3`,"float","Отвечает за силу покачивания оружия при ходьбе",[`2`,`0`,`6`])
+WeaponInfo("DontDecals",`false`,"bool","Указывает, надо ли создавать декали при ударах",[`true`])
+WeaponInfo("SwingSounds",`WMLib.SoundsSwing["Heavy"] --Тяжёлое оружие`,"table {string (sound)}","Указывает какие звуки проигрывать при взмахе<br>Если указать \"empty\" то звука не будет",[`WMLib.SoundsSwing["Light"] --Лёгкое оружие`,`WMLib.SoundsSwing["HeavySharp"] --Тяжёлое острое оружие`,`WMLib.SoundsSwing["LightSharp"] --Лёгкое острое оружие`,`{"garrysmod/save_load1.wav"} --Кастомный звук`,`"empty" --Без звука`])
+WeaponInfo("KickScale",`1`,"float","Умножает силу откидывания пропов и сущностей при ударах",[`0`,`2`])
+WeaponInfo("InertiaScale",`1`,"float","Умножает силу инерции при взмахе",[`0`,`2`,`-1`])
+WeaponInfo("PunchAngle",`Angle(10,0,0)`,"Angle","Указывает покачивание камеры при взмахе в градусах",[`Angle(0,10,0)`,`Angle(1,5,0)`,`Angle(0,0,0)`])
+WeaponInfo("WaterSplashSize",`nil`,"float","Ставит размер всплеска при ударе об воду<br>Если поставить nil то это число будет вычисляться автоматически",[`5`])
+WeaponInfo("SwingWait",`0`,"float","Указывает задержку в секундах, прежде чем вызвать звук взмаха",[`0.25`,`0.5`,`0.75`,`1`])
+WeaponInfo("Funny",`false`,"bool","Указывает, является ли оружие шуточным",[`true`])
+WeaponInfo("Sharp",`false`,"bool","Указывает, является ли оружие режущим",[`true`])
+WeaponInfo("Heavy",`false`,"bool","Указывает, является ли оружие тяжёлым<br>Влияет на то, будет ли это оружие снимать блок противника",[`true`])
+WeaponInfo("AutoBlock",`false`,"bool","Указывает, является ли оружие с автоматическим блоком",[`true`])
+WeaponInfo("BlockPos",`Vector(0,0,0)`,"Vector","Указывает offset по позиции оружия от первого лица когда игрок блокирует",[`Vector(0,0,5)`,`Vector(0,3,-5)`,`Vector(10,0,-25)`])
+WeaponInfo("BlockRot",`Angle(0,0,-45)`,"Angle","Указывает offset по повороту оружия от первого лица когда игрок блокирует",[`Angle(0,0,-30)`,`Angle(-80,0,0)`])
+WeaponInfo("BlockWait",`1`,"float","Указывает скорость приминения offset оружия от первого лица когда игрок блокирует",[`0.5`,`0.75`,`1.25`])
+WeaponInfo("BlockPower",`0.25`,"float","Указывает на сколько надо умножать получаемый урон если игрок блокирует удар",[`0`,`0.125`,`2 --усилит урон в 2 раза`])
+WeaponInfo("WBlockPos",`Vector(0,0,0)`,"Vector","Указывает offset по позиции оружия от 3-го лица когда игрок блокирует",[`Vector(0,-3,0)`])
+WeaponInfo("WBlockRot",`Angle(0,0,-80)`,"Angle","Указывает offset по повороту оружия от 3-го лица когда игрок блокирует",[`Angle(0,30,-45)`])
+WeaponInfo("BlockHold",`"melee2"`,"string (<a href='https://wiki.facepunch.com/gmod/Hold_Types'>hold</a>)","Указывает какую анимацию проигрывать когда игрок блокирует от 3-го лица",[`"camera"`])
+WWAddTitle("weaponinfos_func","weaponinfos","Функции",{})
+WeaponInfo("HitFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч наносячим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (до основной функции)",[
+`function(rayresult,owner,dont)
+	if not dont and rayresult.Hit then
+		local bloodhit = false
+		if rayresult.Entity == Entity(0) and not (rayresult.MatType == MAT_SAND or rayresult.MatType == MAT_GRASS or rayresult.MatType == MAT_FOLIAGE or rayresult.MatType == MAT_SNOW or rayresult.MatType == MAT_SLOSH) then
+			bloodhit = true
+		end
+		if not (rayresult.Entity:IsNPC() or rayresult.Entity:IsPlayer()) then
+			if rayresult.MatType ~= MAT_SAND and rayresult.MatType ~= MAT_GRASS and rayresult.MatType ~= MAT_FOLIAGE and rayresult.MatType ~= MAT_PLASTIC and rayresult.MatType ~= MAT_SNOW and rayresult.MatType ~= MAT_FLESH and rayresult.MatType ~= MAT_GRATE and rayresult.MatType ~= MAT_EGGSHELL and rayresult.MatType ~= MAT_BLOODYFLESH and rayresult.MatType ~= MAT_SLOSH and rayresult.MatType ~= MAT_ALIENFLESH then
+				bloodhit = true
+			end
+		end
+		if bloodhit then
+			if math.random()>0.5 then
+				local decals = {"decals/flesh/blood1","decals/flesh/blood2","decals/flesh/blood3","decals/flesh/blood4","decals/flesh/blood5"}
+				WMLib.PlaceDecal(decals[math.random(1,#decals)],rayresult.Entity,rayresult.HitPos,rayresult.HitNormal,Color(math.random(230,255),math.random(230,255),math.random(230,255)),Vector(math.random(120,80)/100,math.random(120,80)/100))
+				owner:TakeDamage(math.random(1,5),owner,owner)
+			end
+		end
+	end
+end`])
+WeaponInfo("HitAfterFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч не наносящим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (после основной функции)",[
+`function(rayresult,owner,dont)
+	if not dont and rayresult.Hit and math.random()>0.1 then
+		local effectInfo = EffectData()
+		effectInfo:SetOrigin(rayresult.HitPos)
+		effectInfo:SetEntity(rayresult.Entity)
+		effectInfo:SetScale(1)
+		effectInfo:SetMagnitude(3)
+		util.Effect( "ElectricSpark", effectInfo )
+		WMLib.ShockEntity(rayresult.Entity,10)
+	end
+end`])
+WeaponInfo("PreAttackFunctionInfo()",`function(curinfo) return curinfo end`,`function(table (Текущая информация оружия)) return table (новую информацию оружия)`,"Вызывается перед началом взмаха, позволяет изменять информацию оружия в реальном времени<br>Полезно для разных ударов",[
+`function(curinfo)
+	local rand = math.random(1,3)
+	if rand == 1 then
+		curinfo.AnimationHit = {"Slash1"}
+		curinfo.PunchAngle = Angle(0,-5,0)
+		curinfo.Rays = {{Angle(0,30,0),0},{Angle(0,0,0),0.075},{Angle(0,-30,0),0.075}}
+		curinfo.AttackHitWait = 0.3
+		curinfo.AttackDistance = 60
+	elseif rand == 2 then
+		curinfo.AnimationHit = {"Slash3"}
+		curinfo.PunchAngle = Angle(0,5,0)
+		curinfo.Rays = {{Angle(0,-30,0),0},{Angle(0,0,0),0.075},{Angle(0,30,0),0.075}}
+		curinfo.AttackHitWait = 0.3
+		curinfo.AttackDistance = 60
+	else
+		curinfo.AnimationHit = {"Slash2"}
+		curinfo.PunchAngle = Angle(-5,0,0)
+		curinfo.Rays = {{Angle(0,0,0),0},{Angle(-5,-5,0),0},{Angle(0,0,0),0},{Angle(5,5,0),0},{Angle(0,0,0),0},{Angle(5,-5,0),0},{Angle(0,0,0),0},{Angle(-5,5,0),0}}
+		curinfo.AttackHitWait = 0.4
+		curinfo.AttackDistance = 80
+	end
 
-"wi_hitfunction": ["weapon_info","HitFunction()",{},WeaponInfo("HitFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч наносячим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (до основной функции)",[`
-function(rayresult,owner,dont)<br>
-	if not dont and rayresult.Hit then<br>
-		local bloodhit = false<br>
-		if rayresult.Entity == Entity(0) and not (rayresult.MatType == MAT_SAND or rayresult.MatType == MAT_GRASS or rayresult.MatType == MAT_FOLIAGE or rayresult.MatType == MAT_SNOW or rayresult.MatType == MAT_SLOSH) then<br>
-			bloodhit = true<br>
-		end<br>
-		if not (rayresult.Entity:IsNPC() or rayresult.Entity:IsPlayer()) then<br>
-			if rayresult.MatType ~= MAT_SAND and rayresult.MatType ~= MAT_GRASS and rayresult.MatType ~= MAT_FOLIAGE and rayresult.MatType ~= MAT_PLASTIC and rayresult.MatType ~= MAT_SNOW and rayresult.MatType ~= MAT_FLESH and rayresult.MatType ~= MAT_GRATE and rayresult.MatType ~= MAT_EGGSHELL and rayresult.MatType ~= MAT_BLOODYFLESH and rayresult.MatType ~= MAT_SLOSH and rayresult.MatType ~= MAT_ALIENFLESH then<br>
-				bloodhit = true<br>
-			end<br>
-		end<br>
-		if bloodhit then<br>
-			if math.random()>0.5 then<br>
-				local decals = {"decals/flesh/blood1","decals/flesh/blood2","decals/flesh/blood3","decals/flesh/blood4","decals/flesh/blood5"}<br>
-				WMLib.PlaceDecal(decals[math.random(1,#decals)],rayresult.Entity,rayresult.HitPos,rayresult.HitNormal,Color(math.random(230,255),math.random(230,255),math.random(230,255)),Vector(math.random(120,80)/100,math.random(120,80)/100))<br>
-				owner:TakeDamage(math.random(1,5),owner,owner)<br>
-			end<br>
-		end<br>
-	end<br>
-end`])],
-"wi_hitafterfunction": ["weapon_info","HitAfterFunction()",{},WeaponInfo("HitAfterFunction()",`function() end`,`function(table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">traceresult</a>),player (owner),bool (является ли луч не наносящим урон))`,"Эта функция вызывается когда игрок ударил оружием какой-то объект (после основной функции)",[
-`function(rayresult,owner,dont)<br>
-	if not dont and rayresult.Hit and math.random()>0.1 then<br>
-		local effectInfo = EffectData()<br>
-		effectInfo:SetOrigin(rayresult.HitPos)<br>
-		effectInfo:SetEntity(rayresult.Entity)<br>
-		effectInfo:SetScale(1)<br>
-		effectInfo:SetMagnitude(3)<br>
-		util.Effect( "ElectricSpark", effectInfo )<br>
-		WMLib.ShockEntity(rayresult.Entity,10)<br>
-	end<br>
-end<br>`])],
-"wi_preattackfunctioninfo": ["weapon_info","PreAttackFunctionInfo()",{},WeaponInfo("PreAttackFunctionInfo()",`function(curinfo) return curinfo end`,`function(table (Текущая информация оружия)) return table (новую информацию оружия)`,"Вызывается перед началом взмаха, позволяет изменять информацию оружия в реальном времени<br>Полезно для разных ударов",[`function(curinfo)<br>
-	local rand = math.random(1,3)<br>
-	if rand == 1 then<br>
-		curinfo.AnimationHit = {"Slash1"}<br>
-		curinfo.PunchAngle = Angle(0,-5,0)<br>
-		curinfo.Rays = {{Angle(0,30,0),0},{Angle(0,0,0),0.075},{Angle(0,-30,0),0.075}}<br>
-		curinfo.AttackHitWait = 0.3<br>
-		curinfo.AttackDistance = 60<br>
-	elseif rand == 2 then<br>
-		curinfo.AnimationHit = {"Slash3"}<br>
-		curinfo.PunchAngle = Angle(0,5,0)<br>
-		curinfo.Rays = {{Angle(0,-30,0),0},{Angle(0,0,0),0.075},{Angle(0,30,0),0.075}}<br>
-		curinfo.AttackHitWait = 0.3<br>
-		curinfo.AttackDistance = 60<br>
-	else<br>
-		curinfo.AnimationHit = {"Slash2"}<br>
-		curinfo.PunchAngle = Angle(-5,0,0)<br>
-		curinfo.Rays = {{Angle(0,0,0),0},{Angle(-5,-5,0),0},{Angle(0,0,0),0},{Angle(5,5,0),0},{Angle(0,0,0),0},{Angle(5,-5,0),0},{Angle(0,0,0),0},{Angle(-5,5,0),0}}<br>
-		curinfo.AttackHitWait = 0.4<br>
-		curinfo.AttackDistance = 80<br>
-	end<br>
-<br>
-	return curinfo<br>
-end`,`function(curinfo)<br>
-	local rand = math.random(1,3)<br>
-	if rand == 1 then<br>
-		curinfo.AnimationHit = {"Misscenter1"}<br>
-		curinfo.PunchAngle = Angle(5,5,0)<br>
-		curinfo.Rays = {{Angle(-10,-20,0),0},{Angle(0,0,0),0.025},{Angle(10,20,0),0.025}}<br>
-	elseif rand == 2 then<br>
-		curinfo.AnimationHit = {"Misscenter2"}<br>
-		curinfo.PunchAngle = Angle(5,-5,0)<br>
-		curinfo.Rays = {{Angle(-10,20,0),0},{Angle(0,0,0),0.025},{Angle(10,-20,0),0.025}}<br>
-	else<br>
-		curinfo.AnimationHit = {"Misscenter3"}<br>
-		curinfo.PunchAngle = Angle(5,0,0)<br>
-		curinfo.Rays = {{Angle(-20,0,0),0},{Angle(0,0,0),0.025},{Angle(20,0,0),0.025}}<br>
-	end<br>
-<br>
-	return curinfo<br>
-end`])],
-"wi_blockhitfunction": ["weapon_info","BlockHitFunction()",{},WeaponInfo("BlockHitFunction()",`nil`,`function(entity (получающий, владелец), entity (атакующий), int (получаемый урон), int (получаемый урон без блока))`,"Вызывается когда владелец оружия блокирует урон оружием",[`function(owner,attacker,damage,fulldamage)<br>
-	if math.random()>0.5 or damage > 30 then<br>
-		if owner:IsPlayer() then<br>
-			owner:StripWeapon("wm_missile")<br>
-		else<br>
-			SafeRemoveEntity(owner:GetActiveWeapon())<br>
-		end<br>
-		local explode = ents.Create( "env_explosion" )<br>
-		explode:SetPos( owner:GetPos() )<br>
-		explode:SetOwner( owner )<br>
-		explode:Spawn()<br>
-		explode:SetKeyValue( "iMagnitude", "150" )<br>
-		explode:Fire( "Explode", 0, 0 )<br>
-		explode:EmitSound( "weapon_AWP.Single", 400, 400 )<br>
-	end<br>
-end`,`function(owner,attacker,damage,fulldamage)<br>
-	if IsValid(owner) then<br>
-		if IsValid(owner:GetActiveWeapon()) then<br>
-			local pos = owner:GetActiveWeapon():GetPos()<br>
-			pos:Add(Vector(0,0,50))<br>
-			createparticles(pos,Vector((math.random()-0.5)*10,(math.random()-0.5)*10,(math.random()-0.5)*10),math.random(0,math.floor(fulldamage/4)))<br>
-		end<br>
-	end<br>
-end`])],
-"wi_attackfunctioninfo": ["weapon_info","AttackFunctionInfo()",{},WeaponInfo("AttackFunctionInfo()",`~`,`~`,"Толком не тестировалось",[``])],
-"wi_startinfo"         : ["weapon_info","StartInfo()",{},WeaponInfo("StartInfo()",`~`,`~`,"Толком не тестировалось",[``])],
+	return curinfo
+end`,`function(curinfo)
+	local rand = math.random(1,3)
+	if rand == 1 then
+		curinfo.AnimationHit = {"Misscenter1"}
+		curinfo.PunchAngle = Angle(5,5,0)
+		curinfo.Rays = {{Angle(-10,-20,0),0},{Angle(0,0,0),0.025},{Angle(10,20,0),0.025}}
+	elseif rand == 2 then
+		curinfo.AnimationHit = {"Misscenter2"}
+		curinfo.PunchAngle = Angle(5,-5,0)
+		curinfo.Rays = {{Angle(-10,20,0),0},{Angle(0,0,0),0.025},{Angle(10,-20,0),0.025}}
+	else
+		curinfo.AnimationHit = {"Misscenter3"}
+		curinfo.PunchAngle = Angle(5,0,0)
+		curinfo.Rays = {{Angle(-20,0,0),0},{Angle(0,0,0),0.025},{Angle(20,0,0),0.025}}
+	end
 
-"ai_name": ["addon_info","Name",{},AddonInfo("Name",`~`,"string (можно перевести)","Название модификации",true)],
-"ai_author": ["addon_info","Author",{},AddonInfo("Author",`"Anonymous"`,"string","Автор модификации",false)],
+	return curinfo
+end`])
+WeaponInfo("BlockHitFunction()",`nil`,`function(entity (получающий, владелец), entity (атакующий), int (получаемый урон), int (получаемый урон без блока))`,"Вызывается когда владелец оружия блокирует урон оружием",[
+`function(owner,attacker,damage,fulldamage)
+	if math.random()>0.5 or damage > 30 then
+		if owner:IsPlayer() then
+			owner:StripWeapon("wm_missile")
+		else
+			SafeRemoveEntity(owner:GetActiveWeapon())
+		end
+		local explode = ents.Create( "env_explosion" )
+		explode:SetPos( owner:GetPos() )
+		explode:SetOwner( owner )
+		explode:Spawn()
+		explode:SetKeyValue( "iMagnitude", "150" )
+		explode:Fire( "Explode", 0, 0 )
+		explode:EmitSound( "weapon_AWP.Single", 400, 400 )
+	end
+end`,`function(owner,attacker,damage,fulldamage)
+	if IsValid(owner) then
+		if IsValid(owner:GetActiveWeapon()) then
+			local pos = owner:GetActiveWeapon():GetPos()
+			pos:Add(Vector(0,0,50))
+			createparticles(pos,Vector((math.random()-0.5)*10,(math.random()-0.5)*10,(math.random()-0.5)*10),math.random(0,math.floor(fulldamage/4)))
+		end
+	end
+end`])
+WeaponInfo("AttackFunctionInfo()",`~`,`~`,"Толком не тестировалось",[``])
+WeaponInfo("StartInfo()",`~`,`~`,"Толком не тестировалось",[``])
 
-"ei_e1" : ["errors","E1" ,{},ErrorInfo("E1" ,`Не может загрузить оружие потому-что айди оружия не начинается на "wm_"`)],
-"ei_e2" : ["errors","E2" ,{},ErrorInfo("E2" ,`Не может загрузить оружие (lua файл) потому-что оно не находится в папке с оружием (weapons)`)],
-"ei_e3" : ["errors","E3" ,{},ErrorInfo("E3" ,`Не может загрузить оружие потому-что информация о оружии пуста`)],
-"ei_e4" : ["errors","E4" ,{},ErrorInfo("E4" ,`Не может загрузить модификацию потому-что модификация с таким айди уже есть`)],
-"ei_e5" : ["errors","E5" ,{},ErrorInfo("E5" ,`Не может загрузить модификацию потому-что айди не типа строки`)],
-"ei_e6" : ["errors","E6" ,{},ErrorInfo("E6" ,`Не может загрузить оружие потому-что не найдена модификация к которому оно относится`)],
-"ei_e7" : ["errors","E7" ,{},ErrorInfo("E7" ,`Не может загрузить модификацию потому-что информация о модификации не является таблицей`)],
-"ei_e8" : ["errors","E8" ,{},ErrorInfo("E8" ,`Не может загрузить модификацию потому-что не хватает информации о модификации`)],
-"ei_e9" : ["errors","E9" ,{},ErrorInfo("E9" ,`Не может получить информацию о оружии, потому-что это оружие не Woowz Melee`)],
-"ei_e10": ["errors","E10",{},ErrorInfo("E10",`Не может найти кость в вьюмодельки`)],
-
-"cv_enabled"               : ["cvars","wm_enabled",{},CVarInfo("enabled","bool","1",null,true,`Отображать оружия в спавменю?`)],
-"cv_categorytop"           : ["cvars","wm_categorytop",{},CVarInfo("categorytop","bool","0",null,true,`Отображать категорию Woowz Melee в самом верху?`)],
-"cv_onlyadmin"             : ["cvars","wm_onlyadmin",{},CVarInfo("onlyadmin","bool","0",null,true,`Позволить выбирать оружия только администратору?`)],
-"cv_funny_weapons"         : ["cvars","wm_funny_weapons",{},CVarInfo("funny_weapons","bool","1",null,true,`Отображать шуточные оружия в спавменю?`)],
-"cv_extendeddesc"          : ["cvars","wm_extendeddesc",{},CVarInfo("extendeddesc","bool","0",null,true,`Сделать описание оружий более чётким и понятным?`)],
-"cv_takeweapons"           : ["cvars","wm_takeweapons",{},CVarInfo("takeweapons","bool","1",null,false,`Разрешить поднимать WM оружие?`)],
-"cv_npccanuse"             : ["cvars","wm_npccanuse",{},CVarInfo("npccanuse","bool","1",null,false,`Разрешить NPC использовать оружие?`)],
-"cv_npcweapons"            : ["cvars","wm_npcweapons",{},CVarInfo("npcweapons","bool","1",null,true,`Добавить оружие в "выбор оружия" при спавне NPC?`)],
-"cv_slot"                  : ["cvars","wm_slot",{},CVarInfo("slot","int","0",false,true,`В каком слоте хотбара будут отображаться оружия (0-5)`)],
-"cv_canblock"              : ["cvars","wm_canblock",{},CVarInfo("canblock","bool","1",null,false,`Включить блок?`)],
-"cv_blockscale"            : ["cvars","wm_blockscale",{},CVarInfo("blockscale","float","1",false,false,`Умножает урон игроку который в блоке`)],
-"cv_blockspeed"            : ["cvars","wm_blockspeed",{},CVarInfo("blockspeed","float","1",false,false,`Умножает на скорость блокировки`)],
-"cv_distancescale"         : ["cvars","wm_distancescale",{},CVarInfo("distancescale","float","1",false,false,`Умножает на растояние с которого можно достать оружием`)],
-"cv_attackwaitscale"       : ["cvars","wm_attackwaitscale",{},CVarInfo("attackwaitscale","float","1",false,false,`Умножает ожидание между ударами`)],
-"cv_kickscale"             : ["cvars","wm_kickscale",{},CVarInfo("kickscale","float","1",null,false,`Умножает на силу отбрасывания пропов или сущностей`)],
-"cv_inertiascale"          : ["cvars","wm_inertiascale",{},CVarInfo("inertiascale","float","1",null,false,`Умножает на инерцию от ударов`)],
-"cv_attackunderwater"      : ["cvars","wm_attackunderwater",{},CVarInfo("attackunderwater","bool","0",null,false,`Можно махать оружием под водой?`)],
-"cv_entityprior"           : ["cvars","wm_entityprior",{},CVarInfo("entityprior","bool","1",null,false,`В приоритете будет удар по энтити?<br>Если 0 (Нет), то можно будет случайно задевать стены при ударах`)],
-"cv_damagescale"           : ["cvars","wm_damagescale",{},CVarInfo("damagescale","float","1",false,false,`Умножает урон на сущности и игроков`)],
-"cv_damagescale_player"    : ["cvars","wm_damagescale_player",{},CVarInfo("damagescale_player","float","1",false,false,`Умножает урон на игроков`)],
-"cv_damagescale_prop"      : ["cvars","wm_damagescale_prop",{},CVarInfo("damagescale_prop","float","1",false,false,`Умножает урон на пропы`)],
-"cv_damagescale_headshot"  : ["cvars","wm_damagescale_headshot",{},CVarInfo("damagescale_headshot","float","4",false,false,`Умножает урон когда ударяешь по голове`)],
-"cv_ragdollize"            : ["cvars","wm_ragdollize",{},CVarInfo("ragdollize","bool","1",null,false,`Рагдоллить игрока при мощных ударах? (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`)],
-"cv_ragdollize_needdamage" : ["cvars","wm_ragdollize_needdamage",{},CVarInfo("ragdollize_needdamage","int","35",false,false,`Сколько нужно нанести урона игроку что-бы он рагдольнулся? (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`)],
-"cv_interimhittomain"      : ["cvars","wm_interimhittomain",{},CVarInfo("interimhittomain","bool","0",null,false,`Делает переходные лучи такими же как и наносящие урон`)],
-"cv_hitcenter"             : ["cvars","wm_hitcenter",{},CVarInfo("hitcenter","bool","0",null,false,`Делает ровно в центр один удар`)],
-"cv_showhits"              : ["cvars","wm_showhits",{},CVarInfo("showhits","bool","0",null,false,`Отображать попадания по сущностям и игрокам?`)],
-"cv_placedecals"           : ["cvars","wm_placedecals",{},CVarInfo("placedecals","bool","1",null,false,`Отображать декали после ударов?`)],
-"cv_viewpunch"             : ["cvars","wm_viewpunch",{},CVarInfo("viewpunch","bool","1",null,false,`Двигать камеру при взмахе оружием?`)],
-"cv_viewpunchscale"        : ["cvars","wm_viewpunchscale",{},CVarInfo("viewpunchscale","float","1",null,false,`Умножает движение камеры при взмахе оружием`)],
-"cv_camerashake"           : ["cvars","wm_camerashake",{},CVarInfo("camerashake","bool","1",null,false,`Тряски камеру при ударах?`)],
-"cv_camerashakescale"      : ["cvars","wm_camerashakescale",{},CVarInfo("camerashakescale","float","1",null,false,`Умножает силу тряски камеры при ударах`)],
-"cv_fovscale"              : ["cvars","wm_fovscale",{},CVarInfo("fovscale","float","1",null,false,`Умножает FOV оружия в руках`)],
-"cv_crosshair"             : ["cvars","wm_crosshair",{},CVarInfo("crosshair","bool","0",null,false,`Отображать прицел по середине экрана?`)],
-"cv_customfunctions"       : ["cvars","wm_customfunctions",{},CVarInfo("customfunctions","bool","1",null,false,`Включить кастомные скрипты оружий?`)],
-"cv_hitsquality"           : ["cvars","wm_hitsquality",{},CVarInfo("hitsquality","int","0",false,false,`Сколько добавить к качеству лучей оружия?<br>(Чем больше число тем больше лагает, но больше шанс попасть по тонкому объекту)`)],
-"cv_bobbingscale"          : ["cvars","wm_bobbingscale",{},CVarInfo("bobbingscale","float","1",null,false,`Умножает к силе боббингу (анимации при ходьбе) оружия`)],
-"cv_swayscale"             : ["cvars","wm_swayscale",{},CVarInfo("swayscale","float","1",null,false,`Умножает к силе качения при поворотах`)],
-"cv_idlescale"             : ["cvars","wm_idlescale",{},CVarInfo("idlescale","float","1",null,false,`Умножает а анимации простоя оружия`)],
-"cv_funny_burn"            : ["cvars","wm_funny_burn",{},CVarInfo("funny_burn","bool","0",null,false,`Поджигать объекты при ударах?`)],
-"cv_funny_shock"           : ["cvars","wm_funny_shock",{},CVarInfo("funny_shock","bool","0",null,false,`Бить током объекты при ударах?`)],
-"cv_randomnames"           : ["cvars","wm_randomnames",{},CVarInfo("randomnames","bool","0",null,true,`Рандомизировать имена оружий и скрыть иконки?`)],
-"cv_randomdecals"          : ["cvars","wm_randomdecals",{},CVarInfo("randomdecals","bool","0",null,false,`Рандомизировать декали?`)],
-"cv_debug_livetime"        : ["cvars","wm_debug_livetime",{},CVarInfo("debug_livetime","float","10",false,false,`Сколько секунд будут отображаться отладочные элементы?`)],
-"cv_debug_weapons"         : ["cvars","wm_debug_weapons",{},CVarInfo("debug_weapons","bool","0",null,true,`Загрузить отладочное оружие?`)],
-"cv_showhit"               : ["cvars","wm_showhit",{},CVarInfo("showhit","bool","0",null,false,`Отображать лучи при ударах?`)],
-"cv_showfailhit"           : ["cvars","wm_showfailhit",{},CVarInfo("showfailhit","bool","0",null,false,`Отображать лучи при не попаданиях?`)],
-"cv_showdamage"            : ["cvars","wm_showdamage",{},CVarInfo("showdamage","bool","0",null,false,`Отображать отладочные сообщения об уроне? (нужно включить developer 1)`)],
-
-"lib_createmod"      : ["lib","CreateMod()",{},LibInfo("CreateMod()",`function(string (айди модификации), table (информация модификации))`,`Эта функция создаёт новую модификацию в WMLib<br>Нужно вызвать эту функцию перед тем как создавать оружие`,[`CreateMod("new_mod",{Name = "New Mod", Author = "Syslik"})`])], 
-"lib_createmelee"    : ["lib","CreateMelee()",{},LibInfo("CreateMelee()",`function(SWEP, table (информация оружия), string (айди модификации)) return bool (возвращает false если ошибка)`,`Эта функция создаёт новое оружие в указанную вами модификацию<br>Эту функцию нужно вызывать в скрипте оружия (в папке weapons)<br>Название скрипта должно начинаться на "wm_", а если это отладочное оружие то на "wm_debug_"<br><br>Вызывается только в SWEP скриптах!`,[`CreateMelee(SWEP,{Name = "New Weapon"},"vanilla")`])], 
-"lib_shockentity"    : ["lib","ShockEntity()",{},LibInfo("ShockEntity()",`function(entity, float (сила удара током))`,`Эта функция бьёт током сущности, игроков, пропов<br>Эта функция урон не наносит<br>При сильных ударах рагдоллит (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`,[`ShockEntity(entity,10)`])], 
-"lib_placedecal"     : ["lib","PlaceDecal()",{},LibInfo("PlaceDecal()",`function(string (material), entity (на которую поставить декаль), Vector (позиция), Vector (нормаль), Color (цвет декали), Vector (Размер декали))`,`Эта функция создаёт декаль`,[`PlaceDecal("decals/flesh/blood1",rayresult.Entity,rayresult.HitPos,rayresult.HitNormal,Color(255,255,255),Vector(math.random(120,80)/100,math.random(120,80)/100))`])], 
-"lib_deltatime"      : ["lib","DeltaTime()",{},LibInfo("DeltaTime()",`function() return float`,`Эта функция возвращает DeltaTime (работает криво)<br>В среднем число равно 1, +- 0.3<br>Если функция вызвана не в интерфейсе, то она выдаст ошибку`,[`DeltaTime() --1.06`])], 
-"lib_drawsphere"     : ["lib","DrawSphere()",{},LibInfo("DrawSphere()",`function(Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип [default,headshot,block,ragdoll,entity,ragdollize,glass]))`,`Эта функция создаёт отладочную сферу (работает только если wm_showhit или wm_showfailhit включен)`,[`DrawSphere(ray.HitPos,2,5,Color(255,255,255))`])], 
-"lib_thatwmweapon"   : ["lib","ThatWMWeapon()",{},LibInfo("ThatWMWeapon()",`function(entity (цель, оружие)) return bool (это wm оружие?)`,`Эта функция проверяет, является ли энтити оружием из Woowz Melee`,[`ThatWMWeapon(Entity(1))`,`ThatWMWeapon(Entity(1):GetActiveWeapon())`])], 
-"lib_getinfo"        : ["lib","GetInfo()",{},LibInfo("GetInfo()",`function(entity (цель, оружие)) return table (информация оружия)`,`Эта функция получает информацию о оружии`,[`GetInfo(Entity(1):GetActiveWeapon())`])], 
-"lib_getrandomweapon": ["lib","GetRandomWeapon()",{},LibInfo("GetRandomWeapon()",`function() return string`,`Эта функция возвращает класс любого оружия из Woowz Melee которое может быть загружено без админки<br>Если списка оружия нету, то выдаст nil`,[`GetRandomWeapon() --wm_mace`])], 
-"lib_createdust"     : ["lib","CreateDust()",{},LibInfo("CreateDust()",`function(Vector (позиция), Vector (Скорость), float (размер), float (время жизни), Color (цвет))`,`Эта функция создаёт эффект пыли`,[`CreateDust(ray.HitPos,ray.HitNormal)`])], 
-"lib_createparticle" : ["lib","###()",{},LibInfo("CreateDust()",`function(Vector (позиция), Vector (Скорость), float (размер), float (время жизни), Color (цвет))`,`Эта функция создаёт эффект пыли`,[`CreateDust(ray.HitPos,ray.HitNormal)`])], 
-
-"lib_version"      : ["lib","Version",{},LibInfo("Version",`string`,`Возвращает версию WMLib`,[`Version`])],
-"lib_wiki"         : ["lib","Wiki",{},LibInfo("Wiki",`string`,`Возвращает ссылку на эту википедию`,[`Wiki`])],
-"lib_mods"         : ["lib","Mods",{},LibInfo("Mods",`table`,`Возвращает список Woowz Melee модификаций`,[`Mods`])],
-"lib_weapons"      : ["lib","Weapons",{},LibInfo("Weapons",`table`,`Возвращает список Woowz Melee загруженых оружий`,[`Weapons`])],
-"lib_soundsswing"  : ["lib","SoundsSwing",{},LibInfo("SoundsSwing",`table {table {string (sound)}}`,`Возвращает список swing звуков<br>Есть 4 типа swing звуков, Light, LightSharp, Heavy, HeavySharp<br>Эти списки звуков можно заменить на кастомные звуки<br><br></center>WMLib.SoundsSwing = {<br>
-	["Light"]      = {"wm/swing/light1.wav","wm/swing/light2.wav","wm/swing/light3.wav"},<br>
-	["LightSharp"] = {"wm/swing/light1sharp.wav","wm/swing/light2sharp.wav","wm/swing/light3sharp.wav"},<br>
-	["Heavy"]      = {"wm/swing/heavy1.wav","wm/swing/heavy2.wav","wm/swing/heavy3.wav"},<br>
-	["HeavySharp"] = {"wm/swing/heavy1sharp.wav","wm/swing/heavy2sharp.wav","wm/swing/heavy3sharp.wav"},<br>
-}<center>`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;"),[`SoundsSwing["Light"]`])],
-
-"hook_hit"         : ["hooks","WM_Hit",{},HookInfo("Hit",`function(entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара)) return table {bool (производить удар?), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), bool (это не главный удар?), bool (есть энтити на траектории удара)}`,`Вызывается при ударе об твёрдую поверхность оружием Woowz Melee`,`function(ent,info,rayresult,angle,dont,entityonray) return {true,ent,info,rayresult,dont,entityonray} end`)],
-"hook_hitwater"    : ["hooks","WM_HitWater",{},HookInfo("HitWater",`function(float (сила всплеска), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара), string (партикл)) return table {float (сила всплеска), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), string (партикл)}`,`Вызывается при ударе об воду оружием Woowz Melee`,`function(watersize,ent,info,rayresult,angle,dont,entityonray) return {watersize,rayresult} end`)],
-"hook_hitblock"    : ["hooks","WM_HitBlock",{},HookInfo("HitBlock",`function(entity (атакующий), table (информация оружия атакующего), entity (цель), table (информация оружия цели), bool (цель блокирует удары?), bool (атакованы ноги?)) return table {bool (блокировать удар?), table (информация оружия атакующего), table (информация оружия цели)}`,`Вызывается при при ударах энтити с оружием Woowz Melee в руках<br>Лучше всего использовать когда нужна логика блокировки урона`,`function(owner,info,target,target_weapon_info,target_block,hitlegs) return {nil,info,target_info} end`)],
-"hook_drawsphere"  : ["hooks","WM_DrawSphere",{},HookInfo("DrawSphere",`function(Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип)) return table {bool (рендерить круг?), Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип)}`,`Вызывается при рендере отладочных кругов`,`function(pos,size,lifetime,color,typ) return {true,pos,size,lifetime,color,typ} end`)],
-"hook_weaponload"  : ["hooks","WM_WeaponLoad",{},HookInfo("WeaponLoad",`function(SWEP, table (информация оружия), string (айди модификации), string (класс оружия), bool (это отладочное оружие?), bool (загружать оружие?)) return table {bool (загружать оружие?), table (информация оружия), string (айди модификации), bool (это отладочное оружие?)}`,`Вызывается при загрузки Woowz Melee оружия`,`function(swep,info,modid,class,thatdebug,loadswep) return {loadswep,info,modid,thatdebug} end`)],
-"hook_hitinfoload" : ["hooks","WM_HitInfoLoad",{},HookInfo("HitInfoLoad",`function(table (таблица декалей), table (таблица звуков), table (таблица звуков при режущих ударах), table (таблица партиклов)) return table {table (таблица декалей), table (таблица звуков), table (таблица звуков при режущих ударах), table (таблица партиклов)}`,`Вызывается при загрузки таблицы декалей, звуков и т.д<br>Позволяет делать ретекстуры декалей и ресаунды<br>Пример: decals = {[MAT_DEFAULT] = {"decals/eye"}}`,`function(decals,sounds,sharp_sounds,particles) return {decals,sounds,sharp_sounds,particles} end`)],
+WWAddTitle("modinfos",null,"Информация мода",{});
+function AddonInfo(name,def,type,info,mandatory){
+	WWAddPage("ai_"+name,"modinfos",name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br>`+(mandatory==true?"Эту переменную обязательно нужно указать!":"Это не обязательная переменная")+`<br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`</center>`)});
 }
-info["Pages"] = pages
+AddonInfo("Name",`~`,"string (можно перевести)","Название модификации",true)
+AddonInfo("Author",`"Anonymous"`,"string","Автор модификации",false)
 
-WWCreateWiki(info)
+WWAddTitle("errors",null,"Ошибки",{});
+function ErrorInfo(error,info){
+	WWAddPage("error_"+error,"errors",error,{"Page":(`<center><br><font style="font-size:2em;">Ошибка `+error+`</font><br><br><font>`+info+`</font></center>`)});
+}
+ErrorInfo("E1" ,`Не может загрузить оружие потому-что айди оружия не начинается на "wm_"`)
+ErrorInfo("E2" ,`Не может загрузить оружие (lua файл) потому-что оно не находится в папке с оружием (weapons)`)
+ErrorInfo("E3" ,`Не может загрузить оружие потому-что информация о оружии пуста`)
+ErrorInfo("E4" ,`Не может загрузить модификацию потому-что модификация с таким айди уже есть`)
+ErrorInfo("E5" ,`Не может загрузить модификацию потому-что айди не типа строки`)
+ErrorInfo("E6" ,`Не может загрузить оружие потому-что не найдена модификация к которому оно относится`)
+ErrorInfo("E7" ,`Не может загрузить модификацию потому-что информация о модификации не является таблицей`)
+ErrorInfo("E8" ,`Не может загрузить модификацию потому-что не хватает информации о модификации`)
+ErrorInfo("E9" ,`Не может получить информацию о оружии, потому-что это оружие не Woowz Melee`)
+ErrorInfo("E10",`Не может найти кость в вьюмодельки`)
 
+WWAddTitle("cvars",null,"CVar's",{});
+function CVarInfo(cvar,type,def,canminus,needrestart,info){
+	WWAddPage("cvar_"+cvar,"cvars","wm_"+cvar,{"Page":(`<center><br><font style="font-size:2em;">wm_`+cvar+`</font><br><br><font>`+type+`</font><br><br>`+(type!="bool"&&canminus==false?"Число не может быть отрицательным!<br><br>":"")+(needrestart==true?"Что-бы применилось нужно перезапустить карту!<br><br>":"")+`<hr><br><font>Дефолтное значение</font><br><br>`+(type=="bool"?(def=="1"?"1 (Да)":"0 (Нет)"):def)+`<br><br><hr><br>`+info+`</center>`)});
+}
+CVarInfo("enabled","bool","1",null,true,`Отображать оружия в спавменю?`)
+CVarInfo("categorytop","bool","0",null,true,`Отображать категорию Woowz Melee в самом верху?`)
+CVarInfo("onlyadmin","bool","0",null,true,`Позволить выбирать оружия только администратору?`)
+CVarInfo("funny_weapons","bool","1",null,true,`Отображать шуточные оружия в спавменю?`)
+CVarInfo("extendeddesc","bool","0",null,true,`Сделать описание оружий более чётким и понятным?`)
+CVarInfo("takeweapons","bool","1",null,false,`Разрешить поднимать WM оружие?`)
+CVarInfo("npccanuse","bool","1",null,false,`Разрешить NPC использовать оружие?`)
+CVarInfo("npcweapons","bool","1",null,true,`Добавить оружие в "выбор оружия" при спавне NPC?`)
+CVarInfo("slot","int","0",false,true,`В каком слоте хотбара будут отображаться оружия (0-5)`)
+CVarInfo("canblock","bool","1",null,false,`Включить блок?`)
+CVarInfo("blockscale","float","1",false,false,`Умножает урон игроку который в блоке`)
+CVarInfo("blockspeed","float","1",false,false,`Умножает на скорость блокировки`)
+CVarInfo("distancescale","float","1",false,false,`Умножает на растояние с которого можно достать оружием`)
+CVarInfo("attackwaitscale","float","1",false,false,`Умножает ожидание между ударами`)
+CVarInfo("kickscale","float","1",null,false,`Умножает на силу отбрасывания пропов или сущностей`)
+CVarInfo("inertiascale","float","1",null,false,`Умножает на инерцию от ударов`)
+CVarInfo("attackunderwater","bool","0",null,false,`Можно махать оружием под водой?`)
+CVarInfo("entityprior","bool","1",null,false,`В приоритете будет удар по энтити?<br>Если 0 (Нет), то можно будет случайно задевать стены при ударах`)
+CVarInfo("damagescale","float","1",false,false,`Умножает урон на сущности и игроков`)
+CVarInfo("damagescale_player","float","1",false,false,`Умножает урон на игроков`)
+CVarInfo("damagescale_prop","float","1",false,false,`Умножает урон на пропы`)
+CVarInfo("damagescale_headshot","float","4",false,false,`Умножает урон когда ударяешь по голове`)
+CVarInfo("ragdollize","bool","1",null,false,`Рагдоллить игрока при мощных ударах? (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`)
+CVarInfo("ragdollize_needdamage","int","35",false,false,`Сколько нужно нанести урона игроку что-бы он рагдольнулся? (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`)
+CVarInfo("interimhittomain","bool","0",null,false,`Делает переходные лучи такими же как и наносящие урон`)
+CVarInfo("hitcenter","bool","0",null,false,`Делает ровно в центр один удар`)
+CVarInfo("showhits","bool","0",null,false,`Отображать попадания по сущностям и игрокам?`)
+CVarInfo("placedecals","bool","1",null,false,`Отображать декали после ударов?`)
+CVarInfo("viewpunch","bool","1",null,false,`Двигать камеру при взмахе оружием?`)
+CVarInfo("viewpunchscale","float","1",null,false,`Умножает движение камеры при взмахе оружием`)
+CVarInfo("camerashake","bool","1",null,false,`Тряски камеру при ударах?`)
+CVarInfo("camerashakescale","float","1",null,false,`Умножает силу тряски камеры при ударах`)
+CVarInfo("fovscale","float","1",null,false,`Умножает FOV оружия в руках`)
+CVarInfo("crosshair","bool","0",null,false,`Отображать прицел по середине экрана?`)
+CVarInfo("customfunctions","bool","1",null,false,`Включить кастомные скрипты оружий?`)
+CVarInfo("hitsquality","int","0",false,false,`Сколько добавить к качеству лучей оружия?<br>(Чем больше число тем больше лагает, но больше шанс попасть по тонкому объекту)`)
+CVarInfo("bobbingscale","float","1",null,false,`Умножает к силе боббингу (анимации при ходьбе) оружия`)
+CVarInfo("swayscale","float","1",null,false,`Умножает к силе качения при поворотах`)
+CVarInfo("idlescale","float","1",null,false,`Умножает а анимации простоя оружия`)
+CVarInfo("funny_burn","bool","0",null,false,`Поджигать объекты при ударах?`)
+CVarInfo("funny_shock","bool","0",null,false,`Бить током объекты при ударах?`)
+CVarInfo("randomnames","bool","0",null,true,`Рандомизировать имена оружий и скрыть иконки?`)
+CVarInfo("randomdecals","bool","0",null,false,`Рандомизировать декали?`)
+CVarInfo("debug_livetime","float","10",false,false,`Сколько секунд будут отображаться отладочные элементы?`)
+CVarInfo("debug_weapons","bool","0",null,true,`Загрузить отладочное оружие?`)
+CVarInfo("showhit","bool","0",null,false,`Отображать лучи при ударах?`)
+CVarInfo("showfailhit","bool","0",null,false,`Отображать лучи при не попаданиях?`)
+CVarInfo("showdamage","bool","0",null,false,`Отображать отладочные сообщения об уроне? (нужно включить developer 1)`)
+
+WWAddTitle("libs",null,"Функции библиотеки",{});
+function LibInfo(name,type,info,example){
+	var examples = ""
+	for(var i = 0; i < example.length; i++){
+		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
+		examples = examples + `<font>WMLib.`+e+`</font><br><br>`
+	}
+	WWAddPage("lib_"+name,(name.includes("()")?"libs":"libs_notfunc"),name,{"Page":(`<center><br><font style="font-size:2em;">WMLib.`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><br><hr><br><font>Пример</font></center><br><br>`+examples)});
+}
+LibInfo("CreateMod()",`function(string (айди модификации), table (информация модификации))`,`Эта функция создаёт новую модификацию в WMLib<br>Нужно вызвать эту функцию перед тем как создавать оружие`,[`CreateMod("new_mod",{Name = "New Mod", Author = "Syslik"})`])
+LibInfo("CreateMelee()",`function(SWEP, table (информация оружия), string (айди модификации)) return bool (возвращает false если ошибка)`,`Эта функция создаёт новое оружие в указанную вами модификацию<br>Эту функцию нужно вызывать в скрипте оружия (в папке weapons)<br>Название скрипта должно начинаться на "wm_", а если это отладочное оружие то на "wm_debug_"<br><br>Вызывается только в SWEP скриптах!`,[`CreateMelee(SWEP,{Name = "New Weapon"},"vanilla")`])
+LibInfo("ShockEntity()",`function(entity, float (сила удара током))`,`Эта функция бьёт током сущности, игроков, пропов<br>Эта функция урон не наносит<br>При сильных ударах рагдоллит (нужен мод <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2817879135">Ragmod</a>)`,[`ShockEntity(entity,10)`])
+"PlaceDecal()",{},LibInfo("PlaceDecal()",`function(string (material), entity (на которую поставить декаль), Vector (позиция), Vector (нормаль), Color (цвет декали), Vector (Размер декали))`,`Эта функция создаёт декаль`,[`PlaceDecal("decals/flesh/blood1",rayresult.Entity,rayresult.HitPos,rayresult.HitNormal,Color(255,255,255),Vector(math.random(120,80)/100,math.random(120,80)/100))`])
+"DeltaTime()",{},LibInfo("DeltaTime()",`function() return float`,`Эта функция возвращает DeltaTime (работает криво)<br>В среднем число равно 1, +- 0.3<br>Если функция вызвана не в интерфейсе, то она выдаст ошибку`,[`DeltaTime() --1.06`])
+"DrawSphere()",{},LibInfo("DrawSphere()",`function(Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип [default,headshot,block,ragdoll,entity,ragdollize,glass]))`,`Эта функция создаёт отладочную сферу (работает только если wm_showhit или wm_showfailhit включен)`,[`DrawSphere(ray.HitPos,2,5,Color(255,255,255))`])
+"ThatWMWeapon()",{},LibInfo("ThatWMWeapon()",`function(entity (цель, оружие)) return bool (это wm оружие?)`,`Эта функция проверяет, является ли энтити оружием из Woowz Melee`,[`ThatWMWeapon(Entity(1))`,`ThatWMWeapon(Entity(1):GetActiveWeapon())`])
+"GetInfo()",{},LibInfo("GetInfo()",`function(entity (цель, оружие)) return table (информация оружия)`,`Эта функция получает информацию о оружии`,[`GetInfo(Entity(1):GetActiveWeapon())`])
+"GetRandomWeapon()",{},LibInfo("GetRandomWeapon()",`function() return string`,`Эта функция возвращает класс любого оружия из Woowz Melee которое может быть загружено без админки<br>Если списка оружия нету, то выдаст nil`,[`GetRandomWeapon() --wm_mace`])
+"CreateDust()",{},LibInfo("CreateDust()",`function(Vector (позиция), Vector (Скорость), float (размер), float (время жизни), Color (цвет))`,`Эта функция создаёт эффект пыли`,[`CreateDust(ray.HitPos,ray.HitNormal)`])
+LibInfo("CreateDust()",`function(Vector (позиция), Vector (Скорость), float (размер), float (время жизни), Color (цвет))`,`Эта функция создаёт эффект пыли`,[`CreateDust(ray.HitPos,ray.HitNormal)`])
+WWAddTitle("libs_notfunc","libs","Переменные библиотеки",{});
+LibInfo("Version",`string`,`Возвращает версию WMLib`,[`Version`])
+LibInfo("Wiki",`string`,`Возвращает ссылку на эту википедию`,[`Wiki`])
+LibInfo("Mods",`table`,`Возвращает список Woowz Melee модификаций`,[`Mods`])
+LibInfo("Weapons",`table`,`Возвращает список Woowz Melee загруженых оружий`,[`Weapons`])
+LibInfo("SoundsSwing",`table {table {string (sound)}}`,`Возвращает список swing звуков<br>Есть 4 типа swing звуков, Light, LightSharp, Heavy, HeavySharp<br>Эти списки звуков можно заменить на кастомные звуки<br><br></center>WMLib.SoundsSwing = {
+	["Light"]      = {"wm/swing/light1.wav","wm/swing/light2.wav","wm/swing/light3.wav"},
+	["LightSharp"] = {"wm/swing/light1sharp.wav","wm/swing/light2sharp.wav","wm/swing/light3sharp.wav"},
+	["Heavy"]      = {"wm/swing/heavy1.wav","wm/swing/heavy2.wav","wm/swing/heavy3.wav"},
+	["HeavySharp"] = {"wm/swing/heavy1sharp.wav","wm/swing/heavy2sharp.wav","wm/swing/heavy3sharp.wav"},
+}<center>`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;"),[`SoundsSwing["Light"]`])
+
+WWAddTitle("hooks",null,"Хуки",{});
+function HookInfo(hook,type,info,def){
+	WWAddPage("hook_"+hook,"hooks","WM_"+hook,{"Page":(`<center><br><font style="font-size:2em;">WM_`+hook+`</font><br><br><font>`+type+`</font><br><br><hr><br>`+info+`<br><br><hr><br><font>hook.Add("WM_`+hook+`","wm_example",`+def+`)</font></center>`)});
+}
+HookInfo("Hit",`function(entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара)) return table {bool (производить удар?), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), bool (это не главный удар?), bool (есть энтити на траектории удара)}`,`Вызывается при ударе об твёрдую поверхность оружием Woowz Melee`,`function(ent,info,rayresult,angle,dont,entityonray) return {true,ent,info,rayresult,dont,entityonray} end`)
+HookInfo("HitWater",`function(float (сила всплеска), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара), string (партикл)) return table {float (сила всплеска), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), string (партикл)}`,`Вызывается при ударе об воду оружием Woowz Melee`,`function(watersize,ent,info,rayresult,angle,dont,entityonray) return {watersize,rayresult} end`)
+HookInfo("HitBlock",`function(entity (атакующий), table (информация оружия атакующего), entity (цель), table (информация оружия цели), bool (цель блокирует удары?), bool (атакованы ноги?)) return table {bool (блокировать удар?), table (информация оружия атакующего), table (информация оружия цели)}`,`Вызывается при при ударах энтити с оружием Woowz Melee в руках<br>Лучше всего использовать когда нужна логика блокировки урона`,`function(owner,info,target,target_weapon_info,target_block,hitlegs) return {nil,info,target_info} end`)
+HookInfo("DrawSphere",`function(Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип)) return table {bool (рендерить круг?), Vector (позиция), float (размер), float (время жизни), Color (цвет), string (тип)}`,`Вызывается при рендере отладочных кругов`,`function(pos,size,lifetime,color,typ) return {true,pos,size,lifetime,color,typ} end`)
+HookInfo("WeaponLoad",`function(SWEP, table (информация оружия), string (айди модификации), string (класс оружия), bool (это отладочное оружие?), bool (загружать оружие?)) return table {bool (загружать оружие?), table (информация оружия), string (айди модификации), bool (это отладочное оружие?)}`,`Вызывается при загрузки Woowz Melee оружия`,`function(swep,info,modid,class,thatdebug,loadswep) return {loadswep,info,modid,thatdebug} end`)
+HookInfo("HitInfoLoad",`function(table (таблица декалей), table (таблица звуков), table (таблица звуков при режущих ударах), table (таблица партиклов)) return table {table (таблица декалей), table (таблица звуков), table (таблица звуков при режущих ударах), table (таблица партиклов)}`,`Вызывается при загрузки таблицы декалей, звуков и т.д<br>Позволяет делать ретекстуры декалей и ресаунды<br>Пример: decals = {[MAT_DEFAULT] = {"decals/eye"}}`,`function(decals,sounds,sharp_sounds,particles) return {decals,sounds,sharp_sounds,particles} end`)
+
+WWCreateWiki();
 </script>

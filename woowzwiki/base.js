@@ -1,214 +1,202 @@
-/*
-Временная википедия для википедии вот так вот да!
+/*Версия Woowzwiki*/
+WWVersion = "0.0.0"
 
-Переменные для WWCreateWiki
+/*Глобальная информация о википедии*/
+WWGlobalInfo = {}
 
-Name = Название википедии
-Author = Автор википедии
-List = Список
-Pages = Страницы
-StartPage = Страница которая откроется первой
-
-Переменные для Style
-
-Background = цвет заднего фона
-Farground = цвет переднего фона
-
-Переменные для категории
-
-Open = Открывать список с самого начала?
-
-*/ 
-
-WWVersion = "0.0.1 Alpha" //Версия библиотеки на википедии
-WWAuthor = "Woowz11" //Создатель библиотеки на википедии
-WWLink = "https://woowz11.github.io/woowzsite/woowzwiki/base.js" //Ссылка на библиотеку на википедии
-WWLocalLink = "woowzwiki/base.js" //Локальная ссылка на библиотеку на википедии
-
-function WWGet(info, id, def) { //Получить элемент из таблицы или вернуть дефолт
-    if(info[id] !== undefined){
-        return info[id];
-    }
-    return def;
+/*Установка информации о википедии*/
+function WWSetInfo(info){
+	info["List"] = {};
+	WWGlobalInfo = info;
 }
 
-var WIKIDATA = {}
+/*Получает страницу*/
+function WWGetPage(id){
+	return GetFT(WWGlobalInfo["List"],id,null);
+}
 
-function WWOpenPage(id){ //Открывает определённую страницу по айди
-	var content = "("+id+") not found!"
-	var title = "?"
-	var pageinfo = null
-	var categoryinfo = null
-	
-	for (var categoryid in WIKIDATA) {
-		if (WIKIDATA[categoryid]["Pages"].hasOwnProperty(id)) {
-			categoryinfo = WIKIDATA[categoryid]
-			pageinfo = categoryinfo["Pages"][id];
-			break;
+/*Добавить страницу*/
+function WWAddPage(id,paren,name,page_info){
+	/* Информация страниц
+	CustomSortID - Кастомный айдишник при сортировке
+	*/
+	if(WWGetPage(id)==null){
+		paren = RemoveHTML(paren);
+		if(WWGetPage(paren)!=null || paren==null){
+			var page = {"Type":"Page","ID":RemoveHTML(id),"Parent":paren,"Name":RemoveHTML(name),"Info":page_info}
+			WWGlobalInfo["List"][id] = page;
+		}else{
+			error("Не найден родитель ["+paren+"] страницы ["+id+"]! По этому не возможно её добавить! WWE3")
 		}
-	}
-	
-	if (pageinfo != null){
-		content = pageinfo["Content"]
-		title = categoryinfo["Name"]+"\\"+pageinfo["Name"]+" ("+id+")"
-	}
-	
-	document.getElementById("text").innerHTML = content
-	document.getElementById("text-title").textContent = title
-}
-
-function WWOpenCategory(id){ //Открывает категорию или закрывает
-	var list = document.getElementById("list-"+id)
-	if(list.style.display == "none"){
-		list.style.display = "block"
 	}else{
-		list.style.display = "none"
+		error("Страница ["+id+"] уже существует! По этому не возможно её добавить! WWE1")
 	}
 }
 
-function WWCreateWiki(info){ //Создать википедию
-	var head = document.head || document.getElementsByTagName('head')[0];
-	
-	var Name = WWGet(info,"Name","Unnamed Wiki")
-	var Author = WWGet(info,"Author","Anonymous")
-	var Style = WWGet(info,"Style",{})
-	
-	document.title = "Loading..."
-	
-	document.addEventListener('DOMContentLoaded', function() {
-		document.title = Name
-		var body = document.body || document.getElementsByTagName('body')[0];
+/*Добавить текст*/
+function WWAddTitle(id,paren,name,title_info){
+	if(WWGetPage(id)==null){
+		if(WWGetPage(paren)!=null || paren==null){
+			var title = {"Type":"Title","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(name),"Info":title_info}
+			WWGlobalInfo["List"][id] = title;
+		}else{
+			error("Не найден родитель ["+paren+"] тайтла ["+id+"]! По этому не возможно его добавить! WWE4")
+		}
+	}else{
+		error("Тайтл ["+id+"] уже существует! По этому не возможно его добавить! WWE2")
+	}
+}
+
+/*Открыть страницу по айди*/
+function WWOpenPage(id){
+	var page = WWGetPage(id);
+	if(page!=null){
+		var info = page["Info"];
+		var page_html = GetFT(info,"Page","Пустая страница ['"+id+"']...");
 		
-		var S_Background = WWGet(Style,"Background",[230,230,230])
-		var S_Farground = WWGet(Style,"Farground",[128,128,128])
-		var style = `
-html{
-	background-color: rgb(`+S_Background[0]+`,`+S_Background[1]+`,`+S_Background[2]+`);
-	cursor: default;
-}
-
-::selection{
-	background-color: transparent;
-}
-
-.text-result::selection {
-    background-color: #3367D1;
-	color: white;
-}
-.text-result *::selection {
-    background-color: #3367D1;
-	color: white;
-}
-
-body {
-	margin: 0px;
-}
-
-ul {
-    list-style-type: none;
-	padding: 0;
-    margin: 0;
-}
-
-.category{
-	cursor: pointer;
-	color: rgb(70,70,70);
-}
-
-.category:hover{
-	color: red;
-}
-
-.category-text{
-	
-}
-		`
-		var styleElement = document.createElement('style');
-		styleElement.innerHTML = style;
-		document.head.appendChild(styleElement);
+		page_html = page_html.replace(/\n/g, '<br>');
 		
-		var bodyhtml = 
-`<!-- Generated wikipedia (`+Name+`) based on "Woowzwiki" -->
-<div style="position: absolute; width: 90vw; min-width: 1024px; max-width: 1700px; display:flex;">
-	<div style="width: 15vw; min-width:200px; height:100vh;"></div>
+		document.getElementById("PageID").innerHTML = "<font>"+page["Name"]+" <font style='font-size:13px;'>[ID=\""+page["ID"]+"\";INDEX=\""+page["Index"]+"\"]</font></font>"
+		document.getElementById("Page").innerHTML = page_html;
+	}
+}
+
+/*Открыть категорию*/
+function WWOpenCategory(id){
+	var category = document.getElementById(id+"___block");
+	var symb = "⏷"
+	if(category.style.display=="none"){
+		category.style.display="unset"
+		symb = "⏶";
+	}else{
+		category.style.display="none"
+	}
+	document.getElementById(id+"___symb").innerHTML = symb;
+}
+
+/*Компилировать википедию*/
+function WWCreateWiki(){
+	var WikiName = GetFT(WWGlobalInfo,"Name","Новая википедия");
 	
-	<div style="width: 400px; min-width:200px; height:100vh; display:flex; flex-direction: column; background-color:rgb(`+S_Farground[0]+`,`+S_Farground[1]+`,`+S_Farground[2]+`);">
-		<div style="height:90px; position: relative;"><font style="font-size: 2em; position: absolute; left:50%; top:50%; transform: translate(-50%, -50%); text-align: center;">`+Name+`</font></div>
-		<div style="height:100%; display: contents;">
-			<div id="list" style="overflow-y: auto; height:100%;">
-				
-			</div>
-		</div>
-		<div style="height:90px;"><p></p></div>
-	</div>
-	<div style="width: 100%; height:100vh; display:flex; flex-direction: column; background-color:rgb(`+S_Farground[0]+`,`+S_Farground[1]+`,`+S_Farground[2]+`);">
-		<div style="height:110px;"><p id="text-title">?</p></div>
-		<div style="height:100%; display: contents;">
-			<div style="overflow-y: auto; overflow-x: auto; white-space: nowrap; height:100%; width: 1215px; background-color:white;"><div class="text-result" id="text" style="margin-left:30px; margin-right:30px; margin-top:15px; margin-bottom:15px;"></div></div>
-		</div>
-		<div style="height:110px;">Создатель вики: `+Author+`<br>База: <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">Woowzwiki</a><br>Версия: `+WWVersion+`<br><font style="color:red;">!ALPHA VERSION!</font></div>
-	</div>
-</div>
+	WoowzsiteConstructionProject = {
+		"Name":"(Woowzwiki) "+WikiName,
+		"Version":GetFT(WWGlobalInfo,"Version",null),
+		"Author":GetFT(WWGlobalInfo,"Author",null),
+		"CustomVersion":"{VERSION} (WW:"+WWVersion+")"
+	}
+
+	var SiteInfo = {
+
+	"HeadInformation":{
+		"Title":WikiName,
+		"Icon":GetFT(WWGlobalInfo,"Icon","source/ww.ico")
+	},
+
+	"Style":`
+	html{
+		background-color:lightgray;
+	}
+	`,
+
+	"StartPage":
 `
+<block id="Title" style="height:100px; width:100vw; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);">
+`+WikiName+` by `+	WoowzsiteConstructionProject["Author"]+`<br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font>
+</block><br>
+<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:auto;overflow-x:hidden;">
+
+</block>
+<block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); background-color:transparent; overflow-y:auto;overflow-x:auto;">
+<block id="PageID" style="width:100%;background-color:rgba(255,255,255,0.25);">???</block><br>
+<block id="Page" style="width:100%;">
+На этой википедии нету ни одной страницы!<br>Если вы не знаете как их сделать,<br>прочтите это https://woowz11.github.io/woowzsite/woowzwiki_wiki.html
+</block>
+</block>
+<block style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:auto;overflow-x:hidden;">
+Скоро...
+</block>
+`
+
+	};
+
+	SiteInfo = CreateDocument(SiteInfo);
+
+	CompileSiteConstruction();
+	print("Начата сборка википедии...")
+	var compiletime = new Date();
+	
+	var List = GetFT(WWGlobalInfo,"List",{})
+	
+	var j = 0;
+	var List_ = [];
+	for(i in List){
+		var page = List[i];
+		var id = page["ID"];
+		var paren = page["Parent"];
+		var paren_idresult = "";
 		
-		body.innerHTML = bodyhtml
-		
-		function LoadData(){
-			function CreateCategory(id,data){
-				WIKIDATA[data[0]] = {Name: data[1], Pages: {}, Info: data[2]}
-			}
-			function CreatePage(id,data){
-				if(WIKIDATA[data[0]] == undefined){
-					data[0] = "unknown"
-					CreateCategory(-1,[data[0],"Unknown"])
-				}
-				WIKIDATA[data[0]]["Pages"][id] = {Name: data[1],Content: data[3]}
-			}
-			
-			var listdata = WWGet(info,"List",[["example_category","New Category",{}]])
-			for (var i = 0; i < listdata.length; i++){
-				var categoryinfo = listdata[i]
-				CreateCategory(i,categoryinfo)
-			}
-			var pagesdata = WWGet(info,"Pages",{"example_page":["example_category","New Page",{},`That example page!`]})
-			for (var pageid in pagesdata){
-				var pageinfo = pagesdata[pageid]
-				CreatePage(pageid,pageinfo)
-			}
+		var idresult = "("+j+")_"+id;
+		if(paren_idresult!=""){
+			idresult = paren_idresult+"_"+idresult
 		}
-		LoadData()
-		
-		function LoadList(){
-			var list = document.getElementById("list")
-			var result = ``
-			for (var categoryid in WIKIDATA){
-				var categoryinfo = WIKIDATA[categoryid]
-				var pages = categoryinfo["Pages"]
-				var pages_length = Object.keys(pages).length
-				var emptycategory = (pages_length==0)
-				result = result + `<center><b `+(emptycategory?`class="category-text"`:`class="category" onclick="WWOpenCategory('`+categoryid+`');"`)+`>`+categoryinfo["Name"]+(emptycategory?``:` (`+pages_length+`)`)+`</b></center><ul id="list-`+categoryid+`" style="display: none;">`
-				for (var pageid in pages){
-					var pageinfo = pages[pageid]
-					result = result + `<li><button style="width:100%;" onclick="WWOpenPage('`+pageid+`');">`+pageinfo["Name"]+"</button></li>"
-				}
-				result = result + `</ul>`
-			}
-			list.innerHTML = result
-			
-			for (var categoryid in WIKIDATA){
-				var categoryinfo = WIKIDATA[categoryid]
-				var category_info = categoryinfo["Info"]
-				var open = WWGet(category_info,"Open",false)
-				if (open){
-					WWOpenCategory(categoryid)
-				}
-			}
+
+		j++;
+		if(GetFT(page["Info"],"CustomSortID",null)!=null){
+			idresult = page["Info"]["CustomSortID"];
 		}
-		LoadList()
-		
-		var startpageid = WWGet(info,"StartPage","")
-		if (startpageid!=""){
-			WWOpenPage(startpageid)
-		}
+		page["Index"] = idresult;
+		List_.push(page);
+	}
+	
+	List_.sort((a,b)=>{
+		return a.Index.localeCompare(b.Index,"ru",{ignorePunctuation: true, numeric: true});
 	});
+	
+	var Deep = {};
+	
+	var ListResult = "";
+	var FirstPageID = null;
+	print("Добавление страниц...")
+	for(i in List_){
+		var page = List_[i]
+		if(FirstPageID==null){
+			FirstPageID=page["ID"];
+		}
+		var type = page["Type"];
+		var Result = "EMPTY";
+		var IfParen = `<block id="`+page["ID"]+`___list" style="display:none;"><button id="`+page["ID"]+`___symb" onclick="WWOpenCategory('`+page["ID"]+`');">⏷</button><block id="`+page["ID"]+`___block" style="display:none;"></block></block>`;
+		switch(type){
+			case "Page":
+				Result = `<button id="`+page["ID"]+`" style="min-width:50%;" onclick="WWOpenPage('`+page["ID"]+`');">` + page["Name"] + `</button>`
+				break;
+			case "Title":
+				Result = `<font id="`+page["ID"]+`">`+page["Name"] + `</font>`
+				break;
+			default:
+				Result = `<font id="`+page["ID"]+`" style="color:red;background-color:black;">Не найдено! ("`+type+`")</font>`
+		}
+		Result = Result + IfParen
+		if(page["Parent"]==null){
+			ListResult = ListResult+Result+"<br>";
+			document.getElementById("List").innerHTML = ListResult;
+		}else{
+			document.getElementById(page["Parent"]+"___list").style.display = "unset";
+			var parentparent = WWGetPage(page["Parent"])["Parent"]
+			if(parentparent==null){
+				Deep[page["Parent"]] = 1
+			}else{
+				Deep[page["Parent"]] = Deep[parentparent] + 1
+			}
+			
+			var deep = Deep[page["Parent"]]
+			document.getElementById(page["Parent"]+"___block").innerHTML = document.getElementById(page["Parent"]+"___block").innerHTML + "<br>" + "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(deep) + Result
+			ListResult = document.getElementById("List").innerHTML;
+		}
+		print("Добавлен "+type+" ["+page["ID"]+"] "+page["Name"])
+	}
+	
+	WWOpenPage(GetFT(WWGlobalInfo,"StartPage",FirstPageID));
+	var compiletimeEnd = new Date() - compiletime;
+	print("Википедия собрана! ✔️ "+compiletimeEnd+"ms")
+	println();
 }

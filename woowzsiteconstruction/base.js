@@ -9,11 +9,13 @@
 WoowzsiteConstructionVersion = "0.0.0";
 
 /*Информация о проекте*/
-WoowzsiteConstructionProject = {
+WoowzsiteConstructionProjectDefault = {/*[НЕ ИЗМЕНЯТЬ]*/
 	"Name":"Неизвестный проект",/*Название проекта*/
 	"Version":"?.?.?",/*Версия проекта*/
-	"Author":"Аноним"/*Автор проекта*/
+	"Author":"Аноним",/*Автор проекта*/
+	"CustomVersion":"{VERSION}"/*Дополнительная информация в строке с версией*/
 }
+WoowzsiteConstructionProject = {};
 
 /*Сайт собран?*/
 var SiteConstructed = false;/*[НЕ ИЗМЕНЯТЬ]*/
@@ -35,7 +37,7 @@ CurrentScene = {};
 
 /*Рисует линию в консоли*/
 function println(){
-	print("⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯",true)
+	print("⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯",true)
 }
 
 /*Получает информацию о сайте, и создаёт сайт по этой информации*/
@@ -43,6 +45,7 @@ function CompileSiteConstruction(){
 	if(SiteConstructed){error("Сайт уже собран! Его нельзя повторно собрать!","E1")}else{
 		if(!SiteError){
 			SiteConstructed = true;
+			AddTableToTable(WoowzsiteConstructionProjectDefault,WoowzsiteConstructionProject);
 print(`██╗    ██╗ ██████╗  ██████╗ ██╗    ██╗███████╗███████╗██╗████████╗███████╗
 ██║    ██║██╔═══██╗██╔═══██╗██║    ██║╚══███╔╝██╔════╝██║╚══██╔══╝██╔════╝
 ██║ █╗ ██║██║   ██║██║   ██║██║ █╗ ██║  ███╔╝ ███████╗██║   ██║   █████╗  
@@ -55,19 +58,18 @@ print(` ██████╗ ██████╗ ███╗   ██╗█�
 ██║     ██║   ██║██║╚██╗██║╚════██║   ██║   ██╔══██╗██║   ██║██║        ██║   ██║██║   ██║██║╚██╗██║
 ╚██████╗╚██████╔╝██║ ╚████║███████║   ██║   ██║  ██║╚██████╔╝╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║
  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝`)
-			print("Версия: "+WoowzsiteConstructionVersion)
+			print("Версия: "+WoowzsiteConstructionProject["CustomVersion"].replace(/{VERSION}/g,WoowzsiteConstructionVersion))
 			print("Проект: "+WoowzsiteConstructionProject["Name"]+(WoowzsiteConstructionProject["Version"]!="?.?.?"?" ("+WoowzsiteConstructionProject["Version"]+")":""))
 			print("Автор: "+WoowzsiteConstructionProject["Author"])
 			println();
 			
 			StartPrintMessage = "{HH}:{MI}:{SS}:{MS} | {MESSAGE}";
 			
-			print("Начата сборка сайта...")
+			print("Начата сборка базы сайта...")
+			var compiletime = new Date();
 			WSCCompileHeadInformation()
-			WSCCompileStyleElement(document.documentElement,GetFT(GlobalSiteInfo,"Style",{}))
-			WSCRenderScene();
-			print("Сайт собран! ✔️")
-			println();
+			var compiletimeEnd = new Date() - compiletime;
+			print("База сайта собрана! ✔️ "+compiletimeEnd+"ms")
 		}
 	}
 }
@@ -89,80 +91,49 @@ function WSCCompileHeadInformation(){
 	
 	/*Загрузка дефолтных стилей*/
 	let styleElement = document.createElement('style');
+	styleElement.id = "Style"
 	styleElement.innerHTML = `
 	html{
-		font-size:1.5em;
+		font-size:0;
 		cursor:default;
+		white-space: nowrap;
+	}
+	
+	font{
+		font-size:20px;
+	}
+	
+	button{
+		
 	}
 	
 	div{
 		display:inline-block;
+		unicode-bidi: isolate;
 		border-radius: 20px;
+		font-size:20px;
+	}
+	
+	block{
+		display:inline-block;
+		unicode-bidi: isolate;
+		font-size:20px;
 	}
 	`
 	document.head.appendChild(styleElement);
-}
-
-function WSCCompileStyleElement(el,style){
-	var result = "";
-	
-	/*Установить задний фон*/
-	var Background = GetFT(style,"Background","white");
-	result = result + "background-color: "+Background+";";
-	
-	el.style.cssText = result;
-}
-
-function WSCRenderScene(){
-	var scene = GlobalSiteInfo["Scene"];
-	var result = "";
-	
-	for(el_id in scene){
-		var el = scene[el_id]
-		var typ = el["Type"]
-		var r = "";
-		switch(typ){
-			case "panel":
-				r = `panel`
-				break;
-			case "text":
-				r = `text`
-				break;
-			default:
-				r = `<div style="background-color:black; border: 3px solid red; padding:10px;"><font style="color:red;">Unknown type [`+RemoveHTML(typ)+`]!</font></div>`
-		}
-		result = result + r;
+	var customStyle = GetFT(GlobalSiteInfo,"Style","");
+	if(customStyle!=""){
+		let styleElementCustom = document.createElement('style');
+		styleElementCustom.id = "CustomStyle"
+		styleElementCustom.innerHTML = GetFT(GlobalSiteInfo,"Style","")
+		document.head.appendChild(styleElementCustom);
 	}
-
-	if(CurrentScene!=scene){
-		CurrentScene = scene;
-		document.body.innerHTML = result;
-	}
-	requestAnimationFrame(WSCRenderScene);
+	
+	/* Установка начальной страницы */
+	document.body.innerHTML = GetFT(GlobalSiteInfo,"StartPage",`<font style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);">Это пустая страница сайта проекта [`+RemoveHTML(WoowzsiteConstructionProject["Name"])+`]!</font>`)
 }
-requestAnimationFrame(WSCRenderScene);
 
 /* _______________________________________________________________ */
-
-/*Проверить есть ли на сцене элемент*/
-function HasElement(id){
-	return GlobalSiteInfo["Scene"][id]!=null;
-}
-
-/*Создать элемент*/
-function Create(id,par,typ,info){
-	if(!HasElement(id)){
-		if(HasElement(par)||par==null){
-			typ=typ.toLowerCase();
-			var result = {"ID":id,"Parent":par,"Type":typ,"Info":info};
-			SetFT(GlobalSiteInfo["Scene"],id,result);
-		}else{
-			error("Элемент ["+id+","+par+","+typ+"] не может быть создан, потому-что не найден родитель!","E3");
-		}
-	}else{
-		error("Элемент ["+id+","+par+","+typ+"] уже существует на сцене!","E2")
-	}
-}
 
 /*Сгенерировать сцену, без неё не будет работать компиляция*/
 function CreateDocument(SiteInfo){
