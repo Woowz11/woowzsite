@@ -83,7 +83,7 @@ function WSCCompileHeadInformation(){
 	SetSiteTitle(GetFT(hdinf,"Title","WSC сайт!"))
 	
 	/*Установка стартовой иконки сайта*/
-	SetSiteIcon(GetFT(hdinf,"Icon","../source/wsc.ico"))
+	SetSiteIcon(GetFT(hdinf,"Icon","https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/wsc.ico"))
 	
 	/*Загрузка стилей к body*/
 	var body = document.body;

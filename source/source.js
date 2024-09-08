@@ -20,7 +20,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"locate","lupa","metal","microsoft_fly_simulator_epicepdiditonpps","newfolder","no-cat","nointernet","noway!!!","obsidian_bowl","open","openprojecttitle","options","p","paper","par","paste","pixel","plus",
 	"plushover","position_end","position_end1","p_back","quare","rename","search","selectall","selectdinverse","selectdone","sky","smolarrow_bottom","smolarrow_right","smol_galka","sup","systems","teh","test",
 	"title","title2","title3","title4","title_smol","vis","wcom","windowpluginfolders","windowpluginfolders_left","windowpluginfolders_right","woowz11","woowzengine","zakrep","transparent","transparent-dark",
-	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror"
+	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown"
 ],"source/",".png")
 
 WoowzsiteSourceImagesJPG = AddFullnessToTable([
@@ -62,14 +62,14 @@ WoowzsiteSourceWoowzengine = AddTableToTable(AddFullnessToTable([
 ])
 
 WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
-	".fom","aleks_cherri","apdown1533","arab2827","artyomrus","aspa102","bacteriahowler","baranki135","beryks","blue.fox.","cadaver9599","cool.so.sandwich","cyberpaul_red.","deerrus","dermuaress","dexony","dragolite_17",
+	"fom","aleks_cherri","apdown1533","arab2827","artyomrus","aspa102","bacteriahowler","baranki135","beryks","blue.fox.","cadaver9599","cool.so.sandwich","cyberpaul_red.","deerrus","dermuaress","dexony","dragolite_17",
 	"dragonlordxxx","drom6906","faserredeve","fawdot","fordongreeman048","gaips","gemingtv","gero1n41k","glados1358","goni0052","gyg9600","hachumakentosh","hiking702","iamscienceman","iwannasleepinyourbed","jacket48",
 	"justgamingyt5949","kasqw","kastikepussukka","kersher","kirk1448","klaverr","kotyara228","kseleron","lisstons","lomakinnn","mannytko","meeee66","metallcore999","monsterfish._","mor1oka","morphandriy","morzz1c",
 	"myleskingston","nekitplay155","neoprod","no","pacocareal","pavkalakar","pussyfapper","redsham","rodrigesgames","ruslanconnection","sadsalat","santinnel","shiir0k","styledun","sv1t.","taykeu","the0ceanman",
 	"thewindowskerpka","treepii24","troll_bebra","turbobtv","uzelezz","wantedrobot","wldoui","woowz11.","woowz11","xyzswagga","your_local_russian","youwillseelowskill","zebratv","zinderant","zooi","zvski",
-	"_brigadir_","_mrgun_","_primorskiy_","_ruddi","_sleepingman"
+	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman"
 ],"source/discordavatars/",".png"),AddFullnessToTable([
-	"nberbaaaaaaa","_brinq_","haveaniceday."
+	"nberbaaaaaaa","brinq_","haveaniceday."
 ],"source/discordavatars/",".gif"))
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
@@ -96,7 +96,8 @@ WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([
 ],"source/bloodeyesystems/",".png")
 
 WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
-	"ants","bath_oil_pearls","beer","bg","button","dice","husky","spider_crab","teeth","chess","poison","trash_can","nokia","error","dark","rainbow_tiles"
+	"ants","bath_oil_pearls","beer","bg","button","dice","husky","spider_crab","teeth","chess","poison","trash_can","nokia","error","dark","rainbow_tiles","color-tunel","web","melted-dvd","w","face","cheese_mouse","eye",
+	"ie","biohazard","emo_scene_rave_rainbow_smiley"
 ],"core-wiki/source/",".png"),AddTableToTable(AddFullnessToTable([
 	"200w","3demail21","acid","ametist","atom1","back","ball","basement","bg","bingus","bubbles","cat-gift","cat","cat_skateboard","cd-rom","centipede","centipede_face","chrome_mans","console","cyclon",
 	"dancing_cat","dark_eye","dark_eye_pyramid","dice_white","donut","dream","email6","emerald","envelope","equalizer","error","face","fish","flame","flowers","godzilla","going_to_hell","got_mail","grapher",
@@ -104,9 +105,14 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"police","pyramid","pyramids2","radar","rainbow_gold","red","red_tiles","robot","robot_music","roses","rotglobe","screw","scrollmail","sea","seastar","set_water","sickness","siren","smallerskull","smiling",
 	"smoking-skull","speker","spider-password","spiralition","spotting","star","stars","sword","target","teddy","teeth","teeth_sphere","teeth_sphere2","teeth_weel","text_scroll","trash","under_construction",
 	"updated","washing_maching","wave","windows_95_error","windows_cockroach","worm","yes","you_are_an_idiot","xp-cat","email_computers","ie","rainbow_gold2","exclamation","800x600","glitter","rainbow","kiss",
-	"ipod","fish_tv","globe","xp","folder","media-player","old_laptop","waveform","player_free","player","star_tiny","camera","feather","pink","earth","wireframe","illusion","windows_ripples"
+	"ipod","fish_tv","globe","xp","folder","media-player","old_laptop","waveform","player_free","player","star_tiny","camera","feather","pink","earth","wireframe","illusion","windows_ripples","orange-cat","dot-cat","two-cats",
+	"yellow-cat","bys","yhti-cat","cat-license","cat-3d","m","e","o","w","i-love-cats","cat-pixel","govno","eXPerience","mail-wrame","chine-internet-explorer","blue-death-screen","dolphin","swirl","mega_worm","dead_body",
+	"poison_3d","green_ipod","lucky","color","i-love-pc","spider","pinch","centipede_dance","fat-animal","emo-stars","melt","fat_star","hardcore_happinies","stars_on_black_background",
+	"rave","rave2","do-I-bug-you","rave_citty","ballon-face","football","feather2","robot-dog","mario_star","pills","instagram","cursor_heart","poolroom","download","cringe-folder","skeleton-war","skeleton","cybergoth",
+	"biohazard","herobrine-fan","flying-pig","matrix","real-spider","weed","skeleton_coffin","red-skull","tf-heart","rainbow-pixels","pills-3d","cool-kids-club","disturbing","refresh","heart","prikol","eyes_sphere",
+	"mouths_sphere","cylinder"
 ],"core-wiki/source/",".gif"),AddFullnessToTable([
-	"vaporwave","window"
+	"vaporwave","window","catbackground"
 ],"core-wiki/source/",".jpg")))
 
 /*__________________________________________________________________________________________________*/

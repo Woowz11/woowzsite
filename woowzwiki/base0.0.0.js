@@ -1,8 +1,5 @@
-/*Это архивная версия?*/
-var WWArchive = false
-
 /*Версия Woowzwiki*/
-WWVersion = "0.0.1"+(WWArchive?" ARCHIVE":"")
+WWVersion = "0.0.0 ARCHIVE"
 
 /*Глобальная информация о википедии*/
 WWGlobalInfo = {}
