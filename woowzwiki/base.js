@@ -2,7 +2,7 @@
 var WWArchive = false
 
 /*Версия Woowzwiki*/
-WWVersion = "0.0.1"+(WWArchive?" ARCHIVE":"")
+WWVersion = "0.0.1a"+(WWArchive?" ARCHIVE":"")
 
 /*Глобальная информация о википедии*/
 WWGlobalInfo = {}
@@ -47,6 +47,34 @@ function WWAddTitle(id,paren,name,title_info){
 		}
 	}else{
 		error("Тайтл ["+id+"] уже существует! По этому не возможно его добавить! WWE2")
+	}
+}
+
+/*Добавить линию (разделение)*/
+function WWAddLine(id,paren,line_info){
+	if(WWGetPage(id)==null){
+		if(WWGetPage(paren)!=null || paren==null){
+			var line = {"Type":"Line","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(id),"Info":line_info}
+			WWGlobalInfo["List"][id] = line;
+		}else{
+			error("Не найден родитель ["+paren+"] линии ["+id+"]! По этому не возможно её добавить! WWE6")
+		}
+	}else{
+		error("Линия ["+id+"] уже существует! По этому не возможно её добавить! WWE5")
+	}
+}
+
+/*Добавить кастомный элемент*/
+function WWAddCustom(id,paren,code,custom_info){
+	if(WWGetPage(id)==null){
+		if(WWGetPage(paren)!=null || paren==null){
+			var custom = {"Type":"Custom","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":code,"Info":custom_info}
+			WWGlobalInfo["List"][id] = custom;
+		}else{
+			error("Не найден родитель кастомного элемента ["+paren+"] ["+id+"]! По этому не возможно его добавить! WWE8")
+		}
+	}else{
+		error("Кастомный элемент ["+id+"] уже существует! По этому не возможно его добавить! WWE7")
 	}
 }
 
@@ -96,17 +124,31 @@ function WWCreateWiki(){
 	},
 
 	"Style":`
+	@font-face {
+		font-family: "comfortaa";
+		src: url("https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/Comfortaa.ttf") format('opentype');
+	}
+	
 	html{
 		background-color:lightgray;
+		font-family: comfortaa;
+		font-weight: bold;
+		font-stretch: condensed;
+	}
+	
+	button{
+		font-family: comfortaa;
+		font-weight: bold;
+		font-stretch: condensed;
 	}
 	`,
 
 	"StartPage":
 `
 <block id="Title" style="height:100px; width:100vw; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);">
-`+WikiName+` by `+	WoowzsiteConstructionProject["Author"]+`<br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font>
+<font style="font-size:1.5em;">`+WikiName+`</font><br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font>
 </block><br>
-<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:auto;overflow-x:hidden;">
+<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:scroll;overflow-x:hidden;">
 
 </block>
 <block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); background-color:transparent; overflow-y:auto;overflow-x:auto;">
@@ -170,17 +212,24 @@ function WWCreateWiki(){
 		var IfParen = `<block id="`+page["ID"]+`___list" style="display:none;"><button id="`+page["ID"]+`___symb" onclick="WWOpenCategory('`+page["ID"]+`');">⏷</button><block id="`+page["ID"]+`___block" style="display:none;"></block></block>`;
 		switch(type){
 			case "Page":
-				Result = `<button id="`+page["ID"]+`" style="min-width:50%;" onclick="WWOpenPage('`+page["ID"]+`');">` + page["Name"] + `</button>`
+				Result = `<button id="`+page["ID"]+`" style="width:55%;" onclick="WWOpenPage('`+page["ID"]+`');">` + page["Name"] + `</button>`
 				break;
 			case "Title":
 				Result = `<font id="`+page["ID"]+`">`+page["Name"] + `</font>`
+				break;
+			case "Line":
+				Result = `<hr id="`+page["ID"]+`" style="margin-left:{margin}px; margin-bottom:-15px;">`
+				break;
+			case "Custom":
+				Result = page["Name"]
 				break;
 			default:
 				Result = `<font id="`+page["ID"]+`" style="color:red;background-color:black;">Не найдено! ("`+type+`")</font>`
 		}
 		Result = Result + IfParen
+		Result = Result.replace(/{id}/g,page["ID"])
 		if(page["Parent"]==null){
-			ListResult = ListResult+Result+"<br>";
+			ListResult = ListResult+Result.replace(/{margin}/g,0)+"<br>";
 			document.getElementById("List").innerHTML = ListResult;
 		}else{
 			document.getElementById(page["Parent"]+"___list").style.display = "unset";
@@ -192,7 +241,7 @@ function WWCreateWiki(){
 			}
 			
 			var deep = Deep[page["Parent"]]
-			document.getElementById(page["Parent"]+"___block").innerHTML = document.getElementById(page["Parent"]+"___block").innerHTML + "<br>" + "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(deep) + Result
+			document.getElementById(page["Parent"]+"___block").innerHTML = document.getElementById(page["Parent"]+"___block").innerHTML + "<br>" + (page["Type"]=="Line"||page["Type"]=="Custom"?"":"&nbsp;&nbsp;&nbsp;&nbsp;".repeat(deep)) + Result.replace(/{margin}/g,deep*24)
 			ListResult = document.getElementById("List").innerHTML;
 		}
 		print("Добавлен "+type+" ["+page["ID"]+"] "+page["Name"])

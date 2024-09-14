@@ -1,0 +1,84 @@
+<!-- Сайт следует лицензии WoowzsiteConstruction & Woowzwiki -->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Шаблонная часть для WoowzsiteConstruction & Woowzwiki -->
+		<meta charset="utf-8">
+		<script src='../lib/lib.js'></script>
+		<script src='../woowzsiteconstruction/base.js'></script>
+		<script src='../woowzwiki/base.js'></script>
+		<!-- ----------------------------------------- -->
+	</head>
+</html>
+
+<script>
+
+var info = {
+	Name: "Пример (категория)",
+	Version: null,
+	Author: null,
+	Icon: null,
+}
+
+WWSetInfo(info);
+
+WWAddPage("a1",null,"Обычная страница",{});
+
+WWAddPage("a2",null,"Страница со страницой",{});
+WWAddPage("a3","a2","Страница в странице",{});
+
+WWAddPage("a4",null,"Первая страница",{"CustomSortID":"!"});
+
+WWAddPage("a5",null,"Последняя страница",{"CustomSortID":"𐁝"});
+
+WWAddTitle("a6",null,"Тайтл",{});
+
+WWAddTitle("a9",null,"Тайтл с тайтлом",{});
+WWAddTitle("a10","a9","Тайтл в тайтле",{});
+
+WWAddLine("a_line",null,{})
+
+WWAddTitle("a7",null,"Тайтл с страницой",{});
+WWAddPage("a8","a7","Страница в тайтле",{});
+
+WWAddPage("a11",null,"Страница с тайтлом",{});
+WWAddTitle("a12","a11","Тайтл в странице",{});
+
+WWAddPage("a13",null,"Страница с страницами",{});
+WWAddPage("a14","a13","Страница 1",{});
+WWAddPage("a15","a13","Страница 2",{});
+WWAddPage("a16","a13","Страница 3",{});
+WWAddPage("a17","a13","Страница 4",{});
+WWAddPage("a18","a13","Страница 5",{});
+
+WWAddPage("a19",null,"Страница с разным",{});
+WWAddPage("a20","a19","Страница",{});
+WWAddPage("a21","a19","Страница",{});
+WWAddLine("a22","a19",{});
+WWAddPage("a23","a19","Страница",{});
+WWAddPage("a24","a19","Страница",{});
+WWAddTitle("a25","a19","Тайтл",{});
+WWAddPage("a26","a19","Страница",{});
+
+WWAddPage("a27",null,"Страница с под элементами",{});
+function AddPagesToA27(j){
+	var paren = "a27"+(j==0?"":"_"+(j-1))
+	WWAddPage("a27_"+j+"_page",paren,"Страница",{})
+	WWAddTitle("a27_"+j+"_title",paren,"Тайтл",{})
+	WWAddLine("a27_"+j+"_line",paren,{})
+	var colors = ["red","blue","green","yellow","orange","purple","lime","aqua"]
+	WWAddCustom("a27_"+j+"_custom",paren,`<font id="{id}" style="margin-left:{margin}px; color:`+colors[Math.floor(Math.random()*colors.length)]+`;">Кастомный элемент</font>`,{});
+	WWAddPage("a27_"+j,paren,"Далее... ("+(j+1)+")",{})
+}
+for (let i = 0; i <= 10; i++) {
+    AddPagesToA27(i);
+}
+
+WWAddCustom("a28",null,`<font id="{id}" style="margin-left:{margin}px; color:red;">Это кастомный элемент</font>`,{});
+
+WWAddCustom("a29",null,`<font id="{id}" style="margin-left:{margin}px; color:red;">Кастомный элемент с страницой</font>`,{});
+WWAddPage("a30","a29","Страница в кастомном элементе",{})
+
+WWCreateWiki();
+
+</script>

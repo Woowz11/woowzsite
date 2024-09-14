@@ -4,8 +4,20 @@
 <link rel="icon" type="image/x-icon" href="source/folder.ico">
 
 <style>
+@font-face {
+	font-family: "comfortaa";
+	src: url("source/Comfortaa.ttf") format('opentype');
+}
+	
 html{
 	background-color:rgb(50,50,50);
+	cursor:default;
+	font-family: comfortaa;
+}
+
+.white-font{
+	color:white;
+	text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.5);
 	cursor:default;
 }
 
@@ -34,18 +46,20 @@ html{
 
 button{
 	cursor:pointer;
+	font-family: comfortaa;
 }
 
 select{
 	cursor:pointer;
+	font-family: comfortaa;
 }
 </style>
 
 <body>
 	<div class="background-image-div custom-cursor" style="margin:0px;">
 		<div style="background-color:rgba(0,0,0,0.2);">
-			<font style="font-size:5em; color:white; padding-left:10px;"><img style="image-rendering: pixelated; height:0.65em;" src="source/newfolder.png"> Woowzsites Files</font><br>
-			<font style="color:white;">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
+			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files</font><br>
+			<font class="white-font">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
 				<option value="source/transparent.png">Светлый</option>
 				<option value="source/transparent-dark.png">Тёмный</option>
 				<option value="source/transparent-red.png">Красный</option>
@@ -58,15 +72,17 @@ select{
 			</select> 
 			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button> 
 			<button onclick="ChangeStyle('custom-cursor',`cursor:auto;`)">Сбросить курсор</button>
-			<input type="checkbox" id="checkbox" name="checkbox" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"><label for="checkbox" style="color:white;">Сделать изображения размытыми</label>
+			<input type="checkbox" id="checkbox" name="checkbox" style="Transform: scale(1.6) translateY(1px);" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"> <font class="white-font">Сделать изображения размытыми</font>
 			<hr></div>
-		<font style="font-size:5em; color:white;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>%</font>
+		<font class="white-font" style="font-size:5em;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>% <font id="finish-ms" style="font-size: 0.75em;"></font></font>
 		<div id="explorer"></div>
 	</div>
 </body>
 
 <script src="source/source.js"></script>
 <script>
+	var disable = false;
+
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
 	var types = {
@@ -110,12 +126,19 @@ select{
 	var counts = {}
 	var fullcounts = [0,0]
 	function GenerateTable(text,tabl){
+		if(disable){return;}
+		
 		counts[text] = [tabl.length,0];
 		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
 		document.getElementById("total-all").innerHTML = fullcounts[0];
-		var result = `<font style="font-size:5em; color:white;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
+		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
 		
 		function LoadSource(that,src,text,type){
+			console.log(fullcounts[0],fullcounts[1])
+			if(fullcounts[0]==fullcounts[1]+1){
+				document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
+			}
+		
 			var type = "idk"
 			if(src.includes(".png")){type="png"}
 			if(src.includes(".jpg")){type="jpg"}
@@ -143,11 +166,10 @@ select{
 			`<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
 			)+`
 			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>
-			`+(type=="mp4"?"":`${x}x${y}`+(x==y?" ⬜":"")+`<br>`)+`
 			<font style="color:${time_col};">${time}</font>ms<br>`+
-			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">SetBG</button><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">SetBG2</button>`:``)+
-			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">SetICO</button>`:``)+
-			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">SetCUR</button>`:``)
+			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
+			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
+			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">Установить курсор</button>`:``)
 			+`</div></div></div>`)
 			var c = counts[text][1]+1;
 			counts[text] = [counts[text][0],c]
@@ -205,7 +227,7 @@ select{
 	}
 	function GenerateTableCustom(text,tabl,codefirst,code,codelast){
 		tabl.sort();
-		var result = `<font style="font-size:5em; color:white;">${text}</font><br>`+codefirst
+		var result = `<font class="white-font" style="font-size:5em;">${text}</font><br>`+codefirst
 		for(var src of tabl){
 			result = result + code.replace(/{s}/g, src.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 		}
@@ -213,6 +235,7 @@ select{
 		explorer.innerHTML = explorer.innerHTML + result
 	}
 	
+	var compiletimestart = new Date();
 	GenerateTable("source/*.png",WoowzsiteSourceImagesPNG);
 	GenerateTable("source/*.jpg",WoowzsiteSourceImagesJPG);
 	GenerateTable("source/*.gif",WoowzsiteSourceImagesGIF);

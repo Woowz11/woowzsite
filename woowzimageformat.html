@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Woowz Image Format</title>
+<link rel="icon" type="image/x-icon" href="source\ops.ico">
+
+<style>
+input[type="file"] {
+    color: transparent;
+}
+
+img{
+	image-rendering: pixelated;
+}
+</style>
+
+<body>
+	говно параша забудьте<br>
+	<font style="font-size:2em;">Конвертировать онлайн PNG в WIF</font><br><br>
+	<input type="checkbox" onchange="ChangeConvertType();" id="ThatWIFFile" name="ThatWIFFile"><label id="label" for="ThatWIFFile">PNG -> WIF</label><br>
+	<font>Загрузить изображение (<font id="that">PNG</font>) для конвертации в (<font id="tothat">WIF</font>)</font><br><br>
+	<input type="file" name="fileUpload" onchange="InputFile();" id="input" accept=".png"><br>
+	<font>Файл: <font id="file">empty</font></font><br><br>
+	<img style="min-height:256px; max-height:256px;" id="img" src="source/empty.png"><br><br>
+	<button id="convert" style="display:none;" onclick="Convert();">Конвертировать</button><br><br>
+	
+	<canvas id="canvas" style="display: none;"></canvas>
+</body>
+
+<script>
+var ConvertWIFtoPNG = false;
+function ChangeConvertType(){
+	ConvertWIFtoPNG = !ConvertWIFtoPNG;
+	var input = document.getElementById("input")
+	if(ConvertWIFtoPNG){
+		document.getElementById("that").innerHTML = "WIF"
+		document.getElementById("tothat").innerHTML = "PNG"
+		document.getElementById("label").innerHTML = "WIF -> PNG"
+		input.accept = ".wif"
+	}else{
+		document.getElementById("that").innerHTML = "PNG"
+		document.getElementById("tothat").innerHTML = "WIF"
+		document.getElementById("label").innerHTML = "PNG -> WIF"
+		input.accept = ".png"
+	}
+	document.value = null
+	document.getElementById("file").innerHTML = "empty"
+	document.getElementById("img").src = "source/empty.png"
+	document.getElementById("convert").style.display = "none"
+}
+
+function InputFile(){
+	var input = document.getElementById("input")
+	document.getElementById("file").innerHTML = input.value
+	const file = input.files[0]
+	const reader = new FileReader()
+	
+	reader.onload = function(e){
+		document.getElementById("img").src = e.target.result
+		document.getElementById("convert").style.display = "unset"
+	}
+	reader.readAsDataURL(file)
+}
+
+function Convert(){
+	const input = document.getElementById('input');
+	const canvas = document.getElementById('canvas');
+	const ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	const file = input.files[0];
+
+	if(ConvertWIFtoPNG){
+		
+	}else{
+		const reader = new FileReader();
+	
+		reader.onload = function(e) {
+			const img = new Image();
+			img.onload = function() {
+				canvas.width = img.width;
+				canvas.height = img.height;
+				ctx.drawImage(img, 0, 0);
+
+				const imageData = ctx.getImageData(0, 0, img.width, img.height);
+				const data = imageData.data;
+
+				const colors = [];
+				for (let i = 0; i < data.length; i += 4) {
+					colors.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
+				}
+
+				console.log("PNG->WIF");
+				var result_wif = "‰WIF";
+				
+				result_wif += img.width
+				
+				result_wif += " "
+				
+				var image_src = ""
+				
+				var prev_hex = ""
+				var symb_count = 1
+				
+				var numbers = {"0":true,"1":true,"2":true,"3":true,"4":true,"5":true,"6":true,"7":true,"8":true,"9":true}
+				
+				for (let i = 0; i < colors.length; i++) {
+					var color = colors[i]
+					var combinedNum = ((color[0] << 24) | (color[1] << 16)) + ((color[2] << 8) | color[3]);
+					var symb = String.fromCharCode((combinedNum >> 16) & 0xFFFF, combinedNum & 0xFFFF);
+					image_src += symb
+
+					/*let combinedNumBack = (symb.charCodeAt(0) << 16) + symb.charCodeAt(1);
+					console.log(combinedNumBack);
+					let num4Extracted = combinedNumBack & 0xFF;
+					let num3Extracted = (combinedNumBack >> 8) & 0xFF;
+					let num2Extracted = (combinedNumBack >> 16) & 0xFF;
+					let num1Extracted = (combinedNumBack >> 24) & 0xFF;
+					console.log(num1Extracted, num2Extracted, num3Extracted, num4Extracted);*/
+				}
+				
+				let compressedStr = "";
+				let count = 1;
+				let lastsymb = ""
+				
+				for (let i = 0; i < image_src.length; i+=2) {
+					var symb = image_src[i]+image_src[i+1]
+					if(lastsymb==symb){
+						count++
+					}else{
+						compressedStr+=(count>1?count:"")+symb
+						count=1
+						lastsymb=symb
+					}
+				}
+				
+				result_wif += compressedStr
+				
+				console.log(result_wif)
+				
+				const element = document.createElement('a');
+				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result_wif));
+				element.setAttribute('download', "result.wif");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				element.click();
+				document.body.removeChild(element);
+			};
+
+			img.src = e.target.result;
+		};
+
+		reader.readAsDataURL(file);
+	}
+}
+</script>

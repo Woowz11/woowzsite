@@ -14,44 +14,15 @@
 <script>
 
 var info = {
-	Name: "Example",
-	Version: "1.2.3",
-	Author: "Noob",
-	Icon: "source/woowz11.ico",
-	StartPage: "test3"
+	Name: "Примеры Woowzwiki",
+	Version: null,
+	Author: null,
+	Icon: null,
+	StartPage: "examples"
 }
 
 WWSetInfo(info);
-WWAddPage("test1",null,"Самый последний",{"CustomSortID":"ZZZZZZZZZZZZZZ","Page":"Я последний((("});
-WWAddPage("test2",null,"print hi",{"Page":"hi"});
-WWAddPage("test3",null,"Стартовая страница тип",{"Page":"тип StartPage"});
-WWAddTitle("title1",null,"Тайтел тип",{})
-WWAddPage("test4","title1","Внутри категории",{});
-WWAddPage("test5",null,"Кнопка-тайтел",{});
-WWAddPage("test6","test5","Внутри кнопки",{});
-WWAddTitle("title3",null,"Тайтел с тайтел",{});
-WWAddTitle("title4","title3","Тайтел",{});
-WWAddPage("test7",null,"Кнопка с кнопками",{});
-WWAddPage("test8","test7","Кнопка 1",{});
-WWAddPage("test9","test8","Кнопка 2",{});
-WWAddTitle("title2",null,"Тайтел №2",{})
-WWAddPage("test10","test9","Кнопка 3",{});
-WWAddPage("test11","test10","Кнопка 4",{});
-WWAddPage("test12","test11","Кнопка 5",{});
-WWAddPage("test13","test12","Кнопка 6",{});
-WWAddTitle("title6","test12","омг",{})
-WWAddPage("omg_button","title6","омг",{"Page":"omg"});
-WWAddTitle("title5",null,"<button>test</button>",{})
-WWAddPage("test14",null,"<button>test</button>",{});
-WWAddPage("test15",null,"💀",{"Page":"<center><font style='font-size:600px;'>💀</font></center>"});
-WWAddPage(" ",null,"Айди пробел",{});
-WWAddPage("",null,"Айди пустота",{});
-WWAddPage("русский",null,"Айди кириллица",{});
-WWAddPage("test19",null,"Много текста",{"Page":("Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! Привет!!! <br>".repeat(2048))});
-WWAddPage("test20",null,"Переход на другую страницу",{"Page":`<button onclick="WWOpenPage('test15');">рискни, кликни</button>`});
-WWAddPage("test21",null,"Тест 21",{});
-WWAddPage("test22",null,"Тест 22",{});
-WWAddPage("test23",null,"Самый первый",{"CustomSortID":"!!!!!!!!!!!!!","Page":"ЙЯ ЙЯ! Я ПЕРВЫЙ"});
+WWAddPage("examples",null,"Примеры",{"Page":"хех"});
 WWCreateWiki();
 
 </script>
