@@ -21,9 +21,60 @@ var info = {
 	StartPage: "startpage"
 }
 
+var Pages = {
+	startpage:
+`Добро пожаловать на википедию по конструктору википедий Woowzwiki!
+
+Как создать свою википедию?
+link
+
+Примеры википедий
+link
+
+Информация о конструкторе
+link
+`,
+
+	info:
+`Информация о проекте Woowzwiki
+
+Автор: <a href="https://github.com/Woowz11">Woowz11</a>
+Версия проекта: `+WWVersion+`
+Версия википедии: `+info["Version"]+`
+
+Работает на базе <a>WoowzsiteConstruction</a>
+Использует библиотеку <a>Woowzsite Lib</a>
+
+Дата создания проекта: (Старая версия:?) (Новая версия: ?)
+`
+}
+
 WWSetInfo(info);
 
-WWAddPage("startpage",null,"Добро пожаловать!",{Page:`цыц`});
+WWAddTitle("title_main",null,"Основная информация",{Open:true})
+WWAddPage("startpage","title_main","Добро пожаловать!",{Page:Pages["startpage"]})
+WWAddPage("info","title_main","Информация",{Page:Pages["info"]})
+
+WWAddLine("line",null,{})
+
+WWAddTitle("title_create",null,"Создание",{Open:true})
+WWAddPage("createownwiki","title_create","Создать свою википедию",{})
+WWAddPage("createownwiki_page","title_create","Создать свою страницу на вики",{})
+WWAddPage("examples","title_create","Примеры википедий",{})
+
+WWAddTitle("title_params",null,"Параметры",{})
+WWAddTitle("title_params_wiki","title_params","Вики",{})
+WWAddTitle("title_params_page","title_params","Страницы",{})
+WWAddPage("params_page_Page","title_params_page","Page",{})
+WWAddPage("params_page_CustomSortID","title_params_page","CustomSortID",{})
+WWAddPage("params_page_Margin","title_params_page","Margin",{})
+
+WWAddTitle("title_params_categories","title_params","Категории",{})
+WWAddPage("params_page_Open","title_params_categories","Open",{})
+
+WWAddTitle("title_params_elements","title_params","Элементы",{})
+
+WWAddTitle("title_funcs",null,"Функции",{})
 
 WWCreateWiki();
 

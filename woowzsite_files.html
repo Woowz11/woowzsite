@@ -83,6 +83,9 @@ select{
 <script>
 	var disable = false;
 
+	var mem_prikol_one_category = false;
+	var mem_prikol_screamer = true;
+
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
 	var types = {
@@ -93,6 +96,7 @@ select{
 		"ico": "ICON",
 		"cur": "CURSOR",
 		"mp4": "VIDEO",
+		"mp3": "AUDIO",
 	}
 	
 	async function CopyToClipboard(text) {
@@ -134,7 +138,6 @@ select{
 		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
 		
 		function LoadSource(that,src,text,type){
-			console.log(fullcounts[0],fullcounts[1])
 			if(fullcounts[0]==fullcounts[1]+1){
 				document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
 			}
@@ -146,6 +149,7 @@ select{
 			if(src.includes(".ico")){type="ico"}
 			if(src.includes(".cur")){type="cur"}
 			if(src.includes(".mp4")){type="mp4"}
+			if(src.includes(".mp3")){type="mp3"}
 		
 			var x = that.width;
 			var y = that.height;
@@ -159,17 +163,21 @@ select{
 			if(time>50000){time_col="yellow; background-color:black";}
 			if(time>100000){time_col="orange; background-color:black";}
 			if(time>200000){time_col="red; background-color:black";}
-			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" `+(type!="mp4"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` min-height:300px; height:350px; `+(type!="mp4"?"padding: 10px;":"background-image:url('source/black.png');")+` display:flex; justify-content: center; align-items: center;">
+			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type=="mp3"?"height:50px":"height:350px")+`; `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
-			`<video style="width:100%; height:100%; object-fit: fill;" controls><source src="${src}#t=0.1" type="video/mp4"></video>`
+			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` controls><source src="${src}#t=0.1" type="video/mp4"></video>`
 			:
-			`<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
+				(type=="mp3")?
+				`<audio style="width:100%; height: 100%;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}" type="audio/mpeg"></audio>`
+				:
+				`<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
 			)+`
 			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>
 			<font style="color:${time_col};">${time}</font>ms<br>`+
 			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
 			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
-			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">Установить курсор</button>`:``)
+			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">Установить курсор</button>`:``)+
+			((type=="mp3")?`<button onclick="window.open('${src}', '_blank');">Открыть в новой вкладке</button>`:``)
 			+`</div></div></div>`)
 			var c = counts[text][1]+1;
 			counts[text] = [counts[text][0],c]
@@ -208,12 +216,13 @@ select{
 			if(src.includes(".ico")){type="ico"}
 			if(src.includes(".cur")){type="cur"}
 			if(src.includes(".mp4")){type="mp4"}
+			if(src.includes(".mp3")){type="mp3"}
 
-			if(type=="mp4"){
-				var video = document.createElement('video');
-				video.onloadedmetadata = function() { LoadSource(video,src,text); };
-				video.onerror = function() { OnError(src,text); };
-				video.src = src;
+			if(type=="mp4"||type=="mp3"){
+				var media = document.createElement(type=="mp4"?'video':'audio');
+				media.onloadedmetadata = function() { LoadSource(media,src,text); };
+				media.onerror = function() { OnError(src,text); };
+				media.src = src;
 			}else{
 				var img = new Image();
 				img.onload = function(){ LoadSource(img,src,text); }
@@ -227,7 +236,7 @@ select{
 	}
 	function GenerateTableCustom(text,tabl,codefirst,code,codelast){
 		tabl.sort();
-		var result = `<font class="white-font" style="font-size:5em;">${text}</font><br>`+codefirst
+		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(`+tabl.length+`)</font></font><br>`+codefirst
 		for(var src of tabl){
 			result = result + code.replace(/{s}/g, src.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 		}
@@ -236,20 +245,43 @@ select{
 	}
 	
 	var compiletimestart = new Date();
-	GenerateTable("source/*.png",WoowzsiteSourceImagesPNG);
-	GenerateTable("source/*.jpg",WoowzsiteSourceImagesJPG);
-	GenerateTable("source/*.gif",WoowzsiteSourceImagesGIF);
-	GenerateTable("source/*.ico",WoowzsiteSourceIcons);
-	GenerateTable("source/*.cur",WoowzsiteSourceCursors);
-	GenerateTable("source/specialforrandomsite/*",WoowzsiteSourceRandomSite);
-	GenerateTable("core-wiki/source/*",WoowzsiteSourceCore);
-	GenerateTable("source/woowzbackrooms/*",WoowzsiteSourceBackrooms);
-	GenerateTable("source/woowzengine/*",WoowzsiteSourceWoowzengine);
-	GenerateTable("source/discordavatars/*",WoowzsiteSourceDiscordAvatars);
-	GenerateTable("source/cats/*.png",WoowzsiteSourceCats);
-	GenerateTable("source/bloodeyesystems/*.png",WoowzsiteSourceBloodeyeSystems);
-	GenerateTable("source/wldbackroomsgame/*.png",WoowzsiteSourceWldouiBackrooms);
-	GenerateTable("source/bloodraw/*",WoowzsiteSourceBloodraw);
-	GenerateTable("source/*.mp4",WoowzsiteSourceVideos);
+	
+	var categoryes = {
+		"source/*.png"                 :WoowzsiteSourceImagesPNG,
+		"source/*.jpg"                 :WoowzsiteSourceImagesJPG,
+		"source/*.gif"                 :WoowzsiteSourceImagesGIF,
+		"source/*.ico"                 :WoowzsiteSourceIcons,
+		"source/*.cur"                 :WoowzsiteSourceCursors,
+		"source/specialforrandomsite/*":WoowzsiteSourceRandomSite,
+		"core-wiki/source/*"           :WoowzsiteSourceCore,
+		"source/woowzbackrooms/*"      :WoowzsiteSourceBackrooms,
+		"source/woowzengine/*"         :WoowzsiteSourceWoowzengine,
+		"source/discordavatars/*"      :WoowzsiteSourceDiscordAvatars,
+		"source/cats/*.png"            :WoowzsiteSourceCats,
+		"source/bloodeyesystems/*.png" :WoowzsiteSourceBloodeyeSystems,
+		"source/wldbackroomsgame/*.png":WoowzsiteSourceWldouiBackrooms,
+		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
+		"source/*.mp4"                 :WoowzsiteSourceVideos,
+		"source/*.mp3"                 :WoowzsiteSourceAudios,
+	};
+	
+	if(mem_prikol_one_category){
+		var result = [];
+		for (var key in categoryes) {
+			if (categoryes.hasOwnProperty(key)) {
+				var value = categoryes[key];
+				result = AddTableToTable(result,value);
+			}
+		}
+		categoryes = {"*":result};
+	}
+	
+	for (var key in categoryes) {
+		if (categoryes.hasOwnProperty(key)) {
+			var value = categoryes[key];
+			GenerateTable(key,value);
+		}
+	}
+	
 	GenerateTableCustom("Слова",WoowzsiteWords,`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);
 </script>

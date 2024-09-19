@@ -1,0 +1,85 @@
+<!-- Сайт следует лицензии WoowzsiteConstruction & Woowzwiki -->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Шаблонная часть для WoowzsiteConstruction & Woowzwiki -->
+		<meta charset="utf-8">
+		<script src='../lib/lib.js'></script>
+		<script src='../woowzsiteconstruction/base.js'></script>
+		<script src='../woowzwiki/base.js'></script>
+		<!-- ----------------------------------------- -->
+	</head>
+</html>
+
+<script>
+
+var info = {
+	Name: "Пример (страницы)",
+	Version: null,
+	Author: null,
+	Icon: null
+}
+
+WWSetInfo(info);
+WWAddPage("empty",null,"Пустая страница",{});
+WWAddPage("default",null,"Страница",{Page:"Hello world!"});
+WWAddPage("padding",null,"Страница Padding",{Page:"Страница с Padding равным 50",Padding:50});
+WWAddPage("long",null,"Длинная страница",{Page:"Длинная страница!\n".repeat(1000)});
+WWAddPage("fat",null,"Широкая страница",{Page:"Широкая страница! ".repeat(100)});
+WWAddPage("fat+long",null,"Широкая и длинная страница",{Page:("Широкая и длинная страница! ".repeat(10)+"\n").repeat(100)});
+WWAddPage("elements",null,"Разные элементы",{Page:
+`Обычная строка
+<font>FONT строка</font>
+💀
+<a href="#">Ссылка</a>
+<button>Кнопка</button>
+<input type="checkbox" name="checbox"><label for="checkbox">Чекбокс</label>
+<input type="radio" name="radio" id="radio1"><label for="radio1">Радио 1</label>
+<input type="radio" name="radio" id="radio2"><label for="radio2">Радио 2</label>
+<input type="radio" name="radio" id="radio3"><label for="radio3">Радио 3</label>
+<input type="range" name="range" min="0" max="100" value="50" step="1"><label for="range">Ползунок</label>
+<input type="range" name="range" min="0" max="10" value="5" step="1"><label for="range">Ползунок (жёсткий)</label>
+<input type="text" name="text"><label for="text">Ввод текста</label>
+<textarea id="textarea" name="textarea" rows="4" cols="50"></textarea><label for="textarea">Ввод текста (поддержка нескольких линий)</label>
+<input type="email" name="email"><label for="email">Ввод почты</label>
+<input type="password" name="password"><label for="password">Ввод пароля</label>
+<input type="tel" name="tel"><label for="tel">Ввод телефона</label>
+<input type="url" name="url"><label for="url">Ввод ссылки</label>
+<input type="search" name="search"><label for="search">Поиск</label>
+<input type="color" name="color"><label for="color">Выбор цвета</label>
+<input type="time" name="time"><label for="time">Выбор времени</label>
+<input type="date" name="date"><label for="date">Выбор даты</label>
+<input type="datetime-local" name="datetime-local"><label for="datetime-local">Выбор даты и времени</label>
+<input type="week" name="week"><label for="week">Выбор недели</label>
+<input type="month" name="month"><label for="month">Выбор месяца</label>
+<input type="file" name="file"><label for="file">Выбор файла</label>
+<hr>
+<audio src="../source/doom.mp3" type="audio/mpeg" controls></audio>
+<table>
+    <tr>
+        <td>Ячейка 1.1</td>
+        <td>Ячейка 1.2</td>
+    </tr>
+    <tr>
+        <td>Ячейка 2.1</td>
+        <td>Ячейка 2.2</td>
+    </tr>
+</table>
+<img src="../source/specialforrandomsite/horse.png">
+<img src="../source/specialforrandomsite/0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE.gif">
+<video controls>
+    <source src="../source/specialforrandomsite/sick.mp4" type="video/mp4">
+</video>
+<font style="font-size:1.5em;">
+0123456789+-=()_*/|#%"<>^[]{}~.,:;№!?"±≤≥≈∞$AaBbCcDdEeFfGgHhIiJjKkLlM
+mNnOoPpQqRrSsTtUuVvWwXxYyZz©®™√≠§█▓▒░÷¬АаБбВвГгДдЕеЖж
+ЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯ
+яЁё€₽£¥←→↑↓∫·°∾∝∅⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾∑☺☹Ææ¢¯¤¦¡¿«»ƒ≡✔❌☥✝卍卐◀▶▲▼⚠☢⚡⚐
+☮☯☭○∓Δ∀〈〉⋮⋯∬∥∦□⊂⊃∩∪◦‣◼◾●▞Ωαβγδθ♥★♀♂♫₣επ▌▐▀▄▖▗▘▝▙▟▛▜
+✉×
+</font>
+`
+});
+WWCreateWiki();
+
+</script>

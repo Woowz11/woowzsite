@@ -7,6 +7,9 @@ WWVersion = "0.0.1a"+(WWArchive?" ARCHIVE":"")
 /*Глобальная информация о википедии*/
 WWGlobalInfo = {}
 
+/*Текущая страница ID*/
+WWCurrentPage = ""
+
 /*Установка информации о википедии*/
 function WWSetInfo(info){
 	info["List"] = {};
@@ -26,7 +29,7 @@ function WWAddPage(id,paren,name,page_info){
 	if(WWGetPage(id)==null){
 		paren = RemoveHTML(paren);
 		if(WWGetPage(paren)!=null || paren==null){
-			var page = {"Type":"Page","ID":RemoveHTML(id),"Parent":paren,"Name":RemoveHTML(name),"Info":page_info}
+			var page = {"Type":"Page","ID":RemoveHTML(id),"Parent":paren,"Name":RemoveHTML(name),"Info":GetFT(page_info,null,{})}
 			WWGlobalInfo["List"][id] = page;
 		}else{
 			error("Не найден родитель ["+paren+"] страницы ["+id+"]! По этому не возможно её добавить! WWE3")
@@ -40,7 +43,7 @@ function WWAddPage(id,paren,name,page_info){
 function WWAddTitle(id,paren,name,title_info){
 	if(WWGetPage(id)==null){
 		if(WWGetPage(paren)!=null || paren==null){
-			var title = {"Type":"Title","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(name),"Info":title_info}
+			var title = {"Type":"Title","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(name),"Info":GetFT(title_info,null,{})}
 			WWGlobalInfo["List"][id] = title;
 		}else{
 			error("Не найден родитель ["+paren+"] тайтла ["+id+"]! По этому не возможно его добавить! WWE4")
@@ -54,7 +57,7 @@ function WWAddTitle(id,paren,name,title_info){
 function WWAddLine(id,paren,line_info){
 	if(WWGetPage(id)==null){
 		if(WWGetPage(paren)!=null || paren==null){
-			var line = {"Type":"Line","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(id),"Info":line_info}
+			var line = {"Type":"Line","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":RemoveHTML(id),"Info":GetFT(line_info,null,{})}
 			WWGlobalInfo["List"][id] = line;
 		}else{
 			error("Не найден родитель ["+paren+"] линии ["+id+"]! По этому не возможно её добавить! WWE6")
@@ -68,7 +71,7 @@ function WWAddLine(id,paren,line_info){
 function WWAddCustom(id,paren,code,custom_info){
 	if(WWGetPage(id)==null){
 		if(WWGetPage(paren)!=null || paren==null){
-			var custom = {"Type":"Custom","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":code,"Info":custom_info}
+			var custom = {"Type":"Custom","ID":RemoveHTML(id),"Parent":RemoveHTML(paren),"Name":code,"Info":GetFT(custom_info,null,{})}
 			WWGlobalInfo["List"][id] = custom;
 		}else{
 			error("Не найден родитель кастомного элемента ["+paren+"] ["+id+"]! По этому не возможно его добавить! WWE8")
@@ -80,15 +83,20 @@ function WWAddCustom(id,paren,code,custom_info){
 
 /*Открыть страницу по айди*/
 function WWOpenPage(id){
-	var page = WWGetPage(id);
-	if(page!=null){
-		var info = page["Info"];
-		var page_html = GetFT(info,"Page","Пустая страница ['"+id+"']...");
-		
-		page_html = page_html.replace(/\n/g, '<br>');
-		
-		document.getElementById("PageID").innerHTML = "<font>"+page["Name"]+" <font style='font-size:13px;'>[ID=\""+page["ID"]+"\";INDEX=\""+page["Index"]+"\"]</font></font>"
-		document.getElementById("Page").innerHTML = page_html;
+	if(WWCurrentPage!=id){
+		var page = WWGetPage(id);
+		if(page!=null){
+			WWCurrentPage = id;
+			print("Открыта страница ["+id+"] "+page["Name"])
+			var info = page["Info"];
+			var page_html = GetFT(info,"Page","Пустая страница ['"+id+"']...");
+			
+			page_html = page_html.replace(/\n/g, '<br>');
+			
+			document.getElementById("PageID").innerHTML = "<font>"+page["Name"]+" <font style='font-size:13px;'>[ID=\""+page["ID"]+"\";INDEX=\""+page["Index"]+"\"]</font></font>"
+			document.getElementById("Page").innerHTML = page_html;
+			document.getElementById("PageParent").style.padding = GetFT(info,"Padding",10)+"px";
+		}
 	}
 }
 
@@ -108,6 +116,7 @@ function WWOpenCategory(id){
 /*Компилировать википедию*/
 function WWCreateWiki(){
 	var WikiName = GetFT(WWGlobalInfo,"Name","Новая википедия");
+	var Icon = GetFT(WWGlobalInfo,"Icon","https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/ww.ico");
 	
 	WoowzsiteConstructionProject = {
 		"Name":"(Woowzwiki) "+WikiName,
@@ -120,7 +129,7 @@ function WWCreateWiki(){
 
 	"HeadInformation":{
 		"Title":WikiName,
-		"Icon":GetFT(WWGlobalInfo,"Icon","https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/ww.ico")
+		"Icon":Icon
 	},
 
 	"Style":`
@@ -130,7 +139,7 @@ function WWCreateWiki(){
 	}
 	
 	html{
-		background-color:lightgray;
+		background-color:rgba(0,0,0,0.05);
 		font-family: comfortaa;
 		font-weight: bold;
 		font-stretch: condensed;
@@ -141,23 +150,41 @@ function WWCreateWiki(){
 		font-weight: bold;
 		font-stretch: condensed;
 	}
+	
+	img{
+		border-radius: 15px;
+	}
+	
+	video{
+		border-radius: 15px;
+	}
+	
+	::selection{
+		background-color:transparent;
+	}
+	
+	.Page::selection, .Page *::selection{
+		background-color:yellow;
+	}
 	`,
 
 	"StartPage":
 `
-<block id="Title" style="height:100px; width:100vw; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);">
-<font style="font-size:1.5em;">`+WikiName+`</font><br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font>
+<block id="Title" style="height:100px; width:100vw; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);">
+<img style="height:1.5em; border-radius: 0px;" src="`+Icon+`"> <font style="font-size:1.5em;">`+WikiName+`</font><br><br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font> <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">Подробнее...</a>
 </block><br>
-<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:scroll;overflow-x:hidden;">
+<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.05); overflow-y:scroll;overflow-x:hidden;">
 
 </block>
-<block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); background-color:transparent; overflow-y:auto;overflow-x:auto;">
-<block id="PageID" style="width:100%;background-color:rgba(255,255,255,0.25);">???</block><br>
-<block id="Page" style="width:100%;">
-На этой википедии нету ни одной страницы!<br>Если вы не знаете как их сделать,<br>прочтите это https://woowz11.github.io/woowzsite/woowzwiki_wiki.html
+<block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); min-height:100%; background-color:transparent; overflow-y:auto;overflow-x:auto;">
+	<block id="PageID" style="min-width:100%; height: 3%; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);">???</block><br>
+	<block id="PageParent" style="min-width:100%; min-height:calc(100% - 3%); padding: 10px; box-sizing: border-box; background-color:rgba(0,0,0,0.025);">
+		<block class="Page" id="Page" style="min-width:100%;">
+			На этой википедии нету ни одной страницы!<br>Если вы не знаете как их сделать,<br>прочтите это <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">документация по Woowzwiki</a>
+		</block>
+	</block>
 </block>
-</block>
-<block style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.125); overflow-y:auto;overflow-x:hidden;">
+<block style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.05); overflow-y:auto;overflow-x:hidden;">
 Скоро...
 </block>
 `
@@ -202,8 +229,10 @@ function WWCreateWiki(){
 	var ListResult = "";
 	var FirstPageID = null;
 	print("Добавление страниц...")
+	var OpenCategories = [];
 	for(i in List_){
-		var page = List_[i]
+		var page = List_[i];
+		var info = GetFT(page,"Info",{});
 		if(FirstPageID==null){
 			FirstPageID=page["ID"];
 		}
@@ -212,7 +241,7 @@ function WWCreateWiki(){
 		var IfParen = `<block id="`+page["ID"]+`___list" style="display:none;"><button id="`+page["ID"]+`___symb" onclick="WWOpenCategory('`+page["ID"]+`');">⏷</button><block id="`+page["ID"]+`___block" style="display:none;"></block></block>`;
 		switch(type){
 			case "Page":
-				Result = `<button id="`+page["ID"]+`" style="width:55%;" onclick="WWOpenPage('`+page["ID"]+`');">` + page["Name"] + `</button>`
+				Result = `<button id="`+page["ID"]+`" style="min-width:55%;" onclick="WWOpenPage('`+page["ID"]+`');">` + page["Name"] + `</button>`
 				break;
 			case "Title":
 				Result = `<font id="`+page["ID"]+`">`+page["Name"] + `</font>`
@@ -244,7 +273,15 @@ function WWCreateWiki(){
 			document.getElementById(page["Parent"]+"___block").innerHTML = document.getElementById(page["Parent"]+"___block").innerHTML + "<br>" + (page["Type"]=="Line"||page["Type"]=="Custom"?"":"&nbsp;&nbsp;&nbsp;&nbsp;".repeat(deep)) + Result.replace(/{margin}/g,deep*24)
 			ListResult = document.getElementById("List").innerHTML;
 		}
+		if(GetFT(info,"Open",false)){
+			OpenCategories.push(page["ID"]);
+		}
 		print("Добавлен "+type+" ["+page["ID"]+"] "+page["Name"])
+	}
+	
+	for(const i in OpenCategories){
+		const id = OpenCategories[i]
+		WWOpenCategory(id);
 	}
 	
 	WWOpenPage(GetFT(WWGlobalInfo,"StartPage",FirstPageID));

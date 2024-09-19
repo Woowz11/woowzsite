@@ -20,7 +20,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"locate","lupa","metal","microsoft_fly_simulator_epicepdiditonpps","newfolder","no-cat","nointernet","noway!!!","obsidian_bowl","open","openprojecttitle","options","p","paper","par","paste","pixel","plus",
 	"plushover","position_end","position_end1","p_back","quare","rename","search","selectall","selectdinverse","selectdone","sky","smolarrow_bottom","smolarrow_right","smol_galka","sup","systems","teh","test",
 	"title","title2","title3","title4","title_smol","vis","wcom","windowpluginfolders","windowpluginfolders_left","windowpluginfolders_right","woowz11","woowzengine","zakrep","transparent","transparent-dark",
-	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty"
+	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon"
 ],"source/",".png")
 
 WoowzsiteSourceImagesJPG = AddFullnessToTable([
@@ -45,6 +45,16 @@ WoowzsiteSourceVideos = AddFullnessToTable([
 	"h"
 ],"source/specialforrandomsite/",".mp4")
 
+WoowzsiteSourceAudios = AddFullnessToTable([
+	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest",
+],"source/specialforrandomsite/",".mp3")
+
+WoowzsiteSourceAudios = AddTableToTable(AddFullnessToTable([
+	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest",
+],"source/",".mp3"),[
+	"source/woowzbackrooms/sounds/breath.mp3","source/woowzbackrooms/sounds/level0.mp3","source/woowzbackrooms/sounds/walk.mp3"
+])
+
 WoowzsiteSourceBackrooms = AddTableToTable(AddFullnessToTable([
 	"0_0","0_1","0_2","0_3","0_4","0_5","0_6","0_7","0_8","0_9","0_10","0_11","0_12","0_13","0_14","0_15","0_16","0_17","0_18"
 ],"source/woowzbackrooms/levels/",".png"),[
@@ -67,16 +77,16 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 	"justgamingyt5949","kasqw","kastikepussukka","kersher","kirk1448","klaverr","kotyara228","kseleron","lisstons","lomakinnn","mannytko","meeee66","metallcore999","monsterfish._","mor1oka","morphandriy","morzz1c",
 	"myleskingston","nekitplay155","neoprod","no","pacocareal","pavkalakar","pussyfapper","redsham","rodrigesgames","ruslanconnection","sadsalat","santinnel","shiir0k","styledun","sv1t.","taykeu","the0ceanman",
 	"thewindowskerpka","treepii24","troll_bebra","turbobtv","uzelezz","wantedrobot","wldoui","woowz11.","woowz11","xyzswagga","your_local_russian","youwillseelowskill","zebratv","zinderant","zooi","zvski",
-	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman"
+	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx"
 ],"source/discordavatars/",".png"),AddFullnessToTable([
 	"nberbaaaaaaa","brinq_","haveaniceday.","uranus52"
 ],"source/discordavatars/",".gif"))
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"9311797.164999995_image","10056771.889999975_image","image","IMG_20230618_013225","omg","Pngpng","ssasa","test-aubergine","cowsea","cowfly","spyder","paint","horse","skeleton","pz","fish","castale","spheres","cat",
-	"doudou","rotten-meatball","mine","minecraft","random"
+	"doudou","rotten-meatball","mine","minecraft","random","hair-creeper"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
-	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin",
+	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp",
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzsiteSourceCats = AddFullnessToTable([
@@ -214,4 +224,6 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "соединение","краска","расстояние","мечта","село","еда","зло","подразделение","сюжет","рубеж","сигнал","атмосфера","крест","вес","взрыв","контакт","сигарета","восторг","золото","почва","премия","король","подъезд",
 "шанс","автомат","заказ","мальчишка","очки","миг","штука","чтение","поселок","свидетель","ставка","сумка","удивление","хвост","песок","поворот","возвращение","мгновение","статус","озеро","строй","параметр","сказка",
 "тенденция","вина","дыхание","версия","масштаб","монастырь","хозяйка","дочка","танец","эксплуатация","коммунист","пенсия","приятель","объяснение","набор","производитель","пыль","философия","мощность","обязательство",
-"уход","горло","кризис","указание","плата","яблоко","препарат","действительность","москвич","остаток","изображение","сделка","сочинение","покупатель","танк","затрата","строка","единица","обработка","чемпионат","lua","html"]
+"уход","горло","кризис","указание","плата","яблоко","препарат","действительность","москвич","остаток","изображение","сделка","сочинение","покупатель","танк","затрата","строка","единица","обработка","чемпионат","lua","html",
+"коллумбайн","дыня","баклажан","ээээээ","наебал","вертолёт","нахуй","Иркутск","kristina-561@mail.ru","болят","Привет, я менеджер по найму в WILDBERRIES, и мы набираем в нашу команду людей, которые смогут работать удаленно по 30–60 минут в день и получать зарплату ежедневно. Ежедневный доход: от 200 до 30 000 руб. Если вас заинтересовала данная вакансия, нажмите на кнопку и свяжитесь с менеджером через WhatsApp. 👇👇👇",
+"б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐"]
