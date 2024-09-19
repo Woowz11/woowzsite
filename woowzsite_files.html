@@ -58,7 +58,7 @@ select{
 <body>
 	<div class="background-image-div custom-cursor" style="margin:0px;">
 		<div style="background-color:rgba(0,0,0,0.2);">
-			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files</font><br>
+			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files <font id="prikol">(с приколом!)</font></font><br>
 			<font class="white-font">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
 				<option value="source/transparent.png">Светлый</option>
 				<option value="source/transparent-dark.png">Тёмный</option>
@@ -83,8 +83,12 @@ select{
 <script>
 	var disable = false;
 
-	var mem_prikol_one_category = false;
-	var mem_prikol_screamer = true;
+	var mem_prikol_one_category = Math.random()>0.95;
+	var mem_prikol_screamer = Math.random()>0.95;
+	var mem_prikol_more_category = Math.random()>0.95 && !mem_prikol_more_category;
+	var mem_prikol_random_category = Math.random()>0.95;
+	var mem_prikol_peremeshat = Math.random()>0.95;
+	var mem_prikol_fullrandom = Math.random()>0.95;
 
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
@@ -165,7 +169,7 @@ select{
 			if(time>200000){time_col="red; background-color:black";}
 			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type=="mp3"?"height:50px":"height:350px")+`; `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
-			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` controls><source src="${src}#t=0.1" type="video/mp4"></video>`
+			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}#t=0.1" type="video/mp4"></video>`
 			:
 				(type=="mp3")?
 				`<audio style="width:100%; height: 100%;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}" type="audio/mpeg"></audio>`
@@ -192,9 +196,11 @@ select{
 			var parentElement = document.getElementById(text);
 			var childElements = Array.from(parentElement.querySelectorAll('.grid-element'));
 
-			childElements.sort(function(a, b){
-				return a.id.localeCompare(b.id);
-			});
+			if(!mem_prikol_peremeshat){
+				childElements.sort(function(a, b){
+					return a.id.localeCompare(b.id);
+				});
+			}
 
 			childElements.forEach(function(child){
 				parentElement.appendChild(child);
@@ -265,6 +271,43 @@ select{
 		"source/*.mp3"                 :WoowzsiteSourceAudios,
 	};
 	
+	if(mem_prikol_fullrandom){
+		var all = [];
+		var categoryes_ = [];
+		for (var key in categoryes) {
+			categoryes_.push(key);
+			var value = categoryes[key];
+			all = AddTableToTable(all,value);
+		}
+		
+		var result = {};
+		for(var el of all){
+			var cat = categoryes_[Math.floor(Math.random()*categoryes_.length)]
+			if(result[cat]){
+				result[cat].push(el);
+			}else{
+				result[cat] = [];
+			}
+		}
+		categoryes = result;
+	}
+	
+	if(mem_prikol_peremeshat){
+		var result = [];
+		for (var key in categoryes) {
+			if (categoryes.hasOwnProperty(key)) {
+				var value = categoryes[key];
+				
+				value = value.sort(function() {
+					return Math.random() - 0.5;
+				});
+				
+				result[key] = value;
+			}
+		}
+		categoryes = result;
+	}
+	
 	if(mem_prikol_one_category){
 		var result = [];
 		for (var key in categoryes) {
@@ -276,11 +319,56 @@ select{
 		categoryes = {"*":result};
 	}
 	
+	if(mem_prikol_more_category){
+		var result = {};
+		var t = [];
+		for (var key in categoryes) {
+			var value = categoryes[key];
+			for(var el of value){
+				if(Math.random()>0.25||t.length<=0){
+					t.push(el);
+				}else{
+					t.push(el);
+					result[el] = t;
+					t = [];
+				}
+			}
+		}
+		categoryes = result;
+	}
+	
+	if(mem_prikol_random_category){
+		var result = {};
+		for (var key in categoryes) {
+			if (categoryes.hasOwnProperty(key)) {
+				var value = categoryes[key];
+				result[WoowzsiteWords[Math.floor(Math.random()*WoowzsiteWords.length)]] = value;
+			}
+		}
+		
+		var keys = Object.keys(result);
+
+		keys = keys.sort(function() {
+			return Math.random() - 0.5;
+		});
+
+		var shuffledObj = {};
+		keys.forEach(function(key, index) {
+			shuffledObj[key] = result[key];
+		});
+		
+		categoryes = shuffledObj;
+	}
+	
 	for (var key in categoryes) {
 		if (categoryes.hasOwnProperty(key)) {
 			var value = categoryes[key];
 			GenerateTable(key,value);
 		}
+	}
+	
+	if(!(mem_prikol_fullrandom||mem_prikol_more_category||mem_prikol_one_category||mem_prikol_peremeshat||mem_prikol_random_category||mem_prikol_screamer)){
+		document.getElementById("prikol").style.display = "none";
 	}
 	
 	GenerateTableCustom("Слова",WoowzsiteWords,`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);

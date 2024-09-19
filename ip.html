@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Get IP</title>
+<link rel="icon" type="image/x-icon" href="source\none.ico">
+
+<font id="result">Получение IP...</font>
+
+<script>
+        fetch('https://api.ipify.org/?format=json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.ip;
+            })
+            .catch(error => {document.getElementById('result').textContent = "Ошибка при получении"; console.error('Error fetching IP address:', error)});
+</script>
