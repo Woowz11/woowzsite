@@ -14,10 +14,23 @@
 async function ask(){
 	var question = document.getElementById("input").value;
 	var response = await sendToAI(question);
-	document.getElementById("response").innerText = response;
+	document.getElementById("response").innerHTML = response;
 }
 
 async function sendToAI(text) {
-	return "~"
+	const api = 'https://api-inference.huggingface.co/models/gpt2';
+	const key = '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';
+	
+	const response = await fetch(api,{
+		method: 'POST',
+		headers:{
+			'Authorization': `Bearer ${key}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({inputs: text})
+	})
+	const data = await response.json();
+	console.log(data);
+	return data[0].generated_text;
 }
 </script>

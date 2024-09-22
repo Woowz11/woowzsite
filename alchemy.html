@@ -1,0 +1,486 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Woowz Alchemy</title>
+<link rel="icon" type="image/x-icon" href="source\none.ico">
+
+<style>
+@font-face {
+    font-family: "custom";
+    src: url("source/Comfortaa.ttf") format('opentype');
+}
+
+html{
+	background-image: url("source/grid.png");
+	font-family: custom;
+	cursor: default;
+}
+
+body{
+	margin:0px;
+	overflow: hidden;
+	
+	user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+::selection{
+	background-color: transparent;
+}
+textarea::selection {
+    background-color: blue;
+	color:white;
+}
+
+button{
+	font-family: custom;
+	font-size:2em;
+	box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+	cursor:pointer;
+}
+
+* {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-drag: none;
+}
+
+.element{
+	transition: transform 0.3s;
+	filter: drop-shadow(0px 0px 5px rgba(0,0,0,0.3));
+}
+.element:hover{
+	transform: scale(1.2);
+}
+
+.rotate-slow {
+    animation: rotate 30s linear infinite;
+}
+.rotate-fast {
+    animation: rotate 0.3s linear infinite;
+}
+.energy {
+    animation: rotate 0.3s linear infinite;
+	filter: drop-shadow(0px 0px 5px rgba(255,255,255,1));
+	
+}
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.size-slow {
+    animation: size 15s linear infinite;
+}
+.size-fast {
+    animation: size 1s linear infinite;
+}
+@keyframes size {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+	100%{
+		transform: scale(1);
+	}
+}
+
+</style>
+
+<body>
+	<div id="mainmenu" style="position:fixed; background-image:url('source/wall.png'); width:100vw; height:100vh; text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.4);">
+		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:5vh; font-size:5em; white-space: nowrap;"><b>⚗️ Woowz Alchemy ⚗️</b></font>
+		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:17vh; font-size:3em; white-space: nowrap;"><b>Версия: <font id="version">?.?.?</font></b></font>
+		
+		<div style="position:fixed; right:50%; transform: translateX(50%); bottom:30%;">
+			<button style="width:30vw; min-width:500px; margin-top:30px;" onclick="StartGame(null);">Начать новую игру</button><br>
+			<button style="width:30vw; min-width:500px; margin-top:30px;" onclick="StartGameWithSave();">Загрузить игру</button><br>
+			<button style="width:30vw; min-width:500px; margin-top:30px;">Настройки</button>
+		</div>
+		
+		<div style="position:fixed; right:50px; bottom:10%;">
+			<textarea id="generated-recipes" style="width:30vw; height:70vh; resize: none; overflow-y:scroll;" rows="4" colds="50"></textarea>
+		</div>
+		
+		<font style="position:fixed; right:10px; bottom:10px; font-size:2em; white-space: nowrap;">Сделано Woowz11</font>
+	</div>
+
+	<div style="background-color:rgb(200,200,200); box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.2); height:100vh; width:36.5%; display: inline-block;">
+		<div style="height:15%; background-color:red;">
+		
+		</div>
+		<div style="height:calc(100% - 15% - 15%); padding:20px;">
+			<div style="background-color:rgba(0,0,0,0.2); width:100%; height:100%; border-radius: 20px; box-shadow: inset 0 0 10px 10px rgba(0, 0, 0, 0.2); overflow: hidden; overflow-y: scroll;">
+				<div id="inventory" style="height:auto; width:95%; margin-left:calc(5% / 2); margin-top:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); grid-auto-rows: 160px;">
+				</div>
+			</div>
+		</div>
+		<div style="height:10%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); grid-gap: 5px; margin-left:20px; margin-right:20px;">
+			<button style="font-size:16px;">Выйти в меню</button>
+			<button style="font-size:16px;">Сохранить</button>
+			<button style="font-size:16px;" onclick="ClearTable();">Очистить стол</button>
+			<button style="font-size:16px;">Настройки</button>
+			<button style="font-size:16px;">История</button>
+			<button style="font-size:16px;">Рецепты</button>
+		</div>
+	</div>
+	
+	<div_ id="table" style="height:100vh; width:calc(100% - 37%); white-space: nowrap;"></div_>
+	
+	<font style="position:fixed; right:10px; top:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>Woowz Alchemy<br>Версия: <font id="version">?.?.?</font><br><font id="dev" style="color:red;"></font></b></font>
+	
+	<font style="position:fixed; right:10px; bottom:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>На сцене: <font id="total-in-table">0</font><br><b>Элементов: <font id="open-elements">?</font>/<font id="total-elements">?</font><br>Рецептов: <font id="open-recipes">0</font>/<font id="total-recipes">?</font></b></font>
+	
+	<input id="file-input" type="file" style="display:none;" accept=".woowzalchemy">
+</body>
+<script src="F:\woowzsite-private\alchemy.js"></script>
+
+<script>
+
+const GameVersion = "0.0.0";
+const DevMode = true;
+
+document.querySelectorAll("#version").forEach(function(element){
+    element.innerText = GameVersion;
+});
+if(DevMode){
+	document.getElementById("dev").innerText="!Режим отладки!";
+}else{
+	document.getElementById("generated-recipes").style.display = "none";
+}
+
+var ElementsOnTable = [];
+var ElementsOnTableIDS = 0;
+var SelectedElement = null;
+var zindex = 0;
+var ElementsDatas = {};
+var OpenElements = {};
+var RecipesDatas = {};
+var OpenRecipes = {};
+
+var MouseOffsetX = 0; var MouseOffsetY = 0;
+
+function CreateElement(id){
+	ElementsOnTableIDS++;
+	return {"id":id,"name":id,"number":ElementsOnTableIDS};
+}
+
+function ClearTable(){
+	var elot = [...ElementsOnTable];
+	for(var el of elot){
+		RemoveElementFromTable(el["number"]);
+	}
+}
+
+function CheckRecipe(id1,id2){
+	var result = null;
+	var recipe = id1+"+"+id2;
+	result = RecipesDatas[recipe];
+	if(result==null){recipe = id2+"+"+id1;result = RecipesDatas[recipe];}
+	if(OpenRecipes[recipe]==null&&result!=null){
+		OpenRecipes[recipe] = result;
+		document.getElementById("open-recipes").innerText = Object.keys(OpenRecipes).length;
+	}
+	if(result!=null){
+		for(var el of result){
+			if(OpenElements[el]==null){
+				AddElementToInventory(el);
+			}
+		}
+	}
+	return result;
+}
+
+function CombineElements(el1,el2,distance){
+	if(el1!=null&&el2!=null&&distance<90){
+		var id1 = GetElementDataById(el1.id)["number"]; var id2 = GetElementDataById(el2.id)["number"];
+		var result = CheckRecipe(GetElementDataById(el1.id)["id"],GetElementDataById(el2.id)["id"]);
+		if(result!=null){
+			var rect1 = el1.getBoundingClientRect();
+			var rect2 = el2.getBoundingClientRect();
+			var x = rect1.left/2+rect2.left/2;
+			var y = rect1.top/2+rect1.top/2;
+			RemoveElementFromTable(id1);
+			RemoveElementFromTable(id2);
+			for(var el of result){
+				AddElementToTable(el,x,y);
+			}
+		}
+	}
+}
+
+function SelectElement(id,event,dontmouseoffset){
+	var el = document.getElementById(id);
+	if(dontmouseoffset!=true){
+		var rect = el.getBoundingClientRect();
+		MouseOffsetX = event.clientX - rect.left;
+		MouseOffsetY = event.clientY - rect.top;
+	}
+	SelectedElement = el;
+	zindex++;
+	SelectedElement.style.zIndex = zindex;
+}
+document.addEventListener('mouseup', function(event) {
+    if (event.button == 0 && SelectedElement!=null) {
+		var rect1 = SelectedElement.getBoundingClientRect();
+		var x1 = rect1.left + rect1.width / 2;
+		var y1 = rect1.top + rect1.height / 2;
+
+		var nearimage = null;
+		var minDistance = Number.MAX_VALUE;
+		for(var eldata of ElementsOnTable){
+			var el = document.getElementById(eldata["number"]);
+			var rect2 = el.getBoundingClientRect();
+			var x2 = rect2.left + rect2.width / 2;
+			var y2 = rect2.top + rect2.height / 2;
+			
+			var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+			if(distance<minDistance && el != SelectedElement){
+				minDistance = distance;
+				nearimage = el;
+			}
+		}
+		CombineElements(SelectedElement,nearimage,minDistance);
+        SelectedElement = null;
+		MouseOffsetX = 0; MouseOffsetY = 0;
+    }
+});
+document.addEventListener('mousemove', function(event) {
+    if(SelectedElement){
+		SelectedElement.style.left = (event.clientX-MouseOffsetX)+"px";
+		SelectedElement.style.top = (event.clientY-MouseOffsetY)+"px";
+	}
+});
+
+var initialWindowWidth = window.innerWidth;
+var initialWindowHeight = window.innerHeight;
+window.addEventListener('resize', function() {
+	for(var el of ElementsOnTable){
+		var el_ = document.getElementById(el["number"]);
+		if(el_!=null){
+			var rect = el_.getBoundingClientRect();
+			var leftResult = Math.floor(rect.left*(window.innerWidth/initialWindowWidth));
+			var topResult = Math.floor(rect.top*(window.innerHeight/initialWindowHeight));
+			el_.style.left = leftResult + 'px';
+			el_.style.top = topResult + 'px';
+		}
+	}
+	
+	initialWindowWidth = window.innerWidth;
+    initialWindowHeight = window.innerHeight;
+});
+
+function GetElementDataById(id){
+	var foundElement = ElementsOnTable.find(function(element) {
+		return element.number == id;
+	});
+	return foundElement;
+}
+
+function CloneElement(id){
+	var el = document.getElementById(id);
+	var rect = el.getBoundingClientRect();
+	var eldata = GetElementDataById(id);
+	AddElementToTable(eldata["id"],rect.left+30,rect.top-30,true);
+}
+
+function AddElementToTable(id,posx,posy,z_top){
+	var el = CreateElement(id);
+	var elid = el["number"];
+	ElementsOnTable.push(el);
+	var result = `<div id="`+elid+`" class="element" style="position:fixed; left:`+posx+`px; top:`+posy+`px;"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:100px; height:100px; border-radius: 20%; cursor:pointer;" draggable="false" title="`+ElementsDatas[id]["Name"]+`" onerror="this.src='alchemy/dev.png';" src="alchemy/`+id+`.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div>`;
+	document.getElementById("table").innerHTML += result;
+	var el_ = document.getElementById(elid);
+	if(z_top==true){
+		zindex++;
+		el_.style.zIndex = zindex;
+	}
+}
+document.getElementById("table").addEventListener("mousedown", function(event) {
+	if(event.button == 0){
+		if(event.target!=null){
+			var id = event.target.id;
+			if(id==""){
+				id = event.target.parentNode.id;
+			}
+			SelectElement(id,event);
+		}
+	}
+});
+function hasParentWithId(element, parentId) {
+    var parent = element.parentNode;
+    while (parent) {
+        if (parent.id === parentId) {
+            return parent;
+        }
+        parent = parent.parentNode;
+    }
+    return null;
+}
+document.getElementById("inventory").addEventListener("mousedown", function(event) {
+	if(event.button == 0){
+		var got = hasParentWithId(event.target,"got");
+		if(got != null){
+			if(got.id == "got"){
+				GetElementFromInventory(event,got.getAttribute("elementid"),false,got);
+			}
+		}
+	}
+});
+
+document.getElementById("table").addEventListener('dblclick', function(event) {
+	if(event.button == 0){
+		var id = event.target.id;
+		if(id==""){
+			id = event.target.parentNode.id;
+		}
+		CloneElement(id);
+	}
+});
+
+function RemoveElementFromTable(id){
+	document.getElementById(id).remove();
+	var foundIndex = ElementsOnTable.findIndex(function(element) {
+		return element.number === id;
+	});
+	ElementsOnTable.splice(foundIndex,1);
+}
+
+function PerSecond(){
+	for(var el of ElementsOnTable){
+		var el_ = document.getElementById(el["number"]);
+		var rect = el_.getBoundingClientRect();
+		var remove = false;
+		if(rect.left>window.innerWidth||rect.top>window.innerHeight||rect.left<0||rect.top<-100){
+			remove = true;
+		}
+		
+		if(remove){
+			if(el_!=SelectedElement){
+				RemoveElementFromTable(el["number"]);
+			}
+		}
+	}
+	
+	document.getElementById("total-in-table").innerText = ElementsOnTable.length;
+}
+setInterval(PerSecond,1000);
+
+function StartGame(save){
+	document.getElementById("mainmenu").style.display = "none";
+	
+	if(save==null){
+		for(var eldata of AlchemyElements){
+			if(eldata["Start"]==true){ AddElementToInventory(eldata["Id"]); }
+		}
+	}else{
+	
+	}
+}
+
+function StartGameWithSave(){
+	var input = document.getElementById("file-input");
+	input.addEventListener('change', function() {
+		if (input.files.length > 0) {
+			const file = input.files[0];
+			StartGame(file);
+		}
+	});
+	input.click();
+}
+
+function GetElementFromInventory(event,id,justclick,el){
+	if(event.button == 0){
+		var rect = el.getBoundingClientRect();
+		MouseOffsetX = event.clientX - rect.left;
+		MouseOffsetY = event.clientY - rect.top;
+		AddElementToTable(id,event.clientX - MouseOffsetX,event.clientY - MouseOffsetY);
+		SelectElement(ElementsOnTableIDS,event,true);
+	}
+}
+
+function AddElementToInventory(id){
+	var result = `<div id="got" elementid="`+id+`" style="padding:5px; text-align:center; cursor:pointer;"><div style="background-color:rgb(200,200,200); border-radius: 10px; padding:5px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);"><div class="element"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:100px; height:100px; border-radius: 20%;" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"><br><font style="font-size:1.2em;"></div><b>`+(ElementsDatas[id]["Name"])+`</b></font></div></div>`;
+	document.getElementById("inventory").innerHTML += result;
+	OpenElements[id] = true;
+	document.getElementById("open-elements").innerText = Object.keys(OpenElements).length;
+}
+document.getElementById("total-elements").innerText = AlchemyElements.length;
+document.getElementById("total-recipes").innerText = AlchemyRecipes.length;
+
+for(var eldata of AlchemyElements){
+	ElementsDatas[eldata["Id"]] = eldata;
+}
+
+for(var recipe of AlchemyRecipes){
+	var craft = recipe.split("=");
+	RecipesDatas[craft[0]] = craft[1].split(",");
+}
+
+if(DevMode){
+	var wetrecipesresult = "";
+	
+	let values = {};
+	var AlchemyRecipesWet_ = [];
+	for (let str of AlchemyRecipesWet) {
+		str = str.toLowerCase();
+		let parts = str.split("=");
+		let parts2 = parts[0].split("+");
+
+		var error = false;
+		if(ElementsDatas[parts2[0]]==null&&!/\{.*\}/.test(parts2[0])){
+			console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ ПЕРВЫЙ ЭЛЕМЕНТ (`+parts2[0]+`) НЕИЗВЕСТЕН!`)
+			error = true;
+		}
+		if(ElementsDatas[parts2[1]]==null&&!/\{.*\}/.test(parts2[1])){
+			console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ ВТОРОЙ ЭЛЕМЕНТ (`+parts2[1]+`) НЕИЗВЕСТЕН!`)
+			error = true;
+		}
+		
+		if (values[parts2[0]+"+"+parts2[1]]!=null||values[parts2[1]+"+"+parts2[0]]!=null) {
+			var val = values[parts2[0]+"+"+parts2[1]];
+			if(val==null){val=values[parts2[1]+"+"+parts2[0]];}
+			console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ УЖЕ ЕСТЬ РЕЦЕПТ (`+val+`)!`);
+		} else {
+			values[parts2[0]+"+"+parts2[1]] = str;
+			if(error==false){
+				AlchemyRecipesWet_.push(str);
+			}
+		}
+	}
+	
+	var wetrecipes = {};
+	for(var wetrecipe of AlchemyRecipesWet_){
+		var recipe = wetrecipe.split("=");
+		var elements = recipe[0].split("+");
+		var el1 = elements[0];
+		var el2 = elements[1];
+		var result = recipe[1].split(",")
+		
+		var el1_group = /\{.*\}/.test(el1);
+		var el2_group = /\{.*\}/.test(el2);
+		if(el1_group||el2_group){
+			var el1_ = (el1_group?el1.slice(1,-1):el1);
+			var el2_ = (el2_group?el2.slice(1,-1):el2);
+			var group1 = (el1_group?AlchemyGroups[el1_]:[el1]);
+			var group2 = (el2_group?AlchemyGroups[el2_]:[el2]);
+			for(var x of group1){
+				for(var y of group2){
+					wetrecipesresult += "\""+x+"+"+y+"="+recipe[1]+"\",\n";
+				}
+			}
+		}else{
+			wetrecipesresult += "\""+wetrecipe+"\",\n";
+		}
+	}
+	document.getElementById("generated-recipes").innerHTML = wetrecipesresult.slice(0, -1);;
+}
+
+</script>
