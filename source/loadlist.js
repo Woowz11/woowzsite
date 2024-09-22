@@ -12,10 +12,10 @@ const new_html = "";
 function AddSite(site,new_html,saved_category)
 {
 	if(saved_category!=site.catalog){
-			new_html = new_html + "<p>---------------["+site.catalog+"]-------------</p>";
+			new_html = new_html + "<hr><font>["+site.catalog+"]</font><hr><br><br>";
 			saved_category = site.catalog;
 	}
-	return [new_html + '<a href="' + site.href + '.html">' + site.name + '</a><p></p><font>' + String(site.tags).replace(",",", ") + '</font><p></p>',saved_category];
+	return [new_html + '<a href="' + site.href + '.html">' + site.name + '</a><br><br><font>' + String(site.tags).replace(",",", ") + '</font><br><br>',saved_category];
 }
 
 function lodlist(show_hide) {

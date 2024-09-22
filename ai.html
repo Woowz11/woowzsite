@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Ask AI</title>
+<link rel="icon" type="image/x-icon" href="source\none.ico">
+
+ХЗ КАК СДЕЛАТЬ, НЕ НАШЁЛ НОРМАЛЬНЫХ НЕЙРОСЕТЕЙ БЕСПЛАТНЫХ ЧТО-БЫ СВЯЗАТЬ<br>
+<input type="text" id="input"><br>
+<button onclick="ask();"">Спросить ИИ</button><br>
+<br>
+<font>Ответ:</font><br>
+<font id="response"></font>
+
+<script>
+async function ask(){
+	var question = document.getElementById("input").value;
+	var response = await sendToAI(question);
+	document.getElementById("response").innerText = response;
+}
+
+async function sendToAI(text) {
+	return "~"
+}
+</script>

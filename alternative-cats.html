@@ -4,6 +4,10 @@
 <link rel="icon" type="image/x-icon" href="source\cat.ico">
 
 <style>
+@font-face {
+    font-family: "custom";
+    src: url("source/inkverse.ttf") format('opentype');
+}
 
 html{
     background-color: black;
@@ -29,7 +33,7 @@ font{
 	-moz-user-select: none;
 	user-select: none;
 	pointer-events: none;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: custom;
     background:url("source/concrete.png") no-repeat center/cover;
     text-shadow: black 0px 10px 15px;
     -webkit-background-clip:text;
@@ -64,7 +68,7 @@ button{
     text-decoration: none;
     color: black;
     border-radius: 12px;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: custom;
     text-shadow: black 0px 10px 15px;
     font-size: 2.6vh;
     height: 4vh;
@@ -72,7 +76,8 @@ button{
     user-select: none;
     -webkit-user-select: none;
 	-moz-user-select: none;
-    box-shadow: 0px 20px 10px rgb(0, 0, 0);
+    box-shadow: 0px 10px 10px rgb(0, 0, 0);
+	transition: transform 0.3s, color 0.3s;
 }
 
 button:hover{
@@ -103,12 +108,12 @@ label{
 
 <script>
     const base = document.getElementById("base");
-    const GameVersion = "2";
+    const GameVersion = "3";
 
     const CatsBase = [
 
         ["cat1",5],["cat2",5],["cat3",5],["cat4",5],["cat5",5],["cat6",5],["cat7",5],["cat8",5],["cat9",5],["cat10",5],["cat11",5],["cat12",5],
-        ["cat13",5],["cat14",5],["cat15",5],["cat16",5],["cat17",5],["cat18",5]
+        ["cat13",5],["cat14",5],["cat15",5],["cat16",5],["cat17",5],["cat18",5],["cat19",5]
 
     ];
 
@@ -126,8 +131,9 @@ label{
     let s_minutes = 0;
 
     let timer;
+	let timerNOGAME;
     var skippednormals = 0;
-    var maxround = 10;
+    var maxround = 15;
 
     var hardmode = false;
 
@@ -139,27 +145,36 @@ label{
             count_alternativies = count_alternativies + catinfo[1];
         }
         var count_total = count_cats+count_alternativies;
+		
+		if(localStorage.getItem("altcat-totalgames")==null){
+			localStorage.setItem("altcat-totalgames",0);
+		}
+		var totalplay = localStorage.getItem("altcat-totalgames")
+		
         base.innerHTML = `
             <center style="margin-top: 2vh;">
-                <font style="font-size: 10vh;">Game stats</font><br>
+                <font class="title" style="font-size: 10vh;">Game stats</font><br>
                 
                 <br>
                 <br>
                 <br>
                 <br>
 
-                <div>
+                <div style="text-align:left; margin-left:44%;">
                     <font style="font-size: 3vh;">Cats: `+count_cats+`</font><br>
                     <font style="font-size: 3vh;">Alternatives: `+count_alternativies+`</font><br>
                     <font style="font-size: 3vh;">Total photos: `+count_total+`</font><br>
+					<font style="font-size: 3vh;">Total games: `+localStorage.getItem("altcat-totalgames")+`</font><br>
+					<font style="font-size: 3vh;">Best score: `+(localStorage.getItem("altcat-totalgames")=="0"?"You've never played a game!":localStorage.getItem("altcat-best"))+`</font><br>
                 </div>
 
-                <button style="margin-top: 40vh;" onclick="LoadGame()">Back</button>
+                <button style="margin-top: 40vh;" onclick="SetDivStart()">Back</button>
             </center>
         `;
+		document.title = "Alternative Cats | Stats";
     }
 
-    function SetDivStart(endgame){
+    function SetDivStart(endgame,thathardgame){
         clearInterval(timer);
         timer = null;
 
@@ -201,22 +216,60 @@ label{
 
             endresult = `
             <font style="font-size: 5vh;">`+ocenka+`</font><br><br>
-            <font>You skipped alternatives: `+skippedalternatives+`!</font><br>
-            <font>You destroyed the normal cats: `+skippednormals+`!</font><br>
+            <font>You skipped alternatives: `+skippedalternatives+`/`+totalalternatives+`!</font><br>
+            <font>You destroyed the normal cats: `+skippednormals+`/`+totalnormals+`!</font><br>
             <font>Time: `+minutesString+":"+secondsString+":"+millisecondsString+`!</font><br>
+			<font>Best: {best}</font><br>
             <br>`;
-        }
+			if(localStorage.getItem("altcat-totalgames")==null){
+				localStorage.setItem("altcat-totalgames",0);
+			}
+			localStorage.setItem("altcat-totalgames",parseInt(localStorage.getItem("altcat-totalgames"))+1);
+			var best = localStorage.getItem("altcat-best");
+			var best_parts = best.split("|");
+			var best_ocenka = best_parts[0].trim();
+			var best_time = best_parts[1].trim();
+			var update = false;
+			
+			if(ocenka_==7){ocenka_=-1;}
+			var best_ocenka_ = ocenki.indexOf(best_ocenka);
+			if(best_ocenka_==7){best_ocenka_=-1;}
+			console.log(ocenka_,best_ocenka_);
+			if(ocenka_>best_ocenka_){update=true;}else if(ocenka_==best_ocenka_){
+				var best_time_parts = best_time.split(":");
+				var best_time_min = parseInt(best_time_parts[0]);
+				var best_time_sec = parseInt(best_time_parts[1]);
+				var best_time_mil = parseInt(best_time_parts[2]);
+				
+				var totaltime = (minutes*60 + seconds)*100 + milliseconds;
+				var best_totaltime = (best_time_min*60 + best_time_sec)*100 + best_time_mil;
+				if(best_totaltime>totaltime){update=true;}
+			}
+			
+			document.title = "Alternative Cats "+ocenka+" | "+minutesString+":"+secondsString+":"+millisecondsString;
+			
+			if(thathardgame!=true){
+				if(update){
+					localStorage.setItem("altcat-best",ocenka+" | "+minutesString+":"+secondsString+":"+millisecondsString);
+				}
+				
+				endresult = endresult.replace(/{best}/g,(update?"<font style='text-shadow: -1px -1px 0 rgba(255, 0, 0, 0.2), 1px -1px 0 rgba(255, 0, 0, 0.2), -1px 1px 0 rgba(255, 0, 0, 0.2), 1px 1px 0 rgba(255, 0, 0, 0.2);'>":"")+localStorage.getItem("altcat-best")+(update?"</font>":""));
+			}
+		}else{
+			document.title = "Alternative Cats";
+		}
         base.innerHTML = `
            <center style="margin-top: 2vh;">
-              <font style="font-size: 10vh;">Alternative Cats</font><br>
+              <font class="title" style="font-size: 10vh;">Alternative Cats</font><br>
               <font style="font-size: 3vh;">By Woowz11</font><br>
               <font style="font-size: 2vh;">Version `+GameVersion+`</font>
 
-              <div style="margin-top: 40vh;">
+              <div style="margin-top: 35vh;">
                 `+endresult+`
 
                 <button onclick="StartGame(true)" style="width: 30vh;">Start game</button><br><br>
-                <button onclick="StartGame(true,true)" style="width: 30vh;">Start "hard" game</button>
+                <button onclick="StartGame(true,true)" style="width: 30vh;">Start "hard" game</button><br><br>
+				`+(endgame?`<button onclick="SetDivStart()" style="width: 30vh;">Back</button>`:"")+`
                </div>
            </center>
            <br>
@@ -227,20 +280,27 @@ label{
         seconds = 0;
         minutes = 0;
     }
+	var saved_count = 0;
+	var styles_ = [];
     function SetDivGame(count){
+		saved_count = count;
         var result = 
         `
-        <div style="display: flex; height: 80vh;">
+        <div style="display: flex; height: 65vh;">
 
         `;
 
         for(var i = 0; i < count; i++){
             var catinfo = cats[i];
-            var randscale = Math.random()*0.15+1;
+			if(styles_.length<(i+1)){
+				var styl = document.createElement("style");
+				styles_.push(styl);
+				document.head.appendChild(styl)
+			}
             result = result + `
             <div style="margin-left: 5px;" class="catphotodiv">
                 <center style="margin-top: 6vh;">
-                    <div style="position: relative; display: inline;"><input type="checkbox" style="display: none;" id="checkbox`+i+`"><label for="checkbox`+i+`"><img src="source/anomaly-cat.png" style="cursor: pointer; transform: scale(`+randscale+`); width: 45vh; height: 45vh;"></label><img src="`+catinfo["photo"]+`" style="transform: scale(`+randscale+`); z-index: -1; position: absolute; bottom: 3px; right: 0; width: 45vh; height: 45vh; box-shadow: 0px 20px 10px rgb(0, 0, 0);"></div><br>
+                    <div style="position: relative; display: inline;"><input type="checkbox" style="display: none;" id="checkbox`+i+`"><label for="checkbox`+i+`"><img class="anomaly`+i+`" src="source/anomaly-cat.png" style="cursor: pointer; width: 45vh; height: 45vh;"></label><img src="`+catinfo["photo"]+`" style="z-index: -1; position: absolute; bottom: 3px; right: 0; width: 45vh; height: 45vh; `+(Math.random()>0.5?"transform: scaleX(-1);":"")+` box-shadow: 0px 20px 10px rgb(0, 0, 0);"></div><br>
                 </center>
             </div>
             `;
@@ -250,35 +310,52 @@ label{
         </div>
         <div style="height: 20vh;">
             <center>
-                <font id="timer" style="font-size: 2vh;"></font><br>
-                <font style="font-size: 2vh;">Round `+round+`/10</font><br>
+                <div style="width:60px; text-align: left;"><font id="timer" style="font-size: 2vh;"></font></div><br>
+                <font style="font-size: 2vh;">Round `+round+`/`+maxround+`</font><br>
                 <font style="font-size: 2vh;">Select alternative cats</font><br>
-                <button onclick="ThatAllButton()" style="margin-top: 0; width: 20vh;">That all</button><br><br><br>
-                <button onclick="SetDivStart()" style="margin-top: 0; width: 15vh;">Restart</button>
+                <button onclick="ThatAllButton()" style="margin-top: 5px; width: 20vh;">That all</button><br>
+                <button onclick="SetDivStart()" style="margin-top: 10vh; width: 15vh;">Restart</button>
             </center>
         </div>
         `;
         base.innerHTML = result;
     }
     function LoadGame(){
+		timerNOGAME = setInterval(updateTimerNOGAME,50);
         SetDivStart();
     }
 
     function updateTimer() {
-            milliseconds++;
-            if (milliseconds >= 60) {
-                milliseconds = 0;
-                seconds++;
-            }
-            if (seconds >= 60) {
-                seconds = 0;
-                minutes++;
-            }
-            let millisecondsString = milliseconds < 10 ? '0' + milliseconds : milliseconds;
-            let secondsString = seconds < 10 ? '0' + seconds : seconds;
-            let minutesString = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('timer').innerText = minutesString + ':' + secondsString + ":" + millisecondsString;
+        milliseconds++;
+        if (milliseconds >= 60) {
+            milliseconds = 0;
+            seconds++;
         }
+        if (seconds >= 60) {
+            seconds = 0;
+            minutes++;
+        }
+        let millisecondsString = milliseconds < 10 ? '0' + milliseconds : milliseconds;
+        let secondsString = seconds < 10 ? '0' + seconds : seconds;
+        let minutesString = minutes < 10 ? '0' + minutes : minutes;
+        document.getElementById('timer').innerText = minutesString + ':' + secondsString + ":" + millisecondsString;
+		document.title = "Alternative Cats | "+minutesString+":"+secondsString+":"+millisecondsString;
+			
+		for(var i = 0; i < styles_.length; i++){
+			var styl = styles_[i];
+			styl.innerHTML = `
+			.anomaly`+i+`{
+				transform: scaleX(`+(1+(Math.random()/50))+`) scaleY(`+(1+(Math.random()/50))+`);
+			}
+			`
+		}
+    }
+	
+	var titleStyl = document.createElement("style");
+	document.head.appendChild(titleStyl);
+	function updateTimerNOGAME(){
+		titleStyl.innerHTML = `.title{text-shadow: black 0px `+(Math.round((Math.random()-0.5)*15))+`px `+(Math.round(Math.random()*15))+`px;}`
+	}
 
     function StartGame(start,hard){
         round = round + 1;
@@ -293,7 +370,7 @@ label{
             round = 0;
         }
         if(round>maxround){
-            SetDivStart(true);
+            SetDivStart(true,hard);
             endgame = true;
         }
         if(!endgame){

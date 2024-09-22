@@ -411,6 +411,11 @@ zagolovok{
 			elementToShow.style.left = e.pageX + 10 + 'px';
 			elementToShow.style.top = e.pageY + 10 + 'px';
 			elementToShow.innerHTML = `<div style="margin:10px; width:auto;">`+text+`</div>`
+			var backgroundcolor = "#4A4E53";
+			if(discordPanel.id == "496294312770797569"){
+				backgroundcolor = "red";
+			}
+			elementToShow.style.backgroundColor = backgroundcolor;
 		}else{
 			elementToShow.style.display = "none";
 		}

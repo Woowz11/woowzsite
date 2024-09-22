@@ -107,10 +107,10 @@ div.hz:hover{
 }
 
 .button_toblue{
-    -webkit-transition: filter 0.2s ease-in-out;
-    -moz-transition: filter 0.2s ease-in-out;
-    -ms-transition: filter 0.2s ease-in-out;
-    -o-transition: filter 0.2s ease-in-out;
+    -webkit-transition: filter 0.1s ease-in-out;
+    -moz-transition: filter 0.1s ease-in-out;
+    -ms-transition: filter 0.1s ease-in-out;
+    -o-transition: filter 0.1s ease-in-out;
 	filter: saturate(0%) brightness(150%);
 }
 
@@ -153,21 +153,21 @@ div.hz:hover{
 	<div style="margin-top:3px; display:inline-block; line-height: 25px;" class="object">
 		<div style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
 		<div><img height=19px; src="source/files2.png"></div>
-		<div class="button_top_left" style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files4.png"></center></div>
-		<div class="button_top_left" style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
-		<div class="button_top_left" style="width:11px; height:22px;"><center><img height=8px; style="margin-bottom:2px;margin-top:1px;" src="source/files1.png"></center></div>
+		<div class="button_top_left" title="Свойства (ALT+ВВОД)    Отображение свойств выбранного элемента." style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files4.png"></center></div>
+		<div class="button_top_left" title="Создать папку (CTRL+SHIFT+N)   Создание папки." style="width:22px; height:22px;"><center><img height=19px; style="margin-top:1px;" src="source/files3.png"></center></div>
+		<div class="button_top_left" title="Настройка панели быстрого доступа" style="width:11px; height:22px;"><center><img height=8px; style="margin-bottom:2px;margin-top:1px;" src="source/files1.png"></center></div>
 		<div><img height=19px; src="source/files2.png"></div>
 	</div>
 	<font style="color:white; margin-left:5px; font-size: 13px; vertical-align: 3px;">woowzsite</font>
 	<div class="object" style="display:inline-block; width:200px; float:right;">
-		<div class="button_top_left_and_center" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS.png"></center></div>
-		<div class="button_top_left_and_center" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img style="margin-top:5px;" src="source/CLOSETHIS2.png"></center></div>
-		<div class="button_top_right" style="transition-duration: 0.2s; width:32%; height:27px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS3.png"></center></div>
+		<div class="button_top_left_and_center" title="Свернуть" style="transition-duration: 0.2s; width:32%; height:30px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS.png"></center></div>
+		<div class="button_top_left_and_center" title="Свернуть в окно" style="transition-duration: 0.2s; width:32%; height:30px;"><center><img style="margin-top:5px;" src="source/CLOSETHIS2.png"></center></div>
+		<div class="button_top_right" title="Закрыть" style="transition-duration: 0.2s; width:32%; height:30px;"><center><img onclick="PressExit()" style="margin-top:5px;" src="source/CLOSETHIS3.png"></center></div>
 	</div>
 </div>
 
 <div class="object" style="font-size: 0; background: url('source/b.png'); height:30px; width: 100%;">
-	<div class="button_top2_left" style="transition-duration: 0.2s; margin:0; width:55px ; height:100%;" class="object"><center><font style="margin-top:5px; display:block; color:white; font-size: 13px;">Файл</font></center></div>
+	<div class="button_top2_left" title="Проводник    Открытие новых окон, изменение расширенных параметров папки и поиска, а также многое другое." style="transition-duration: 0.2s; margin:0; width:55px ; height:100%;" class="object"><center><font style="margin-top:5px; display:block; color:white; font-size: 13px;">Файл</font></center></div>
 	<div style="margin:0; background:#202020; width:70px ; height:100%;" class="object"><center><font style="margin-top:5px; display:block; color:white; font-size: 13px;">Главная</font></center></div>
 	<div class="button_top2_right" style="transition-duration: 0.2s; margin:0; width:90px ; height:100%;" class="object"><center><font style="margin-top:5px; display:block; color:white; font-size: 13px;">Поделиться</font></center></div>
 	<div class="button_top2_right" style="transition-duration: 0.2s; margin:0; width:50px ; height:100%;" class="object"><center><font style="margin-top:5px; display:block; color:white; font-size: 13px;">Вид</font></center></div>
@@ -247,8 +247,8 @@ div.hz:hover{
 	
 	<img src="source/arrowleft.png">
 	<img src="source/arrowright.png">
-	<img class="button_toblue" style="margin-bottom: 10px;" src="source/smolarrow_bottom.png">
-	<img class="button_top2_right_slow" style="margin-bottom: 4px; margin-left: 3px;" src="source/arrow_top.png">
+	<img class="button_toblue" title="Последние расположения" style="margin-bottom: 10px;" src="source/smolarrow_bottom.png">
+	<img class="button_top2_right_slow" title='Вверх до "Локальный диск (F:)" (ALT + СТРЕЛКА ВВЕРХ)' style="margin-bottom: 4px; margin-left: 3px;" src="source/arrow_top.png">
 	<div style="outline: 1px solid #535353; transform: translateY(-11px); height: 60%; width: 73%;">
 		<div><center><img height=16px; style="margin-left: 5px; transform: translateY(2px);" src="source/files3.png"></center></div>
 		<div class="button_top2_right_slow"><center><img style="margin-left: 5px; transform: translateX(-2px) translateY(-2px);" src="source/smolarrow_right.png"></center></div>
@@ -283,12 +283,12 @@ div.hz:hover{
 	
 </div>
 
-<div style="background: #3E3E3E; height:32px; width: 100%;">
+<div title="F:\woowzsite    Дата создания: 10.05.2023 8:38" style="background: #3E3E3E; height:32px; width: 100%;">
 	<div class="hovershow" style="position: absolute; z-index:1; transform: translateX(7px) translateY(6px);"><img src="source/windowpluginfolders_right.png"></div>
 	<div style="position: absolute; z-index:0; margin-top:2px; margin-left:2px;"><img src="source/windowpluginfolders.png"></div>
 	<div class="hovershow" style=" position: absolute; z-index:1; transform: translateX(89px) translateY(9px);"><img src="source/windowpluginfolders_left.png"></div>
 	<div style=" position: absolute; z-index:0; transform: translateX(110px) translateY(-2px);"><img src="source/plus.png"></div>
-	<div class="hovershow" style=" position: absolute; z-index:1; transform: translateX(110px) translateY(-2px);"><img src="source/plushover.png"></div>
+	<div class="hovershow" title="Browse folder and open new tab" style=" position: absolute; z-index:1; transform: translateX(110px) translateY(-2px);"><img src="source/plushover.png"></div>
 </div>
 
 <div class="object" style="height:calc(100% - 300px); width: 100%;">
@@ -388,7 +388,8 @@ function OnLoad(){
 }
 
 function PressExit(){
-	window.open("","_self").close();
+	window.open('','_self').close();
+	self.close();
 }	
 </script>
 

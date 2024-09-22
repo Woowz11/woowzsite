@@ -4,15 +4,17 @@
 <link rel="icon" type="image/x-icon" href="source/folder.ico">
 
 <style>
-@font-face {
-	font-family: "comfortaa";
-	src: url("source/Comfortaa.ttf") format('opentype');
+@font-face{ font-family:"Comfortaa"; src: url("source/Comfortaa.ttf")format('opentype'); }
+
+:root {
+  --a-outline: rgb(64,64,0);
+  --a-outline-hover: rgb(64,0,0);
 }
-	
+
 html{
 	background-color:rgb(50,50,50);
 	cursor:default;
-	font-family: comfortaa;
+	font-family: Comfortaa;
 }
 
 .white-font{
@@ -40,26 +42,50 @@ html{
 	image-rendering: pixelated;
 }
 
-.div-image{
+.div-image, .div-image-short{
 	background-image:url('source/transparent.png');
 }
 
 button{
 	cursor:pointer;
-	font-family: comfortaa;
+	font-family: Comfortaa;
 }
 
 select{
 	cursor:pointer;
-	font-family: comfortaa;
+	font-family: Comfortaa;
 }
+
+a{
+	text-decoration: none;
+	color:yellow;
+	text-shadow: -1px -1px 0 var(--a-outline), 1px -1px 0 var(--a-outline), -1px 1px 0 var(--a-outline), 1px 1px 0 var(--a-outline); 
+}
+
+a:hover{
+	color:red;
+	text-shadow: -1px -1px 0 var(--a-outline-hover), 1px -1px 0 var(--a-outline-hover), -1px 1px 0 var(--a-outline-hover), 1px 1px 0 var(--a-outline-hover); 
+}
+
+.grid-size{
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.div-image{
+	height:350px;
+}
+
+.div-image-short{
+	height:50px;
+}
+
 </style>
 
 <body>
 	<div class="background-image-div custom-cursor" style="margin:0px;">
-		<div style="background-color:rgba(0,0,0,0.2);">
-			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files <font id="prikol">(с приколом!)</font></font><br>
-			<font class="white-font">Задний фон: </font><select id="background-select" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
+		<div style="background-color:rgba(0,0,0,0.2); padding:5px;">
+			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files <font id="prikol" style="font-size:0.6em;"></font></font><br>
+			<font class="white-font">Задний фон: </font><select id="background-select" onclick="ChangeStyle('div-image, .div-image-short',`background-image:url('`+document.getElementById('background-select').value+`')`);" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
 				<option value="source/transparent.png">Светлый</option>
 				<option value="source/transparent-dark.png">Тёмный</option>
 				<option value="source/transparent-red.png">Красный</option>
@@ -72,7 +98,10 @@ select{
 			</select> 
 			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button> 
 			<button onclick="ChangeStyle('custom-cursor',`cursor:auto;`)">Сбросить курсор</button>
+			<button onclick="ChangeFont('Comfortaa')">Сбросить шрифт</button>
 			<input type="checkbox" id="checkbox" name="checkbox" style="Transform: scale(1.6) translateY(1px);" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"> <font class="white-font">Сделать изображения размытыми</font>
+			
+			<div style="float: right"><input type="range" min="0.2" max="2" step="0.01" value="0.5" id="range"><font class="white-font">Размер ячеек</font> <button onclick="ChangeSize(true);">Сбросить</button></div>
 			<hr></div>
 		<font class="white-font" style="font-size:5em;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>% <font id="finish-ms" style="font-size: 0.75em;"></font></font>
 		<div id="explorer"></div>
@@ -80,6 +109,7 @@ select{
 </body>
 
 <script src="source/source.js"></script>
+<script src="source/all_sites.js"></script>
 <script>
 	var disable = false;
 
@@ -123,13 +153,44 @@ select{
 	function ChangeStyle(clas,styl){
 		var styleElement = document.createElement('style');
 		styleElement.innerHTML = `
-			.${clas} {
-				${styl}
-			}
+.${clas} {
+	${styl}
+}
 		`;
 
 		document.head.appendChild(styleElement);
 	}
+	
+	function ChangeFont(font){
+		var styleElement = document.createElement('style');
+		styleElement.innerHTML = `
+html {
+	font-family:${font};
+}
+button{
+	font-family:${font};
+}
+select{
+	font-family:${font};
+}
+		`;
+
+		document.head.appendChild(styleElement);
+	}
+	
+	var range = document.getElementById("range");
+	function ChangeSize(reset){
+		var newsize = range.value;
+		var default_value = 0.5;
+		if(reset==true){
+			newsize = default_value;
+			range.value = newsize;
+		}
+		ChangeStyle("grid-size",`grid-template-columns: repeat(auto-fill, minmax(`+Math.floor(newsize/default_value*300)+`px, 1fr));`);
+		ChangeStyle("div-image",`height:`+Math.floor(newsize/default_value*350)+`px;`);
+		ChangeStyle("div-image-short",`height:`+Math.floor(newsize/default_value*50)+`px;`);
+	}
+	range.addEventListener("input",ChangeSize);
 	
 	var counts = {}
 	var fullcounts = [0,0]
@@ -139,11 +200,14 @@ select{
 		counts[text] = [tabl.length,0];
 		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
 		document.getElementById("total-all").innerHTML = fullcounts[0];
-		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div id="${text}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">`
+		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
 		
 		function LoadSource(that,src,text,type){
 			if(fullcounts[0]==fullcounts[1]+1){
 				document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
+				document.title = "Woowzsites Files";
+			}else{
+				document.title = "Woowzsites Files ("+(fullcounts[1]+1)+"/"+(fullcounts[0])+")";
 			}
 		
 			var type = "idk"
@@ -167,7 +231,7 @@ select{
 			if(time>50000){time_col="yellow; background-color:black";}
 			if(time>100000){time_col="orange; background-color:black";}
 			if(time>200000){time_col="red; background-color:black";}
-			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type=="mp3"?"height:50px":"height:350px")+`; `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
+			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image`+(type=="mp3"?"-short":"")+`" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
 			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}#t=0.1" type="video/mp4"></video>`
 			:
@@ -188,7 +252,7 @@ select{
 			document.getElementById(text+"-loaded").innerHTML = c
 			document.getElementById(text+"-proc").innerHTML = Math.floor((c/counts[text][0])*10000)/100
 			if(c >= counts[text][0]){document.getElementById(text+"-img").innerHTML=""}
-				
+
 			fullcounts = [fullcounts[0],fullcounts[1]+1];
 			document.getElementById("total-loading").innerHTML = fullcounts[1];
 			document.getElementById("total-proc").innerHTML = Math.floor((fullcounts[1]/fullcounts[0])*10000)/100;
@@ -240,11 +304,40 @@ select{
 		result = result + `</div><br>`
 		explorer.innerHTML = explorer.innerHTML + result
 	}
-	function GenerateTableCustom(text,tabl,codefirst,code,codelast){
+	function GenerateTableSites(){
+		var result = `<font class="white-font" style="font-size:5em;">Публичные сайты <font style="font-size:0.5em;">(`+all_sites.length+`)</font></font><br>
+		<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 10px; cursor:default;">
+		`
+			
+		for(var src of all_sites){
+			var tags = "";
+			var tag_ = 0;
+			for(var tag of src["tags"]){
+				tags += ((tag_==0?"":", ")+"<font class='src' style='cursor:text;'>"+(tag==""?"<i>NULL</i>":tag)+"</font>");
+				tag_++;
+			}
+			result += `<div style="width:100%; height:200px; background-color:rgb(250,250,250); border-radius: 20px;"><div style="padding:10px;"><img style="height:28px; " src="source/`+(src["icon"]==null?"none":src["icon"])+`.ico"> <font style="font-size:1.75em;"><b>`+src["name"]+`</b></font><br><br>
+			<b><a style="font-size:1.5em;" href="`+src["href"]+`.html">`+src["href"]+`</a></b><br><br>
+			<font>Теги: ${tags}</font></div></div>`
+		}
+			
+		result = result + `</div><br>`
+		explorer.innerHTML = explorer.innerHTML + result
+	}
+	function GenerateTableCustom(text,tabl,codefirst,code,codelast,func,func_src){
 		tabl.sort();
 		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(`+tabl.length+`)</font></font><br>`+codefirst
 		for(var src of tabl){
-			result = result + code.replace(/{s}/g, src.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+			if(func!=null){
+				func(src);
+			}
+			var src_ = src;
+			var src2 = src_;
+			if(func_src!=null){
+				src_ = func_src(src_);
+			}
+			
+			result = result + code.replace(/{s}/g, src_.replace(/</g, '&lt;').replace(/>/g, '&gt;')).replace(/{s2}/g, src2.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 		}
 		result = result + codelast + `<br>`
 		explorer.innerHTML = explorer.innerHTML + result
@@ -266,6 +359,7 @@ select{
 		"source/cats/*.png"            :WoowzsiteSourceCats,
 		"source/bloodeyesystems/*.png" :WoowzsiteSourceBloodeyeSystems,
 		"source/wldbackroomsgame/*.png":WoowzsiteSourceWldouiBackrooms,
+		"corrupted_minecraft/*.png"    :WoowzsiteSourceCorruptedMinecraft,
 		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
 		"source/*.mp4"                 :WoowzsiteSourceVideos,
 		"source/*.mp3"                 :WoowzsiteSourceAudios,
@@ -367,9 +461,16 @@ select{
 		}
 	}
 	
-	if(!(mem_prikol_fullrandom||mem_prikol_more_category||mem_prikol_one_category||mem_prikol_peremeshat||mem_prikol_random_category||mem_prikol_screamer)){
-		document.getElementById("prikol").style.display = "none";
+	if(mem_prikol_fullrandom||mem_prikol_more_category||mem_prikol_one_category||mem_prikol_peremeshat||mem_prikol_random_category||mem_prikol_screamer){
+		document.getElementById("prikol").innerHTML = "(с приколом!)";
 	}
+	
+	GenerateTableCustom("Шрифты",WoowzsiteSourceFonts,
+	`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; padding:5px; text-align: justify;">`,
+	`<div style="width:99.5%; display:inline-block; background-color:rgb(250,250,250); border-radius: 20px; padding:5px; margin-bottom:5px; cursor:default;"><center style="margin-bottom:10px;"><font>{s2}</font><br><button onclick="ChangeFont('{s}');">Установить шрифт</button></center><font style="font-family:{s}; padding:5px; word-wrap: break-word;">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ<br>аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ<br>0123456789+-=_(){}[]<>!?~@#№$.,:;%^&*"\`/|\\'<br>·•°™©®§±µ«»€…</font></div> `,
+	`</div>`,function(src){ var stl = document.createElement("style"); stl.innerHTML = "@font-face{ font-family:\""+src.split("/")[1].split(".")[0]+"\"; src: url(\""+src+"\")format('opentype'); }"; document.head.appendChild(stl); },function(src){ return src.split("/")[1].split(".")[0]; });
+	
+	GenerateTableSites();
 	
 	GenerateTableCustom("Слова",WoowzsiteWords,`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);
 </script>
