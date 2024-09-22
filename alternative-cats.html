@@ -226,6 +226,7 @@ label{
 			}
 			localStorage.setItem("altcat-totalgames",parseInt(localStorage.getItem("altcat-totalgames"))+1);
 			var best = localStorage.getItem("altcat-best");
+			if(best==null){best="F | 60:0:0";}
 			var best_parts = best.split("|");
 			var best_ocenka = best_parts[0].trim();
 			var best_time = best_parts[1].trim();

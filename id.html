@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Get ID & Geo</title>
+<link rel="icon" type="image/x-icon" href="source\none.ico">
+
+<font id="result">Получение информации о госте...</font><br>
+<font id="result-geo">Получение геолокации...</font>
+
+<script>
+    let browserInfo = navigator.userAgent;
+    document.getElementById("result").innerText = browserInfo;
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            console.log(position.coords);
+            document.getElementById("result-geo").innerHTML = "Широта: " + position.coords.latitude + "<br>Долгота: " + position.coords.longitude + "<br>Точная: " + position.coords.accuracy;
+        });
+    } else {
+        document.getElementById("result-geo").innerText = "Не получилось получить геолокации";
+    }
+</script>
