@@ -111,9 +111,9 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png")
 
 WoowzsiteSourceAlchemy = AddTableToTable(AddFullnessToTable([
-	"dev","empty","difference","dark","full","energy","temp","pressure","kosmolog_singular","kvant_gravity","boson_x","boson_y","qvark","lepton"
+	"dev","пу","по","разница","тьма","э","т","д","космологическая_сингулярность","гравитация_квантовая","бозон_x","бозон_y","кварк","лептон"
 ],"alchemy/",".png"),AddFullnessToTable([
-	"time","big_space_explosion"
+	"в","большой_взрыв"
 ],"alchemy/",".gif"))
 
 WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([

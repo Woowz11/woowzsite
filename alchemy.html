@@ -48,7 +48,7 @@ button{
 
 .element{
 	transition: transform 0.3s;
-	filter: drop-shadow(0px 0px 5px rgba(0,0,0,0.3));
+	filter: drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
 }
 .element:hover{
 	transform: scale(1.2);
@@ -61,9 +61,8 @@ button{
     animation: rotate 0.3s linear infinite;
 }
 .energy {
-    animation: rotate 0.3s linear infinite;
-	filter: drop-shadow(0px 0px 5px rgba(255,255,255,1));
-	
+    animation: rotate 0.2s linear infinite;
+	filter: drop-shadow(0px 0px 20px rgba(255,255,0,1));
 }
 @keyframes rotate {
     0% {
@@ -92,6 +91,43 @@ button{
 	}
 }
 
+.light {
+	filter: drop-shadow(0px 0px 30px rgba(255,255,255,1)) drop-shadow(0px 0px 30px rgba(255,255,255,1)) drop-shadow(0px 0px 30px rgba(255,255,255,1)) drop-shadow(0px 0px 30px rgba(255,255,255,1));
+	animation: light 60s linear infinite;
+}
+@keyframes light {
+    0% {
+        transform: scale(2) rotate(0deg);
+    }
+    50% {
+        transform: scale(2.2) rotate(180deg);
+    }
+	100%{
+		transform: scale(2) rotate(360deg);
+	}
+}
+
+.dark {
+	filter: drop-shadow(0px 0px 30px rgba(0,0,0,1)) drop-shadow(0px 0px 30px rgba(0,0,0,1));
+	animation: bog 60s linear infinite;
+}
+
+.bog {
+	filter: drop-shadow(0px 0px 5px rgba(255,255,255,1)) drop-shadow(0px 0px 5px rgba(255,255,0,1));
+	animation: bog 60s linear infinite;
+}
+@keyframes bog {
+    0% {
+        transform: scale(1.5) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.7) rotate(180deg);
+    }
+	100%{
+		transform: scale(1.5) rotate(360deg);
+	}
+}
+
 </style>
 
 <body>
@@ -106,7 +142,8 @@ button{
 		</div>
 		
 		<div style="position:fixed; right:50px; bottom:10%;">
-			<textarea id="generated-recipes" style="width:30vw; height:70vh; resize: none; overflow-y:scroll;" rows="4" colds="50"></textarea>
+			<textarea id="generated-recipes" style="width:30vw; height:70vh; resize: none; overflow-y:scroll; word-wrap: normal;" spellcheck="false" rows="4" colds="50"></textarea><br>
+			<font id="error" style="color:red; font-size:1.2em; display:none;"><b>ОШИБКА ПРИ КОМПИЛЯЦИИ РЕЦЕПТОВ! СМ. F12</b></font>
 		</div>
 		
 		<font style="position:fixed; right:10px; bottom:10px; font-size:2em; white-space: nowrap;">Сделано Woowz11</font>
@@ -118,13 +155,12 @@ button{
 		</div>
 		<div style="height:calc(100% - 15% - 15%); padding:20px;">
 			<div style="background-color:rgba(0,0,0,0.2); width:100%; height:100%; border-radius: 20px; box-shadow: inset 0 0 10px 10px rgba(0, 0, 0, 0.2); overflow: hidden; overflow-y: scroll;">
-				<div id="inventory" style="height:auto; width:95%; margin-left:calc(5% / 2); margin-top:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); grid-auto-rows: 160px;">
-				</div>
+				<div id="inventory" style="height:auto; width:95%; margin-left:calc(5% / 2); margin-top:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); grid-auto-rows: 55px;"></div>
 			</div>
 		</div>
 		<div style="height:10%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); grid-gap: 5px; margin-left:20px; margin-right:20px;">
-			<button style="font-size:16px;">Выйти в меню</button>
-			<button style="font-size:16px;">Сохранить</button>
+			<button style="font-size:16px;" onclick="GoToMainMenu();">Выйти в меню</button>
+			<button style="font-size:16px;" onclick="SaveGame();">Сохранить<font id="save" style="display:none;">*</font></button>
 			<button style="font-size:16px;" onclick="ClearTable();">Очистить стол</button>
 			<button style="font-size:16px;">Настройки</button>
 			<button style="font-size:16px;">История</button>
@@ -164,6 +200,7 @@ var ElementsDatas = {};
 var OpenElements = {};
 var RecipesDatas = {};
 var OpenRecipes = {};
+var needsave = false;
 
 var MouseOffsetX = 0; var MouseOffsetY = 0;
 
@@ -179,14 +216,20 @@ function ClearTable(){
 	}
 }
 
+function AddRecipe(recipe,result){
+	OpenRecipes[recipe] = result;
+	document.getElementById("open-recipes").innerText = Object.keys(OpenRecipes).length;
+	needsave = true;
+	document.getElementById("save").style.display = "unset";
+}
+
 function CheckRecipe(id1,id2){
 	var result = null;
 	var recipe = id1+"+"+id2;
 	result = RecipesDatas[recipe];
 	if(result==null){recipe = id2+"+"+id1;result = RecipesDatas[recipe];}
 	if(OpenRecipes[recipe]==null&&result!=null){
-		OpenRecipes[recipe] = result;
-		document.getElementById("open-recipes").innerText = Object.keys(OpenRecipes).length;
+		AddRecipe(recipe,result);
 	}
 	if(result!=null){
 		for(var el of result){
@@ -203,6 +246,7 @@ function CombineElements(el1,el2,distance){
 		var id1 = GetElementDataById(el1.id)["number"]; var id2 = GetElementDataById(el2.id)["number"];
 		var result = CheckRecipe(GetElementDataById(el1.id)["id"],GetElementDataById(el2.id)["id"]);
 		if(result!=null){
+			result.sort(()=> Math.random()-0.5);
 			var rect1 = el1.getBoundingClientRect();
 			var rect2 = el2.getBoundingClientRect();
 			var x = rect1.left/2+rect2.left/2;
@@ -376,24 +420,29 @@ setInterval(PerSecond,1000);
 function StartGame(save){
 	document.getElementById("mainmenu").style.display = "none";
 	
-	if(save==null){
-		for(var eldata of AlchemyElements){
-			if(eldata["Start"]==true){ AddElementToInventory(eldata["Id"]); }
+	for(var eldata of AlchemyElements){
+		if(eldata["Start"]==true){ AddElementToInventory(eldata["Id"]); }
+	}
+	if(save!=null){
+		var save_recipes = save.split(",");
+		
+		for(var recipe of save_recipes){
+			if(RecipesDatas[recipe]!=null){
+				var results = RecipesDatas[recipe];
+				for(var result of results){
+					AddElementToInventory(result);
+				}
+				AddRecipe(recipe,results)
+			}
 		}
-	}else{
-	
+		needsave = false;
+		document.getElementById("save").style.display = "none";
 	}
 }
 
 function StartGameWithSave(){
-	var input = document.getElementById("file-input");
-	input.addEventListener('change', function() {
-		if (input.files.length > 0) {
-			const file = input.files[0];
-			StartGame(file);
-		}
-	});
-	input.click();
+	var save = localStorage.getItem("alchemy_save");
+	StartGame((save==null?null:save));
 }
 
 function GetElementFromInventory(event,id,justclick,el){
@@ -406,11 +455,63 @@ function GetElementFromInventory(event,id,justclick,el){
 	}
 }
 
+window.addEventListener('beforeunload', function (e) {
+	if(needsave){
+		e.preventDefault();
+		e.returnValue = '';
+	}
+});
+
+function LoadingMainMenu(){
+	document.getElementById("mainmenu").style.display = "unset";
+	ClearTable();
+	OpenRecipes = {};
+	OpenElements = {};
+	document.getElementById("inventory").innerHTML = "";
+	
+	needsave = false;
+	document.getElementById("save").style.display = "none";
+}
+
+function GoToMainMenu(){
+	var gotomenu = false;
+	if(needsave){
+		const result = confirm("Вы не сохранили прогресс, продолжить выход?");
+		if(result){
+			gotomenu = true;
+		}
+	}else{
+		gotomenu = true;
+	}
+	if(gotomenu){
+		LoadingMainMenu();
+	}
+}
+
+function SaveGame(){
+	var save_recipes = "";
+	
+	for(var recipeid in OpenRecipes){
+		save_recipes += ((save_recipes==""?"":",") + recipeid)
+	}
+	
+	if(DevMode){
+		console.log("Сохранено:",save_recipes);
+	}
+	localStorage.setItem("alchemy_save",save_recipes)
+	
+	needsave = false;
+	document.getElementById("save").style.display = "none";
+}
+
 function AddElementToInventory(id){
-	var result = `<div id="got" elementid="`+id+`" style="padding:5px; text-align:center; cursor:pointer;"><div style="background-color:rgb(200,200,200); border-radius: 10px; padding:5px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);"><div class="element"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:100px; height:100px; border-radius: 20%;" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"><br><font style="font-size:1.2em;"></div><b>`+(ElementsDatas[id]["Name"])+`</b></font></div></div>`;
-	document.getElementById("inventory").innerHTML += result;
-	OpenElements[id] = true;
-	document.getElementById("open-elements").innerText = Object.keys(OpenElements).length;
+	if(OpenElements[id]!=true){
+		var name = ElementsDatas[id]["Name"];
+		var result = `<div id="got" elementid="`+id+`" title="`+name+`" style="text-align:center; cursor:pointer; z-index:`+Math.floor(1000+Math.random()*100)+`;"><div><div class="element"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:50px; height:50px; border-radius: 20%;" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div></div></div>`;
+		document.getElementById("inventory").innerHTML += result;
+		OpenElements[id] = true;
+		document.getElementById("open-elements").innerText = Object.keys(OpenElements).length;
+	}
 }
 document.getElementById("total-elements").innerText = AlchemyElements.length;
 document.getElementById("total-recipes").innerText = AlchemyRecipes.length;
@@ -443,10 +544,18 @@ if(DevMode){
 			console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ ВТОРОЙ ЭЛЕМЕНТ (`+parts2[1]+`) НЕИЗВЕСТЕН!`)
 			error = true;
 		}
+		var results = parts[1].split(",");
+		for(var result of results){
+			if(ElementsDatas[result]==null){
+				console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ ЭЛЕМЕНТ ИЗ РЕЗУЛЬТАТА (`+result+`) НЕИЗВЕСТЕН!`)
+				error = true;
+			}
+		}
 		
 		if (values[parts2[0]+"+"+parts2[1]]!=null||values[parts2[1]+"+"+parts2[0]]!=null) {
 			var val = values[parts2[0]+"+"+parts2[1]];
 			if(val==null){val=values[parts2[1]+"+"+parts2[0]];}
+			error = true;
 			console.log(`РЕЦЕПТ: РЕЦЕПТ (`+str+`) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ УЖЕ ЕСТЬ РЕЦЕПТ (`+val+`)!`);
 		} else {
 			values[parts2[0]+"+"+parts2[1]] = str;
@@ -454,9 +563,15 @@ if(DevMode){
 				AlchemyRecipesWet_.push(str);
 			}
 		}
+		
+		if(error){
+			document.getElementById("error").style.display = "unset";
+		}
 	}
 	
-	var wetrecipes = {};
+	var wetrecipes = [];
+	var t = 0;
+	var t_max = 3;
 	for(var wetrecipe of AlchemyRecipesWet_){
 		var recipe = wetrecipe.split("=");
 		var elements = recipe[0].split("+");
@@ -473,13 +588,33 @@ if(DevMode){
 			var group2 = (el2_group?AlchemyGroups[el2_]:[el2]);
 			for(var x of group1){
 				for(var y of group2){
-					wetrecipesresult += "\""+x+"+"+y+"="+recipe[1]+"\",\n";
+					wetrecipes.push(x+"+"+y+"="+recipe[1]);
 				}
 			}
 		}else{
-			wetrecipesresult += "\""+wetrecipe+"\",\n";
+			wetrecipes.push(wetrecipe);
 		}
 	}
+	
+	var recipes_ = {};
+	for(var recipe of wetrecipes){
+		var r = recipe.split("=");
+		var elements = r[0].split("+");
+		if(recipes_[r[0]]==null&&recipes_[elements[1]+"+"+elements[0]]==null){
+			recipes_[r[0]] = r[1];
+		}
+	}
+	console.log(recipes_);
+	
+	for(var key in recipes_){
+		var val = recipes_[key];
+		t++;
+		wetrecipesresult += "\""+key+"="+val+"\","+(t>=t_max?"\n":"");
+		if(t>=t_max){
+			t = 0;
+		}
+	}
+	
 	document.getElementById("generated-recipes").innerHTML = wetrecipesresult.slice(0, -1);;
 }
 
