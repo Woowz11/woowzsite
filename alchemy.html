@@ -176,12 +176,12 @@ button{
 	
 	<input id="file-input" type="file" style="display:none;" accept=".woowzalchemy">
 </body>
-<script src="F:\woowzsite-private\alchemy.js"></script>
+<script src=".\woowzsite-private\alchemy.js"></script> <!-- F:\woowzsite-private\alchemy.js | .\woowzsite-private\alchemy.js -->
 
 <script>
 
 const GameVersion = "0.0.0";
-const DevMode = true;
+const DevMode = false;
 
 document.querySelectorAll("#version").forEach(function(element){
     element.innerText = GameVersion;
