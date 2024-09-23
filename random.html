@@ -137,7 +137,7 @@ function generaterandomtext(){
 	var result = "";
 	for(var i = 0; i <=rand; i++){
 		var word = (GetRandom(100)>30?words[GetRandom(words.length)]:GetRandom(100)>60?generateRandomWord():generateRandomEmojes());
-		result = result + " " + (GetRandom(10)>1?word:word.toUpperCase());
+		result = result + (result==""?"":" ") + (GetRandom(10)>1?word:word.toUpperCase());
 	}
 	return result;
 }
@@ -176,7 +176,7 @@ function generaterandommedia(){
 	var result = "";
 	
 	if(GetRandom(10)>3){
-		result = '<audio style="margin-top:'+GetRandom(5000)+'vh; z-index:1024; '+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+'" '+(GetRandom(150)>5?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="source/' + audios[GetRandom(audios.length)] + '.mp3" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
+		result = '<audio style="margin-top:'+GetRandom(5000)+'vh; z-index:1024; '+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+'" '+(GetRandom(150)>5?"":"autoplay ")+(GetRandom(10)>5?"":"loop ")+(GetRandom(10)>5?"":"controls ")+'><source src="' + audios[GetRandom(audios.length)] + '" type="audio/mpeg">'+generaterandomtext(true)+'</audio>';
 	}else{
 		result = '<video style="margin-top:'+GetRandom(5000)+'vh; z-index:1024; '+(GetRandom(10)>9 ? "transform: translateX("+(GetRandom(100)-50)+"vw);" : (GetRandom(10)>3 ? generatetransform(GetRandom(100)>20, true) : generatetransform(GetRandom(100)>20, false)))+' object-fit: fill;" controls name="media" '+(GetRandom(150)>5?"":"autoplay ")+' poster="'+getrandomimage()+'" '+"width='"+GetRandom(370)+"px'" + "height='"+GetRandom(370)+"px'"+'><source src="'+videos[GetRandom(videos.length)]+'" type="video/mp4"></video>';
 	}
@@ -212,12 +212,8 @@ function generateRandomEmojes(){
 	return word;
 }
 
-function getrandomcursor(){
-	var cursors = [];
-	randomcursors.forEach(element => cursors.push("url('"+element+"'), auto"))
-	cursors = [...cursors, ...["default","none","context-menu","help","auto","pointer","progress","wait","cell","crosshair","text","vertical-text","alias","copy","move","no-drop","not-allowed","grab","grabbing","all-scroll","col_resize","row-resize","n-resize","e-resize","s-resize","w-resize","ne-resize","nw-resize","se-resize","sw-resize","ew-resize","ns-resize","nesw-resize","nwse-resize","zoom-in","zoom-out"]];
-	
-	return cursors[GetRandom(cursors.length)];
+function getrandomcursor(){	
+	return randomcursors[GetRandom(randomcursors.length)];
 }
 
 function randomcssstyle(){
@@ -289,10 +285,8 @@ function randomcssstyle(){
 	@keyframes epicevents {
 	
 		from{
-			//`+(randomevents?veryepicrandomevents[veryepiceventsid][0]:"")+`
 			opacity: 0;
 		}to{
-			//`+(randomevents?veryepicrandomevents[veryepiceventsid][1]:"")+`
 			opacity: 1;
 		}
 	
@@ -461,25 +455,19 @@ function createrandomhtml(){
 		result = result + createuiimage();
 	}
 	
-	window.addEventListener('scroll', function() {
-	   /*let elements = document.querySelectorAll('scroll');
-
-		elements.forEach(function(element) {
-			let scrollTop = window.scrollY;
-			
-			element.style.top = scrollTop + 'px';
-		});*/
-	});
-	
 	return result+"</div>";
 }
 	const animations = ["anim1","anim2","anim3","anim4","anim5","anim6","anim7","anim8"];
 	const hrefs = ["woowzbackrooms","ai/random-images-galery","ai/3d-sceene","alternative-cats","nointernet","3d","w","console","blank","text-scripts","core","real-folder","blood_eye_co","blood_eye_co_new","blood_eye_co_systems","dexon","dexonmusic","eyes","firstpage","forest","img","index","list","null","openprojectsource","openprojectsource_download","quaere","random","site_woowz11","site_woowz11_2","skull-party!","test_site","xxx"];
 	const videos = WoowzsiteSourceVideos;
-	const audios = ["woowzbackrooms/sounds/breath","woowzbackrooms/sounds/level0","woowzbackrooms/sounds/walk","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","babah","sun","forest","Schoolhouse_Trouble_Metal_Version","Pixelizer","doom"]
+	const audios = WoowzsiteSourceAudios;
 	const words = WoowzsiteWords;
 	const fonts = ["Minecraft","Comfortaa","Inkverse","Topor","Concrete","Bookman","Apple Chancery","Marlett","Comic Sans MS","Arial","Helvetica","Verdana","Bradley Hand","Brush Script MT","Impact","cursive","Stencil Std","fantasy","Trattatello","Marker Felt","Chalkduster","Blippo","Jazz LET","Luminari","Snell Roundhand","URW Chancery L","Trebuchet MS","Gill Sans","American Typewriter","FreeMono","serif","OCR A Std","monospace","DejaVu Sans Mono","New Century Schoolbook","Courier","Noto Sans","Optima","Arial Narrow","Courier New","Andale Mono","sans-serif","Times","Didot","Georgia","Palatino"];
-	const randomcursors = WoowzsiteSourceCursors;
+	var randomcursors = ["default","none","context-menu","help","auto","pointer","progress","wait","cell","crosshair","text","vertical-text","alias","copy","move","no-drop","not-allowed","grab","grabbing","all-scroll","col_resize","row-resize","n-resize","e-resize","s-resize","w-resize","ne-resize","nw-resize","se-resize","sw-resize","ew-resize","ns-resize","nesw-resize","nwse-resize","zoom-in","zoom-out"];
+	for(var el of WoowzsiteSourceCursors){
+		randomcursors.push(`url("${el}"), auto`)
+	}
+	
 function randommake(){
 	
 	var link = document.querySelector("link[rel~='icon']");

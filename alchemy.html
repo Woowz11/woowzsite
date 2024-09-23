@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>Woowz Alchemy</title>
-<link rel="icon" type="image/x-icon" href="source\none.ico">
+<link rel="icon" type="image/x-icon" href="source/al.ico">
 
 <style>
 @font-face {
@@ -32,11 +32,19 @@ textarea::selection {
     background-color: blue;
 	color:white;
 }
+input::selection {
+    background-color: blue;
+	color:white;
+}
 
 button{
 	font-family: custom;
 	font-size:2em;
 	box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+	cursor:pointer;
+}
+
+input[type="checkbox"]{
 	cursor:pointer;
 }
 
@@ -61,7 +69,7 @@ button{
     animation: rotate 0.3s linear infinite;
 }
 .energy {
-    animation: rotate 0.2s linear infinite;
+    animation: rotate 0.15s linear infinite;
 	filter: drop-shadow(0px 0px 20px rgba(255,255,0,1));
 }
 @keyframes rotate {
@@ -128,10 +136,61 @@ button{
 	}
 }
 
+.fire {
+	filter: drop-shadow(0px 0px 100px rgba(255,255,0,1)) drop-shadow(0px 0px 5px rgba(255,255,0,1)) drop-shadow(0px 0px 7px rgba(255,128,0,1)) drop-shadow(0px 0px 10px rgba(255,0,0,1));
+	animation: rand-height 5s linear infinite;
+}
+@keyframes rand-height {
+    0%   { transform: scaleY(1    ); }
+	10%  { transform: scaleY(1.1  ); }
+	20%  { transform: scaleY(1.05 ); }
+	30%  { transform: scaleY(0.95 ); }
+	40%  { transform: scaleY(1.05 ); }
+	50%  { transform: scaleY(1.05 ); }
+	60%  { transform: scaleY(1.075); }
+	70%  { transform: scaleY(0.975); }
+	80%  { transform: scaleY(1.05 ); }
+	90%  { transform: scaleY(1.025); }
+	100% { transform: scaleY(0.975); }
+}
+
+.shake {
+	animation: shake 1s linear infinite;
+}
+@keyframes shake {
+    0%   { transform: translateY(0%); }
+	10%  { transform: translateY(1%); }
+	20%  { transform: translateY(-0.5%); }
+	30%  { transform: translateY(1.5%); }
+	40%  { transform: translateY(-0.5%); }
+	50%  { transform: translateY(1%); }
+	60%  { transform: translateY(-1%); }
+	70%  { transform: translateY(1.5%); }
+	80%  { transform: translateY(0%); }
+	90%  { transform: translateY(-7%); }
+	100% { transform: translateY(-3%); }
+}
+
+.electr {
+	animation: electr 0.5s linear infinite;
+}
+@keyframes electr {
+    0%   { filter: drop-shadow(0px 0px 60px rgba(128,128,255,1)); }
+	20%  { filter: drop-shadow(0px 0px 80px rgba(200,230,255,1)); }
+	40%  { filter: drop-shadow(0px 0px 70px rgba(200,200,255,1)); }
+	60%  { filter: drop-shadow(0px 0px 50px rgba(100,100,255,1)); }
+	80%  { filter: drop-shadow(0px 0px 60px rgba(255,128,255,1)); }
+	100% { filter: drop-shadow(0px 0px 70px rgba(200,200,255,1)); }
+}
+
+.glow-purple {
+	filter: drop-shadow(0px 0px 100px rgba(255,0,255,1)) drop-shadow(0px 0px 30px rgba(255,0,255,1));
+}
+
 </style>
 
 <body>
-	<div id="mainmenu" style="position:fixed; background-image:url('source/wall.png'); width:100vw; height:100vh; text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.4);">
+	<div id="mainmenu" style="position:fixed; background-image:url('source/wall.png'); width:100vw; height:100vh; text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.4); z-index:3000;">
 		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:5vh; font-size:5em; white-space: nowrap;"><b>⚗️ Woowz Alchemy ⚗️</b></font>
 		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:17vh; font-size:3em; white-space: nowrap;"><b>Версия: <font id="version">?.?.?</font></b></font>
 		
@@ -150,8 +209,13 @@ button{
 	</div>
 
 	<div style="background-color:rgb(200,200,200); box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.2); height:100vh; width:36.5%; display: inline-block;">
-		<div style="height:15%; background-color:red;">
-		
+		<div style="height:15%; padding-left:2.5%; position: relative;">
+			<button style="width:60%; font-size:1.2em; margin-top:10px;">Подсказка</button>
+			<input type="checkbox" id="sort-checkbox" style="transform: scale(1.15);"><font>В алфавитном порядке</font><br>
+			<input type="text" id="search" autocomplete="off" spellcheck="false" placeholder="Поиск..." style="width:94%; margin-top:5px; height:30px; font-size:1.2em;"><br>
+			<div style="background-color:rgb(220,220,220); border-radius:20px; width:95%; height:6vh; margin-top:10px; margin-bottom:10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); text-align:center; padding:5px;">
+				<font><b id="desc"></b></font>
+			</div>
 		</div>
 		<div style="height:calc(100% - 15% - 15%); padding:20px;">
 			<div style="background-color:rgba(0,0,0,0.2); width:100%; height:100%; border-radius: 20px; box-shadow: inset 0 0 10px 10px rgba(0, 0, 0, 0.2); overflow: hidden; overflow-y: scroll;">
@@ -172,22 +236,29 @@ button{
 	
 	<font style="position:fixed; right:10px; top:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>Woowz Alchemy<br>Версия: <font id="version">?.?.?</font><br><font id="dev" style="color:red;"></font></b></font>
 	
-	<font style="position:fixed; right:10px; bottom:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>На сцене: <font id="total-in-table">0</font><br><b>Элементов: <font id="open-elements">?</font>/<font id="total-elements">?</font><br>Рецептов: <font id="open-recipes">0</font>/<font id="total-recipes">?</font></b></font>
+	<font style="position:fixed; right:10px; bottom:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>На сцене: <font id="total-in-table">0</font><br>Элементов: <font id="open-elements">?</font>/<font id="total-elements">?</font><br>Рецептов: <font id="open-recipes">0</font>/<font id="total-recipes">?</font></b></font>
+	
+	<div id="dev-tool" style="position:fixed; background-color:rgba(200,200,200,0.9); width:auto; height:300px; top:100px; right:10px; text-align: center; display:none;">
+		<font>Отладка</font><br>
+		<button style="font-size:1.5em;" onclick="DebugOpenAll();">Открыть всё</button>
+	</div>
 	
 	<input id="file-input" type="file" style="display:none;" accept=".woowzalchemy">
 </body>
-<script src=".\woowzsite-private\alchemy.js"></script> <!-- F:\woowzsite-private\alchemy.js | .\woowzsite-private\alchemy.js -->
+<script src="F:\woowzsite-private\alchemy.js"></script> <!-- F:\woowzsite-private\alchemy.js | .\woowzsite-private\alchemy.js -->
 
 <script>
 
-const GameVersion = "0.0.0";
-const DevMode = false;
+const GameVersion = "0.0.1";
+const DevMode = true;
+/*Не забудь изменить скрипт с указания папки на ссылку!*/
 
 document.querySelectorAll("#version").forEach(function(element){
     element.innerText = GameVersion;
 });
 if(DevMode){
 	document.getElementById("dev").innerText="!Режим отладки!";
+	document.getElementById("dev-tool").style.display = "unset";
 }else{
 	document.getElementById("generated-recipes").style.display = "none";
 }
@@ -195,14 +266,60 @@ if(DevMode){
 var ElementsOnTable = [];
 var ElementsOnTableIDS = 0;
 var SelectedElement = null;
-var zindex = 0;
+var zindex = 2000;
 var ElementsDatas = {};
 var OpenElements = {};
 var RecipesDatas = {};
 var OpenRecipes = {};
 var needsave = false;
 
+var sort_alphaphyte = false;
+var search_applying = false;
+
 var MouseOffsetX = 0; var MouseOffsetY = 0;
+
+function SortAlphaphyte(){
+	var grid = document.getElementById("inventory");
+	var elements = Array.from(grid.children);
+	
+	elements.sort((a,b) => ElementsDatas[a.getAttribute("elementid")]["Name"].localeCompare(ElementsDatas[b.getAttribute("elementid")]["Name"]));
+	
+	elements.forEach(el => grid.appendChild(el));
+}
+
+function ChangeSortAlphaphyte(){
+	sort_alphaphyte = document.getElementById("sort-checkbox").checked;
+	if(sort_alphaphyte){
+		SortAlphaphyte();
+	}else{
+		var grid = document.getElementById("inventory");
+		var elements = Array.from(grid.children);
+		console.log(OpenElements);
+		
+		elements.sort((a,b) => OpenElements[a.getAttribute("elementid")] - OpenElements[b.getAttribute("elementid")]);
+		
+		elements.forEach(el => grid.appendChild(el));
+	}
+}
+document.getElementById("sort-checkbox").addEventListener('change',function(){ ChangeSortAlphaphyte(); });
+
+function ApplySearch(){
+	var text = document.getElementById("search").value.toLowerCase();
+
+	if(search_applying==false&&text!=""){ search_applying=true; }
+	if(search_applying){
+		var grid = document.getElementById("inventory");
+		var elements = Array.from(grid.children);
+		
+		for(var el of elements){
+			var name = ElementsDatas[el.getAttribute("elementid")]["Name"].toLowerCase();
+			el.style.display = (name.includes(text)?"unset":"none");
+		}
+		
+		if(search_applying&&text==""){ search_applying=false; }
+	}
+}
+document.getElementById("search").addEventListener('input',function(){ApplySearch();});
 
 function CreateElement(id){
 	ElementsOnTableIDS++;
@@ -221,6 +338,33 @@ function AddRecipe(recipe,result){
 	document.getElementById("open-recipes").innerText = Object.keys(OpenRecipes).length;
 	needsave = true;
 	document.getElementById("save").style.display = "unset";
+	
+	var elements_ = recipe.split("+");
+	
+	var dif = {};
+	for(const key in RecipesDatas){
+		if(RecipesDatas[key] !== OpenRecipes[key]){
+			dif[key] = RecipesDatas[key];
+		}
+	}
+	var notendcraft1 = false;
+	var notendcraft2 = false;
+	for(var recipe in dif){
+		var elements = recipe.split("+");
+		if(elements[0]==elements_[0]||elements[1]==elements_[0]){
+			notendcraft1 = true;
+		}
+		if(elements[0]==elements_[1]||elements[1]==elements_[1]){
+			notendcraft2 = true;
+		}
+	}
+		
+	if(notendcraft1==false){
+		document.getElementById(elements_[0]+"_END2").style.display = "unset";
+	}
+	if(notendcraft2==false){
+		document.getElementById(elements_[1]+"_END2").style.display = "unset";
+	}
 }
 
 function CheckRecipe(id1,id2){
@@ -358,6 +502,15 @@ document.getElementById("table").addEventListener("mousedown", function(event) {
 		}
 	}
 });
+document.getElementById("table").addEventListener('dblclick', function(event) {
+	if(event.button == 0){
+		var id = event.target.id;
+		if(id==""){
+			id = event.target.parentNode.id;
+		}
+		CloneElement(id);
+	}
+});
 function hasParentWithId(element, parentId) {
     var parent = element.parentNode;
     while (parent) {
@@ -378,15 +531,24 @@ document.getElementById("inventory").addEventListener("mousedown", function(even
 		}
 	}
 });
-
-document.getElementById("table").addEventListener('dblclick', function(event) {
-	if(event.button == 0){
-		var id = event.target.id;
-		if(id==""){
-			id = event.target.parentNode.id;
+var desc = document.getElementById("desc");
+document.addEventListener("mousemove", function(event) {
+	var id = "";
+	if(event.target!=null){
+		var got = hasParentWithId(event.target,"got");
+		if(got != null){
+			if(got.id == "got"){
+				id = got.getAttribute("elementid");
+			}
 		}
-		CloneElement(id);
 	}
+	var d = "";
+	if(id!=""){
+		if(ElementsDatas[id]["Desc"]!=null){
+			d = ElementsDatas[id]["Desc"];
+		}
+	}
+	desc.innerHTML = d;
 });
 
 function RemoveElementFromTable(id){
@@ -417,6 +579,18 @@ function PerSecond(){
 }
 setInterval(PerSecond,1000);
 
+function DebugOpenAll(){
+	if(DevMode){
+		for(var key in RecipesDatas){
+			var val = RecipesDatas[key];
+			for(var result of val){
+				AddElementToInventory(result);
+			}
+			AddRecipe(key,val);
+		}
+	}
+}
+
 function StartGame(save){
 	document.getElementById("mainmenu").style.display = "none";
 	
@@ -438,6 +612,9 @@ function StartGame(save){
 		needsave = false;
 		document.getElementById("save").style.display = "none";
 	}
+	
+	document.getElementById("search").value = "";
+	ApplySearch();
 }
 
 function StartGameWithSave(){
@@ -505,12 +682,26 @@ function SaveGame(){
 }
 
 function AddElementToInventory(id){
-	if(OpenElements[id]!=true){
+	if(OpenElements[id]==null){
 		var name = ElementsDatas[id]["Name"];
-		var result = `<div id="got" elementid="`+id+`" title="`+name+`" style="text-align:center; cursor:pointer; z-index:`+Math.floor(1000+Math.random()*100)+`;"><div><div class="element"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:50px; height:50px; border-radius: 20%;" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div></div></div>`;
+		var result = `<div id="got" elementid="`+id+`" title="`+name+`" style="text-align:center; cursor:pointer; z-index:`+Math.floor(1000+Math.random()*100)+`;"><div><div class="element"><img id="`+id+`_END" src="alchemy/that_end2.png" style="position:fixed; width:50px; height:50px; z-index:10; display:none;"><img id="`+id+`_END2" src="alchemy/that_end.png" style="position:fixed; width:50px; height:50px; z-index:10; display:none;"><img `+(ElementsDatas[id]["Class"]==null?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:50px; height:50px; border-radius: 20%;" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div></div></div>`;
 		document.getElementById("inventory").innerHTML += result;
-		OpenElements[id] = true;
+		OpenElements[id] = Object.keys(OpenElements).length+1;
 		document.getElementById("open-elements").innerText = Object.keys(OpenElements).length;
+		if(sort_alphaphyte){
+			SortAlphaphyte();
+		}
+		ApplySearch();
+	}
+	var hascraft = false;
+	for(var recipe in RecipesDatas){
+		var elements = recipe.split("+");
+		if(elements[0]==id||elements[1]==id){
+			hascraft = true;
+		}
+	}
+	if(hascraft==false){
+		document.getElementById(id+"_END").style.display = "unset";
 	}
 }
 document.getElementById("total-elements").innerText = AlchemyElements.length;
@@ -604,7 +795,6 @@ if(DevMode){
 			recipes_[r[0]] = r[1];
 		}
 	}
-	console.log(recipes_);
 	
 	for(var key in recipes_){
 		var val = recipes_[key];
