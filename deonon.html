@@ -3,71 +3,127 @@
 <title>Получить информацию</title>
 <link rel="icon" type="image/x-icon" href="source/dead.ico">
 
-<style> font{ color:blue; } .red{ color:red; } </style>
+<style>
+@font-face {
+    font-family: "custom";
+    src: url("source/Comfortaa.ttf") format('opentype');
+}
+
+html{font-family:custom; background-color:rgb(50,50,50);color:white;}
+
+font{ color:yellow; } .red{ color:red; }
+
+.th{ text-align:center; }
+
+::selection{
+	background-color:transparent;
+}
+font::selection{
+	background-color:black;
+}
+</style>
 
 <body>
-	На этом сайте будет показываться разная информация о госте
+	<center style="font-size:1.2em;">На этом сайте будет показываться разная информация о госте</center>
 	<hr>
-	<t title="">Браузер:</t> <font id="browser-info">Получение...</font><br>
-	<t title="">Название браузера:</t> <font id="browser">Получение...</font><br>
-	<t title="Показывает ваш IP с которым вы зашли на сайт">IP:</t> <font class="red" id="ip">Получение...</font><br>
-	<t title="">Провайдер:</t> <font class="red" id="prov">Получение...</font><br>
-	<t title="">Позиция:</t> <font class="red" id="pos">Получение...</font><br>
-	<t title="">Координаты:</t> <font class="red" id="cords">Получение...</font><br>
-	<t title="">Временная зона:</t> <font id="timezone">Получение...</font><br>
-	<t title="">Хост:</t> <font class="red" id="host">Получение...</font><br>
-	<t title="Показывает координаты широту вашей позиции">Широта:</t> <font class="red" id="geo-lat">Получение...</font><br>
-	<t title="Показывает координаты долготу вашей позиции">Долгота:</t> <font class="red" id="geo-lon">Получение...</font><br>
-	<t title="">Полная позиция:</t> <font class="red" id="geo">Получение...</font><br>
-	<t title="Страна в которой находится пользователь">Страна:</t> <font class="red" id="count">Получение...</font><br>
-	<t title="Показывает время обновление вашей позиции">Время обновления гео:</t> <font id="geo-time">Получение...</font><br>
-	<t title="Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgent">С телефона?:</t> <font id="phone">Получение...</font><br>
-	<t title="Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgentData.mobile">С телефона? (2 вариант):</t> <font id="phone2">Получение...</font><br>
-	<t title="Обрезанный путь до этого сайта">Путь:</t> <font id="path">Получение...</font><br>
-	<t title="Путь до этого сайта">Полный путь:</t> <font id="href">Получение...</font><br>
-	<t title="">Протокол:</t> <font id="protocol">Получение...</font><br>
-	<t title="Всё что написано с # в пути сайта">Хеш:</t> <font id="hash">Получение...</font><br>
-	<t title="Этот сайт хоститься?">Локальный файл?:</t> <font id="local-file">Получение...</font><br>
-	<t title="Сколько раз вы зашли на этот сайт, сохраняется через localStorage">Посещений на этот сайт:</t> <font id="entries">Получение...</font> раз<br>
-	<t title="Язык браузера сейчас">Язык:</t> <font id="lang">Получение...</font><br>
-	<t title="Системные языки">Языки:</t> <font id="langs">Получение...</font><br>
-	<t title="">Бренды:</t> <font id="brands">Получение...</font><br>
-	<t title="Показывает на какой платформе открыт сайт">Платформа:</t> <font id="platform">Получение...</font><br>
-	<t title="">Поставщик:</t> <font id="vendor">Получение...</font><br>
-	<t title="">Продукт:</t> <font id="product">Получение...</font><br>
-	<t title="Устройство подключено к интернету?">Есть интернет?:</t> <font id="internet">Получение...</font><br>
-	<t title="Тип соеденения, эффективныцй тип соеденения, расчётное эффективное время приёма-передачи текущего соединения, оценка пропускной способности">Соеденение:</t> <font id="connection">Получение...</font><br>
-	<t title="Кол-во логических процессоров на компьютере">Логических процессоров:</t> <font id="hc">Получение...</font><br>
-	<t title="Показывает сколько максимум можно делать одновременно касаний по экрану, работает естественно только на мобильных девайсах">Максимум касаний по экрану:</t> <font id="touch">Получение...</font><br>
-	<t title="Показывает сколько памяти выделяется в гигабайтах">Память:</t> <font id="memory">Получение...</font> ГБ<br>
-	<t title="Сколько заряда в % на устройстве">Заряд батареи:</t> <font id="bat-level">Получение...</font>%<br>
-	<t title="Находится ли устройство на зарядке?">Батарея заряжается?:</t> <font id="bat-char">Получение...</font><br>
-	<t title="Сколько секунд осталось до полной зарядки устройства">Сколько секунд зарядки:</t> <font id="bat-time">Получение...</font> сек<br>
-	<t title="">Плагины браузера:</t> <font id="browser-plugins">Получение...</font><br>
-	<t title="">Cookie включены:</t> <font id="cookie">Получение...</font><br>
-	<t title="">"Режим "Не отслеживать":</t> <font id="dnt">Получение...</font><br>
-	<t title="Указывает кол-во страниц которые находятся в стеке истории">Стек истории:</t> <font id="history">Получение...</font><br>
-	<t title="Соотношение сторон дисплея текущего устройства в физических пикселях к разрешению в логических (CSS) пикселях (Меняется когда меняете масштаб)">Масштаб пикселей:</t> <font id="pixel">Получение...</font><br>
-	<t title="Разрешение экрана, длина x высота в пикселях">Разрешение:</t> <font id="screen">Получение...</font><br>
-	<t title="Разрешение окна браузера, длина x высота в пикселях">Разрешение окна:</t> <font id="browser-screen">Получение...</font><br>
-	<t title="">FPS:</t> <font id="fps">Получение...</font><br>
-	<t title="">Полноэкранный режим?:</t> <font id="full">Получение...</font><br>
-	<t title="">Безопасный контент:</t> <font id="isc">Получение...</font><br>
-	<t title="Время на компьютере пользователя">Время:</t> <font id="time">Получение...</font><br>
-	<t title="Сколько пользователь в миллисекундах на сайте">Времени на сайте:</t> <font id="time-site">Получение...</font><br>
+	
+	<table border="1" id="result" style="width:100%; text-align:left;">
+		
+	</table>
+	
+	<hr>
+	<center style="font-size:1.2em;">Данные с сайта никуда не отправляются, мне незачем ваши данные</center>
 </body>
 
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.js"></script>
 
 <script>
+	/* Идеи
+
+	*/
+
+	var table = document.getElementById("result");
+	var table_result = `<tr style="color:gray;"><th class="th">Название</th><th>Переменная</th></tr>`;
+	var values = {
+		"browser-info"		:{name:"Браузер",title:"Текущий и используеваемые браузер гостя"},
+		"browser"			:{name:"Название браузера",title:"Текущие название браузера"},
+		"ip"				:{name:"IP",title:"Показывает ваш IP с которым вы зашли на сайт",red:true},
+		"prov"				:{name:"Провайдер",title:"Компания, которая предоставляет вам доступ к интернету",red:true},
+		"pos"				:{name:"Позиция",title:"Ваше текущее местоположение в мире. Точка на карте, где вы сейчас находитесь",red:true},
+		"cords"				:{name:"Координаты",title:"Точные географические координаты вашего местоположения — широта и долгота",red:true},
+		"timezone"			:{name:"Временная зона",title:"Региональный стандарт времени, который зависит от вашего текущего местоположения"},
+		"ip-host"			:{name:"IP Хост",title:"IP-адрес, который присваивается пользователю для его идентификации в сети",red:true},
+		"geo-lat"			:{name:"Широта",title:"Показывает координаты широту вашей позиции",red:true},
+		"geo-lon"			:{name:"Долгота",title:"Показывает координаты долготу вашей позиции",red:true},
+		"geo"				:{name:"Полная позиция",title:"Полная позиция гостя",red:true},
+		"count"				:{name:"Страна",title:"Страна в которой находится пользователь",red:true},
+		"geo-time"			:{name:"Время обновления гео",title:"Показывает время обновление вашей позиции"},
+		"phone"				:{name:"С телефона?",title:"Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgent"},
+		"phone2"			:{name:"С телефона? (2 вариант)",title:"Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgentData.mobile"},
+		"path"				:{name:"Путь",title:"Обрезанный путь до этого сайта"},
+		"href"				:{name:"Полный путь",title:"Путь до этого сайта"},
+		"host"				:{name:"Хост",title:"Показывает зашли ли вы на сайт с файла или же нет"},
+		"protocol"			:{name:"Протокол",title:""},
+		"hash"				:{name:"Хеш",title:"Всё что написано с # в пути сайта"},
+		"local-file"		:{name:"Локальный файл?",title:"Этот сайт не хоститься?"},
+		"entries"			:{name:"Посещений на этот сайт",title:"Сколько раз вы зашли на этот сайт, сохраняется через localStorage"},
+		"entries-total"		:{name:"Всего посещений",title:"Сколько раз всего зашли на этот сайт"},
+		"lang"				:{name:"Язык",title:"Язык браузера сейчас"},
+		"langs"				:{name:"Языки",title:"Системные языки с приоритетного к менее"},
+		"brands"			:{name:"Бренды",title:""},
+		"platform"			:{name:"Платформа",title:"Показывает на какой платформе открыт сайт"},
+		"vendor"			:{name:"Поставщик",title:"Компания, которая разработала или предоставляет ваш браузер"},
+		"product"			:{name:"Продукт",title:"Название конкретного браузера или программы, используемой для доступа к странице"},
+		"internet"			:{name:"Есть интернет?",title:"Устройство подключено к интернету?"},
+		"connection"		:{name:"Соеденение",title:"Тип соеденения, эффективный тип соеденения, расчётное эффективное время приёма-передачи текущего соединения, оценка пропускной способности"},
+		"hc"				:{name:"Логических процессоров",title:"Кол-во логических процессоров на компьютере"},
+		"memory"			:{name:"Память",title:"Показывает сколько памяти выделяется в гигабайтах"},
+		"bat-level"			:{name:"Заряд батареи",title:"Сколько заряда в % на устройстве"},
+		"bat-char"			:{name:"Батарея заряжается?",title:"Находится ли устройство на зарядке?"},
+		"bat-time"			:{name:"Сколько секунд зарядки",title:"Сколько секунд осталось до полной зарядки устройства"},
+		"browser-plugins"	:{name:"Плагины браузера",title:"Встроенные дополнения в браузер"},
+		"cookie"			:{name:"Cookie включены",title:"Показывает, разрешены ли в браузере файлы cookie, которые помогают сайтам сохранять информацию о госте"},
+		"dnt"				:{name:"Режим \"Не отслеживать\"",title:"Настройка браузера, которая запрещает доступ к сбору информации сайтам с браузера"},
+		"history"			:{name:"Стек истории",title:"Указывает кол-во страниц которые находятся в стеке истории"},
+		"pixel"				:{name:"Масштаб пикселей",title:"Соотношение сторон дисплея текущего устройства в физических пикселях к разрешению в логических (CSS) пикселях (Меняется когда меняете масштаб)"},
+		"screen"			:{name:"Разрешение",title:"Разрешение экрана, длина x высота в пикселях"},
+		"browser-screen"	:{name:"Разрешение окна",title:"Разрешение окна браузера, длина x высота в пикселях"},
+		"full"				:{name:"Полноэкранный режим?",title:"Пользователь сделал браузер в полноэкранный режим? Работает только в firefox"},
+		"fps"				:{name:"FPS",title:"Количество кадров в секунду, которое отображает ваш браузер"},
+		"isc"				:{name:"Безопасный контент",title:"Проверяет включена ли опция безопасный режим"},
+		"time"				:{name:"Время",title:"Время на компьютере пользователя"},
+		"time-site"			:{name:"Времени на сайте",title:"Сколько пользователь в миллисекундах на сайте"},
+		"ref"				:{name:"История переходов",title:"Переход с предыдущего сайта"},
+		"graph"				:{name:"Графика",title:""},
+		"touch"				:{name:"Максимум касаний по экрану",title:"Показывает сколько максимум можно делать одновременно касаний по экрану, работает естественно только на мобильных девайсах"},
+		"touch-now"			:{name:"Косаний",title:"Сколько в данный момент косаний на экране"},
+		"mouse-pos"			:{name:"Позиция курсора",title:"Показывает позицию курсора, горизонталь x вертикаль в пикселях"},
+		"mouse-buttons"		:{name:"Кнопки мышки",title:"Показывает какие кнопки зажаты на мышке"},
+		"keyboard-buttons"	:{name:"Кнопки клавиатуры",title:"Показывает какие кнопки зажаты на клавиатуре"},
+		"webcam"			:{name:"Камера",title:"Изображение с вебкамеры",webcam:true},
+		"micro"				:{name:"Микрофон",title:"Звук с микрофона",micro:true},
+	}
+	for(var key in values){
+		var val = values[key];
+		var title = val["title"]
+		var res = `<font `+(val["red"]?"class='red'":"")+` id="`+key+`">Получение...</font>`;
+		if(val["webcam"]==true){
+			res = `<div id="webcam-div"><video id="webcam-video" width="640" height="480" autoplay></video></div>`;
+		}
+		if(val["micro"]==true){
+			res = `<div id="micro-div"><audio id="micro-audio" style="width: 185px;" controls></audio></div>`;
+		}
+		table_result+=`<tr title="`+(title==null?"":title)+`"><th class="th"><t>`+val["name"]+`</t></th><th>`+res+`</th><tr>`
+	}
+	table.innerHTML = table_result;
+
 	var browserInfo = navigator.userAgent; /*Информация о браузере*/
-	var location = window.location; /*Путь сайта*/
 	var entries = localStorage.getItem("entries"); /*Получение посещений на сайт*/
 	
     /*Получение IP*/
 	document.addEventListener("DOMContentLoaded", function() {
-		fetch('https://api.ipify.org/?format=json').then(response => response.json()).then(data => {
+		fetch('https://api.ipify.io/?format=json').then(response => response.json()).then(data => {
 			var ip = data.ip;
 			document.getElementById('ip').textContent = ip;
 			
@@ -79,14 +135,17 @@
 				document.getElementById("pos").innerText = data.city+" ["+data.region+"] "+data.country+" ("+data.postal+")";
 				document.getElementById("cords").innerText = data.loc;
 				document.getElementById("timezone").innerText = data.timezone;
-				document.getElementById("host").innerText = data.hostname;
+				document.getElementById("ip-host").innerText = data.hostname;
 			})
 			.catch(error => {
 				document.getElementById("prov").innerText = "Ошибка при получении информации об IP ("+error+")";
+				document.getElementById("pos").innerText = "Ошибка при получении информации об IP ("+error+")";
+				document.getElementById("cords").innerText = "Ошибка при получении информации об IP ("+error+")";
+				document.getElementById("timezone").innerText = "Ошибка при получении информации об IP ("+error+")";
+				document.getElementById("ip-host").innerText = "Ошибка при получении информации об IP ("+error+")";
 			});
 		}).catch(error => {document.getElementById('ip').textContent = "Ошибка при получении IP ("+error+")";});
 	});
-	
 	
     /*Установка информации о браузере*/
 	document.getElementById("browser-info").innerText = browserInfo;
@@ -110,16 +169,22 @@
 	document.getElementById("dnt").innerText = dnt_result;
 	document.getElementById("history").innerText = window.history.length;
 	document.getElementById("isc").innerText = window.isSecureContext;
+	document.getElementById("ref").innerText = document.referrer;
 	
 	/*Компьютер*/
 	document.getElementById("hc").innerText = navigator.hardwareConcurrency;
-	document.getElementById("memory").innerText = navigator.deviceMemory;
+	document.getElementById("memory").innerText = navigator.deviceMemory+" гб";
+	var canvas = document.createElement('canvas');
+	var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+	var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+	var gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+	document.getElementById("graph").innerText = gpu;
 	
 	/*Телефон*/
 	document.getElementById("touch").innerText = navigator.maxTouchPoints;
 	
 	/*Интернет*/
-	document.getElementById("connection").innerText = navigator.connection.type + " " + navigator.connection.effectiveType + " rtt: "+navigator.connection.rtt+" downlink: "+navigator.connection.downlink+"кб/сек";
+	document.getElementById("connection").innerText = navigator.connection.type + " " + navigator.connection.effectiveType + " rtt: "+navigator.connection.rtt+" downlink: "+navigator.connection.downlink+" кб/сек";
 	
 	/*Установка "Пользователь с телефона?"*/
 	document.getElementById("phone").innerText = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(browserInfo);
@@ -128,14 +193,15 @@
 	/*Установка посещений*/
 	entries = (entries==null||entries=="NaN"?1:parseInt(entries)+1);
 	localStorage.setItem("entries",entries);
-	document.getElementById("entries").innerText = entries;
+	document.getElementById("entries").innerText = entries+" раз";
 	
 	/*Получение информации о пути сайта*/
-	document.getElementById("path").innerText = location.pathname;
-	document.getElementById("href").innerText = location.href;
-	document.getElementById("protocol").innerText = location.protocol;
-	document.getElementById("hash").innerText = location.hash;
-	document.getElementById("local-file").innerText = thatLocalFile = location.protocol == "file:";
+	document.getElementById("path").innerText = window.location.pathname;
+	document.getElementById("href").innerText = window.location.href;
+	document.getElementById("protocol").innerText = window.location.protocol;
+	document.getElementById("hash").innerText = window.location.hash;
+	document.getElementById("host").innerText = window.location.host;
+	document.getElementById("local-file").innerText = thatLocalFile = window.location.protocol == "file:";
 	
 	/*Получение языка*/
 	document.getElementById("lang").innerText = navigator.language;
@@ -194,6 +260,97 @@
 		document.getElementById("count").innerText = "Не удалось получить геолокацию";
 	}
 	
+	var touching = 0;
+	document.getElementById("touch-now").innerText = touching;
+	document.addEventListener("touchstart",function(event){
+		touching++;
+		document.getElementById("touch-now").innerText = touching;
+	})
+	document.addEventListener("touchend",function(event){
+		touching--;
+		document.getElementById("touch-now").innerText = touching;
+	})
+	
+	/*Мышка*/
+	document.getElementById("mouse-pos").innerText = "?x?";
+	document.addEventListener('mousemove', function(event) {
+        const x = event.clientX;
+        const y = event.clientY;
+        document.getElementById("mouse-pos").innerText = x+"x"+y;
+    });
+
+	var pressed_mouse_buttons = {};
+	function upd_pressed_mouse_buttons(){
+		var res = "";
+		var keystabl = {
+			0:"Левая",
+			1:"Колёсико",
+			2:"Правая",
+			3:"Доп. нижняя",
+			4:"Доп. верхняя",
+		}
+		for(var key in pressed_mouse_buttons){
+			var val = pressed_mouse_buttons[key];
+			if(val==true){
+				res+=(res==""?"":", ")+(keystabl[key]==null?key:keystabl[key]);
+			}
+		}
+		document.getElementById("mouse-buttons").innerText = res;
+	}
+	document.getElementById("mouse-buttons").innerText = "";
+	document.addEventListener('mousedown', function(event) {
+		pressed_mouse_buttons[event.button] = true;
+		upd_pressed_mouse_buttons();
+    });
+	document.addEventListener('mouseup', function(event) {
+		pressed_mouse_buttons[event.button] = false;
+		upd_pressed_mouse_buttons();
+    });
+	
+	/*Клавиатура*/
+	var pressed_keyboard_buttons = {};
+	function upd_pressed_keyboard_buttons(){
+		var res = "";
+		for(var key in pressed_keyboard_buttons){
+			var val = pressed_keyboard_buttons[key];
+			if(val==true){
+				res+=(res==""?"":", ")+key;
+			}
+		}
+		document.getElementById("keyboard-buttons").innerText = res;
+	}
+	document.getElementById("keyboard-buttons").innerText = "";
+	document.addEventListener('keydown', function(event) {
+		pressed_keyboard_buttons[event.key] = true;
+		upd_pressed_keyboard_buttons();
+    });
+	document.addEventListener('keyup', function(event) {
+		pressed_keyboard_buttons[event.key] = false;
+		upd_pressed_keyboard_buttons();
+    });
+
+	/*Вебкамера*/
+	const video = document.getElementById('webcam-video');
+
+	navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        video.srcObject = stream;
+    })
+    .catch(err => {
+		document.getElementById("webcam-div").innerHTML = `<font>Ошибка при доступе к камере (`+err+`)</font>`;
+    });
+
+	/*Микрофон*/
+	const audio = document.getElementById('micro-audio');
+
+	navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        audio.srcObject = stream;
+    })
+    .catch(err => {
+        document.getElementById("micro-div").innerHTML = `<font>Ошибка при доступе к микрофону (`+err+`)</font>`;
+    });
+
 	/*Динамичные*/
 	var fontPixel = document.getElementById("pixel");
 	var fontScreen = document.getElementById("screen");
@@ -218,16 +375,30 @@
 		/*Телефон*/
 		navigator.getBattery().then((bat)=>{
 			document.getElementById("bat-char").innerText = bat.charging;
-			document.getElementById("bat-time").innerText = bat.dischargingTime;
-			document.getElementById("bat-level").innerText = bat.level.toFixed(4)*100;
+			document.getElementById("bat-time").innerText = bat.dischargingTime+" сек";
+			document.getElementById("bat-level").innerText = (bat.level.toFixed(4)*100)+"%";
 		});
 	}
 	setInterval(UpdateSlow,1000);
 	UpdateSlow();
 	
 	/*Тест*/
-	console.log("Путь:",location);
+	console.log("Путь:",window.location);
 	console.log("Навигатор:",navigator);
 	console.log("Окно:",window);
+	console.log("Документ:",document);
 	
+</script>
+
+<script type="module">
+	import { SaveData, LoadData } from "./woowzsite-private/database.js";
+	
+	var total = -1;
+	LoadData("deonon").then((data) => {
+		if (data) {
+			total = data+1;
+			document.getElementById("entries-total").innerText = total+" раз";
+			SaveData("deonon",total);
+		}
+	});
 </script>
