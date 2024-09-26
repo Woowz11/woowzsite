@@ -84,7 +84,7 @@ a:hover{
 <body>
 	<div class="background-image-div custom-cursor" style="margin:0px;">
 		<div style="background-color:rgba(0,0,0,0.2); padding:5px;">
-			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png"> Woowzsites Files <font id="prikol" style="font-size:0.6em;"></font></font><br>
+			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png" loading="eager"> Woowzsites Files <font id="prikol" style="font-size:0.6em;"></font></font><br>
 			<font class="white-font">Задний фон: </font><select id="background-select" onclick="ChangeStyle('div-image, .div-image-short',`background-image:url('`+document.getElementById('background-select').value+`')`);" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
 				<option value="source/transparent.png">Светлый</option>
 				<option value="source/transparent-dark.png">Тёмный</option>
@@ -106,6 +106,8 @@ a:hover{
 		<font class="white-font" style="font-size:5em;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>% <font id="finish-ms" style="font-size: 0.75em;"></font></font>
 		<div id="explorer"></div>
 	</div>
+	
+	<img  style="display:none;" src="source/transparent.png" loading="eager">
 </body>
 
 <script src="source/source.js"></script>
@@ -200,7 +202,7 @@ select{
 		counts[text] = [tabl.length,0];
 		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
 		document.getElementById("total-all").innerHTML = fullcounts[0];
-		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
+		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif" loading="eager"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
 		
 		function LoadSource(that,src,text,type){
 			if(fullcounts[0]==fullcounts[1]+1){
@@ -272,7 +274,7 @@ select{
 		}
 		function OnError(src,text){
 			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
-			<img class="image" style="width:100%; height:100%;" src="source/onerror.png">
+			<img class="image" style="width:100%; height:100%;" src="source/onerror.png" loading="eager">
 			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (<font style='color:red;'>ERROR</font>)</div></div></div>`)
 		}
 		

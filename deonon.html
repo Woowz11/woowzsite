@@ -1,0 +1,233 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Получить информацию</title>
+<link rel="icon" type="image/x-icon" href="source/dead.ico">
+
+<style> font{ color:blue; } .red{ color:red; } </style>
+
+<body>
+	На этом сайте будет показываться разная информация о госте
+	<hr>
+	<t title="">Браузер:</t> <font id="browser-info">Получение...</font><br>
+	<t title="">Название браузера:</t> <font id="browser">Получение...</font><br>
+	<t title="Показывает ваш IP с которым вы зашли на сайт">IP:</t> <font class="red" id="ip">Получение...</font><br>
+	<t title="">Провайдер:</t> <font class="red" id="prov">Получение...</font><br>
+	<t title="">Позиция:</t> <font class="red" id="pos">Получение...</font><br>
+	<t title="">Координаты:</t> <font class="red" id="cords">Получение...</font><br>
+	<t title="">Временная зона:</t> <font id="timezone">Получение...</font><br>
+	<t title="">Хост:</t> <font class="red" id="host">Получение...</font><br>
+	<t title="Показывает координаты широту вашей позиции">Широта:</t> <font class="red" id="geo-lat">Получение...</font><br>
+	<t title="Показывает координаты долготу вашей позиции">Долгота:</t> <font class="red" id="geo-lon">Получение...</font><br>
+	<t title="">Полная позиция:</t> <font class="red" id="geo">Получение...</font><br>
+	<t title="Страна в которой находится пользователь">Страна:</t> <font class="red" id="count">Получение...</font><br>
+	<t title="Показывает время обновление вашей позиции">Время обновления гео:</t> <font id="geo-time">Получение...</font><br>
+	<t title="Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgent">С телефона?:</t> <font id="phone">Получение...</font><br>
+	<t title="Пользователь зашёл с мобильного устройства? Определяется через navigator.userAgentData.mobile">С телефона? (2 вариант):</t> <font id="phone2">Получение...</font><br>
+	<t title="Обрезанный путь до этого сайта">Путь:</t> <font id="path">Получение...</font><br>
+	<t title="Путь до этого сайта">Полный путь:</t> <font id="href">Получение...</font><br>
+	<t title="">Протокол:</t> <font id="protocol">Получение...</font><br>
+	<t title="Всё что написано с # в пути сайта">Хеш:</t> <font id="hash">Получение...</font><br>
+	<t title="Этот сайт хоститься?">Локальный файл?:</t> <font id="local-file">Получение...</font><br>
+	<t title="Сколько раз вы зашли на этот сайт, сохраняется через localStorage">Посещений на этот сайт:</t> <font id="entries">Получение...</font> раз<br>
+	<t title="Язык браузера сейчас">Язык:</t> <font id="lang">Получение...</font><br>
+	<t title="Системные языки">Языки:</t> <font id="langs">Получение...</font><br>
+	<t title="">Бренды:</t> <font id="brands">Получение...</font><br>
+	<t title="Показывает на какой платформе открыт сайт">Платформа:</t> <font id="platform">Получение...</font><br>
+	<t title="">Поставщик:</t> <font id="vendor">Получение...</font><br>
+	<t title="">Продукт:</t> <font id="product">Получение...</font><br>
+	<t title="Устройство подключено к интернету?">Есть интернет?:</t> <font id="internet">Получение...</font><br>
+	<t title="Тип соеденения, эффективныцй тип соеденения, расчётное эффективное время приёма-передачи текущего соединения, оценка пропускной способности">Соеденение:</t> <font id="connection">Получение...</font><br>
+	<t title="Кол-во логических процессоров на компьютере">Логических процессоров:</t> <font id="hc">Получение...</font><br>
+	<t title="Показывает сколько максимум можно делать одновременно касаний по экрану, работает естественно только на мобильных девайсах">Максимум касаний по экрану:</t> <font id="touch">Получение...</font><br>
+	<t title="Показывает сколько памяти выделяется в гигабайтах">Память:</t> <font id="memory">Получение...</font> ГБ<br>
+	<t title="Сколько заряда в % на устройстве">Заряд батареи:</t> <font id="bat-level">Получение...</font>%<br>
+	<t title="Находится ли устройство на зарядке?">Батарея заряжается?:</t> <font id="bat-char">Получение...</font><br>
+	<t title="Сколько секунд осталось до полной зарядки устройства">Сколько секунд зарядки:</t> <font id="bat-time">Получение...</font> сек<br>
+	<t title="">Плагины браузера:</t> <font id="browser-plugins">Получение...</font><br>
+	<t title="">Cookie включены:</t> <font id="cookie">Получение...</font><br>
+	<t title="">"Режим "Не отслеживать":</t> <font id="dnt">Получение...</font><br>
+	<t title="Указывает кол-во страниц которые находятся в стеке истории">Стек истории:</t> <font id="history">Получение...</font><br>
+	<t title="Соотношение сторон дисплея текущего устройства в физических пикселях к разрешению в логических (CSS) пикселях (Меняется когда меняете масштаб)">Масштаб пикселей:</t> <font id="pixel">Получение...</font><br>
+	<t title="Разрешение экрана, длина x высота в пикселях">Разрешение:</t> <font id="screen">Получение...</font><br>
+	<t title="Разрешение окна браузера, длина x высота в пикселях">Разрешение окна:</t> <font id="browser-screen">Получение...</font><br>
+	<t title="">FPS:</t> <font id="fps">Получение...</font><br>
+	<t title="">Полноэкранный режим?:</t> <font id="full">Получение...</font><br>
+	<t title="">Безопасный контент:</t> <font id="isc">Получение...</font><br>
+	<t title="Время на компьютере пользователя">Время:</t> <font id="time">Получение...</font><br>
+	<t title="Сколько пользователь в миллисекундах на сайте">Времени на сайте:</t> <font id="time-site">Получение...</font><br>
+</body>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.js"></script>
+
+<script>
+	var browserInfo = navigator.userAgent; /*Информация о браузере*/
+	var location = window.location; /*Путь сайта*/
+	var entries = localStorage.getItem("entries"); /*Получение посещений на сайт*/
+	
+    /*Получение IP*/
+	document.addEventListener("DOMContentLoaded", function() {
+		fetch('https://api.ipify.org/?format=json').then(response => response.json()).then(data => {
+			var ip = data.ip;
+			document.getElementById('ip').textContent = ip;
+			
+			fetch("https://ipinfo.io/"+ip+"/json")
+			.then(response => response.json())
+			.then(data => {
+				console.log("Информация об IP:",ip,data);
+				document.getElementById("prov").innerText = data.org;
+				document.getElementById("pos").innerText = data.city+" ["+data.region+"] "+data.country+" ("+data.postal+")";
+				document.getElementById("cords").innerText = data.loc;
+				document.getElementById("timezone").innerText = data.timezone;
+				document.getElementById("host").innerText = data.hostname;
+			})
+			.catch(error => {
+				document.getElementById("prov").innerText = "Ошибка при получении информации об IP ("+error+")";
+			});
+		}).catch(error => {document.getElementById('ip').textContent = "Ошибка при получении IP ("+error+")";});
+	});
+	
+	
+    /*Установка информации о браузере*/
+	document.getElementById("browser-info").innerText = browserInfo;
+	document.getElementById("browser").innerText = navigator.appName;
+	var brands = "";
+	for(var brand of navigator.userAgentData.brands){
+		brands+=(brands==""?"":", ")+brand["brand"]+" - "+brand["version"];
+	}
+	document.getElementById("brands").innerText = brands;
+	document.getElementById("platform").innerText = navigator.platform;
+	document.getElementById("vendor").innerText = navigator.vendor + (navigator.vendorSub==""?"":" - "+navigator.vendorSub);
+	document.getElementById("product").innerText = navigator.product + (navigator.productSub==""?"":" - "+navigator.productSub);
+	var browser_plugins = "";
+	for(var plg of navigator.plugins){
+		browser_plugins+=(browser_plugins==""?"":", ")+plg["name"]+" ("+plg["filename"]+")"
+	}
+	document.getElementById("browser-plugins").innerText = browser_plugins;
+	document.getElementById("cookie").innerText = navigator.cookieEnabled;
+	var dnt_result = (navigator.doNotTrack=="1"?"Не отслеживать":"Отслеживать");
+	if(navigator.doNotTrack==null){dnt_result="Без разницы (не выбрано)"}
+	document.getElementById("dnt").innerText = dnt_result;
+	document.getElementById("history").innerText = window.history.length;
+	document.getElementById("isc").innerText = window.isSecureContext;
+	
+	/*Компьютер*/
+	document.getElementById("hc").innerText = navigator.hardwareConcurrency;
+	document.getElementById("memory").innerText = navigator.deviceMemory;
+	
+	/*Телефон*/
+	document.getElementById("touch").innerText = navigator.maxTouchPoints;
+	
+	/*Интернет*/
+	document.getElementById("connection").innerText = navigator.connection.type + " " + navigator.connection.effectiveType + " rtt: "+navigator.connection.rtt+" downlink: "+navigator.connection.downlink+"кб/сек";
+	
+	/*Установка "Пользователь с телефона?"*/
+	document.getElementById("phone").innerText = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(browserInfo);
+	document.getElementById("phone2").innerText = navigator.userAgentData.mobile;
+	
+	/*Установка посещений*/
+	entries = (entries==null||entries=="NaN"?1:parseInt(entries)+1);
+	localStorage.setItem("entries",entries);
+	document.getElementById("entries").innerText = entries;
+	
+	/*Получение информации о пути сайта*/
+	document.getElementById("path").innerText = location.pathname;
+	document.getElementById("href").innerText = location.href;
+	document.getElementById("protocol").innerText = location.protocol;
+	document.getElementById("hash").innerText = location.hash;
+	document.getElementById("local-file").innerText = thatLocalFile = location.protocol == "file:";
+	
+	/*Получение языка*/
+	document.getElementById("lang").innerText = navigator.language;
+	document.getElementById("langs").innerText = navigator.languages.toString();
+	
+	/*FPS*/
+	var fontFPS = document.getElementById("fps");
+	var lastCalledTime = performance.now();
+	var delta = 0;
+	var fps = 0;
+	var fps_count = 0;
+	var fps_ = 0;
+	function CalculateFPS() {
+		const now = performance.now();
+		delta = (now - lastCalledTime) / 1000;
+		lastCalledTime = now;
+		fps = 1 / delta;
+
+		fps_count++;
+		
+		if(fps_count>10){fps_count=0; fps_=fps;}
+		
+		fontFPS.innerText = "("+fps_.toFixed(3)+") "+fps;
+
+		requestAnimationFrame(CalculateFPS);
+	}
+	CalculateFPS();
+	
+	/*Установка геолокации*/
+    if ("geolocation" in navigator) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			document.getElementById("geo-lat").innerHTML = position.coords.latitude; 
+			document.getElementById("geo-lon").innerHTML = position.coords.longitude; 
+			document.getElementById("geo").innerHTML = position.coords.accuracy; 
+			document.getElementById("geo-time").innerHTML = new Date(position.timestamp) + " " + position.timestamp+"ms";
+
+			var geocoder = L.Control.Geocoder.nominatim();
+			var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+			geocoder.reverse(latlng, 10, function(results) {
+				console.log("Геоданные:", position, results);
+				document.getElementById("count").innerText = results[0].name + " (" + results[0].properties.address.country_code + ")";
+			});
+		}, function(error) {
+			// Обработка ошибки доступа к геоданным
+			document.getElementById("geo").innerText = "Не удалось получить геолокацию: ("+error.message+")";
+			document.getElementById("geo-lon").innerText = "Не удалось получить геолокацию: ("+error.message+")";
+			document.getElementById("geo-lat").innerText = "Не удалось получить геолокацию: ("+error.message+")";
+			document.getElementById("geo-time").innerText = "Не удалось получить геолокацию: ("+error.message+")";
+			document.getElementById("count").innerText = "Не удалось получить геолокацию: ("+error.message+")";
+		});
+	} else {
+		document.getElementById("geo").innerText = "Не удалось получить геолокацию";
+		document.getElementById("geo-lon").innerText = "Не удалось получить геолокацию";
+		document.getElementById("geo-lat").innerText = "Не удалось получить геолокацию";
+		document.getElementById("geo-time").innerText = "Не удалось получить геолокацию";
+		document.getElementById("count").innerText = "Не удалось получить геолокацию";
+	}
+	
+	/*Динамичные*/
+	var fontPixel = document.getElementById("pixel");
+	var fontScreen = document.getElementById("screen");
+	var fontBrowserScreen = document.getElementById("browser-screen");
+	var fontFull = document.getElementById("full");
+	var fontTime = document.getElementById("time");
+	var time = new Date();
+	var fontTimeSite = document.getElementById("time-site");
+	function Update(){
+		fontPixel.innerText = window.devicePixelRatio;
+		fontScreen.innerText = window.screen.width+"x"+window.screen.height;
+		fontBrowserScreen.innerText = window.innerWidth+"x"+window.innerHeight;
+		fontFull.innerText = window.fullScreen;
+		fontTime.innerText = new Date() + " " + Date.now()+"ms";
+		fontTimeSite.innerText = (new Date()-time)+"ms";
+	}
+	setInterval(Update,1);
+	
+	function UpdateSlow(){
+		document.getElementById("internet").innerText = navigator.onLine;
+	
+		/*Телефон*/
+		navigator.getBattery().then((bat)=>{
+			document.getElementById("bat-char").innerText = bat.charging;
+			document.getElementById("bat-time").innerText = bat.dischargingTime;
+			document.getElementById("bat-level").innerText = bat.level.toFixed(4)*100;
+		});
+	}
+	setInterval(UpdateSlow,1000);
+	UpdateSlow();
+	
+	/*Тест*/
+	console.log("Путь:",location);
+	console.log("Навигатор:",navigator);
+	console.log("Окно:",window);
+	
+</script>

@@ -383,5 +383,15 @@ var all_sites = [
       "tags": [
         "woowz11","friends","discord"
       ]
+    },
+	{
+      "href": "alchemy",
+      "name": "Woowz Alchemy",
+      "catalog": "game",
+      "hide": false,
+      "icon": "al",
+      "tags": [
+        "alchemy"
+      ]
     }
   ]
