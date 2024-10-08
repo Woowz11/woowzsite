@@ -3227,7 +3227,7 @@ function SortFunctions(){
   
 	newlist.push(["%Константы"]);
 	
-	newlist.push(["!<table><tr><td>Переменная</td><td>Тип</td><td>Значение</td></tr>"])
+	newlist.push([`!<table style="width:96.5%;"><tr><td>Переменная</td><td>Тип</td><td>Значение</td></tr>`])
 	for(const el in ColumnFunctionsCONS){
 		var thatfullconstant = (ColumnFunctionsCONS[el][2].charAt(0) != '[');
 		var copytothat = ColumnFunctionsCONS[el][2];
@@ -3235,7 +3235,7 @@ function SortFunctions(){
 			var splitresult = copytothat.split(' ');
 			copytothat = splitresult[splitresult.length - 1];
 		}
-		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+"</font></td><td>"+ColumnFunctionsCONS[el][1]+"</td><td "+(thatfullconstant?"style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+copytothat+"')\"":"")+"><font>"+ColumnFunctionsCONS[el][2]+"</font></td></tr>"]);
+		newlist.push(["!<tr><td style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+ColumnFunctionsCONS[el][0]+"')\"><font>"+ColumnFunctionsCONS[el][0]+`</font></td><td style="text-align:center;">`+ColumnFunctionsCONS[el][1]+"</td><td "+(thatfullconstant?"style='cursor: pointer;' class='greentd' title='Скопировать!' onclick=\"CopyToClipboard('"+copytothat+"')\"":"")+"><font>"+ColumnFunctionsCONS[el][2]+"</font></td></tr>"]);
 	}
 	newlist.push(["!</table>"])
 	
