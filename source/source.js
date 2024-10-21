@@ -40,10 +40,13 @@ WoowzsiteSourceCursors = AddFullnessToTable([
 	"roblox","hit","cursor","woowz","hand","m","veryold","block","old2","old","cur2","cur"
 ],"source/",".cur")
 
-WoowzsiteSourceVideos = AddFullnessToTable([
+WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 	"Download20","day","30513769.230000094_SPOILER_memphirs5a532a","Видео Папка","3DVideoDubstep - 382","ssstwitter.com_1722948103448","tumblr_s9un5nm1nT1zbpfgp_720.mp4","audio.destroy-7","sick","нигер в подгузнике",
-	"h"
-],"source/specialforrandomsite/",".mp4")
+	"h","d566d3e9f11dc8c11ff4828cdf1b4a6c","89f5e57c28f923f295f8c02bbace5285","078cad1fad3e10001b98cf573a8b756a","video_2024-10-19_17-47-26","VID_20230830_110751_370","The_Greatest_Burger_King_Facts__20231209_51_new",
+	"SaveInsta.App_-_3170857346224613016","metwiixxd4f943","letychi_world1_2024-10-17-17-04-38_1729173878850","JhaWgqEz4FQP_2MH-1"
+],"source/specialforrandomsite/",".mp4"), AddFullnessToTable([
+	"ssstik.io_illegalbugtrader_1725631254849","LGqqu1KcC9ZCLiN7","IE28099m20the20dog20on20the20first20slide","egg","air_strike","6uENJ1JOvxyX6mzZ"
+],"source/specialforrandomsite/mov/",".mov"))
 
 WoowzsiteSourceAudios = AddFullnessToTable([
 	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest",
@@ -77,16 +80,16 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 	"justgamingyt5949","kasqw","kastikepussukka","kersher","kirk1448","klaverr","kotyara228","kseleron","lisstons","lomakinnn","mannytko","meeee66","metallcore999","monsterfish._","mor1oka","morphandriy","morzz1c",
 	"myleskingston","nekitplay155","neoprod","no","pacocareal","pavkalakar","pussyfapper","redsham","rodrigesgames","ruslanconnection","sadsalat","santinnel","shiir0k","styledun","sv1t.","taykeu","the0ceanman",
 	"thewindowskerpka","treepii24","troll_bebra","turbobtv","uzelezz","wantedrobot","wldoui","woowz11.","woowz11","xyzswagga","your_local_russian","youwillseelowskill","zebratv","zinderant","zooi","zvski",
-	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx"
+	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx","darkus2","rnswt_offical"
 ],"source/discordavatars/",".png"),AddFullnessToTable([
 	"nberbaaaaaaa","brinq_","haveaniceday.","uranus52"
 ],"source/discordavatars/",".gif"))
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"9311797.164999995_image","10056771.889999975_image","image","IMG_20230618_013225","omg","Pngpng","ssasa","test-aubergine","cowsea","cowfly","spyder","paint","horse","skeleton","pz","fish","castale","spheres","cat",
-	"doudou","rotten-meatball","mine","minecraft","random","hair-creeper","what_a_image"
+	"doudou","rotten-meatball","mine","minecraft","random","hair-creeper","what_a_image","dymaite","face","bird","skull","worker","madnes"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
-	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy",
+	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120"
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzsiteSourceCats = AddFullnessToTable([
@@ -109,6 +112,10 @@ WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([
 WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 	"bg","bg1","bg2",
 ],"corrupted_minecraft/",".png")
+
+WoowzsiteSourceWoowzcore = AddFullnessToTable([
+	"version1","version2","version2console","version2mainmenu","version3","version3mainmenu","version3nevada","version3todo","version4","version4mainmenu","version4todo","version5","version5mainmenu","version5seedworld","version5todo"
+],"woowzcore/source/",".png")
 
 WoowzsiteSourceAlchemy = AddTableToTable(AddFullnessToTable([
 	"dev","пу","по","разница","тьма","э","т","д","космологическая_сингулярность","гравитация_квантовая","бозон_x","бозон_y","кварк","лептон","бозон_z","бозон_w","бозон_хиггса","глюон","фотон","свет","гравитон","гравитация",
@@ -155,7 +162,8 @@ function GetAllWoowzsite(){
 	AddTableToTable(WoowzsiteSourceCore,
 	AddTableToTable(WoowzsiteSourceIcons,
 	AddTableToTable(WoowzsiteSourceCorruptedMinecraft,
-	AddTableToTable(WoowzsiteSourceAlchemy,WoowzsiteSourceDiscordAvatars))))))))))))));
+	AddTableToTable(WoowzsiteSourceAlchemy,
+	AddTableToTable(WoowzsiteSourceWoowzcore,WoowzsiteSourceDiscordAvatars)))))))))))))));
 	return tabl;
 }
 
@@ -246,4 +254,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "тенденция","вина","дыхание","версия","масштаб","монастырь","хозяйка","дочка","танец","эксплуатация","коммунист","пенсия","приятель","объяснение","набор","производитель","пыль","философия","мощность","обязательство",
 "уход","горло","кризис","указание","плата","яблоко","препарат","действительность","москвич","остаток","изображение","сделка","сочинение","покупатель","танк","затрата","строка","единица","обработка","чемпионат","lua","html",
 "коллумбайн","дыня","баклажан","ээээээ","наебал","вертолёт","нахуй","Иркутск","kristina-561@mail.ru","болят","Привет, я менеджер по найму в WILDBERRIES, и мы набираем в нашу команду людей, которые смогут работать удаленно по 30–60 минут в день и получать зарплату ежедневно. Ежедневный доход: от 200 до 30 000 руб. Если вас заинтересовала данная вакансия, нажмите на кнопку и свяжитесь с менеджером через WhatsApp. 👇👇👇",
-"б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо"]
+"б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо","вувзкор","woowzcore","веирдкор",
+"роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить","прошу прощения, но мы не может перевести текст с неумесным содержанием"]

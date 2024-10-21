@@ -71,6 +71,10 @@ a:hover{
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
+div{
+	cursor:default;
+}
+
 .div-image{
 	height:350px;
 }
@@ -218,7 +222,7 @@ select{
 			if(src.includes(".gif")){type="gif"}
 			if(src.includes(".ico")){type="ico"}
 			if(src.includes(".cur")){type="cur"}
-			if(src.includes(".mp4")){type="mp4"}
+			if(src.includes(".mp4")||src.includes(".mov")){type="mp4"}
 			if(src.includes(".mp3")){type="mp3"}
 		
 			var x = that.width;
@@ -287,7 +291,7 @@ select{
 			if(src.includes(".gif")){type="gif"}
 			if(src.includes(".ico")){type="ico"}
 			if(src.includes(".cur")){type="cur"}
-			if(src.includes(".mp4")){type="mp4"}
+			if(src.includes(".mp4")||src.includes(".mov")){type="mp4"}
 			if(src.includes(".mp3")){type="mp3"}
 
 			if(type=="mp4"||type=="mp3"){
@@ -363,6 +367,7 @@ select{
 		"source/wldbackroomsgame/*.png":WoowzsiteSourceWldouiBackrooms,
 		"corrupted_minecraft/*.png"    :WoowzsiteSourceCorruptedMinecraft,
 		"alchemy/*.png"        		   :WoowzsiteSourceAlchemy,
+		"woowzcore/source/*.png"       :WoowzsiteSourceWoowzcore,
 		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
 		"source/*.mp4"                 :WoowzsiteSourceVideos,
 		"source/*.mp3"                 :WoowzsiteSourceAudios,
@@ -469,7 +474,7 @@ select{
 	}
 	
 	GenerateTableCustom("Шрифты",WoowzsiteSourceFonts,
-	`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; padding:5px; text-align: justify;">`,
+	`<div style="font-size:2em; padding:5px; text-align: justify;">`,
 	`<div style="width:99.5%; display:inline-block; background-color:rgb(250,250,250); border-radius: 20px; padding:5px; margin-bottom:5px; cursor:default;"><center style="margin-bottom:10px;"><font>{s2}</font><br><button onclick="ChangeFont('{s}');">Установить шрифт</button></center><font style="font-family:{s}; padding:5px; word-wrap: break-word;">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ<br>аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ<br>0123456789+-=_(){}[]<>!?~@#№$.,:;%^&*"\`/|\\'<br>·•°™©®§±µ«»€…</font></div> `,
 	`</div>`,function(src){ var stl = document.createElement("style"); stl.innerHTML = "@font-face{ font-family:\""+src.split("/")[1].split(".")[0]+"\"; src: url(\""+src+"\")format('opentype'); }"; document.head.appendChild(stl); },function(src){ return src.split("/")[1].split(".")[0]; });
 	
