@@ -89,7 +89,7 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"9311797.164999995_image","10056771.889999975_image","image","IMG_20230618_013225","omg","Pngpng","ssasa","test-aubergine","cowsea","cowfly","spyder","paint","horse","skeleton","pz","fish","castale","spheres","cat",
 	"doudou","rotten-meatball","mine","minecraft","random","hair-creeper","what_a_image","dymaite","face","bird","skull","worker","madnes"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
-	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120"
+	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120","ez"
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzsiteSourceCats = AddFullnessToTable([
@@ -141,7 +141,23 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"poison_3d","green_ipod","lucky","color","i-love-pc","spider","pinch","centipede_dance","fat-animal","emo-stars","melt","fat_star","hardcore_happinies","stars_on_black_background",
 	"rave","rave2","do-I-bug-you","rave_citty","ballon-face","football","feather2","robot-dog","mario_star","pills","instagram","cursor_heart","poolroom","download","cringe-folder","skeleton-war","skeleton","cybergoth",
 	"biohazard","herobrine-fan","flying-pig","matrix","real-spider","weed","skeleton_coffin","red-skull","tf-heart","rainbow-pixels","pills-3d","cool-kids-club","disturbing","refresh","heart","prikol","eyes_sphere",
-	"mouths_sphere","cylinder"
+	"mouths_sphere","cylinder","fondoestrellas","boxemail","selada1","dollarspindownd","scorpion","PS2_Online_-_cheathack","n","email","volver","numerosamarilloswwwpercysstkyt0","fondomatrix","SKULLSPIN",
+	"vsim0039","guita","skull3d","skulburn2","fondocalaca","img6","welcome","diskette","back-roll","fire","aar013","aar014",
+	"picture","leafzoom","hack","mail2","icono-lenguita","i1","dance","obras04","yen5","calfn28","img8","warning2",
+	"madhack","calfn18","skelettfuck","pentagrama","counterfast","email2","hdd","mail-eat","Email10","icon-anim","smooool-skull","gamehack",
+	"linball1","calaca","s","explose","roversp6","const010","broadcasttower1","woowzcore-codding","pyramide","lex","microshaft","new2",
+	"sang","computer","computer_surfing_md_clr","COMPUTER_EMAILMEANIM-vi","Computer-wtf","computer-icon","old-computer","kelip","cmpterhpymed_w","computer002","lavori03","computer6",
+	"rotating_computer","Computer-fireball","computer-files","tux_computer_dig_md_clr","computervirusblkonly","galeria","music_note_jamming_md_clr","an_painter","hamwalk","also-computer","computer-face","LennyVasbinderPI_The_Big_Eye_Computer",
+	"Howyourcomputerworks","hummingbirds2","happycomp","whitepersanrun","computer-heart","computer5","computer-epic","animated_computer_3","computerdog","business_secretary_computer_typing_md_wht","computer2","click_001",
+	"computer2-afk","bearBLKmoving","dnce","a-fondo-flaming-mpr","anmplnet","3cte1dee","pingu","bibites","image480","face_anm","netnow_ani","netwheel",
+	"star1","hands","fan","ike","botaoazul","star2","globe2","network_button_next","star3","yousefnet","usflagwav","contruck",
+	"WebNet","dolares","legflamefinal","worm_gear_aple","polibarr","bball2","star_0012","jingo","aniflowericon","coracao05","barmove","mol",
+	"presweb","star_0001","netcaexplo","hot","mline","newgirando","netscf","globe3","planet7","Windows95","7shadow","7previousblk",
+	"cross7","lightening7","bookani","madewithlove7","night7","a5","7","piano","floppy_disk_walking_md_wht","checkerflagwave","image001","madegifblue",
+	"imp005.gif","internetexporgif","a_ilst168","AN385","INTERNET","pistons","gallop","casino2","freestuff2","RotatingMoonMoticon","smuprota","download-gif",
+	"comp3","fish-paint","wallet","tpup","azball","Internet_construction","msinternet","internetfiesta120","wpaa79d628","animoon_e0","churro","newspaper",
+	"animail03","update","InternetLogo","ANISIAMESELAYING","psp","bpmonst","walk","foefilm","maths","phone","Internet2","electrogush2",
+	"slinky","bienbenido_a_mi_sit_en_internet","nota"
 ],"core-wiki/source/",".gif"),AddFullnessToTable([
 	"vaporwave","window","catbackground"
 ],"core-wiki/source/",".jpg")))
