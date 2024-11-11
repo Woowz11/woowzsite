@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="base.js"></script>
+<script>Tool(
+`<center>Сломать байты</center><br>
+Процент сломанности: <input id="proc" type="number" min="0" max="100" value="5" onchange="ClampInput('proc',false)"><br>
+Тип: <select id="broke-type" onchange="SelectChanged()">
+    <option value="gt-exp">Дополнить</option>
+    <option value="gt-change">Заменить</option>
+    <option value="gt-del">Удалять</option>
+    <option value="gt-add">Добавлять</option>
+</select><br>
+<textarea id="this" placeholder="Байты" style="width:49%; resize: none;" rows="20" spellcheck="false"></textarea>
+<textarea id="tothat" placeholder="Сломанные байты" style="width:49%; float: right; resize: none;" rows="20" readonly="readonly" spellcheck="false"></textarea><br>
+<center><button onclick="Broke();">Сломать</button></center>
+`
+);</script>
+
+<script>
+function Broke(){
+    var ThisEl = document.getElementById("this");
+    var ToThatEl = document.getElementById("tothat");
+
+    var Proc = document.getElementById("proc").value/100;
+
+    var This = ThisEl.value;
+    var Bytes = This.split('|').map(Number);
+    var ResultBytes = [];
+    Bytes.forEach((byte) => {
+        if(Math.random()<Proc){
+            ResultBytes.push(Random(0,128,true));
+        }else{
+            ResultBytes.push(byte);
+        }
+    });
+
+    var Result = "";
+    ResultBytes.forEach((byte) => {
+        Result += byte + "|";
+    });
+    
+    if (Result.endsWith("|")) {
+        Result = Result.slice(0, -1);
+    }
+
+    ToThatEl.innerHTML = Result;
+}
+</script>

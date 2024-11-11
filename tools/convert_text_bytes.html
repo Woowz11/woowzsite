@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="base.js"></script>
+<script>Tool(
+`<center>Текст → байты</center><br>
+<textarea id="this" placeholder="Текст" style="width:49%; resize: none;" rows="20" spellcheck="false"></textarea>
+<textarea id="tothat" placeholder="Байты" style="width:49%; float: right; resize: none;" rows="20" readonly="readonly" spellcheck="false"></textarea><br>
+<center><button onclick="Convert();">Конвертировать</button></center>
+<br><hr><br>
+<center>Байты → Текст</center><br>
+<textarea id="thisBack" placeholder="Байты" style="width:49%; resize: none;" rows="20" spellcheck="false"></textarea>
+<textarea id="tothatBack" placeholder="Текст" style="width:49%; float: right; resize: none;" rows="20" readonly="readonly" spellcheck="false"></textarea><br>
+<center><button onclick="ConvertBack();">Конвертировать</button></center>
+`
+);</script>
+
+<script>
+function Convert(){
+    var ThisEl = document.getElementById("this");
+    var ToThatEl = document.getElementById("tothat");
+
+    var This = ThisEl.value;
+    ToThatEl.value = ToBytes(This);
+}
+
+function ConvertBack(){
+    var ThisEl = document.getElementById("thisBack");
+    var ToThatEl = document.getElementById("tothatBack");
+
+    var This = ThisEl.value;
+    ToThatEl.value = ToString(This);
+}
+</script>

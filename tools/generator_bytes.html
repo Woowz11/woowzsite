@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="base.js"></script>
+<script>Tool(
+`<center>Создать байты</center><br>
+Кол-во байт: <input id="count" type="number" min="1" value="32" onchange="ClampInput('count',true)"><br>
+Тип: <select id="generation-type" onchange="SelectChanged()">
+    <option value="gt-rand">Случайные</option>
+    <option value="gt->">По возрастанию</option>
+    <option value="gt-<">По убыванию</option>
+</select><br>
+<hr>
+<div id="extraoption-rand" style="display:none;">
+Минимум: <input id="rand-min" type="number" min="0" max="255" value="0" onchange="ClampInput('rand-min',true)"><br>
+Максимум: <input id="rand-max" type="number" min="0" max="255" value="127" onchange="ClampInput('rand-max',true)"><br>
+</div>
+<hr>
+<textarea id="result" placeholder="Байты" style="width:100%; resize: none;" rows="20" readonly="readonly" spellcheck="false"></textarea><br>
+<center><button onclick="Generate();">Создать</button></center>
+`
+);</script>
+
+<script>
+function LoadedTool(){
+    SelectChanged();
+}
+
+function SelectChanged(){
+    var GenType = document.getElementById("generation-type").value;
+    var EOrand = document.getElementById("extraoption-rand");
+
+    EOrand.style.display = "none";
+
+    switch(GenType){
+        case "gt-rand":
+            EOrand.style.display = "block";
+            break;
+        case "gt->":
+            ResultEl.value = GenerateBytesAscending(Count);
+            break;
+        case "gt-<":
+            ResultEl.value = GenerateBytesDescending(Count);
+            break;
+    }
+}
+
+function Generate(){
+    var ResultEl = document.getElementById("result");
+
+    var Count = document.getElementById("count").value;
+    var GenType = document.getElementById("generation-type").value;
+
+    var Result = "";
+    switch(GenType){
+        case "gt-rand":
+            
+            for(var i = 0; i < Count; i++){
+                var min = document.getElementById("rand-min").value-1;
+                var max = Math.max(min,document.getElementById("rand-max").value-1);
+                Result += Random(0,255,true) + "|";
+            }
+
+            break;
+        case "gt->":
+            ResultEl.value = GenerateBytesAscending(Count);
+            break;
+        case "gt-<":
+            ResultEl.value = GenerateBytesDescending(Count);
+            break;
+    }
+
+    if (Result.endsWith("|")) {
+        Result = Result.slice(0, -1);
+    }
+
+    ResultEl.value = Result;
+}
+</script>
