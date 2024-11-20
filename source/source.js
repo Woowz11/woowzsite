@@ -56,7 +56,18 @@ WoowzsiteSourceAudios = AddTableToTable(AddFullnessToTable([
 
 WoowzcoreMusics = AddFullnessToTable([
 	"Avith Ortega - Dopamine for Her Professing - Edit","Avith Ortega - Leisure Time","EDARUMA - Recent Past","fadinglight - company","Glwzbll - GLW2000","latex fruit - Loveme2",
-	"Lemon Demon - Brodyquest","Seamoon - Six Synergies","Spatial Manufacture Ltd.","t e l e p a t h - track","Visonia - The Amethyst City","Visonia - The Moon Doesn't Want to Look at You"
+	"Lemon Demon - Brodyquest","Seamoon - Six Synergies","Spatial Manufacture Ltd.","t e l e p a t h - track","Visonia - The Amethyst City","Visonia - The Moon Doesn't Want to Look at You",
+	"rodr1se - Hardstyle Drill 2009","Rory in early 20s - track","t e l e p a t h - track 2","t e l e p a t h - track 3","t e l e p a t h - track 4","T.G.T.B. - Derelict","Seamoon - Six Synergies",
+	"M4 Vaporwave - Murderer Star","mayten - self reflection","Nmesh - track","Oliver Buckland - espial","Oneheart - snowfall","permskiy krai - The Virus","Polligopkalo - bloodyangel.mp666",
+	"crossing bridges - Deep Under the Surface of Level 7","Cult Member - The Ravedeath Still Hurts","DJ DR4GM4SHROOM - INTERN3T EXPLOR3R","FM Skyline - body_texture render","FM Skyline - Harlequin","Harold Budd - LAventure","KISYZ - Six Forty Seven",
+	"Wayne Hill - Left Bank Two (Vision On Gallery Theme)","Whitewoods - Beat Street","Xxtarlit","yandere - dreamcore","Ray Lynch","alone land","Constant Smiles - Restlessness (I Dont Sleep Well)",
+	"Pathetic - escalator","Piers Baron - The Last Night on Earth","Rory in early 20s - track 2","rvfzme - Char","Snow Strippers - Fantasy","Snow Strippers - Wont Be Back Again","VHS Logos - Sony",
+	"Noisemaker - Magna Aliqua","Oliver Buckland - vacillate","Betatrip - useless","dxnrm - why i'm here","Lustre - Let Go Like Leaves of Fall","Marc Acardipane - Return to Zero Beztebya","Mietze Conte - d(-_-)b dreaming of your latte art d(-_-)b",
+	"Viselnik - Dying Nature","ZanZiglatore","Avith Ortega - Betrayal","Dargaard - Thy Fleeing Time","Green-House - Xylem","Molina - Hey Kids","Nmesh - track 2",
+	"naran ratan - Forevertime Journeys II","Oliver Buckland - backroom labyrinth","Oliver Buckland - Dead God Graveyard","Raymond Scott - Portofino 2","Robin Guthrie - Imperial","Sacre - An Ending (Arena Tv Series)","Ssaliva - Arrow",
+	"Dottie Evans - Tonight You Belong to Me","dxnrm - restless dreams","Grouper - Poison Tree","Kero Kero Bonito - I'd Rather Sleep","Lifeformed - Undiscovery","Lustre - Petrichor","Mild High Club - Homage",
+	"Art Fact - Whom Are You Dancing For_","crossing bridges - Lighters","crossing bridges - WaterWorld43","CXRGI - weeping (Slowed)",
+	"special/oldebr_music_0","special/oldebr_music_1","special/oldebr_music_2","special/oldebr_music_3","special/oldebr_music_4","special/oldebr_music_5","special/woowzcore_music",
 ],"source/woowzcore/musics/",".mp3")
 
 WoowzsiteSourceBackrooms = AddTableToTable(AddFullnessToTable([
