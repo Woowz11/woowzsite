@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="base.js"></script>
+<script>Tool(
+`<center>Файл → байты<br>
+Название файла | Содержимое файла<br></center>
+<center><input type="file" id="this"></input></center>
+<textarea id="tothat" placeholder="Байты" style="width:100%; resize: none;" rows="20" readonly="readonly" spellcheck="false"></textarea><br>
+<center><button onclick="Convert();">Конвертировать</button></center>
+<br><hr><br>
+<center>Байты → Файл</center><br>
+<textarea id="thisBack" placeholder="Байты" style="width:100%; resize: none;" rows="20" spellcheck="false"></textarea>
+<center><button onclick="ConvertBack();">Конвертировать</button></center>
+`
+);</script>
+
+<script>
+async function Convert(){
+    var ThisEl = document.getElementById("this");
+    var ToThatEl = document.getElementById("tothat");
+
+	const file = ThisEl.files[0];
+	if(file!=null){
+		var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+          var raw = e.target.result;
+          // https://developer.mozilla.org/en/JavaScript_typed_arrays
+          var rawBytes = new Uint8Array(raw);
+
+          
+          console.log(rawBytes);
+        };
+      })(file);
+
+      // Read in the image file as a data URL.
+      reader.readAsArrayBuffer(file);
+	}
+}
+
+function ConvertBack(){
+    var ThisEl = document.getElementById("thisBack");
+
+    var This = ToString(ThisEl.value,true);
+	console.log(This[1]);
+	if(This.length==2){
+		CreateFile(This[0],This[1]);
+	}
+}
+</script>

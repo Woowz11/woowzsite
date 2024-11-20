@@ -58,14 +58,47 @@ function Random(Min,Max,Round){
 }
 
 function ToBytes(Str){
-	const encoder = new TextEncoder();
-    var Result = encoder.encode(Str);
-	return Array.from(Result).join('|');
+	if (typeof Str === 'string') {
+        const encoder = new TextEncoder();
+        var Result = encoder.encode(Str);
+        return Array.from(Result).join('|');
+    } else if (Array.isArray(Str)) {
+        return Str.map(s => ToBytes(s)).join('!');
+    } else {
+        return 'Неверный формат ввода!';
+    }
 }
 
-function ToString(Bytes){
-    const decoder = new TextDecoder();
-    const byteNumbers = Bytes.split('|').map(Number);
-    const byteArray = new Uint8Array(byteNumbers);
-    return decoder.decode(byteArray);
+function ToString(Bytes,ThatTable){
+	if(ThatTable==null){ThatTable=false;}
+	if(ThatTable){
+		var Result = [];
+		const byteArray = Bytes.split('!');
+		byteArray.forEach(function(el){
+			Result.push(ToString(el));
+		});
+		return Result;
+	}else{
+		const decoder = new TextDecoder();
+		const byteNumbers = Bytes.replace(/!/g, "|10|").split('|').map(Number);
+		const byteArray = new Uint8Array(byteNumbers);
+		return decoder.decode(byteArray);
+	}
+}
+
+function CreateFile(Name,Content){
+	const file = new File([Content], Name, {
+	  type: 'text/plain',
+	})
+
+	const link = document.createElement('a')
+	const url = URL.createObjectURL(file)
+
+	link.href = url
+	link.download = file.name
+	document.body.appendChild(link)
+	link.click()
+
+	document.body.removeChild(link)
+	window.URL.revokeObjectURL(url)
 }

@@ -20,7 +20,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"locate","lupa","metal","microsoft_fly_simulator_epicepdiditonpps","newfolder","no-cat","nointernet","noway!!!","obsidian_bowl","open","openprojecttitle","options","p","paper","par","paste","pixel","plus",
 	"plushover","position_end","position_end1","p_back","quare","rename","search","selectall","selectdinverse","selectdone","sky","smolarrow_bottom","smolarrow_right","smol_galka","sup","systems","teh","test",
 	"title","title2","title3","title4","title_smol","vis","wcom","windowpluginfolders","windowpluginfolders_left","windowpluginfolders_right","woowz11","woowzengine","zakrep","transparent","transparent-dark",
-	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall"
+	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face"
 ],"source/",".png")
 
 WoowzsiteSourceImagesJPG = AddFullnessToTable([
@@ -48,15 +48,16 @@ WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 	"ssstik.io_illegalbugtrader_1725631254849","LGqqu1KcC9ZCLiN7","IE28099m20the20dog20on20the20first20slide","egg","air_strike","6uENJ1JOvxyX6mzZ"
 ],"source/specialforrandomsite/mov/",".mov"))
 
-WoowzsiteSourceAudios = AddFullnessToTable([
-	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest",
-],"source/specialforrandomsite/",".mp3")
-
 WoowzsiteSourceAudios = AddTableToTable(AddFullnessToTable([
-	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest",
+	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist"
 ],"source/",".mp3"),[
 	"source/woowzbackrooms/sounds/breath.mp3","source/woowzbackrooms/sounds/level0.mp3","source/woowzbackrooms/sounds/walk.mp3"
 ])
+
+WoowzcoreMusics = AddFullnessToTable([
+	"Avith Ortega - Dopamine for Her Professing - Edit","Avith Ortega - Leisure Time","EDARUMA - Recent Past","fadinglight - company","Glwzbll - GLW2000","latex fruit - Loveme2",
+	"Lemon Demon - Brodyquest","Seamoon - Six Synergies","Spatial Manufacture Ltd.","t e l e p a t h - track","Visonia - The Amethyst City","Visonia - The Moon Doesn't Want to Look at You"
+],"source/woowzcore/musics/",".mp3")
 
 WoowzsiteSourceBackrooms = AddTableToTable(AddFullnessToTable([
 	"0_0","0_1","0_2","0_3","0_4","0_5","0_6","0_7","0_8","0_9","0_10","0_11","0_12","0_13","0_14","0_15","0_16","0_17","0_18"
@@ -165,7 +166,7 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
-	var tabl = AddTableToTable(WoowzsiteSourceImagesPNG,
+	return AddTableToTable(WoowzsiteSourceImagesPNG,
 	AddTableToTable(WoowzsiteSourceImagesJPG,
 	AddTableToTable(WoowzsiteSourceImagesGIF,
 	AddTableToTable(WoowzsiteSourceDiscordAvatars,
@@ -178,9 +179,11 @@ function GetAllWoowzsite(){
 	AddTableToTable(WoowzsiteSourceCore,
 	AddTableToTable(WoowzsiteSourceIcons,
 	AddTableToTable(WoowzsiteSourceCorruptedMinecraft,
-	AddTableToTable(WoowzsiteSourceAlchemy,
-	AddTableToTable(WoowzsiteSourceWoowzcore,WoowzsiteSourceDiscordAvatars)))))))))))))));
-	return tabl;
+	AddTableToTable(WoowzsiteSourceAlchemy,WoowzsiteSourceWoowzcore))))))))))))));
+}
+
+function GetAllWoowzsiteAudios(){
+	return AddTableToTable(WoowzsiteSourceAudios,WoowzcoreMusics);
 }
 
 function GetAllWoowzsiteImages(){
@@ -270,5 +273,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "тенденция","вина","дыхание","версия","масштаб","монастырь","хозяйка","дочка","танец","эксплуатация","коммунист","пенсия","приятель","объяснение","набор","производитель","пыль","философия","мощность","обязательство",
 "уход","горло","кризис","указание","плата","яблоко","препарат","действительность","москвич","остаток","изображение","сделка","сочинение","покупатель","танк","затрата","строка","единица","обработка","чемпионат","lua","html",
 "коллумбайн","дыня","баклажан","ээээээ","наебал","вертолёт","нахуй","Иркутск","kristina-561@mail.ru","болят","Привет, я менеджер по найму в WILDBERRIES, и мы набираем в нашу команду людей, которые смогут работать удаленно по 30–60 минут в день и получать зарплату ежедневно. Ежедневный доход: от 200 до 30 000 руб. Если вас заинтересовала данная вакансия, нажмите на кнопку и свяжитесь с менеджером через WhatsApp. 👇👇👇",
-"б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо","вувзкор","woowzcore","веирдкор",
+"б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо","вувзкор","woowzcore","веирдкор","следствие","стоматолог","<a href='https://woowz11.github.io/woowzsite/quaere.html'>пасхалка</a>","астма","апатия","АПАТИЯ!!!","сиюцид","депрессия","паспорт","discord",
 "роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить","прошу прощения, но мы не может перевести текст с неумесным содержанием"]
