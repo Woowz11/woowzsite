@@ -1,0 +1,35 @@
+@font-face {
+    font-family: "CFont";
+    src: url("minecraft.ttf") format('opentype'); /*Надо будет свой шрифт сделать*/
+}
+
+button{
+    border-image: url("button.png") repeat;
+    border-image-slice: 6 fill;
+    border-image-width: 32px 32px;
+    font-family:CFont;
+    color:white;
+}
+
+button:hover{
+    border-image: url("button_hover.png") repeat;
+    border-image-slice: 6 fill;
+    border-image-width: 32px 32px;
+}
+
+button:disabled{
+    border-image: url("button_disabled.png") repeat;
+    border-image-slice: 6 fill;
+    border-image-width: 32px 32px;
+}
+
+html{
+    font-family:CFont;
+    color:white;
+    font-size: 1.25em;
+    text-shadow: 0.18em 0.18em 0px #404040;
+}
+
+::selection {
+	opacity: 0;
+}

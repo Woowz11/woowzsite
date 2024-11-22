@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>BloodRaw - Редактор скина</title>
+<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
+
+<style>
+
+html{
+	background-image: url("source/bloodraw/dirt.png");
+	background-size: 64px 64px;
+	image-rendering: pixelated;
+}
+
+body{
+	margin:0px;
+}
+
+</style>
+
+<link rel="stylesheet" href="source/bloodraw/css.css">
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+	"imports":{
+		"three":"https://unpkg.com/three@v0.153.0/build/three.module.js",
+		"three/addons/":"https://unpkg.com/three@v0.153.0/examples/jsm/"
+	}
+}
+</script>
+
+<body>
+
+<panel style="width:100vw; height:95vh; display:flex;">
+
+<!-- Настройки персонажа -->
+<panel style="background-color:rgba(256,256,256,0.05); width:35vw; height:100%;">
+цвет кожи, накаченый или жирный, цвет глаз, шрамы, тату, возможно пол? но я не уверен (я уже говорил почему), украшения, тип трусов
+</panel>
+
+<!-- Окно показа -->
+<panel style="width:30vw; height:100%;">
+
+<panel id="scene" style="background-color:black; left:10%; top:2.5%; width: 80%; height: 70%; display:block; position:relative;">
+</panel>
+<panel style="background-color:rgba(256,256,256,0.05); left:10%; top:4%; width: 80%; height: 24.5%; display:block; position:relative;">
+	<button>Скачать</button>
+тут будут кнопки скачать и т.д<br>
+сохранить, сбросить, дисплей установленых одёжек (типо иерархия, можно кликнут и выделить одёжку), мб сохранения скина в виде файла сохранения, в таком случае и загрузка
+</panel>
+
+</panel>
+
+<!-- Выбор одежды -->
+<panel style="background-color:rgba(256,256,256,0.05); width:35vw; height:100%;">
+носки, обувь, штаны, верх (2 слоя), перчатки, шапка, маска, остальная декорация (ремни там, сумки и т.д)
+</panel>
+
+</panel>
+<panel style="background-color:rgba(256,256,256,0.1); width:100vw; height:5vh; display:block;">
+<font style="float:left;">Текст слева</font>
+<font style="position: fixed; left: 0; width: 100vw; text-align: center;">Текст посередине</font>
+<font style="float:right;">Текст справа</font>
+</panel>
+
+</body>
+
+<script type="module">
+	console.log("Create skin 3d model!");
+	import * as THREE from 'three';
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+	var renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.autoClear = false;
+	renderer.autoClearColor = false;
+	renderer.autoClearDepth = false;
+	var scenepanel = document.getElementById("scene");
+	renderer.setClearColor(0, 1);
+	scenepanel.appendChild(renderer.domElement);
+
+	var scene = new THREE.Scene();
+
+	const loader = new THREE.TextureLoader();
+	loader.load(
+		'source/bloodraw/cubemap.png',
+		function ( texture ) {
+			texture.colorSpace = THREE.SRGBColorSpace;
+			const cube = new THREE.Mesh(
+				new THREE.BoxGeometry(2000,2000,2000),
+				new THREE.MeshBasicMaterial({ map : texture, side:THREE.BackSide })
+			)
+			var uv = cube.geometry.attributes.uv;
+			const sx = 1 / 4.0 ;
+			const sy = 1 / 3.0 ;
+			uv.setXY(0, sx*3, sy*2); uv.setXY(1, sx*2,sy*2); uv.setXY(2, sx*3,sy*1); uv.setXY(3, sx*2,sy*1); // Right
+			uv.setXY(4, sx*1, sy*2); uv.setXY(5, sx*0,sy*2); uv.setXY(6, sx*1,sy*1); uv.setXY(7, sx*0,sy*1); // Left
+			uv.setXY(8, sx*1, sy*2); uv.setXY(9, sx*2,sy*2); uv.setXY(10, sx*1,sy*3); uv.setXY(11, sx*2,sy*3); // Top
+			uv.setXY(12, sx*1, sy*0); uv.setXY(13, sx*2,sy*0); uv.setXY(14, sx*1,sy*1); uv.setXY(15, sx*2,sy*1); // Bottom
+			uv.setXY(16, sx*4, sy*2); uv.setXY(17, sx*3,sy*2); uv.setXY(18, sx*4,sy*1); uv.setXY(19, sx*3,sy*1); // Back
+			uv.setXY(20, sx*2, sy*2); uv.setXY(21, sx*1,sy*2); uv.setXY(22, sx*2,sy*1); uv.setXY(23, sx*1,sy*1); // Front
+			cube.renderOrder = -100;
+			scene.add(cube);
+		}
+	)
+
+	var camera = new THREE.PerspectiveCamera(70);
+	camera.position.z = 50;
+	camera.position.set(0,0,-50);
+	camera.lookAt(0,0,0);
+	scene.add(camera);
+
+	var basicMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        lightDirection: { value: new THREE.Vector3(0, 1, 0) },
+		SkinTexture: { type: "t", value: null }
+    },
+    vertexShader: `
+        varying vec3 vNormal;
+        varying vec2 vUv;
+        void main() {
+            vNormal = normal;
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform vec3 lightDirection;
+		uniform sampler2D SkinTexture;
+        varying vec3 vNormal;
+		varying vec2 vUv;
+        void main() {
+            float intensity = dot(normalize(vNormal), normalize(lightDirection));
+            vec3 color;
+			if (intensity > 0.99) {
+				color = vec3(1.0, 1.0, 1.0);
+			} else if (intensity > -0.5) {
+				if (abs(vNormal.x) > abs(vNormal.z)) {
+				color = vec3(0.7, 0.7, 0.7);
+				}else{
+					color = vec3(0.8, 0.8, 0.8);
+				}
+			} else {
+				color = vec3(0.5, 0.5, 0.5);
+			}
+			vec4 texColor = texture2D(SkinTexture, vUv);
+            gl_FragColor = vec4(color * texColor.rgb, texColor.a);
+        }
+    `,
+    depthWrite: false,
+    depthTest: false,
+    transparent: true
+	});
+	//basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+
+	var SS = 1.0/64.0;
+
+	var elcount = -1;
+	var elsaved = null;
+	function SetUV(El,x1,y1,x2,y2,x3,y3,x4,y4){
+		if(elsaved!=El){
+			elsaved = El;
+			elcount = -1;
+		}
+		elcount++;
+		El.setXY(elcount*4, SS*x3, 1-SS*y3); El.setXY(elcount*4+1, SS*x4, 1-SS*y4); El.setXY(elcount*4+2, SS*x1, 1-SS*y1); El.setXY(elcount*4+3, SS*x2, 1-SS*y2);
+	}
+	function SetFullUV(El,posx,posy,sizex,sizey,sizez){
+		var sizez_top = sizex;
+		SetUV(El,posx,posy+sizey+sizez_top,posx+sizex,posy+sizey+sizez_top,posx,posy+sizez_top,posx+sizex,posy+sizez_top);//лево
+		SetUV(El,posx+sizex+sizez,posy+sizey+sizez_top,posx+sizex+sizez+sizex,posy+sizey+sizez_top,posx+sizex+sizez,posy+sizez_top,posx+sizex+sizez+sizex,posy+sizez_top);//право
+		SetUV(El,posx+sizex,posy+sizez_top,posx+sizex+sizez,posy+sizez_top,posx+sizex,posy,posx+sizex+sizez,posy);//вверх
+		SetUV(El,posx+sizex+sizez,posy+sizez_top,posx+sizex+sizez+sizez,posy+sizez_top,posx+sizex+sizez,posy,posx+sizex+sizez+sizez,posy);//низ
+		SetUV(El,posx+sizex+sizez+sizex,posy+sizey+sizez_top,posx+sizex+sizez+sizex+sizez,posy+sizey+sizez_top,posx+sizex+sizez+sizex,posy+sizez_top,posx+sizex+sizez+sizex+sizez,posy+sizez_top);//перед
+		SetUV(El,posx+sizex,posy+sizey+sizez_top,posx+sizex+sizez,posy+sizey+sizez_top,posx+sizex,posy+sizez_top,posx+sizex+sizez,posy+sizez_top);//зад
+	}
+	var PlayerElements = [];
+	function AddElement(posx_element,posy_element,posx,posy,sizex,sizey,sizez,posx_overlay,posy_overlay){
+		var El = new THREE.Mesh(new THREE.BoxGeometry(sizez,sizey,sizex),basicMaterial);
+		var El_UV = El.geometry.attributes.uv;
+		SetFullUV(El_UV,posx,posy,sizex,sizey,sizez);
+		El.position.set(posx_element,posy_element,0);
+		scene.add(El);
+
+		var OverlaySize = 1.125;
+		var El_Overlay = new THREE.Mesh(new THREE.BoxGeometry(sizez+OverlaySize,sizey+OverlaySize,sizex+OverlaySize),basicMaterial);
+		var El_Overlay_UV = El_Overlay.geometry.attributes.uv;
+		SetFullUV(El_Overlay_UV,posx_overlay,posy_overlay,sizex,sizey,sizez);
+		El_Overlay.position.set(posx_element-OverlaySize/4,posy_element-OverlaySize/4,0);
+		El_Overlay.renderOrder = 1;
+		scene.add(El_Overlay);
+	}
+
+	AddElement(0,10,0,0,8,8,8,32,0);
+	AddElement(0,0,16,16,4,12,8,16,32);
+	AddElement(6,0,40,16,4,12,4,40,32);
+	AddElement(-6,0,32,48,4,12,4,48,48);
+	AddElement(2,-12,0,16,4,12,4,0,32);
+	AddElement(-2,-12,16,48,4,12,4,0,48);
+
+	const controls = new OrbitControls(camera, renderer.domElement);
+	controls.minDistance = 25;
+	controls.maxDistance = 200;
+	controls.enableDamping = true;
+	controls.enablePan = false;
+	function render() {
+		requestAnimationFrame(render);
+		var width = scenepanel.clientWidth;
+		var height = scenepanel.clientHeight;
+		renderer.setSize(width, height);
+		camera.aspect = width / height;
+		camera.updateProjectionMatrix();
+
+		controls.update();
+		renderer.render(scene, camera);
+	}
+	render();
+
+	var SkinTexture;
+	function UpdateSkin(){
+		console.log("Update skin texture on model...")
+		basicMaterial.uniforms.SkinTexture.value = SkinTexture;
+	}
+	loader.load(
+		'source/bloodraw/test-skin-2.png',
+		function(t){
+			SkinTexture = t;
+			SkinTexture.magFilter = THREE.NearestFilter;
+			SkinTexture.minFilter = THREE.NearestFilter;
+			UpdateSkin();
+		}
+	)
+
+	console.log("Finish create skin 3d model!");
+</script>

@@ -43,9 +43,10 @@ WoowzsiteSourceCursors = AddFullnessToTable([
 WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 	"Download20","day","30513769.230000094_SPOILER_memphirs5a532a","Видео Папка","3DVideoDubstep - 382","ssstwitter.com_1722948103448","tumblr_s9un5nm1nT1zbpfgp_720.mp4","audio.destroy-7","sick","нигер в подгузнике",
 	"h","d566d3e9f11dc8c11ff4828cdf1b4a6c","89f5e57c28f923f295f8c02bbace5285","078cad1fad3e10001b98cf573a8b756a","video_2024-10-19_17-47-26","VID_20230830_110751_370","The_Greatest_Burger_King_Facts__20231209_51_new",
-	"SaveInsta.App_-_3170857346224613016","metwiixxd4f943","letychi_world1_2024-10-17-17-04-38_1729173878850","JhaWgqEz4FQP_2MH-1"
+	"SaveInsta.App_-_3170857346224613016","metwiixxd4f943","letychi_world1_2024-10-17-17-04-38_1729173878850","JhaWgqEz4FQP_2MH-1","lol_lmao","im_spongebob_roblox","get_gumped8008-20230523_100543-0B4EBF994C7BE6E0211B43557AA62981_video_dashinit",
+	"fish","epic","catpop","can_i_win","tractor","kachok","car","bitch"
 ],"source/specialforrandomsite/",".mp4"), AddFullnessToTable([
-	"ssstik.io_illegalbugtrader_1725631254849","LGqqu1KcC9ZCLiN7","IE28099m20the20dog20on20the20first20slide","egg","air_strike","6uENJ1JOvxyX6mzZ"
+	"ssstik.io_illegalbugtrader_1725631254849","LGqqu1KcC9ZCLiN7","IE28099m20the20dog20on20the20first20slide","egg","air_strike","6uENJ1JOvxyX6mzZ","staris-tiktoke","shutip","ser_na_zemly"
 ],"source/specialforrandomsite/mov/",".mov"))
 
 WoowzsiteSourceAudios = AddTableToTable(AddFullnessToTable([
@@ -68,6 +69,10 @@ WoowzcoreMusics = AddFullnessToTable([
 	"Dottie Evans - Tonight You Belong to Me","dxnrm - restless dreams","Grouper - Poison Tree","Kero Kero Bonito - I'd Rather Sleep","Lifeformed - Undiscovery","Lustre - Petrichor","Mild High Club - Homage",
 	"Art Fact - Whom Are You Dancing For_","crossing bridges - Lighters","crossing bridges - WaterWorld43","CXRGI - weeping (Slowed)",
 	"special/oldebr_music_0","special/oldebr_music_1","special/oldebr_music_2","special/oldebr_music_3","special/oldebr_music_4","special/oldebr_music_5","special/woowzcore_music",
+	"stvrshine - Constant Anxiety","TPFL - track","VAPERROR - Start Up","Yabujin - CHALICE OF MIND","LobotomyCorporation OST  - Second Warning",
+	"Mega Degrod - Xleepy","myxtica - Old Doll (out of tune) (slowed)","Paavoharju - Valo tihkuu kaiken lapi","Saul Stokes - Spirit Control","stvrshine - At the Speed of Light",
+	"Saul Stokes - The Telecine Ensemble","Blod Besvimelse - Misanthrop","Cult Member - U Weren't Here I Really Miss You","DXXDLY - Eerie","Mega Degrod - Athoth a go!! go!!!",
+	"Dargaard - The Infinite","Pye Corner Audio - Hollow Earth","Saul Stokes - Intra-Fantasy"
 ],"source/woowzcore/musics/",".mp3")
 
 WoowzsiteSourceBackrooms = AddTableToTable(AddFullnessToTable([
@@ -114,7 +119,7 @@ WoowzsiteSourceCats = AddFullnessToTable([
 ],"source/cats/",".png")
 
 WoowzsiteSourceBloodraw = AddFullnessToTable([
-	"dirt.png","iconblock.ico","logo.png"
+	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png"
 ],"source/bloodraw/","")
 
 WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([
@@ -285,4 +290,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "уход","горло","кризис","указание","плата","яблоко","препарат","действительность","москвич","остаток","изображение","сделка","сочинение","покупатель","танк","затрата","строка","единица","обработка","чемпионат","lua","html",
 "коллумбайн","дыня","баклажан","ээээээ","наебал","вертолёт","нахуй","Иркутск","kristina-561@mail.ru","болят","Привет, я менеджер по найму в WILDBERRIES, и мы набираем в нашу команду людей, которые смогут работать удаленно по 30–60 минут в день и получать зарплату ежедневно. Ежедневный доход: от 200 до 30 000 руб. Если вас заинтересовала данная вакансия, нажмите на кнопку и свяжитесь с менеджером через WhatsApp. 👇👇👇",
 "б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо","вувзкор","woowzcore","веирдкор","следствие","стоматолог","<a href='https://woowz11.github.io/woowzsite/quaere.html'>пасхалка</a>","астма","апатия","АПАТИЯ!!!","сиюцид","депрессия","паспорт","discord",
-"роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить","прошу прощения, но мы не может перевести текст с неумесным содержанием"]
+"роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить","прошу прощения, но мы не может перевести текст с неумесным содержанием",
+"узник","казах","блудрав","мазь","суп","тот самый суп"]

@@ -99,12 +99,12 @@ div{
 				<option value="source/white.png">Чистый белый</option>
 				<option value="source/black.png">Чистый чёрный</option>
 				<option value="source/invisible.png">Прозрачный</option>
-			</select> 
-			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button> 
+			</select>
+			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button>
 			<button onclick="ChangeStyle('custom-cursor',`cursor:auto;`)">Сбросить курсор</button>
 			<button onclick="ChangeFont('Comfortaa')">Сбросить шрифт</button>
+			<button onclick="LoadAll()">Загрузить всё</button>
 			<input type="checkbox" id="checkbox" name="checkbox" style="Transform: scale(1.6) translateY(1px);" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"> <font class="white-font">Сделать изображения размытыми</font>
-			
 			<div style="float: right"><input type="range" min="0.2" max="2" step="0.01" value="0.5" id="range"><font class="white-font">Размер ячеек</font> <button onclick="ChangeSize(true);">Сбросить</button></div>
 			<hr></div>
 		<font class="white-font" style="font-size:5em;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>% <font id="finish-ms" style="font-size: 0.75em;"></font></font>
@@ -203,6 +203,12 @@ select{
 	function GenerateTable(text,tabl){
 		if(disable){return;}
 		
+		if(document.getElementById(text+"-br")!=null){
+			document.getElementById(text+"-br").remove();
+		}else{
+			return;
+		}
+
 		counts[text] = [tabl.length,0];
 		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
 		document.getElementById("total-all").innerHTML = fullcounts[0];
@@ -308,7 +314,10 @@ select{
 		}
 		
 		result = result + `</div><br>`
-		explorer.innerHTML = explorer.innerHTML + result
+		var newel = document.createElement("resourcechecker");
+		newel.innerHTML = result;
+		var oldel = document.getElementById(text+"-preloader");
+		oldel.parentNode.replaceChild(newel,oldel);
 	}
 	function GenerateTableSites(){
 		var result = `<font class="white-font" style="font-size:5em;">Публичные сайты <font style="font-size:0.5em;">(`+all_sites.length+`)</font></font><br>
@@ -463,11 +472,33 @@ select{
 		categoryes = shuffledObj;
 	}
 	
+	function PreGenerateTable(text,tabl){
+		if(disable){return;}
+		var result = `<div id="${text}-preloader"><font class="white-font" style="font-size:3em;">${text} <font>(0/`+tabl.length+`) <button onclick="GenerateTable('${text}',categoryes['${text}']);" style="height:3em; margin-left:10px;">Загрузить</button></font></font>`;
+		result = result + `</div><br id="${text}-br">`;
+		explorer.innerHTML = explorer.innerHTML + result;
+	}
+
+	function LoadAll(onlyaudio){
+		for (var key in categoryes) {
+			if(onlyaudio==true){
+				if(key.includes(".mp3")||key.includes(".mp4")){
+					GenerateTable(key,categoryes[key]);
+				}
+			}else{
+				GenerateTable(key,categoryes[key]);
+			}
+		}
+	}
+
 	for (var key in categoryes) {
 		if (categoryes.hasOwnProperty(key)) {
 			var value = categoryes[key];
-			GenerateTable(key,value);
+			PreGenerateTable(key,value);
 		}
+	}
+	if(mem_prikol_screamer){
+		LoadAll(true);
 	}
 	
 	if(mem_prikol_fullrandom||mem_prikol_more_category||mem_prikol_one_category||mem_prikol_peremeshat||mem_prikol_random_category||mem_prikol_screamer){
