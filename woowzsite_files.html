@@ -7,8 +7,8 @@
 @font-face{ font-family:"Comfortaa"; src: url("source/Comfortaa.ttf")format('opentype'); }
 
 :root {
-  --a-outline: rgb(64,64,0);
-  --a-outline-hover: rgb(64,0,0);
+	--a-outline: rgb(64,64,0);
+	--a-outline-hover: rgb(64,0,0);
 }
 
 html{
@@ -32,14 +32,15 @@ html{
 	color: white;
 }
 
-.custom-cursor{
-	cursor:auto;
-}
-
 .background-image-div{}
 
 .image{
 	image-rendering: pixelated;
+	transition: transform 0.3s;
+}
+
+.div-image:hover .image{
+	transform: scale(1.5);
 }
 
 .div-image, .div-image-short{
@@ -49,6 +50,10 @@ html{
 button{
 	cursor:pointer;
 	font-family: Comfortaa;
+}
+
+input{
+	cursor:pointer;
 }
 
 select{
@@ -86,7 +91,7 @@ div{
 </style>
 
 <body>
-	<div class="background-image-div custom-cursor" style="margin:0px;">
+	<div class="background-image-div" style="margin:0px;">
 		<div style="background-color:rgba(0,0,0,0.2); padding:5px;">
 			<font class="white-font" style="font-size:5em; padding-left:10px;"><img style="image-rendering: pixelated; height:0.7em;" src="source/newfolder.png" loading="eager"> Woowzsites Files <font id="prikol" style="font-size:0.6em;"></font></font><br>
 			<font class="white-font">Задний фон: </font><select id="background-select" onclick="ChangeStyle('div-image, .div-image-short',`background-image:url('`+document.getElementById('background-select').value+`')`);" onchange="ChangeStyle('div-image',`background-image:url('`+document.getElementById('background-select').value+`')`);">
@@ -101,7 +106,7 @@ div{
 				<option value="source/invisible.png">Прозрачный</option>
 			</select>
 			<button onclick="ChangeStyle('background-image-div',`background-image:url('source/invisible.png');`)">Сбросить главный задний фон</button>
-			<button onclick="ChangeStyle('custom-cursor',`cursor:auto;`)">Сбросить курсор</button>
+			<button onclick="ChangeCursor('default')">Сбросить курсор</button>
 			<button onclick="ChangeFont('Comfortaa')">Сбросить шрифт</button>
 			<button onclick="LoadAll()">Загрузить всё</button>
 			<input type="checkbox" id="checkbox" name="checkbox" style="Transform: scale(1.6) translateY(1px);" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"> <font class="white-font">Сделать изображения размытыми</font>
@@ -156,10 +161,52 @@ div{
 		document.head.appendChild(link);
 	}
 	
-	function ChangeStyle(clas,styl){
+	function ChangeCursor(cur_){
+		var styleElement = document.createElement('style');
+		var cur = "url('"+cur_+"'),auto";
+		var cur_point = cur;
+		if(cur_=="default"){
+			cur = "default";
+			cur_point = "pointer";
+		}
+		styleElement.innerHTML = `
+html {
+	cursor:`+cur+`;
+}
+body {
+	cursor:`+cur+`;
+}
+div {
+	cursor:`+cur+`;
+}
+button {
+	cursor:`+cur_point+`;
+}
+font {
+	cursor:`+cur+`;
+}
+.white-font {
+	cursor:`+cur+`;
+}
+input{
+	cursor:`+cur_point+`;
+}
+select{
+	cursor:`+cur_point+`;
+}
+a{
+	cursor:`+cur_point+`;
+}
+		`;
+
+		document.head.appendChild(styleElement);
+	}
+
+	function ChangeStyle(clas,styl,hasdot){
+		if(hasdot==null){hasdot=true;}
 		var styleElement = document.createElement('style');
 		styleElement.innerHTML = `
-.${clas} {
+`+(hasdot?".":"")+`${clas} {
 	${styl}
 }
 		`;
@@ -215,8 +262,8 @@ select{
 		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif" loading="eager"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
 		
 		function LoadSource(that,src,text,type){
+			document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
 			if(fullcounts[0]==fullcounts[1]+1){
-				document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
 				document.title = "Woowzsites Files";
 			}else{
 				document.title = "Woowzsites Files ("+(fullcounts[1]+1)+"/"+(fullcounts[0])+")";
@@ -256,7 +303,7 @@ select{
 			<font style="color:${time_col};">${time}</font>ms<br>`+
 			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
 			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
-			((type=="cur")?`<button onclick="ChangeStyle('custom-cursor',\`cursor:url('${src}'),auto;\`);">Установить курсор</button>`:``)+
+			((type=="cur")?`<button onclick="ChangeCursor('${src}');">Установить курсор</button>`:``)+
 			((type=="mp3")?`<button onclick="window.open('${src}', '_blank');">Открыть в новой вкладке</button>`:``)
 			+`</div></div></div>`)
 			var c = counts[text][1]+1;
@@ -378,6 +425,7 @@ select{
 		"alchemy/*.png"        		   :WoowzsiteSourceAlchemy,
 		"woowzcore/source/*.png"       :WoowzsiteSourceWoowzcore,
 		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
+		"bloodraw/skineditor/*"        :GetAllBloodrawSkinEditor(),
 		"source/*.mp4"                 :WoowzsiteSourceVideos,
 		"source/*.mp3"                 :WoowzsiteSourceAudios,
 		"source/woowzcore/musics/*.mp3":WoowzcoreMusics,

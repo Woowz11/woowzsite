@@ -27,7 +27,7 @@ html{
     font-family:CFont;
     color:white;
     font-size: 1.25em;
-    text-shadow: 0.18em 0.18em 0px #404040;
+    text-shadow: 0.15em 0.15em 0px #2B2B2B;
 }
 
 ::selection {

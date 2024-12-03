@@ -18,6 +18,7 @@ body{
 </style>
 
 <link rel="stylesheet" href="source/bloodraw/css.css">
+<script src="source/source.js"></script>
 <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 <script type="importmap">
 {
@@ -30,11 +31,20 @@ body{
 
 <body>
 
+<canvas id="canvas" style="display: none;" width="100" height="100"></canvas>
+
 <panel style="width:100vw; height:95vh; display:flex;">
 
 <!-- Настройки персонажа -->
 <panel style="background-color:rgba(256,256,256,0.05); width:35vw; height:100%;">
-цвет кожи, накаченый или жирный, цвет глаз, шрамы, тату, возможно пол? но я не уверен (я уже говорил почему), украшения, тип трусов
+	<selectorgrid style="height: 100%; overflow-y: scroll; overflow-x: hidden; display: grid; grid-template-rows: 300px 300px 150px 300px 300px 300px; align-content: space-evenly; grid-gap: 20px; position: relative; left:2.5%; top:2%; width:95%; height:95.5%;">
+		<selector id="s_body" style="background-color:green;">тело</selector>
+		<selector id="s_hairs" style="background-color:red;">волосы</selector>
+		<selector id="s_eyes" style="background-color:blue;">цвет глаз</selector>
+		<selector id="s_tattoo" style="background-color:magenta;">шрамы+тату</selector>
+		<selector id="s_lowerdecor" style="background-color:white;">украшения (очки, перчатки, бронежелет, серёжки, носки)</selector>
+		<selector id="s_underpants" style="background-color:black;">трусы</selector>
+	</selectorgrid>
 </panel>
 
 <!-- Окно показа -->
@@ -52,14 +62,21 @@ body{
 
 <!-- Выбор одежды -->
 <panel style="background-color:rgba(256,256,256,0.05); width:35vw; height:100%;">
-носки, обувь, штаны, верх (2 слоя), перчатки, шапка, маска, остальная декорация (ремни там, сумки и т.д)
+	<selectorgrid style="height: 100%; overflow-y: scroll; overflow-x: hidden; display: grid; grid-template-rows: repeat(6, 300px); align-content: space-evenly; grid-gap: 20px; position: relative; left:2.5%; top:2%; width:95%; height:95.5%;">
+		<selector id="s_hats" style="background-color:green;">шапка</selector>
+		<selector id="s_mask" style="background-color:red;">маска (очки?)</selector>
+		<selector id="s_cloths" style="background-color:blue;">верхняя одежда</selector>
+		<selector id="s_upperdecor" style="background-color:magenta;">остальное (сумка, ремень)</selector>
+		<selector id="s_pants" style="background-color:white;">штаны</selector>
+		<selector id="s_boots" style="background-color:black;">Ботинки</selector>
+	</selectorgrid>
 </panel>
 
 </panel>
 <panel style="background-color:rgba(256,256,256,0.1); width:100vw; height:5vh; display:block;">
-<font style="float:left;">Текст слева</font>
-<font style="position: fixed; left: 0; width: 100vw; text-align: center;">Текст посередине</font>
-<font style="float:right;">Текст справа</font>
+<font style="float:left;">By Woowz11</font>
+<font style="position: fixed; left: 0; width: 100vw; text-align: center;"><a href="https://woowz11.github.io/woowzsite/bloodraw">Bloodraw</a> Skin Editor</font>
+<font style="float:right;">23.11.2024</font>
 </panel>
 
 </body>
@@ -219,7 +236,7 @@ body{
 		basicMaterial.uniforms.SkinTexture.value = SkinTexture;
 	}
 	loader.load(
-		'source/bloodraw/test-skin-2.png',
+		'bloodraw/skineditor/body/Обычное телоlСамое обычное телосложение.png',
 		function(t){
 			SkinTexture = t;
 			SkinTexture.magFilter = THREE.NearestFilter;
@@ -229,4 +246,177 @@ body{
 	)
 
 	console.log("Finish create skin 3d model!");
+
+	//--------------------------------------------------------------
+
+	var SelectedPlayerSkinSettings = {};
+
+	function AddSelectorElement(Selector,pathToTexture,thatGradient){
+		if(thatGradient==null){thatGradient=false;}
+		var El = document.createElement("img");
+		if(thatGradient){
+			GetPixelColorFromImage(pathToTexture,215,0,function(r,g,b,a){
+				El.style.width = "32px";
+				El.style.height = El.style.width;
+				El.style.backgroundColor = "rgb("+r+","+g+","+b+")";
+			})
+		}else{
+			El.src = pathToTexture;
+		}
+		Selector.appendChild(El);
+	}
+
+	function LoadCloths(id,selecttype){
+		var Selector = document.getElementById("s_"+id);
+		Selector.innerHTML = "";
+		Selector.style.backgroundColor = "rgba(0,0,0,0.15)";
+
+		var Elements = [];
+		switch(id){
+			case "body":
+				Elements = BloodrawSkinEditorBody;
+				break;
+			case "hairs":
+				Elements = BloodrawSkinEditorHairs;
+				break;
+			case "tattoo":
+				Elements = BloodrawSkinEditorTattoo;
+				break;
+			case "lowerdecor":
+				Elements = BloodrawSkinEditorLowerdecor;
+				break;
+			case "underpants":
+				Elements = BloodrawSkinEditorUnderpants;
+				break;
+			case "hats":
+				Elements = BloodrawSkinEditorHats;
+				break;
+			case "mask":
+				Elements = BloodrawSkinEditorMask;
+				break;
+			case "cloths":
+				Elements = BloodrawSkinEditorCloths;
+				break;
+			case "upperdecor":
+				Elements = BloodrawSkinEditorUpperdecor;
+				break;
+			case "pants":
+				Elements = BloodrawSkinEditorPants;
+				break;
+			case "boots":
+				Elements = BloodrawSkinEditorBoots;
+				break;
+		}
+
+		Selector.style.overflow = "hidden";
+		Selector.style.backgroundImage = 'url("source/bloodraw/dirt.png")';
+		Selector.style.backgroundSize = "64px 64px";
+		Selector.style.imageRendering = "pixelated";
+		var Grid = null;
+		if(selecttype=="gradient"){
+			Selector.style.display = "grid";
+			Selector.style.gridTemplateColumns = "1fr 1.5fr";
+
+			var SelectGradient = document.createElement("block");
+			SelectGradient.style.backgroundColor = "green";
+
+			Grid = document.createElement("block");
+			Grid.style.display = "grid";
+			Grid.style.gridTemplateColumns = "repeat(6,1fr)";
+			
+			SelectGradient.style.height = "100%";
+			Grid.style.height = "200%";
+
+			Selector.appendChild(SelectGradient);
+			Selector.appendChild(Grid);
+
+			var Gradients = [];
+			switch(id){
+				case "body":
+					Gradients = BloodrawSkinEditorGradientsSkins;
+					break;
+				case "hairs":
+					Gradients = BloodrawSkinEditorGradientsHairs;
+					break;
+			}
+			Gradients.forEach(el => {
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+				AddSelectorElement(SelectGradient,el,true);
+			})
+		}else{
+			Grid = document.createElement("block");
+			Grid.style.display = "grid";
+			Grid.style.gridTemplateColumns = "repeat(6,1fr)";
+
+			Grid.style.height = "200%";
+
+			Selector.appendChild(Grid);
+		}
+		Grid.style.overflowY = "scroll";
+		Grid.style.overflowX = "hidden";
+		Grid.style.backgroundColor = "red";
+
+		Elements.forEach(el => {
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+			AddSelectorElement(Grid,el);
+		});
+
+		var result = [];
+		switch(id){
+			case "body":
+				result.push("Обычное телоlСамое обычное телосложение");
+				result.push("Светлый");
+				break;
+			
+		}
+		SelectedPlayerSkinSettings[id] = result;
+	}
+	/*
+	Тип выбора
+	gradient = Выбор градиента и текстуры
+	eyes = Выбор цвета глаз и настройка глаз
+	once = Выбор только одного элемента
+	two = Выбор двух элементов, задний и передний
+	inf = Выбор нескольких элементов
+	*/
+	LoadCloths("body","gradient");
+	LoadCloths("hairs","gradient");
+	LoadCloths("eyes","eyes");
+	LoadCloths("tattoo","inf");
+	LoadCloths("lowerdecor","inf");
+	LoadCloths("underpants","once");
+
+	LoadCloths("hats","once");
+	LoadCloths("mask","two");
+	LoadCloths("cloths","two");
+	LoadCloths("upperdecor","inf");
+	LoadCloths("pants","two");
+	LoadCloths("boots","once");
+
+	//--------------------------------------------
+
+	function GetPixelColorFromImage(path,x,y,onload){
+		const canvas = document.createElement("canvas");
+		const ctx = canvas.getContext("2d");
+		const img = new Image();
+		img.src = path;
+		img.onload = function(){
+			ctx.drawImage(img,0,0);
+			const pd = ctx.getImageData(x,y,1,1).data;
+			onload(pd[0],pd[1],pd[2],pd[3]);
+		}
+	}
 </script>

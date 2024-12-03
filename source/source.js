@@ -106,7 +106,7 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"9311797.164999995_image","10056771.889999975_image","image","IMG_20230618_013225","omg","Pngpng","ssasa","test-aubergine","cowsea","cowfly","spyder","paint","horse","skeleton","pz","fish","castale","spheres","cat",
 	"doudou","rotten-meatball","mine","minecraft","random","hair-creeper","what_a_image","dymaite","face","bird","skull","worker","madnes","pisechnik"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
-	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120","ez"
+	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120","ez","fnaf-mewing"
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzsiteSourceCats = AddFullnessToTable([
@@ -179,6 +179,58 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"vaporwave","window","catbackground"
 ],"core-wiki/source/",".jpg")))
 
+BloodrawSkinEditorBody = AddFullnessToTable([
+	"Обычное телоlСамое обычное телосложение"
+],"bloodraw/skineditor/body/",".png")
+
+BloodrawSkinEditorBoots = AddFullnessToTable([
+	
+],"bloodraw/skineditor/boots/",".png")
+
+BloodrawSkinEditorCloths = AddFullnessToTable([
+	
+],"bloodraw/skineditor/cloths/",".png")
+
+BloodrawSkinEditorHats = AddFullnessToTable([
+	
+],"bloodraw/skineditor/hats/",".png")
+
+BloodrawSkinEditorLowerdecor = AddFullnessToTable([
+	
+],"bloodraw/skineditor/lowerdecor/",".png")
+
+BloodrawSkinEditorMask = AddFullnessToTable([
+	
+],"bloodraw/skineditor/mask/",".png")
+
+BloodrawSkinEditorPants = AddFullnessToTable([
+	
+],"bloodraw/skineditor/pants/",".png")
+
+BloodrawSkinEditorHairs = AddFullnessToTable([
+	
+],"bloodraw/skineditor/hairs/",".png")
+
+BloodrawSkinEditorTattoo = AddFullnessToTable([
+	
+],"bloodraw/skineditor/tattoo/",".png")
+
+BloodrawSkinEditorUnderpants = AddFullnessToTable([
+	
+],"bloodraw/skineditor/underpants/",".png")
+
+BloodrawSkinEditorUpperdecor = AddFullnessToTable([
+	
+],"bloodraw/skineditor/upperdecor/",".png")
+
+BloodrawSkinEditorGradientsSkins = AddFullnessToTable([
+	"Светлый"
+],"bloodraw/skineditor/gradients/skins/",".png")
+
+BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
+	
+],"bloodraw/skineditor/gradients/skins/",".png")
+
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
@@ -195,11 +247,27 @@ function GetAllWoowzsite(){
 	AddTableToTable(WoowzsiteSourceCore,
 	AddTableToTable(WoowzsiteSourceIcons,
 	AddTableToTable(WoowzsiteSourceCorruptedMinecraft,
-	AddTableToTable(WoowzsiteSourceAlchemy,WoowzsiteSourceWoowzcore))))))))))))));
+	AddTableToTable(WoowzsiteSourceAlchemy,
+	AddTableToTable(GetAllBloodrawSkinEditor(),WoowzsiteSourceWoowzcore)))))))))))))));
 }
 
 function GetAllWoowzsiteAudios(){
 	return AddTableToTable(WoowzsiteSourceAudios,WoowzcoreMusics);
+}
+
+function GetAllBloodrawSkinEditor(){
+	return AddTableToTable(BloodrawSkinEditorBody,
+	AddTableToTable(BloodrawSkinEditorBoots,
+	AddTableToTable(BloodrawSkinEditorCloths,
+	AddTableToTable(BloodrawSkinEditorHats,
+	AddTableToTable(BloodrawSkinEditorLowerdecor,
+	AddTableToTable(BloodrawSkinEditorMask,
+	AddTableToTable(BloodrawSkinEditorPants,
+	AddTableToTable(BloodrawSkinEditorHairs,
+	AddTableToTable(BloodrawSkinEditorTattoo,
+	AddTableToTable(BloodrawSkinEditorUnderpants,
+	AddTableToTable(BloodrawSkinEditorGradientsHairs,
+	AddTableToTable(BloodrawSkinEditorGradientsSkins,BloodrawSkinEditorUpperdecor))))))))))));
 }
 
 function GetAllWoowzsiteImages(){
