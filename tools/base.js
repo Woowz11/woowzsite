@@ -57,13 +57,27 @@ function Random(Min,Max,Round){
 	return (Round?Math.floor(Math.random() * (Max-Min)+ Min):(Math.random() * (Max-Min)+ Min));
 }
 
-function ToBytes(Str){
+function getKeyByValue(table,value){
+	return Object.keys(table).find(key => table[key] === value);
+}
+
+EncodingTableConvertor = {
+	"utf8"         : "",
+	"utf-8"        : "",
+	"Windows-1252" : "ANSI",
+	"Windows-1251" : "Cyrillic"
+};
+
+function ToBytes(Str,Encoding){
+	if(Encoding==null){Encoding="";}
 	if (typeof Str === 'string') {
-        const encoder = new TextEncoder();
+		console.log("Encode to "+getKeyByValue(EncodingTableConvertor,Encoding));
+        const encoder = new TextEncoder(getKeyByValue(EncodingTableConvertor,Encoding));
         var Result = encoder.encode(Str);
-        return Array.from(Result).join('|');
+		var encod = (Encoding==""?"":"["+Encoding+"]");
+        return encod+Array.from(Result).join('|');
     } else if (Array.isArray(Str)) {
-        return Str.map(s => ToBytes(s)).join('!');
+        return Str.map(s => ToBytes(s,Encoding)).join('!');
     } else {
         return 'Неверный формат ввода!';
     }
@@ -79,7 +93,16 @@ function ToString(Bytes,ThatTable){
 		});
 		return Result;
 	}else{
-		const decoder = new TextDecoder();
+		var SBI = Bytes.indexOf("[");
+		var EBI = Bytes.indexOf("]");
+		var Encoding = "";
+		if(SBI != -1 && EBI != -1){
+			Encoding = Bytes.substring(SBI+1,EBI);
+			Bytes = Bytes.replace("["+Encoding+"]","");
+		}
+		
+		console.log("Decode to "+getKeyByValue(EncodingTableConvertor,Encoding));
+		const decoder = new TextDecoder(getKeyByValue(EncodingTableConvertor,Encoding));
 		const byteNumbers = Bytes.replace(/!/g, "|10|").split('|').map(Number);
 		const byteArray = new Uint8Array(byteNumbers);
 		return decoder.decode(byteArray);

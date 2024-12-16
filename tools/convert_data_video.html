@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<script src="base.js"></script>
+<script>Tool(
+`<center>Файл в видео (mp4)</center><br>
+<center><input type="file" id="file"></input></center><br>
+<center><button onclick="Convert();">Конвертировать</button></center>
+`
+);</script>
+
+<script>
+function Convert(){
+	var File = document.getElementById("file").value;
+    var FileBlob = document.getElementById("file").files[0];
+	
+	console.log(FileBlob);
+	console.log(File);
+	
+	var reader = new FileReader();
+	reader.readAsArrayBuffer(FileBlob)
+	reader.addEventListener('load',(e)=> {
+		
+		console.log(ToBytes(e.currentTarget.result));
+		var massive = new Int8Array(e.currentTarget.result);
+		for(let num of massive){
+			
+		}
+	});
+	
+	console.log();
+}
+</script>

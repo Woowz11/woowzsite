@@ -15,38 +15,21 @@
 );</script>
 
 <script>
-async function Convert(){
-    var ThisEl = document.getElementById("this");
-    var ToThatEl = document.getElementById("tothat");
-
-	const file = ThisEl.files[0];
-	if(file!=null){
-		var reader = new FileReader();
-
-      // Closure to capture the file information.
-      reader.onload = (function(theFile) {
-        return function(e) {
-          var raw = e.target.result;
-          // https://developer.mozilla.org/en/JavaScript_typed_arrays
-          var rawBytes = new Uint8Array(raw);
-
-          
-          console.log(rawBytes);
-        };
-      })(file);
-
-      // Read in the image file as a data URL.
-      reader.readAsArrayBuffer(file);
-	}
-}
-
-function ConvertBack(){
-    var ThisEl = document.getElementById("thisBack");
-
-    var This = ToString(ThisEl.value,true);
-	console.log(This[1]);
-	if(This.length==2){
-		CreateFile(This[0],This[1]);
-	}
+function Convert(){
+    var FileBlob = document.getElementById("this").files[0];
+	
+	var reader = new FileReader();
+	reader.readAsArrayBuffer(FileBlob)
+	reader.addEventListener('load',(e)=> {
+		console.log(e.currentTarget.result);
+		var decoder = new TextDecoder("Windows-1252");
+		console.log(ToBytes(decoder.decode(new Int8Array(e.currentTarget.result))));
+		var massive = new Int8Array(e.currentTarget.result);
+		for(let num of massive){
+			
+		}
+	});
+	
+	console.log();
 }
 </script>
