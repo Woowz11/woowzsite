@@ -1,11 +1,7 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
-<!-- Õ ãåáÖ½Æ· ã ½å  -->
 <title>W.COM</title>
-<link rel="icon" type="image/x-icon" href="source\wcom.ico">
-<script src="source/woowz/main.js"></script>
-<link rel="stylesheet" href="source/woowz/main.css">
-<!-- HTML ã ½å  -->
+<link rel="icon" type="image/x-icon" href="source/wcom.ico">
 
 <style>
 html{
@@ -19,9 +15,90 @@ body{
     margin-bottom: 0px;
     margin-right: 0px;
 }
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ffffff;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #000000;
+}
+
+input[type='range']{
+	accent-color: #FFDB88;
+}
+
 </style>
 
 <ul style="margin: 0; padding: 20px; background: #000000;">
 <li style="display: inline-block; "><a href="w.html"><img src="source\wcom.png" width="169" height="60"></a></li>
+<input id="input" type="range" min="0" max="10" step="0.01" oninput="changespeed_range()" style="width:50%;"> <input id="speed" type="number" min="0" max="16" oninput="changespeed_number()">
+<button onclick="changespeed(0)">min</button><button onclick="changespeed(0.25)">0.25</button><button onclick="changespeed(0.5)">0.5</button><button onclick="changespeed(0.75)">0.75</button><button onclick="changespeed(1)">1</button><button onclick="changespeed(1.25)">1.25</button><button onclick="changespeed(1.5)">1.5</button><button onclick="changespeed(1.75)">1.75</button><button onclick="changespeed(2)">2</button><button onclick="changespeed(16)">max</button>
 </ul>
-÷åÖ ûåÖ ó  ØÖáÔÖ¬á ª·Þ åçå Æ Æ Þ-åÖ
+
+<div id="grid" style="position:fixed; width:95%; height:82.5%; left:2.5%; bottom:2.5%; display:grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: ; grid-column-gap: 5px; grid-row-gap: 5px;  overflow: auto;"></div>
+<script src="source/source.js"></script>
+
+<script>
+var grid = document.getElementById("grid");
+var vidarray = WoowzsiteSourceVideos;
+
+function addvid(i){
+	var vid = document.createElement("video");
+	var src = vidarray[Math.floor(Math.random()*vidarray.length)];
+	vidarray.splice(vidarray.indexOf(src),1);
+	
+	vid.src = src;
+	vid.controls = true;
+	vid.loop = true;
+	vid.style.width = "100%";
+	vid.style.height = "250px";
+	vid.style.backgroundColor = "black";
+	
+	grid.appendChild(vid);
+}
+
+function load(){
+	document.getElementById("speed").value = 1;
+	var n = 50;
+	for (var i = 0; i < n; i++){
+		addvid(i);
+	}
+}
+
+load();
+
+function changespeed(speed,ignorechangerange){
+	speed = Math.max(0.0625,speed);
+	if(ignorechangerange!=false){
+		document.getElementById("speed").value = speed;
+	}
+	
+	if(ignorechangerange!==true){
+		document.getElementById("input").value = 5*Math.pow(speed,1/3.322);
+	}
+	
+	const videos = document.querySelectorAll('video');
+
+	videos.forEach(video => {
+		video.playbackRate = speed;
+	});
+	
+}
+
+function changespeed_range(){
+	var speed = document.getElementById("input").value;
+	speed = Math.pow(speed/5,3.322);
+	speed = Math.round(speed*1000)/1000;
+	changespeed(speed,true);
+}
+
+function changespeed_number(){
+	var speed = document.getElementById("speed").value;
+	changespeed(speed,false);
+}
+</script>
