@@ -226,6 +226,7 @@ input[type="checkbox"]{
 			<input type="checkbox" id="sort-checkbox" style="margin-top:10px; transform: scale(1.15);"><font>В алфавитном порядке</font><br>
 			<input type="text" id="search" autocomplete="off" spellcheck="false" placeholder="Поиск..." style="width:95.5%; margin-top:5px; height:30px; font-size:1.2em;"><br>
 			<div style="background-color:rgb(220,220,220); border-radius:10px; width:95.5%; height:40%; margin-top:10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); text-align:center; text-wrap:wrap; padding:5px;">
+				<font><b id="desc-elementname"></b></font><br>
 				<font><b id="desc"></b></font>
 			</div>
 		</div>
@@ -568,7 +569,7 @@ function AddElementToTable(id,posx,posy,z_top){
 	var el = CreateElement(id);
 	var elid = el["number"];
 	ElementsOnTable.push(el);
-	var result = `<div id="`+elid+`" class="element" style="position:fixed; left:`+posx+`px; top:`+posy+`px; width:100px; height:100px; z-index:2000;"><img `+(ElementsDatas[id]["Class"]==null||EnableClasses==false?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:100px; height:100px; border-radius: 20%; cursor:pointer;" draggable="false" title="`+ElementsDatas[id]["Name"]+`" onerror="this.src='alchemy/dev.png';" src="alchemy/`+id+`.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div>`;
+	var result = `<div id="`+elid+`" class="element" elementid="`+id+`" style="position:fixed; left:`+posx+`px; top:`+posy+`px; width:100px; height:100px; z-index:2000;"><img `+(ElementsDatas[id]["Class"]==null||EnableClasses==false?"":`class="`+ElementsDatas[id]["Class"]+`"`)+` style="width:100px; height:100px; border-radius: 20%; cursor:pointer;" draggable="false" title="`+ElementsDatas[id]["Name"]+`" onerror="this.src='alchemy/dev.png';" src="alchemy/`+id+`.`+(ElementsDatas[id]["Gif"]==true?"gif":"png")+`"></div>`;
 	document.getElementById("table").innerHTML += result;
 	var el_ = document.getElementById(elid);
 	if(z_top==true){
@@ -606,6 +607,20 @@ function hasParentWithId(element, parentId) {
     }
     return null;
 }
+
+function hasAttributeFromParents(element,att){
+	var parent = element.parentNode;
+	while(parent){
+		if(parent instanceof Element){
+			if(parent.hasAttribute(att)){
+				return parent;
+			}
+		}
+		parent = parent.parentNode;
+	}
+	return null;
+}
+
 document.getElementById("inventory").addEventListener("mousedown", function(event) {
 	if(event.button == 0){
 		var got = hasParentWithId(event.target,"got");
@@ -616,23 +631,27 @@ document.getElementById("inventory").addEventListener("mousedown", function(even
 		}
 	}
 });
+var descelname = document.getElementById("desc-elementname");
 var desc = document.getElementById("desc");
 document.addEventListener("mousemove", function(event) {
 	var id = "";
 	if(event.target!=null){
-		var got = hasParentWithId(event.target,"got");
+		var got = hasAttributeFromParents(event.target,"elementid");
 		if(got != null){
-			if(got.id == "got"){
-				id = got.getAttribute("elementid");
-			}
+			id = got.getAttribute("elementid");
 		}
 	}
 	var d = "";
+	var name = "";
 	if(id!=""){
+		if(ElementsDatas[id]["Name"]!=null){
+			name = ElementsDatas[id]["Name"];
+		}
 		if(ElementsDatas[id]["Desc"]!=null){
 			d = ElementsDatas[id]["Desc"];
 		}
 	}
+	descelname.innerHTML = name;
 	desc.innerHTML = d;
 });
 
