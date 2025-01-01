@@ -46,7 +46,7 @@ WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 	"SaveInsta.App_-_3170857346224613016","metwiixxd4f943","letychi_world1_2024-10-17-17-04-38_1729173878850","JhaWgqEz4FQP_2MH-1","lol_lmao","im_spongebob_roblox","get_gumped8008-20230523_100543-0B4EBF994C7BE6E0211B43557AA62981_video_dashinit",
 	"fish","epic","catpop","can_i_win","tractor","kachok","car","bitch","911","corn","plant","titish_1","pis","YouCut_20240220_043324942","roblox_wrf","31","9b62d3b49f0f2dc5","480p",
 	"iqNulmlawLOe_pBe","warning","bing_chiling","butterdog","cat_lanch","Casually_walk","HeGotTheMoves","Car2","236455969_118520010448014_8958250148816217856_n","rootbeer_goose","reality",
-	"1_735_045_580_737"
+	"1_735_045_580_737","censoredspanch2_1"
 ],"source/specialforrandomsite/",".mp4"), AddFullnessToTable([
 	"ssstik.io_illegalbugtrader_1725631254849","LGqqu1KcC9ZCLiN7","IE28099m20the20dog20on20the20first20slide","egg","air_strike","6uENJ1JOvxyX6mzZ","staris-tiktoke","shutip","ser_na_zemly","ptita",
 	"oh_my_god"
@@ -71,11 +71,12 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"670607987815088150","adadadad","bd69a829ddb4-kopija-6","apng","cybertruck","cursors","4444","bassterts","brain","woowz_cloth","paint50","t","svit",
 	"fa2dbcff49113b7c8882f3ae47c7edec-gigapixel-scale-4x","king","unknown-4","Tiles","Ножницы_ESTEL_Premier_для_точных_стрижек,_5.5_1","скрипт",
 	"fullhd","cpu","1515838_ratf_bingus","869216194635374602","b9b_BUKC0ho","flushed_confused","gratis-png-basura-thumbnail","combined","angrcat",
-	"goodproduct","m","sk","weirdcat","chicken","lab_prisedent","kuki","sun","IMG_6847","IMG_4842","hamer","human","dayface"
+	"goodproduct","m","sk","weirdcat","chicken","lab_prisedent","kuki","sun","IMG_6847","IMG_4842","hamer","human","dayface","minecraft-woowzcraft"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
 	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120","ez","fnaf-mewing",
 	"1106463976809828372","dog","ezgif-3-8e481532df","BlueMarble_monthlies_animation","gckl_howler","мем","sxema-raboty-rektifikacionnoj-kolonny-foto","alha","v.03","31642.970","723831047925792818",
-	"a_71d80d5021271963722772d663bdb5df-1-1","GIF 17.08.2020 19-25-55","gg1983e7f015","cat","teapottutor)))","moss","toletole","idiot","bear"
+	"a_71d80d5021271963722772d663bdb5df-1-1","GIF 17.08.2020 19-25-55","gg1983e7f015","cat","teapottutor)))","moss","toletole","idiot","bear",
+	"ai1","ai2","ai3","ai4"
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzcoreMusics = AddFullnessToTable([
@@ -375,4 +376,4 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "коллумбайн","дыня","баклажан","ээээээ","наебал","вертолёт","нахуй","Иркутск","kristina-561@mail.ru","болят","Привет, я менеджер по найму в WILDBERRIES, и мы набираем в нашу команду людей, которые смогут работать удаленно по 30–60 минут в день и получать зарплату ежедневно. Ежедневный доход: от 200 до 30 000 руб. Если вас заинтересовала данная вакансия, нажмите на кнопку и свяжитесь с менеджером через WhatsApp. 👇👇👇",
 "б","г","д","е","ё","ж","з","и","к","л","и","н","о","э","ю","я","ы","ь","ъ","卐","пвз","вайлдберис","хоп","кодиум","нейронная","радиация","вич","вам что-бы выиграть, вам нужно заплатить 3.000$","чмо","вувзкор","woowzcore","веирдкор","следствие","стоматолог","<a href='https://woowz11.github.io/woowzsite/quaere.html'>пасхалка</a>","астма","апатия","АПАТИЯ!!!","сиюцид","депрессия","паспорт","discord",
 "роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить","прошу прощения, но мы не может перевести текст с неумесным содержанием",
-"узник","казах","блудрав","мазь","суп","тот самый суп"]
+"узник","казах","блудрав","мазь","суп","тот самый суп","негр","нигер","негры","негроид","негра","niger","негритоски"]
