@@ -159,6 +159,21 @@ function WWCreateWiki(){
 		border-radius: 15px;
 	}
 	
+	b{
+		text-shadow: -0.5px 0, 0 0.5px, 0.5px 0, 0 -0.5px, -0.5px -0.5px, 0.5px 0.5px, -0.5px 0.5px, 0.5px -0.5px;
+	}
+	
+	code{
+		display: inline-block;
+		white-space: pre;
+		box-sizing: border-box;
+		background-color: rgba(0,0,0,0.2);
+		font-family: "Courier New", Courier, monospace;
+		padding: 5px;
+		border-radius: 8px;
+		border: 1px solid #ddd;
+	}
+	
 	::selection{
 		background-color:transparent;
 	}

@@ -22,12 +22,12 @@ var info = {
 }
 
 function FuncDesc(Name, Values, Desc, Example){
-	return `<center>`+Name+`</center><br><center><code>`+Values+`</code></center><hr><center>`+Desc+`</center><hr>`+Example;
+	return `<center><b>`+Name+`</b></center><br><center><code>`+Values+`</code></center><hr><center>`+Desc+`</center><hr>`+Example;
 }
 
 WWSetInfo(info);
 
-WWAddPage("startpage",null,"Начало...",{"Page":"<code>Википедия как и игра находятся в активной разработке!</code><br>Эта википедия посвощенена моддингу для игры Lithium Universe<br>Строение ресурсов как в Minecraft, моддинг на Lua"});
+WWAddPage("startpage",null,"Начало...",{"Page":"<b>Википедия как и игра находятся в активной разработке!</b><br>Эта википедия посвощенена моддингу для игры Lithium Universe<br>Строение ресурсов как в Minecraft, моддинг на Lua"});
 
 WWAddTitle("resources",null,"Ресурсы",{});
 WWAddPage("resources_info","resources","Строение ресурсов",
@@ -197,33 +197,33 @@ void main()
     }
     FragColor = TextureColor;
 }</code>`+
-`<hr>Информация о uniform's
-
-<li>ID                (int      ) = Айди объекта
-<li>Position          (vec2     ) = Позиция объекта
-<li>CameraPosition    (vec2     ) = Позиция камеры
-<li>CameraOrientation (float    ) = Поворот камеры
-<li>CameraZoom        (float    ) = Зум камеры
-<li>Random            (float    ) = Случайное дробное число от 0 до 1
-<li>LocalRandom       (float    ) = Случайное дробное число от 0 до 1 (у каждого объекта свой)
-<li>ScreenSize        (vec2     ) = Текущий размер экрана
-<li>ScreenStartSize   (vec2     ) = Размер экрана при запуске игры
-<li>MousePosition     (vec2     ) = Позиция мыши в пикселях
-<li>Texture           (sampler2D) = Текстура
-<li>TextureSize       (vec2     ) = Размер текстуры
-<li>Time              (float    ) = Прошедшее время с запуска приложения
-<li>DeltaTime         (float    ) = Размягчение зависящие от FPS
-<li>DebugRender       (bool     ) = Включен отладочный рендер?
-<li>Static            (bool     ) = Объект статичный?
-<li>Physical          (bool     ) = Объект физичный?
-<li>Interface         (bool     ) = Объект является интерфейсом?
-<li>Resize            (bool     ) = Объект меняет размер от размера экрана
-<li>Sleeping          (bool     ) = Физическое тело объекта спит?
+`<hr><code>Информация о uniform's
+ID                (int      ) = Айди объекта
+Position          (vec2     ) = Позиция объекта
+CameraPosition    (vec2     ) = Позиция камеры
+CameraOrientation (float    ) = Поворот камеры
+CameraZoom        (float    ) = Зум камеры
+Random            (float    ) = Случайное дробное число от 0 до 1
+LocalRandom       (float    ) = Случайное дробное число от 0 до 1 (у каждого объекта свой)
+ScreenSize        (vec2     ) = Текущий размер экрана
+ScreenStartSize   (vec2     ) = Размер экрана при запуске игры
+MousePosition     (vec2     ) = Позиция мыши в пикселях
+Texture           (sampler2D) = Текстура
+TextureSize       (vec2     ) = Размер текстуры
+Time              (float    ) = Прошедшее время с запуска приложения
+DeltaTime         (float    ) = Размягчение зависящие от FPS
+DebugRender       (bool     ) = Включен отладочный рендер?
+Static            (bool     ) = Объект статичный?
+Physical          (bool     ) = Объект физичный?
+Interface         (bool     ) = Объект является интерфейсом?
+Resize            (bool     ) = Объект меняет размер от размера экрана
+Sleeping          (bool     ) = Физическое тело объекта спит?
 
 Информация о location's
-<li>[0] PointPosition (vec3) = Позиция точки
-<li>[1] TextureUV     (vec2) = Развёртка текстуры в точке
-<li>[2] PointID       (int ) = Айди точки`});
+[0] PointPosition (vec3) = Позиция точки
+[1] TextureUV     (vec2) = Развёртка текстуры в точке
+[2] PointID       (int ) = Айди точки
+</code>`});
 
 WWAddTitle("mod",null,"Модификации",{});
 WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётся папка с ID мода в папке <code>Mods</code>, и внутри папки создаётся файл <code>{Название вашей папки}.lu_mod</code><br>"+
@@ -240,7 +240,7 @@ WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётс
 "<hr>При загрузке сцены игры запустится <code>MainScript</code>"});
 
 WWAddTitle("api",null,"Скрипты",{});
-WWAddPage("api_print","api","Print",{"Page":FuncDesc("Print","Сообщение (string)","Вызывает в консоль сообщение типа <code>I:[15:34:12:473][MOD    ]: Hello world!</code>","<code>Print(\"Hello world!\")</code>")});
+WWAddPage("api_print","api","Print",{"Page":FuncDesc("Print","Сообщение (string)","Вызывает в консоль сообщение типа <b>I:[15:34:12:473][MOD    ]: Hello world!</b>","<code>Print(\"Hello world!\")</code>")});
 
 WWCreateWiki();
 
