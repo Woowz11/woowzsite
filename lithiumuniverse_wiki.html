@@ -11,6 +11,8 @@
 	</head>
 </html>
 
+<script src="source/lu_wiki/api.js"></script>
+
 <script>
 
 var info = {
@@ -21,8 +23,30 @@ var info = {
 	StartPage: "startpage"
 }
 
-function FuncDesc(Name, Values, Desc, Example){
-	return `<center><b>`+Name+`</b></center><br><center><code>`+Values+`</code></center><hr><center>`+Desc+`</center><hr>`+Example;
+function GenerateParamsString(Params){
+	var Result = "";
+	var First = true;
+	for(const Param of Params){
+		var FuncParamInfo = Param[2];
+		var FPI = "";
+		if(Param[1]=="f"){
+			FPI = "("+(FuncParamInfo!=null?GenerateParamsString(FuncParamInfo):"")+")";
+		}
+		Result += (First?"":", ") + Param[0] + " [ " + ParamsTypeConvert[Param[1]] + FPI + " ]";
+		First = false;
+	}
+	return Result;
+}
+
+function FuncDesc(Func){
+	var Name = Func["name"];
+	var Params = Func["params"];
+	var Desc = Func["description"];
+	var Example = Func["example"];
+	var Result = `<center><b>`+Name+`</b></center><br><center>`;
+	Result += GenerateParamsString(Params);
+	Result += `</center><br><hr><br><center>`+Desc+`</center><hr>`+Example;
+	return Result;
 }
 
 WWSetInfo(info);
@@ -30,8 +54,7 @@ WWSetInfo(info);
 WWAddPage("startpage",null,"Начало...",{"Page":"<b>Википедия как и игра находятся в активной разработке!</b><br>Эта википедия посвощенена моддингу для игры Lithium Universe<br>Строение ресурсов как в Minecraft, моддинг на Lua"});
 
 WWAddTitle("resources",null,"Ресурсы",{});
-WWAddPage("resources_info","resources","Строение ресурсов",
-{"Page":"Строение ресурсов похоже как в игре Minecraft<br>"+
+WWAddPage("resources_info","resources","Строение ресурсов",{"Page":"Строение ресурсов похоже как в игре Minecraft<br>"+
 "<hr>"+
 "Что-бы создать указатель (путь) на ресурс, нужно сначала указать базу ресурса, а потом путь до<br>"+
 "него, например путь ресурса <code>C:\\...\\Resources\\Shaders\\Default.lu_shader</code>,<br>"+
@@ -224,6 +247,7 @@ Sleeping          (bool     ) = Физическое тело объекта с�
 [1] TextureUV     (vec2) = Развёртка текстуры в точке
 [2] PointID       (int ) = Айди точки
 </code>`});
+WWAddPage("fonts","resources","Шрифты",{"Page":"Пока-что в разработке"});
 
 WWAddTitle("mod",null,"Модификации",{});
 WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётся папка с ID мода в папке <code>Mods</code>, и внутри папки создаётся файл <code>{Название вашей папки}.lu_mod</code><br>"+
@@ -240,7 +264,18 @@ WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётс
 "<hr>При загрузке сцены игры запустится <code>MainScript</code>"});
 
 WWAddTitle("api",null,"Скрипты",{});
-WWAddPage("api_print","api","Print",{"Page":FuncDesc("Print","Сообщение (string)","Вызывает в консоль сообщение типа <b>I:[15:34:12:473][MOD    ]: Hello world!</b>","<code>Print(\"Hello world!\")</code>")});
+
+Functions.sort((a, b) => a["name"].localeCompare(b["name"]));
+for(const Func of Functions){
+	WWAddPage(Func["name"],"api",Func["name"],{"Page":FuncDesc(Func)});
+}
+
+WWAddTitle("api_const",null,"Константы",{});
+var ConstKeysResult = `<center><b>Клавиши</b></center><hr>Название клавиш такое же как и в GLFW<hr>`;
+for(const Key of Const["Keys"]){
+	ConstKeysResult += "<li>"+Key[0]+" = "+Key[1];
+}
+WWAddPage("api_const_keys","api_const","Клавиши",{"Page":ConstKeysResult});
 
 WWCreateWiki();
 
