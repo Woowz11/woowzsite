@@ -2,15 +2,26 @@ ParamsTypeConvert = {
 	"s": "String",
 	"r": "Resource",
 	"i": "Int",
-	"f": "Function"
+	"f": "Function",
+	"o": "Object"
 }
 
 Functions = [
 	{
 		"name": "Print",
-		"params": [["Сообщение","s"]],
+		"params": [["Сообщение","o"]],
 		"description": "Выводит 'Сообщение' в консоль",
-		"example": `<code>Print("Hello world!")</code>`
+		"example": 
+`<code>Print("Hello world!")</code>
+<code>Print(-72.841426)</code>
+<code>Print(nil)</code>
+<code>Print(true)</code>
+<code>Print(function() end)</code>`
+	},{
+		"name": "ToString",
+		"params": [["Цель","o"]],
+		"description": "Конвертирует 'Цель' в строку",
+		"example": `<code>Print(ToString(true).." | "..ToString(2).." | "..ToString(function() end))</code>`
 	},{
 		"name": "Resources:LoadScript",
 		"params": [["Скрипт","r"]],
@@ -41,6 +52,27 @@ Functions = [
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' отжата",
 		"example": `<code>Controls:KeyPress(KEY_B,function() Print("KEY B RELEASED") end)</code>`
+	},{
+		"name": "TypeOf",
+		"params": [["Цель","o"]],
+		"return": ["Тип","s"],
+		"description": 
+`Получает тип 'Цель' и выводит его в виде символа 'Тип'
+
+<i>Прошу заметить, что числа возвращаются в виде "i" и "d",
+хотя сами по себе числа в Lua всегда дробные,
+так что если у вас есть проверка на дробное число,
+то так же учитывайте "i"</i>`,
+		"example": 
+`<code>Print(TypeOf())</code> возвращает "n"
+<code>Print(TypeOf(nil))</code> возвращает "n"
+<code>Print(TypeOf("string"))</code> возвращает "s"
+<code>Print(TypeOf(5))</code> возвращает "i"
+<code>Print(TypeOf(6.2))</code> возвращает "d"
+<code>Print(TypeOf(true))</code> возвращает "b"
+<code>Print(TypeOf(function() Print("Hi!") end))</code> возвращает "f"
+<code>Print(TypeOf({"string",-2,0.772,nil,false,{function() end,true}}))</code> возвращает "t"
+<code>Print(TypeOf(?))</code> возвращает "?"`
 	}
 ];
 

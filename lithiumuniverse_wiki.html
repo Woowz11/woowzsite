@@ -41,11 +41,16 @@ function GenerateParamsString(Params){
 function FuncDesc(Func){
 	var Name = Func["name"];
 	var Params = Func["params"];
+	var Return = Func["return"];
 	var Desc = Func["description"];
 	var Example = Func["example"];
 	var Result = `<center><b>`+Name+`</b></center><br><center>`;
 	Result += GenerateParamsString(Params);
-	Result += `</center><br><hr><br><center>`+Desc+`</center><hr>`+Example;
+	Result += `</center><br>`;
+	if(Return!=null){
+		Result += `<center>return `+GenerateParamsString([Return])+`</center><br>`;
+	}
+	Result += `<hr><br><center>`+Desc.replace(/\n/g, "<br>")+`</center><hr>`+Example.replace(/\n/g, "<br>");
 	return Result;
 }
 
