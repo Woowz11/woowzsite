@@ -35,27 +35,25 @@ WWAddPage("startpage",null,"Добро пожаловать!",{"Page":
 Версия библиотеки: 0.0.5 Alpha`});
 
 WWAddTitle("examples",null,"Примеры",{})
-WWAddPage("example_mod","examples","Пример добавления модификации",{"Page":`Нужно создать файл скрипта модификации, например "wmlib_load.lua", в папку lua/autorun, и вписать туда это
+WWAddPage("example_mod","examples","Пример добавления модификации",{"Page":`Нужно создать файл скрипта модификации, например <code>"wmlib_load.lua"</code>, в папку <code>lua/autorun</code>, и вписать туда это
 
-AddCSLuaFile()
+<code>AddCSLuaFile()
 if WMLib then
-&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMod("ваш айди мода",{Name = "Название вашего мода", Author = "Ваш никнейм"})
-end`});
+	WMLib.CreateMod("ваш айди мода",{Name = "Название вашего мода", Author = "Ваш никнейм"})
+end</code>`});
 
 WWAddPage("example_weapon","examples","Пример добавления оружия",{"Page":`Нужно создать файл скрипта оружия, например "wm_example_weapon.lua", в папку weapons, и вписать туда это
 
-AddCSLuaFile()
+<code>AddCSLuaFile()
 if WMLib then
-&nbsp;&nbsp;&nbsp;&nbsp;local Info = {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name = "Примерное оружие"
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;WMLib.CreateMelee(SWEP,Info,"ваш айди мода")
-end`});
+	local Info = { Name = "Примерное оружие" }
+	WMLib.CreateMelee(SWEP,Info,"ваш айди мода")
+end</code>`});
 
 WWAddTitle("examples_weapons","examples","Примеры оружий",{})
 WWAddPage("example_weapon_crowbar","examples_weapons","Crowbar",{"Page":`Пример оружия "Crowbar"
 
-AddCSLuaFile()
+<code>AddCSLuaFile()
 if WMLib then
 	local Info = {
 		Name = "#wm.weapon.crowbar",
@@ -91,12 +89,11 @@ if WMLib then
 		BlockWait = 0.75,
 	}
 	WMLib.CreateMelee(SWEP,Info,"vanilla")
-end
-`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")});
+end</code>`});
 
 WWAddPage("example_weapon_mace","examples_weapons","Mace",{"Page":`Пример оружия "Mace"
 
-AddCSLuaFile()
+<code>AddCSLuaFile()
 if WMLib then
 	local Info = {
 		Name = "#wm.weapon.mace",
@@ -159,17 +156,16 @@ if WMLib then
 		end
 	}
 	WMLib.CreateMelee(SWEP,Info,"vanilla")
-end
-`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")});
+end</code>`});
 
 WWAddTitle("weaponinfos",null,"Информация оружия",{})
 function WeaponInfo(name,def,type,info,example){
 	var examples = ""
 	for(var i = 0; i < example.length; i++){
 		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
-		examples = examples + `<font>`+name.replace(/\(\)/g,"")+` = `+e+`</font><br><br>`
+		examples = examples + `<font><code>`+name+` = `+e+`</code></font><br><br>`
 	}
-	WWAddPage("wi_"+name,(name.includes("()")?"weaponinfos_func":"weaponinfos"),name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`<br><br><hr><br><font>Пример</font></center><br><br>`+examples)})
+	WWAddPage("wi_"+name,(name.includes("()")?"weaponinfos_func":"weaponinfos"),name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br><code>`+def+`</code><br><br><hr><br><font>Пример</font></center><br><br>`+examples)})
 }
 WeaponInfo("Name",`"#wm.weapon.newweapon"`,"string (можно перевести)","Содержит название оружия",[`"Crowbar"`,`"Knife"`,`"Baseball Bat"`,`"#wm.weapon.mace"`])
 WeaponInfo("Category",`"Woowz Melee"`,"string","Содержит категорию в которую нужно добавить оружие, если ничего не указывать будет дефолтная категория",[`"New Category"`,`"Test Category"`])
@@ -339,7 +335,7 @@ WeaponInfo("StartInfo()",`~`,`~`,"Толком не тестировалось",
 
 WWAddTitle("modinfos",null,"Информация мода",{});
 function AddonInfo(name,def,type,info,mandatory){
-	WWAddPage("ai_"+name,"modinfos",name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br>`+(mandatory==true?"Эту переменную обязательно нужно указать!":"Это не обязательная переменная")+`<br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br>`+def+`</center>`)});
+	WWAddPage("ai_"+name,"modinfos",name,{"Page":(`<center><br><font style="font-size:2em;">`+name+`</font><br><font>`+type+`</font><br><br>`+(mandatory==true?"Эту переменную обязательно нужно указать!":"Это не обязательная переменная")+`<br><br><hr><br><font>`+info+`</font><br><br><hr><br><font>Дефолтное значение</font><br><br><code>`+def+`</code></center>`)});
 }
 AddonInfo("Name",`~`,"string (можно перевести)","Название модификации",true)
 AddonInfo("Author",`"Anonymous"`,"string","Автор модификации",false)
@@ -361,7 +357,7 @@ ErrorInfo("E10",`Не может найти кость в вьюмодельки
 
 WWAddTitle("cvars",null,"CVar's",{});
 function CVarInfo(cvar,type,def,canminus,needrestart,info){
-	WWAddPage("cvar_"+cvar,"cvars","wm_"+cvar,{"Page":(`<center><br><font style="font-size:2em;">wm_`+cvar+`</font><br><br><font>`+type+`</font><br><br>`+(type!="bool"&&canminus==false?"Число не может быть отрицательным!<br><br>":"")+(needrestart==true?"Что-бы применилось нужно перезапустить карту!<br><br>":"")+`<hr><br><font>Дефолтное значение</font><br><br>`+(type=="bool"?(def=="1"?"1 (Да)":"0 (Нет)"):def)+`<br><br><hr><br>`+info+`</center>`)});
+	WWAddPage("cvar_"+cvar,"cvars","wm_"+cvar,{"Page":(`<center><br><font style="font-size:2em;">wm_`+cvar+`</font><br><br><font>`+type+`</font><br><br>`+(type!="bool"&&canminus==false?"Число не может быть отрицательным!<br><br>":"")+(needrestart==true?"Что-бы применилось нужно перезапустить карту!<br><br>":"")+`<hr><br><font>Дефолтное значение</font><br><br><code>`+(type=="bool"?(def=="1"?"1 (Да)":"0 (Нет)"):def)+`</code><br><br><hr><br>`+info+`</center>`)});
 }
 CVarInfo("enabled","bool","1",null,true,`Отображать оружия в спавменю?`)
 CVarInfo("categorytop","bool","0",null,true,`Отображать категорию Woowz Melee в самом верху?`)
@@ -417,7 +413,7 @@ function LibInfo(name,type,info,example){
 	var examples = ""
 	for(var i = 0; i < example.length; i++){
 		var e = example[i].replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;")
-		examples = examples + `<font>WMLib.`+e+`</font><br><br>`
+		examples = examples + `<font><code>WMLib.`+e+`</code></font><br><br>`
 	}
 	WWAddPage("lib_"+name,(name.includes("()")?"libs":"libs_notfunc"),name,{"Page":(`<center><br><font style="font-size:2em;">WMLib.`+name+`</font><br><font>`+type+`</font><br><br><hr><br><font>`+info+`</font><br><br><br><hr><br><font>Пример</font></center><br><br>`+examples)});
 }
@@ -437,16 +433,16 @@ LibInfo("Version",`string`,`Возвращает версию WMLib`,[`Version`]
 LibInfo("Wiki",`string`,`Возвращает ссылку на эту википедию`,[`Wiki`])
 LibInfo("Mods",`table`,`Возвращает список Woowz Melee модификаций`,[`Mods`])
 LibInfo("Weapons",`table`,`Возвращает список Woowz Melee загруженых оружий`,[`Weapons`])
-LibInfo("SoundsSwing",`table {table {string (sound)}}`,`Возвращает список swing звуков<br>Есть 4 типа swing звуков, Light, LightSharp, Heavy, HeavySharp<br>Эти списки звуков можно заменить на кастомные звуки<br><br></center>WMLib.SoundsSwing = {
+LibInfo("SoundsSwing",`table {table {string (sound)}}`,`Возвращает список swing звуков<br>Есть 4 типа swing звуков, Light, LightSharp, Heavy, HeavySharp<br>Эти списки звуков можно заменить на кастомные звуки<br><br></center><code>WMLib.SoundsSwing = {
 	["Light"]      = {"wm/swing/light1.wav","wm/swing/light2.wav","wm/swing/light3.wav"},
 	["LightSharp"] = {"wm/swing/light1sharp.wav","wm/swing/light2sharp.wav","wm/swing/light3sharp.wav"},
 	["Heavy"]      = {"wm/swing/heavy1.wav","wm/swing/heavy2.wav","wm/swing/heavy3.wav"},
 	["HeavySharp"] = {"wm/swing/heavy1sharp.wav","wm/swing/heavy2sharp.wav","wm/swing/heavy3sharp.wav"},
-}<center>`.replace(/\t/g,"&nbsp;&nbsp;&nbsp;&nbsp;"),[`SoundsSwing["Light"]`])
+}</code><center>`,[`SoundsSwing["Light"]`])
 
 WWAddTitle("hooks",null,"Хуки",{});
 function HookInfo(hook,type,info,def){
-	WWAddPage("hook_"+hook,"hooks","WM_"+hook,{"Page":(`<center><br><font style="font-size:2em;">WM_`+hook+`</font><br><br><font>`+type+`</font><br><br><hr><br>`+info+`<br><br><hr><br><font>hook.Add("WM_`+hook+`","wm_example",`+def+`)</font></center>`)});
+	WWAddPage("hook_"+hook,"hooks","WM_"+hook,{"Page":(`<center><br><font style="font-size:2em;">WM_`+hook+`</font><br><br><font>`+type+`</font><br><br><hr><br>`+info+`<br><br><hr><br><font><code>hook.Add("WM_`+hook+`","wm_example",`+def+`)</code></font></center>`)});
 }
 HookInfo("Hit",`function(entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара)) return table {bool (производить удар?), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), bool (это не главный удар?), bool (есть энтити на траектории удара)}`,`Вызывается при ударе об твёрдую поверхность оружием Woowz Melee`,`function(ent,info,rayresult,angle,dont,entityonray) return {true,ent,info,rayresult,dont,entityonray} end`)
 HookInfo("HitWater",`function(float (сила всплеска), entity (владелец оружия), table (информация оружия), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), Angle (offset поворота луча удара), bool (это не главный удар?), bool (есть энтити на траектории удара), string (партикл)) return table {float (сила всплеска), table (<a href="https://wiki.facepunch.com/gmod/Structures/TraceResult">TraceResult</a>), string (партикл)}`,`Вызывается при ударе об воду оружием Woowz Melee`,`function(watersize,ent,info,rayresult,angle,dont,entityonray) return {watersize,rayresult} end`)
