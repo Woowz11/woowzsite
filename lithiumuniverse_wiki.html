@@ -302,17 +302,25 @@ for(const ClassName in Classes){
 		WWAddPage(ClassName+"_contructor_"+GenerateShortParamsString(cons_params),ClassName+"_contructor",GenerateShortParamsString(cons_params),{"Page":FuncDesc({"name":ClassName,"params":cons_params,"return":["Результат",ClassData["type"]],"description":ConstructorData["description"],"example":ConstructorData["example"]})})
 	}
 	
-	var ValuesResult = "";
-	if(!ClassData["values"].length){
-		ValuesResult = "<b>В классе "+ClassName+" отсутствуют переменные!</b>";
-	}else{
+	if(ClassData["values"].length){
+		var ValuesResult = "";
 		for(const val of ClassData["values"]){
-			ValuesResult += `<li>`+val["name"]+" ("+ParamsTypeConvert[val["type"]]+"): "+val["description"];
+			ValuesResult += `<li>`+val["name"]+" ("+ParamsTypeConvert[val["type"]]+") : "+val["description"]+"<br>"+val["example"]+"<br><br>";
 		}
+		WWAddPage(ClassName+"_values",ClassName,"Переменные",{"Page":ValuesResult});
 	}
-	WWAddPage(ClassName+"_values",ClassName,"Переменные",{"Page":ValuesResult});
 	
+	
+	if(ClassData["operators"].length){
+		var OperatorsResult = "";
+		for(const OperatorData of ClassData["operators"]){
+			OperatorsResult += "<li>"+ParamsTypeConvert[OperatorData["name"][0]]+" "+OperatorData["name"][1]+" "+ParamsTypeConvert[OperatorData["name"][2]]+"<br>"+OperatorData["example"]+"<br><br>";
+		}
+		WWAddPage(ClassName+"_operators",ClassName,"Операторы",{"Page":OperatorsResult});
+	}
+
 	if(ClassData["functions"].length){
+		ClassData["functions"].sort((a, b) => a["name"].localeCompare(b["name"]));
 		WWAddTitle(ClassName+"_func",ClassName,"Функции",{});
 		for(const FuncData of ClassData["functions"]){
 			WWAddPage(ClassName+"_func_"+FuncData["name"],ClassName+"_func",FuncData["name"],{"Page": FuncDesc(FuncData)});
@@ -323,11 +331,20 @@ for(const ClassName in Classes){
 
 WWAddTitle("api_const",null,"Константы",{});
 
-var ConstKeysResult = `<center><b>Клавиши</b></center><hr>Название клавиш такое же как и в GLFW<hr>`;
+var ConstKeysResult = `<br><center><b>Клавиши</b></center><hr>Название клавиш такое же как и в GLFW<hr>`;
 for(const Key of Const["Keys"]){
 	ConstKeysResult += "<li>"+Key[0]+" = "+Key[1];
 }
 WWAddPage("api_const_keys","api_const","Клавиши",{"Page":ConstKeysResult});
+
+function CreateConstants(Ccat,Cname){
+	var Result = `<br><center><b>`+Cname+`</b></center><hr>`;
+	for(const C of Const[Ccat]){
+		Result += "<li>"+C[0]+" = "+C[1]+" : "+C[2];
+	}
+	WWAddPage("api_const_"+Ccat,"api_const",Cname,{"Page":Result});
+}
+CreateConstants("Errors","Ошибочные переменные");
 
 WWCreateWiki();
 

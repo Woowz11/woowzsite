@@ -93,7 +93,7 @@ function WWOpenPage(id){
 			
 			page_html = page_html.replace(/\n/g, '<br>');
 			
-			document.getElementById("PageID").innerHTML = "<font>"+page["Name"]+" <font style='font-size:13px;'>[ID=\""+page["ID"]+"\";INDEX=\""+page["Index"]+"\"]</font></font>"
+			document.getElementById("PageID").innerHTML = "<font>"+page["Name"]+" <font style='font-size:13px;'>[ID=\""+page["ID"]+"\"; INDEX=\""+page["Index"]+"\"]</font></font>"
 			document.getElementById("Page").innerHTML = page_html;
 			document.getElementById("PageParent").style.padding = GetFT(info,"Padding",10)+"px";
 		}
@@ -172,6 +172,16 @@ function WWCreateWiki(){
 		padding: 5px;
 		border-radius: 8px;
 		border: 1px solid #ddd;
+		tab-size: 3;
+	}
+	
+	a{
+		color: blue;
+		text-decoration: none;
+	}
+	
+	a:hover{
+		text-decoration: underline;
 	}
 	
 	::selection{
@@ -186,9 +196,9 @@ function WWCreateWiki(){
 	"StartPage":
 `
 <block id="Title" style="height:100px; width:100vw; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);">
-<img style="height:1.5em; border-radius: 0px;" src="`+Icon+`"> <font style="font-size:1.5em;">`+WikiName+`</font><br><br><font style="color:red;">!ALPHA VERSION (`+WWVersion+`)!</font> <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">Подробнее...</a>
+<img style="height:1.5em; border-radius: 0px; padding-left:5px; transform: translate(0,2.5px);" src="`+Icon+`"> <font style="font-size:1.75em;">`+WikiName+`</font><br><br><font style="color:red; padding-left:5px;">!ALPHA VERSION! (`+WWVersion+`)</font> <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">Подробнее...</a>
 </block><br>
-<block id="List" style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.05); overflow-y:scroll;overflow-x:hidden;">
+<block id="List" style="height:calc(100vh - 100px); width:379px; background-color:rgba(0,0,0,0.05); overflow-y:scroll; overflow-x:hidden; padding-left:5px;">
 
 </block>
 <block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); min-height:100%; background-color:transparent; overflow-y:auto;overflow-x:auto;">
