@@ -23,6 +23,19 @@ var info = {
 	StartPage: "startpage"
 }
 
+function GenerateShortParamsString(Params){
+	var Result = "";
+	var First = true;
+	for(const Param of Params){
+		Has = true;
+		var FuncParamInfo = Param[2];
+		var FPI = "";
+		Result += (First?"":", ") + ParamsTypeConvert[Param[1]] + FPI;
+		First = false;
+	}
+	return Result;
+}
+
 function GenerateParamsString(Params){
 	var Result = "";
 	var First = true;
@@ -44,13 +57,13 @@ function FuncDesc(Func){
 	var Return = Func["return"];
 	var Desc = Func["description"];
 	var Example = Func["example"];
-	var Result = `<center><b>`+Name+`</b></center><br><center>`;
+	var Result = `<br><center><b>`+Name+`</b></center><br><center>`;
 	Result += GenerateParamsString(Params);
 	Result += `</center><br>`;
 	if(Return!=null){
 		Result += `<center>return `+GenerateParamsString([Return])+`</center><br>`;
 	}
-	Result += `<hr><br><center>`+Desc.replace(/\n/g, "<br>")+`</center><hr>`+Example.replace(/\n/g, "<br>");
+	Result += `<hr><center>`+Desc.replace(/\n/g, "<br>")+`</center><hr>`+Example.replace(/\n/g, "<br>");
 	return Result;
 }
 
@@ -268,14 +281,48 @@ WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётс
 }</code>`+
 "<hr>При загрузке сцены игры запустится <code>MainScript</code>"});
 
-WWAddTitle("api",null,"Скрипты",{});
+WWAddTitle("api",null,"Функции",{});
 
 Functions.sort((a, b) => a["name"].localeCompare(b["name"]));
 for(const Func of Functions){
 	WWAddPage(Func["name"],"api",Func["name"],{"Page":FuncDesc(Func)});
 }
 
+WWAddTitle("api_classes",null,"Классы",{});
+
+for(const ClassName in Classes){
+	const ClassData = Classes[ClassName];
+	WWAddPage(ClassName,"api_classes",ClassName,{"Page":FuncDesc({"name":ClassName,"params":[],"description": ClassData["description"], "example": ClassData["example"]})});
+	WWAddTitle(ClassName+"_contructor",ClassName,"Конструктор",{});
+	for(const ConstructorData of ClassData["constructors"]){
+		var cons_params = ConstructorData["params"];
+		if(!cons_params.length){
+			cons_params = [["","n"]];
+		}
+		WWAddPage(ClassName+"_contructor_"+GenerateShortParamsString(cons_params),ClassName+"_contructor",GenerateShortParamsString(cons_params),{"Page":FuncDesc({"name":ClassName,"params":cons_params,"return":["Результат",ClassData["type"]],"description":ConstructorData["description"],"example":ConstructorData["example"]})})
+	}
+	
+	var ValuesResult = "";
+	if(!ClassData["values"].length){
+		ValuesResult = "<b>В классе "+ClassName+" отсутствуют переменные!</b>";
+	}else{
+		for(const val of ClassData["values"]){
+			ValuesResult += `<li>`+val["name"]+" ("+ParamsTypeConvert[val["type"]]+"): "+val["description"];
+		}
+	}
+	WWAddPage(ClassName+"_values",ClassName,"Переменные",{"Page":ValuesResult});
+	
+	if(ClassData["functions"].length){
+		WWAddTitle(ClassName+"_func",ClassName,"Функции",{});
+		for(const FuncData of ClassData["functions"]){
+			WWAddPage(ClassName+"_func_"+FuncData["name"],ClassName+"_func",FuncData["name"],{"Page": FuncDesc(FuncData)});
+		}
+	}
+	
+}
+
 WWAddTitle("api_const",null,"Константы",{});
+
 var ConstKeysResult = `<center><b>Клавиши</b></center><hr>Название клавиш такое же как и в GLFW<hr>`;
 for(const Key of Const["Keys"]){
 	ConstKeysResult += "<li>"+Key[0]+" = "+Key[1];
