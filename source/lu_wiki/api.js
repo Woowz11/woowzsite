@@ -40,18 +40,46 @@ end)</code>`
 		"params": [["Число","d"]],
 		"return": ["Результат","d"],
 		"description": "Делает 'Число' положительным",
+		"desmos": "zcr9ya39zt",
 		"example":
 `<code>Print(Abs(-6))</code> Выводит 6
 <code>Print(Abs(3))</code> Выводит 3`
+	},{
+		"name": "Sin",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Синус числа 'Число'",
+		"desmos": "oyrngdlpct",
+		"example":
+`<code>Print(Sin(0))</code> Выводит 0
+<code>Print(Sin(PI/6))</code> Выводит 0.499999999998586
+<code>Print(Sin(PI/4))</code> Выводит 0.707106781184816
+<code>Print(Sin(PI/3))</code> Выводит 0.866025403782806
+<code>Print(Sin(PI/2))</code> Выводит 1
+<code>Print(Sin(PI))</code> Выводит 9.79317772029349e-12 (близко к 0)
+<code>Print(Sin((3*PI)/2))</code> Выводит -1
+<code>Print(Sin(2*PI))</code> Выводит -1.9586355440587e-11 (близко к 0)` 
 	},{
 		"name": "Sqrt",
 		"params": [["Число","d"]],
 		"return": ["Результат","d"],
 		"description": "Возводит 'Число' в квадратный корень",
+		"desmos": "c2lhkxfnsh",
 		"example":
 `<code>Print(Sqrt(4))</code> Выводит 2
 <code>Print(Sqrt(6))</code> Выводит 2.44948974278318
 <code>Print(Sqrt(-4))</code> Выводит -2`
+	},{
+		"name": "DeltaTime",
+		"params": [],
+		"return": ["Число","d"],
+		"description":
+`Возвращает число, для стабилизации функций связанных с скоростью выполнения,
+к примеру с FPS
+
+Чем меньше FPS, тем больше это число, и наоборот
+При 400 FPS равно примерно <code>0.00148391723632812</code>`,
+		"example": `<code>Game:Update(function() PrintFast(DeltaTime()) end)</code>`
 	},{
 		"name": "ToString",
 		"params": [["Цель","o"]],
@@ -81,12 +109,127 @@ end)</code>`
 		"name": "Controls:KeyPressed",
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' нажата",
-		"example": `<code>Controls:KeyPress(KEY_V,function() Print("KEY V PRESSED") end)</code>`
+		"example": `<code>Controls:KeyPressed(KEY_V,function() Print("KEY V PRESSED") end)</code>`
 	},{
 		"name": "Controls:KeyReleased",
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' отжата",
-		"example": `<code>Controls:KeyPress(KEY_B,function() Print("KEY B RELEASED") end)</code>`
+		"example": `<code>Controls:KeyReleased(KEY_B,function() Print("KEY B RELEASED") end)</code>`
+	},{
+		"name": "Camera:Reset",
+		"params": [],
+		"description": "Возвращает камеру в исходное положение, позиция: Vector2(0,0), зум: 1, поворот: 0",
+		"example":
+`<code>Controls:KeyPressed(KEY_HOME, function() 
+	Camera:Reset()
+end)</code>`
+	},{
+		"name": "Camera:SetPosition",
+		"params": [["Позиция","v2"]],
+		"description": "Устанавливает позицию камеры на 'Позиция'",
+		"example":
+`<code>local i = 0
+Game:Update(function()
+	Camera:SetPosition(Vector2(0,Sin(i)))
+	i = i + DeltaTime()
+end)</code>`
+	},{
+		"name": "Camera:SetZoom",
+		"params": [["Зум","d"]],
+		"description": "Устанавливает зум камеры на 'Зум'",
+		"example":
+`<code>local i = 0
+Game:Update(function()
+	Camera:SetZoom(Sin(i)+1.5)
+	i = i + DeltaTime()
+end)</code>`
+	},{
+		"name": "Camera:SetOrientation",
+		"params": [["Радиан","d"]],
+		"description": "Устанавливает поворот камеры на 'Радиан'",
+		"example":
+`<code>local i = 0
+Game:Update(function()
+	Camera:SetOrientation(i)
+	i = i + DeltaTime()
+end)</code>`
+	},{
+		"name": "Camera:Move",
+		"params": [["Направление","v2"]],
+		"description": "Двигает камеру на 'Направление'",
+		"example":
+`<code>Game:Update(function()
+	local Shift = Controls:KeyIsPressed(KEY_LEFT_SHIFT)
+	local Control = Controls:KeyIsPressed(KEY_LEFT_CONTROL)
+
+	local Speed = IfThen(Shift,3,IfThen(Control,0.3,1))
+
+	local W = Controls:KeyIsPressed(KEY_W)
+	local S = Controls:KeyIsPressed(KEY_S)
+	local D = Controls:KeyIsPressed(KEY_D)
+	local A = Controls:KeyIsPressed(KEY_A)
+	
+	local DirY = 0
+	if (W and not S) then
+		DirY = 1
+	end
+	if (S and not W) then
+		DirY = -1
+	end
+	
+	local DirX = 0
+	if (D and not A) then
+		DirX = 1
+	end
+	if (A and not D) then
+		DirX = -1
+	end
+	
+	local CameraMovingDirection = Vector2(DirX, DirY) * Speed
+	Camera:Move(CameraMovingDirection)
+end)</code>`
+	},{
+		"name": "Camera:MoveZoom",
+		"params": [["Зум","d"]],
+		"description": "Зумит камеру на 'Зум'",
+		"example":
+`<code>Game:Update(function()
+	local Shift = Controls:KeyIsPressed(KEY_LEFT_SHIFT)
+	local Control = Controls:KeyIsPressed(KEY_LEFT_CONTROL)
+
+	local Speed = IfThen(Shift,3,IfThen(Control,0.3,1))
+
+	local Plus = Controls:KeyIsPressed(KEY_EQUAL)
+	local Minus = Controls:KeyIsPressed(KEY_MINUS)
+	
+	if (Plus and not Minus) then
+		Camera:MoveZoom(Speed)
+	end
+	if (Minus and not Plus) then
+		Camera:MoveZoom(-Speed)
+	end
+end)</code>`
+	},{
+		"name": "Camera:Rotate",
+		"params": [["Радиан","d"]],
+		"description": "Вращает камеру на 'Радиан'",
+		"example":
+`<code>Game:Update(function()
+	local Shift = Controls:KeyIsPressed(KEY_LEFT_SHIFT)
+	local Control = Controls:KeyIsPressed(KEY_LEFT_CONTROL)
+
+	local Speed = IfThen(Shift,3,IfThen(Control,0.3,1))
+
+	local Right = Controls:KeyIsPressed(KEY_RIGHT)
+	local Left = Controls:KeyIsPressed(KEY_LEFT)
+	
+	if (Right and not Left) then
+		Camera:Rotate(Speed)
+	end
+	if (Left and not Right) then
+		Camera:Rotate(-Speed)
+	end
+end)</code>`
 	},{
 		"name": "Controls:KeyIsPressed",
 		"params": [["Клавиша","i"]],
@@ -249,5 +392,9 @@ const Const = {
 	"Errors": [
 		["ErrorDouble",-62122.723,"Ошибочное число, получается при ошибках"],
 		["ErrorInt",-6212223,"Ошибочное целое число, получается при ошибках"]
+	],
+	
+	"Math": [
+		["PI",3.14159265358,"Отношение длины окружности к её диаметру"]
 	]
 };

@@ -57,6 +57,7 @@ function FuncDesc(Func){
 	var Return = Func["return"];
 	var Desc = Func["description"];
 	var Example = Func["example"];
+	var Desmos = Func["desmos"];
 	var Result = `<br><center><b>`+Name+`</b></center><br><center>`;
 	Result += GenerateParamsString(Params);
 	Result += `</center><br>`;
@@ -64,6 +65,9 @@ function FuncDesc(Func){
 		Result += `<center>return `+GenerateParamsString([Return])+`</center><br>`;
 	}
 	Result += `<hr><center>`+Desc.replace(/\n/g, "<br>")+`</center><hr>`+Example.replace(/\n/g, "<br>");
+	if(Desmos!=null){
+		Result += `<br><br><center><iframe src="https://www.desmos.com/calculator/`+Desmos+`?embed" width="700px" height="700px" style="border: 2px solid #ccc;" frameborder="0"></iframe></center>`;
+	}
 	return Result;
 }
 
@@ -345,6 +349,7 @@ function CreateConstants(Ccat,Cname){
 	WWAddPage("api_const_"+Ccat,"api_const",Cname,{"Page":Result});
 }
 CreateConstants("Errors","Ошибочные переменные");
+CreateConstants("Math","Математические");
 
 WWCreateWiki();
 
