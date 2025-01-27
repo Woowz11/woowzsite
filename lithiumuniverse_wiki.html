@@ -43,7 +43,7 @@ function GenerateParamsString(Params){
 		var FuncParamInfo = Param[2];
 		var FPI = "";
 		if(Param[1]=="f"){
-			FPI = "("+(FuncParamInfo!=null?GenerateParamsString(FuncParamInfo):"")+")";
+			FPI = "( <font style='font-size:0.75em;'>"+(FuncParamInfo!=null?GenerateParamsString(FuncParamInfo):"")+"</font> )";
 		}
 		Result += (First?"":", ") + Param[0] + " [ " + ParamsTypeConvert[Param[1]] + FPI + " ]";
 		First = false;
@@ -318,7 +318,13 @@ for(const ClassName in Classes){
 	if(ClassData["operators"].length){
 		var OperatorsResult = "";
 		for(const OperatorData of ClassData["operators"]){
-			OperatorsResult += "<li>"+ParamsTypeConvert[OperatorData["name"][0]]+" "+OperatorData["name"][1]+" "+ParamsTypeConvert[OperatorData["name"][2]]+"<br>"+OperatorData["example"]+"<br><br>";
+			if(OperatorData["name"][2]=="left"){
+				OperatorsResult += "<li>"+OperatorData["name"][1]+ParamsTypeConvert[OperatorData["name"][0]]+" <br>"+OperatorData["example"]+"<br><br>";
+			}else if(OperatorData["name"][2]=="right"){
+				OperatorsResult += "<li>"+ParamsTypeConvert[OperatorData["name"][0]]+OperatorData["name"][1]+" <br>"+OperatorData["example"]+"<br><br>";
+			}else{
+				OperatorsResult += "<li>"+ParamsTypeConvert[OperatorData["name"][0]]+" "+OperatorData["name"][1]+" "+ParamsTypeConvert[OperatorData["name"][2]]+"<br>"+OperatorData["example"]+"<br><br>";
+			}
 		}
 		WWAddPage(ClassName+"_operators",ClassName,"Операторы",{"Page":OperatorsResult});
 	}
@@ -336,7 +342,12 @@ for(const ClassName in Classes){
 WWAddTitle("api_const",null,"Константы",{});
 
 var ConstKeysResult = `<br><center><b>Клавиши</b></center><hr>Название клавиш такое же как и в GLFW<hr>`;
-for(const Key of Const["Keys"]){
+ConstKeysResult += `<b>Коды клавиш мыши</b><br>`;
+for(const Key of Const["Keys"]["Mouse"]){
+	ConstKeysResult += "<li>"+Key[0]+" = "+Key[1];
+}
+ConstKeysResult += `<hr><b>Коды клавиш клавиатуры</b><br>`;
+for(const Key of Const["Keys"]["Keyboard"]){
 	ConstKeysResult += "<li>"+Key[0]+" = "+Key[1];
 }
 WWAddPage("api_const_keys","api_const","Клавиши",{"Page":ConstKeysResult});
