@@ -7,7 +7,10 @@ const ParamsTypeConvert = {
 	"d"  : "Double",
 	"f"  : "Function",
 	"o"  : "Object",
-	"v2" : "Vector2"
+	"go" : "GameObject",
+	"v2" : "Vector2",
+	"t"  : "Table",
+	"c"  : "Color"
 }
 
 const Functions = [
@@ -131,40 +134,156 @@ end)</code>`
 	},{
 		"name": "ToString",
 		"params": [["Цель","o"]],
+		"return": ["Результат","s"],
 		"description": "Конвертирует 'Цель' в строку",
 		"example": `<code>Print(ToString(true).." | "..ToString(2).." | "..ToString(function() end))</code>`
+	},{
+		"name": "TableToString",
+		"params": [["Таблица","t"]],
+		"return": ["Результат","s"],
+		"description": "Конвертирует 'Таблица' в детальную строку таблицы",
+		"example":
+`<code>local t = {"Hello!","Bye!",{true,-6.21,Vector2(80,-10.77),{{"A","B","C"},{"C","B","A"}}},{}}
+Print(t)
+PrintFast(TableToString(t))</code>
+
+<code>Table{4}
+
+{
+   [1] = "Hello!",
+   [2] = "Bye!",
+   [3] = {
+      [1] = true,
+      [2] = -6.21,
+      [3] = Vector2(80,-10.77),
+      [4] = {
+         [1] = {
+            [1] = "A",
+            [2] = "B",
+            [3] = "C",
+         },
+         [2] = {
+            [1] = "C",
+            [2] = "B",
+            [3] = "A",
+         },
+      },
+   },
+   [4] = {},
+}</code>
+
+<code>local t2 = {
+	["A"] = "B",
+	[5] = "C",
+	[false] = "D",
+	["F"] = {
+		[1] = 2,
+		[3] = 4,
+		[5] = 6,
+		[7] = 8
+	},
+	["EMPTY"] = {{{{},{}},{{},{}}},{{{},{}},{{},{}}}}
+}
+Print(t2)
+PrintFast(TableToString(t2))</code>
+
+<code>Table{5}
+
+{
+   ["A"] = "B",
+   ["EMPTY"] = {
+      [1] = {
+         [1] = {
+            [1] = {},
+            [2] = {},
+         },
+         [2] = {
+            [1] = {},
+            [2] = {},
+         },
+      },
+      [2] = {
+         [1] = {
+            [1] = {},
+            [2] = {},
+         },
+         [2] = {
+            [1] = {},
+            [2] = {},
+         },
+      },
+   },
+   [5] = "C",
+   [false] = "D",
+   ["F"] = {
+      [7] = 8,
+      [1] = 2,
+      [5] = 6,
+      [3] = 4,
+   },
+}</code>`
 	},{
 		"name": "Resources:LoadScript",
 		"params": [["Скрипт","r"]],
 		"description": "Загружает 'Скрипт' в текущий скрипт",
 		"example": `<code>Resources:LoadScript("Mod:Test.lua")</code>`
 	},{
+		"name": "Resources:SaveGameObject",
+		"params": [["Игровой объект","go"],["Название","s"]],
+		"description": "Сохраняет 'Игровой объект' в ресурсы игры, по пути <code>Ваш Мод ID:'Название'</code>",
+		"example":
+`Вызывалось в моде с ID: Mod
+<code>local Obj = GameObject:Create("Test!", GO_Physical)
+Resources:SaveGameObject(Obj, "TEST")</code> Путь до ресурса этого <code>Mod:TEST</code>`
+	},{
+		"name": "Resources:CloneGameObject",
+		"params": [["Ресурс игрового объекта","r"]],
+		"return": ["Клонированный игровой объект","go"],
+		"description": "Клонирует 'Ресурс игрового объекта' и возвращает его",
+		"example":
+`Вызывалось в моде с ID: Mod
+<code>local Obj = GameObject:Create("Test!", GO_Physical)
+
+Resources:SaveGameObject(Obj, "TEST")
+
+local linesize = 70
+for a = 0, linesize do
+    Obj = Resources:CloneGameObject("Mod:TEST") 
+    GameObject:SetPosition(Obj,Vector2((a-(linesize/2))*2,0))
+end</code>`
+	},{
 		"name": "Controls:KeyPressed",
+		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда какая-то клавиша нажата",
 		"example": `<code>Controls:KeysPressed(function(Key) Print("KEY "..Key.." PRESSED") end)</code>`
 	},{
 		"name": "Controls:KeyReleased",
+		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда какая-то клавиша отжата",
 		"example": `<code>Controls:KeysReleased(function(Key) Print("KEY "..Key.." RELEASED") end)</code>`
 	},{
 		"name": "Controls:KeyPress",
+		"type": "event",
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' зажата",
 		"example": `<code>Controls:KeyPress(KEY_C,function() Print("KEY C PRESS") end)</code>`
 	},{
 		"name": "Controls:KeyPressedSingle",
+		"type": "event",
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' нажата",
-		"example": `<code>Controls:KeyPressed(KEY_V,function() Print("KEY V PRESSED") end)</code>`
+		"example": `<code>Controls:KeyPressedSingle(KEY_V,function() Print("KEY V PRESSED") end)</code>`
 	},{
 		"name": "Controls:KeyReleasedSingle",
+		"type": "event",
 		"params": [["Клавиша","i"],["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый раз, когда 'Клавиша' отжата",
-		"example": `<code>Controls:KeyReleased(KEY_B,function() Print("KEY B RELEASED") end)</code>`
+		"example": `<code>Controls:KeyReleasedSingle(KEY_B,function() Print("KEY B RELEASED") end)</code>`
 	},{
 		"name": "Controls:MouseScroll",
+		"type": "event",
 		"params": [["Функция","f",[["Направление","d"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда колёсико на мышке прокручено",
 		"example":
@@ -173,6 +292,7 @@ end)</code>`
 end)</code>`
 	},{
 		"name": "Controls:MousePressed",
+		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда клавиша на мышке нажата",
 		"example":
@@ -189,6 +309,7 @@ end)</code>`
 end)</code>`
 	},{
 		"name": "Controls:MouseReleased",
+		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда клавиша на мышке отжата",
 		"example":
@@ -399,9 +520,16 @@ end)</code>`
 end)</code>`
 	},{
 		"name": "Game:Update",
+		"type": "event",
 		"params": [["Функция","f"]],
 		"description": "Вызывает 'Функция' каждый кадр",
-		"example": `<code>Game:Update(function() PrintFast("Hi!!!") end)</code>`
+		"example": `<code>Game:Update(function() PrintFast("Run every frame!") end)</code>`
+	},{
+		"name": "Game:GameObjectLoading",
+		"type": "event",
+		"params": [["Функция","f"]],
+		"description": "Вызывает 'Функция' после загрузки модов, для загрузки игровых объектов",
+		"example": `<code>Game:GameObjectLoading(function() Print("Loading game objects!") end)</code>`
 	},{
 		"name": "IfThen",
 		"params": [["Условие","b"],["Результат 1","o"],["Результат 2","o"]],
@@ -433,7 +561,42 @@ end)</code>`
 <code>Print(TypeOf(function() Print("Hi!") end))</code> возвращает "f"
 <code>Print(TypeOf({"string",-2,0.772,nil,false,{function() end,true}}))</code> возвращает "t"
 <code>Print(TypeOf(Vector2(7,-2.1))</code> возвращает "v2"
+<code>Print(TypeOf(Color(1,0,0.5))</code> возвращает "c"
 <code>Print(TypeOf(?))</code> возвращает "?"`
+	},{
+		"name": "GameObject:Create",
+		"params": [["Имя","s"],["Тип","i"]],
+		"return": ["Игровой объект","go"],
+		"description": "Создаёт новый игровой объект с именем 'Имя' и типом 'Тип', обе переменные могут быть nil",
+		"example":
+`<code>local i = GameObject:Create("Default GameObject!", GO_Default)
+i = GameObject:Create("Physical GameObject!", GO_Physical)
+i = GameObject:Create("UI GameObject", GO_UI)</code>`
+	},{
+		"name": "GameObject:SetPosition",
+		"params": [["Цель","go"],["Позиция","v2"]],
+		"description": "Устанавливает 'Позиция' объекту 'Цель'",
+		"example":
+`<code>local Obj = GameObject:Create()
+Game:Update(function()
+	GameObject:SetPosition(Obj, MouseWorldPosition())
+end)</code>`
+	},{
+		"name": "GameObject:SetColor",
+		"params": [["Цель","go"],["Цвет","c"]],
+		"description": "Устанавливает 'Цвет' объекту 'Цель'",
+		"example":
+`Вызывалось в моде с ID: Vanilla
+<code>local i = GameObject:Create("Default GameObject!", GO_Physical)
+
+Resources:SaveGameObject(i, "TestObject")
+
+local linesize = 70
+for a = 0, linesize do
+	i = Resources:CloneGameObject("Vanilla:TestObject") 
+	GameObject:SetPosition(i, Vector2((a-(linesize/2))*2,0))
+	GameObject:SetColor(i, Color(1,IfThen(a%2 == 0, 1-a/linesize,1),IfThen(a%3 == 0, 1-a/linesize,1)))
+end</code>`
 	}
 ];
 
@@ -558,7 +721,7 @@ Print(V2) Print(V2.Y)</code> Выводит Vector2(2,-5) и -5`
 			},
 			{
 				"name": ["v2","..","s"],
-				"example": `<code>Vector(7,3.2) .. " Hi!" = "Vector(7,3.2) Hi!"</code>`
+				"example": `<code>Vector2(7,3.2) .. " Hi!" = "Vector2(7,3.2) Hi!"</code>`
 			},
 			{
 				"name": ["v2","==","v2"],
@@ -579,6 +742,110 @@ Print(V2) Print(V2.Y)</code> Выводит Vector2(2,-5) и -5`
 <code>Vector2(0,0) <= Vector2(3,2.3) = true</code>`
 			}
 		]
+	},
+	
+	"Color": {
+		"type": "c",
+		"constructors": [
+			{
+				"params": [["Красный","d"],["Зелёный","d"],["Синий","d"],["Прозрачность","d"]],
+				"description": `Возвращает Color где R равен 'Красный' и G равен 'Зелёный' и B равен 'Синий' и A равен 'Прозрачность'`,
+				"example":
+`<code>Print(Color(1,0,0,1))</code> возвращает "Color(1,0,0)" это красный цвет
+<code>Print(Color(1,1,0,1))</code> возвращает "Color(1,1,0)" это жёлтый цвет
+<code>Print(Color(1,0,1,1))</code> возвращает "Color(1,0,1)" это фиолетовый цвет
+<code>Print(Color(0,1,0,1))</code> возвращает "Color(0,1,0)" это зелёный цвет
+<code>Print(Color(0,0,1,1))</code> возвращает "Color(0,0,1)" это синий цвет
+<code>Print(Color(0,1,1,1))</code> возвращает "Color(0,1,1)" это голубой цвет
+<code>Print(Color(1,1,1,1))</code> возвращает "Color(1,1,1)" это белый цвет
+<code>Print(Color(0.5,0.5,0.5,1))</code> возвращает "Color(0.5,0.5,0.5)" это серый цвет
+<code>Print(Color(0,0,0,1))</code> возвращает "Color(0,0,0)" это чёрный цвет
+<code>Print(Color(1,0,0,0.5))</code> возвращает "Color(1,0,0,0.5)" это полу-прозрачный красный цвет`
+			},
+			{
+				"params": [["Красный","d"],["Зелёный","d"],["Синий","d"]],
+				"description": `Возвращает Color где R равен 'Красный' и G равен 'Зелёный' и B равен 'Синий' и A равен 1`,
+				"example":
+`<code>Print(Color(1,0,0))</code> возвращает "Color(1,0,0)" это красный цвет
+<code>Print(Color(1,1,0))</code> возвращает "Color(1,1,0)" это жёлтый цвет
+<code>Print(Color(1,0,1))</code> возвращает "Color(1,0,1)" это фиолетовый цвет`
+			},
+			{
+				"params": [["Красный","d"],["Зелёный","d"]],
+				"description": `Возвращает Color где R равен 'Красный' и G равен 'Зелёный' и B равен 0 и A равен 1`,
+				"example":
+`<code>Print(Color(1,0))</code> возвращает "Color(1,0,0)" это красный цвет
+<code>Print(Color(1,1))</code> возвращает "Color(1,1,0)" это жёлтый цвет
+<code>Print(Color(0,0))</code> возвращает "Color(0,0,0)" это чёрный цвет`
+			},
+			{
+				"params": [["Красный","d"]],
+				"description": `Возвращает Color где R равен 'Красный' и G равен 0 и B равен 0 и A равен 1`,
+				"example":
+`<code>Print(Color(1))</code> возвращает "Color(1,0,0)" это красный цвет
+<code>Print(Color(0))</code> возвращает "Color(0,0,0)" это чёрный цвет`
+			},
+			{
+				"params": [],
+				"description": `Возвращает чёрный цвет`,
+				"example":
+`<code>Print(Color())</code> возвращает "Color(0,0,0)" это чёрный цвет`
+			}
+		],
+		"description": "Хранит в себе RGBA цвет",
+		"example": ``,
+		"values": [
+			{
+				"name": "R",
+				"type": "d",
+				"description": "Насыщенность красного (0-1)",
+				"example":
+`<code>local C = Color(1,1,1)
+C.R = 0
+Print(C) Print(C.R)</code> Выводит Color(0,1,1) и 0`
+			},{
+				"name": "G",
+				"type": "d",
+				"description": "Насыщенность зелёного (0-1)",
+				"example":
+`<code>local C = Color(1,1,1)
+C.G = 0
+Print(C) Print(C.G)</code> Выводит Color(1,0,1) и 0`
+			},{
+				"name": "B",
+				"type": "d",
+				"description": "Насыщенность синего (0-1)",
+				"example":
+`<code>local C = Color(1,1,1)
+C.B = 0
+Print(C) Print(C.B)</code> Выводит Color(1,1,0) и 0`
+			},{
+				"name": "A",
+				"type": "d",
+				"description": "Прозрачность (0-1)",
+				"example":
+`<code>local C = Color(1,1,1)
+C.A = 0
+Print(C) Print(C.A)</code> Выводит Color(1,1,1,0) и 0`
+			}
+		],
+		"functions": [
+			{
+				"name": "ToString",
+				"params": [],
+				"return": ["Результат","s"],
+				"description": "Конвертирует Color в строку",
+				"example":
+`<code>Print(Color(1,0,0.5):ToString())</code> возвращает строку "Color(1,0,0.5)"
+<code>Print(Color(0,1,0,0.63):ToString())</code> возвращает строку "Color(0,1,0,0.63)"`
+			}
+		],
+		"operators": [
+			{
+				"name": ["c","..","s"],
+				"example": `<code>Color(1,0,0.5,0.1) .. " -> What the color?" = "Color(1,0,0.5,0.1) -> What the color?"</code>`
+			},
+		]
 	}
 }
 
@@ -591,7 +858,18 @@ const Const = {
 	"Errors": [
 		["ErrorDouble",-62122.723,"Ошибочное число, получается при ошибках"],
 		["ErrorInt",-6212223,"Ошибочное целое число, получается при ошибках"],
-		["ErrorVector2","Vector2(-62122.723,-62122.723)","Ошибочный Vector2, получается при ошибках"]
+		["ErrorVector2","Vector2(-62122.723,-62122.723)","Ошибочный Vector2, получается при ошибках"],
+		["ErrorString","\"Error_GwevWET23g3#G_#1d\"","Ошибочная строка, получается при ошибках"]
+	],
+	
+	"Other": [
+		["ScreenScale","Vector2(10/3,2.5)","Константы размера экрана"]
+	],
+	
+	"GameObjectTypes": [
+		["GO_Default",0,"Обычный тип объекта, пустышка"],
+		["GO_UI",1,"Объект является интерфейсом"],
+		["GO_Physical",2,"Объект имеет физику"]
 	],
 	
 	"Math": [
