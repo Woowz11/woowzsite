@@ -73,6 +73,75 @@ end)</code>`
 <code>Print(Sqrt(6))</code> Выводит 2.44948974278318
 <code>Print(Sqrt(-4))</code> Выводит -2`
 	},{
+		"name": "Floor",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Округляет 'Число' в меньшую сторону",
+		"desmos": "wsnywmqsxp",
+		"example":
+`<code>Print(Floor(0))</code> Выводит 0
+<code>Print(Floor(1))</code> Выводит 1
+<code>Print(Floor(0.5))</code> Выводит 0
+<code>Print(Floor(-0.5))</code> Выводит -1
+<code>Print(Floor(1.5))</code> Выводит 1
+<code>Print(Floor(-1.5))</code> Выводит -2`
+	},{
+		"name": "Ceil",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Округляет 'Число' в большую сторону",
+		"desmos": "jrylu8juwe",
+		"example":
+`<code>Print(Ceil(0))</code> Выводит 0
+<code>Print(Ceil(1))</code> Выводит 1
+<code>Print(Ceil(0.5))</code> Выводит 1
+<code>Print(Ceil(-0.5))</code> Выводит 0
+<code>Print(Ceil(1.5))</code> Выводит 2
+<code>Print(Ceil(-1.5))</code> Выводит -1`
+	},{
+		"name": "Round",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Округляет число 'Число'",
+		"desmos": "9h9uuyruyw",
+		"example":
+`<code>Print(Floor(0))</code> Выводит 0
+<code>Print(Floor(1))</code> Выводит 1
+<code>Print(Floor(0.2))</code> Выводит 0
+<code>Print(Floor(0.7))</code> Выводит 1
+<code>Print(Floor(0.5))</code> Выводит 1
+<code>Print(Floor(-0.5))</code> Выводит 0
+<code>Print(Floor(1.5))</code> Выводит 2
+<code>Print(Floor(-1.5))</code> Выводит -1`
+	},{
+		"name": "RoundLower",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Округляет число 'Число' (если число равно 0.5, то вернёт 0)",
+		"desmos": "9h9uuyruyw",
+		"example":
+`<code>Print(Floor(0))</code> Выводит 0
+<code>Print(Floor(1))</code> Выводит 1
+<code>Print(Floor(0.2))</code> Выводит 0
+<code>Print(Floor(0.7))</code> Выводит 1
+<code>Print(Floor(0.5))</code> Выводит 0
+<code>Print(Floor(-0.5))</code> Выводит -1
+<code>Print(Floor(1.5))</code> Выводит 1
+<code>Print(Floor(-1.5))</code> Выводит -2`
+	},{
+		"name": "Trunc",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Убирает дробную часть 'Число'",
+		"desmos": "ufzilasi6m",
+		"example":
+`<code>Print(Trunc(0))</code> Выводит 0
+<code>Print(Trunc(1))</code> Выводит 1
+<code>Print(Trunc(0.5))</code> Выводит 0
+<code>Print(Trunc(-0.5))</code> Выводит 0
+<code>Print(Trunc(1.5))</code> Выводит 1
+<code>Print(Trunc(-1.5))</code> Выводит -1`
+	},{
 		"name": "DeltaTime",
 		"params": [],
 		"return": ["Число","d"],
@@ -130,6 +199,16 @@ end)</code> Попробуйте изменить размер окна и по�
 		"example":
 `<code>Game:Update(function()
 	PrintFast(ScreenToWorldPosition(MouseLocalPosition()))
+end)</code>`
+	},{
+		"name": "RandomFast",
+		"params": [],
+		"return": ["Случайное число","d"],
+		"description": `Возвращает случайное дробное число от 0 до 1 (каждый раз случайный сид)`,
+		"desmos": "93d1h8mu0b",
+		"example":
+`<code>Game:Update(function()
+	PrintFast(RandomFast())
 end)</code>`
 	},{
 		"name": "ToString",
@@ -597,6 +676,49 @@ for a = 0, linesize do
 	GameObject:SetPosition(i, Vector2((a-(linesize/2))*2,0))
 	GameObject:SetColor(i, Color(1,IfThen(a%2 == 0, 1-a/linesize,1),IfThen(a%3 == 0, 1-a/linesize,1)))
 end</code>`
+	},{
+		"name": "GameObject:SetTexture",
+		"params": [["Цель","go"],["Текстура","r"]],
+		"description": "Устанавливает 'Текстура' объекту 'Цель'",
+		"example":
+`Вызывалось в моде с ID: Vanilla
+<code>local i = GameObject:Create("Default GameObject!", GO_Physical)
+
+Resources:SaveGameObject(i, "TestObject")
+
+local textures = {"Button.png","ButtonHover.png","Default.png"}
+
+local total = 70
+local t = 1
+for a = 0, total do
+    i = Resources:CloneGameObject("Vanilla:TestObject")
+    
+    GameObject:SetTexture(i,"Base:Textures/"..textures[t])
+    
+    GameObject:SetPosition(i,Vector2((a-(total/2))*2.5,0))
+    t = t + 1
+    if (t>#textures) then
+        t = 1
+    end
+end</code>`
+	},{
+		"name": "GameObject:SetShader",
+		"params": [["Цель","go"],["Шейдер","r"]],
+		"description": "Устанавливает 'Шейдер' объекту 'Цель'",
+		"example":
+`Вызывалось в моде с ID: Vanilla
+<code>local i = GameObject:Create("Default GameObject!", GO_Physical)
+
+Resources:SaveGameObject(i, "TestObject")
+
+local total = 70
+for a = 0, total do
+    i = Resources:CloneGameObject("Vanilla:TestObject")
+    
+    GameObject:SetShader(i,"Vanilla:Shader.lu_shader"); --Укажите свой шейдер
+    
+    GameObject:SetPosition(i,Vector2((a-(total/2))*2.5,0))
+end</code>`
 	}
 ];
 
@@ -860,6 +982,11 @@ const Const = {
 		["ErrorInt",-6212223,"Ошибочное целое число, получается при ошибках"],
 		["ErrorVector2","Vector2(-62122.723,-62122.723)","Ошибочный Vector2, получается при ошибках"],
 		["ErrorString","\"Error_GwevWET23g3#G_#1d\"","Ошибочная строка, получается при ошибках"]
+	],
+	
+	"Resources": [
+		["ErrorTexture","\"Base:Textures/Error/NotFound.png\"","Путь до текстуры ошибки"],
+		["ErrorShader","\"Base:Shaders/Error.lu_shader\"","Путь до шейдера ошибки"]
 	],
 	
 	"Other": [

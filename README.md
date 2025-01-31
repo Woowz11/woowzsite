@@ -15,6 +15,7 @@
 * [Фейковая папка](https://woowz11.github.io/woowzsite/real-folder.html) 
 * [Сайт "Нет подключения к Интернету"](https://woowz11.github.io/woowzsite/nointernet.html) 
 * [Тестовые страницы](https://woowz11.github.io/woowzsite/systems_pages.html) 
+* [Сами вы клон тиктока](https://woowz11.github.io/woowzsite/w.html) 
 
 # Лицензия
 Можно использовать ресурсы, модифицировать, выдавать проект за свой нельзя, получать выгоду с него тоже нельзя
