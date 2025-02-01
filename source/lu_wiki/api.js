@@ -13,6 +13,102 @@ const ParamsTypeConvert = {
 	"c"  : "Color"
 }
 
+const Texts = {
+	"Start":
+`
+<center><b>Wiki по игре и сама игра, находятся в активной разработке!</b>
+Эта wiki посвещена моддингу игры Lithium Universe
+Скоро будет дополнена информация...</center>`,
+
+	"Resources":
+`Система получения ресурсов как в игре Minecraft
+<hr>
+Ресурс указывается следующим образом,
+сначала указывается ID модификации (основы),
+потом символ двоиточие, потом локальный путь до файла
+
+Вот пример, получения файла в ресурсах игры:
+Полный путь -> <code>C:\\...\\Resources\\Shaders\\Default.lu_shader</code>
+Ресурс &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -> <code>Base:Shaders/Default.lu_shader</code>
+
+Вот пример, получения файла в модификации Vanilla:
+Полный путь -> <code>C:\\...\\Mods\\Vanilla\\Base.lua</code>
+Ресурс &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -> <code>Vanilla:Base.lua</code>`,
+	
+	"Textures":
+`Пока-что текстуры должны быть обязательно в формате <code>.png</code>!
+
+Возможен баг, что если текстура маленькая (например 2x2) или очень узкая (500x10),
+то поломается текстура, что-бы это исправить, нужно добавить альфа-канал текстуре
+(например, сделать 1 пиксель прозрачным)`,
+
+	"Shaders":
+`Каждый шейдер в игре состоит из 3-х файлов
+<li> Линковочный файл</li><li> Вертиксный шейдер</li><li> Фрагментный шейдер</li><hr><b>Линковочный файл</b>
+Содержит в себе путь до двух остальных файлов,
+а именно до вертиксного шейдера и фрагментного шейдера
+Должен быть формата <code>.lu_shader</code>
+<code>{
+	"Vertex"   : {Путь до вертиксного шейдера-ресурса},
+	"Fragment" : {Путь до фрагментного шейдера-ресурса}
+}</code>
+
+Пример на <code>Base:Shaders/Default.lu_shader</code>
+<code>{
+	"Vertex"   : "Base:Shaders/Default.vert",
+	"Fragment" : "Base:Shaders/Default.frag"
+}</code>
+<hr><b>Вертиксный файл</b>
+Является шейдером GLSL обозначающий позицию полигонов,
+так же отвечает за позицию объекта, и развёртку текстур
+<hr><b>Фрагментный файл</b>
+Является шейдером GLSL обозначающий цвет пикселей
+<hr>
+<b>Uniforms</b>
+<code>ID                (int      ) = Айди объекта
+Texture           (sampler2D) = Текстура
+TextureSize       (vec2     ) = Размер текстуры
+Position          (vec2     ) = Позиция объекта
+CameraPosition    (vec2     ) = Позиция камеры
+CameraOrientation (float    ) = Поворот камеры
+CameraZoom        (float    ) = Зум камеры
+Random            (float    ) = Случайное дробное число от 0 до 1
+LocalRandom       (float    ) = Случайное дробное число от 0 до 1 (у каждого объекта свой)
+ScreenSize        (vec2     ) = Текущий размер экрана
+ScreenStartSize   (vec2     ) = Размер экрана при запуске игры
+MousePosition     (vec2     ) = Позиция мыши в пикселях
+Time              (float    ) = Прошедшее время с запуска приложения
+DeltaTime         (float    ) = Размягчение зависящие от FPS
+DebugRender       (bool     ) = Включен отладочный рендер?
+Static            (bool     ) = Объект статичный?
+Physical          (bool     ) = Объект физичный?
+Interface         (bool     ) = Объект является интерфейсом?
+Resize            (bool     ) = Объект меняет размер от размера экрана
+Sleeping          (bool     ) = Физическое тело объекта спит?</code>`,
+
+	"Fonts":
+`Шрифты в разработке...`,
+
+	"Mod":
+`Что-бы создать свою модификацию,
+нужно создать папку с ID мода в названии в папке <code>Mods</code>,
+и создать файл с ID мода в названии и форматом <code>.lu_mod</code>
+<hr>Строение файла мода:
+<code>{
+	"Name"          : {Название мода},
+	"Version"       : {Версия мода},
+	"Author"        : {Автор мода},
+	"Description"   : {Описание мода},
+	"MainScript"    : {Первый запускаемый скрипт (можно это поле не указывать)},
+	"Compatibility" : {Пока-что указывайте []},
+	"Incompatible"  : {Пока-что указывайте []}
+}</code>`,
+
+	"Etapi":
+`Этапы запуска скриптов
+<hr><li>MainScript's модов</li><li>Game:GameObjectLoading ивент</li>`
+}
+
 const Functions = [
 	{
 		"name": "Print",
@@ -63,6 +159,42 @@ end)</code>`
 <code>Print(Sin((3*PI)/2))</code> Выводит -1
 <code>Print(Sin(2*PI))</code> Выводит -1.9586355440587e-11 (близко к 0)` 
 	},{
+		"name": "Cos",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Косинус числа 'Число'",
+		"desmos": "gm8wcq20wx",
+		"example":
+`<code>Print(Cos(0))</code> Выводит 1
+<code>Print(Cos(PI/6))</code> Выводит 0.866025403785255
+<code>Print(Cos(PI/4))</code> Выводит 0.707106781188279
+<code>Print(Cos(PI/3))</code> Выводит 0.500000000002827
+<code>Print(Cos(PI/2))</code> Выводит 4.89658886014675e-12 (близко к 0)
+<code>Print(Cos(PI))</code> Выводит -1
+<code>Print(Cos((3*PI)/2))</code> Выводит -1.46897665804402e-11 (близко к 0)
+<code>Print(Cos(2*PI))</code> Выводит 1` 
+	},{
+		"name": "Deg",
+		"params": [["Радиан","d"]],
+		"return": ["Градус","d"],
+		"description": "Конвертирует 'Радиан' в градус",
+		"desmos": "rrgdf29os1",
+		"example":
+`<code>Print(Deg(0))</code> Выводит 0
+<code>Print(Deg(1.5708))</code> Выводит 90.0002104594303
+<code>Print(Deg(3.14159))</code> Выводит 179.999847961065
+<code>Print(Deg(PI))</code> Выводит 180`
+	},{
+		"name": "Rad",
+		"params": [["Градус","d"]],
+		"return": ["Радиан","d"],
+		"description": "Конвертирует 'Градус' в радиан",
+		"desmos": "7cialiups1",
+		"example":
+`<code>Print(Rad(0))</code> Выводит 0
+<code>Print(Rad(90))</code> Выводит 1.57079632679
+<code>Print(Rad(180))</code> Выводит 3.14159265358`
+	},{
 		"name": "Sqrt",
 		"params": [["Число","d"]],
 		"return": ["Результат","d"],
@@ -72,6 +204,57 @@ end)</code>`
 `<code>Print(Sqrt(4))</code> Выводит 2
 <code>Print(Sqrt(6))</code> Выводит 2.44948974278318
 <code>Print(Sqrt(-4))</code> Выводит -2`
+	},{
+		"name": "Cbrt",
+		"params": [["Число","d"]],
+		"return": ["Результат","d"],
+		"description": "Возводит 'Число' в кубический корень",
+		"desmos": "fbhap8ciar",
+		"example":
+`<code>Print(Cbrt(8))</code> Выводит 2
+<code>Print(Cbrt(27))</code> Выводит 3
+<code>Print(Cbrt(-8))</code> Выводит -2
+<code>Print(Cbrt(-27))</code> Выводит -3`
+	},{
+		"name": "Max",
+		"params": [["Число 1","d"],["Число 2","d"]],
+		"return": ["Большее","d"],
+		"description": "Возвращает большее число из 'Число 1' и 'Число 2'",
+		"example":
+`<code>Print(Max(0,0))</code> Выводит 0
+<code>Print(Max(0,1))</code> Выводит 1
+<code>Print(Max(1,0))</code> Выводит 1
+<code>Print(Max(1,5))</code> Выводит 5
+<code>Print(Max(3,3.001))</code> Выводит 3.001
+<code>Print(Max(-2,-3))</code> Выводит -2
+<code>Print(Max(-6,-6.001))</code> Выводит -6`
+	},{
+		"name": "Min",
+		"params": [["Число 1","d"],["Число 2","d"]],
+		"return": ["Меньшее","d"],
+		"description": "Возвращает меньшее число из 'Число 1' и 'Число 2'",
+		"example":
+`<code>Print(Min(0,0))</code> Выводит 0
+<code>Print(Min(0,1))</code> Выводит 0
+<code>Print(Min(1,0))</code> Выводит 0
+<code>Print(Min(1,5))</code> Выводит 1
+<code>Print(Min(3,3.001))</code> Выводит 3
+<code>Print(Min(-2,-3))</code> Выводит -3
+<code>Print(Min(-6,-6.001))</code> Выводит -6.001`
+	},{
+		"name": "Sgn",
+		"params": [["Число","d"]],
+		"return": ["Знак числа","i"],
+		"description": "Возвращает знак 'Число'",
+		"desmos": "ca8na2en0u",
+		"example":
+`<code>Print(Sgn(1))</code> Выводит 1
+<code>Print(Sgn(0))</code> Выводит 0
+<code>Print(Sgn(-1))</code> Выводит -1
+<code>Print(Sgn(5))</code> Выводит 1
+<code>Print(Sgn(-5))</code> Выводит -1
+<code>Print(Sgn(802.53))</code> Выводит 1
+<code>Print(Sgn(-802.53))</code> Выводит -1`
 	},{
 		"name": "Floor",
 		"params": [["Число","d"]],
@@ -661,6 +844,15 @@ Game:Update(function()
 	GameObject:SetPosition(Obj, MouseWorldPosition())
 end)</code>`
 	},{
+		"name": "GameObject:SetSize",
+		"params": [["Цель","go"],["Размер","v2"]],
+		"description": "Устанавливает 'Размер' объекту 'Цель'",
+		"example":
+`<code>local Obj = GameObject:Create()
+GameObject:SetSize(Obj,Vector2(2,1)) -- Объект шире в 2 раза
+GameObject:SetSize(Obj,Vector2(1,2)) -- Объект выше в 2 раза
+GameObject:SetSize(Obj,Vector2(2,2)) -- Объект больше в 2 раза</code>`
+	},{
 		"name": "GameObject:SetColor",
 		"params": [["Цель","go"],["Цвет","c"]],
 		"description": "Устанавливает 'Цвет' объекту 'Цель'",
@@ -715,7 +907,7 @@ local total = 70
 for a = 0, total do
     i = Resources:CloneGameObject("Vanilla:TestObject")
     
-    GameObject:SetShader(i,"Vanilla:Shader.lu_shader"); --Укажите свой шейдер
+    GameObject:SetShader(i,"Vanilla:Shader.lu_shader") --Укажите свой шейдер
     
     GameObject:SetPosition(i,Vector2((a-(total/2))*2.5,0))
 end</code>`

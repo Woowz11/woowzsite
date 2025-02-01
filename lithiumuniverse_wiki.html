@@ -23,6 +23,20 @@ var info = {
 	StartPage: "startpage"
 }
 
+WWSetInfo(info);
+
+WWAddPage("startpage",null,"Начало...",{"Page":Texts["Start"]});
+
+WWAddTitle("resources",null,"Ресурсы",{});
+WWAddPage("resources_info","resources","Строение ресурсов",{"Page":Texts["Resources"]});
+WWAddPage("textures","resources","Текстуры",{"Page":Texts["Textures"]});
+WWAddPage("shaders","resources","Шейдеры",{"Page":Texts["Shaders"]});
+WWAddPage("fonts","resources","Шрифты",{"Page":Texts["Fonts"]});
+
+WWAddTitle("mod",null,"Модификации",{});
+WWAddPage("mod_info","mod","Строение мода",{"Page":Texts["Mod"]});
+WWAddPage("mod_runsteps","mod","Этапы запуска",{"Page":Texts["Etapi"]});
+
 function GenerateShortParamsString(Params){
 	var Result = "";
 	var First = true;
@@ -71,224 +85,6 @@ function FuncDesc(Func){
 	}
 	return Result;
 }
-
-WWSetInfo(info);
-
-WWAddPage("startpage",null,"Начало...",{"Page":"<b>Википедия как и игра находятся в активной разработке!</b><br>Эта википедия посвощенена моддингу для игры Lithium Universe<br>Строение ресурсов как в Minecraft, моддинг на Lua"});
-
-WWAddTitle("resources",null,"Ресурсы",{});
-WWAddPage("resources_info","resources","Строение ресурсов",{"Page":"Строение ресурсов похоже как в игре Minecraft<br>"+
-"<hr>"+
-"Что-бы создать указатель (путь) на ресурс, нужно сначала указать базу ресурса, а потом путь до<br>"+
-"него, например путь ресурса <code>C:\\...\\Resources\\Shaders\\Default.lu_shader</code>,<br>"+
-"он находится в папке Resources, значит это ванильный ресурс, значит как базу нужно указать <code>Base</code>,<br>"+
-"значит получается <code>Base:Shaders/Default.lu_shader</code><br>"+
-"Пример для ресурса из мода <code>Test</code>, <code>Test:Shaders/ModShader.lu_shader</code><br>"+
-"Ресурсы можно обновлять в реальном времени, нужно нажать кнопку на перезагрузку ресурсов"});
-WWAddPage("textures","resources","Текстуры",{"Page":"Текстуры должны быть обязательно формата <code>.png</code>!<br>В будущем будет больше поддержки текстур<br>Если текстура маленькая может произойти баг, когда текстура загружается неправильно!"});
-WWAddPage("shaders","resources","Шейдеры",{"Page":"Шейдер состоит из 3-х файлов,<br>"+
-"<li>SHADER.lu_shader - Содержит в себе указатели на Vert и Frag шейдеры, название этого файла служит ID шейдера<br>"+
-"<li>SHADER.vert - Текстовой файл содержащий в себе код на геометрию объекта<br>"+
-"<li>SHADER.frag - Текстовой файл содержащий в себе код на рисование объекта<br>"+
-"Не обязательно должны быть форматы .vert и .frag, можно поставить свои<br>"+
-"<hr>"+
-"Строение <code>*.lu_shader</code><br>"+
-"<code>{\n	\"Vertex\"   : \"{Путь до Vert шейдера}\",\n	\"Fragment\" : \"{Путь до Fragment шейдера}\"\n}</code><br>"+
-"Нужно указать свою позицию до файлов шейдера, или можно использовать существующие<br>"+
-"<hr>Код <code>Default</code> Vertex<br>"+
-`<code>#version 330 core
-layout (location = 0) in vec3 PointPosition;
-layout (location = 1) in vec2 TextureUV;
-layout (location = 2) in int PointID;
-
-out vec2 TextureCoord;
-
-uniform vec2 Position;
-uniform float Orientation;
-uniform vec2 Size;
-uniform float Layer;
-uniform int ID;
-uniform vec2 CameraPosition;
-uniform float CameraOrientation;
-uniform float CameraZoom;
-uniform bool Interface;
-uniform bool Resize;
-uniform vec2 ScreenStartSize;
-uniform vec2 ScreenSize;
-
-mat4 Scale(mat4 mat, vec2 vec){
-	return mat4(
-		mat[0] * vec[0],
-		mat[1] * vec[1],
-		mat[2],
-		mat[3]);
-}
-
-mat4 Rotate(mat4 mat, float angl){
-	float c = cos(angl);
-	float s = sin(angl);
-	
-	vec3 axis = normalize(vec3(0,0,1));
-	vec3 temp = (1 - c) * axis;
-	
-	mat4 Rotate;
-	Rotate[0][0] = c + temp[0] * axis[0];
-	Rotate[0][1] = temp[0] * axis[1] + s * axis[2];
-	Rotate[0][2] = temp[0] * axis[2] - s * axis[1];
-
-	Rotate[1][0] = temp[1] * axis[0] - s * axis[2];
-	Rotate[1][1] = c + temp[1] * axis[1];
-	Rotate[1][2] = temp[1] * axis[2] + s * axis[0];
-
-	Rotate[2][0] = temp[2] * axis[0] + s * axis[1];
-	Rotate[2][1] = temp[2] * axis[1] - s * axis[0];
-	Rotate[2][2] = c + temp[2] * axis[2];
-	
-	mat4 Result;
-	Result[0] = mat[0] * Rotate[0][0] + mat[1] * Rotate[0][1] + mat[2] * Rotate[0][2];
-	Result[1] = mat[0] * Rotate[1][0] + mat[1] * Rotate[1][1] + mat[2] * Rotate[1][2];
-	Result[2] = mat[0] * Rotate[2][0] + mat[1] * Rotate[2][1] + mat[2] * Rotate[2][2];
-	Result[3] = mat[3];
-	return Result;
-}
-
-mat4 Translate(mat4 mat, vec3 vec)
-{
-	return mat4(
-		mat[0],
-        mat[1],
-        mat[2],
-		mat[0] * vec[0] + mat[1] * vec[1] + mat[2] * vec[2] + mat[3]
-	);
-}
-
-mat4 Translate(mat4 mat, vec2 vec){
-	return Translate(mat, vec3(vec, 0));
-}
-
-mat4 Ortho(float L, float R, float B, float T){
-	float ZN = -1000;
-	float ZF = 1000;
-	mat4 Result;
-	Result[0] = vec4(2/(R-L),0,0,0);
-	Result[1] = vec4(0,2/(T-B),0,0);
-	Result[2] = vec4(0,0,-(1/(ZF-ZN)),0);
-	Result[3] = vec4(-((R+L)/(R-L)),-((T+B)/(T-B)),-(ZN/(ZF-ZN)),1);
-	return Result;
-}
-
-const vec2 ScreenScale = vec2(10.0/3, 7.5/3);
-
-void main()
-{
-	float SW = Resize ? ScreenStartSize.x : ScreenSize.x;
-	float SH = Resize ? ScreenStartSize.y : ScreenSize.y;
-
-	float Z = Interface ? 1 : 1/CameraZoom;
-
-	float PLeft  = -SW / 240;
-	float PRight =  SW / 240;
-	float PDown  = -SH / 240;
-	float PUp    =  SH / 240;
-	mat4 Projection = Ortho(PLeft/Z, PRight/Z, PDown/Z, PUp/Z);
-
-	vec2 ScreenDifference = vec2(ScreenSize.x/ScreenStartSize.x, ScreenSize.y/ScreenStartSize.y);
-
-	mat4 RPosition;
-	RPosition[0] = vec4(1,0,0,0);
-	RPosition[1] = vec4(0,1,0,0);
-	RPosition[2] = vec4(0,0,1,0);
-	RPosition[3] = vec4(0,0,0,1);
-	
-	if(!Interface){
-		RPosition = Rotate(RPosition, CameraOrientation);
-	}
-	
-	RPosition = Translate(RPosition, vec3(Position * (Interface ? (Resize ? ScreenScale : ScreenScale * ScreenDifference) : vec2(1,1)), (Layer + (float(ID)/100))/100));
-	
-	if(!Interface){
-		RPosition = Translate(RPosition, CameraPosition);
-	}
-	
-	RPosition = Rotate(RPosition, Orientation);
-	
-	RPosition = Scale(RPosition, Size);
-	
-    gl_Position = Projection * RPosition * vec4(PointPosition, 1.0f);
-    TextureCoord = vec2(TextureUV.x, 1.0 - TextureUV.y);
-}</code>`+
-"<hr>Код <code>Default</code> Fragment<br>"+
-`<code>#version 330 core
-out vec4 FragColor;
-
-in vec2 TextureCoord;
-
-uniform sampler2D Texture;
-uniform vec4 Color;
-uniform float Random;
-uniform float Time;
-uniform float DeltaTime;
-
-uniform bool DebugRender;
-uniform bool Sleeping;
-
-void main()
-{
-    vec4 TextureColor = texture(Texture, TextureCoord) * Color;
-    if(TextureColor.a == 0){ discard; }
-    if(DebugRender){
-        if(Sleeping){
-            TextureColor *= vec4(1,0,0,1);
-        }
-    }
-    FragColor = TextureColor;
-}</code>`+
-`<hr><code>Информация о uniform's
-ID                (int      ) = Айди объекта
-Position          (vec2     ) = Позиция объекта
-CameraPosition    (vec2     ) = Позиция камеры
-CameraOrientation (float    ) = Поворот камеры
-CameraZoom        (float    ) = Зум камеры
-Random            (float    ) = Случайное дробное число от 0 до 1
-LocalRandom       (float    ) = Случайное дробное число от 0 до 1 (у каждого объекта свой)
-ScreenSize        (vec2     ) = Текущий размер экрана
-ScreenStartSize   (vec2     ) = Размер экрана при запуске игры
-MousePosition     (vec2     ) = Позиция мыши в пикселях
-Texture           (sampler2D) = Текстура
-TextureSize       (vec2     ) = Размер текстуры
-Time              (float    ) = Прошедшее время с запуска приложения
-DeltaTime         (float    ) = Размягчение зависящие от FPS
-DebugRender       (bool     ) = Включен отладочный рендер?
-Static            (bool     ) = Объект статичный?
-Physical          (bool     ) = Объект физичный?
-Interface         (bool     ) = Объект является интерфейсом?
-Resize            (bool     ) = Объект меняет размер от размера экрана
-Sleeping          (bool     ) = Физическое тело объекта спит?
-
-Информация о location's
-[0] PointPosition (vec3) = Позиция точки
-[1] TextureUV     (vec2) = Развёртка текстуры в точке
-[2] PointID       (int ) = Айди точки
-</code>`});
-WWAddPage("fonts","resources","Шрифты",{"Page":"Пока-что в разработке"});
-
-WWAddTitle("mod",null,"Модификации",{});
-WWAddPage("mod_info","mod","Строение мода",{"Page":"Создаётся папка с ID мода в папке <code>Mods</code>, и внутри папки создаётся файл <code>{Название вашей папки}.lu_mod</code><br>"+
-"<hr>Строение <code>*.lu_mod</code><br>"+
-`<code>{
-	"Name": "{Название вашей модификации}",
-	"Version" : "{Версия вашей модификации}",
-	"Author" : "{Автор модификации}",
-	"Description" : "{Описание модификации}",
-	"MainScript" : "{Путь до первого вызываемого скрипта модификации}",
-	"Compatibility" : [""],
-	"Incompatible" : [""]
-}</code>`+
-"<hr>При загрузке сцены игры запустится <code>MainScript</code>"});
-WWAddPage("mod_runsteps","mod","Этапы запуска",{"Page":`Этапы запуска скриптов
-<hr>
-<li> Главные скрипты мода
-<li> Ивент Game:GameObjectLoading`});
 
 var Functions_ = [];
 var Events = [];
