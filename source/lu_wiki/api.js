@@ -106,7 +106,7 @@ Sleeping          (bool     ) = Физическое тело объекта с�
 
 	"Etapi":
 `Этапы запуска скриптов
-<hr><li>MainScript's модов</li><li>Game:GameObjectLoading ивент</li>`
+<hr><li>MainScript's модов</li><li>Game:GameObjectLoading ивент</li><li>Game:UILoading ивент</li>`
 }
 
 const Functions = [
@@ -518,13 +518,13 @@ end</code>`
 		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда какая-то клавиша нажата",
-		"example": `<code>Controls:KeysPressed(function(Key) Print("KEY "..Key.." PRESSED") end)</code>`
+		"example": `<code>Controls:KeyPressed(function(Key) Print("KEY "..Key.." PRESSED") end)</code>`
 	},{
 		"name": "Controls:KeyReleased",
 		"type": "event",
 		"params": [["Функция","f",[["Клавиша","i"]]]],
 		"description": "Вызывает 'Функция' каждый раз, когда какая-то клавиша отжата",
-		"example": `<code>Controls:KeysReleased(function(Key) Print("KEY "..Key.." RELEASED") end)</code>`
+		"example": `<code>Controls:KeyReleased(function(Key) Print("KEY "..Key.." RELEASED") end)</code>`
 	},{
 		"name": "Controls:KeyPress",
 		"type": "event",
@@ -787,11 +787,36 @@ end)</code>`
 		"description": "Вызывает 'Функция' каждый кадр",
 		"example": `<code>Game:Update(function() PrintFast("Run every frame!") end)</code>`
 	},{
+		"name": "Game:UpdateEveryGameObject",
+		"type": "event",
+		"params": [["Функция","f",[["Игровой объект","go"]]]],
+		"description": "Вызывает 'Функция' каждый кадр для каждого игрового объекта",
+		"example": 
+`<code>Game:UpdateEveryGameObject(function(i)
+	PrintFast(GameObject:GetName(i))
+end)</code>`
+	},{
+		"name": "Game:SetSimulationSpeed",
+		"params": [["Скорость симуляции","d"]],
+		"description": "Устанавливает 'Скорость симуляции'",
+		"example":
+`<code>local i = 0
+Game:Update(function()
+	Game:SetSimulationSpeed(Sin(i/100)+1)
+	i = i + 1
+end)</code>`
+	},{
 		"name": "Game:GameObjectLoading",
 		"type": "event",
 		"params": [["Функция","f"]],
 		"description": "Вызывает 'Функция' после загрузки модов, для загрузки игровых объектов",
 		"example": `<code>Game:GameObjectLoading(function() Print("Loading game objects!") end)</code>`
+	},{
+		"name": "Game:UILoading",
+		"type": "event",
+		"params": [["Функция","f"]],
+		"description": "Вызывает 'Функция' после загрузки модов, для загрузки интерфейса",
+		"example": `<code>Game:UILoading(function() Print("Loading UI!") end)</code>`
 	},{
 		"name": "IfThen",
 		"params": [["Условие","b"],["Результат 1","o"],["Результат 2","o"]],
@@ -835,6 +860,15 @@ end)</code>`
 i = GameObject:Create("Physical GameObject!", GO_Physical)
 i = GameObject:Create("UI GameObject", GO_UI)</code>`
 	},{
+		"name": "GameObject:Delete",
+		"params": [["Игровой объект","o"]],
+		"description": "Удаляет 'Игровой объект'",
+		"example":
+`<code>local i = GameObject:Create()
+Print(GameObject:GetName(i))
+GameObject:Delete(i)
+Print(GameObject:GetName(i))</code>`
+	},{
 		"name": "GameObject:SetPosition",
 		"params": [["Цель","go"],["Позиция","v2"]],
 		"description": "Устанавливает 'Позиция' объекту 'Цель'",
@@ -868,6 +902,57 @@ for a = 0, linesize do
 	GameObject:SetPosition(i, Vector2((a-(linesize/2))*2,0))
 	GameObject:SetColor(i, Color(1,IfThen(a%2 == 0, 1-a/linesize,1),IfThen(a%3 == 0, 1-a/linesize,1)))
 end</code>`
+	},{
+		"name": "GameObject:GetName",
+		"params": [["Цель","go"]],
+		"return": ["Название","s"],
+		"description": "Возвращает название 'Цель'",
+		"example":
+`<code>local i = GameObject:Create("That GameObject Name!")
+Print(GameObject:GetName(i))</code>`
+	},{
+		"name": "GameObject:GetPosition",
+		"params": [["Цель","go"]],
+		"return": ["Позиция","v2"],
+		"description": "Возвращает позицию 'Цель'",
+		"example":
+`<code>local i = GameObject:Create(nil,GO_Physical)
+Game:Update(function()
+	PrintFast(GameObject:GetPosition(i))
+end)</code>`
+	},{
+		"name": "GameObject:SetData",
+		"params": [["Цель","go"],["Айди информации","i"],["Информация","o"]],
+		"description": "Устанавливает 'Информация' в поле 'Айди информации' объекту 'Цель'",
+		"example":
+`<code>local i = GameObject:Create()
+Print(GameObject:GetData(i,536))
+GameObject:SetData(i,536,"Hello!")
+Print(GameObject:GetData(i,536))</code>`
+	},{
+		"name": "GameObject:GetData",
+		"params": [["Цель","go"],["Айди информации","i"]],
+		"return": ["Информация","o"],
+		"description":
+`Возвращает информацию из поля 'Айди информации' в 'Цель'
+Если не найдено, возвращает nil`,
+		"example":
+`<code>local i = GameObject:Create()
+Print(GameObject:GetData(i,"536))
+GameObject:SetData(i,536,"Hello!")
+Print(GameObject:GetData(i,536))</code>`
+	},{
+		"name": "GameObject:SetSizeFromTexture",
+		"params": [["Цель","go"],["Текстура","r"],["Маштаб","d"]],
+		"description":
+`Устанавливает размер, подобно размеру 'Текстура' умноженная 'Маштаб' объекту 'Цель'
+Если 'Маштаб' не установлен, то он равен 1
+Обычный размер, это 32 пикселя тектсуры = 1 игровой метр`,
+		"example":
+`Вызывалось в моде с ID: Vanilla
+<code>local HumanSize = GameObject:Create("HumanSize", GO_Physical)
+GameObject:SetTexture(HumanSize, "Vanilla:HumanSize.png")
+GameObject:SetSizeFromTexture(HumanSize, "Vanilla:HumanSize.png")</code>`
 	},{
 		"name": "GameObject:SetTexture",
 		"params": [["Цель","go"],["Текстура","r"]],
