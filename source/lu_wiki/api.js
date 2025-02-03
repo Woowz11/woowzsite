@@ -342,6 +342,12 @@ end)</code>`
 При 400 FPS равно примерно <code>0.00148391723632812</code>`,
 		"example": `<code>Game:Update(function() PrintFast(DeltaTime()) end)</code>`
 	},{
+		"name": "Game:GetFullVersion",
+		"params": [],
+		"return": ["Версия","s"],
+		"description": `Возвращает текущую версию игры`,
+		"example": `<code>Print(Game:GetFullVersion())</code>`
+	},{
 		"name": "MouseWorldPosition",
 		"params": [],
 		"return": ["Позиция","v2"],
@@ -882,6 +888,59 @@ Print(GameObject:GetName(i))</code>`
 `<code>local Obj = GameObject:Create()
 Game:Update(function()
 	GameObject:SetPosition(Obj, MouseWorldPosition())
+end)</code>`
+	},{
+		"name": "GameObject:SetResize",
+		"params": [["Цель","go"],["Менять размер объекту в зависимости от размера окна?","b"]],
+		"description":
+`Устанавливает 'Менять размер объекту в зависимости от размера окна?' объекту 'Цель'
+Корректно работает только с интерфейсом`,
+		"example":
+`<code>local Obj = GameObject:Create(nil, GO_UI)
+GameObject:SetResize(Obj,false)</code>`
+	},{
+		"name": "GameObject:MakeItText",
+		"params": [["Цель","go"],["Стартовый текст","s"]],
+		"description": `Превращает 'Цель' в текст, с начальным текстом 'Стартовый текст'`,
+		"example":
+`<code>local Obj = GameObject:Create(nil, GO_UI)
+GameObject:MakeItText(Obj,"Hello!")</code>`
+	},{
+		"name": "GameObject:SetOrientation",
+		"params": [["Цель","go"],["Радиан","v2"]],
+		"description": "Устанавливает поворот объекта 'Цель' на 'Радиан'",
+		"example":
+`<code>local i = GameObject:Create()
+GameObject:SetOrientation(i,Rad(45))</code>`
+	},{
+		"name": "GameObject:SetCenter",
+		"params": [["Цель","go"],["Центр","v2"]],
+		"description": "Устанавливает 'Центр' объекту 'Цель'",
+		"example":
+`<code>local i1 = GameObject:Create()
+GameObject:SetSize(i1,Vector2(4,1))
+GameObject:SetPosition(i1,Vector2(-15,0))
+GameObject:SetColor(i1,Color(1))
+GameObject:SetCenter(i1,Vector2(-1,0))
+
+local i2 = GameObject:Create()
+GameObject:SetSize(i2,Vector2(4,1))
+GameObject:SetPosition(i2,Vector2(0,0))
+GameObject:SetColor(i2,Color(0,1))
+GameObject:SetCenter(i2,Vector2(0,0))
+
+local i3 = GameObject:Create()
+GameObject:SetSize(i3,Vector2(4,1))
+GameObject:SetPosition(i3,Vector2(15,0))
+GameObject:SetColor(i3,Color(0,0,1))
+GameObject:SetCenter(i3,Vector2(1,0))
+
+local t = 0;
+Game:Update(function()
+	t = t + 0.001
+	GameObject:SetOrientation(i1,t)
+	GameObject:SetOrientation(i2,t)
+	GameObject:SetOrientation(i3,t)
 end)</code>`
 	},{
 		"name": "GameObject:SetSize",
