@@ -25,7 +25,8 @@ a{
 <hr>
 Игра SandBox 2D с модификациями на LUA
 <hr>
-Создано Woowz11
+Создано Woowz11<br>
+Возраст игры: <b id="age">...</b> дня
 <hr>
 Лицензия: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>
 <hr>
@@ -49,3 +50,12 @@ a{
 
 </center>
 </body>
+
+<script>
+const specifiedTime = new Date(2025, 0, 10);
+const currentTime = new Date();
+const differenceInMilliseconds = currentTime - specifiedTime;
+const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+const daysPassed = Math.floor(differenceInMilliseconds / millisecondsInOneDay);
+document.getElementById("age").innerHTML = daysPassed;
+</script>
