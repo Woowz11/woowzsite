@@ -65,6 +65,7 @@ const Texts = {
 Является шейдером GLSL обозначающий цвет пикселей
 <hr>
 <b>Uniforms</b>
+<b>Эта графа будет переписана!</b>
 <code>ID                (int      ) = Айди объекта
 Texture           (sampler2D) = Текстура
 TextureSize       (vec2     ) = Размер текстуры
@@ -112,7 +113,26 @@ Sleeping          (bool     ) = Физическое тело объекта с�
 
 	"Etapi":
 `Этапы запуска скриптов
-<hr><li>MainScript's модов</li><li>Game:GameObjectLoading ивент</li><li>Game:UILoading ивент</li>`
+<hr><li>MainScript's модов</li><li>Game:GameObjectLoading ивент</li><li>Game:UILoading ивент</li>`,
+
+	"TextColors":
+`Цвета текста (пока-что работает только в консоли)
+Пример: <code>Print("$$RRed $$GGreen $$BBlue $$YYellow")</code>
+<hr><li>$$_ - Сбросить цвет (установить на белый (тёмный))</li>`+
+`<li>$$W - Установить белый цвет</li>`+
+`<li>$$R - Установить красный цвет</li>`+
+`<li>$$G - Установить зелёный цвет</li>`+
+`<li>$$B - Установить синий цвет</li>`+
+`<li>$$Y - Установить жёлтый цвет</li>`+
+`<li>$$P - Установить пурпурный цвет</li>`+
+`<li>$$A - Установить голубой цвет</li>`+
+`<li>$$w - Установить белый цвет (тёмный)</li>`+
+`<li>$$r - Установить красный цвет (тёмный)</li>`+
+`<li>$$g - Установить зелёный цвет (тёмный)</li>`+
+`<li>$$b - Установить синий цвет (тёмный)</li>`+
+`<li>$$y - Установить жёлтый цвет (тёмный)</li>`+
+`<li>$$p - Установить пурпурный цвет (тёмный)</li>`+
+`<li>$$a - Установить голубой цвет (тёмный)</li>`
 }
 
 const Functions = [
@@ -944,6 +964,20 @@ Game:Update(function()
 	GameObject:SetPosition(Obj, MouseWorldPosition())
 end)</code>`
 	},{
+		"name": "GameObject:SetLayer",
+		"params": [["Цель","go"],["Слой","d"]],
+		"description": "Устанавливает 'Слой' объекту 'Цель'",
+		"example":
+`<code>local i = GameObject:Create()
+GameObject:SetColor(i,Color(1))
+GameObject:SetPosition(i,Vector2(0.5,0.5))
+GameObject:SetLayer(i,10)
+
+i = GameObject:Create()
+GameObject:SetColor(i,Color(0,1))
+GameObject:SetPosition(i,Vector2(-0.5,-0.5))
+GameObject:SetLayer(i,-10)</code>`
+	},{
 		"name": "GameObject:SetResize",
 		"params": [["Цель","go"],["Менять размер объекту в зависимости от размера окна?","b"]],
 		"description":
@@ -1044,7 +1078,7 @@ Game:Update(function()
 	GameObject:SetText(i,TimePrefix..t)
 end)</code>`
 	},{
-		"name": "Table:Remove",
+		"name": "Table:RemoveKey",
 		"params": [["Таблица","t"],["Ключ (или индекс)","o"],["Удалять по ключу?","b"]],
 		"description":
 `Удаляет из 'Таблица' элемент под индексом 'Ключ (или индекс)' если 'Удалять по ключу?' равен false или nil, или
@@ -1052,30 +1086,78 @@ end)</code>`
 		"example":
 `<code>local T = {10,9,8,7,6,5,4,3,2,1,0}
 Print(Table:ToString(T))
-Table:Remove(T,2)
-Table:Remove(T,2)
+Table:RemoveKey(T,2)
+Table:RemoveKey(T,2)
 Print(Table:ToString(T))
 
 T = {[true] = 1, [false] = 2, [1] = 3, ["Text!"] = 4, [{1,2,3}] = 5}
 Print(Table:ToString(T))
-Table:Remove(T,false,true)
-Table:Remove(T,"Text!",true)
+Table:RemoveKey(T,false,true)
+Table:RemoveKey(T,"Text!",true)
+Print(Table:ToString(T))</code>`
+	},{
+		"name": "Table:Remove",
+		"params": [["Таблица","t"],["Элемент","o"]],
+		"description": `Удаляет 'Элемент' из 'Таблица' (работает только если таблица без ключей)`,
+		"example":
+`<code>local T = {"a","b","c","d"}
+Print(Table:ToString(T))
+Table:Remove(T,"c")
+Print(Table:ToString(T))</code>`
+	},{
+		"name": "Table:Add",
+		"params": [["Таблица","t"],["Элемент","o"]],
+		"description": `Добавляет 'Элемент' в 'Таблица' (работает только если таблица без ключей)`,
+		"example":
+`<code>local T = {"a","b","c"}
+Print(Table:ToString(T))
+Table:Add(T,"d")
 Print(Table:ToString(T))</code>`
 	},{
 		"name": "Table:Pairs",
 		"params": [["Таблица","t"],["Функция","f",[["Индекс","i"],["Ключ","o"],["Переменная","o"]]]],
-		"description": `Разбирает 'Таблица' по компонентам (индекс (позиция элемента), ключ, переменная) и вызывает их в 'Функция',`,
+		"description": `Разбирает 'Таблица' по компонентам (индекс (позиция элемента), ключ, переменная) и вызывает их в 'Функция'`,
 		"example":
 `<code>local T = {"a","b","c","d","f","g"}
 
 Table:Pairs(T,function(i,Key,Value)
-	Print("["..i.."] "..Key.." = "..ToString(Value))
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value))
 end)
 
 T = {["a"] = true, ["b"] = false, ["c"] = Vector2(0,2), ["d"] = "str"}
 
 Table:Pairs(T,function(i,Key,Value)
-	Print("["..i.."] "..Key.." = "..ToString(Value))
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value))
+end)</code>`
+	},{
+		"name": "Table:PairsInvert",
+		"params": [["Таблица","t"],["Функция","f",[["Индекс","i"],["Ключ","o"],["Переменная","o"]]]],
+		"description": `Разбирает 'Таблица' по компонентам (индекс (позиция элемента), ключ, переменная) и вызывает их в 'Функция' в обратном порядке`,
+		"example":
+`<code>local T = {"a","b","c","d","f","g"}
+
+Table:PairsInvert(T,function(i,Key,Value)
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value))
+end)
+
+T = {["a"] = true, ["b"] = false, ["c"] = Vector2(0,2), ["d"] = "str"}
+
+Table:PairsInvert(T,function(i,Key,Value)
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value))
+end)</code>`
+	},{
+		"name": "Table:GetLast",
+		"params": [["Таблица","t"],["Функция","f",[["Индекс","i"],["Ключ","o"],["Переменная","o"]]]],
+		"description": `Получает последний элемент 'Таблица' и вводит его в 'Функция'`,
+		"example":
+`<code>local T = {["a"] = 53, ["c"] = -23, ["b"] = 632}
+Table:GetLast(T,function(i,Key,Value)
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value))
+end)
+
+T = {}
+Table:GetLast(T,function(i,Key,Value)
+	Print("["..i.."] "..ToString(Key).." = "..ToString(Value)) --Эта функция не будет вызвана, потому-что таблица пустая
 end)</code>`
 	},{
 		"name": "GameObject:GetName",
@@ -1190,6 +1272,11 @@ for a = 0, total do
     
     GameObject:SetPosition(i,Vector2((a-(total/2))*2.5,0))
 end</code>`
+	},{
+		"name": "OS:GetSystemLanguage",
+		"params": [],
+		"description": "Получить главный язык системы",
+		"example": `<code>Print(OS:GetSystemLanguage())</code> Поскольку у меня стоит Русский язык как главный, у меня вернуло <code>Russian</code>`
 	}
 ];
 
