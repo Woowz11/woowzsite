@@ -555,7 +555,7 @@ select{
 	
 	GenerateTableCustom("Шрифты",WoowzsiteSourceFonts,
 	`<div style="font-size:2em; padding:5px; text-align: justify;">`,
-	`<div style="width:99.5%; display:inline-block; background-color:rgb(250,250,250); border-radius: 20px; padding:5px; margin-bottom:5px; cursor:default;"><center style="margin-bottom:10px;"><font>{s2}</font><br><button onclick="ChangeFont('{s}');">Установить шрифт</button></center><font style="font-family:{s}; padding:5px; word-wrap: break-word;">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ<br>аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ<br>0123456789+-=_(){}[]<>!?~@#№$.,:;%^&*"\`/|\\'<br>·•°™©®§±µ«»€…</font></div> `,
+	`<div style="width:99.5%; display:inline-block; background-color:rgb(250,250,250); border-radius: 20px; padding:5px; margin-bottom:5px; cursor:default;"><center style="margin-bottom:10px;"><font>{s2}</font><br><button onclick="ChangeFont('{s}');">Установить шрифт</button></center><font style="font-family:{s}; padding:5px; word-wrap: break-word;">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ<br>аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ<br>0123456789+-=_(){}[]<>!?~@#№$.,:;%^&*"\`/|\\'<br>·•°™©®§±µ«»€█§¿¢£…</font></div> `,
 	`</div>`,function(src){ var stl = document.createElement("style"); stl.innerHTML = "@font-face{ font-family:\""+src.split("/")[1].split(".")[0]+"\"; src: url(\""+src+"\")format('opentype'); }"; document.head.appendChild(stl); },function(src){ return src.split("/")[1].split(".")[0]; });
 	
 	GenerateTableSites();

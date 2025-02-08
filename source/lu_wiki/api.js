@@ -161,6 +161,29 @@ Game:Update(function()
 	i = i + 1
 end)</code>`
 	},{
+		"name": "Storage:SaveFunction",
+		"params": [["Название функции","s"],["Функция","f"]],
+		"description":
+`Сохранить 'Функция' по пути {ID мода где вызвали функцию}:'Название функции'
+Если вы получаете таблицу где в переменных есть объекты (по типу Vector2, Color, ...)
+Тогда таблицу засуньте ещё в Deserialize функцию`,
+		"example": 
+`<code>function Test(V)
+	V = Deserialize(V)
+	Print(V[1] + V[2])
+end
+
+Storage:SaveFunction("Test2",Test)</code> Смотрите продолжения кода в Storage:RunFunction`
+	},{
+		"name": "Storage:RunFunction",
+		"params": [["Путь до функции","r"],["Переменные","t"]],
+		"description":
+`Вызвать функциию по 'Путь до функции' с переменными 'Переменные'
+Если вы передаёте таблицу где в переменных есть объекты (по типу Vector2, Color, ...)
+Тогда таблицу засуньте ещё в Serialize функцию`,
+		"example": 
+`<code>Storage:RunFunction("VanillaLib:Test2",Serialize({1,2}))</code> Прошлая часть кода в Storage:SaveFunction`
+	},{
 		"name": "Abs",
 		"params": [["Число","d"]],
 		"return": ["Результат","d"],

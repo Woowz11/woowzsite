@@ -1,6 +1,6 @@
 @font-face {
     font-family: "CFont";
-    src: url("minecraft.ttf") format('opentype'); /*Надо будет свой шрифт сделать*/
+    src: url("minecraft.ttf") format('opentype');
 }
 
 button{

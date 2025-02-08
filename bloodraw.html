@@ -1,15 +1,26 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
-<!-- Настройки сайта -->
 <title>BloodRaw</title>
-<link rel="icon" type="image/x-icon" href="source\bloodraw\iconblock.ico">
-<!-- HTML сайта -->
+<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
 
 <style>
 html{
 	background-image: url("source/bloodraw/dirt.png");
 	background-size: 64px 64px;
 	image-rendering: pixelated;
+}
+
+body{
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	color: #B0ACA8;
+	text-shadow: 0px 5px 5px black;
+}
+
+select{
+	pointer-events: all;
 }
 
 img{
@@ -19,26 +30,23 @@ img{
 	pointer-events: none;
 }
 
-font{
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	user-select: none;
-	pointer-events: none;
-	color: #B0ACA8;
-	text-shadow: 0px 10px 15px black;
-	-webkit-text-stroke-width: 1px;
-	-webkit-text-stroke-color: #574F46;
+button{
+	pointer-events: all;
 }
 
 a{
-	color: #B7B3A8;
+	color: #9AA171;
 	text-shadow: 0px 10px 15px black;
-	-webkit-text-stroke-width: 1px;
-	-webkit-text-stroke-color: #B0ACA8;
 	text-decoration: none;
+	pointer-events: all;
+}
+
+a:hover{
+	color: #5F6B29;
 }
 </style>
 <link rel="stylesheet" href="source/bloodraw/css.css">
+<script src="vremennaya_papka_bloodraw/pack-constructor.js"></script>
 
 <body>
 
@@ -51,7 +59,33 @@ a{
 <center><font style="font-size: 150%;">Сайт по ресурс паку <b>BloodRaw</b> для Minecraft!</font></center>
 <center><font>Сделано Woowz11 </font><a href="https://github.com/Woowz11/BloodRaw-Minecraft/blob/main/license.txt">License</a></center>
 <center><font>Сайт в разработке!</font></center>
-<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft">Скачать ресурс пак</a></center>
+<center>=----------------------------------------------------=</center>
+<center>Временный конструктор текстур пака</center>
+<center>Выберите версию которую хотите скачать</center>
+<center><select id="version-select"></select></center>
+<center><button id="download">Скачать</button></center>
+<center>=----------------------------------------------------=</center>
 <center><a href="https://woowz11.github.io/woowzsite/bloodraw_skineditor">Сделать скин</a></center>
+<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft">Github</a></center>
 
 </body>
+
+<script>
+const AcceptVersions = Object.keys(PackVersions).reverse();
+const VersionSelector = document.getElementById("version-select");
+AcceptVersions.forEach(V => {
+	const VOE = document.createElement("option");
+	VOE.text = V;
+	VOE.value = V;
+	VersionSelector.appendChild(VOE);
+});
+
+async function ClickDownload(){
+	var SelectedVersion = VersionSelector.options[VersionSelector.selectedIndex].text;
+	await CreatePack({
+		"Version": SelectedVersion,
+		"VersionInfo": PackVersions[SelectedVersion]
+	});
+}
+document.getElementById("download").addEventListener("click",ClickDownload);
+</script>
