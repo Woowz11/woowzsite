@@ -139,7 +139,7 @@ WoowzsiteSourceCats = AddFullnessToTable([
 ],"source/cats/",".png")
 
 WoowzsiteSourceBloodraw = AddFullnessToTable([
-	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png"
+	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png"
 ],"source/bloodraw/","")
 
 WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([

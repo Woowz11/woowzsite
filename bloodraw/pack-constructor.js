@@ -1,3 +1,53 @@
+async function UpdateGithubCommitInfo(){
+	const CommitURL = "https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits?per_page=1";
+	CommitDescription = "Fetch GitHub failed!\nSee for yourself: https://github.com/Woowz11/BloodRaw-Minecraft";
+	try {
+		const R = await fetch(CommitURL);
+		if (!R.ok) {
+            throw new Error(`Failed to fetch commits: ${R.statusText}`);
+        }
+		const D = await R.json();
+		if (D.length > 0) {
+			CommitDescription = D[0].commit.message;
+			var Splitted = CommitDescription.split("\n\n");
+			LastCommitVersion = Splitted[0];
+			CommitDescription = Splitted[1];
+			
+			CommitReleaseDate = D[0].commit.committer.date;
+		} else {
+			throw new Error('No commits found');
+		}
+	} catch(error) {
+		console.error('Error fetching commit message:', error);
+		LastCommitVersion = "Unknown";
+	}
+}
+
+function CalculateTimeDifference(OneTime){
+	const StartTime = new Date(OneTime);
+	const EndTime = new Date();
+
+	const TimeDiff = EndTime - StartTime;
+	
+	var Days  = Math.floor(TimeDiff / (1000 * 60 * 60 * 24));
+	var Years = Math.floor(Days / 365);
+	Days = Days - Years*365;
+    var Hours = Math.floor((TimeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+	return (Years>0?Years+" "+(Years==1?"год":(Years<=4?"года":"лет"))+", ":"")+Days+" "+(Days==1?"день":(Days<=4&&Days>0?"дня":"дней"))+", "+Hours+" "+(Hours==1?"час":(Hours<=4&&Hours>0?"часа":"часов"));
+}
+
+async function ApplyInformationToBloodrawHTML(){
+	await UpdateGithubCommitInfo();
+	document.getElementById("bloodraw-version").innerHTML = LastCommitVersion;
+	document.getElementById("bloodraw-description").innerHTML = CommitDescription;
+	var UpdatePainting = await GetIDTexture("painting","update");
+	document.getElementById("bloodraw-painting").src = await LoadImageAB_GetURL(UpdatePainting);
+	document.getElementById("bloodraw-releasedate").innerHTML = "Времени с обновления: "+CalculateTimeDifference(CommitReleaseDate);
+	
+	document.getElementById("bloodraw-commits").innerHTML = "Обновлений: "+LastCommitVersion.replaceAll(".","");
+	document.getElementById("bloodraw-age").innerHTML = "Возраст: "+CalculateTimeDifference("2023-07-14T13:00:42Z");
+}
+
 var PackConstructorScriptsLoaded = false;
 
 async function AddScript(url,onloadfunc){
@@ -33,10 +83,13 @@ const LoadThatScripts = [
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/guis.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/environments.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/fonts.js",
-	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/paintings.js"
+	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/paintings.js",
+	
+	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/assets/textures.js"
 ];
 
 var ResourcePackInfo = {};
+var ResourcePackInfoAssets = {};
 
 var PackConstructorScriptsLoaded_Total = 0;
 function CheckScriptLoading(){
@@ -57,12 +110,55 @@ function CheckScriptLoading(){
 		ResourcePackInfo["font"]        = ResourcePackInfo_Fonts;
 		ResourcePackInfo["painting"]    = ResourcePackInfo_Paintings;
 		
+		function AddAssets(PackAssets){
+			for (const key in PackAssets) {
+				if (PackAssets.hasOwnProperty(key)) {
+					if (ResourcePackInfoAssets.hasOwnProperty(key)) {
+						ResourcePackInfoAssets[key] = ResourcePackInfoAssets[key].concat(PackAssets[key]);
+					} else {
+						ResourcePackInfoAssets[key] = PackAssets[key];
+					}
+				}
+			}
+		}
+		
+		AddAssets(ResourcePackInfo_AssetsTextures);
+		
+		ApplyInformationToBloodrawHTML();
+		
 		console.log("Scripts loaded!");
 	}
 }
 LoadThatScripts.forEach(src => AddScript(src,CheckScriptLoading));
 
 /* ================================================================================================================================================ */
+
+/*
+
+
+Текстур паки
+0  = Alpha 1.2.6
+1  = Beta 1.2
+2  = Beta 1.3
+3  = Beta 1.4
+4  = Beta 1.5
+5  = Beta 1.6
+6  = Beta 1.7
+7  = Beta 1.8
+8  = 1.0
+9  = 1.1
+10 = 1.2.1
+11 = 1.3.1
+12 = 1.4.2
+13 = 1.5.2
+
+Ресурс паки
+0  = 1.6.4
+1  = 1.7.10
+2  = 1.8
+3  = 1.9
+
+*/
 
 PackVersions = {};
 PackVersions["Alpha 1.2.6"] = {
@@ -120,14 +216,18 @@ PackVersions["1.5.2"]["Texture ID"] = 13;
 
 PackVersions["1.6.4"] = { ...PackVersions["1.5.2"] };
 PackVersions["1.6.4"]["ThatTexturePack"] = false;
+PackVersions["1.6.4"]["Texture ID"] = 0;
 PackVersions["1.6.4"]["Pack Format"] = 1;
 
 PackVersions["1.7.10"] = { ...PackVersions["1.6.4"] };
+PackVersions["1.7.10"]["Texture ID"] = 1;
 
 PackVersions["1.8"] = { ...PackVersions["1.7.10"] };
+PackVersions["1.8"]["Texture ID"] = 2;
 
 PackVersions["1.9"] = { ...PackVersions["1.8"] };
 PackVersions["1.9"]["Pack Format"] = 2;
+PackVersions["1.9"]["Texture ID"] = 3;
 
 ZipResult = null;
 SelectedVersion = null;
@@ -137,13 +237,16 @@ CreatingPack = false;
 ThatFunVersion = false;
 
 LastCommitVersion = null;
+CommitDescription = null;
+CommitReleaseDate = null;
 
 /* ==== Приколы ==== */
 
 FUN_RandomTerrainBlocks = false;
 FUN_BigTerrain = false; /* Модификатор FUN_RandomTerrainBlocks */
+FUN_ApplyToAllThatGradient = "8colors";
 
-if(FUN_RandomTerrainBlocks||FUN_BigTerrain){
+if(FUN_RandomTerrainBlocks||FUN_BigTerrain||FUN_ApplyToAllThatGradient){
 	ThatFunVersion = true;
 }
 
@@ -204,9 +307,13 @@ function GetImageFromURL(src){
     });
 }
 
-async function LoadImageAB(AB){
+async function LoadImageAB_GetURL(AB){
 	const blob = new Blob([AB], { type: "image/png" });
-	const url = URL.createObjectURL(blob);
+	return await URL.createObjectURL(blob);
+}
+
+async function LoadImageAB(AB){
+	const url = await LoadImageAB_GetURL(AB);
 	try {
         return await GetImageFromURL(url);
     } finally {
@@ -435,6 +542,10 @@ async function ApplyTextureOption(IMG,N,Base,ID,V,V2,V3,V4){
 		return await OverlayTexture(IMG,await LoadIDTexture(Base,V),V2,V3);
 	}
 	
+	if(N=="Special_Update"){
+		return await OverlayTexture(IMG,await LoadImage("resources/textures/update.png"),1,1);
+	}
+	
 	console.log(`Texture option ${N} (${V}) for image ${IMG} not found! (when create ${Base} ${ID})`);
 	return IMG;
 }
@@ -447,6 +558,9 @@ async function GetIDTexture(Base,ID){
 	var T = Info["Texture"];
 	var AB = await ReadImage("resources/"+T["Path"],T["x"],T["y"],T["w"],T["h"]);
 	var Extra = Info["Extra"];
+	if(FUN_ApplyToAllThatGradient!=""&&Base!="gradient"){
+		Extra.push(["Gradient",FUN_ApplyToAllThatGradient]);
+	}
 	var Img = await LoadImageAB(AB);
 	for (let i = 0; i < Extra.length; i++) {
 		var pair    = Extra[i];
@@ -590,7 +704,7 @@ async function CreateTerrainPNG(){
 			await AddTile(12,2,"furnace");
 			await AddTile(13,2,"cobblestone_side");
 			await AddTile(14,2,"dispenser");
-			await AddTile(15,2,"fire2");
+			await AddTile(15,2,"fire_2");
 			
 			await AddTile(0 ,3,"sponge");
 			await AddTile(1 ,3,"glass");
@@ -604,7 +718,7 @@ async function CreateTerrainPNG(){
 			await AddTile(9 ,3,(TID<4?"":"lightdetector_day"));
 			await AddTile(10,3,(TID<4?"":"lightdetector"));
 			await AddTile(11,3,"craftingtable_side");
-			await AddTile(12,3,"craftingtable_side2");
+			await AddTile(12,3,"craftingtable_side_2");
 			await AddTile(13,3,"furnace_on");
 			await AddTile(14,3,"cobblestone_top");
 			await AddTile(15,3,"spruce_sapling");
@@ -1016,7 +1130,7 @@ async function CreateItemsPNG(f){
 		await AddItem(7 ,10,"minecart_furnace");
 		await AddItem(8 ,10,"coal_wood");
 		await AddItem(9 ,10,"spawn_overlay");
-		await AddItem(10,10,"");
+		await AddItem(10,10,"ruby");
 		await AddItem(11,10,"bottle_xp");
 		await AddItem(12,10,"brewingstand");
 		await AddItem(13,10,"magma");
@@ -1114,7 +1228,7 @@ async function CreateItemsPNG(f){
 	}
 }
 
-async function CreateParticlesPNG(f){
+async function CreateParticlesPNG(f,onlyClouds){
 	try {
 		var C = CreateCanvas(128, 128);
 		var c = C.getContext("2d");
@@ -1137,97 +1251,99 @@ async function CreateParticlesPNG(f){
 		await AddParticle(6 ,0,"cloud_6");
 		await AddParticle(7 ,0,"cloud");
 		
-		await AddParticle(0 ,1,"watersplash_3");
-		await AddParticle(1 ,1,"watersplash_1");
-		await AddParticle(2 ,1,"watersplash_2");
-		await AddParticle(3 ,1,"watersplash");
-		await AddParticle(4 ,1,"watersplash_4");
-		await AddParticle(5 ,1,"watersplash_5");
-		await AddParticle(6 ,1,"watersplash_6");
-		
-		await AddParticle(0 ,2,"bubble");
-		await AddParticle(1 ,2,"float");
-		await AddParticle(4 ,2,"flash");
-		
-		await AddParticle(0 ,3,"fire");
-		await AddParticle(1 ,3,"magma");
-		
-		await AddParticle(0 ,4,"note");
-		await AddParticle(1 ,4,"crit");
-		await AddParticle(2 ,4,"crit_magic");
-		await AddParticle(3 ,4,"damage");
-		
-		await AddParticle(0 ,5,"heart");
-		await AddParticle(1 ,5,"angry");
-		await AddParticle(2 ,5,"happy");
-		
-		await AddParticle(0 ,7,"drop");
-		await AddParticle(1 ,7,"drop_falling");
-		await AddParticle(2 ,7,"drop_falled");
-		
-		await AddParticle(0 ,8,"potion_0");
-		await AddParticle(1 ,8,"potion");
-		await AddParticle(2 ,8,"potion_2");
-		await AddParticle(3 ,8,"potion_3");
-		await AddParticle(4 ,8,"potion_4");
-		await AddParticle(5 ,8,"potion_5");
-		await AddParticle(6 ,8,"potion_6");
-		await AddParticle(7 ,8,"potion_7");
-		
-		await AddParticle(0 ,9,"potion_instant_0");
-		await AddParticle(1 ,9,"potion_instant_1");
-		await AddParticle(2 ,9,"potion_instant_2");
-		await AddParticle(3 ,9,"potion_instant_3");
-		await AddParticle(4 ,9,"potion_instant_4");
-		await AddParticle(5 ,9,"potion_instant_5");
-		await AddParticle(6 ,9,"potion_instant_6");
-		await AddParticle(7 ,9,"potion_instant");
-		
-		await AddParticle(0 ,10,"firework_0");
-		await AddParticle(1 ,10,"firework_1");
-		await AddParticle(2 ,10,"firework_2");
-		await AddParticle(3 ,10,"firework_3");
-		await AddParticle(4 ,10,"firework");
-		await AddParticle(5 ,10,"firework_5");
-		await AddParticle(6 ,10,"firework_6");
-		await AddParticle(7 ,10,"firework_7");
-		
-		await AddParticle(0 ,11,"endrod_0");
-		await AddParticle(1 ,11,"endrod_1");
-		await AddParticle(2 ,11,"endrod_2");
-		await AddParticle(3 ,11,"endrod_3");
-		await AddParticle(4 ,11,"endrod_4");
-		await AddParticle(5 ,11,"endrod_5");
-		await AddParticle(6 ,11,"endrod_6");
-		await AddParticle(7 ,11,"endrod");
-		
-		await AddParticle(1 ,13,"enchantmenttable_up");
-		await AddParticle(2 ,13,"enchantmenttable_down");
-		await AddParticle(3 ,13,"enchantmenttable_jetta");
-		await AddParticle(4 ,13,"enchantmenttable_wotta");
-		await AddParticle(5 ,13,"enchantmenttable_bomb");
-		await AddParticle(6 ,13,"enchantmenttable_zepta");
-		await AddParticle(7 ,13,"enchantmenttable_blocky");
-		await AddParticle(8 ,13,"enchantmenttable_void");
-		await AddParticle(9 ,13,"enchantmenttable_singular");
-		await AddParticle(10,13,"enchantmenttable_eye");
-		await AddParticle(11,13,"enchantmenttable_spin");
-		await AddParticle(12,13,"enchantmenttable_cube");
-		await AddParticle(13,13,"enchantmenttable_func");
-		await AddParticle(14,13,"enchantmenttable_lambda");
-		await AddParticle(15,13,"enchantmenttable_hole");
-		
-		await AddParticle(0 ,14,"enchantmenttable_right");
-		await AddParticle(1 ,14,"enchantmenttable_left");
-		await AddParticle(2 ,14,"enchantmenttable_valve");
-		await AddParticle(3 ,14,"enchantmenttable_jj");
-		await AddParticle(4 ,14,"enchantmenttable_dot");
-		await AddParticle(5 ,14,"enchantmenttable_line");
-		await AddParticle(6 ,14,"enchantmenttable_selection");
-		await AddParticle(7 ,14,"enchantmenttable_smile");
-		await AddParticle(8 ,14,"enchantmenttable_del");
-		await AddParticle(9 ,14,"enchantmenttable_pc");
-		await AddParticle(10,14,"enchantmenttable_minecraft");
+		if(onlyClouds!=true){
+			await AddParticle(0 ,1,"watersplash_3");
+			await AddParticle(1 ,1,"watersplash_1");
+			await AddParticle(2 ,1,"watersplash_2");
+			await AddParticle(3 ,1,"watersplash");
+			await AddParticle(4 ,1,"watersplash_4");
+			await AddParticle(5 ,1,"watersplash_5");
+			await AddParticle(6 ,1,"watersplash_6");
+			
+			await AddParticle(0 ,2,"bubble");
+			await AddParticle(1 ,2,"float");
+			await AddParticle(4 ,2,"flash");
+			
+			await AddParticle(0 ,3,"fire");
+			await AddParticle(1 ,3,"magma");
+			
+			await AddParticle(0 ,4,"note");
+			await AddParticle(1 ,4,"crit");
+			await AddParticle(2 ,4,"crit_magic");
+			await AddParticle(3 ,4,"damage");
+			
+			await AddParticle(0 ,5,"heart");
+			await AddParticle(1 ,5,"angry");
+			await AddParticle(2 ,5,"happy");
+			
+			await AddParticle(0 ,7,"drop");
+			await AddParticle(1 ,7,"drop_falling");
+			await AddParticle(2 ,7,"drop_falled");
+			
+			await AddParticle(0 ,8,"potion_0");
+			await AddParticle(1 ,8,"potion");
+			await AddParticle(2 ,8,"potion_2");
+			await AddParticle(3 ,8,"potion_3");
+			await AddParticle(4 ,8,"potion_4");
+			await AddParticle(5 ,8,"potion_5");
+			await AddParticle(6 ,8,"potion_6");
+			await AddParticle(7 ,8,"potion_7");
+			
+			await AddParticle(0 ,9,"potion_instant_0");
+			await AddParticle(1 ,9,"potion_instant_1");
+			await AddParticle(2 ,9,"potion_instant_2");
+			await AddParticle(3 ,9,"potion_instant_3");
+			await AddParticle(4 ,9,"potion_instant_4");
+			await AddParticle(5 ,9,"potion_instant_5");
+			await AddParticle(6 ,9,"potion_instant_6");
+			await AddParticle(7 ,9,"potion_instant");
+			
+			await AddParticle(0 ,10,"firework_0");
+			await AddParticle(1 ,10,"firework_1");
+			await AddParticle(2 ,10,"firework_2");
+			await AddParticle(3 ,10,"firework_3");
+			await AddParticle(4 ,10,"firework");
+			await AddParticle(5 ,10,"firework_5");
+			await AddParticle(6 ,10,"firework_6");
+			await AddParticle(7 ,10,"firework_7");
+			
+			await AddParticle(0 ,11,"endrod_0");
+			await AddParticle(1 ,11,"endrod_1");
+			await AddParticle(2 ,11,"endrod_2");
+			await AddParticle(3 ,11,"endrod_3");
+			await AddParticle(4 ,11,"endrod_4");
+			await AddParticle(5 ,11,"endrod_5");
+			await AddParticle(6 ,11,"endrod_6");
+			await AddParticle(7 ,11,"endrod");
+			
+			await AddParticle(1 ,13,"enchantmenttable_up");
+			await AddParticle(2 ,13,"enchantmenttable_down");
+			await AddParticle(3 ,13,"enchantmenttable_jetta");
+			await AddParticle(4 ,13,"enchantmenttable_wotta");
+			await AddParticle(5 ,13,"enchantmenttable_bomb");
+			await AddParticle(6 ,13,"enchantmenttable_zepta");
+			await AddParticle(7 ,13,"enchantmenttable_blocky");
+			await AddParticle(8 ,13,"enchantmenttable_void");
+			await AddParticle(9 ,13,"enchantmenttable_singular");
+			await AddParticle(10,13,"enchantmenttable_eye");
+			await AddParticle(11,13,"enchantmenttable_spin");
+			await AddParticle(12,13,"enchantmenttable_cube");
+			await AddParticle(13,13,"enchantmenttable_func");
+			await AddParticle(14,13,"enchantmenttable_lambda");
+			await AddParticle(15,13,"enchantmenttable_hole");
+			
+			await AddParticle(0 ,14,"enchantmenttable_right");
+			await AddParticle(1 ,14,"enchantmenttable_left");
+			await AddParticle(2 ,14,"enchantmenttable_valve");
+			await AddParticle(3 ,14,"enchantmenttable_jj");
+			await AddParticle(4 ,14,"enchantmenttable_dot");
+			await AddParticle(5 ,14,"enchantmenttable_line");
+			await AddParticle(6 ,14,"enchantmenttable_selection");
+			await AddParticle(7 ,14,"enchantmenttable_smile");
+			await AddParticle(8 ,14,"enchantmenttable_del");
+			await AddParticle(9 ,14,"enchantmenttable_pc");
+			await AddParticle(10,14,"enchantmenttable_minecraft");
+		}
 
 		await AddCanvas(f,"particles.png",C);
 	} catch (error) {
@@ -1297,11 +1413,6 @@ async function CreatePaintingsPNG(f){
 async function CreateTexturePack(){
 	var TID = VersionInfo["Texture ID"];
 	
-	if (VersionInfo["Terrain Atlas"] > -1 && TID<13){
-		await CreateTerrainPNG();
-		console.log("Terrain created!");
-	}
-	
 	var Art = PackFolder.folder("art");
 	var Armor = PackFolder.folder("armor");
 	var Environment = PackFolder.folder("environment");
@@ -1310,12 +1421,40 @@ async function CreateTexturePack(){
 	var Item = PackFolder.folder("item");
 	var Misc = PackFolder.folder("misc");
 	var Mob = PackFolder.folder("mob");
-	var Terrain = PackFolder.folder("terrain");
+	var Terrain = (TID<13?PackFolder.folder("terrain"):null);
 	var Title = PackFolder.folder("title");
 	
 	if(TID<13){
+		if (VersionInfo["Terrain Atlas"] > -1){
+			await CreateTerrainPNG();
+			console.log("Terrain created!");
+		}
+		
 		await CreateItemsPNG(Gui);
 		console.log("Items created!");
+	}else{
+		var Textures = PackFolder.folder("textures");
+		var Blocks = Textures.folder("blocks");
+		var Items = Textures.folder("items");
+		var MinecraftAssets = ResourcePackInfoAssets["Minecraft"];
+		for(const Resource of MinecraftAssets){
+			if(Resource[2]!=false||Resource[2]==true){
+				var Paths = Resource[1];
+				if(Paths[0][0] == -1){
+					var Path = Paths[0][1];
+					var Asset = Resource[0];
+					var AssetType = Asset[0];
+					var AssetFile = Asset[1];
+					var PathSplit = Path.split('/');
+					var SelectedFolder = (PathSplit[0]=="blocks"?Blocks:Items);
+					var FileName = PathSplit[1];
+					console.log("Loading: "+AssetFile[1]);
+					if(AssetType=="texture"){
+						AddFile(SelectedFolder,FileName,await GetIDTexture(AssetFile[0],AssetFile[1]));
+					}
+				}
+			}
+		}
 	}
 	
 	async function L(f,n,b,p){
@@ -1324,35 +1463,41 @@ async function CreateTexturePack(){
 		AddFile(f,n,AB);
 	}
 	
-	await CreateParticlesPNG((TID<3?PackFolder:Gui));
-	await CreatePaintingsPNG(Art);
-	await L(Environment,"clouds.png","environment","clouds");
-	await L(Environment,"rain.png","environment","rain");
-	await L(Environment,"snow.png","environment","snow");
-	await L(Font,"default.png","font","ascii");
-	await L(Gui,"container.png","gui","chest");
-	await L(Gui,"background.png","gui","background");
-	await L(Gui,"crafting.png","gui","craftingtable");
-	await L(Gui,"furnace.png","gui","furnace");
-	await L(Gui,"gui.png","gui","widgets");
-	await L(Gui,"icons.png","gui","icons");
-	await L(Gui,"inventory.png","gui","inventory");
-	await L(Gui,"unknown_pack.png","gui","unknown");
-	if(TID<13){
-		await L(Terrain,"moon.png","environment","moon");
-		await L(Terrain,"sun.png","environment","sun");
+	await CreateParticlesPNG(PackFolder);
+	if(TID>=3){
+		await CreateParticlesPNG(Gui,true);
 	}
-	await L(Title,"mojang.png","gui","loadingscreen_white");
 	await L(Armor,"chain_1.png","armor","chain");
 	await L(Armor,"chain_2.png","armor","chain_pants");
-	await L(Armor,"cloth_1.png","armor","leather");
-	await L(Armor,"cloth_2.png","armor","leather_pants");
+	if(TID<12){
+		await L(Armor,"cloth_1.png","armor","leather_old");
+		await L(Armor,"cloth_2.png","armor","leather_pants_old");
+	}else{
+		await L(Armor,"cloth_1.png","armor","leather");
+		await L(Armor,"cloth_2.png","armor","leather_pants");
+	}
 	await L(Armor,"diamond_1.png","armor","diamond");
 	await L(Armor,"diamond_2.png","armor","diamond_pants");
 	await L(Armor,"gold_1.png","armor","gold");
 	await L(Armor,"gold_2.png","armor","gold_pants");
 	await L(Armor,"iron_1.png","armor","iron");
 	await L(Armor,"iron_2.png","armor","iron_pants");
+	await CreatePaintingsPNG(Art);
+	await L(Environment,"clouds.png","environment","clouds");
+	await L(Environment,"rain.png","environment","rain");
+	await L(Environment,"snow.png","environment","snow");
+	await L(Font,"default.png","font","ascii");
+	await L(Gui,"background.png","gui","background");
+	await L(Gui,"container.png","gui","chest");
+	await L(Gui,"crafting.png","gui","craftingtable");
+	await L(Gui,"furnace.png","gui","furnace");
+	await L(Gui,"gui.png","gui","widgets");
+	await L(Gui,"icons.png","gui","icons");
+	await L(Gui,"inventory.png","gui","inventory_alpha");
+	if(TID<7){
+		await L(Gui,"logo.png","gui","title_line");
+	}
+	await L(Gui,"unknown_pack.png","gui","unknown");
 	await L(Item,"arrows.png","entity","arrow");
 	await L(Item,"boat.png","entity","boat");
 	await L(Item,"cart.png","entity","minecart");
@@ -1360,7 +1505,6 @@ async function CreateTexturePack(){
 	await L(Misc,"dial.png","other","dial");
 	await L(Misc,"foliagecolor.png","environment","colormap_foliage");
 	await L(Misc,"grasscolor.png","environment","colormap_grass");
-	await L(Misc,"watercolor.png","environment","colormap_water");
 	await L(Misc,"pumpkinblur.png","gui","overlay_pumpkin");
 	await L(Misc,"shadow.png","particle","shadow");
 	await L(Misc,"vignette.png","other","vignette");
@@ -1389,11 +1533,17 @@ async function CreateTexturePack(){
 	}else{
 		await L(Mob,"zombie.png","mob","zombie_old");
 	}
-	
-	if(TID>=2){
+	if(TID<13){
+		await L(Terrain,"moon.png","environment","moon");
+		await L(Terrain,"sun.png","environment","sun");
+	}
+	await L(Title,"mojang.png","gui","loadingscreen_white");
+	/* добавить сплеши */
+	if(TID>=1){
 		await L(Gui,"trap.png","gui","dispenser");
 		await L(Mob,"squid.png","mob","squid");
-		if(TID>=4){
+		if(TID>=3){
+			var Achievement = PackFolder.folder("achievement");
 			await L(Mob,"wolf.png","mob","wolf");
 			await L(Mob,"wolf_angry.png","mob","wolf_angry");
 			if(TID>=12){
@@ -1402,23 +1552,24 @@ async function CreateTexturePack(){
 				await L(Mob,"wolf_tame.png","mob","wolf_pet_old");
 			}
 			await L(Title,"mclogo.png","gui","title_default");
-			if(TID>=5){
-				var Achievement = PackFolder.folder("achievement");
+			if(TID>=4){
+				await L(Armor,"power.png","mob","creeper_power");
 				await L(Achievement,"bg.png","gui","achievements_old");
 				await L(Gui,"slot.png","gui","stats");
-				if(TID>=6){
-					await L(Armor,"power.png","mob","creeper_power");
+				if(TID>=5){
 					await L(Misc,"mapbg.png","gui","map");
 					await L(Misc,"mapicons.png","gui","map_icons_old");
-					if(TID>=7){
+					await L(Misc,"watercolor.png","environment","colormap_water");
+					if(TID>=6){
 						await L(Mob,"silverfish.png","mob","silverfish");
-						if(TID>=8){
+						if(TID>=7){
+							/* текстура света, light_normal в environment */
 							await L(Gui,"allitems.png","gui",(TID>=11?"creative_tabs":"creative_old"));
+							await L(Gui,"crash_logo.png","gui","crash");
 							await L(Item,"chest.png","entity","chest");
 							await L(Item,"largechest.png","entity","chest_double");
 							await L(Item,"xporb.png","particle","xp");
 							await L(Misc,"explosion.png","particle","explosion");
-							await L(Misc,"particlefield.png","environment","endportal");
 							await L(Mob,"cavespider.png","mob","spider_cave");
 							await L(Mob,"enderman.png","mob","enderman");
 							await L(Mob,"enderman_eyes.png","mob","enderman_eyes");
@@ -1429,22 +1580,22 @@ async function CreateTexturePack(){
 							await L(TitleBG,"panorama3.png","other","panorama_mainmenu_3");
 							await L(TitleBG,"panorama4.png","other","panorama_mainmenu_4");
 							await L(TitleBG,"panorama5.png","other","panorama_mainmenu_5");
-							if(TID>=9){
-								await L(Gui,"brewing_stand.png","gui","brewingstand");
-								await L(Gui,"crash_logo.png","gui","crash");
+							if(TID>=8){
+								/* добавлен шрифт alternate */
+								/* добавлены иконки эффектов в инвенторе */
+								/* появились кредиты, победный текст и т.д */
+								await L(Gui,"alchemy.png","gui","brewingstand");
 								await L(Gui,"enchant.png","gui","enchantmenttable");
-								await L(Gui,"logo.png","gui","title_line");
 								await L(Item,"book.png","particle","book");
 								await L(Misc,"glint.png","other","enchant");
 								await L(Misc,"tunnel.png","other","sky_end");
+								await L(Misc,"particlefield.png","environment","endportal");
 								var EnderDragon = Mob.folder("enderdragon");
 								await L(EnderDragon,"beam.png","particle","beam_endcrystal");
 								await L(EnderDragon,"crystal.png","entity","endcrystal");
 								await L(EnderDragon,"ender.png","mob","enderdragon");
 								await L(EnderDragon,"ender_eyes.png","mob","enderdragon_eyes");
-								await L(Mob,"fire.png","mob","blaze");
-								await L(Mob,"lava.png","mob","magma");
-								await L(Mob,"redcow.png","mob","cow_red");
+								await L(EnderDragon,"shuffle.png","mob","enderdragon_exploding");
 								var Villager = Mob.folder("villager");
 								await L(Villager,"butcher.png","mob","villager_old_butcher");
 								await L(Villager,"farmer.png","mob","villager_old_farmer");
@@ -1452,44 +1603,55 @@ async function CreateTexturePack(){
 								await L(Villager,"priest.png","mob","villager_old_priest");
 								await L(Villager,"smith.png","mob","villager_old_smith");
 								await L(Villager,"villager.png","mob","villager_old");
+								await L(Mob,"fire.png","mob","blaze");
+								await L(Mob,"lava.png","mob","magma");
+								await L(Mob,"redcow.png","mob","cow_red");
 								if(TID<13){
 									await L(Terrain,"moon_phases.png","environment","moon_phases");
 								}
-								if(TID>=11){
-									await L(Mob,"ozelot.png","mob","ocelot");
-									await L(Mob,"cat_black.png","mob","cat_black");
-									await L(Mob,"cat_red.png","mob","cat");
-									await L(Mob,"cat_siamese.png","mob","cat_siamese");
-									await L(Mob,"iron_golem.png","mob","golem_iron");
-									await L(Gui,"book.png","gui","book");
-									var CreativeInv = Gui.folder("creative_inv");
-									await L(CreativeInv,"list_items.png","gui","creative");
-									await L(CreativeInv,"search.png","gui","creative_search");
-									await L(CreativeInv,"survival_inv.png","gui","creative_inventory");
-									await L(Gui,"demo_bg.png","gui","demo");
-									await L(Gui,"trading.png","gui","villager");
-									await L(Item,"enderchest.png","entity","chest_ender");
-									await L(Mob,"snowman.png","mob","golem_snow");
-									if(TID>=12){
-										await L(Mob,"witherarmor.png","mob","wither_power");
-										await L(Mob,"wither.png","mob","wither");
-										await L(Mob,"wither_invul.png","mob","wither_invulnerable");
-										await L(Misc,"beam.png","particle","beam");
-										await L(Mob,"bat.png","mob","bat");
-										await L(Mob,"skeleton_wither.png","mob","skeleton_wither");
-										await L(Villager,"witch.png","mob","witch");
-										await L(Mob,"wolf_collar.png","mob","wolf_pet_overlay");
-										await L(Mob,"zombie_villager.png","mob","zombie_villager");
-										if(TID>=13){
-											await L(Environment,"moon.png","environment","moon");
-											await L(Environment,"moon_phases.png","environment","moon_phases");
-											await L(Environment,"sun.png","environment","sun");
-											await L(Gui,"hopper.png","gui","hopper");
-											await L(Gui,"repair.png","gui","anvil");
-											await L(Item,"trap_small.png","entity","chest_trap");
-											await L(Item,"trap_large.png","entity","chest_trap_double");
-											await L(Item,"xmaschest.png","entity","chest_xmas");
-											await L(Item,"largexmaschest.png","entity","chest_xmas_double");
+								if(TID>=9){
+									/* добавили юникод */
+									if(TID>=10){
+										await L(Mob,"ozelot.png","mob","ocelot");
+										await L(Mob,"cat_black.png","mob","cat_black");
+										await L(Mob,"cat_red.png","mob","cat");
+										await L(Mob,"cat_siamese.png","mob","cat_siamese");
+										await L(Mob,"villager_golem.png","mob","golem_iron");
+										await L(Mob,"snowman.png","mob","golem_snow");
+										if(TID>=11){
+											var CreativeInv = Gui.folder("creative_inv");
+											await L(CreativeInv,"list_items.png","gui","creative");
+											await L(CreativeInv,"search.png","gui","creative_search");
+											await L(CreativeInv,"survival_inv.png","gui","creative_inventory");
+											await L(Gui,"book.png","gui","book");
+											await L(Gui,"demo_bg.png","gui","demo");
+											await L(Gui,"trading.png","gui","villager");
+											await L(Item,"enderchest.png","entity","chest_ender");
+											if(TID>=12){
+												await L(Armor,"cloth_1_b.png","armor","leather_overlay");
+												await L(Armor,"cloth_2_b.png","armor","leather_pants_overlay");
+												await L(Armor,"witherarmor.png","mob","wither_power");
+												await L(Misc,"beam.png","particle","beam");
+												await L(Villager,"witch.png","mob","witch");
+												await L(Mob,"bat.png","mob","bat");
+												await L(Mob,"skeleton_wither.png","mob","skeleton_wither");
+												await L(Mob,"wither.png","mob","wither");
+												await L(Mob,"wither_invul.png","mob","wither_invulnerable");
+												await L(Mob,"wolf_collar.png","mob","wolf_pet_overlay");
+												await L(Mob,"zombie_villager.png","mob","zombie_villager");
+												if(TID>=13){
+													await L(Environment,"moon.png","environment","moon");
+													await L(Environment,"moon_phases.png","environment","moon_phases");
+													await L(Environment,"sun.png","environment","sun");
+													await L(Gui,"hopper.png","gui","hopper");
+													await L(Gui,"repair.png","gui","anvil");
+													var Chests = Item.folder("chests");
+													await L(Chests,"trap_small.png","entity","chest_trap");
+													await L(Chests,"trap_large.png","entity","chest_trap_double");
+													await L(Item,"xmaschest.png","entity","chest_xmas");
+													await L(Item,"largexmaschest.png","entity","chest_xmas_double");
+												}
+											}
 										}
 									}
 								}
@@ -1514,26 +1676,7 @@ async function CreatePack(PackInfo) {
 	}
 	CreatingPack = true;
 	
-	const CommitURL = "https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits?per_page=1";
-	var CommitDescription = "Fetch GitHub failed!\nSee for yourself: https://github.com/Woowz11/BloodRaw-Minecraft";
-	try {
-		const R = await fetch(CommitURL);
-		if (!R.ok) {
-            throw new Error(`Failed to fetch commits: ${R.statusText}`);
-        }
-		const D = await R.json();
-		if (D.length > 0) {
-			var CommitDescription = D[0].commit.message;
-			var Splitted = CommitDescription.split("\n\n");
-			LastCommitVersion = Splitted[0];
-			CommitDescription = Splitted[1];
-		} else {
-			throw new Error('No commits found');
-		}
-	} catch(error) {
-		console.error('Error fetching commit message:', error);
-		LastCommitVersion = "Unknown";
-	}
+	await UpdateGithubCommitInfo();
 	
 	SelectedVersion = PackInfo["Version"];
 	
