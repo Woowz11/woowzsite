@@ -244,9 +244,9 @@ CommitReleaseDate = null;
 
 FUN_RandomTerrainBlocks = false;
 FUN_BigTerrain = false; /* Модификатор FUN_RandomTerrainBlocks */
-FUN_ApplyToAllThatGradient = "8colors";
+FUN_ApplyToAllThatGradient = "";
 
-if(FUN_RandomTerrainBlocks||FUN_BigTerrain||FUN_ApplyToAllThatGradient){
+if(FUN_RandomTerrainBlocks||FUN_BigTerrain||FUN_ApplyToAllThatGradient!=""){
 	ThatFunVersion = true;
 }
 
