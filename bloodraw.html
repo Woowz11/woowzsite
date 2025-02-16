@@ -21,6 +21,7 @@ body{
 	line-height: 1.2;
 	transform: scale(0.9);
     transform-origin: top center;
+	word-spacing: 5px;
 }
 
 select{
@@ -43,6 +44,7 @@ a{
 	text-shadow: 0px 10px 15px black;
 	text-decoration: none;
 	pointer-events: all;
+	cursor: pointer;
 }
 
 a:hover{
@@ -52,9 +54,53 @@ a:hover{
 <link rel="stylesheet" href="source/bloodraw/css.css">
 <script src="bloodraw/pack-constructor.js"></script>
 
-<body>
+<body id="body"></body>
 
-<center><img src="source/bloodraw/logo.png"></center>
+<script>
+const body = document.getElementById("body");
+
+var SelectedVersion = "";
+function SelectVersion(Version){
+	SelectedVersion = Version;
+	document.getElementById("selected-version").innerHTML = SelectedVersion;
+}
+
+async function PageGeneratePack(){
+	var Versions = Object.keys(PackVersions).reverse();
+
+	var VersionsListString = "";
+	
+	for(const Version of Versions){
+		VersionsListString += `<a style="word-spacing: 50px;" onclick="SelectVersion('${Version}');">${Version}</a> `;
+	}
+
+	const Content = `<center><img src="source/bloodraw/logo.png"></center>
+<center>Конструктор текстур пака в разработке!</center>
+<center>Выберите версию которую хотите скачать</center>
+<br>
+<center>Выбрана: <font id="selected-version">...</font></center>
+<br>
+<div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 50vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
+<div style="display: grid; grid-template-columns: repeat(15, 1fr); gap: 10px; justify-content: center; align-items: center; text-align: center;" id="versions">${VersionsListString}</div>
+</div>
+<br>
+<center><button style="transform:scale(2);" id="download">Скачать</button></center>`;
+
+	body.innerHTML = Content;
+	
+	SelectVersion(Versions[0]);
+	
+	async function ClickDownload(){
+		await CreatePack({
+			"Version": SelectedVersion,
+			"VersionInfo": PackVersions[SelectedVersion]
+		});
+	}
+	document.getElementById("download").addEventListener("click",ClickDownload);
+}
+
+async function PageStart(){
+	const Content = `<center><img src="source/bloodraw/logo.png"></center>
 <center><font style="font-size:1.5em;">Сайт по ресурс паку <b>BloodRaw</b> для Minecraft!</font></center>
 <center><font>Создано Woowz11</font></center>
 <center><font>Сайт и ресурс пак в разработке!</font></center>
@@ -71,33 +117,18 @@ a:hover{
 <br>
 <center><img id="bloodraw-painting" src="source/bloodraw/updatepainting.png" style="width:128px;"></center>
 <center>=----------------------------------------------------=</center>
-<center>Временный конструктор текстур пака</center>
-<center>Выберите версию которую хотите скачать</center>
-<center><select id="version-select"></select></center>
-<center><button id="download">Скачать</button></center>
-<center>=----------------------------------------------------=</center>
+<center><a href="https://woowz11.github.io/woowzsite/bloodraw#download">Скачать</a></center>
 <center><a href="https://woowz11.github.io/woowzsite/bloodraw_skineditor">Сделать скин</a></center>
 <center><a href="https://github.com/Woowz11/BloodRaw-Minecraft">Github</a></center>
-<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft/blob/main/license.txt">License</a></center>
+<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft/blob/main/license.txt">License</a></center>`;
 
-</body>
-
-<script>
-const AcceptVersions = Object.keys(PackVersions).reverse();
-const VersionSelector = document.getElementById("version-select");
-AcceptVersions.forEach(V => {
-	const VOE = document.createElement("option");
-	VOE.text = V;
-	VOE.value = V;
-	VersionSelector.appendChild(VOE);
-});
-
-async function ClickDownload(){
-	var SelectedVersion = VersionSelector.options[VersionSelector.selectedIndex].text;
-	await CreatePack({
-		"Version": SelectedVersion,
-		"VersionInfo": PackVersions[SelectedVersion]
-	});
+	body.innerHTML = Content;
+	ApplyInformationToBloodrawHTML();
 }
-document.getElementById("download").addEventListener("click",ClickDownload);
+
+if (window.location.hash === "#download") {
+	PageGeneratePack();
+}else{
+	PageStart();
+}
 </script>

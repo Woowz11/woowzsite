@@ -37,6 +37,9 @@ function CalculateTimeDifference(OneTime){
 }
 
 async function ApplyInformationToBloodrawHTML(){
+	while (!PackConstructorScriptsLoaded) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
 	await UpdateGithubCommitInfo();
 	document.getElementById("bloodraw-version").innerHTML = LastCommitVersion;
 	document.getElementById("bloodraw-description").innerHTML = CommitDescription;
@@ -124,8 +127,6 @@ function CheckScriptLoading(){
 		
 		AddAssets(ResourcePackInfo_AssetsTextures);
 		
-		ApplyInformationToBloodrawHTML();
-		
 		console.log("Scripts loaded!");
 	}
 }
@@ -169,7 +170,13 @@ PackVersions["Alpha 1.2.6"] = {
 	"Transparency Destroy Textures": false
 };
 
-PackVersions["Beta 1.2"] = { ...PackVersions["Alpha 1.2.6"] };
+PackVersions["Beta 1.0"] = { ...PackVersions["Alpha 1.2.6"] };
+
+PackVersions["Beta 1.0.2"] = { ...PackVersions["Beta 1.0"] };
+
+PackVersions["Beta 1.1"] = { ...PackVersions["Beta 1.0.2"] };
+
+PackVersions["Beta 1.2"] = { ...PackVersions["Beta 1.1"] };
 PackVersions["Beta 1.2"]["Terrain Atlas"] = 1; /* Теперь железный, золотой, алмазный блок из 1-й текстуры */
 PackVersions["Beta 1.2"]["Texture ID"] = 1;
 
@@ -187,14 +194,32 @@ PackVersions["Beta 1.6"] = { ...PackVersions["Beta 1.5"] };
 PackVersions["Beta 1.6"]["Texture ID"] = 5;
 PackVersions["Beta 1.6"]["Transparency Destroy Textures"] = true;
 
-PackVersions["Beta 1.7"] = { ...PackVersions["Beta 1.6"] };
+PackVersions["Beta 1.6.1"] = { ...PackVersions["Beta 1.6"] };
+
+PackVersions["Beta 1.6.2"] = { ...PackVersions["Beta 1.6.1"] };
+
+PackVersions["Beta 1.6.3"] = { ...PackVersions["Beta 1.6.2"] };
+
+PackVersions["Beta 1.6.4"] = { ...PackVersions["Beta 1.6.3"] };
+
+PackVersions["Beta 1.6.5"] = { ...PackVersions["Beta 1.6.4"] };
+
+PackVersions["Beta 1.6.6"] = { ...PackVersions["Beta 1.6.5"] };
+
+PackVersions["Beta 1.7"] = { ...PackVersions["Beta 1.6.6"] };
 PackVersions["Beta 1.7"]["Terrain Atlas"] = 3; /* Текстура кровати и торта опущена вниз */
 PackVersions["Beta 1.7"]["Texture ID"] = 6;
 
-PackVersions["Beta 1.8"] = { ...PackVersions["Beta 1.7"] };
+PackVersions["Beta 1.7.2"] = { ...PackVersions["Beta 1.7"] };
+
+PackVersions["Beta 1.7.3"] = { ...PackVersions["Beta 1.7.2"] };
+
+PackVersions["Beta 1.8"] = { ...PackVersions["Beta 1.7.3"] };
 PackVersions["Beta 1.8"]["Texture ID"] = 7;
 
-PackVersions["1.0"] = { ...PackVersions["Beta 1.8"] };
+PackVersions["Beta 1.8.1"] = { ...PackVersions["Beta 1.8"] };
+
+PackVersions["1.0"] = { ...PackVersions["Beta 1.8.1"] };
 PackVersions["1.0"]["Texture ID"] = 8;
 
 PackVersions["1.1"] = { ...PackVersions["1.0"] };
@@ -203,29 +228,83 @@ PackVersions["1.1"]["Texture ID"] = 9;
 PackVersions["1.2.1"] = { ...PackVersions["1.1"] };
 PackVersions["1.2.1"]["Texture ID"] = 10;
 
-PackVersions["1.3.1"] = { ...PackVersions["1.2.1"] };
+PackVersions["1.2.2"] = { ...PackVersions["1.2.1"] };
+
+PackVersions["1.2.3"] = { ...PackVersions["1.2.2"] };
+
+PackVersions["1.2.4"] = { ...PackVersions["1.2.3"] };
+
+PackVersions["1.2.5"] = { ...PackVersions["1.2.4"] };
+
+PackVersions["1.3.1"] = { ...PackVersions["1.2.5"] };
 PackVersions["1.3.1"]["Texture ID"] = 11;
 
-PackVersions["1.4.2"] = { ...PackVersions["1.3.1"] };
+PackVersions["1.3.2"] = { ...PackVersions["1.3.1"] };
+
+PackVersions["1.4.2"] = { ...PackVersions["1.3.2"] };
 PackVersions["1.4.2"]["Terrain Atlas"] = 4; /* Сундук теперь 3д модель */
 PackVersions["1.4.2"]["Texture ID"] = 12;
 
-PackVersions["1.5.2"] = { ...PackVersions["1.4.2"] };
+PackVersions["1.4.4"] = { ...PackVersions["1.4.2"] };
+
+PackVersions["1.4.5"] = { ...PackVersions["1.4.4"] };
+
+PackVersions["1.4.6"] = { ...PackVersions["1.4.5"] };
+
+PackVersions["1.4.7"] = { ...PackVersions["1.4.6"] };
+
+PackVersions["1.5.1"] = { ...PackVersions["1.4.7"] };
+
+PackVersions["1.5.2"] = { ...PackVersions["1.5.1"] };
 PackVersions["1.5.2"]["Terrain Atlas"] = -1;
 PackVersions["1.5.2"]["Texture ID"] = 13;
 
-PackVersions["1.6.4"] = { ...PackVersions["1.5.2"] };
+PackVersions["1.6.1"] = { ...PackVersions["1.5.2"] };
+
+PackVersions["1.6.2"] = { ...PackVersions["1.6.1"] };
+
+PackVersions["1.6.4"] = { ...PackVersions["1.6.2"] };
 PackVersions["1.6.4"]["ThatTexturePack"] = false;
 PackVersions["1.6.4"]["Texture ID"] = 0;
 PackVersions["1.6.4"]["Pack Format"] = 1;
 
-PackVersions["1.7.10"] = { ...PackVersions["1.6.4"] };
+PackVersions["1.7.2"] = { ...PackVersions["1.6.4"] };
+
+PackVersions["1.7.3"] = { ...PackVersions["1.7.2"] };
+
+PackVersions["1.7.4"] = { ...PackVersions["1.7.3"] };
+
+PackVersions["1.7.5"] = { ...PackVersions["1.7.4"] };
+
+PackVersions["1.7.6"] = { ...PackVersions["1.7.5"] };
+
+PackVersions["1.7.7"] = { ...PackVersions["1.7.7"] };
+
+PackVersions["1.7.10"] = { ...PackVersions["1.7.7"] };
 PackVersions["1.7.10"]["Texture ID"] = 1;
 
 PackVersions["1.8"] = { ...PackVersions["1.7.10"] };
 PackVersions["1.8"]["Texture ID"] = 2;
 
-PackVersions["1.9"] = { ...PackVersions["1.8"] };
+PackVersions["1.8.1"] = { ...PackVersions["1.8"] };
+
+PackVersions["1.8.2"] = { ...PackVersions["1.8.1"] };
+
+PackVersions["1.8.3"] = { ...PackVersions["1.8.2"] };
+
+PackVersions["1.8.4"] = { ...PackVersions["1.8.3"] };
+
+PackVersions["1.8.5"] = { ...PackVersions["1.8.4"] };
+
+PackVersions["1.8.6"] = { ...PackVersions["1.8.5"] };
+
+PackVersions["1.8.7"] = { ...PackVersions["1.8.6"] };
+
+PackVersions["1.8.8"] = { ...PackVersions["1.8.7"] };
+
+PackVersions["1.8.9"] = { ...PackVersions["1.8.8"] };
+
+PackVersions["1.9"] = { ...PackVersions["1.8.9"] };
 PackVersions["1.9"]["Pack Format"] = 2;
 PackVersions["1.9"]["Texture ID"] = 3;
 
