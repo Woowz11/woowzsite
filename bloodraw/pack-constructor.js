@@ -1,10 +1,13 @@
+var UL = navigator.language || navigator.userLanguage;
+var RU = UL.includes("ru");
+
 async function UpdateGithubCommitInfo(){
 	const CommitURL = "https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits?per_page=1";
-	CommitDescription = "Fetch GitHub failed!\nSee for yourself: https://github.com/Woowz11/BloodRaw-Minecraft";
+	CommitDescription = (RU?"Не получилось получить обновление из GitHub!\nПосмотрите сами: https://github.com/Woowz11/BloodRaw-Minecraft":"Fetch GitHub failed!\nSee for yourself: https://github.com/Woowz11/BloodRaw-Minecraft");
 	try {
 		const R = await fetch(CommitURL);
 		if (!R.ok) {
-            throw new Error(`Failed to fetch commits: ${R.statusText}`);
+            throw new Error(`${RU?"Не получилось получить обновление":"Failed to fetch commits"}: ${R.statusText}`);
         }
 		const D = await R.json();
 		if (D.length > 0) {
@@ -15,10 +18,10 @@ async function UpdateGithubCommitInfo(){
 			
 			CommitReleaseDate = D[0].commit.committer.date;
 		} else {
-			throw new Error('No commits found');
+			throw new Error(RU?"Обновления не найдены!":"No commits found!");
 		}
 	} catch(error) {
-		console.error('Error fetching commit message:', error);
+		ToConsole(`${RU?"Ошибка при получении описания обновления":"Error fetching commit message"}: ${error}`,true);
 		LastCommitVersion = "Unknown";
 	}
 }
@@ -33,7 +36,11 @@ function CalculateTimeDifference(OneTime){
 	var Years = Math.floor(Days / 365);
 	Days = Days - Years*365;
     var Hours = Math.floor((TimeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-	return (Years>0?Years+" "+(Years==1?"год":(Years<=4?"года":"лет"))+", ":"")+Days+" "+(Days==1?"день":(Days<=4&&Days>0?"дня":"дней"))+", "+Hours+" "+(Hours==1?"час":(Hours<=4&&Hours>0?"часа":"часов"));
+	if(RU){
+		return (Years>0?Years+" "+(Years==1?"год":(Years<=4?"года":"лет"))+", ":"")+Days+" "+(Days==1?"день":(Days<=4&&Days>0?"дня":"дней"))+", "+Hours+" "+(Hours==1?"час":(Hours<=4&&Hours>0?"часа":"часов"));
+	}else{
+		return (Years>0?Years+" "+(Years==1?"year":"years")+", ":"")+Days+" "+(Days==1?"day":"days")+", "+Hours+" "+(Hours==1?"hour":"hours");
+	}
 }
 
 async function ApplyInformationToBloodrawHTML(){
@@ -45,10 +52,10 @@ async function ApplyInformationToBloodrawHTML(){
 	document.getElementById("bloodraw-description").innerHTML = CommitDescription;
 	var UpdatePainting = await GetIDTexture("painting","update");
 	document.getElementById("bloodraw-painting").src = await LoadImageAB_GetURL(UpdatePainting);
-	document.getElementById("bloodraw-releasedate").innerHTML = "Времени с обновления: "+CalculateTimeDifference(CommitReleaseDate);
+	document.getElementById("bloodraw-releasedate").innerHTML = (RU?"Времени с обновления":"Time since commit")+": "+CalculateTimeDifference(CommitReleaseDate);
 	
-	document.getElementById("bloodraw-commits").innerHTML = "Обновлений: "+LastCommitVersion.replaceAll(".","");
-	document.getElementById("bloodraw-age").innerHTML = "Возраст: "+CalculateTimeDifference("2023-07-14T13:00:42Z");
+	document.getElementById("bloodraw-commits").innerHTML = (RU?"Обновлений":"Commits")+": "+LastCommitVersion.replaceAll(".","");
+	document.getElementById("bloodraw-age").innerHTML = (RU?"Возраст":"Age")+": "+CalculateTimeDifference("2023-07-14T13:00:42Z");
 }
 
 var PackConstructorScriptsLoaded = false;
@@ -56,7 +63,7 @@ var PackConstructorScriptsLoaded = false;
 async function AddScript(url,onloadfunc){
 	const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`Failed to load script: ${response.statusText}`);
+            throw new Error(RU?`Ошибка при загрузке скрипта [${url}]: ${response.statusText}`:`Failed to load script [${url}]: ${response.statusText}`);
         }
         const scriptText = await response.text();
         const script = document.createElement('script');
@@ -68,8 +75,7 @@ async function AddScript(url,onloadfunc){
 	try{
 		
 	}catch(error){
-		console.error(`Failed to load script: ${url}`);
-        console.error('Error:', error);
+		console.error(RU?`Ошибка при загрузке скрипта [${url}]: ${error}`:`Failed to load script [${url}]: ${error}`);
 	}
 }
 
@@ -127,10 +133,34 @@ function CheckScriptLoading(){
 		
 		AddAssets(ResourcePackInfo_AssetsTextures);
 		
-		console.log("Scripts loaded!");
+		console.log(RU?"Скрипты загружены!":"Scripts loaded!");
 	}
 }
 LoadThatScripts.forEach(src => AddScript(src,CheckScriptLoading));
+
+var Console = null;
+var Errors = 0;
+
+function ToConsole(Message,Error){
+	if(Error==true){
+		if(Console!=null){
+			Console.innerHTML = `<font style="color:red;">${Message}</font><br>` + Console.innerHTML;
+			Errors++;
+			document.getElementById("errors").innerHTML = Errors;
+		}
+		console.error(Message);
+	}else{
+		if(Console!=null){Console.innerHTML = `${Message}<br>` + Console.innerHTML;}
+		console.log(Message);
+	}
+}
+
+function ClearConsole(C){
+	if(C==true){Console.innerHTML=""; return;}
+	if(C!=null){Console = C;}
+	Console.innerHTML = (RU?"Тут будет показываться прогресс генерации текстур/ресурс пака!":"The progress of texture/resource pack generation will be shown here!");
+	Errors = 0;
+}
 
 /* ================================================================================================================================================ */
 
@@ -167,7 +197,8 @@ PackVersions["Alpha 1.2.6"] = {
 	"Terrain Atlas": 0,
 	"Pack Format": 0,
 	"Texture ID": 0,
-	"Transparency Destroy Textures": false
+	"Transparency Destroy Textures": false,
+	"WIP": false
 };
 
 PackVersions["Beta 1.0"] = { ...PackVersions["Alpha 1.2.6"] };
@@ -269,6 +300,7 @@ PackVersions["1.6.4"]["Texture ID"] = 0;
 PackVersions["1.6.4"]["Pack Format"] = 1;
 
 PackVersions["1.7.2"] = { ...PackVersions["1.6.4"] };
+PackVersions["1.7.2"]["WIP"] = true;
 
 PackVersions["1.7.3"] = { ...PackVersions["1.7.2"] };
 
@@ -278,7 +310,7 @@ PackVersions["1.7.5"] = { ...PackVersions["1.7.4"] };
 
 PackVersions["1.7.6"] = { ...PackVersions["1.7.5"] };
 
-PackVersions["1.7.7"] = { ...PackVersions["1.7.7"] };
+PackVersions["1.7.7"] = { ...PackVersions["1.7.6"] };
 
 PackVersions["1.7.10"] = { ...PackVersions["1.7.7"] };
 PackVersions["1.7.10"]["Texture ID"] = 1;
@@ -332,7 +364,7 @@ if(FUN_RandomTerrainBlocks||FUN_BigTerrain||FUN_ApplyToAllThatGradient!=""){
 /* ================= */
 
 function DownloadPack(){
-	console.log("Start downloading...");
+	ToConsole(RU?"Компиляция...":"Compilation...");
 	ZipResult.generateAsync({ type: "blob" }).then(function(content){
 		const url = URL.createObjectURL(content);
 		const a = document.createElement("a");
@@ -341,7 +373,7 @@ function DownloadPack(){
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
-		console.log("Downloading...");
+		ToConsole(RU?"Скачивание...":"Downloading...");
 	});
 	CreatingPack = false;
 }
@@ -349,23 +381,24 @@ function DownloadPack(){
 async function FetchURL(Path,IfNotFound = null, ThatError = false){
 	try {
 		if (ThatError==true){
-			console.log(`File not found. Trying fallback path: ${Path}`);
+			ToConsole(`Файл не найден! Заменяем путь на [${Path}]`,true);
 		}
 		const Response = await fetch("https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/" + Path);
 		if (!Response.ok){
+			ToConsole(`Ошибка при загрузке файла по пути [${Path}]: ${Response.statusText}`,true);
 			if (IfNotFound != null){
-				console.log(`File not found at [${Path}]. Trying fallback path: ${IfNotFound}`);
+				ToConsole(`Заменяем путь на [${IfNotFound}]`,true);
 				const IfNotFoundR = await FetchURL(IfNotFound);
 				return IfNotFoundR;
 			}else{
-				throw new Error(`Failed to fetch file [${Path}]: ${response.statusText}`);
+				throw new Error(`Ошибка при загрузке файла по пути [${Path}]: ${Response.statusText}`);
 			}
 		}
 		return Response;
 	} catch(error) {
-		console.error(`Error fetching file [${Path}]:`, error);
+		ToConsole(`Ошибка при загрузке файла по пути [${Path}]: ${error}`,true);
         if (IfNotFound != null) {
-			console.log(`File not found at [${Path}]. Trying fallback path: ${IfNotFound}`);
+			ToConsole(`Заменяем путь на [${IfNotFound}]`,true);
             const IfNotFoundR = await FetchURL(IfNotFound);
 			return IfNotFoundR;
         } else {
@@ -379,7 +412,7 @@ function GetImageFromURL(src){
         const img = new Image();
         img.onload = () => resolve(img);
         img.onerror = (error) => {
-            console.error(`Error loading image from URL ${src}:`, error);
+			ToConsole(`Ошибка при загрузке картинки по ссылке [${src}]: ${error}`,true);
             reject(error);
         };
         img.src = src;
@@ -405,7 +438,7 @@ async function LoadImage(Path){
 		const AB = await ReadImage(Path);
 		return await LoadImageAB(AB);
 	} catch (error) {
-		console.error(`Error loading image from path ${Path}:`, error);
+		ToConsole(`Ошибка при загрузке картинки по пути [${Path}]: ${error}`,true);
 		throw error;
 	}
 }
@@ -421,12 +454,17 @@ function CreateCanvas(W,H){
 	return C;
 }
 
-async function AddCanvas(f,ImageName,C){
+async function GetCanvas(C){
 	const D = C.toDataURL("image/png");
 	const blob = await fetch(D).then(res => res.blob());
 	const AB = await blob.arrayBuffer();
-	AddFile(f, ImageName, AB);
 	document.body.removeChild(C);
+	return AB;
+}
+
+async function AddCanvas(f,ImageName,C){
+	const AB = await GetCanvas(C);
+	AddFile(f, ImageName, AB);
 }
 
 async function CropImage(AB,x,y,w,h){
@@ -486,14 +524,36 @@ async function ClearTexture(img,x,y,w,h){
     return newImg;
 }
 
+async function AtlasTexture(img,atlasid){
+	if(atlasid=="Particles Old"){
+		return await CreateParticlesPNG();
+	}
+	if(atlasid=="Particles Gui Old"){
+		return await CreateParticlesPNG(true);
+	}
+	if(atlasid=="Paintings"){
+		return await CreatePaintingsPNG();
+	}
+	if(atlasid=="Blocks"){
+		return await CreateTerrainPNG();
+	}
+	if(atlasid=="Items"){
+		return await CreateItemsPNG();
+	}
+	
+	ToConsole(`Не найден атлас [${atlasid}]!`,true);
+	
+	return await LoadIDTexture("other","badgeneration");
+}
+
 async function ApplyGradient(IMG,Gradient){
 	if (!IMG || !Gradient) {
-        console.error('One or both images are null or undefined');
+		ToConsole(`Текстура или градиент пустые или не найдены!`,true);
         return null;
     }
 
     if (IMG.width <= 0 || IMG.height <= 0) {
-        console.error('Invalid dimensions for the main image:', IMG.width, IMG.height);
+		ToConsole(`Неверный размер текстуры: ${IMG.width} ${IMG.height}`,true);
         return null;
     }
 
@@ -502,7 +562,7 @@ async function ApplyGradient(IMG,Gradient){
 	}
 	
     if (Gradient.width <= 0 || Gradient.height != 1) {
-        console.error('Invalid dimensions for the gradient image:', Gradient.width, Gradient.height);
+		ToConsole(`Неверный размер градиента: ${Gradient.width} ${Gradient.height}`,true);
         return null;
     }
 	
@@ -546,7 +606,7 @@ async function ApplyGradient(IMG,Gradient){
 
 async function ResizeTexture(img,w,h,m = "nearest"){
     if (w <= 0 || h <= 0) {
-        console.error('Invalid dimensions:', w, h);
+		ToConsole(`Неверный размер текстуры: ${w} ${h}`,true);
         return img;
     }
 
@@ -557,7 +617,7 @@ async function ResizeTexture(img,w,h,m = "nearest"){
         c.imageSmoothingEnabled = false;
         c.drawImage(img, 0, 0, w, h);
     } else {
-        console.error('Unsupported resize method:', m);
+		ToConsole(`Не поддерживаемый формат изменения размера: ${m}`,true);
         return img;
     }
 
@@ -621,11 +681,15 @@ async function ApplyTextureOption(IMG,N,Base,ID,V,V2,V3,V4){
 		return await OverlayTexture(IMG,await LoadIDTexture(Base,V),V2,V3);
 	}
 	
+	if(N=="Atlas"){
+		return await AtlasTexture(IMG,V);
+	}
+	
 	if(N=="Special_Update"){
 		return await OverlayTexture(IMG,await LoadImage("resources/textures/update.png"),1,1);
 	}
 	
-	console.log(`Texture option ${N} (${V}) for image ${IMG} not found! (when create ${Base} ${ID})`);
+	ToConsole(`Настройка текстуры ${N} (${V}) для картинки {$IMG} ([${Base}] ${ID}) не найдена!`,true);
 	return IMG;
 }
 
@@ -670,7 +734,7 @@ async function LoadIDTexture(Base,ID){
 		const AB = await GetIDTexture(Base,ID);
 		return await LoadImageAB(AB);
 	} catch (error) {
-		console.error(`Error loading ${Base} texture from id ${ID}:`, error);
+		ToConsole(`Не получилось загрузить текстуру [${Base}] ${ID}: ${error}`,true);
 		throw error;
 	}
 }
@@ -685,7 +749,7 @@ async function AddFileFetch(f,ImageName,Path){
 		const Source = await R.text();
 		AddFile(f,ImageName,Source);
 	} catch (error) {
-		console.error(`Error fetching file ${Path}:`, error);
+		ToConsole(`Ошибка при получении файла ${Path}: ${error}`,true);
 	}
 }
 
@@ -694,16 +758,11 @@ async function AddImage(f,ImageName,Path,x,y,w,h){
 		const AB = await ReadImage(Path,x,y,w,h);
 		AddFile(f,ImageName,AB);
 	} catch (error) {
-		console.error(`Error fetching image ${Path}:`, error);
+		ToConsole(`Ошибка при получении изображения ${Path}: ${error}`,true);
 	}
 }
 
 //==========================================================//
-
-async function CreateResourcePack(){
-	var Assets = PackFolder.folder("assets");
-	var Minecraft = Assets.folder("minecraft");
-}
 
 async function CreateTerrainPNG(){
 	try {
@@ -714,7 +773,7 @@ async function CreateTerrainPNG(){
 
 		async function AddTile(x,y,tileName,extra){
 			if (extra == null){ extra = {}; }
-			console.log("Create terrain: " + tileName);
+			ToConsole(`Атлас [Blocks]: ${tileName}`);
 			if (extra["Ignore"]!=true){
 				var m = (extra["32"]?32:16);
 				c.clearRect(x*m, y*m, m, m);
@@ -1009,19 +1068,20 @@ async function CreateTerrainPNG(){
 		
 		}
 
-		await AddCanvas(PackFolder,"terrain.png",C);
+		return await GetImageFromCanvas(C);
 	} catch (error) {
-		console.error(`Error creating terrain PNG:`, error);
+		ToConsole(`Ошибка при создании атласа [Blocks]: ${error}`,true);
 	}
+	return await GetIDTexture("other","badgeneration");
 }
 
-async function CreateItemsPNG(f){
+async function CreateItemsPNG(){
 	try {
 		var C = CreateCanvas(256, 256);
 		var c = C.getContext("2d");
 
 		async function AddItem(x,y,itemName){
-			console.log("Create items: " + itemName);
+			ToConsole(`Атлас [Items]: ${itemName}`);
 			c.clearRect(x*16, y*16, 16, 16);
 			if (itemName != ""){
 				const item = await LoadIDTexture("item",itemName);
@@ -1301,19 +1361,22 @@ async function CreateItemsPNG(f){
 		await AddItem(14,15,"");
 		await AddItem(15,15,"");
 
-		await AddCanvas(f,"items.png",C);
+		return await GetImageFromCanvas(C);
 	} catch (error) {
-		console.error(`Error creating items PNG:`, error);
+		ToConsole(`Ошибка при создании атласа [Items]: ${error}`,true);
 	}
+	return await GetIDTexture("other","badgeneration");
 }
 
-async function CreateParticlesPNG(f,onlyClouds){
+async function CreateParticlesPNG(onlyClouds){
 	try {
 		var C = CreateCanvas(128, 128);
 		var c = C.getContext("2d");
 
+		var Atlas = (onlyClouds?"Particles Gui":"Particles");
+
 		async function AddParticle(x,y,particleName){
-			console.log("Create particle: " + particleName);
+			ToConsole(`Атлас [${Atlas}]: ${particleName}`);
 			c.clearRect(x*8, y*8, 8, 8);
 			if (particleName != ""){
 				const particle = await LoadIDTexture("particle",particleName);
@@ -1424,19 +1487,20 @@ async function CreateParticlesPNG(f,onlyClouds){
 			await AddParticle(10,14,"enchantmenttable_minecraft");
 		}
 
-		await AddCanvas(f,"particles.png",C);
+		return await GetImageFromCanvas(C);
 	} catch (error) {
-		console.error(`Error creating particles PNG:`, error);
+		ToConsole(`Ошибка при создании атласа [${Atlas}]: ${error}`,true);
 	}
+	return await GetIDTexture("other","badgeneration");
 }
 
-async function CreatePaintingsPNG(f){
+async function CreatePaintingsPNG(){
 	try {
 		var C = CreateCanvas(256, 256);
 		var c = C.getContext("2d");
 
 		async function AddPainting(x,y,paintingName){
-			console.log("Create painting: " + paintingName);
+			ToConsole(`Атлас [Painting]: ${paintingName}`);
 			if (paintingName != ""){
 				const painting = await LoadIDTexture("painting",paintingName);
 				c.drawImage(painting, x*16, y*16);
@@ -1483,10 +1547,11 @@ async function CreatePaintingsPNG(f){
 		await AddPainting(12,4,"overlay_4x3");
 		await AddPainting(12,7,"overlay_4x3");
 		
-		await AddCanvas(f,"kz.png",C);
+		return await GetImageFromCanvas(C);
 	} catch (error) {
-		console.error(`Error creating paintings PNG:`, error);
+		ToConsole(`Ошибка при создании атласа [Painting]: ${error}`,true);
 	}
+	return await GetIDTexture("other","badgeneration");
 }
 
 async function CreateTexturePack(){
@@ -1503,21 +1568,25 @@ async function CreateTexturePack(){
 	var Terrain = (TID<13?PackFolder.folder("terrain"):null);
 	var Title = PackFolder.folder("title");
 	
+	async function L(f,n,b,p){
+		ToConsole(`Загрузка текстуры: [${b}] ${p}`);
+		var AB = await GetIDTexture(b,p);
+		AddFile(f,n,AB);
+	}
+	
 	if(TID<13){
 		if (VersionInfo["Terrain Atlas"] > -1){
-			await CreateTerrainPNG();
-			console.log("Terrain created!");
+			await L(PackFolder,"terrain.png","block","atlas");
 		}
 		
-		await CreateItemsPNG(Gui);
-		console.log("Items created!");
+		await L(Gui,"items.png","item","atlas");
 	}else{
 		var Textures = PackFolder.folder("textures");
 		var Blocks = Textures.folder("blocks");
 		var Items = Textures.folder("items");
 		var MinecraftAssets = ResourcePackInfoAssets["Minecraft"];
 		for(const Resource of MinecraftAssets){
-			if(Resource[2]!=false||Resource[2]==true){
+			if(Resource[2]==true){
 				var Paths = Resource[1];
 				if(Paths[0][0] == -1){
 					var Path = Paths[0][1];
@@ -1536,15 +1605,9 @@ async function CreateTexturePack(){
 		}
 	}
 	
-	async function L(f,n,b,p){
-		console.log("Loading: "+p);
-		var AB = await GetIDTexture(b,p);
-		AddFile(f,n,AB);
-	}
-	
-	await CreateParticlesPNG(PackFolder);
+	await L(PackFolder,"particles.png","particle","atlas_old");
 	if(TID>=3){
-		await CreateParticlesPNG(Gui,true);
+		await L(Gui,"particles.png","particle","atlas_gui_old");
 	}
 	await L(Armor,"chain_1.png","armor","chain");
 	await L(Armor,"chain_2.png","armor","chain_pants");
@@ -1561,7 +1624,7 @@ async function CreateTexturePack(){
 	await L(Armor,"gold_2.png","armor","gold_pants");
 	await L(Armor,"iron_1.png","armor","iron");
 	await L(Armor,"iron_2.png","armor","iron_pants");
-	await CreatePaintingsPNG(Art);
+	await L(Art,"kz.png","painting","atlas");
 	await L(Environment,"clouds.png","environment","clouds");
 	await L(Environment,"rain.png","environment","rain");
 	await L(Environment,"snow.png","environment","snow");
@@ -1743,23 +1806,74 @@ async function CreateTexturePack(){
 	}
 }
 
+//==========================================================//
+
+async function CreateResourcePack(){
+	var TID = VersionInfo["Texture ID"];
+	
+	var Assets = PackFolder.folder("assets");
+	
+	async function AddAssetFile(FileName,Folder,FileFullInfo,Path){
+		var FileType = FileFullInfo[0];
+		var FileInfo = FileFullInfo[1];
+		
+		if(FileType=="texture"){
+			ToConsole(`Загрузка текстуры: ${Path}`);
+			AddFile(Folder,FileName,await GetIDTexture(FileInfo[0],FileInfo[1]));
+		}
+	}
+	
+	async function AddAsset(Base,Asset){
+		var Paths = Asset[1];
+		var SelectedPath = "";
+		for(const Path of Paths){
+			if(TID<=Path[0]){
+				SelectedPath = Path[1];
+			}
+		}
+		if(SelectedPath==""){
+			ToConsole(`Асет [${Asset}] не имеет путей!`,true);
+		}
+		
+		var PathSplit = SelectedPath.split('/');
+		var FileName = PathSplit.pop();
+		
+		var F = null;
+		for(const P of PathSplit){
+			F = (F==null?Assets.folder(P):F.folder(P));
+		}
+		
+		await AddAssetFile(FileName,F,Asset[0],SelectedPath);
+	}
+	
+	for(const BaseName of Object.keys(ResourcePackInfoAssets)){
+		var Base = ResourcePackInfoAssets[BaseName];
+		for(const Asset of Base){
+			await AddAsset(Base,Asset);
+		}
+	}
+}
+
+//==========================================================//
+
 async function CreatePack(PackInfo) {
 	if (!PackConstructorScriptsLoaded){
-		console.log("Wait for the scripts to load!");
+		ToConsole("Дождитесь окончания загрузки скриптов!");
 		return;
 	}
 	
 	if (CreatingPack) {
-		console.log("Wait for the last download pack!");
+		ToConsole("Дождитесь окончания генерации!");
 		return;
 	}
 	CreatingPack = true;
+	ClearConsole(true);
 	
 	await UpdateGithubCommitInfo();
 	
 	SelectedVersion = PackInfo["Version"];
 	
-	console.log("Start generate pack from version [" + SelectedVersion + "] from [" + LastCommitVersion + "]");
+	ToConsole("Начало генерации пака для версии [" + SelectedVersion + "] из [" + LastCommitVersion + "]");
 	
 	VersionInfo = PackInfo["VersionInfo"];
 	var ThatTexturePack = VersionInfo["ThatTexturePack"];

@@ -8,7 +8,11 @@ html{
 	background-image: url("source/bloodraw/dirt.png");
 	background-size: 64px 64px;
 	image-rendering: pixelated;
-	overflow: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 body{
@@ -50,6 +54,14 @@ a{
 a:hover{
 	color: #5F6B29;
 }
+
+.WipLink{
+	color: #D8211E;
+}
+
+.WipLink:hover{
+	color: #961715;
+}
 </style>
 <link rel="stylesheet" href="source/bloodraw/css.css">
 <script src="bloodraw/pack-constructor.js"></script>
@@ -59,10 +71,19 @@ a:hover{
 <script>
 const body = document.getElementById("body");
 
+function OpenPage(page){
+	window.location.href = (page==null?`https://woowz11.github.io/woowzsite/bloodraw`:`https://woowz11.github.io/woowzsite/bloodraw#${page}`);
+	setTimeout(function() {
+		location.reload();
+    }, 100);
+}
+
 var SelectedVersion = "";
 function SelectVersion(Version){
 	SelectedVersion = Version;
 	document.getElementById("selected-version").innerHTML = SelectedVersion;
+	
+	document.getElementById("selected-version-wip").innerHTML = (PackVersions[SelectedVersion]["WIP"]?(RU?"Внимание! Эта версия ещё находится в разработке!":"Attention! This version is still under development!"):"&nbsp;");
 }
 
 async function PageGeneratePack(){
@@ -71,24 +92,39 @@ async function PageGeneratePack(){
 	var VersionsListString = "";
 	
 	for(const Version of Versions){
-		VersionsListString += `<a style="word-spacing: 50px;" onclick="SelectVersion('${Version}');">${Version}</a> `;
+		var wip = PackVersions[Version]["WIP"];
+		VersionsListString += `<a ${wip==true?"class=\"WipLink\"":""} style="word-spacing: 50px;" onclick="SelectVersion('${Version}');">${Version}</a> `;
+		if(!wip&&SelectedVersion==""){
+			SelectedVersion = Version;
+		}
 	}
 
 	const Content = `<center><img src="source/bloodraw/logo.png"></center>
-<center>Конструктор текстур пака в разработке!</center>
-<center>Выберите версию которую хотите скачать</center>
+<center>${RU?"Конструктор пака в разработке!":"The pack constructor is in development!"}</center>
+<center>${RU?"Выберите версию которую хотите скачать":"Select the version you want to download"}</center>
 <br>
-<center>Выбрана: <font id="selected-version">...</font></center>
+<center>${RU?"Выбрана":"Selected"}: <font id="selected-version">...</font></center>
+<center><font id="selected-version-wip" style="color: #D8211E;"></font></center>
 <br>
 <div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 50vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
 <div style="display: grid; grid-template-columns: repeat(15, 1fr); gap: 10px; justify-content: center; align-items: center; text-align: center;" id="versions">${VersionsListString}</div>
 </div>
 <br>
-<center><button style="transform:scale(2);" id="download">Скачать</button></center>`;
+<center><font>${RU?"Ошибок":"Errors"}: <font id="errors">0</font></font></center>
+<br>
+<center><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; width:75%; height: 25vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
+<div style="align-items: center; text-align: center; white-space: nowrap;" id="console"></div>
+</div></center>
+<br>
+<center><button style="transform:scale(2);" id="download">${RU?"Скачать":"Download"}</button></center>
+<br>
+<center><a onclick="OpenPage();">${RU?"Вернуться":"Back"}</a></center>`;
 
 	body.innerHTML = Content;
 	
-	SelectVersion(Versions[0]);
+	ClearConsole(document.getElementById("console"));
+	
+	SelectVersion(SelectedVersion);
 	
 	async function ClickDownload(){
 		await CreatePack({
@@ -101,13 +137,13 @@ async function PageGeneratePack(){
 
 async function PageStart(){
 	const Content = `<center><img src="source/bloodraw/logo.png"></center>
-<center><font style="font-size:1.5em;">Сайт по ресурс паку <b>BloodRaw</b> для Minecraft!</font></center>
-<center><font>Создано Woowz11</font></center>
-<center><font>Сайт и ресурс пак в разработке!</font></center>
+<center><font style="font-size:1.5em;">${RU?"Сайт по паку <b>BloodRaw</b> для Minecraft!":"Site for the <b>BloodRaw</b> pack for Minecraft!"}</font></center>
+<center><font>${RU?"Автор":"Author"}: Woowz11</font></center>
+<center><font>${RU?"Сайт и пак в разработке!":"Site and pack in development!"}</font></center>
 <center><font id="bloodraw-commits">...</font></center>
 <center><font id="bloodraw-age">...</font></center>
 <center>=----------------------------------------------------=</center>
-<center><font>Текущая версия</font></center>
+<center><font>${RU?"Текущая версия":"Current version"}</font></center>
 <br>
 <center><font id="bloodraw-version" style="font-size:1.5em;">?.?.?</font></center>
 <br>
@@ -117,10 +153,10 @@ async function PageStart(){
 <br>
 <center><img id="bloodraw-painting" src="source/bloodraw/updatepainting.png" style="width:128px;"></center>
 <center>=----------------------------------------------------=</center>
-<center><a href="https://woowz11.github.io/woowzsite/bloodraw#download">Скачать</a></center>
-<center><a href="https://woowz11.github.io/woowzsite/bloodraw_skineditor">Сделать скин</a></center>
+<center><a onclick="OpenPage('download');">${RU?"Скачать":"Download"}</a></center>
+<center><a href="https://woowz11.github.io/woowzsite/bloodraw_skineditor">${RU?"Сделать скин":"Create skin"}</a></center>
 <center><a href="https://github.com/Woowz11/BloodRaw-Minecraft">Github</a></center>
-<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft/blob/main/license.txt">License</a></center>`;
+<center><a href="https://github.com/Woowz11/BloodRaw-Minecraft/blob/main/license.txt">${RU?"Лицензия":"License"}</a></center>`;
 
 	body.innerHTML = Content;
 	ApplyInformationToBloodrawHTML();
