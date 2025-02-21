@@ -3,6 +3,15 @@
 <title>BloodRaw</title>
 <link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
 
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://woowz11.github.io/woowzsite/bloodraw">
+<meta property="og:image" content="https://raw.githubusercontent.com/Woowz11/woowzsite/main/source/bloodraw/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<meta property="og:site_name" content="Bloodraw">
+<meta property="og:title" content="Minecraft Texture/Resource pack!">
+<meta property="og:description" content="">
+
 <style>
 html{
 	background-image: url("source/bloodraw/dirt.png");
@@ -43,6 +52,11 @@ button{
 	pointer-events: all;
 }
 
+input{
+	pointer-events: all;
+	cursor: pointer;
+}
+
 a{
 	color: #9AA171;
 	text-shadow: 0px 10px 15px black;
@@ -72,18 +86,23 @@ a:hover{
 const body = document.getElementById("body");
 
 function OpenPage(page){
-	window.location.href = (page==null?`https://woowz11.github.io/woowzsite/bloodraw`:`https://woowz11.github.io/woowzsite/bloodraw#${page}`);
+	window.location.href = (page=="main"?`https://woowz11.github.io/woowzsite/bloodraw`:`https://woowz11.github.io/woowzsite/bloodraw#${page}`);
 	setTimeout(function() {
 		location.reload();
+		document.documentElement.scrollTop = 0;
+		document.body.scrollTop = 0;
     }, 100);
 }
 
 var SelectedVersion = "";
 function SelectVersion(Version){
 	SelectedVersion = Version;
+	document.title = `BloodRaw (${SelectedVersion})`;
 	document.getElementById("selected-version").innerHTML = SelectedVersion;
 	
 	document.getElementById("selected-version-wip").innerHTML = (PackVersions[SelectedVersion]["WIP"]?(RU?"Внимание! Эта версия ещё находится в разработке!":"Attention! This version is still under development!"):"&nbsp;");
+
+	document.getElementById("download").innerText = (RU?"Скачать":"Download") + " " + (PackVersions[SelectedVersion]["ThatTexturePack"]?(RU?"текстур":"texture"):(RU?"ресурс":"resource")) + " " + (RU?"пак":"pack");
 }
 
 async function PageGeneratePack(){
@@ -102,7 +121,11 @@ async function PageGeneratePack(){
 	const Content = `<center><img src="source/bloodraw/logo.png"></center>
 <center>${RU?"Конструктор пака в разработке!":"The pack constructor is in development!"}</center>
 <center>${RU?"Выберите версию которую хотите скачать":"Select the version you want to download"}</center>
+<br><center>
+<b>${RU?"В РАЗРАБОТКЕ":"IN DEV."} -></b> <input type="checkbox" checked="checked"> <font>${RU?"Сделать в zip файле?":"Make it into a zip file?"}</font>
 <br>
+<b>${RU?"В РАЗРАБОТКЕ":"IN DEV."} -></b> <input type="checkbox" checked="checked"> <font>${RU?"Включить":"Include"} Optifine?</font> &nbsp;&nbsp;&nbsp;&nbsp; <input type="checkbox"> <font>${RU?"Включить":"Include"} Forge ${RU?"и":"and"} Mods?</font>
+</center><br>
 <center>${RU?"Выбрана":"Selected"}: <font id="selected-version">...</font></center>
 <center><font id="selected-version-wip" style="color: #D8211E;"></font></center>
 <br>
@@ -116,9 +139,9 @@ async function PageGeneratePack(){
 <div style="align-items: center; text-align: center; white-space: nowrap;" id="console"></div>
 </div></center>
 <br>
-<center><button style="transform:scale(2);" id="download">${RU?"Скачать":"Download"}</button></center>
+<center><button style="transform:scale(2);" id="download">...</button></center>
 <br>
-<center><a onclick="OpenPage();">${RU?"Вернуться":"Back"}</a></center>`;
+<center><a onclick="OpenPage('main');">${RU?"Вернуться":"Back"}</a></center>`;
 
 	body.innerHTML = Content;
 	

@@ -34,3 +34,26 @@ html{
 ::selection {
 	opacity: 0;
 }
+
+input[type='checkbox'] {
+	-webkit-appearance: none;
+	width: 30px;
+	height: 30px;
+	vertical-align:middle;
+	background-image: url("checkbox.png");
+	background-size: 100%;
+	background-position: right center;
+	background-repeat: no-repeat;
+}
+
+input[type='checkbox']:checked {
+	background-image: url("checkbox_checked.png");
+}
+
+input[type='checkbox']:hover {
+	background-image: url("checkbox_hover.png");
+}
+
+input[type='checkbox']:checked:hover {
+	background-image: url("checkbox_hover_checked.png");
+}
