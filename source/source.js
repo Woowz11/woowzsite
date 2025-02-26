@@ -36,7 +36,7 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddFullnessToTable([
 	"goodproduct","m","sk","weirdcat","chicken","lab_prisedent","kuki","sun","IMG_6847","IMG_4842","hamer","human","dayface","minecraft-woowzcraft","bg","bg2",
 	"uranus","uranus_megus","woowzers1","never","mr","pavka","papaga","mass","bro","brothan","chto","download_-_2024-09-22T163544","prikol","smotr_nakazanie","popa","glitc",
 	"cold","die","cupi","fireinthehole","photo","orange","orig","susun","d0282a93507dbc8d526e841dab161320","zont_blokirator","catat","strampro","vseh","poshkal",
-	"cat_kronzy","mine_semen","happy_cat","semen_that","god_lithium","licvidated","ads","mic"
+	"cat_kronzy","mine_semen","happy_cat","semen_that","god_lithium","licvidated","ads","mic","drachyn"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
 	"0AE7CCF4-4A80-4942-8D8C-E031CF3A68BE","bye","catblyat","orange-cat","screams","Sequence_01_1","sleep","who","who-are-you-cat","meevin-melvin","Clipchamp","energy","0001-0120","ez","fnaf-mewing",
 	"1106463976809828372","dog","ezgif-3-8e481532df","BlueMarble_monthlies_animation","gckl_howler","мем","sxema-raboty-rektifikacionnoj-kolonny-foto","alha","v.03","31642.970","723831047925792818",
@@ -140,7 +140,7 @@ WoowzsiteSourceCats = AddFullnessToTable([
 
 WoowzsiteSourceBloodraw = AddFullnessToTable([
 	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png","og.png",
-	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png"
+	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png"
 ],"source/bloodraw/","")
 
 WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([

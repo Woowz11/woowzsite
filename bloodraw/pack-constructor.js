@@ -83,6 +83,7 @@ async function AddScript(url,onloadfunc){
 
 const LoadThatScripts = [
 	"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js",
+	"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/other.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/blocks.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/items.js",
@@ -96,6 +97,7 @@ const LoadThatScripts = [
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/fonts.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/paintings.js",
 	
+	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/assets/mods.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/assets/textures.js"
 ];
 
@@ -136,32 +138,62 @@ function CheckScriptLoading(){
 		AddAssets(ResourcePackInfo_AssetsTextures);
 		
 		console.log(RU?"Скрипты загружены!":"Scripts loaded!");
+		
+		UpdateModsList();
 	}
 }
 LoadThatScripts.forEach(src => AddScript(src,CheckScriptLoading));
 
+function UpdateModsList(){
+	if(!PackConstructorScriptsLoaded){return;}
+	var ModsList = "";
+		
+	for(var ModID of Object.keys(ResourcePackInfo_Mods)){
+		if(ModID!="forge"&&ModID!="optifine"){
+			var Mod = ResourcePackInfo_Mods[ModID];
+			ModsList += `<a style="display:flex; width:100%; height:100%; justify-content: center; align-items: center;">${Mod["Name"]}</a>`;
+		}
+	}
+	
+	document.getElementById("mods-list").innerHTML = ModsList;
+}
+
+window.addEventListener('beforeunload', function(event) {
+	if(CreatingPack){
+		event.preventDefault();
+        //event.returnValue = RU?"Вы уверены что хотите уйти? Генерация пака будет прекращена!":"Are you sure you want to leave? Pack generation will be cancelled!";
+	}
+});
+
 var Console = null;
 var Errors = 0;
+var Total = 0;
 
 function ToConsole(Message,Error){
+	Total++;
 	if(Error==true){
 		if(Console!=null){
-			Console.innerHTML = `<font style="color:red;">${Message}</font><br>` + Console.innerHTML;
+			Console.innerHTML = `${Total}: <font style="color:#D8211E;">${Message}</font><br>` + Console.innerHTML;
 			Errors++;
 			document.getElementById("errors").innerHTML = Errors;
+			document.getElementById("errors").style.color = "#D8211E";
 		}
 		console.error(Message);
 	}else{
-		if(Console!=null){Console.innerHTML = `${Message}<br>` + Console.innerHTML;}
+		if(Console!=null){Console.innerHTML = `${Total}: ${Message}<br>` + Console.innerHTML;}
 		console.log(Message);
 	}
 }
 
 function ClearConsole(C){
+	Errors = 0;
+	Total = 0;
+	document.getElementById("errors").innerHTML = Errors;
+	document.getElementById("errors").style.color = "";
+	//ClearURLs();
 	if(C==true){Console.innerHTML=""; return;}
 	if(C!=null){Console = C;}
 	Console.innerHTML = (RU?"Тут будет показываться прогресс генерации пака!":"The progress of pack generation will be shown here!");
-	Errors = 0;
 }
 
 /* ================================================================================================================================================ */
@@ -186,10 +218,11 @@ function ClearConsole(C){
 13 = 1.5.2
 
 Ресурс паки
-0  = 1.6.4
-1  = 1.7.10
-2  = 1.8
-3  = 1.9
+0   = 1.6.1
+1   = 1.7.2
+1.1 = 1.7.4
+2   = 1.8
+3   = 1.9
 
 */
 
@@ -200,7 +233,9 @@ PackVersions["Alpha 1.2.6"] = {
 	"Pack Format": 0,
 	"Texture ID": 0,
 	"Transparency Destroy Textures": false,
-	"WIP": false
+	"WIP": false,
+	"Forge": false,
+	"Optifine": false
 };
 
 PackVersions["Beta 1.0"] = { ...PackVersions["Alpha 1.2.6"] };
@@ -268,9 +303,13 @@ PackVersions["1.2.3"] = { ...PackVersions["1.2.2"] };
 PackVersions["1.2.4"] = { ...PackVersions["1.2.3"] };
 
 PackVersions["1.2.5"] = { ...PackVersions["1.2.4"] };
+PackVersions["1.2.5"]["Forge"] = true;
+PackVersions["1.2.5"]["Optifine"] = true;
 
 PackVersions["1.3.1"] = { ...PackVersions["1.2.5"] };
 PackVersions["1.3.1"]["Texture ID"] = 11;
+PackVersions["1.3.1"]["Forge"] = false;
+PackVersions["1.3.1"]["Optifine"] = false;
 
 PackVersions["1.3.2"] = { ...PackVersions["1.3.1"] };
 
@@ -285,56 +324,77 @@ PackVersions["1.4.5"] = { ...PackVersions["1.4.4"] };
 PackVersions["1.4.6"] = { ...PackVersions["1.4.5"] };
 
 PackVersions["1.4.7"] = { ...PackVersions["1.4.6"] };
+PackVersions["1.4.7"]["Forge"] = true;
+PackVersions["1.4.7"]["Optifine"] = true;
 
 PackVersions["1.5.1"] = { ...PackVersions["1.4.7"] };
+PackVersions["1.5.1"]["Forge"] = false;
+PackVersions["1.5.1"]["Optifine"] = false;
 
 PackVersions["1.5.2"] = { ...PackVersions["1.5.1"] };
 PackVersions["1.5.2"]["Terrain Atlas"] = -1;
 PackVersions["1.5.2"]["Texture ID"] = 13;
+PackVersions["1.5.2"]["Forge"] = true;
+PackVersions["1.5.2"]["Optifine"] = true;
 
 PackVersions["1.6.1"] = { ...PackVersions["1.5.2"] };
+PackVersions["1.6.1"]["ThatTexturePack"] = false;
+PackVersions["1.6.1"]["Texture ID"] = 0;
+PackVersions["1.6.1"]["Pack Format"] = 1;
+PackVersions["1.6.1"]["Forge"] = false;
+PackVersions["1.6.1"]["Optifine"] = false;
 
 PackVersions["1.6.2"] = { ...PackVersions["1.6.1"] };
 
 PackVersions["1.6.4"] = { ...PackVersions["1.6.2"] };
-PackVersions["1.6.4"]["ThatTexturePack"] = false;
-PackVersions["1.6.4"]["Texture ID"] = 0;
-PackVersions["1.6.4"]["Pack Format"] = 1;
+PackVersions["1.6.4"]["Forge"] = true;
+PackVersions["1.6.4"]["Optifine"] = true;
 
 PackVersions["1.7.2"] = { ...PackVersions["1.6.4"] };
-PackVersions["1.7.2"]["WIP"] = true;
+PackVersions["1.7.2"]["Texture ID"] = 1;
 
 PackVersions["1.7.3"] = { ...PackVersions["1.7.2"] };
+PackVersions["1.7.3"]["Forge"] = false;
+PackVersions["1.7.3"]["Optifine"] = false;
 
 PackVersions["1.7.4"] = { ...PackVersions["1.7.3"] };
+PackVersions["1.7.4"]["Texture ID"] = 1.1;
 
 PackVersions["1.7.5"] = { ...PackVersions["1.7.4"] };
+PackVersions["1.7.5"]["WIP"] = true;
 
 PackVersions["1.7.6"] = { ...PackVersions["1.7.5"] };
 
 PackVersions["1.7.7"] = { ...PackVersions["1.7.6"] };
 
 PackVersions["1.7.10"] = { ...PackVersions["1.7.7"] };
-PackVersions["1.7.10"]["Texture ID"] = 1;
+PackVersions["1.7.10"]["Forge"] = true;
+PackVersions["1.7.10"]["Optifine"] = true;
 
 PackVersions["1.8"] = { ...PackVersions["1.7.10"] };
 PackVersions["1.8"]["Texture ID"] = 2;
 
 PackVersions["1.8.1"] = { ...PackVersions["1.8"] };
+PackVersions["1.8.1"]["Forge"] = false;
 
 PackVersions["1.8.2"] = { ...PackVersions["1.8.1"] };
+PackVersions["1.8.2"]["Optifine"] = false;
 
 PackVersions["1.8.3"] = { ...PackVersions["1.8.2"] };
+PackVersions["1.8.3"]["Optifine"] = true;
 
 PackVersions["1.8.4"] = { ...PackVersions["1.8.3"] };
 
 PackVersions["1.8.5"] = { ...PackVersions["1.8.4"] };
+PackVersions["1.8.5"]["Optifine"] = false;
 
 PackVersions["1.8.6"] = { ...PackVersions["1.8.5"] };
 
 PackVersions["1.8.7"] = { ...PackVersions["1.8.6"] };
+PackVersions["1.8.7"]["Optifine"] = true;
 
 PackVersions["1.8.8"] = { ...PackVersions["1.8.7"] };
+PackVersions["1.8.8"]["Forge"] = true;
 
 PackVersions["1.8.9"] = { ...PackVersions["1.8.8"] };
 
@@ -364,6 +424,15 @@ if(FUN_RandomTerrainBlocks||FUN_BigTerrain||FUN_ApplyToAllThatGradient!=""){
 }
 
 /* ================= */
+
+var URLs = {};
+
+/*function ClearURLs(){
+	for(var url_id of Object.keys(URLs)){
+		URL.revokeObjectURL(URLs[url_id]);
+	}
+	URLs = {};
+}*/
 
 function DownloadPack(){
 	ToConsole(RU?"Компиляция...":"Compilation...");
@@ -421,9 +490,15 @@ function GetImageFromURL(src){
     });
 }
 
+function ABtoHash(AB){
+	const hash = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(new Uint8Array(AB)));
+    return hash.toString(CryptoJS.enc.Hex).substring(0, 32);
+}
+
 async function LoadImageAB_GetURL(AB){
 	const blob = new Blob([AB], { type: "image/png" });
-	return await URL.createObjectURL(blob);
+	var url = await URL.createObjectURL(blob);
+	return url;
 }
 
 async function LoadImageAB(AB){
@@ -435,10 +510,14 @@ async function LoadImageAB(AB){
     }
 }
 
+var LoadedImages = {};
 async function LoadImage(Path){
 	try {
+		if(LoadedImages[Path]){return LoadedImages[Path];}
 		const AB = await ReadImage(Path);
-		return await LoadImageAB(AB);
+		var Img = await LoadImageAB(AB);
+		LoadedImages[Path] = Img;
+		return Img;
 	} catch (error) {
 		ToConsole(`Ошибка при загрузке картинки по пути [${Path}]: ${error}`,true);
 		throw error;
@@ -1829,23 +1908,28 @@ async function CreateResourcePack(){
 		var Paths = Asset[1];
 		var SelectedPath = "";
 		for(const Path of Paths){
-			if(TID<=Path[0]){
+			if(TID>=Path[0]){
 				SelectedPath = Path[1];
 			}
 		}
-		if(SelectedPath==""){
-			ToConsole((RU?`Объект [${Asset}] не имеет путей!`:`Asset [${Asset}] has no paths!`),true);
+		
+		if(SelectedPath!=false){
+			
+			if(SelectedPath==""){
+				ToConsole((RU?`Объект [${Asset}] не имеет путей!`:`Asset [${Asset}] has no paths!`),true);
+			}
+			
+			var PathSplit = SelectedPath.split('/');
+			var FileName = PathSplit.pop();
+			
+			var F = null;
+			for(const P of PathSplit){
+				F = (F==null?Assets.folder(P):F.folder(P));
+			}
+			
+			await AddAssetFile(FileName,F,Asset[0],SelectedPath);
+			
 		}
-		
-		var PathSplit = SelectedPath.split('/');
-		var FileName = PathSplit.pop();
-		
-		var F = null;
-		for(const P of PathSplit){
-			F = (F==null?Assets.folder(P):F.folder(P));
-		}
-		
-		await AddAssetFile(FileName,F,Asset[0],SelectedPath);
 	}
 	
 	for(const BaseName of Object.keys(ResourcePackInfoAssets)){
@@ -1866,6 +1950,7 @@ async function CreatePack(PackInfo) {
 	
 	if (CreatingPack) {
 		ToConsole(RU?"Дождитесь окончания генерации!":"Wait until the generation is complete!");
+		console.log(URLs);
 		return;
 	}
 	CreatingPack = true;
@@ -1875,15 +1960,18 @@ async function CreatePack(PackInfo) {
 	
 	SelectedVersion = PackInfo["Version"];
 	
-	ToConsole(RU?"Начало генерации пака для версии [${SelectedVersion}] из [${LastCommitVersion}]":"Starting pack generation for version [${SelectedVersion}] of [${LastCommitVersion}]");
+	var MakeItZip = document.getElementById("checkbox-zip-file").checked;
+	
+	console.log("-".repeat(51));
+	ToConsole(RU?`Начало генерации пака для версии [${SelectedVersion}] из [${LastCommitVersion}]`:`Starting pack generation for version [${SelectedVersion}] of [${LastCommitVersion}]`);
 	
 	VersionInfo = PackInfo["VersionInfo"];
 	var ThatTexturePack = VersionInfo["ThatTexturePack"];
 	
 	ZipResult = new JSZip();
 	
-	const MainFolder = ZipResult.folder(ThatTexturePack?"texturepacks":"resourcepacks");
-	PackFolder = (ThatTexturePack?new JSZip():MainFolder.folder("BloodRaw"));
+	const MainFolder = ZipResult;
+	PackFolder = (MakeItZip?new JSZip():MainFolder.folder("BloodRaw"));
 	
 	await AddFileFetch(PackFolder,"license.txt","license.txt");
 	AddFile(PackFolder,"update-info.txt",CommitDescription);
@@ -1892,8 +1980,8 @@ async function CreatePack(PackInfo) {
 	AddFile(PackFolder,"pack." + (ThatTexturePack?"txt":"mcmeta"),(ThatTexturePack?SelectedVersion + " | " + LastCommitVersion + " (Generated)" + (ThatFunVersion?" (Fun)":"") + " ©":
 `{
 	"pack": {
-		"pack_format": ` + VersionInfo["Pack Format"] + `,
-		"description": "Version ` + SelectedVersion + `\\nBy Woowz11\\n` + LastCommitVersion + ` (Generated)` + (ThatFunVersion?" (Fun)":"") + ` ©"
+		"pack_format": ${VersionInfo["Pack Format"]},
+		"description": "Version ${SelectedVersion}\\nBy Woowz11\\n${LastCommitVersion} (Generated)${(ThatFunVersion?" (Fun)":"")} ©"
 	}
 }`));
 	
@@ -1901,10 +1989,13 @@ async function CreatePack(PackInfo) {
 	
 	if (ThatTexturePack){
 		await CreateTexturePack();
-		const TexturePackZip = await PackFolder.generateAsync({type: "blob"});
-		AddFile(MainFolder,"BloodRaw.zip",TexturePackZip);
 	}else{
 		await CreateResourcePack();
+	}
+	
+	if(MakeItZip){
+		const PackZip = await PackFolder.generateAsync({type: "blob"});
+		AddFile(MainFolder,"BloodRaw.zip",PackZip);
 	}
 	
 	DownloadPack();

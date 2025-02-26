@@ -57,6 +57,16 @@ input{
 	cursor: pointer;
 }
 
+.logo{
+	pointer-events: all;
+	cursor: pointer;
+	transition: transform 0.3s ease;
+}
+
+.logo:hover {
+	transform: scale(1.1) translateY(10px);
+}
+
 a{
 	color: #9AA171;
 	text-shadow: 0px 10px 15px black;
@@ -75,6 +85,10 @@ a:hover{
 
 .WipLink:hover{
 	color: #961715;
+}
+
+.pe{
+	pointer-events: all;
 }
 </style>
 <link rel="stylesheet" href="source/bloodraw/css.css">
@@ -102,8 +116,55 @@ function SelectVersion(Version){
 	
 	document.getElementById("selected-version-wip").innerHTML = (PackVersions[SelectedVersion]["WIP"]?(RU?"Внимание! Эта версия ещё находится в разработке!":"Attention! This version is still under development!"):"&nbsp;");
 
-	document.getElementById("download").innerText = (RU?"Скачать":"Download") + " " + (PackVersions[SelectedVersion]["ThatTexturePack"]?(RU?"текстур":"texture"):(RU?"ресурс":"resource")) + " " + (RU?"пак":"pack");
+	var sp = "&nbsp;&nbsp;&nbsp;";
+	document.getElementById("download").innerHTML = (RU?"Скачать":"Download") + sp + (PackVersions[SelectedVersion]["ThatTexturePack"]?(RU?"текстур":"texture"):(RU?"ресурс":"resource")) + sp + (RU?"пак":"pack") + sp + "(" + SelectedVersion + ")";
+	document.getElementById("put-folder-name").innerText = ".minecraft\\"+(PackVersions[SelectedVersion]["ThatTexturePack"]?"texturepacks":"resourcepacks");
+	
+	CheckboxPressed("Forge");
+	UpdateModsList();
 }
+
+var ForgeVersion = false;
+
+function CheckboxPressed(t){
+	if(t=="Forge"){
+		ForgeVersion = document.getElementById("checkbox-forge").checked;
+		var VersionHasForge = PackVersions[SelectedVersion]["Forge"];
+		ForgeVersion = ForgeVersion && VersionHasForge;
+		document.getElementById("forge-checkbox").style.display = VersionHasForge?"":"none";
+		document.getElementById("mods").style.display = ForgeVersion?"":"none";
+	}
+}
+
+function AddLine(line,enable){
+	if(!enable){return "";}
+	var Title = "?";
+	var ColorL = "white";
+	var ColorR = "black";
+	if(line=="forge"   ){Title="Forge"   ; ColorL="#304361"; ColorR="#DFA671";}
+	if(line=="optifine"){Title="Optifine"; ColorL="#963435"; ColorR="#F0B240";}
+	return `<img style="width:0.75em; background: linear-gradient(to right, ${ColorL}, ${ColorR}); width:100%; height:3px;" class="pe" src="source/invisible.png" title="${Title}">`;
+}
+
+function AddLines(Version){
+	var i_Forge = PackVersions[Version]["Forge"];
+	var i_Optifine = PackVersions[Version]["Optifine"];
+	
+	var Title = "";
+	function AddToTitle(name,enable){
+		if(enable){
+			if(Title!=""){Title+=", ";}
+			if(Title==""){Title+=(RU?"Содержит":"Includes")+" ";}
+			Title+=name;
+		}
+	}
+	AddToTitle("Forge",i_Forge);
+	AddToTitle("Optifine",i_Optifine);
+	
+	return [Title,AddLine("forge",i_Forge)+AddLine("optifine",i_Optifine)];
+}
+
+var ClickableLogo = `<a onclick="OpenPage('main');"><img class="logo" src="source/bloodraw/logo.png"></a>`;
 
 async function PageGeneratePack(){
 	var Versions = Object.keys(PackVersions).reverse();
@@ -112,36 +173,39 @@ async function PageGeneratePack(){
 	
 	for(const Version of Versions){
 		var wip = PackVersions[Version]["WIP"];
-		VersionsListString += `<a ${wip==true?"class=\"WipLink\"":""} style="word-spacing: 50px;" onclick="SelectVersion('${Version}');">${Version}</a> `;
+		var Lines = AddLines(Version);
+		VersionsListString += `<a ${wip==true?"class=\"WipLink\"":""} style="word-spacing: 50px; display:flex; width:100%; height:100%; justify-content: center; align-items: center;" onclick="SelectVersion('${Version}');"><font style="display:flex; flex-direction:column; gap:2px;"><font title="${Lines[0]}">${Version}</font>${Lines[1]}</font></a> `;
 		if(!wip&&SelectedVersion==""){
 			SelectedVersion = Version;
 		}
 	}
 
-	const Content = `<center><img src="source/bloodraw/logo.png"></center>
+	const Content = `<center>${ClickableLogo}</center>
 <center>${RU?"Конструктор пака в разработке!":"The pack constructor is in development!"}</center>
 <center>${RU?"Выберите версию которую хотите скачать":"Select the version you want to download"}</center>
 <br><center>
-<b>${RU?"В РАЗРАБОТКЕ":"IN DEV."} -></b> <input type="checkbox" checked="checked"> <font>${RU?"Сделать в zip файле?":"Make it into a zip file?"}</font>
+<center><input type="checkbox" checked="checked" id="checkbox-zip-file"> <font>${RU?"Сделать в zip файле?":"Make it into a zip file?"}</font></center>
 <br>
-<b>${RU?"В РАЗРАБОТКЕ":"IN DEV."} -></b> <input type="checkbox" checked="checked"> <font>${RU?"Включить":"Include"} Optifine?</font> &nbsp;&nbsp;&nbsp;&nbsp; <input type="checkbox"> <font>${RU?"Включить":"Include"} Forge ${RU?"и":"and"} Mods?</font>
+<center><div_ id="forge-checkbox"><input type="checkbox" onclick="CheckboxPressed('Forge');" id="checkbox-forge"> <font>${RU?"Включить":"Include"} Forge ${RU?"и":"and"} Mods?</font></div_> &nbsp;&nbsp;&nbsp;&nbsp; <input type="checkbox" checked="checked"> <font>${RU?"Включить":"Include"} Optifine?</font></center>
 </center><br>
 <center>${RU?"Выбрана":"Selected"}: <font id="selected-version">...</font></center>
 <center><font id="selected-version-wip" style="color: #D8211E;"></font></center>
 <br>
 <div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 50vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
-<div style="display: grid; grid-template-columns: repeat(15, 1fr); gap: 10px; justify-content: center; align-items: center; text-align: center;" id="versions">${VersionsListString}</div>
-</div>
+<div style="display: grid; grid-template-columns: repeat(15, 1fr); grid-auto-rows: 75px; justify-content: center; align-items: center; text-align: center;" id="versions">${VersionsListString}</div></div>
 <br>
+<div_ style="display:none;" id="mods"><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 50vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
+<div style="display: grid; grid-template-columns: repeat(10, 1fr); grid-auto-rows: 75px; justify-content: center; align-items: center; text-align: center;" id="mods-list">${RU?"Дождитесь&nbsp;загрузки&nbsp;скриптов!":"Wait&nbsp;for&nbsp;the&nbsp;scripts&nbsp;to&nbsp;load!"}</div></div>
+<br></div_>
 <center><font>${RU?"Ошибок":"Errors"}: <font id="errors">0</font></font></center>
 <br>
-<center><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; width:75%; height: 25vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
-<div style="align-items: center; text-align: center; white-space: nowrap;" id="console"></div>
+<center><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 25vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: left; text-align: left;">
+<div style="align-items: left; text-align: left; white-space: nowrap;" id="console"></div>
 </div></center>
 <br>
-<center><button style="transform:scale(2);" id="download">...</button></center>
+<center><font>${RU?"Перекинуть в папку":"Put in folder"} <b id="put-folder-name">...</b></font></center>
 <br>
-<center><a onclick="OpenPage('main');">${RU?"Вернуться":"Back"}</a></center>`;
+<center><button style="transform:scale(2);" id="download">...</button></center>`;
 
 	body.innerHTML = Content;
 	
@@ -159,7 +223,7 @@ async function PageGeneratePack(){
 }
 
 async function PageStart(){
-	const Content = `<center><img src="source/bloodraw/logo.png"></center>
+	const Content = `<center>${ClickableLogo}</center>
 <center><font style="font-size:1.5em;">${RU?"Сайт по паку <b>BloodRaw</b> для Minecraft!":"Site for the <b>BloodRaw</b> pack for Minecraft!"}</font></center>
 <center><font>${RU?"Автор":"Author"}: Woowz11</font></center>
 <center><font>${RU?"Сайт и пак в разработке!":"Site and pack in development!"}</font></center>
