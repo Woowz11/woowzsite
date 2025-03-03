@@ -24,6 +24,19 @@ html{
     height: 0;
 }
 
+.scrollable::-webkit-scrollbar {
+    width: 12px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: #9AA171;
+    border-radius: 6px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background-color: rgba(0,0,0,0);
+}
+
 body{
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -121,10 +134,12 @@ function SelectVersion(Version){
 	document.getElementById("put-folder-name").innerText = ".minecraft\\"+(PackVersions[SelectedVersion]["ThatTexturePack"]?"texturepacks":"resourcepacks");
 	
 	CheckboxPressed("Forge");
+	CheckboxPressed("Optifine");
 	UpdateModsList();
 }
 
 var ForgeVersion = false;
+var OptifineVersion = false;
 
 function CheckboxPressed(t){
 	if(t=="Forge"){
@@ -133,6 +148,12 @@ function CheckboxPressed(t){
 		ForgeVersion = ForgeVersion && VersionHasForge;
 		document.getElementById("forge-checkbox").style.display = VersionHasForge?"":"none";
 		document.getElementById("mods").style.display = ForgeVersion?"":"none";
+	}
+	if(t=="Optifine"){
+		OptifineVersion = document.getElementById("checkbox-optifine").checked;
+		var VersionHasOptifine = PackVersions[SelectedVersion]["Optifine"];
+		OptifineVersion = OptifineVersion && VersionHasOptifine;
+		document.getElementById("optifine-checkbox").style.display = VersionHasOptifine?"":"none";
 	}
 }
 
@@ -186,7 +207,7 @@ async function PageGeneratePack(){
 <br><center>
 <center><input type="checkbox" checked="checked" id="checkbox-zip-file"> <font>${RU?"Сделать в zip файле?":"Make it into a zip file?"}</font></center>
 <br>
-<center><div_ id="forge-checkbox"><input type="checkbox" onclick="CheckboxPressed('Forge');" id="checkbox-forge"> <font>${RU?"Включить":"Include"} Forge ${RU?"и":"and"} Mods?</font></div_> &nbsp;&nbsp;&nbsp;&nbsp; <input type="checkbox" checked="checked"> <font>${RU?"Включить":"Include"} Optifine?</font></center>
+<center><div_ id="forge-checkbox"><input type="checkbox" onclick="CheckboxPressed('Forge');" id="checkbox-forge"> <font>${RU?"Включить":"Include"} Forge ${RU?"и":"and"} Mods?</font></div_> &nbsp;&nbsp;&nbsp;&nbsp; <div_ id="optifine-checkbox"><input type="checkbox" onclick="CheckboxPressed('Optifine');" id="checkbox-optifine" checked="checked"> <font>${RU?"Включить":"Include"} Optifine?</font></div_></center>
 </center><br>
 <center>${RU?"Выбрана":"Selected"}: <font id="selected-version">...</font></center>
 <center><font id="selected-version-wip" style="color: #D8211E;"></font></center>
@@ -197,15 +218,15 @@ async function PageGeneratePack(){
 <div_ style="display:none;" id="mods"><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 50vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: center; text-align: center;">
 <div style="display: grid; grid-template-columns: repeat(10, 1fr); grid-auto-rows: 75px; justify-content: center; align-items: center; text-align: center;" id="mods-list">${RU?"Дождитесь&nbsp;загрузки&nbsp;скриптов!":"Wait&nbsp;for&nbsp;the&nbsp;scripts&nbsp;to&nbsp;load!"}</div></div>
 <br></div_>
-<center><font>${RU?"Ошибок":"Errors"}: <font id="errors">0</font></font></center>
-<br>
-<center><div style="background-color:rgba(0,0,0,0.2); border-radius: 50px; border: 4px solid rgba(0,0,0,0.3); padding: 20px; box-sizing: border-box; height: 25vh; pointer-events: all; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; justify-content: left; text-align: left;">
-<div style="align-items: left; text-align: left; white-space: nowrap;" id="console"></div>
-</div></center>
 <br>
 <center><font>${RU?"Перекинуть в папку":"Put in folder"} <b id="put-folder-name">...</b></font></center>
 <br>
-<center><button style="transform:scale(2);" id="download">...</button></center>`;
+<center><button style="transform:scale(2);" id="download">...</button></center>
+<br>
+<center><font>${RU?"Ошибок":"Errors"}: <font id="errors">0</font></font></center>
+<br>
+<center><div class="scrollable" style="background-color:rgba(0,0,0,0.2); border-radius:50px; border:4px solid rgba(0,0,0,0.3); padding:20px; box-sizing:border-box; height:auto; display:flex; justify-content:left; text-align:left;"><div>
+<div style="align-items:left; text-align:left; white-space:nowrap;" id="console"></div></div></center>`;
 
 	body.innerHTML = Content;
 	

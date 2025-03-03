@@ -84,6 +84,7 @@ async function AddScript(url,onloadfunc){
 const LoadThatScripts = [
 	"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js",
 	"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
+	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/anims.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/other.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/blocks.js",
 	"https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/resources/info/items.js",
@@ -110,6 +111,7 @@ function CheckScriptLoading(){
     if (PackConstructorScriptsLoaded_Total == LoadThatScripts.length) {
 		PackConstructorScriptsLoaded = true;
 		
+		ResourcePackInfo["anim"]        = ResourcePackInfo_Anims;
 		ResourcePackInfo["other"]       = ResourcePackInfo_Other;
 		ResourcePackInfo["block"]       = ResourcePackInfo_Blocks;
 		ResourcePackInfo["item"]        = ResourcePackInfo_Items;
@@ -449,10 +451,10 @@ function DownloadPack(){
 	CreatingPack = false;
 }
 
-async function FetchURL(Path,IfNotFound = null, ThatError = false){
+async function FetchURL(Path,IfNotFound = null, ThatError = false, OldBase = "?", OldPath = "?"){
 	try {
 		if (ThatError==true){
-			ToConsole(`Файл не найден! Заменяем путь на [${Path}]`,true);
+			ToConsole((RU?`Файл не найден!`:`File not found!`)+" ["+OldBase+"] "+OldPath,true);
 		}
 		const Response = await fetch("https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/" + Path);
 		if (!Response.ok){
@@ -737,7 +739,7 @@ async function InvertTexture(img){
 
 var NotFoundTexture = "resources/textures/notfound.png";
 async function ReadImage(Path,x,y,w,h){
-	const R = await FetchURL(Path,NotFoundTexture,x);
+	const R = await FetchURL(Path,NotFoundTexture,x,y,w);
 	AB = await R.arrayBuffer();
 	if (x!=null&&x!=true){
 		AB = await CropImage(AB,x,y,w,h);
@@ -774,10 +776,12 @@ async function ApplyTextureOption(IMG,N,Base,ID,V,V2,V3,V4){
 	return IMG;
 }
 
-async function GetIDTexture(Base,ID){
+async function GetIDTexture(Base,ID,ReturnInfo){
 	var Info = ResourcePackInfo[Base][ID];
 	if (Info==null){
-		return await ReadImage(NotFoundTexture,true);
+		var NotFound = await ReadImage(NotFoundTexture,true,Base,ID);
+		if(ReturnInfo||Base=="anim"){return [NotFound,null]}
+		return NotFound
 	}
 	var T = Info["Texture"];
 	var AB = await ReadImage("resources/"+T["Path"],T["x"],T["y"],T["w"],T["h"]);
@@ -807,7 +811,20 @@ async function GetIDTexture(Base,ID){
 		}, 'image/png');
 	});
 	document.body.removeChild(C);
-	return NewAB;
+	
+	var Result = NewAB;
+	if(ReturnInfo){
+		Result = [NewAB,Info["Info"],Info];
+	}
+	if(Base=="anim"){
+		Result = [NewAB,Info["Animation"],Info];
+	}
+	
+	return Result;
+}
+
+async function GetIDTextureAnim(ID){
+	return await GetIDTexture("anim",ID)
 }
 
 async function LoadIDTexture(Base,ID){
@@ -1677,9 +1694,37 @@ async function CreateTexturePack(){
 					var PathSplit = Path.split('/');
 					var SelectedFolder = (PathSplit[0]=="blocks"?Blocks:Items);
 					var FileName = PathSplit[1];
-					console.log((RU?"Загрузка":"Loading")+": "+AssetFile[1]);
+					ToConsole((RU?"Загрузка текстуры":"Loading texture")+": ["+AssetFile[0]+"] "+AssetFile[1]);
 					if(AssetType=="texture"){
-						AddFile(SelectedFolder,FileName,await GetIDTexture(AssetFile[0],AssetFile[1]));
+						var TextureInfo = await GetIDTexture(AssetFile[0],AssetFile[1],true);
+						if(TextureInfo[2]!=null){
+							var Info = TextureInfo[2]["Info"];
+							if(Info["anim"]){
+								var AnimInfo = await GetIDTextureAnim(Info["anim"]);
+								if(AnimInfo[1]==null||AnimInfo[2]==null){
+									ToConsole(`Не найдена информация об анимации!`,true);
+								}else{
+									var AnimFramesCount = AnimInfo[2]["Texture"]["h"]/AnimInfo[2]["Texture"]["w"];
+									AddFile(SelectedFolder,FileName,AnimInfo[0]);
+									var AnimSpeed = AnimInfo[1]["Speed"]||1;
+									var AnimFrames = AnimInfo[1]["Frames"];
+									if(AnimFrames==null){
+										AnimFrames = [];
+										for(var i = 0; i < AnimFramesCount; i++){
+											AnimFrames.push(i);
+										}
+									}
+									var AnimationResult = "";
+									for(var i of AnimFrames){
+										if(AnimationResult!=""){AnimationResult+="\n";}
+										AnimationResult += i+(AnimSpeed==1?"":"*"+AnimSpeed);
+									}
+									AddFile(SelectedFolder,FileName.split(".")[0]+".txt",AnimationResult);
+								}
+							}else{
+								AddFile(SelectedFolder,FileName,TextureInfo[0]);
+							}
+						}
 					}
 				}
 			}
@@ -1725,7 +1770,9 @@ async function CreateTexturePack(){
 	await L(Item,"boat.png","entity","boat");
 	await L(Item,"cart.png","entity","minecart");
 	await L(Item,"sign.png","entity","oak_sign");
-	await L(Misc,"dial.png","other","dial");
+	if(TID<13){
+		await L(Misc,"dial.png","other","dial");
+	}
 	await L(Misc,"foliagecolor.png","environment","colormap_foliage");
 	await L(Misc,"grasscolor.png","environment","colormap_grass");
 	await L(Misc,"pumpkinblur.png","gui","overlay_pumpkin");
@@ -1894,13 +1941,53 @@ async function CreateResourcePack(){
 	
 	var Assets = PackFolder.folder("assets");
 	
+	async function AddAssetFileInfo(FileName,Folder,Info){
+		if(Info==null){return true;}
+		var continue_ = true;
+		var Name = FileName.split(".")[0];
+		
+		if(Info["anim"]){
+			var AnimInfo = await GetIDTextureAnim(Info["anim"]);
+			if(AnimInfo[1]!=null){
+				var AnimResult = "";
+				if(AnimInfo[1]["Smooth"]){
+					AnimResult = `"interpolate":${AnimInfo[1]["Smooth"]}`;
+				}
+				if(AnimInfo[1]["Speed"]){
+					if(AnimResult!=""){AnimResult+=",\n";}
+					AnimResult += `"frametime":${AnimInfo[1]["Speed"]}`;
+				}
+				if(AnimInfo[1]["Frames"]){
+					if(AnimResult!=""){AnimResult+=",\n";}
+					var AnimFrames = "";
+					for(var i of AnimInfo[1]["Frames"]){
+						if(AnimFrames!=""){AnimFrames+=",";}
+						AnimFrames += i;
+					}
+					AnimResult += `"frames":[${AnimFrames}]}`;
+				}
+				AddFile(Folder,FileName+".mcmeta",`{"animation":{${AnimResult}}}`)
+				AddFile(Folder,FileName,AnimInfo[0]);
+				continue_ = false;
+			}else{
+				ToConsole(`Не найдена информация об анимации!`,true);
+			}
+		}
+		
+		return continue_;
+	}
+	
 	async function AddAssetFile(FileName,Folder,FileFullInfo,Path){
 		var FileType = FileFullInfo[0];
 		var FileInfo = FileFullInfo[1];
 		
 		if(FileType=="texture"){
 			ToConsole(`${RU?"Загрузка текстуры":"Loading texture"}: ${Path}`);
-			AddFile(Folder,FileName,await GetIDTexture(FileInfo[0],FileInfo[1]));
+			var TextureInfo = await GetIDTexture(FileInfo[0],FileInfo[1],true);
+			var continue_ = await AddAssetFileInfo(FileName,Folder,TextureInfo[1]);
+			if(continue_){
+				AddFile(Folder,FileName,TextureInfo[0]);
+			}
 		}
 	}
 	
