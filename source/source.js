@@ -176,7 +176,9 @@ WoowzsiteSourceAlchemy = AddTableToTable(AddFullnessToTable([
 
 WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"ants","bath_oil_pearls","beer","bg","button","dice","husky","spider_crab","teeth","chess","poison","trash_can","nokia","error","dark","rainbow_tiles","color-tunel","web","melted-dvd","w","face","cheese_mouse","eye",
-	"ie","biohazard","emo_scene_rave_rainbow_smiley","molted","balls","weird","ballons","0_0","rabbit"
+	"ie","biohazard","emo_scene_rave_rainbow_smiley","molted","balls","weird","ballons","0_0","rabbit",
+	"luck","google","icons","media","spore","waterdrop","dymaite","meat","cubemap","(","glass_dog","hart",
+	"4d","cybersport","papa","papapa"
 ],"core-wiki/source/",".png"),AddTableToTable(AddFullnessToTable([
 	"200w","3demail21","acid","ametist","atom1","back","ball","basement","bg","bingus","bubbles","cat-gift","cat","cat_skateboard","cd-rom","centipede","centipede_face","chrome_mans","console","cyclon",
 	"dancing_cat","dark_eye","dark_eye_pyramid","dice_white","donut","dream","email6","emerald","envelope","equalizer","error","face","fish","flame","flowers","godzilla","going_to_hell","got_mail","grapher",
@@ -205,11 +207,20 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"imp005.gif","internetexporgif","a_ilst168","AN385","INTERNET","pistons","gallop","casino2","freestuff2","RotatingMoonMoticon","smuprota","download-gif",
 	"comp3","fish-paint","wallet","tpup","azball","Internet_construction","msinternet","internetfiesta120","wpaa79d628","animoon_e0","churro","newspaper",
 	"animail03","update","InternetLogo","ANISIAMESELAYING","psp","bpmonst","walk","foefilm","maths","phone","Internet2","electrogush2",
-	"slinky","bienbenido_a_mi_sit_en_internet","nota","hands2","chat","eyes","emojis","run","pet","bg2",
+	"slinky","bienbenido_a_mi_sit_en_internet","nota","hands2","chat","eyes","emojis","run","pet",
 	"glitch","rainbow_stars","z","scary","duck","bobls","sad","spiral","comics","eye","prismarine","eye_dark",
-	"wavy","screw2","smarties","opengl","radiation","hippo","wavyhand","cat_monitor","wavyglitch"
+	"wavy","screw2","smarties","opengl","radiation","hippo","wavyhand","cat_monitor","wavyglitch","phone_pink",
+	"vampire","icecream","wavypc","gem","gem_heart","sea_bottom","eyes_blue","bath","login","pc_burn",
+	"sad_normal","emoticon","glitch_wavy","distortion","tv","static","trash_sad","itch","pizza","fuck",
+	"error_glitch","mod","browser","files_xp_3d_model_epic_name","mspaint","window","spam","polygon",
+	"he_walkin","crystal-skull","computer-broken","wow","a_ia_vishy_chto_tam_smile","jewel","bobl",
+	"gem_prism","blob","cloud","orb","diagram","circle","freaky","cube","nasral","marble","atomic",
+	"cube_smooth","chars","portal","gem_spikey","kitty","iraslav_babsik","do_youuuu_know_the_mushroom",
+	"render","yshas","weird","eyes_spiral","eye_God","eyeball","couch","effect","pc-icon","fractal",
+	"triangle_illusino","thing","glint","rainbow_spiral","fraclatekrl","abstract","effeckt","fond",
+	"art","sepsep"
 ],"core-wiki/source/",".gif"),AddFullnessToTable([
-	"vaporwave","window","catbackground"
+	"vaporwave","window","catbackground","accept_christ"
 ],"core-wiki/source/",".jpg")))
 
 BloodrawSkinEditorBody = AddFullnessToTable([
@@ -394,4 +405,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 "роскомнадзор","тварь","мразь","скотина","шлюха","падла","упырок","упырь","жаба","гандон","еблан","хуйлан","аутист","цирк","клоун","шут","дебил","сука","уебан","нежить",
 "прошу прощения, но мы не может перевести текст с неумесным содержанием","узник","казах","блудрав","мазь","суп","тот самый суп","негр","нигер","негры","негроид","негра","niger","негритоски",
 "😊","©","😁","☺","😋","😇","☢","☣","☕ <- JAVA","☨","■","♻","Lithium Universe","Bloodraw","Blood Eye","13:32","c++","PYTHON ГОВНО!!!","сфд","superfighters deluxe","Survival Tools","Extra Backrooms","WVirus","💢","₿",
-"₽","㎏","جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد  جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد :woowz_bloodeye_gold_toilet: 🤬 🤯 من جديد!الشيوعية ستولد  جديد!الشيوعية ستولد من جديد!الشيوعية ستولد 🤟"]
+"₽","㎏","جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد  جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد من جديد!الشيوعية ستولد :woowz_bloodeye_gold_toilet: 🤬 🤯 من جديد!الشيوعية ستولد  جديد!الشيوعية ستولد من جديد!الشيوعية ستولد 🤟",
+"VNNet запрашивает новые разрешения⚠","сын сутенёра"]
