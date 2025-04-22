@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Генерация WCL - Java</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+	<style>
+		html{
+			background-color:black;
+		}
+	
+		.CodeMirror {
+			width: 98%;
+			font-size: 16px;
+			margin: 1%;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+	
+	<button onclick="Download();">Скачать сгенерированное одним ZIP файлом</button>
+</body>
+
+<script>
+	/* В БУДУЩЕМ, WCL будет не только для Java, но и для C++, Lua, JavaScript и т.д, так же будет несколько его вариантов:
+		Язык: Русский или английский
+		Коментарии: С коментариями или без
+		Расширеный: Будет ли иметь в себе расширенные функции (к примеру не только Vector4 а вплоть до Vector10)
+		Компактный: Будет ли он меньше весить но менее читаемый
+		Кастомизация: Позволит называть классы как угодно и добавляет различные модификаторы (только для генерации на сайте)
+	*/
+
+	/* Генерировать javadoc коментарии */
+	var M_JAVADOC = true; /*true*/
+	/* Комментарии */
+	var M_COMMENTS = true; /*true*/
+	/* Добавлять доп. пробелы что-бы не было сжато */
+	var M_SPACES = true; /*true*/
+	
+	/* Строгие по типу данных Vector, если true то допустим Vector3f будет принимать только float */
+	var M_VECTOR_STRICTLY = false; /*false*/
+	/* Кол-во создаваемых векторов */
+	var M_VECTOR_COUNT = 4; /*4 (2-26)*/
+	/* Создать вектор с типом long */
+	var M_VECTOR_LONG = true; /*true*/
+
+	/* Очень сжатый вариант */
+	/*M_JAVADOC = false;
+	M_COMMENTS = false;
+	M_SPACES = false;
+	M_VECTOR_STRICTLY = true;
+	M_VECTOR_COUNT = 4;*/
+
+	var Generated = {};
+
+	function Download(){
+		const zip = new JSZip();
+		for(const [ClassName, ClassContent] of Object.entries(Generated)){
+			zip.file(ClassName+".java", ClassContent);
+		}
+		
+		zip.generateAsync({ type: "blob" }).then(function(content){
+			const url = URL.createObjectURL(content);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = "GENERATED-WCL-JAVA.zip";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		});
+	}
+
+	function CreateScriptPanel(code){
+		const RegexGetClassName = /public\s+class\s+(\w+)\s*{/;
+		Generated[code.match(RegexGetClassName)[1]] = code;
+	
+		var TextArea = document.createElement('textarea');
+		TextArea.id = 'CodeEditor';
+		TextArea.textContent = code;
+		document.body.appendChild(TextArea);
+		
+		var Editor = CodeMirror.fromTextArea(TextArea, {
+			mode: "text/x-java",
+			lineNumbers: true,
+			theme: "default",
+			autoCloseTags: true,
+			matchBrackets: true,
+			autoCloseBrackets: true,
+			indentWithTabs: true,
+			indentUnit: 4
+		});
+		
+		Editor.setSize(null, "auto");
+		Editor.refresh();
+	}
+	
+	/* ===================================================================== */
+	
+	var NumToString = {
+		[1 ]: "Первые",
+		[2 ]: "Вторые",
+		[3 ]: "Третьи",
+		[4 ]: "Четвёртые",
+		[5 ]: "Пятые",
+		[6 ]: "Шестые",
+		[7 ]: "Седьмые",
+		[8 ]: "Восьмые",
+		[9 ]: "Девятые",
+		[10]: "Десятые",
+		[11]: "Одиннадцатые",
+		[12]: "Двенадцатые",
+		[13]: "Тринадцатые",
+		[14]: "Четырнадцатые",
+		[15]: "Пятнадцатые",
+		[16]: "Шестнадцатые",
+		[17]: "Семнадцатые",
+		[18]: "Восемнадцатые",
+		[19]: "Девятнадцатые",
+		[20]: "Двадцатые",
+		[21]: "Двадцать первые",
+		[22]: "Двадцать вторые",
+		[23]: "Двадцать третьи",
+		[24]: "Двадцать четвёртые",
+		[25]: "Двадцать пятые",
+		[26]: "Двадцать шестые"
+	}
+	
+	var Package = "package wcl;";
+	
+	var GeneratedMessage = "/* Этот скрипт сгенерирован Woowzsite для WCL */";
+	
+	var SPACE = (M_SPACES ? " " : "");
+	
+	function CreateVector(Symbols, Type){
+		var Len = Symbols.length;
+		var Vector = "Vector" + Len + Type.charAt(0);
+		var ClassDescription =
+`/**
+ * Класс содержащий в себе ${Len} данных типа ${Type}
+ */`
+		var Result = Package + "\n\n" + GeneratedMessage + "\n" + (M_JAVADOC ? "\n" + ClassDescription : "" ) + "\n" + "public class " + Vector + " {\n\n";
+
+		if(M_COMMENTS){ Result += "\t/* Данные */\n\n"; }
+		
+		for(var i = 0; i < Len; i++){
+			if(M_JAVADOC){ Result += "\t/** " + NumToString[i+1] + " данные */\n"; }
+			Result += "\tpublic " + Type + " " + Symbols.charAt(i) + ";\n";
+		}
+
+		if(M_COMMENTS){ Result += "\n\t/* Создание класса */\n"; } Result += "\n";
+
+		function CreateCreators(NewType){
+			for(var i = 0; i < Len; i++){
+				var Values = "";
+				var Sets = "";
+				var Description = (M_JAVADOC ? "\t/**\n\t * Создаёт " + Vector + " с указанными {@code " + (i+1) + "} данными типа {@code " + NewType + "}\n" : "");
+				for(var j = 0; j < i+1; j++){
+					var Symbol = Symbols.charAt(j);
+				
+					if(Values){ Values += "," + SPACE; }
+					Values += NewType + " " + Symbol;
+					
+					if(Sets){ Sets += SPACE; }
+					Sets += "this." + Symbol + SPACE + "=" + SPACE + (Type == NewType ? "" : "(" + Type + ")") + Symbol + ";";
+					
+					if(M_JAVADOC){
+						Description += "\t * @param " + Symbol + " " + NumToString[j+1] + " данные\n";
+					}
+				}
+				if(M_JAVADOC){ Description += "\t */\n" };
+			
+				var R = Description + "\tpublic " + Vector + "(" + Values + "){" + SPACE;
+				R += Sets;
+				Result += R + SPACE + "}\n";
+			}
+			Result += "\n";
+		}
+		
+		if(M_VECTOR_STRICTLY){ CreateCreators(Type) }else{
+			CreateCreators("float" );
+			CreateCreators("double");
+			CreateCreators("int"   );
+			if(M_VECTOR_LONG){CreateCreators("long"  );}
+		}
+		
+		return Result + "}";
+	}
+	
+	/* ===================================================================== */
+	
+	function AddVector(Symbols){
+		CreateScriptPanel(CreateVector(Symbols,"float" ));
+		CreateScriptPanel(CreateVector(Symbols,"double"));
+		CreateScriptPanel(CreateVector(Symbols,"int"   ));
+		if(M_VECTOR_LONG){CreateScriptPanel(CreateVector(Symbols,"long"  ));}
+	}
+	
+	function AddVectors(Symbols){
+		var Len = Symbols.length;
+		for(var i = 2; i < Len+1; i++){
+			AddVector(Symbols.slice(0,i));
+		}
+	}
+	
+	/* ===================================================================== */
+	
+	AddVectors("xyzwvutsrqpnmlkjhgfdcba".slice(0,M_VECTOR_COUNT));
+	
+</script>
