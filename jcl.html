@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Генерация JAVA кода (не смотреть!!!)</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+	<style>
+		html{
+			background-color:black;
+		}
+	
+		.CodeMirror {
+			width: 98%;
+			font-size: 16px;
+			margin: 1%;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+	
+	<button onclick="Download();">Скачать сгенерированное одним ZIP файлом</button>
+</body>
+
+<script>
+	var Generated = {};
+
+	function Download(){
+		const zip = new JSZip();
+		for(const [ClassName, ClassContent] of Object.entries(Generated)){
+			zip.file(ClassName+".java", ClassContent);
+		}
+		
+		zip.generateAsync({ type: "blob" }).then(function(content){
+			const url = URL.createObjectURL(content);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = "GENERATED-JCL.zip";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		});
+	}
+
+	function CreateScriptPanel(code){
+		const RegexGetClassName = /public\s+class\s+(\w+)\s*{/;
+		Generated[code.match(RegexGetClassName)[1]] = code;
+	
+		var TextArea = document.createElement('textarea');
+		TextArea.id = 'CodeEditor';
+		TextArea.textContent = code;
+		document.body.appendChild(TextArea);
+		
+		var Editor = CodeMirror.fromTextArea(TextArea, {
+			mode: "text/x-java",
+			lineNumbers: true,
+			theme: "default",
+			autoCloseTags: true,
+			matchBrackets: true,
+			autoCloseBrackets: true,
+			indentWithTabs: true,
+			indentUnit: 4
+		});
+		
+		Editor.setSize(null, "auto");
+		Editor.refresh();
+	}
+	
+	/* ===================================================================== */
+	
+	var Package = "package jcl;";
+	
+	var GeneratedMessage = "/* Этот скрипт сгенерирован Woowzsite для JCL */";
+	
+	function CreateVector(Symbols){
+		var Len = Symbols.length;
+		var Vector = "Vector" + Len + "<T>";
+		var ClassDescription =
+`/**
+ * Класс содержащий в себе ${Len} переменных типа <Type>
+ */`
+		var Result = Package + "\n\n" + GeneratedMessage + "\n\n" + ClassDescription + "\n" + "public class " + Vector + " {\n\n";
+
+		Result += "\t/* Создание класса */\n\n";
+
+		function CreateCreators(NewType){
+			for(var i = 0; i < Len; i++){
+				var Values = "";
+				var Description = "\t/**\n\t * Создаёт " + Vector + " с указанными {@code " + (i+1) + "} переменными типа {@code " + NewType + "}\n";
+				for(var j = 0; j < i+1; j++){
+					var Symbol = Symbols.charAt(j);
+				
+					if(Values){ Values += ", "; }
+					Values += NewType + " " + Symbol;
+					
+				}
+				Description += "\t */";
+			
+				var R = Description + "\n\tpublic " + Vector + "(" + Values + "){";
+				
+				Result += R + "}\n";
+			}
+			Result += "\n";
+		}
+		
+		CreateCreators("float" );
+		CreateCreators("double");
+		CreateCreators("int"   );
+		CreateCreators("long"  );
+		
+		return Result + "}";
+	}
+	
+	function ConvertToOtherType(Script, NewType){
+		var T = NewType.charAt(0);
+		return Script.replace(/<T>/g,T).replace(/<Type>/g,NewType);
+	}
+	
+	/* ===================================================================== */
+	
+	function AddVector(Symbols){
+		var VectorResult = CreateVector(Symbols);
+		CreateScriptPanel(ConvertToOtherType(VectorResult,"float" ));
+		CreateScriptPanel(ConvertToOtherType(VectorResult,"double"));
+		CreateScriptPanel(ConvertToOtherType(VectorResult,"int"   ));
+		CreateScriptPanel(ConvertToOtherType(VectorResult,"long"  ));
+	}
+	
+	function AddVectors(Symbols){
+		var Len = Symbols.length;
+		for(var i = 2; i < Len+1; i++){
+			AddVector(Symbols.slice(0,i));
+		}
+	}
+	
+	/* ===================================================================== */
+	
+	//AddVectors("xyzwvutsrq");
+	AddVectors("xyzw");
+	
+</script>
