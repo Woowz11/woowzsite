@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+
+<style>
+html{
+	background-color: lime;
+}
+
+body{
+	overflow: hidden;
+	margin: 0;
+    height: 100vh;
+}
+
+img{
+	position: absolute;
+	top: 25%;
+    left: 36%;
+	width: 500px;
+    height: 500px;
+	transition: transform 0.5s ease;
+	image-rendering: pixelated;
+}
+</style>
+
+<body></body>
+
+<script>
+var imgs = [];
+for(var i = 0; i < 100; i++){
+	const img = document.createElement('img');
+	img.src = "source/god.png";
+	document.body.appendChild(img);
+	var angle2 = Math.random() * 360;
+	var rand1 = (1-(i/100))*1.3;
+	var rand3 = Math.random()*10;
+	img.style.transform = `rotate(${angle2}deg) scale(${rand1},${rand1})`;
+	imgs.push([img,angle2,rand1,rand1,rand3]);
+}
+
+function rotateImage() {
+	for(var imginfo of imgs){
+		imginfo[1] += imginfo[4];
+		imginfo[0].style.transform = `rotate(${imginfo[1]}deg) scale(${imginfo[2]},${imginfo[3]})`;
+	}
+	requestAnimationFrame(rotateImage);
+}
+rotateImage();
+</script>

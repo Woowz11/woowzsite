@@ -39,7 +39,7 @@
 		Кастомизация: Позволит называть классы как угодно и добавляет различные модификаторы (только для генерации на сайте)
 	*/
 
-	const WCL_JAVA_VERSION = 3;
+	const WCL_JAVA_VERSION = 4;
 
 	/* Генерировать javadoc коментарии */
 	var M_JAVADOC = true; /*true*/
@@ -67,9 +67,12 @@
 	var M_VECTOR_LONG = true; /*true*/
 	
 	/* Создать функцию Vector#Set */
-	var M_VECTOR_SET = true; /*true*/
-	/* Функция Vector#Set поддерживает возможность обозначать данные через число */
+	var M_VECTOR_SET = true; /*true*/ /* ФИКС, ЧТО ЕСЛИ FALSE, ТО -> public Vector4l(long x, long y, long z, long w){ this(); Set(x, y, z, w); } ОСТАЁТСЯ Set() + Clear(),Zero(),One(), и т.д */
+	/* Функция Vector#Set поддерживает возможность обозначать данные через число (так же действует на Get) */
 	var M_VECTOR_SET_NUMBER = true; /*true*/
+	
+	/* Создать функцию Vector#Get */
+	var M_VECTOR_GET = true; /*true*/
 	
 	/* Создать функцию Vector#Clear */
 	var M_VECTOR_CLEAR = true; /*true*/
@@ -84,6 +87,9 @@
 	var M_VECTOR_MATH = true; /*true*/
 	/* Содержит функции по типу Sub, Div */
 	var M_VECTOR_MATH_NEGATIVE = true; /*true*/
+	
+	/* Содержит более продвинутую математику? Dot, Normalize, Length и т.д */
+	var M_VECTOR_MATHHARD = true; /*true*/
 
 	/* Очень сжатый вариант */
 	/*M_JAVADOC = false;
@@ -91,6 +97,10 @@
 	M_SPACES = false;
 	M_VECTOR_STRICTLY = true;
 	M_VECTOR_COUNT = 4;*/
+	
+	//M_VECTOR_SET = false;
+	//M_VECTOR_GET = false;
+	//M_VECTOR_MATH = false;
 
 	var Generated = {};
 
@@ -143,6 +153,19 @@
 	}
 	
 	/* ===================================================================== */
+	
+	function MLC(s){ return M_LOWERCASE ? s : s.toUpperCase(); }
+	
+	var Rr = MLC("r");
+	var Cc = MLC("c");
+	var Dd = MLC("d");
+	var Ll = MLC("l");
+	var Nn = MLC("n");
+	var Ss = MLC("s");
+	var Gg = MLC("g");
+	var Aa = MLC("a");
+	var Mm = MLC("m");
+	var Pp = MLC("p");
 	
 	var NumToString = {
 		[1 ]: "Первые",
@@ -215,11 +238,13 @@
 		
 		Result += NextCategory;
 		
-		Result += AddInfo("Vector"      ,M_VECTOR      ,"boolean","WCL содержит вектора?");
-		Result += AddInfo("Vector_Set"  ,M_VECTOR_SET  ,"boolean","Вектора содержат Set?");
-		Result += AddInfo("Vector_Clear",M_VECTOR_CLEAR,"boolean","Вектора содержат Clear?");
-		Result += AddInfo("Vector_Clone",M_VECTOR_CLONE,"boolean","Вектора содержат Clone?");
-		Result += AddInfo("Vector_Math" ,M_VECTOR_MATH ,"boolean","Вектора содержат математику?");
+		Result += AddInfo("Vector"         ,M_VECTOR         ,"boolean","WCL содержит вектора?");
+		Result += AddInfo("Vector_Set"     ,M_VECTOR_SET     ,"boolean","Вектора содержат Set?");
+		Result += AddInfo("Vector_Get"     ,M_VECTOR_GET     ,"boolean","Вектора содержат Get?");
+		Result += AddInfo("Vector_Clear"   ,M_VECTOR_CLEAR   ,"boolean","Вектора содержат Clear?");
+		Result += AddInfo("Vector_Clone"   ,M_VECTOR_CLONE   ,"boolean","Вектора содержат Clone?");
+		Result += AddInfo("Vector_Math"    ,M_VECTOR_MATH    ,"boolean","Вектора содержат математику?");
+		Result += AddInfo("Vector_MathHard",M_VECTOR_MATHHARD,"boolean","Вектора содержат более сложную математику?");
 		
 		Result += NextSubCategory;
 		
@@ -319,7 +344,7 @@
 				if(M_JAVADOC){ Description += "\t */\n" };
 			
 				var R = Description + "\tpublic " + Vector + "(" + Values + "){" + SPACE + (M_TAGS ? "this();" + SPACE : "");
-				R += (M_LOWERCASE ? "s" : "S") + "et(" + Sets + ");";
+				R += Ss + "et(" + Sets + ");";
 				Result += R + SPACE + "}\n";
 			}
 			Result += "\n";
@@ -341,7 +366,7 @@
 			function CreateSetSingle(NewType, i){
 				function F(Symbol,Param){
 					var Description = "\t/**\n\t * Устанавливает данные " + Symbols.charAt(i) + " (" + i + ")\n\t * @param " + Param + " Данные\n\t * @return Результат\n\t */\n";
-					Result += (M_JAVADOC ? Description : "") + "\tpublic " + Vector + " " + (M_LOWERCASE ? "s" : "S") + "et" + Symbol.toString().toUpperCase() + "(" + NewType + " " + Param + "){" + SPACE + "this." + Symbols.charAt(i) + SPACE + "=" + SPACE + (NewType==Type?"":"(" + Type + ")") + Param + ";" + SPACE + "return this;" + SPACE + "}\n";
+					Result += (M_JAVADOC ? Description : "") + "\tpublic " + Vector + " " + Ss + "et" + Symbol.toString().toUpperCase() + "(" + NewType + " " + Param + "){" + SPACE + "this." + Symbols.charAt(i) + SPACE + "=" + SPACE + (NewType==Type?"":"(" + Type + ")") + Param + ";" + SPACE + "return this;" + SPACE + "}\n";
 				}
 				
 				F(Symbols.charAt(i),"v" + (i+1));
@@ -391,7 +416,7 @@
 						Sets += "this." + Symbols.charAt(j) + SPACE + "=" + SPACE + (Type == NewType ? "" : "(" + Type + ")") + LastSymbol + ";";
 					}
 				
-					var R = Description + "\tpublic " + Vector + " " + (M_LOWERCASE ? "s" : "S") + "et(" + Values + "){" + SPACE;
+					var R = Description + "\tpublic " + Vector + " " + Ss + "et(" + Values + "){" + SPACE;
 					R += Sets;
 					Result += R + SPACE + "return this;" + SPACE + "}\n";
 				}
@@ -413,7 +438,7 @@
 						Sets += (j < i ? (NewType==Type?"":"(" + Type + ")") + "v." + Symbols.charAt(Math.min(j,i-1)) : "this." + Symbols.charAt(j));;
 					}
 					var Description = (M_JAVADOC ? "\t/**\n\t * Копирует данные из " + NewVector + " в " + Vector + "\n\t * @param v Откуда копировать\n\t * @return Результат\n\t */\n" : "");
-					var R = "\tpublic " + Vector + " " + (M_LOWERCASE ? "s" : "S") + "et(" + NewVector + " v){" + SPACE + (M_LOWERCASE ? "s" : "S") + "et(" + Sets + ");" + SPACE + "return this;" + SPACE ;
+					var R = "\tpublic " + Vector + " " + Ss + "et(" + NewVector + " v){" + SPACE + "return " + Ss + "et(" + Sets + ");" + SPACE + SPACE ;
 					
 					Result += Description + R + "}\n";
 				}
@@ -426,6 +451,17 @@
 			}
 		}
 		
+		if(M_VECTOR_GET){
+			Result += "\n";
+			for(var i = 0; i < Len; i++){
+				function F(Symbol){
+					Result += (M_JAVADOC ? "\t/**\n\t * Получает данные " + Symbols.charAt(i) + " (" + (i+1) + ")\n\t * @return Данные\n\t */\n" : "") + "\tpublic " + Type + " " + Gg + "et" + Symbol.toString().toUpperCase() + "(){" + SPACE + "return " + Symbols.charAt(i) + ";" + SPACE + "}\n"
+				}
+				F(Symbols.charAt(i));
+				if(M_VECTOR_SET_NUMBER){ F(i+1); }
+			}
+		}
+		
 		Result += "\n";
 		
 		if(M_COMMENTS){ Result += "\t/* Дополнительные назначение данных */\n\n"; }
@@ -433,7 +469,7 @@
 		if(M_VECTOR_CLEAR){
 			var ClearSets = "";
 			for(var i = 0; i < Len; i++){ if(ClearSets){ ClearSets += "," + SPACE; } ClearSets += "0"; }
-			Result += (M_JAVADOC ? "\t/**\n\t * Очищает " + Vector + "\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + (M_LOWERCASE ? "c" : "C") + "lear(){" + SPACE + (M_LOWERCASE ? "s" : "S") + "et(" + ClearSets + ");" + SPACE + "return this;" + SPACE + "}\n";
+			Result += (M_JAVADOC ? "\t/**\n\t * Очищает " + Vector + "\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Cc + "lear(){" + SPACE + "return " + Ss + "et(" + ClearSets + ");" + SPACE + "}\n";
 		}
 		
 		if(Object.keys(M_VECTOR_CONSTANTS).length > 0){
@@ -448,7 +484,7 @@
 			
 				Result += (M_JAVADOC ? "\t/**\n\t * Создаёт " + Vector + " со значениями " + ConstantSets + "\n\t * @return " + Vector + " со значениями " + ConstantSets + "\n\t */\n" : "" ) + "\tpublic static " + Vector + " " + ConstantName + "(){" + SPACE + "return new " + Vector + "(" + ConstantSets + ");" + SPACE + "}\n";
 				
-				Result += (M_JAVADOC ? "\t/**\n\t * Устанавливает значения " + ConstantSets + "\n\t * @return Результат\n\t */\n" : "" ) + "\tpublic " + Vector + " " + (M_LOWERCASE ? ConstantName.toLowerCase() : ConstantName.charAt(0) + ConstantName.slice(1).toLowerCase() ) + "(){" + SPACE + (M_LOWERCASE ? "s" : "S") + "et(" + ConstantSets + ");" + SPACE + "return this;" + SPACE + "}\n";
+				Result += (M_JAVADOC ? "\t/**\n\t * Устанавливает значения " + ConstantSets + "\n\t * @return Результат\n\t */\n" : "" ) + "\tpublic " + Vector + " " + (M_LOWERCASE ? ConstantName.toLowerCase() : ConstantName.charAt(0) + ConstantName.slice(1).toLowerCase() ) + "(){" + SPACE + "return " + Ss + "et(" + ConstantSets + ");" + SPACE + "}\n";
 			}
 			for(var key in M_VECTOR_CONSTANTS){ CreateConstant(key,M_VECTOR_CONSTANTS[key]); }
 		}
@@ -502,7 +538,7 @@
 							if(Sets){ Sets += "," + SPACE; }
 							Sets += ((j < Math.min(i,Len)) ? "v." + Symbols[j] : Def);
 						}
-						Result += (M_JAVADOC ? "\t/**\n\t * " + FormulaDesc + " " + NewVector + " к " + Vector + "\n\t * @param v Вектор\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Name + "(" + NewVector + " v){" + SPACE + Name + "(" + Sets + ");" + SPACE + "return this;" + SPACE + "}\n";
+						Result += (M_JAVADOC ? "\t/**\n\t * " + FormulaDesc + " " + NewVector + " к " + Vector + "\n\t * @param v Вектор\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Name + "(" + NewVector + " v){" + SPACE + "return " + Name + "(" + Sets + ");" + SPACE + SPACE + "}\n";
 					}
 				}
 				
@@ -514,15 +550,148 @@
 				}
 			}
 			
-			CreateMathOperation((M_LOWERCASE ? "a" : "A") + "dd","+","Прибавляет",0);
+			CreateMathOperation(Aa + "dd","+","Прибавляет",0);
 			Result += "\n";
-			CreateMathOperation((M_LOWERCASE ? "m" : "M") + "ul","*","Умножает",1);
+			CreateMathOperation(Mm + "ul","*","Умножает",1);
 			Result += "\n";
 			if(M_VECTOR_MATH_NEGATIVE){
-				CreateMathOperation((M_LOWERCASE ? "s" : "S") + "ub","-","Вычитает",0);
+				CreateMathOperation(Ss + "ub","-","Вычитает",0);
 				Result += "\n";
-				CreateMathOperation((M_LOWERCASE ? "d" : "D") + "iv","/","Делит",1);
+				CreateMathOperation(Dd + "iv","/","Делит",1);
 			}
+		}
+		
+		if(M_VECTOR_MATHHARD){
+			if(M_COMMENTS){ Result += "\n\t/* Сложная математика */\n\n"; }
+			
+			/* MAX & MIN */
+			function CreateMaxMin(NewType){
+				function F(Name, Desc){
+					var Values = "";
+					var Sets = "";
+					var Sets2 = "";
+					var Desc2 = "";
+					for(var i = 0; i < Len; i++){
+						if(Values){ Values += "," + SPACE; }
+						Values += NewType + " " + Symbols.charAt(i);
+						
+						if(Sets){ Sets += "," + SPACE; }
+						Sets += "Math." + Name.toLowerCase() + "(this." + Symbols.charAt(i) + "," + SPACE + Symbols.charAt(i) + ")"
+						
+						if(Sets2){ Sets2 += "," + SPACE; }
+						Sets2 += "v." + Symbols.charAt(i);
+						
+						Desc2 += "\t * @param " + Symbols.charAt(i) + " " + NumToString[i+1] + " данные\n";
+					}
+					Result += (M_JAVADOC ? "\t/**\n\t * Берёт " + Desc + " данные из двух векторов\n" + Desc2 + "\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Name + "(" + Values + "){" + SPACE + "return " + Ss + "et(" + Sets + ");" + SPACE + "}\n";
+					
+					var NewVector = "Vector" + Len + NewType.charAt(0);
+					Result += (M_JAVADOC ? "\t/**\n\t * Берёт " + Desc + " данные из двух векторов\n\t * @param v Вектор\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Name + "(" + NewVector + " v){" + SPACE + "return " + Name + "(" + Sets2 + ");" + SPACE + "}\n";
+				}
+				F(Mm+"ax","максимальные");
+				F(Mm+"in","минимальные");
+			}
+			if(M_VECTOR_STRICTLY){ CreateMaxMin(Type) }else{
+				CreateMaxMin("float" );
+				CreateMaxMin("double");
+				CreateMaxMin("int"   );
+				if(M_VECTOR_LONG){CreateMaxMin("long");}
+			}
+			
+			/* DOT */
+			function CreateDot(NewType){
+				var Values = "";
+				var Returns = "";
+				var Sets = "";
+				var Desc = "";
+				for(var i = 0; i < Len; i++){
+					if(Values){ Values += "," + SPACE; }
+					Values += NewType + " " + Symbols.charAt(i);
+					
+					if(Returns){ Returns += SPACE + "+" + SPACE; }
+					Returns += "this." + Symbols.charAt(i) + SPACE + "*" + SPACE + (NewType==Type ? "" : "("+Type+")") + Symbols.charAt(i);
+					
+					Desc += "\t * @param " + Symbols.charAt(i) + " " + NumToString[i+1] + " данные\n";
+					
+					if(Sets){ Sets += "," + SPACE; }
+					Sets += "v." + Symbols.charAt(i);
+				}
+				Result += (M_JAVADOC ? "\t/**\n\t * Вычисляет скалярное произведение\n" + Desc + "\t * @return Скалярное произведение\n\t */\n" : "") + "\tpublic " + Type + " " + Dd + "ot(" + Values + "){" + SPACE + "return " + Returns + ";" + SPACE + "}\n"
+			
+				var NewVector = "Vector" + Len + NewType.charAt(0);
+				Result += (M_JAVADOC ? "\t/**\n\t * Вычисляет скалярное произведение\n\t * @param v Вектор\n\t * @return Скалярное произведение\n\t */\n" : "") + "\tpublic " + Type + " " + Dd + "ot(" + NewVector + " v){" + SPACE + "return " + Dd + "ot(" + Sets + ");" + SPACE + "}\n";
+			}
+			if(M_VECTOR_STRICTLY){ CreateDot(Type) }else{
+				CreateDot("float" );
+				CreateDot("double");
+				CreateDot("int"   );
+				if(M_VECTOR_LONG){CreateDot("long");}
+			}
+			
+			Result += "\n";
+			
+			/* LENGTHSQUARED */
+			var LengthSets = "";
+			for(var i = 0; i < Len; i++){
+				if(LengthSets){ LengthSets += SPACE + "+" + SPACE; }
+				LengthSets += Symbols.charAt(i) + SPACE + "*" + SPACE + Symbols.charAt(i);
+			}
+			Result += (M_JAVADOC ? "\t/**\n\t * Квадрат длины вектора\n\t * @return Квадрат длины вектора\n\t */\n" : "") + "\tpublic double " + Ll + "engthSquared(){" + SPACE + "return " + LengthSets + ";" + SPACE + "}\n"
+			
+			Result += "\n";
+			
+			/* LENGTH */
+			Result += (M_JAVADOC ? "\t/**\n\t * Вычисляет длину вектора\n\t * @return Длина вектора\n\t */\n" : "") + "\tpublic double " + Ll + "ength(){" + SPACE + "return Math.sqrt(" + Ll + "engthSquared());" + SPACE + "}\n";
+		
+			Result += "\n";
+		
+			/* NORMALIZE */
+			var NormalizeSets = "";
+			for(var i = 0; i < Len; i++){
+				if(NormalizeSets){ NormalizeSets += "," + SPACE; }
+				NormalizeSets += "this." + Symbols.charAt(i) + SPACE + "/" + SPACE + "l";
+			}
+			Result += (M_JAVADOC ? "\t/**\n\t * Нормализует вектор (делая его длину 1)\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Nn + "ormalize(){" + SPACE + Type + " l" + SPACE + "=" + SPACE + (Type=="double" ? "" : "("+Type+")") + Ll + "ength();" + SPACE + "return " + Ss + "et(" + NormalizeSets + ");" + SPACE + "}\n"
+		
+			Result += "\n";
+			
+			/* LERP */
+			function CreateLerp(NewType){
+				var LerpSets = "";
+				for(var i = 0; i < Len; i++){
+					// x + (v.x - x) * t
+					if(LerpSets){ LerpSets += "," + SPACE; }
+					LerpSets += (NewType==Type?"":"(" + NewType + ")(") + Symbols.charAt(i) + SPACE + "+" + SPACE + "(v." + Symbols.charAt(i) + SPACE + "-" + SPACE + Symbols.charAt(i) + ")" + (NewType==Type?"":")") + SPACE + "*" + SPACE + "t";
+				}
+				Result += (M_JAVADOC ? "\t/**\n\t * Смешивает " + Vector + " и " + Vector + " по {@code t}/{@code 100%} - Линейная интерполяция\n\t * @param v Из какого вектора брать данные\n\t * @param t Процент соотношения {@code t}/{@code 100%}\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Ll + "erp(" + Vector + " v," + SPACE + NewType + " t){" + SPACE + "return " + Ss + "et(" + LerpSets + ");" + SPACE + "}\n";
+			}
+			CreateLerp("float");
+			CreateLerp("double");
+			
+			Result += "\n";
+			
+			/* ROTATE */
+			function CreateRotate(NewType){
+				var RotateSets = "";
+				for(var i = 2; i < Len; i++){
+					RotateSets = "," + SPACE;
+					RotateSets += Symbols.charAt(i);
+				}
+				Result += (M_JAVADOC ? "\t/**\n\t * Поворачивает вектор по радианам\n\t * @param rad Радиан\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Rr + "otate(" + NewType + " rad){\n\t\tdouble s" + SPACE + "=" + SPACE + "Math.sin(rad);\n\t\tdouble c" + SPACE + "=" + SPACE + "Math.cos(rad);\n\t\t" + Ss + "et(" + (Type=="double"?"":"("+Type+")(") + Symbols.charAt(0) + SPACE + "*" + SPACE + "c" + SPACE + "-" + SPACE + Symbols.charAt(1) + SPACE + "*" + SPACE + "s" + (Type=="double"?"":")") + "," + SPACE + (Type=="double"?"":"("+Type+")(") + Symbols.charAt(0) + SPACE + "*" + SPACE + "s" + SPACE + "+" + SPACE + Symbols.charAt(1) + SPACE + "*" + SPACE + "c" + (Type=="double"?"":")") + RotateSets + ");\n\t\treturn this;\n\t}\n";
+				Result += (M_JAVADOC ? "\t/**\n\t * Поворачивает вектор по градусам\n\t * @param deg Градус\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Rr + "otateDeg(" + NewType + " deg){\n\t\tdouble rad" + SPACE + "=" + SPACE + "Math.toRadians(deg);\n\t\treturn " + Rr + "otate(rad);\n\t}\n";
+			}
+			CreateRotate("float");
+			CreateRotate("double");
+		
+			Result += "\n";
+			
+			/* PROJECT */
+			Result += (M_JAVADOC ? "\t/**\n\t * Вычисляет проекцию вектора на другой вектор\n\t * @param v Другой вектор\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Pp + "roject(" + Vector + " v){" + SPACE + "double dot" + SPACE + "=" + SPACE + Dd + "ot(v);" + SPACE + "double lenSq" + SPACE + "=" + SPACE + "v." + Dd + "ot(v);" + SPACE + "return " + Ss + "et(v." + Cc + "lone()." + Mm + "ul(dot" + SPACE + "/" + SPACE + "lenSq));" + SPACE + "}\n";
+		
+			Result += "\n";
+		
+			/* REFLECT */
+			Result += (M_JAVADOC ? "\t/**\n\t * Отражает вектор относительно нормали\n\t * @param normal Нормаль\n\t * @return Результат\n\t */\n" : "") + "\tpublic " + Vector + " " + Rr + "eflect(" + Vector + " normal){" + SPACE + "return " + Ss + "ub(normal." + Cc + "lone()." + Mm + "ul(2" + SPACE + "*" + SPACE + Dd + "ot(normal)));" + SPACE + "}\n";
 		}
 		
 		if(M_COMMENTS){ Result += "\n\t/* Остальное */\n\n"; }
@@ -533,7 +702,7 @@
 				if(CloneSets){ CloneSets += "," + SPACE; }
 				CloneSets += "this." + Symbols.charAt(i);
 			}
-			Result += (M_JAVADOC ? "\t/**\n\t * Создаёт копию " + Vector + "\n\t * @return Копия\n\t */\n" : "") + "\tpublic " + Vector + " " + (M_LOWERCASE ? "c" : "C") + "lone(){" + SPACE + "return new " + Vector + "(" + CloneSets + ");" + SPACE + "}\n";
+			Result += (M_JAVADOC ? "\t/**\n\t * Создаёт копию " + Vector + "\n\t * @return Копия\n\t */\n" : "") + "\tpublic " + Vector + " " + Cc + "lone(){" + SPACE + "return new " + Vector + "(" + CloneSets + ");" + SPACE + "}\n";
 		}
 		
 		var ToStringSets = "";
