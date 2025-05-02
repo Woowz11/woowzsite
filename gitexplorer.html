@@ -1,36 +1,289 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub API Example</title>
+	<link rel="icon" type="image/x-icon" href="source/griffer.ico">
+    <title>GitExplorer</title>
+	<style>
+
+html{
+	font-family: cursive;
+}
+
+body{
+	margin        : 0     ;
+	padding       : 0     ;
+	height        : 100%  ;
+	display       : flex  ;
+    flex-direction: column;
+}
+
+	</style>
 </head>
-<body>
-    <h1>Files in Repository</h1>
-    <ul id="file-list"></ul>
+<body id="body"></body>
 
-    <script>
-        const owner = 'Woowz11';
-        const repo = 'GitExplorer-test';
+<script>
+const Body = document.getElementById("body");
 
-        async function getRepositoryFiles() {
-            const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`;
-            const response = await fetch(url);
-            const data = await response.json();
-            return data.tree;
-        }
+//---------------------------------------
 
-        async function displayFiles() {
-            const files = await getRepositoryFiles();
-            const fileList = document.getElementById('file-list');
-            files.forEach(file => {
-                const listItem = document.createElement('li');
-                listItem.textContent = file.path;
-                fileList.appendChild(listItem);
-            });
-        }
+var CurrentScale = 1;
 
-        displayFiles();
-    </script>
-</body>
-</html>
+//---------------------------------------
+
+function ScreenAddition(){
+	return `<div id="canvases" style="${DEBUG_SaveCanvas?"":"display:none;"}"></div>`;
+}
+
+function Screen_Start(){
+	var Content = 
+`<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="https://github.com/Woowz11/GitExplorer-test">
+<button onclick="OpenRepo();">Начать</button>`;
+	Body.innerHTML = Content + ScreenAddition();
+}
+
+function Screen_Explorer(){
+	var Content = 
+`<style>
+.NotExplorer{
+	height: 125px;
+}
+
+.Explorer{
+	height: calc(100vh - 125px);
+}
+
+.Middle{
+	height: calc(100% - 2em);
+	display: flex;
+	overflow: hidden;
+	background-color:black;
+}
+.Bottom{
+	height: 2em; 
+	display: flex;
+	align-items: center;
+	padding-left : 7px;
+	padding-right: 7px;
+	background-color:rgb(128,128,128);
+}
+.Left{
+	width: 300px;
+	transition: width 0.3s ease;
+	background-color:white;
+}
+.Right{
+	width: calc(100% - 300px);
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr));
+	grid-template-rows   : repeat(auto-fill, ${CurrentScale*200}px); 
+	gap: 10px;
+	padding: 10px;
+	transition: width 0.3s ease;
+	overflow-x: hidden;
+	overflow-y: auto;
+	background-color:yellow;
+}
+
+@media (max-width: 700px) {
+	.Left{
+		width: 0%;
+	}
+	.Right{
+		width: 100%;
+	}
+}
+
+@media (max-height: 156px) {
+	.Middle{
+		display: none;
+	}
+	.NotExplorer{
+		height: calc(100vh - 2em);
+	}
+	.Explorer{
+		height: calc(100vh - (100vh - 2em));
+	}
+}
+
+.BottomCenter{
+	margin-left : auto;
+	margin-right: auto;
+}
+
+.File{
+	height: ${CurrentScale*200}px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.FileIcon{
+	margin-bottom: 2.5px;
+}
+
+.FileName{
+	word-wrap: break-word;
+}
+
+.FileIcon_IMG{
+	width: 100%;
+	height: auto;
+}
+
+</style>
+<div class="NotExplorer"><button onclick="StartScreen();">Новый репозиторий</button></div>
+<div class="Explorer">
+	<div class="Middle">
+		<div class="Left"></div>
+		<div class="Right" id="explorer-content"></div>
+	</div>
+	<div class="Bottom">
+		Элементов: <t id="bottom-elements-count">?</t>
+		<div class="BottomCenter">
+			CENTER
+		</div>
+		<div class="BottomRight">
+			<input type="range" id="bottom-scale" min="0" max="100" value="${CurrentScale*75}">
+		</div>
+	</div>
+</div>`;
+	Body.innerHTML = Content + ScreenAddition();
+	
+	document.getElementById("bottom-scale").addEventListener("input", function() {
+		CurrentScale = Math.max(0.01,this.value/75);
+		document.querySelectorAll(".File"    ).forEach(File => { File.style.height = `${CurrentScale*200}px`; });
+		document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale}em`; });
+		var qS_R = document.querySelector(".Right");
+		qS_R.style.gridTemplateColumns = `repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr))`;
+		qS_R.style.gridTemplateRows    = `repeat(auto-fill, ${CurrentScale*200}px)`;
+	});
+}
+
+//---------------------------------------
+
+function StartScreen(){
+	Screen_Start();
+}
+
+async function OpenRepo(){
+	const RepoURL = document.getElementById("repo").value;
+	try{
+		if(!RepoURL){ throw new Error("Не указан репозиторий!"); }
+		const RepoURL_Parts = RepoURL.split('/');
+		if(RepoURL_Parts.length < 5 || RepoURL_Parts[2] !== "github.com"){ throw new Error("Неверно указана ссылка репозитория!"); }
+		
+		const Owner = RepoURL_Parts[3];
+		const Repo  = RepoURL_Parts[4];
+		const API   = `https://api.github.com/repos/${Owner}/${Repo}/git/trees/main?recursive=1`;
+		
+		try{
+			const Response = await fetch(API);
+			if(!Response.ok){ throw new Error("Не получилось response!"); }
+			const Data = await Response.json();
+			await GoTo(Data.tree.filter(item => !item.path.includes('/')));
+		}catch(error){
+			throw new Error("Не получилось получить файлы: " + error);
+		}
+	}catch(error){
+		alert("Не получилось открыть репозиторий: " + error);
+	}
+}
+
+async function GoTo(Data){
+	Screen_Explorer();
+	Data.forEach(File => {
+		ShowFile(File);
+	});
+	
+	document.getElementById("bottom-elements-count").innerText = Data.length;
+}
+
+//---------------------------------------
+
+async function ShowFile(File){
+	console.log(File);
+	var Content = `<div class="File" id="${File.sha}"><t class="FileIcon" id="file-icon"><img class="FileIcon_IMG" src="${await GetIcon(File,false)}"></t><t class="FileName" id="file-name">${File.path}</t></div>`;
+	document.getElementById("explorer-content").innerHTML += Content;
+	ShowFile_Extend(File);
+}
+
+async function GetIcon(File,Extend){
+	if(!Extend){
+		if(File.type==="tree"){ return await GenerateFastFolder(File); }
+		return Math.random()>0.5?"source/test.jpg":"source/s.gif";
+	}else{
+		return "source/empty.png";
+	}
+}
+
+async function ShowFile_Extend(File){
+
+}
+
+//---------------------------------------
+
+const DEBUG_SaveCanvas = true;
+const IconSize = 512;
+const ErrorImage = "source/error-image.png";
+
+async function GenerateFastFolder(File){
+	try{
+		const C = GenerateCanvas(IconSize,IconSize);
+		const c = C.getContext("2d");
+
+		c.fillStyle = "lightblue";
+		c.fillRect(0,0,C.width,C.height);
+		c.fillStyle = "red";
+		c.font = "48px serif";
+		c.fillText("hello",50,100);
+		
+		await c_OverImage(c,/*"ge/folder_bottom.png"*/"https://woowz11.github.io/woowzsite/source/quare.png",0,0,IconSize,IconSize);
+		
+		var Result = C.toDataURL();
+		ClearCanvas(C);
+		return Result;
+	}catch(error){
+		console.error("Не получилось GenerateFastFolder: " + error);
+		return ErrorImage;
+	}
+}
+
+async function c_OverImage(c,Path,x,y,w,h){
+	try{
+		const I = new Image();
+		I.crossOrigin = "anonymous";
+		I.src = Path;
+		
+		await new Promise((resolve, reject) => {
+            I.onload = function() {
+                c.drawImage(I, x, y, w, h);
+                resolve();
+            };
+            I.onerror = function() {
+                reject(new Error("Произошла ошибка при загрузке изображения!"));
+            };
+        });
+	}catch(error){
+		console.error("Не получилось OverImage: " + error);
+	}
+}
+
+function GenerateCanvas(w,h){
+	const C = document.createElement("canvas");
+	C.width = w; C.height = h;
+	document.getElementById("canvases").appendChild(C);
+	return C;
+}
+function ClearCanvas(C){
+	if(!DEBUG_SaveCanvas){
+		C.remove();
+	}
+}
+
+//---------------------------------------
+
+StartScreen();
+
+</script>

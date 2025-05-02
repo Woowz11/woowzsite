@@ -115,7 +115,12 @@ div{
 			<button onclick="LoadAll()">Загрузить всё</button>
 			<input type="checkbox" id="checkbox" name="checkbox" style="Transform: scale(1.6) translateY(1px);" onchange="var value=document.getElementById('checkbox').checked;ChangeStyle('image',value?'image-rendering: auto;':'image-rendering: pixelated;');"> <font class="white-font">Сделать изображения размытыми</font>
 			<div style="float: right"><input type="range" min="0.2" max="2" step="0.01" value="0.5" id="range"><font class="white-font">Размер ячеек</font> <button onclick="ChangeSize(true);">Сбросить</button></div>
-			<hr></div>
+			</div>
+		<div style="margin-bottom:10px;padding:5px;background-color:rgba(0,0,0,0.2);"><hr><div style="display:flex;">
+			<div style="margin-left:12.5%;"><div style="width:200px;height:200px;background-color:rgb(0,0,0,0.2);align-items: center;display: flex;justify-content: center;" id="rand-i"></div><center><button onclick="Button_Rand('i');">Случайная<br>картинка</button></center></div>
+			<div style="margin-left:auto;"><div style="width:200px;height:200px;background-color:rgb(0,0,0,0.2);align-items: center;display: flex;justify-content: center;" id="rand-v"></div><center><button onclick="Button_Rand('v');">Случайное<br>видео</button></div>
+			<div style="margin-left:auto;margin-right:12.5%;"><div style="width:200px;height:200px;align-items: center;display: flex;justify-content: center;" id="rand-a"></div><center><button onclick="Button_Rand('a');">Случайное<br>аудио</button></div>
+		</div><hr></div>
 		<font class="white-font" style="font-size:5em;">(<font id="total-loading">?</font>/<font id="total-all">?</font>) <font id="total-proc">?</font>% <font id="finish-ms" style="font-size: 0.75em;"></font></font>
 		<div id="explorer"></div>
 	</div>
@@ -147,6 +152,26 @@ div{
 		"mp4": "VIDEO",
 		"mp3": "AUDIO",
 	}
+	
+	function Button_Rand(id){
+		const Container = document.getElementById("rand-"+id);
+		if(id==="i"){
+			const images = GetAllWoowzsiteImages();
+			const image = images[Math.floor(Math.random() * images.length)];
+			Container.innerHTML = `<img style="width:100%;height:100%;object-fit:contain;" src="${image}">`;
+		}else if(id==="v"){
+			const videos = WoowzsiteSourceVideos;
+			const video = videos[Math.floor(Math.random() * videos.length)];
+			Container.innerHTML = `<video style="width:100%;height:100%;object-fit:contain;" controls="" loop="" src="${video}"></video>`;
+		}else{
+			const audios = GetAllWoowzsiteAudios();
+			const audio = audios[Math.floor(Math.random() * audios.length)];
+			Container.innerHTML = `<audio style="width:100%;" controls="" loop="" src="${audio}"></audio>`;
+		}
+	}
+	Button_Rand("i");
+	Button_Rand("v");
+	Button_Rand("a");
 	
 	async function CopyToClipboard(text) {
 		console.log("Copy ["+text+"]");
@@ -430,6 +455,7 @@ select{
 		"woowzcore/source/*.png"       :WoowzsiteSourceWoowzcore,
 		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
 		"bloodraw/skineditor/*"        :GetAllBloodrawSkinEditor(),
+		"ge/*"                         :GitExplorerSource,
 		"source/*.mp4"                 :WoowzsiteSourceVideos,
 		"source/*.mp3"                 :WoowzsiteSourceAudios,
 		"source/woowzcore/musics/*.mp3":WoowzcoreMusics,
