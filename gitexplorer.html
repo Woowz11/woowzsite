@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API Example</title>
+</head>
+<body>
+    <h1>Files in Repository</h1>
+    <ul id="file-list"></ul>
+
+    <script>
+        const owner = 'Woowz11';
+        const repo = 'GitExplorer-test';
+
+        async function getRepositoryFiles() {
+            const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.tree;
+        }
+
+        async function displayFiles() {
+            const files = await getRepositoryFiles();
+            const fileList = document.getElementById('file-list');
+            files.forEach(file => {
+                const listItem = document.createElement('li');
+                listItem.textContent = file.path;
+                fileList.appendChild(listItem);
+            });
+        }
+
+        displayFiles();
+    </script>
+</body>
+</html>
