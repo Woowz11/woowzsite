@@ -335,7 +335,35 @@ async function ShowFile(File){
 async function GetIcon(File,Extend){
 	if(!Extend){
 		if(File.type==="tree"){ return await GenerateFastFolder(File); }
-		return FileImage;
+		
+		var Result = FileImage;
+		
+		var Icons = {
+			"png" : "image_png",
+			"jpg" : "image_jpg",
+			"jpeg": "image_jpg",
+			"cur" : "image_cur",
+			"bmp" : "image_bmp",
+			"dib" : "image_bmp",
+			"rle" : "image_bmp",
+			"tga" : "image_tga",
+			"tpic": "image_tga",
+			"vda" : "image_tga",
+			"vst" : "image_tga",
+			"icb" : "image_tga",
+			"tif" : "image_tif",
+			"tiff": "image_tif",
+			"ico" : "image_ico",
+			"dds" : "image_dds",
+			"pdn" : "image_pdn",
+			"psd" : "image_psd"
+		}
+		var Extension = null;
+		if(File.path.includes(".")){
+			Extension = File.path.split('.').pop().toLowerCase();
+			if(Icons[Extension]){ Result = "ge/" + Icons[Extension] + ".png"; }
+		}
+		return Result;
 	}else{
 		return "source/empty.png";
 	}
@@ -360,24 +388,6 @@ async function GenerateFastFolder(File){
 		const c = C.getContext("2d");
 		
 		c_OverImage(c,await GetImage("https://woowz11.github.io/woowzsite/ge/folder_bottom.png"),0,0);
-		
-		const RandColors = [0,117,-124];
-		const RandBright = [0,75 ,-75 ];
-		
-		const ColorRands = await GetRandomNumbersFromSha(File.sha, 6);
-		
-		var Color1 = await GetImage("https://woowz11.github.io/woowzsite/ge/folder_bottom_marker1.png");
-		var Color2 = await GetImage("https://woowz11.github.io/woowzsite/ge/folder_bottom_marker2.png");
-		var Color3 = await GetImage("https://woowz11.github.io/woowzsite/ge/folder_bottom_marker3.png");
-		
-		if(ColorRands[0]>0.5){Color1 = i_ChangeHue(Color1,RandColors[Math.floor(ColorRands[3] * RandColors.length)]);}else{Color1 = i_Brightness(i_ToGray(Color1),RandBright[Math.floor(ColorRands[3] * RandBright.length)]);}
-		if(ColorRands[1]>0.5){Color2 = i_ChangeHue(Color2,RandColors[Math.floor(ColorRands[4] * RandColors.length)]);}else{Color2 = i_Brightness(i_ToGray(Color2),RandBright[Math.floor(ColorRands[4] * RandBright.length)]);}
-		if(ColorRands[2]>0.5){Color3 = i_ChangeHue(Color3,RandColors[Math.floor(ColorRands[5] * RandColors.length)]);}else{Color3 = i_Brightness(i_ToGray(Color3),RandBright[Math.floor(ColorRands[5] * RandBright.length)]);}
-		
-		c_OverImage(c,Color1,0,0);
-		c_OverImage(c,Color2,0,0);
-		c_OverImage(c,Color3,0,0);
-		
 		c_OverImage(c,await GetImage("https://woowz11.github.io/woowzsite/ge/folder_top.png"),0,0);
 		
 		var Result = C.toDataURL();

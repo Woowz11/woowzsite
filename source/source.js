@@ -141,7 +141,8 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 ],"source/discordavatars/",".gif"))
 
 GitExplorerSource = AddFullnessToTable([
-	"folder_bottom","folder_top","folder_bottom_marker1","folder_bottom_marker2","folder_bottom_marker3","file","file_unknown","folder_unknown"
+	"folder_bottom","folder_top","folder_bottom_marker1","folder_bottom_marker2","folder_bottom_marker3","file","file_unknown","folder_unknown","image_png","image_jpg","image_bmp","image_tga",
+	"image_tif","image_ico","image_cur","image_dds","file_project","image_pdn","image_psd"
 ],"ge/",".png")
 
 WoowzsiteSourceCats = AddFullnessToTable([
