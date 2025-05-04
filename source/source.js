@@ -140,10 +140,12 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 	"nberbaaaaaaa","brinq_","haveaniceday.","uranus52"
 ],"source/discordavatars/",".gif"))
 
-GitExplorerSource = AddFullnessToTable([
-	"folder_bottom","folder_top","folder_bottom_marker1","folder_bottom_marker2","folder_bottom_marker3","file","file_unknown","folder_unknown","image_png","image_jpg","image_bmp","image_tga",
-	"image_tif","image_ico","image_cur","image_dds","file_project","image_pdn","image_psd"
-],"ge/",".png")
+GitExplorerSource = AddTableToTable(AddFullnessToTable([
+	"folder","file","file_unknown","folder_unknown","image_png","image_jpg","image_bmp","image_tga",
+	"image_tif","image_ico","image_cur","image_dds","file_project","image_pdn","image_psd","file_gitignore","file_vcxproj"
+],"ge/",".png"),
+	["ge/pdn/image_gif.gif"]
+)
 
 WoowzsiteSourceCats = AddFullnessToTable([
 	"cat1","cat10","cat10_1","cat10_2","cat10_3","cat10_4","cat10_5","cat11","cat11_1","cat11_2","cat11_3","cat11_4","cat11_5","cat12","cat12_1","cat12_2","cat12_3","cat12_4","cat12_5","cat13","cat13_1","cat13_2",

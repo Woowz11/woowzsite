@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/x-icon" href="source/griffer.ico">
-		<title>GitExplorer</title>
+	<title>GitExplorer</title>
+	
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 	<style>
 
 html{
@@ -11,11 +13,11 @@ html{
 }
 
 body{
-	margin				: 0		 ;
-	padding			 : 0		 ;
-	height				: 100%	;
-	display			 : flex	;
-		flex-direction: column;
+	margin			: 0	  	;
+	padding			: 0	  	;
+	height			: 100%	;
+	display			: flex	;
+	flex-direction  : column;
 }
 
 	</style>
@@ -27,7 +29,7 @@ const Body = document.getElementById("body");
 
 //---------------------------------------
 
-var CurrentScale = 1;
+var CurrentScale = 0.75;
 
 //---------------------------------------
 
@@ -38,6 +40,7 @@ function ScreenAddition(){
 function Screen_Start(){
 	var Content = 
 `<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="https://github.com/Woowz11/GitExplorer-test">
+<input type="password" id="token" placeholder="Токен (если нужен)" value="">
 <button onclick="OpenRepo();">Начать</button>`;
 	Body.innerHTML = Content + ScreenAddition();
 }
@@ -80,7 +83,7 @@ function Screen_Explorer(){
 	transition: width 0.3s ease;
 	overflow-x: hidden;
 	overflow-y: auto;
-	background-color:rgba(0,0,0,0.2);
+	background-color:rgba(0,0,0,0.05);
 }
 .Top{
 	display: flex;
@@ -99,16 +102,32 @@ function Screen_Explorer(){
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items   : center;
+	padding: 2px;
+	border-color: white;
+	transition: background-color 0.3s, border-color 0.3s;
+}
+
+.File:hover{
+	background-color: rgba(255,255,255,0.5);
+	padding: 0px;
+	border: 2px solid transparent;
+	border-color: white;
 }
 
 .FileIcon{
 	margin-bottom: 2.5px;
+	filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.2));
 }
 
 .FileName{
-	font-size: ${CurrentScale}em;
-	word-wrap: break-word;
+	width: 100%;
+	text-align: center;
+	font-size: ${CurrentScale+0.125}em;
+	white-space: nowrap;
+	overflow: clip;
+	text-overflow: ellipsis; 
+	cursor: default;
 }
 
 .FileIcon_IMG{
@@ -143,7 +162,10 @@ function Screen_Explorer(){
 	}
 }
 </style>
-<div class="NotExplorer"><button onclick="StartScreen();">Новый репозиторий</button></div>
+<div class="NotExplorer">
+	<button onclick="StartScreen();">Новый репозиторий</button>
+	<t id="ratelimit-used">?</t>/<t id="ratelimit-limit">?</t>
+</div>
 <div class="Explorer">
 	<div class="Top">
 		<button id="button-undo"><-</button>
@@ -171,12 +193,15 @@ function Screen_Explorer(){
 	document.getElementById("bottom-scale").addEventListener("input", function() {
 		CurrentScale = Math.max(0.01,this.value/75);
 		document.querySelectorAll(".File"		).forEach(File => { File.style.height = `${CurrentScale*200}px`; });
-		document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale}em`; });
+		document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale+0.125}em`; });
 		var qS_R = document.querySelector(".Right");
 		qS_R.style.gridTemplateColumns = `repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr))`;
 		qS_R.style.gridTemplateRows	   = `repeat(auto-fill, ${CurrentScale*200}px)`;
 		qS_R.style.gap                 = `${10*CurrentScale}px`;
 	});
+	
+	document.getElementById("ratelimit-used" ).innerText = RateLimits[0];
+	document.getElementById("ratelimit-limit").innerText = RateLimits[1];
 }
 
 //---------------------------------------
@@ -185,81 +210,187 @@ function StartScreen(){
 	Screen_Start();
 }
 
-var AllFiles = null;
+var Files       = {};
+
+var Contents    = {};
 var CurrentFile = -1;
 var CurrentRepoName = null;
-async function OpenRepo(){
-	const RepoURL = document.getElementById("repo").value;
+var CurrentToken = null;
+const UserAgent = "woowzsite/GitExplorer";
+var RateLimits  = null;
+const GithubApiVersion = "2022-11-28";
+var O = null;
+var Owner = null;
+var Repo = null;
+
+/* Получить все файлы внутри папки (example/path/) или файл (example/path) */
+async function GetDir(Path){
+	if(Files[Path]){ return Files[Path]; }
+	var Result = [];
+	var ParentPath = "";
+	if(Path !== "/" && Path !== ""){
+		ParentPath = Path;
+		if(ParentPath.endsWith('/')){ ParentPath = ParentPath.slice(0,-1); }
+		const Segments = ParentPath.split('/');
+		Segments.pop();
+		ParentPath = Segments.join('/');
+	}
+	
+	if(!Path.endsWith('/')){ if(Files[Path + "/"]){ console.error("Файл [" + Path + "] не найден!"); return "ERROR_NOT_FOUND"; } }
+	
 	try{
+		const Iter = O.paginate.iterator(O.rest.repos.getContent, {
+			owner: Owner,
+			repo : Repo,
+			path : Path.slice(0,-1)
+		});
+		RateLimits[0] += 1;
+		
+		for await (const { data: Tree } of Iter){
+			console.log(Tree.length);
+			Result = Result.concat(Tree);
+		}
+		
+		Files[Path] = Result;
+		if(Path !== "/" && Path !== ""){
+			var ParentFiles = await GetDir(ParentPath + "/");
+			Files[Path.slice(0,-1)] = ParentFiles.filter(File => File.path === Path.slice(0,-1))[0];
+		}
+	}catch(error){
+		console.error("Не получилось получить файлы по пути [" + Path + "]: " + error);
+	}
+	
+	return Result;
+}
+
+async function OpenRepo(){
+	Files = {};
+	CurrentFile = -1;
+
+	const { Octokit, App } = await import("https://esm.sh/octokit");
+
+	const RepoURL = document.getElementById("repo").value;
+	CurrentToken  = document.getElementById("token").value;
+	
+	O = CurrentToken ? new Octokit({ auth: CurrentToken }) : new Octokit();
+	try{
+		try{
+			const { data: rateLimit } = await O.request('GET /rate_limit');
+			const Rate = rateLimit.rate;
+			const ResetTime = new Date(Rate.reset * 1000).toLocaleString();
+			RateLimits = [Rate.used,Rate.limit];
+			if(RateLimits[0] >= RateLimits[1]){
+				throw new Error("Превышено кол-во запросов! Подождите до: " + ResetTime);
+			}
+		}catch(error){
+			throw new Error("Ошибка с RateLimit: " + error);
+		}
+	
 		if(!RepoURL){ throw new Error("Не указан репозиторий!"); }
 		const RepoURL_Parts = RepoURL.split('/');
 		if(RepoURL_Parts.length < 5 || RepoURL_Parts[2] !== "github.com"){ throw new Error("Неверно указана ссылка репозитория!"); }
 		
-		const Owner = RepoURL_Parts[3];
-		const Repo	= RepoURL_Parts[4];
-		const API	= `https://api.github.com/repos/${Owner}/${Repo}/git/trees/main?recursive=1`;
+		Owner = RepoURL_Parts[3];
+		Repo  = RepoURL_Parts[4];
 		CurrentRepoName = Owner + " : " + Repo;
 		
 		try{
-			const Response = await fetch(API);
-			if(!Response.ok){ throw new Error("Не получилось response!"); }
-			AllFiles = await Response.json();
-			AllFiles = AllFiles.tree;
+			await GetDir("/");
+		}catch(error){
+			if(error.status === 404){ throw new Error("Репозиторий не найден, или токен не подходит: " + error); }else{
+				throw new Error("Не получилось получить файлы: " + error);
+			}
+		}
+		
+		try{
 			await Open(null);
 		}catch(error){
-			throw new Error("Не получилось получить файлы: " + error);
+			throw new Error("Не получилось открыть основную папку: " + error);
 		}
+		
+		/*
+		
+		async function GetContent(File){
+				if(File.type!=="dir"){
+					var Content = null;
+					try{
+						const Response2 = await axios.get(File.url,{
+							headers: {
+								"User-Agent": UserAgent
+							}
+						});
+						Content = atob(Response2.data.content);
+						console.log(File.path);
+						console.log(Content);
+						Contents[File.path] = Content;
+					}catch(error){
+						Contents[File.path] = false;
+						console.error("Не получилось получить содержимое файла [" + File.path + "]: " + error);
+					}
+				}
+			}
+			for(var File of A1llFiles){
+				//GetContent(File);
+			}
+		
+		*/
+	
 	}catch(error){
+		console.error("Не получилось открыть репозиторий: " + error);
 		alert("Не получилось открыть репозиторий: " + error);
 	}
 }
 
 var TotalPathButtons = 0;
 async function GoTo(Data){
-	Screen_Explorer();
-	TotalPathButtons = 0;
-	
-	const PathElement = document.getElementById("Path");
-	function CreatePathButton(File){
-		TotalPathButtons++;
-		var PathName = !File ? CurrentRepoName : File.path.split('/').pop();
-		var Button = `<button id="path-button-${TotalPathButtons}" onclick="Open(${TotalPathButtons});">${PathName}</button>`;
-		PathElement.innerHTML += Button;
-	}
-	CreatePathButton(null);
-	var P = "";
-	if(CurrentFile){
-		for(const Path of CurrentFile.path.split('/')){
-			if(P){ P += "/"; }
-			P += Path;
-			CreatePathButton(AllFiles.find(item => item.path === P));
+	try{
+		Screen_Explorer();
+		TotalPathButtons = 0;
+		
+		const PathElement = document.getElementById("Path");
+		function CreatePathButton(File){
+			TotalPathButtons++;
+			var PathName = !File ? CurrentRepoName : File.path.split('/').pop();
+			var Button = `<button id="path-button-${TotalPathButtons}" onclick="Open(${TotalPathButtons});">${PathName}</button>`;
+			PathElement.innerHTML += Button;
 		}
-	}
-	
-	document.getElementById("button-parent").addEventListener("click",function(){
-		Open(TotalPathButtons-1);
-	});
-	
-	const ShowFileAsync = (File) => {
-		return new Promise((resolve) => {
-			requestAnimationFrame(() => {
-				ShowFile(File);
-				resolve();
-			});
+		CreatePathButton(null);
+		var P = "";
+		if(CurrentFile){
+			for(const Path of CurrentFile.path.split('/')){
+				if(P){ P += "/"; }
+				P += Path;
+				CreatePathButton(await GetDir(P));
+			}
+		}
+		
+		document.getElementById("button-parent").addEventListener("click",function(){
+			Open(TotalPathButtons-1);
 		});
-	};
-	
-	await Promise.all(Data.map(File => ShowFileAsync(File)));
-	
-	document.getElementById("bottom-elements-count").innerText = Data.length;
+		
+		const ShowFileAsync = (File) => {
+			return new Promise((resolve) => {
+				requestAnimationFrame(() => {
+					ShowFile(File);
+					resolve();
+				});
+			});
+		};
+		
+		await Promise.all(Data.map(File => ShowFileAsync(File)));
+		
+		document.getElementById("bottom-elements-count").innerText = Data.length + (Data.length===1000?"...":"");
+	}catch(error){
+		throw new Error("Произошла ошибка в GoTo: " + error);
+	}
 }
 
 function FilterFiles(Files){
 	return [...Files].sort((a,b) => {
-		if (a.type === "tree" && b.type !== "tree") {
+		if (a.type === "dir" && b.type !== "dir") {
             return -1;
         }
-        if (a.type !== "tree" && b.type === "tree") {
+        if (a.type !== "dir" && b.type === "dir") {
             return 1;
         }
         return 0;
@@ -267,7 +398,7 @@ function FilterFiles(Files){
 }
 
 async function Open(File){
-	if((!File || (File && Number.isInteger(File) && File <= 1)) && CurrentFile){ CurrentFile = null; await GoTo(FilterFiles(AllFiles).filter(item => !item.path.includes('/'))); return; }
+	if((File===null || (File!==null && Number.isInteger(File) && File <= 1)) && CurrentFile!==null){ CurrentFile = null; await GoTo(FilterFiles(await GetDir("/"))); return; }
 	if(Number.isInteger(File)){
 		if(File!==TotalPathButtons){
 			var P = "";
@@ -278,21 +409,21 @@ async function Open(File){
 				if(P){ P += "/"; }
 				P += Path;
 			}
-			Open(AllFiles.find(item => item.path === P));
+			await Open(await GetDir(P));
 		}
 	}else{
-		if(File.type==="tree"){
+		if(File.type==="dir"){
 			try{
-				var Data = FilterFiles(AllFiles).filter(item => {
-					return item.path.includes(File.path + "/") && item.path.split('/').length === File.path.split('/').length+1;
-				});
+				var Data =  FilterFiles(await GetDir(File.path + "/"));
+				Data = FilterFiles(Data);
 				CurrentFile = File;
 				await GoTo(Data);
 			}catch(error){
+				console.error("Не получилось открыть директорию: " + error);
 				alert("Не получилось открыть директорию: " + error)
 			}
 		}else{
-		
+			console.log(File);
 		}
 	}
 }
@@ -307,7 +438,7 @@ async function ShowFile(File){
 	const Icon = document.createElement("t");
 	Icon.className = "FileIcon";
 	Icon.id		   = "file-icon";
-	Icon.innerHTML = `<img class="FileIcon_IMG" loading="lazy" src="${File.type==="tree"?UnknownFImage:UnknownImage}">`;
+	Icon.innerHTML = `<img class="FileIcon_IMG" loading="lazy" src="${File.type==="dir"?UnknownFImage:UnknownImage}">`;
 	
 	const Name = document.createElement("t");
 	Name.className   = "FileName";
@@ -316,6 +447,7 @@ async function ShowFile(File){
 	
 	Div.appendChild(Icon);
 	Div.appendChild(Name);
+	Div.title = Name.textContent;
 	
 	Div.addEventListener("click",function(){
 		Open(File);
@@ -334,12 +466,13 @@ async function ShowFile(File){
 
 async function GetIcon(File,Extend){
 	if(!Extend){
-		if(File.type==="tree"){ return await GenerateFastFolder(File); }
+		if(File.type==="dir"){ return /*await GenerateFastFolder(File)*/"ge/folder.png"; }
 		
 		var Result = FileImage;
 		
 		var Icons = {
 			"png" : "image_png",
+			"apng": "image_png",
 			"jpg" : "image_jpg",
 			"jpeg": "image_jpg",
 			"cur" : "image_cur",
@@ -356,12 +489,21 @@ async function GetIcon(File,Extend){
 			"ico" : "image_ico",
 			"dds" : "image_dds",
 			"pdn" : "image_pdn",
-			"psd" : "image_psd"
+			"psd" : "image_psd",
+			
+			"gitignore": "file_gitignore",
+			"vcxproj": "file_vcxproj"
 		}
+		
+		var AnimatedIcons = {
+			"gif": "image_gif"
+		}
+		
 		var Extension = null;
 		if(File.path.includes(".")){
 			Extension = File.path.split('.').pop().toLowerCase();
-			if(Icons[Extension]){ Result = "ge/" + Icons[Extension] + ".png"; }
+			if(        Icons[Extension]){ Result = "ge/" +         Icons[Extension] + ".png"; }
+			if(AnimatedIcons[Extension]){ Result = "ge/" + AnimatedIcons[Extension] + ".gif"; }
 		}
 		return Result;
 	}else{
