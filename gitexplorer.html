@@ -2,7 +2,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/x-icon" href="source/griffer.ico">
+	<link rel="icon" type="image/x-icon" href="ge/file_scr.png">
 	<title>GitExplorer</title>
 	
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -20,6 +20,16 @@ body{
 	flex-direction  : column;
 }
 
+*{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	
+	user-select: none;
+	-webkit-user-drag: none;
+	user-drag: none;
+}
 	</style>
 </head>
 <body id="body"></body>
@@ -34,6 +44,7 @@ var CurrentScale = 0.75;
 //---------------------------------------
 
 function ScreenAddition(){
+	MouseInnerExplorer = false;
 	return `<div id="canvases" style="${DEBUG_SaveCanvas?"":"display:none;"}"></div>`;
 }
 
@@ -45,6 +56,7 @@ function Screen_Start(){
 	Body.innerHTML = Content + ScreenAddition();
 }
 
+var MouseInnerExplorer = false;
 function Screen_Explorer(){
 	var Content = 
 `<style>
@@ -141,6 +153,15 @@ function Screen_Explorer(){
 	background-color:rgba(0,0,0,0.2);
 }
 
+.Selector{
+	position: absolute;
+	pointer-events: none;
+	z-index: 1000;
+	background-color: rgba(255,255,255,0.5);
+	border: 2px solid transparent;
+	border-color: white;
+}
+
 @media (max-width: 700px) {
 	.Left{
 		width: 0%;
@@ -190,11 +211,11 @@ function Screen_Explorer(){
 </div>`;
 	Body.innerHTML = Content + ScreenAddition();
 	
+	var qS_R = document.querySelector(".Right");
 	document.getElementById("bottom-scale").addEventListener("input", function() {
 		CurrentScale = Math.max(0.01,this.value/75);
 		document.querySelectorAll(".File"		).forEach(File => { File.style.height = `${CurrentScale*200}px`; });
 		document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale+0.125}em`; });
-		var qS_R = document.querySelector(".Right");
 		qS_R.style.gridTemplateColumns = `repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr))`;
 		qS_R.style.gridTemplateRows	   = `repeat(auto-fill, ${CurrentScale*200}px)`;
 		qS_R.style.gap                 = `${10*CurrentScale}px`;
@@ -202,6 +223,13 @@ function Screen_Explorer(){
 	
 	document.getElementById("ratelimit-used" ).innerText = RateLimits[0];
 	document.getElementById("ratelimit-limit").innerText = RateLimits[1];
+	
+	qS_R.addEventListener("mouseenter", () => {
+		MouseInnerExplorer = true;
+	});
+	qS_R.addEventListener("mouseleave", () => {
+		MouseInnerExplorer = false;
+	});
 }
 
 //---------------------------------------
@@ -247,7 +275,6 @@ async function GetDir(Path){
 		RateLimits[0] += 1;
 		
 		for await (const { data: Tree } of Iter){
-			console.log(Tree.length);
 			Result = Result.concat(Tree);
 		}
 		
@@ -364,6 +391,13 @@ async function GoTo(Data){
 			}
 		}
 		
+		var CopyPath = `https://github.com/${Owner}/${Repo}`;
+		if(TotalPathButtons>1){
+			CopyPath += "/tree/main/" + CurrentFile.path;
+		}
+		var CopyPathButton = `<button onclick="CopyToClipboard('${CopyPath}');">📋</button>`;
+		PathElement.innerHTML += CopyPathButton;
+		
 		document.getElementById("button-parent").addEventListener("click",function(){
 			Open(TotalPathButtons-1);
 		});
@@ -466,7 +500,7 @@ async function ShowFile(File){
 
 async function GetIcon(File,Extend){
 	if(!Extend){
-		if(File.type==="dir"){ return /*await GenerateFastFolder(File)*/"ge/folder.png"; }
+		if(File.type==="dir"){ return "ge/folder.png"; }
 		
 		var Result = FileImage;
 		
@@ -490,6 +524,15 @@ async function GetIcon(File,Extend){
 			"dds" : "image_dds",
 			"pdn" : "image_pdn",
 			"psd" : "image_psd",
+			
+			"exe" : "file_exe",
+			"bat" : "file_bat",
+			"com" : "file_com",
+			"msc" : "file_msc",
+			"scr" : "file_scr",
+			"suo" : "file_suo",
+			
+			"java" : "script_java",
 			
 			"gitignore": "file_gitignore",
 			"vcxproj": "file_vcxproj"
@@ -515,6 +558,85 @@ async function ShowFile_Extend(File){
 
 }
 
+var Selector = null;
+var MousePosition = [0,0];
+var StartSelectorPosition = [0,0];
+function CreateSelector(Create){
+	if(Create){
+		if(Selector===null){
+			console.log("Create");
+			Selector = document.createElement("div");
+			Selector.className = "Selector";
+			Selector.style.width = "1px";
+			Selector.style.height = "1px";
+			StartSelectorPosition = MousePosition;
+			Selector.style.left = `${StartSelectorPosition[0]}px`;
+			Selector.style.top  = `${StartSelectorPosition[1]}px`;
+			
+			document.getElementById("explorer-content").appendChild(Selector);
+		}
+	}else{
+		if(Selector!==null){ Selector.remove(); Selector = null; }
+	}
+}
+
+function UpdateSelector(){
+	if(Selector !== null){
+		var LT = [...StartSelectorPosition];
+		var RB = [...MousePosition];
+		
+		if(RB[0] < LT[0]){ [LT[0],RB[0]] = [RB[0],LT[0]]; }
+		if(RB[1] < LT[1]){ [LT[1],RB[1]] = [RB[1],LT[1]]; }
+		
+		var Rect = document.getElementById("explorer-content").getBoundingClientRect();
+		
+		if(LT[0] < Rect.left){ LT[0] = Rect.left; }
+		if(LT[1] < Rect.top ){ LT[1] = Rect.top ; }
+		const Size = [RB[0]-LT[0],RB[1]-LT[1]];
+		if(LT[0] + Size[0] > Rect.right ){ Size[0] = Rect.right  - LT[0]; }
+		if(LT[1] + Size[1] > Rect.bottom){ Size[1] = Rect.bottom - LT[1]; }
+		
+		Selector.style.left   = `${LT[0]}px`;
+		Selector.style.top    = `${LT[1]}px`;
+		Selector.style.width  = `${Size[0]}px`;
+		Selector.style.height = `${Size[1]}px`;
+	}
+}
+
+var MousePressed = false;
+document.addEventListener("mousedown",(event) => {
+	MousePressed = true;
+	if(MouseInnerExplorer){
+		CreateSelector(true);
+	}
+});
+document.addEventListener("mouseup",(event) => {
+	MousePressed = false;
+	CreateSelector(false);
+});
+document.addEventListener("mousemove",(event) => {
+	MousePosition = [event.clientX,event.clientY];
+	UpdateSelector();
+});
+
+/*document.addEventListener('contextmenu', function(event) {
+	if (event.target.tagName === 'IMG') {
+		event.preventDefault();
+	}
+});*/
+
+document.addEventListener('dragstart', function(event) {
+	if (event.target.tagName === 'IMG') {
+		event.preventDefault();
+	}
+});
+
+/*document.addEventListener('copy', function(event) {
+	if (event.target.tagName === 'IMG') {
+		event.preventDefault();
+	}
+});*/
+
 //---------------------------------------
 
 const DEBUG_SaveCanvas = true;
@@ -523,23 +645,6 @@ const ErrorImage = "source/error-image.png";
 const FileImage	= "ge/file.png";
 const UnknownImage	= "ge/file_unknown.png";
 const UnknownFImage	= "ge/folder_unknown.png";
-
-async function GenerateFastFolder(File){
-	try{
-		const C = GenerateCanvas(IconSize,IconSize);
-		const c = C.getContext("2d");
-		
-		c_OverImage(c,await GetImage("https://woowz11.github.io/woowzsite/ge/folder_bottom.png"),0,0);
-		c_OverImage(c,await GetImage("https://woowz11.github.io/woowzsite/ge/folder_top.png"),0,0);
-		
-		var Result = C.toDataURL();
-		ClearCanvas(C);
-		return Result;
-	}catch(error){
-		console.error("Не получилось GenerateFastFolder: " + error);
-		return ErrorImage;
-	}
-}
 
 function i_ChangeHue(I,v){
 	const data = I.data;
@@ -709,6 +814,17 @@ function hslToRgb(h, s, l) {
 	}
 
 	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+//---------------------------------------
+
+async function CopyToClipboard(Content) {
+	try {
+		await navigator.clipboard.writeText(Content);
+		alert("Скопировано [" + Content + "]!");
+	} catch (error) {
+		console.error("Не получилось копировать [" + Content + "]: " + error);
+	}
 }
 
 //---------------------------------------
