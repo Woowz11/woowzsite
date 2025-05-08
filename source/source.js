@@ -88,7 +88,7 @@ WoowzsiteSourceAudios = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"ВЫЙТИ НА УЛИЦУ ТАМ ЙОБАНЫ ЛОС","spongebob-asking-are-you-pooping-made-with","Morning-Flower","s","Cheetahmen","Toilet-story","Mr. Trololo original upload","idiotic music","otkroi-glazki",
 	"寻梦高粱红","Qahwah.Bootleg (feat. ilyhiryu)","gabber.bootleg","spo","what-the-song1","what-the-song2","what-the-song3"
 ],"source/specialforrandomsite/",".mp3"),AddFullnessToTable([
-	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist"
+	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist","open"
 ],"source/",".mp3")),[
 	"source/woowzbackrooms/sounds/breath.mp3","source/woowzbackrooms/sounds/level0.mp3","source/woowzbackrooms/sounds/walk.mp3"
 ])
@@ -135,7 +135,7 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 	"justgamingyt5949","kasqw","kastikepussukka","kersher","kirk1448","klaverr","kotyara228","kseleron","lisstons","lomakinnn","mannytko","meeee66","metallcore999","monsterfish._","ne1grox","morphandriy","morzz1c",
 	"myleskingston","nekitplay155","neoprod","no","pacocareal","pavkalakar","pussyfapper","redsham","rodrigesgames","ruslanconnection","sadsalat","santinnel","shiir0k","styledun","sv1t.","taykeu","the0ceanman",
 	"thewindowskerpka","treepii24","troll_bebra","turbobtv","uzelezz","wantedrobot","wldoui","woowz11.","woowz11","xyzswagga","your_local_russian","youwillseelowskill","zebratv","zinderant","zooi","zvski",
-	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx","darkus2","rnswt_offical"
+	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx","darkus2","rnswt_offical","4ro9ito"
 ],"source/discordavatars/",".png"),AddFullnessToTable([
 	"nberbaaaaaaa","brinq_","haveaniceday.","uranus52"
 ],"source/discordavatars/",".gif"))
@@ -143,9 +143,9 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 GitExplorerSource = AddTableToTable(AddFullnessToTable([
 	"folder","file","file_unknown","folder_unknown","image_png","image_jpg","image_bmp","image_tga",
 	"image_tif","image_ico","image_cur","image_dds","file_project","image_pdn","image_psd","file_gitignore","file_vcxproj","file_exe",
-	"file_bat","file_com","file_msc","file_scr","file_suo","script_java"
+	"file_bat","file_com","file_msc","file_scr","file_suo","script_java","script_c","license","background"
 ],"ge/",".png"),AddFullnessToTable([
-	"image_gif.gif","script.png","sliders.png","vs.png","script.png","java.png"
+	"image_gif.gif","script.png","sliders.png","vs.png","script.png","java.png","c.png","emoji.png"
 ],"ge/pdn/cache/",""))
 
 WoowzsiteSourceCats = AddFullnessToTable([
