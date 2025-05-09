@@ -81,12 +81,58 @@ function ScreenAddition(){
 	return `<div id="canvases" style="${DEBUG_SaveCanvas?"":"display:none;"}"></div>`;
 }
 
+const TotalRecents = 42;
 function Screen_Start(){
 	var Content = 
-`<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="${RepoURL===null?"https://github.com/Woowz11/GitExplorer-test":RepoURL}">
+`<style>
+.RecentHistory{
+	display:grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	grid-template-rows	 : repeat(auto-fill, minmax(100px, 1fr));
+	gap: 10px;
+	padding: 10px;
+	height:100%;
+}
+
+.RecentPanel{
+	background-color:rgba(0,0,0,0.1);
+	padding: 10px;
+	border-radius: 10px;
+	overflow: hidden;
+	cursor: pointer;
+}
+</style>
+
+<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="${RepoURL===null?"https://github.com/Woowz11/GitExplorer-test":RepoURL}">
 <input type="password" id="token" placeholder="Токен (если нужен)" value="${CurrentToken===null?"":CurrentToken}">
-<button id="OpenRepoButton" onclick="OpenRepo();">Начать</button>`;
+<button id="OpenRepoButton" onclick="OpenRepo();">Начать</button>
+<div class="RecentHistory" id="recent-history"></div>`;
 	Body.innerHTML = Content + ScreenAddition();
+	
+	const RecentHistoryPanel = document.getElementById("recent-history");
+	function CreateRecent(RecentInfo,i){
+		if(RecentInfo!==null){
+			const RecentInfo_ = RecentInfo.split("||");
+			const Panel = document.createElement("div");
+			Panel.className = "RecentPanel";
+			Panel.id = "recent-" + i;
+			Panel.innerHTML = `${i + 1}:<br><hr>${RecentInfo_[0].replace("https://github.com/","")}<br>${RecentInfo_[1].replace(/./g,'●')}`;
+			
+			Panel.addEventListener("click", function(){
+				const InputRepo  = document.getElementById("repo" );
+				const InputToken = document.getElementById("token");
+				
+				InputRepo .value = RecentInfo_[0];
+				InputToken.value = RecentInfo_[1];
+			});
+			
+			RecentHistoryPanel.appendChild(Panel);
+		}
+	}
+	
+	for(var i = 0; i < TotalRecents; i++){
+		CreateRecent(localStorage.getItem("recent_" + i), i);
+	}
 }
 
 var MouseInnerExplorer = false;
@@ -175,17 +221,24 @@ function Screen_Explorer(){
 	filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.2));
 }
 
+.FileIcon_IMG{
+	width: 100%;
+	height: auto;
+}
+
+.FileLoading{
+	pointer-events: none;
+	position: fixed;
+	opacity: 0.1;
+	transform: scale(0.4) translateY(-128px);
+}
+
 .FileName{
 	width: 100%;
 	text-align: center;
 	font-size: ${CurrentScale+0.2}em;
 	white-space: nowrap;
 	cursor: default;
-}
-
-.FileIcon_IMG{
-	width: 100%;
-	height: auto;
 }
 
 .Path{
@@ -387,9 +440,9 @@ async function ReadFile(URL){
 		
 		Result = Data;
 		Contents[URL] = Result;
-		console.log("Файл [" + URL + "] прочитан!");
+		console.log("Файл [" + URL.replace(/\?token=[^#]+/,"[TOKEN]") + "] прочитан!");
 	}catch(error){
-		console.error("Не получилось прочитать файл по ссылке [" + URL + "]: " + error);
+		console.error("Не получилось прочитать файл по ссылке [" + URL.replace(/\?token=[^#]+/,"[TOKEN]") + "]: " + error);
 		throw error;
 	}
 	return Result;
@@ -459,6 +512,11 @@ html,body{
 		
 		try{
 			await Open(null);
+			try{
+				SaveRecents();
+			}catch(error){
+				throw new Error("Не получилось сохранить недавние репозитории: " + error);
+			}
 		}catch(error){
 			throw new Error("Не получилось открыть основную папку: " + error);
 		}
@@ -483,21 +541,6 @@ async function GoTo(Data){
 		CurrentReadme = null;
 		for(const File of Data){
 			if(File.type!=="dir"){
-				async function AsyncRead(){
-					const Content = await ReadFile(File.download_url);
-					if(File.path.toLowerCase().includes("readme.md")){ 
-						ReadedReadme = File;
-						
-						if(CurrentReadme.sha===ReadedReadme.sha){
-							const ReadmePanel = document.getElementById("readme");
-							if(ReadmePanel){
-								ReadmePanel.innerHTML = marked.parse(Content);
-								ReadmePanel.style.display = "block";
-							}
-						}
-					}
-				}
-				AsyncRead();
 				if(File.path.toLowerCase().includes("readme.md")){ CurrentReadme = File; }
 			}
 		}
@@ -546,6 +589,37 @@ async function GoTo(Data){
 		await Promise.all(Data.map(File => ShowFileAsync(File)));
 		
 		document.getElementById("bottom-elements-count").innerText = Data.length + (Data.length===1000?"...":"");
+		
+		for(const File of Data){
+			if(File.type!=="dir"){
+				async function AsyncRead(){
+					const Content = await ReadFile(File.download_url);
+					
+					const FilePanel = document.getElementById(File.path);
+					if(FilePanel){
+						const IconPanel = FilePanel.querySelector(".FileIcon");
+						const NewIcon = await GetIconExtend(File,Content,IconPanel.querySelector(".FileIcon_IMG").src);
+						if(NewIcon!==null){
+							IconPanel.innerHTML = `<img class="FileIcon_IMG" src="${NewIcon}">`;
+						}
+						FilePanel.querySelector(".FileLoading").remove();
+					}
+					
+					if(File.path.toLowerCase().includes("readme.md")){ 
+						ReadedReadme = File;
+						
+						if(CurrentReadme.sha===ReadedReadme.sha){
+							const ReadmePanel = document.getElementById("readme");
+							if(ReadmePanel){
+								ReadmePanel.innerHTML = marked.parse(Content);
+								ReadmePanel.style.display = "block";
+							}
+						}
+					}
+				}
+				AsyncRead();
+			}
+		}
 	}catch(error){
 		throw new Error("Произошла ошибка в GoTo: " + error);
 	}
@@ -610,11 +684,20 @@ async function ShowFile(File){
 	const Icon = document.createElement("t");
 	Icon.className = "FileIcon";
 	Icon.id		   = "file-icon";
-	Icon.innerHTML = `<img class="FileIcon_IMG" loading="lazy" src="${File.type==="dir"?UnknownFImage:UnknownImage}">`;
+	Icon.innerHTML = `<img class="FileIcon_IMG" src="${GetIcon(File)}">`;
+	Div.appendChild(Icon);
+	
+	if(File.type!=="dir"){
+		const Loading = document.createElement("t");
+		Loading.className = "FileLoading";
+		Loading.innerHTML = `<img class="" src="source/loading.gif">`;
+		Div.appendChild(Loading);
+	}
 	
 	const Name = document.createElement("t");
 	Name.className   = "FileName";
 	Name.id		     = "file-name";
+	Div.appendChild(Name);
 	
 	const OrigN = File.path.split('/').pop();
 	var N = OrigN;
@@ -629,8 +712,6 @@ async function ShowFile(File){
 	
 	Name.textContent = N;
 	
-	Div.appendChild(Icon);
-	Div.appendChild(Name);
 	Div.title = OrigN;
 	
 	Div.addEventListener("click",function(){
@@ -638,80 +719,109 @@ async function ShowFile(File){
 	});
 	
 	document.getElementById("explorer-content").appendChild(Div);
-	
-	const FastIcon = await GetIcon(File,false);
-
-	Icon.innerHTML = `<img class="FileIcon_IMG" src="${FastIcon}">`;
-	
-	//const ExtendIcon = await GetIcon(File,true);
-	
-	//Icon.innerHTML = `<img class="FileIcon_IMG" src="${ExtendIcon}">`;
 }
 
-async function GetIcon(File,Extend){
-	if(!Extend){
-		if(File.type==="dir"){ return "ge/folder.png"; }
+function GetIcon(File){
+	if(File.type==="dir"){ return "ge/folder.png"; }
+	
+	var Result = FileImage;
+	
+	var Icons = {
+		"png" : "image_png",
+		"apng": "image_png",
+		"jpg" : "image_jpg",
+		"jpeg": "image_jpg",
+		"cur" : "image_cur",
+		"bmp" : "image_bmp",
+		"dib" : "image_bmp",
+		"rle" : "image_bmp",
+		"tga" : "image_tga",
+		"tpic": "image_tga",
+		"vda" : "image_tga",
+		"vst" : "image_tga",
+		"icb" : "image_tga",
+		"tif" : "image_tif",
+		"tiff": "image_tif",
+		"ico" : "image_ico",
+		"dds" : "image_dds",
+		"pdn" : "image_pdn",
+		"psd" : "image_psd",
 		
-		var Result = FileImage;
+		"exe" : "file_exe",
+		"bat" : "file_bat",
+		"com" : "file_com",
+		"msc" : "file_msc",
+		"scr" : "file_scr",
+		"suo" : "file_suo",
 		
-		var Icons = {
-			"png" : "image_png",
-			"apng": "image_png",
-			"jpg" : "image_jpg",
-			"jpeg": "image_jpg",
-			"cur" : "image_cur",
-			"bmp" : "image_bmp",
-			"dib" : "image_bmp",
-			"rle" : "image_bmp",
-			"tga" : "image_tga",
-			"tpic": "image_tga",
-			"vda" : "image_tga",
-			"vst" : "image_tga",
-			"icb" : "image_tga",
-			"tif" : "image_tif",
-			"tiff": "image_tif",
-			"ico" : "image_ico",
-			"dds" : "image_dds",
-			"pdn" : "image_pdn",
-			"psd" : "image_psd",
-			
-			"exe" : "file_exe",
-			"bat" : "file_bat",
-			"com" : "file_com",
-			"msc" : "file_msc",
-			"scr" : "file_scr",
-			"suo" : "file_suo",
-			
-			"java" : "script_java",
-			"c"    : "script_c",
-			
-			"gitignore": "file_gitignore",
-			"vcxproj": "file_vcxproj",
-			"license": "license"
-		}
+		"java" : "script_java",
+		"c"    : "script_c",
+		"cpp"  : "script_cpp",
+		"py"   : "script_py",
+		"asm"  : "script_asm",
+		"lua"  : "script_lua",
 		
-		var AnimatedIcons = {
-			"gif": "image_gif"
-		}
+		"txt" : "file_txt",
+		"text": "file_txt",
+		"log" : "file_log",
+		"md"  : "file_md",
 		
-		var Extension = null;
-		if(File.path.includes(".")){
-			Extension = File.path.split('.').pop().toLowerCase();
-			if(        Icons[Extension]){ Result = "ge/" +         Icons[Extension] + ".png"; }
-			if(AnimatedIcons[Extension]){ Result = "ge/" + AnimatedIcons[Extension] + ".gif"; }
-		}
+		"bin"  : "file_byte",
+		"byte" : "file_byte",
+		"bytes": "file_byte",
 		
-		const Lower = File.path.toLowerCase();
-		if(Lower.includes("license")){ Result = "ge/license.png"; }
-		
-		return Result;
-	}else{
-		return "source/empty.png";
+		"gitignore": "file_gitignore",
+		"vcxproj": "file_vcxproj",
+		"license": "license"
 	}
+	
+	var AnimatedIcons = {
+		"gif": "image_gif"
+	}
+	
+	var Double_Icon = {
+		"log.gz": "file_log"
+	}
+	
+	var Extension = null;
+	if(File.path.includes(".")){
+		var Extensions = File.path.split('.');
+		
+		Extension = Extensions.pop().toLowerCase();
+		if(        Icons[Extension]){ Result = "ge/" +         Icons[Extension] + ".png"; }
+		if(AnimatedIcons[Extension]){ Result = "ge/" + AnimatedIcons[Extension] + ".gif"; }
+		
+		if(Extensions.length>1){
+			Extension = Extensions.pop().toLowerCase() + "." + Extension;
+			if(Double_Icon[Extension]){ Result = "ge/" + Double_Icon[Extension] + ".png"; }
+		}
+	}
+	
+	const Lower = File.path.toLowerCase();
+	if(Lower.includes("license")){ Result = "ge/license.png"; }
+	
+	return Result;
 }
 
-async function ShowFile_Extend(File){
-
+async function GetIconExtend(File,Content,OldIcon){
+	OldIcon = OldIcon.replace("file:///W:/Other/woowzsite/","");
+	if(OldIcon==="ge/file.png"){
+		if(Content===""){ return "ge/file_empty.png"; }else{
+			var ThatByteFile = false;
+			
+			for(var i = 0; i < Content.length; i++){
+				if(Content[i] === "�"){ ThatByteFile = true; }
+			}
+			
+			if(ThatByteFile){ return "ge/file_byte.png"; }
+		}
+	}
+	
+	if(OldIcon==="ge/image_png.png"){
+		if(Content.includes("acTL")){ return "ge/image_apng.gif"; }
+	}
+	
+	return null;
 }
 
 var Selector = null;
@@ -835,6 +945,41 @@ document.addEventListener("dragstart",function(event) {
 		event.preventDefault();
 	}
 });*/
+
+function SaveRecents(){
+	const CurrentRecent = RepoURL + "||" + CurrentToken;
+	
+	var FoundIndex = -1;
+	for(var i = 0; i < TotalRecents; i++){
+		const ExistingRecent = localStorage.getItem("recent_" + i);
+		if(ExistingRecent === CurrentRecent){
+			FoundIndex = i;
+			break;
+		}
+	}
+	
+	if(FoundIndex !== -1){
+		for(var i = FoundIndex; i > 0; i--){
+			const OldRecent = localStorage.getItem("recent_" + (i - 1));
+			if (OldRecent !== null) {
+				localStorage.setItem("recent_" + i, OldRecent);
+			} else {
+				localStorage.removeItem("recent_" + i);
+			}
+		}
+	}else{
+		for(var i = TotalRecents - 1; i > 0; i--) {
+			const OldRecent = localStorage.getItem("recent_" + (i - 1));
+			if (OldRecent !== null) {
+				localStorage.setItem("recent_" + i, OldRecent);
+			} else {
+				localStorage.removeItem("recent_" + i);
+			}
+		}
+	}
+	
+	localStorage.setItem("recent_0", CurrentRecent);
+}
 
 //---------------------------------------
 
