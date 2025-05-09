@@ -83,8 +83,8 @@ function ScreenAddition(){
 
 function Screen_Start(){
 	var Content = 
-`<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="https://github.com/Woowz11/GitExplorer-test">
-<input type="password" id="token" placeholder="Токен (если нужен)" value="">
+`<input type="text" id="repo" placeholder="Ссылка на репозиторий" value="${RepoURL===null?"https://github.com/Woowz11/GitExplorer-test":RepoURL}">
+<input type="password" id="token" placeholder="Токен (если нужен)" value="${CurrentToken===null?"":CurrentToken}">
 <button id="OpenRepoButton" onclick="OpenRepo();">Начать</button>`;
 	Body.innerHTML = Content + ScreenAddition();
 }
@@ -116,12 +116,12 @@ function Screen_Explorer(){
 	background-color:rgb(128,128,128);
 }
 .Left{
-	width: 300px;
+	width: 400px;
 	transition: width 0.3s ease;
 	background-color:rgba(0,0,0,0.05);
 }
 .Right{
-	width  : calc(100% - 300px${HasReadme?" - 30%":""});
+	width  : 100%;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr));
 	grid-template-rows	 : repeat(auto-fill, ${CurrentScale*200}px); 
@@ -132,8 +132,8 @@ function Screen_Explorer(){
 	overflow-y: auto;
 }
 .RightRight{
-	${HasReadme?"":"display: none;"}
-	width: 30%;
+	display: none;
+	width: 700px;
 	overflow-x: hidden;
 	overflow-y: auto;
 	transition: width 0.3s ease;
@@ -218,17 +218,17 @@ function Screen_Explorer(){
 	padding:10px;
 }
 
-@media (max-width: 900px) {
-	.Left{
-		width: 0%;
-	}
+@media (max-width: 1200px) {
 	.RightRight{
 		width: 0%;
 		padding: 0;
 		overflow-y: hidden;
 	}
-	.Right{
-		width: 100%;
+}
+
+@media (max-width: 900px) {
+	.Left{
+		width: 0%;
 	}
 }
 
@@ -259,7 +259,7 @@ function Screen_Explorer(){
 	<div class="Middle">
 		<div class="Left"></div>
 		<div class="Right" id="explorer-content"></div>
-		<div class="RightRight" id="readme">${ReadmeContent!==null?marked.parse(ReadmeContent):""}</div>
+		<div class="RightRight" id="readme"></div>
 	</div>
 	<div class="Bottom">
 		Элементов: <t id="bottom-elements-count">?</t>
@@ -301,12 +301,13 @@ function StartScreen(){
 var Files       = {};
 var Contents    = {};
 
-var CurrentFile = -1;
+var CurrentFile  = -1;
 var CurrentToken = null;
-var RateLimits  = null;
-var O = null;
-var Owner = null;
-var Repo = null;
+var RepoURL      = null;
+var RateLimits   = null;
+var O            = null;
+var Owner        = null;
+var Repo         = null;
 
 /* Получить все файлы внутри папки (example/path/) или файл (example/path) */
 async function GetFile(Path){
@@ -350,7 +351,7 @@ async function GetFile(Path){
 	return Result;
 }
 
-/* Получить папку */
+/* Получить папку/файл на прямую по пути */
 async function GetDir(Path){
 	try{
 		var ParentPath = "";
@@ -370,29 +371,25 @@ async function GetDir(Path){
 	}
 }
 
-async function ReadFile(Path){
-	if(Contents[Path]){ return Contents[Path]; }
+async function ReadFile(URL){
+	if(Contents[URL]){ return Contents[URL]; }
 	
 	var Result = "ERROR";
 	try{
-		const Response = await O.rest.repos.getContent({
-			owner: Owner,
-			repo : Repo,
-			path : Path
-		});
-		RateLimits[0] += 1;
+		const Response = await fetch(URL);
+		if(!Response.ok){ throw new Error("Не получилось Resnpose: " + Response.status); }
 		
-		if(Array.isArray(Response.data)){
+		const Data = await Response.text();
+		
+		if(Array.isArray(Data)){
 			throw new Error("Путь указывает на директорию а не на файл!");
 		}
 		
-		const Base64Content = atob(Response.data.content);
-		const Decoder = new TextDecoder("utf-8");
-		const Content = Decoder.decode(new Uint8Array(Base64Content.split('').map(c => c.charCodeAt(0))));
-		Result = Content;
-		Contents[Path] = Result;
+		Result = Data;
+		Contents[URL] = Result;
+		console.log("Файл [" + URL + "] прочитан!");
 	}catch(error){
-		console.error("Не получилось прочитать файл по пути [" + Path + "]: " + error);
+		console.error("Не получилось прочитать файл по ссылке [" + URL + "]: " + error);
 		throw error;
 	}
 	return Result;
@@ -428,7 +425,7 @@ html,body{
 
 	const { Octokit, App } = await import("https://esm.sh/octokit");
 
-	const RepoURL = document.getElementById("repo").value;
+	RepoURL = document.getElementById("repo").value;
 	CurrentToken  = document.getElementById("token").value;
 	
 	O = CurrentToken ? new Octokit({ auth: CurrentToken }) : new Octokit();
@@ -465,34 +462,7 @@ html,body{
 		}catch(error){
 			throw new Error("Не получилось открыть основную папку: " + error);
 		}
-		
-		/*
-		
-		async function GetContent(File){
-				if(File.type!=="dir"){
-					var Content = null;
-					try{
-						const Response2 = await axios.get(File.url,{
-							headers: {
-								"User-Agent": UserAgent
-							}
-						});
-						Content = atob(Response2.data.content);
-						console.log(File.path);
-						console.log(Content);
-						Contents[File.path] = Content;
-					}catch(error){
-						Contents[File.path] = false;
-						console.error("Не получилось получить содержимое файла [" + File.path + "]: " + error);
-					}
-				}
-			}
-			for(var File of A1llFiles){
-				//GetContent(File);
-			}
-		
-		*/
-	
+
 	}catch(error){
 		console.error("Не получилось открыть репозиторий: " + error);
 		alert("Не получилось открыть репозиторий: " + error);
@@ -505,15 +475,31 @@ html,body{
 
 var TotalPathButtons = 0;
 
-var HasReadme = false;
-var ReadmeContent = null;
+var CurrentReadme = null;
+var ReadedReadme  = null;
 
 async function GoTo(Data){
 	try{
-		HasReadme = false;
-		ReadmeContent = null;
+		CurrentReadme = null;
 		for(const File of Data){
-			if(File.path.toLowerCase().includes("readme.md")){ HasReadme = true; ReadmeContent = await ReadFile(File.path); }
+			if(File.type!=="dir"){
+				async function AsyncRead(){
+					const Content = await ReadFile(File.download_url);
+					if(File.path.toLowerCase().includes("readme.md")){ 
+						ReadedReadme = File;
+						
+						if(CurrentReadme.sha===ReadedReadme.sha){
+							const ReadmePanel = document.getElementById("readme");
+							if(ReadmePanel){
+								ReadmePanel.innerHTML = marked.parse(Content);
+								ReadmePanel.style.display = "block";
+							}
+						}
+					}
+				}
+				AsyncRead();
+				if(File.path.toLowerCase().includes("readme.md")){ CurrentReadme = File; }
+			}
 		}
 	
 		Screen_Explorer();
