@@ -144,10 +144,11 @@ GitExplorerSource = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"folder","file","file_unknown","folder_unknown","image_png","image_jpg","image_bmp","image_tga",
 	"image_tif","image_ico","image_cur","image_dds","image_pdn","image_psd","file_gitignore","file_vcxproj","file_exe",
 	"file_bat","file_com","file_msc","file_scr","file_suo","script_java","script_c","license","background","file_empty","file_byte","file_txt",
-	"script_cpp","script_py","script_asm","file_log","file_md","script_lua"
+	"script_cpp","script_py","script_asm","file_log","file_md","script_lua","readme","script_h","script_js",
+	"file_txt_utf8","file_tlog","file_rtf","image_hdr"
 ],"ge/",".png"),AddFullnessToTable([
 	"image_gif.gif","script.png","sliders.png","vs.png","script.png","java.png","c.png","emoji.png","cpp.png","py.png","file_project.png","processor.png",
-	"image_apng.png","image_apng.gif","lua.png"
+	"image_apng.png","image_apng.gif","lua.png","book.png","note.png","js.png"
 ],"ge/pdn/cache/","")),[
 	"ge/image_gif.gif","ge/image_apng.gif"
 ])

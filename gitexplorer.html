@@ -69,10 +69,12 @@ code{
 
 <script>
 const Body = document.getElementById("body");
+const GitExplorerVersion = "0.0.0";
 
 //---------------------------------------
 
-var CurrentScale = 0.75;
+const DefaultCurrentScale = 0.75;
+var CurrentScale = DefaultCurrentScale;
 
 //---------------------------------------
 
@@ -81,16 +83,16 @@ function ScreenAddition(){
 	return `<div id="canvases" style="${DEBUG_SaveCanvas?"":"display:none;"}"></div>`;
 }
 
-const TotalRecents = 42;
+const TotalRecents = 60;
 function Screen_Start(){
 	var Content = 
 `<style>
 .RecentHistory{
 	display:grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	grid-template-rows	 : repeat(auto-fill, minmax(100px, 1fr));
-	gap: 10px;
-	padding: 10px;
+	grid-template-rows	 : repeat(auto-fill, minmax(70px, 1fr));
+	gap: 4.9px;
+	padding: 4px;
 	height:100%;
 }
 
@@ -179,11 +181,21 @@ function Screen_Explorer(){
 }
 .RightRight{
 	display: none;
+	flex-direction: column;
 	width: 700px;
+	transition: width 0.3s ease;
+	background-color:rgba(0,0,0,0.05);
+}
+.RightRightContent{
+	height: calc(100% - 1.5em);
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
 	overflow-x: hidden;
 	overflow-y: auto;
-	transition: width 0.3s ease;
-	padding: 10px;
+}
+.RightRightTop{
+	height: 1.5em;
 	background-color:rgba(0,0,0,0.05);
 }
 .Top{
@@ -252,7 +264,7 @@ function Screen_Explorer(){
 }
 
 .Selector{
-	position: absolute;
+	position: fixed;
 	pointer-events: none;
 	z-index: 1000;
 	background-color: rgba(255,255,255,0.5);
@@ -261,7 +273,7 @@ function Screen_Explorer(){
 }
 
 .ContextMenu{
-	position: absolute;
+	position: fixed;
 	display: flex;
 	flex-direction: column;
 	z-index: 1001;
@@ -312,26 +324,25 @@ function Screen_Explorer(){
 	<div class="Middle">
 		<div class="Left"></div>
 		<div class="Right" id="explorer-content"></div>
-		<div class="RightRight" id="readme"></div>
+		<div class="RightRight" id="fileexplorer">
+			<div class="RightRightTop" id="fileexplorer-name"></div>
+			<div class="RightRightContent" id="fileexplorer-content"></div>
+		</div>
 	</div>
 	<div class="Bottom">
 		Элементов: <t id="bottom-elements-count">?</t>
 		<div class="DoCenter">
-			CENTER
+			${GitExplorerVersion}
 		</div>
 		<input type="range" id="bottom-scale" min="0" max="100" value="${CurrentScale*75}">
+		<button onclick="document.getElementById('bottom-scale').value=${DefaultCurrentScale*75}; UpdateFilePanelsSizes(${DefaultCurrentScale*75});">R</button>
 	</div>
 </div>`;
 	Body.innerHTML = Content + ScreenAddition();
 	
 	qS_R = document.querySelector(".Right");
 	document.getElementById("bottom-scale").addEventListener("input", function() {
-		CurrentScale = Math.max(0.01,this.value/75);
-		document.querySelectorAll(".File"		).forEach(File => { File.style.height = `${CurrentScale*200}px`; });
-		document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale+0.125}em`; });
-		qS_R.style.gridTemplateColumns = `repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr))`;
-		qS_R.style.gridTemplateRows	   = `repeat(auto-fill, ${CurrentScale*200}px)`;
-		qS_R.style.gap                 = `${10*CurrentScale}px`;
+		UpdateFilePanelsSizes(this.value);
 	});
 	
 	document.getElementById("ratelimit-used" ).innerText = RateLimits[0];
@@ -343,6 +354,14 @@ function Screen_Explorer(){
 	qS_R.addEventListener("mouseleave", () => {
 		MouseInnerExplorer = false;
 	});
+}
+function UpdateFilePanelsSizes(value){
+	CurrentScale = Math.max(0.01,value/75);
+	document.querySelectorAll(".File"		).forEach(File => { File.style.height = `${CurrentScale*200}px`; });
+	document.querySelectorAll(".FileName").forEach(Name => { Name.style.fontSize = `${CurrentScale+0.125}em`; });
+	qS_R.style.gridTemplateColumns = `repeat(auto-fill, minmax(${CurrentScale*150}px, 1fr))`;
+	qS_R.style.gridTemplateRows	   = `repeat(auto-fill, ${CurrentScale*200}px)`;
+	qS_R.style.gap                 = `${10*CurrentScale}px`;
 }
 
 //---------------------------------------
@@ -609,10 +628,13 @@ async function GoTo(Data){
 						ReadedReadme = File;
 						
 						if(CurrentReadme.sha===ReadedReadme.sha){
-							const ReadmePanel = document.getElementById("readme");
-							if(ReadmePanel){
-								ReadmePanel.innerHTML = marked.parse(Content);
-								ReadmePanel.style.display = "block";
+							const FileExplorerPanel        = document.getElementById("fileexplorer"        );
+							const FileExplorerContentPanel = document.getElementById("fileexplorer-content");
+							const FileExplorerNamePanel    = document.getElementById("fileexplorer-name"   );
+							if(FileExplorerPanel && FileExplorerContentPanel && FileExplorerNamePanel){
+								FileExplorerContentPanel.innerHTML = marked.parse(Content);
+								FileExplorerPanel.style.display = "block";
+								FileExplorerNamePanel.innerText = File.path;
 							}
 						}
 					}
@@ -746,6 +768,7 @@ function GetIcon(File){
 		"dds" : "image_dds",
 		"pdn" : "image_pdn",
 		"psd" : "image_psd",
+		"hdr" : "image_hdr",
 		
 		"exe" : "file_exe",
 		"bat" : "file_bat",
@@ -760,11 +783,15 @@ function GetIcon(File){
 		"py"   : "script_py",
 		"asm"  : "script_asm",
 		"lua"  : "script_lua",
+		"h"    : "script_h",
+		"js"   : "script_js",
 		
 		"txt" : "file_txt",
 		"text": "file_txt",
 		"log" : "file_log",
 		"md"  : "file_md",
+		"tlog": "file_tlog",
+		"rtf" : "file_rtf",
 		
 		"bin"  : "file_byte",
 		"byte" : "file_byte",
@@ -798,6 +825,7 @@ function GetIcon(File){
 	}
 	
 	const Lower = File.path.toLowerCase();
+	if(Lower.includes("readme" )){ Result = "ge/readme.png" ; }
 	if(Lower.includes("license")){ Result = "ge/license.png"; }
 	
 	return Result;
@@ -819,6 +847,12 @@ async function GetIconExtend(File,Content,OldIcon){
 	
 	if(OldIcon==="ge/image_png.png"){
 		if(Content.includes("acTL")){ return "ge/image_apng.gif"; }
+	}
+	
+	if(OldIcon==="ge/file_txt.png"){
+		for(var i = 0; i < Content.length; i++){
+			if(Content.charCodeAt(i) > 127){ return "ge/file_txt_utf8.png"; }
+		}
 	}
 	
 	return null;
