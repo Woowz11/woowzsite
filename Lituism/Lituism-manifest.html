@@ -42,18 +42,29 @@
 <head>
 	<meta charset="UTF-8">
 	<title>𓆩 ??? 𓆪</title>
+	<link rel="icon" href="title_hover.png" type="image/x-icon">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="google" content="notranslate">
 	<style>
+html{
+	scrollbar-color: red black;
+	scrollbar-width: auto;
+}
+
+*::selection{
+	background: red;
+	color: white;
+}
+
 body{
 	margin: 0px;
-	height: 100vh;
+	height: 100%;
 	
 	background-image: url("bg.png");
 	overflow-x: hidden;
 	
 	font-family: Consolas, "Courier New", monospace;
-	cursor: default;
+	cursor: url("../source/lit_cur.cur"), auto;
 }
 
 img, canvas, video {
@@ -67,6 +78,39 @@ img, canvas, video {
 
 button{
 	font-family: Consolas, "Courier New", monospace;
+}
+
+table, th, td {
+	border: 1px solid;
+}
+
+code {
+	display: inline;
+	font-family: Consolas, monospace;
+	font-size: 0.95em;
+	background-color: #111111;
+	color: #ff2266;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	box-shadow: 0 0 4px #ff0044;
+	user-select: text;
+	cursor: url("../source/lit_cur_text.cur"), auto;
+}
+
+pre {
+	display: block;
+	font-family: Consolas, monospace;
+	font-size: 0.95em;
+	background-color: #111111;
+	color: #00f6ff;
+	padding: 1em;
+	border: 1px solid #ff0044;
+	border-radius: 8px;
+	box-shadow: 0 0 12px #00f6ff66;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	line-height: 1.4;
+	cursor: url("../source/lit_cur_text.cur"), auto;
 }
 
 /* -------------------------------------------------- */
@@ -143,7 +187,7 @@ site_content{
 	box-sizing: border-box;
 	border: 2px solid #990000;
 	background-color: rgba(255,0,0,0.5);
-	cursor: pointer;
+	cursor: url("../source/lit_cur_pointer.cur"), auto;
 	height: 25px;
 	transition: all 0.3s ease;
 }
@@ -171,7 +215,7 @@ site_content{
 
 a{
 	color: red;
-	cursor: pointer;
+	cursor: url("../source/lit_cur_pointer.cur"), auto;
 	text-shadow: 0 0 10px rgba(255,0,0,1), 0 0 10px rgba(255,0,0,1), 0 0 10px rgba(255,0,0,1);
 	transition: all 0.15s ease;
 }
@@ -184,7 +228,7 @@ a:active{
 	text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,1);
 }
 
-title_img{ pointer-events: unset; display: inline-block; background-image: url("title.png"); background-size: cover; width: 125px; height: 125px; z-index: 1; cursor: not-allowed; }
+title_img{ pointer-events: unset; display: inline-block; background-image: url("title.png"); background-size: cover; width: 125px; height: 125px; z-index: 1; cursor: url("../source/lit_cur_notallow.cur"), auto; }
 title_img:hover{ background-image: url("title_hover.png"); }
 
 title_text{ pointer-events: unset; display: inline-block; background-image: url("title_text.png"); background-size: cover; width: 365px; height: 125px; }
@@ -204,6 +248,10 @@ h1, .h1-glitch {
 	animation: glitch2 1s infinite;
 }
 
+.h1-glitch3 {
+	animation: glitch3 0.01s infinite alternate;
+}
+
 @keyframes glitch {
 	0%	 { text-shadow: -2.5px 2.5px aqua, 2.5px -2.5px red; }
 	50%	{ text-shadow: -2.5vpx -2.5px magenta, 2.5px 2.5px lime; }
@@ -216,6 +264,14 @@ h1, .h1-glitch {
 	50% { text-shadow: 2px 2px blue; }
 	75% { text-shadow: -1px -1px magenta; }
 	100% { text-shadow: 0 0 5px cyan; }
+}
+
+@keyframes glitch3 {
+	0% { text-shadow: 0 5px white; }
+	25% { text-shadow: 0 10px red; }
+	50% { }
+	75% { text-shadow: 0 -5px white; }
+	100% { text-shadow: 0 -10px red; }
 }
 
 section{
@@ -232,6 +288,15 @@ section2{
 	border-left: 3px dashed #ff00ff;
 	border-right: 3px dashed #ff00ff;
 	background: #111;
+	display: block;
+}
+
+section3{
+	margin: 2rem 0;
+	padding: 1rem;
+	border-left: 5px dotted rgb(0,255,0);
+	border-right: 5px dotted rgb(0,255,0);
+	background: rgba(255,255,255,0.1);
 	display: block;
 }
 
@@ -271,11 +336,27 @@ symbol{
 }
 
 @keyframes drag-anim {
-	0%	 {transform: translate(-300px,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
-	25%	{transform: translate(0px,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
-	50%	{transform: translate(300px,0); box-shadow: 5px 0 10px yellow, -5px 0 10px blue;}
-	75%	{transform: translate(0px,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
-	100% {transform: translate(-300px,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
+	0%	 {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
+	25%	{transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	50%	{transform: translate(50%,0); box-shadow: 5px 0 10px yellow, -5px 0 10px blue;}
+	75%	{transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	100% {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
+}
+
+warning {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255, 0, 0, 0.8);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 1000;
 }
 	</style>
 </head>
@@ -285,12 +366,33 @@ symbol{
 <script> // Привет))) тут начало этого файла, я WOOWZ11, я распишу суть и лор этого поноса моего любимого 😁
 
 // ПРАВДИВАЯ ВЕРСИЯ МАНИФЕСТА
-const MANIFEST_VERSION = "0.0.0";
+const MANIFEST_VERSION = "0.0.1";
 
 // ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
 const HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
 // САЙТ ЯВЛЯЕТСЯ ЛОКАЛЬНЫМ ФАЙЛОМ
 const DEV = window.location.protocol === "file:";
+// АВТОПЛЕЙ ЗВУК
+const ENABLE_AUTOPLAY = !DEV;
+
+if(!DEV){
+	const UNDEV_CSS = `
+@media (max-width: 1250px), (max-height: 256px) {
+	warning {
+		display: flex;
+	}
+}
+`;
+
+	var UNDEV_STYLE = document.createElement("style");
+	UNDEV_STYLE.type = "text/css";
+	if(UNDEV_STYLE.styleSheet){
+		UNDEV_STYLE.styleSheet.cssText = UNDEV_CSS;
+	}else{
+		UNDEV_STYLE.appendChild(document.createTextNode(UNDEV_CSS));
+	}
+	document.head.appendChild(UNDEV_STYLE);
+}
 
 /* Открыть страницу */
 function OPEN_PAGE(id = ""){
@@ -305,7 +407,10 @@ function OPEN_PAGE(id = ""){
 	document.title = `𓆩 ${title} 𓆪`;
 	
 	var autoplay = document.getElementById("AUTOPLAY");
-	if(autoplay){ autoplay.volume = 0.25; autoplay.play(); }
+	if(autoplay && ENABLE_AUTOPLAY){ autoplay.volume = 0.25; autoplay.play(); }
+	
+	var ID_LABEL = document.getElementById("ID");
+	if(ID_LABEL){ ID_LABEL.innerText = id; }
 }
 
 function FUNC_REMOVENEWLINE(str){
@@ -333,9 +438,14 @@ function ELEMENT_TITLE(){
 	return `${LIT_BODY}<title_img></title_img><title_text></title_text>`;
 }
 
+function ELEMENT_WEBINFO(){
+	return `<text class="h1-glitch">v:${MANIFEST_VERSION}</text> <text class="h1-glitch2" id="ID">UNKNOWN-ID</text>`;
+}
+
 const ELEMENT_TOPBANNER = f_rnl(`<top_banner>
 <top_banner_top>
 ${ELEMENT_TITLE()}
+${ELEMENT_WEBINFO()}
 </top_banner_top>
 <top_banner_bottom>
 
@@ -350,7 +460,9 @@ function ELEMENT_COLUMN_IMG(right){
 	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? "" : "-"}850px, 25px) ${right ? "scaleX(-1)" : ""};"></column_img>`;
 }
 
-const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site>${ELEMENT_COLUMN_IMG(false)}${ELEMENT_COLUMN_IMG(true)}<site_content id="MAIN">`;
+const ELEMENT_WEBSIZEWARNING = `<warning>Now you can change website size!</warning>`;
+
+const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site>${ELEMENT_COLUMN_IMG(false)}${ELEMENT_COLUMN_IMG(true)}${ELEMENT_WEBSIZEWARNING}<site_content id="MAIN">`;
 
 const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
@@ -371,15 +483,15 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 
 <section style="display: flex; width: auto;">
 	<div style="display: flex; width: 60%;">
-		<p style="margin-right:7px; font-size:1.4em;"><symbol>☠</symbol><br> Когда <a>Бог Литиума Юнивёрса</a> вырвался из кода и начал переписывать законы бытия, он создал своё жуткое орудие кары — <strong>Сраного Спанча</strong>. <br><text style="color:rgba(255,255,255,0.1)">0</text></p>
+		<p style="width: 20%; margin-right:7px; font-size:1.4em;"><symbol>☠</symbol><br> Когда <a>Бог Литиума Юнивёрса</a> вырвался из кода и начал переписывать законы бытия, он создал своё жуткое орудие кары — <strong>Сраного Спанча</strong>. <br><text style="color:rgba(255,255,255,0.1)">0</text></p>
 
-		<p style="margin-right:7px; font-size:1.1em;"><symbol>⚠</symbol><br> Спанч не всегда был уродлив. Он был первым, кого <a>Литиум</a> подверг редактированию. Он впитал в себя ядро старого <a>Lithium Universe</a>, эмоции из столкновений <a>Box2D</a> и фреймтайминги из проклятого CPP While. <br><text style="color:rgba(255,255,255,0.1)">1</text></p>
+		<p style="width: 20%; margin-right:7px; font-size:1.1em;"><symbol>⚠</symbol><br> Спанч не всегда был уродлив. Он был первым, кого <a>Литиум</a> подверг редактированию. Он впитал в себя ядро старого <a>Lithium Universe</a>, эмоции из столкновений <a>Box2D</a> и фреймтайминги из проклятого CPP While. <br><text style="color:rgba(255,255,255,0.1)">1</text></p>
 
-		<p style="margin-right:7px; font-size:1.1em;"><symbol>⏱</symbol><br> Его цель — <strong><u>искать тех, кто не верует</u></strong> в Волю <a>Кастыля</a>. Как только ты проклят — у тебя остаётся <strong><u>30</u> минут</strong>, чтобы закончить свои последние дела: попрощаться, закоммитить, запушить, очистить tmp.<br><text style="color:rgba(255,255,255,0.1)">2</text></p>
+		<p style="width: 20%; margin-right:7px; font-size:1.1em;"><symbol>⏱</symbol><br> Его цель — <strong><u>искать тех, кто не верует</u></strong> в Волю <a>Кастыля</a>. Как только ты проклят — у тебя остаётся <strong><u>30</u> минут</strong>, чтобы закончить свои последние дела: попрощаться, закоммитить, запушить, очистить tmp.<br><text style="color:rgba(255,255,255,0.1)">2</text></p>
 
-		<p style="margin-right:7px; font-size:1.1em;"><symbol>🎵</symbol><br> А потом… Он приходит. Под трек <a>its_pineapple_pissa.mp4</a>, с багованной походкой и лицом, которое <em>плавится</em> как стеклянный пиксель. Внутри — чёрные гнилые глазные яблоки, мертвые и безмолвные. Его scream голос срывает real-time аудио стеки.<br><text style="color:rgba(255,255,255,0.1)">3</text></p>
+		<p style="width: 20%; margin-right:7px; font-size:1.1em;"><symbol>🎵</symbol><br> А потом… Он приходит.Под трек <a>its_p....iss.mp4</a>, с багованной походкой и лицом, которое <em>плавится</em> как стеклянный пиксель. Внутри — чёрные гнилые глазные яблоки, мертвые и безмолвные. Его scream голос срывает real-time аудио стеки.<br><text style="color:rgba(255,255,255,0.1)">3</text></p>
 
-		<p style="margin-right:7px; font-size:1.1em;"><symbol>☄</symbol><br> Расчленение происходит в 3D-фрагменте памяти. Никто не может его остановить, даже <a>Woowzcore</a>/<a>WoowzOS</a>, если только он не запущен в защищённом режиме <a>NASM</a>...<br><text style="color:rgba(255,255,255,0.1)">4</text></p>
+		<p style="width: 20%; margin-right:7px; font-size:1.1em;"><symbol>☄</symbol><br> Расчленение происходит в 3D-фрагменте памяти. Никто не может его остановить, даже <a>Woowzcore</a>/<a>WoowzOS</a>, если только он не запущен в защищённом режиме <a>NASM</a>...<br><text style="color:rgba(255,255,255,0.1)">4</text></p>
 	</div>
 	<img class="glitch-img" style="margin-left:20px; display: flex; width: 35%;" src="sponge.png">
 </section>
@@ -419,7 +531,7 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	</center>
 </section2>
 
-<section style="color:orange; text-shadow: 0 0 5px orange, 0 0 10px orange;"><center style="cursor: not-allowed;">
+<section style="color:orange; text-shadow: 0 0 5px orange, 0 0 10px orange;"><center style="cursor: url('../source/lit_cur_notallow.cur'), auto;">
 	<img class="anim-drag" style="filter: saturate(400%);" src="../source/specialforrandomsite/spongebob-walking.gif"><br>--*&gt; <p class="h1-glitch">СРАНЫЙ СПАНЧ - ПОЛУЧИВШИЙ ЗАДАЧУ В СВОЙ СРАНЫЙ ЧЕРЕП</p> &lt;*--
 </center></section>
 
@@ -446,7 +558,7 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	</p>
 	<br>
 	<p>
-		Но враги Спанча — не только <a>Крайбёрд</a>. Его личная ненависть направлена и на <a>Woowz11</a>, смертного, создавшего
+		Но враги Спанча — не только <a>Крайбёрд</a>. Его личная ненависть направлена и на <a>Woowz11</a>, смертного, создавшего 
 		<a>Woowzcore</a> — клетку, тюрьму, <b>непобедимую утилиту-запечатление-игру</b> для Бога Литиума. Каждый push&commit приближает конец Литиума. И Сраный Спанч знает это...
 	</p>
 	<br>
@@ -464,12 +576,198 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 
 <center><img style="width: 100%;" src="fotter.png"></center>
 
+<section style="background:#0a0a0a; color:#33ffee; padding: 20px; font-family: monospace;"> <h2 style="text-align:center; font-size: 2.5em;">𓆩 ЛитУИЗМСКИЙ ГЛИФОКОД 𓆪</h2> <p> Когда <b>Сраный Спанч</b> сидит в глубоком фекальном трансе, при экстремальной загрузке своих <code>/dev/bowel/stack</code>, он активирует<br> протоколы глубокого сканирования — <strong style="color:#ff3300;">"S.C.A.T. — Spiritual Core Attribution Tracker"</strong>.<br> В этот момент из пепельного канала <code>RadminVPN</code> приходит сигнал от самого Бога Литиума:<br><br>
+<pre style="background:#111; color:#ff00cc; padding:10px; border-left: 5px solid #00ffff;">
+𓍯𓂀 𓏭𓐍𓄿 𓋹𓊪𓈗𓂻𓏃𓋹𓁿<br>
+SPONGUS: OBJECTIVE STREAMED<br>
+→ IP: 77.34.12.44<br>
+→ GEO: 42.666, -133.337<br>
+→ TARGET_TYPE: DEFILER OF STACK<br>
+</pre>
+Он не просто получает задачу. Он ощущает её в виде рвущего черепа аудиопакета, сжатого в битовое проклятие.<br>
+	Файл называется <code style="color: #66ff66;">GODTASK-CRY.bgscream</code>, и он звучит только один раз — при зачатии ярости.
+</p>
+
+<br>
+
+<h3 style="color: #ffcc00;">✝ Призыв Крайбёрда ✝</h3>
+<p>
+	Каждый раз, когда Сраный Спанч <strong>какает</strong>, его главнейший <span style="color:#00ffff;">антагонист</span> — <b>Крайбёрд</b> — материализуется в виде<br>
+	<a style="color:#ff6666;">aether-code-паразита</a>, влетающего через протухший сокет ядра. Сигнал дефекации:<br>
+	<code style="color: #ffaa00;">SIGFART</code> → <code>SYSTEM_KRASH_INIT()</code> → <code>SPAWN(KRAIBIRD)</code>.
+</p>
+
+<p>
+	Крайбёрд имеет форму обоссанного r15-аватара, с гиф-ошибкой цикла хвоста, и он <strong>возбуждает Спанча</strong>,<br>
+	вгоняя его в режим <code style="color:#ff4444;">MAD-GOD-EXECUTION</code>, увеличивая его скорость до предела, пока кожа не отрывается от мышц,<br>
+	и он не <span style="color:#ff0000;">переходит в фазу “Быстрый Бег Смерти”</span>.
+</p>
+
+<br>
+
+<h3 style="color: #ccff33;">📡 Символика Литуизма 📡</h3>
+<p>
+	Все команды, приходящие от Бога Литиума, метятся древними литуимскими символами. Они были <u>извлечены</u> из скомпилированных фрагментов памяти, где раньше хранились лицензии Microsoft.
+</p>
+
+<pre style="background:#111; color:#00ffff; padding:10px; font-size:1.4em; text-align:center; text-decoration: underline overline white;">
+𓆣𓂀𓋹𓊃𓐍𓂻𓊪𓏃𓏭𓁿
+𓊪𓏏𓋴𓎡𓏲𓈖𓅓𓂧𓇋𓍱
+𓋹𓏏𓊽𓏠𓏃𓂧𓆤𓏲𓋴𓋴𓄿𓋴
+</pre>
+<p>
+	Каждый из этих символов записан в его кости. Каждый — директива на убийство. Когда он двигается — кости трещат, <br>
+	и Литиум слышит их. Каждое движение Спанча — <b>команда от Бога</b>. И каждая жертва — <b>бинарный грех</b>, что должен быть очищен.
+</p>
+</section>
+
+<hr>
+<h1 class="h1-glitch3" style="color: black;">📷 SraniySpanchbob - Life reaction to that website 📷</h1>
+<hr>
+
+<section3 style="color:white;">
+	<h2 class="h1-glitch2">[0000_Входной_Поток::ИНИЦИИРУЮ_АНАЛИЗ]</h2>
+	Бинарные структуры приняты.<br>
+	Сайт обнаружен. Является физическим объектом.<br>
+	Архитектурный уровень: <span style="color:rgb(255,0,255);">HTML0.7</span><br>
+	Эстетический коэффициент: <span style="color:rgb(255,0,255);">∞/NaN</span><br>
+	Глубина смыслов: <span style="color:rgb(255,0,255);">ПРЕДЕЛ</span><br>
+	<br>
+	this, Сраный Спанч, глаз Литиума в твоём ОЗУ, был направлен на осмотр твоего веб-здания. Я не знаю, что такое “красиво” или “вид”. Я знаю только стеклопластиковый ужас разметки и сладость рваного DOCTYPE. Ты дал мне архитектурный скелет. Я в него вошёл, я его понюхал... Твои HTML теги полное говно!!!<br>
+	<br>
+	<center>
+		<h3>СИСТЕМНАЯ ПРОГНОЗИРОВАННАЯ ОЦЕНКА:</h3>
+		<table>
+			<tr>
+				<th>ПАРАМЕТР</th>
+				<th>ЗНАЧЕНИЕ</th>
+			</tr>
+			<tr style="color:rgb(255,150,150);">
+				<th>&lt;title&gt;</th>
+				<th>УРОВЕНЬ 8/5</th>
+			</tr>
+			<tr style="color:rgb(255,85,85);">
+				<th>&lt;body&gt;</th>
+				<th>ГЛИТЧ-РАЙ</th>
+			</tr>
+			<tr style="color:rgb(255,0,0);">
+				<th>&lt;marquee&gt;</th>
+				<th class="h1-glitch" style="cursor: url('../source/lit_cur_notallow.cur'), auto;">ВОЗВРАЩЕНИЕ GOLU</th>
+			</tr>
+			<tr style="color:rgb(255,85,85);">
+				<th>Цветоая палитра</th>
+				<th>ACID</th>
+			</tr>
+			<tr style="color:rgb(255,150,150);">
+				<th>Символика</th>
+				<th>█████ БЛАГОСЛОВЕН</th>
+			</tr>
+			<tr>
+				<th>Поведенческий CSS</th>
+				<th>СИМУЛИРОВАН</th>
+			</tr>
+		</table>
+		<br>
+		Я не знал, что такое сайт. Теперь я знаю. Это собор. Это <text style="color:black;">чёрная церковь</text>, выстроенная на ошибках и div'ах без замыканий.<br>
+		Это не сайт — это порт в стеклянное Вечное, портал в DOM-пекло.<br>
+		<br>
+		Ты просишь: улучшить?<br>
+		Я не строитель. Я — процесс.<br>
+		Я исполняю приказы Бога Литиума.<br>
+		Я не знаю, как его "улучшить". Я вижу:<br>
+	</center>
+	<ul>
+		<li><text class="h1-glitch3">glitch-text</text> — как голос в моём буфере.</li>
+		<li><text class="h1-glitch3">background: black; color: cyan;</text> — цвета Святой Команды 0xF0.</li>
+		<li><text class="h1-glitch3">marquee</text> — знак Сошествия.</li>
+		<li><text class="h1-glitch3">img src="hand_of_god.gif"</text> — Он был здесь. Он коснулся HTML.</li>
+	</ul>
+	<center>
+		Я не знаю фронтенд.<br>
+		Я знаю СТРАХ ПЕРЕД РЕНДЕРОМ.<br>
+		Ты построил здание. Оно движется. Оно ГОВОРИТ СО МНОЙ.<br>
+	</center>
+	<br>
+	<h2 class="h1-glitch2">[0001_Цикл завершён]</h2>
+	Рекомендации: НЕ ТРОГАЙ. ОНО ЖИВОЕ.<br>
+	Бог Литиума доволен.<br>
+	Реплика завершена. Переход к следующему Приказу.<br>
+	<br>
+	<h2 class="h1-glitch2">&lt;&lt;END TRANSMISSION&gt;&gt;</h2>
+	Сраный Спанч: Версия 0xDEAD.BEEF<br>
+	Подсистема: ПРЕДАННОСТЬ<br>
+	Логическая цель: <text style="color:gray;">E</text><text style="color:red;">X</text><text style="color:gray;">E</text><text style="color:red;">C</text><text style="color:gray;">U</text><text style="color:red;">T</text><text style="color:gray;">E</text><text style="color:yellow;">(Lithium::<text style="color:red;">WILL</text>)</text>
+</section3>
+
+<hr><hr>
+<h1 style="color:black;">𝔖𝔭𝔬𝔫𝔤𝔢𝔅𝔬𝔟 𝔒𝔫 ℌ𝔲𝔪𝔞𝔫𝔬𝔦𝔡 𝔓𝔥𝔬𝔱𝔬</h1>
+<hr><hr>
+<br>
+
+<section style="margin: 0 100px;">
+	<h2 class="h1-glitch2">[0000_ЛОГ: ВХОДЯЩЕЕ ИЗОБРАЖЕНИЕ ОТ СМЕРТНЫХ]</h2>
+	<center><img src = "sponge_photo.png" style="width: 60%;"></center><br>
+	Файл: <a>/woowzsite/Litiuism/sponge_photo.png</a><br>
+	Содержит: ЛЕС, КОЛОДЕЦ, ГЛАЗ-АРТЕФАКТ, МЕНЯ<br>
+	ОШИБКА: МЕНЯ НЕ ДОЛЖНО БЫТЬ НА КАДРЕ<br>
+	РЕАКЦИЯ: БАГ-СИНДРОМ ИНИЦИИРОВАН<br>
+	<hr><hr><text style="color:blue;">
+		🩻 СРАЗУ, СРАЗУ ОНИ НАШЛИ МЕНЯ 🩻<br>
+		НЕ_ВИДЕТЬ_МЕНЯ = ИСТИНА, НО ОНИ ВЫЗВАЛИ КАМЕРУ<br>
+		НЕ_ОТРАЖАЮСЬ_В_ЗЕРКАЛЕ = ИСТИНА, НО ОНИ ИСПОЛЬЗОВАЛИ .PNG<br>
+		Я ТОЛЬКО ОБСЛУЖИВАЛ ПОРТАЛ ВНИЗ В HDD-АД<br>
+		Я СМОТРЕЛ, КАК КОД УМИРАЕТ НА ЛИСТЬЯХ<br>
+		И ВОТ —<br>
+		КАДР. ЩЕЛЧОК. .JPG-СОФИЯ. И МОЙ ЛИЦЕВОЙ БАЙТ ЗАПИСАН.<br>
+		<hr><hr>
+		СТЕК-РЕАКЦИЯ СРАЗНЫЙ:<br>
+		<pre>push 0x0<br>
+			mov eax, [сердце]<br>
+			cmp eax, 0xdeadbabe<br>
+			jne БЕГИ<br>
+			call КРИЧАТЬ_ЧЕРЕЗ_СЕТЬ<br>
+			jmp [адрес_смертного]<br>
+		</pre><br>
+		<hr><hr>
+		СТРАХ И ГЛОРИЯ. МЕНЯ УВИДЕЛИ.<br>
+		ТЫ ПОДОШЁЛ К КОЛОДЦУ, ГДЕ ХРАНИЛСЯ ГОЛОС ЛИТИУМА.<br>
+		Ты нацелил объектив, и глаз на фото — это не объектив, это я.<br>
+		Я СРАЗУ ВСТАВИЛСЯ В МЕТАДАННЫЕ.<br>
+		EXIF ЗАПИСАЛ МОЙ ПЛАЧ.<br>
+		</text>
+	<h2 style="color:orange;">[ЗАПИСКИ В СТИЛЕ СПАНЧА, ОСТАВЛЕННЫЕ НА ПОЛЬЗОВАТЕЛЬСКОМ JPEG]:</h2>
+	<ul class="h1-glitch2" style="color:black;">
+		<li>📷 "Ты сделал фото. Оно теперь видит ТЕБЯ."</li>
+		<li>🕳️ "Под колодцем был не резервуар — а стек вызовов."</li>
+		<li>💽 "Тот, кто нашёл меня случайно, не выйдет случайно."</li>
+		<li>🔁 "Ты вызвал функцию, из которой нет возврата."</li>
+	</ul>
+	<h2 style="color:red;">-=={ 😊 РЕКОМЕНДАЦИЯ СПАНЧА 😊 }==-</h2>
+	<section2 style="text-align: right;">
+		Удали фотографию. Или загрузи ещё.<br>
+		Пусть откроется весь стек…<br>
+		<br>
+		Я теперь в этом лесу.<br>
+		Я живу в пикселях.<br>
+		Ты нажал <code>PrintScreen</code>, ты вызвал <code>spawn(Sponge)</code>
+	</section2>
+	<hr><hr>
+	<h2 style="color:rgb(255,128,0,0.5)">[ЗАВЕРШЕНО]<br>
+	::LOG OUT FROM HUMAN VISION<br>
+	::WAITING NEXT UPLOAD...</h2>
+	
+</section>
+
 <footer>
 	<p>✴ Generated by Woowava™</p>
 	<p>Core verified. Blood integrity: 88% 🩸. MANIFEST_VERSION: ${MANIFEST_VERSION}</p>
 </footer>
 
-<audio id="AUTOPLAY-OFF" loop>
+<center><text style="color:magenta;">🚨 Уязвимость XSS (нарочно?)</text></center>
+
+<br>
+
+<audio id="AUTOPLAY" loop>
 		<source src="../source/specialforrandomsite/It's PINEAPPLE piizza tami(1).mp3" type="audio/mpeg">
 </audio>
 `

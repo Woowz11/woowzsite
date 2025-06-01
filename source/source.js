@@ -66,7 +66,7 @@ WoowzsiteSourceIcons = AddFullnessToTable([
 ],"source/",".ico")
 
 WoowzsiteSourceCursors = AddFullnessToTable([
-	"roblox","hit","cursor","woowz","hand","m","veryold","block","old2","old","cur2","cur"
+	"roblox","hit","cursor","woowz","hand","m","veryold","block","old2","old","cur2","cur","lit_cur","lit_cur_pointer","lit_cur_notallow","lit_cur_text"
 ],"source/",".cur")
 
 WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
@@ -179,7 +179,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png")
 
 WoowzsiteLituism = AddFullnessToTable([
-	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge"
+	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo"
 ],"Lituism/",".png")
 
 WoowzsiteSourceWoowzcore = AddFullnessToTable([
