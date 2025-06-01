@@ -43,6 +43,7 @@
 	<meta charset="UTF-8">
 	<title>𓆩 𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼 𓆪</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="google" content="notranslate">
 	<style>
 body{
 	margin: 0px;
@@ -99,12 +100,23 @@ top_banner_bottom{
 	display: flex;
 	width: 100vw;
 	height: 25px;
+	z-index: 1;
 	
 	box-shadow: 0 0 32px rgba(255,0,0,0.58);
 }
 
 column_img{
 	position: absolute;
+	animation: column_img_anim 1s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;
+	width: 64px;
+	background-image: url("left-right.png");
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+@keyframes column_img_anim {
+	0%   { height: 576px; }
+	100% { height: 550px; }
 }
 
 site{
@@ -132,15 +144,36 @@ site_content{
 	border: 2px solid #990000;
 	background-color: rgba(255,0,0,0.5);
 	cursor: pointer;
+	height: 25px;
+	transition: all 0.3s ease;
 }
 .category_button:hover{
 	background-color: rgba(255,0,0,1);
 	box-shadow: 0 0 32px rgba(255,0,0,1);
+	color: white;
+	height: 30px;
 }
 .category_button:active{
 	background-color: rgba(128,0,0,1);
 	box-shadow: none;
+	color: orange;
+	height: 25px;
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+title_img{ pointer-events: unset; display: inline-block; background-image: url("title.png"); background-size: cover; width: 125px; height: 125px; z-index: 1; cursor: not-allowed; }
+title_img:hover{ background-image: url("title_hover.png"); }
+
+title_text{ pointer-events: unset; display: inline-block; background-image: url("title_text.png"); background-size: cover; width: 365px; height: 125px; }
+title_text:hover{ background-image: url("title_text_hover.png"); }
 
 	</style>
 </head>
@@ -149,11 +182,16 @@ site_content{
 
 <script> // Привет))) тут начало этого файла, я WOOWZ11, я распишу суть и лор этого поноса моего любимого 😁
 
+// ПРАВДИВАЯ ВЕРСИЯ МАНИФЕСТА
+const MANIFEST_VERSION = "0.0.0";
+
 // ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
 const HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
+// САЙТ ЯВЛЯЕТСЯ ЛОКАЛЬНЫМ ФАЙЛОМ
+const DEV = window.location.protocol === "file:";
 
 /* Открыть страницу */
-function OPEN_PAGE(id){
+function OPEN_PAGE(id = ""){
 	PAGE_MAINPAGE();
 }
 
@@ -174,28 +212,44 @@ function SETBODY_CONTENT(newcontent, newlines = true){
 	BODY.innerHTML = newcontent;
 }
 
+/* ============================================== */
+
+function ELEMENT_TITLE(){
+	const LIT_BODY_SRC = "../source/god.png";
+	var LIT_BODY = "";
+	for(var i = 0; i < 5; i++){
+		var LIT_BODY_PART = `<img src="${LIT_BODY_SRC}" style="position: absolute; animation: spin ${i+1}s linear infinite; animation-name: spin;">`;
+		LIT_BODY += LIT_BODY_PART;
+	}
+	return `${LIT_BODY}<title_img></title_img><title_text></title_text>`;
+}
+
 const ELEMENT_TOPBANNER = f_rnl(`<top_banner>
 <top_banner_top>
-<img src="title.png">
+${ELEMENT_TITLE()}
 </top_banner_top>
 <top_banner_bottom>
 
 <button class="category_button">&lt;@&gt;</button>
-<button class="category_button">{MAIN PAGE}</button>
+<button onclick="OPEN_PAGE();" class="category_button">{MAIN PAGE}</button>
 <button class="category_button">DATABASE</button>
 
 </top_banner_bottom>
 </top_banner>`);
 
 function ELEMENT_COLUMN_IMG(right){
-	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? 1980 * 0.8 + 5 : -80}px, 25px) ${right ? "scaleX(-1)" : ""};"><img src="left-right.png"></column_img>`;
+	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? 1980 * 0.8 + 5 : -80}px, 25px) ${right ? "scaleX(-1)" : ""};"></column_img>`;
 }
 
 const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site><site_content>${ELEMENT_COLUMN_IMG(false)}${ELEMENT_COLUMN_IMG(true)}`;
 
 const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
-const PAGE_MAINPAGE_CONTENT = `${ELEMENT_SITETOP}<img src="../source/specialforrandomsite/c6j0PNI.gif">${ELEMENT_SITEBOTTOM}`;
+function ELEMENT_SITE(content){
+	return `${ELEMENT_SITETOP}${content}${ELEMENT_SITEBOTTOM}`;
+}
+
+const PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(`<img src="../source/specialforrandomsite/c6j0PNI.gif">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`);
 
 
 
@@ -219,7 +273,10 @@ const PAGE_MAINPAGE_CONTENT = `${ELEMENT_SITETOP}<img src="../source/specialforr
 
 
 
-
+/* РАЗЛИЧНЫЙ МУСОР - TRASH */
+if(!DEV){
+	document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+}
 
 OPEN_PAGE(HASH);
 
