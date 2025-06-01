@@ -89,7 +89,7 @@ WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 
 WoowzsiteSourceAudios = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"ВЫЙТИ НА УЛИЦУ ТАМ ЙОБАНЫ ЛОС","spongebob-asking-are-you-pooping-made-with","Morning-Flower","s","Cheetahmen","Toilet-story","Mr. Trololo original upload","idiotic music","otkroi-glazki",
-	"寻梦高粱红","Qahwah.Bootleg (feat. ilyhiryu)","gabber.bootleg","spo","what-the-song1","what-the-song2","what-the-song3"
+	"寻梦高粱红","Qahwah.Bootleg (feat. ilyhiryu)","gabber.bootleg","spo","what-the-song1","what-the-song2","what-the-song3","It's PINEAPPLE piizza tami(1)"
 ],"source/specialforrandomsite/",".mp3"),AddFullnessToTable([
 	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist","open"
 ],"source/",".mp3")),[
@@ -179,7 +179,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png")
 
 WoowzsiteLituism = AddFullnessToTable([
-	"bg","left-right","space","title","title_hover","title_text","title_text_hover"
+	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge"
 ],"Lituism/",".png")
 
 WoowzsiteSourceWoowzcore = AddFullnessToTable([
