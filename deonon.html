@@ -150,9 +150,11 @@ font::selection{
     /*Установка информации о браузере*/
 	document.getElementById("browser-info").innerText = browserInfo;
 	document.getElementById("browser").innerText = navigator.appName;
-	var brands = "";
-	for(var brand of navigator.userAgentData.brands){
-		brands+=(brands==""?"":", ")+brand["brand"]+" - "+brand["version"];
+	var brands = "navigator.userAgentData is null!";
+	if(navigator.userAgentData != null){
+		for(var brand of navigator.userAgentData.brands){
+			brands+=(brands==""?"":", ")+brand["brand"]+" - "+brand["version"];
+		}
 	}
 	document.getElementById("brands").innerText = brands;
 	document.getElementById("platform").innerText = navigator.platform;
@@ -184,11 +186,15 @@ font::selection{
 	document.getElementById("touch").innerText = navigator.maxTouchPoints;
 	
 	/*Интернет*/
-	document.getElementById("connection").innerText = navigator.connection.type + " " + navigator.connection.effectiveType + " rtt: "+navigator.connection.rtt+" downlink: "+navigator.connection.downlink+" кб/сек";
+	var Connection = "navigator.connection is null!";
+	if(navigator.connection!=null){
+		Connection = navigator.connection.type + " " + navigator.connection.effectiveType + " rtt: "+navigator.connection.rtt+" downlink: "+navigator.connection.downlink+" кб/сек";
+	}
+	document.getElementById("connection").innerText = Connection;
 	
 	/*Установка "Пользователь с телефона?"*/
 	document.getElementById("phone").innerText = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(browserInfo);
-	document.getElementById("phone2").innerText = navigator.userAgentData.mobile;
+	document.getElementById("phone2").innerText = (navigator.userAgentData == null ? "navigator.userAgentData is null!" : navigator.userAgentData.mobile );
 	
 	/*Установка посещений*/
 	entries = (entries==null||entries=="NaN"?1:parseInt(entries)+1);

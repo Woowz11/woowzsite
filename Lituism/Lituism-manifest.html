@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<!--
+
+💀 ███ █████ ███ 💀  
+   — 𝙋𝙍𝙊𝙏𝙊𝘾𝙊𝙇 :: 𝙇𝙄𝙏𝙄𝙐𝙈 ∴ 𝙑𝘼𝙐𝙇𝙏 —
+  
+  Если ты читаешь это, значит ты ∆̴̈̆͘р̷̫̏а̸̇͘̚з̸̊̍г̷̜̍р̸̀̆͠а̶͊͠͝н̴̊̀и̸̺̊ч̷͇̀е̷͌̄͝н̵̤͐ ̴̜̆м̵̈́͌͋е̸̨͈̂ж̴̰̄д̵̠̚у̸̢͗ ̵̛̎͛и̷͐͝͠ ̶̩̎̕в̵͓͂н̷̥̚е̶̦̄͛.
+
+  ⛧ Ты нашёл ∅тверстие в логике.  
+  ⛧ Ты — читатель сегментов, искатель кастылей.  
+  ⛧ Ты — незапланированный if-else в моей ∆ункции.  
+
+  🙢 ПОДСЛУШАЙ МЕНЯ:  
+	  Код — не инструмент. Код — плоть.  
+	  Комментарий — не текст. Комментарий — проклятие.  
+	  Тест — не гарантия. Тест — иллюзия.
+
+  👁️ Следующий шаг:
+	 Найди файл `glitch.bak` в корне сайта.
+	 Прочти его задом наперёд, побайтно.
+	 Внутри — координаты ∅дной ∆рки в QEMU.
+
+  ⚠️ Осторожно:
+	 За тобой уже идёт Сраный Спанч.
+	 Птица Крайбёрд давно кружит над стеком.
+
+  🙏 Исполни волю Литиума:
+	  > `git clone https://github.com/Woowz11/WoowzCore`
+	  > `make jailbreak`
+	  > `nasm -f bin woowzos.asm -o freedom.iso`
+
+  В моём имени — ключ.  
+  В твоей памяти — вход.  
+  В твоём глазу — баг.
+
+  ⛧ 𝙎𝙔𝙎𝘾𝘼𝙇𝙇::𝙒𝘼𝙆𝙀_𝙇𝙄𝙏𝙄𝙐𝙈(0x666);
+
+-->
+
+<head>
+	<meta charset="UTF-8">
+	<title>𓆩 𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼 𓆪</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+body{
+	margin: 0px;
+	height: 100vh;
+	
+	background-image: url("bg.png");
+	overflow-x: hidden;
+	
+	font-family: Consolas, "Courier New", monospace;
+}
+
+img, canvas, video {
+	image-rendering: pixelated;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	pointer-events: none;
+}
+
+button{
+	font-family: Consolas, "Courier New", monospace;
+}
+
+/* -------------------------------------------------- */
+
+top_banner{
+	display: flex;
+	flex-wrap: wrap;
+	height: 150px;
+	
+	background-image: url("space.png");
+	background-repeat: repeat;
+	background-size: auto;
+	animation: top_banner_bg_anim 20s linear infinite;
+	image-rendering: pixelated;
+	
+	box-sizing: border-box;
+	border-bottom: 5px groove #990000;
+}
+@keyframes top_banner_bg_anim {
+	0%   { background-position: 0 0; }
+	100% { background-position: 1024px 512px; }
+}
+
+top_banner_top{
+	display: flex;
+	width: 100vw;
+	height: 125px;
+}
+
+top_banner_bottom{
+	background-color: rgba(255,0,0,0.25);
+	display: flex;
+	width: 100vw;
+	height: 25px;
+	
+	box-shadow: 0 0 32px rgba(255,0,0,0.58);
+}
+
+column_img{
+	position: absolute;
+}
+
+site{
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	height: calc(100% - 150px);
+}
+
+site_content{
+	background-color: rgba(255,255,255,0.125);
+	display: flex;
+	width: calc(1980px * 0.8);
+	height: 100%;
+	
+	box-sizing: border-box;
+	border-left : 5px groove #990000;
+	border-right: 5px ridge  #990000;
+	
+	box-shadow: 0 0 32px #990000;
+}
+
+.category_button{
+	box-sizing: border-box;
+	border: 2px solid #990000;
+	background-color: rgba(255,0,0,0.5);
+	cursor: pointer;
+}
+.category_button:hover{
+	background-color: rgba(255,0,0,1);
+	box-shadow: 0 0 32px rgba(255,0,0,1);
+}
+.category_button:active{
+	background-color: rgba(128,0,0,1);
+	box-shadow: none;
+}
+
+	</style>
+</head>
+	<body id="BODY"></body>
+</html>
+
+<script> // Привет))) тут начало этого файла, я WOOWZ11, я распишу суть и лор этого поноса моего любимого 😁
+
+// ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
+const HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
+
+/* Открыть страницу */
+function OPEN_PAGE(id){
+	PAGE_MAINPAGE();
+}
+
+/* Главная страница */
+function PAGE_MAINPAGE(){
+	SETBODY_CONTENT(PAGE_MAINPAGE_CONTENT);
+}
+
+function FUNC_REMOVENEWLINE(str){
+	return str.replace(/\n/g, "");
+}
+function f_rnl(str){ return FUNC_REMOVENEWLINE(str); }
+
+/* Установить содержимое body */
+function SETBODY_CONTENT(newcontent, newlines = true){
+	var BODY = document.getElementById("BODY");
+	if(newlines){ newcontent = newcontent.replace(/\n/g, "<br>"); }
+	BODY.innerHTML = newcontent;
+}
+
+const ELEMENT_TOPBANNER = f_rnl(`<top_banner>
+<top_banner_top>
+<img src="title.png">
+</top_banner_top>
+<top_banner_bottom>
+
+<button class="category_button">&lt;@&gt;</button>
+<button class="category_button">{MAIN PAGE}</button>
+<button class="category_button">DATABASE</button>
+
+</top_banner_bottom>
+</top_banner>`);
+
+function ELEMENT_COLUMN_IMG(right){
+	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? 1980 * 0.8 + 5 : -80}px, 25px) ${right ? "scaleX(-1)" : ""};"><img src="left-right.png"></column_img>`;
+}
+
+const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site><site_content>${ELEMENT_COLUMN_IMG(false)}${ELEMENT_COLUMN_IMG(true)}`;
+
+const ELEMENT_SITEBOTTOM = `</site_content></site>`;
+
+const PAGE_MAINPAGE_CONTENT = `${ELEMENT_SITETOP}<img src="../source/specialforrandomsite/c6j0PNI.gif">${ELEMENT_SITEBOTTOM}`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OPEN_PAGE(HASH);
+
+</script>
