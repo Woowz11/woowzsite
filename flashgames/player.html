@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Player (Ruffle)</title>
+    <script src="ruffle/ruffle.js"></script>
+	
+	<style>
+html{
+	background-color: black;
+	color: white;
+}
+	</style>
+</head>
+<body>
+    <center>
+		<h1>Загрузите и играйте в Flash игры</h1>
+
+		<form id="uploadForm">
+			<input type="file" id="swfFile" accept=".swf" required>
+			<button type="submit">Загрузить игру</button>
+		</form>
+
+		<div id="container"></div>
+	</center>
+
+    <script>
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("container");
+            container.appendChild(player);
+
+            player.addEventListener("load", () => {
+                console.log("Игра загружена успешно");
+            });
+
+            player.addEventListener("error", (event) => {
+                console.error("Ошибка загрузки игры:", event.detail);
+            });
+
+            document.getElementById("uploadForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+                const fileInput = document.getElementById("swfFile");
+                const file = fileInput.files[0];
+
+                if (file) {
+                    const fileURL = URL.createObjectURL(file);
+                    player.ruffle().load(fileURL);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
