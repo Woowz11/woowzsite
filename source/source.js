@@ -179,7 +179,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png")
 
 WoowzsiteLituism = AddFullnessToTable([
-	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo"
+	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2"
 ],"Lituism/",".png")
 
 WoowzsiteSourceWoowzcore = AddFullnessToTable([

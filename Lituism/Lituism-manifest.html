@@ -58,7 +58,7 @@ html{
 
 body{
 	margin: 0px;
-	height: 100%;
+	height: 100vh;
 	
 	background-image: url("bg.png");
 	overflow-x: hidden;
@@ -79,6 +79,28 @@ img, canvas, video {
 button{
 	font-family: Consolas, "Courier New", monospace;
 }
+
+button:not(.category_button) {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(to bottom, rgba(255, 128, 128, 0.8), rgba(255, 255, 255, 0.8));
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    border-radius: 15px;
+	font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    transition: all 1s ease;
+	cursor: url("../source/lit_cur_pointer.cur"), auto;
+}
+
+button:hover:not(.category_button) {
+    background: linear-gradient(to bottom, rgba(255, 128, 128, 1), rgba(255, 255, 255, 1));
+}
+
 
 table, th, td {
 	border: 1px solid;
@@ -151,13 +173,9 @@ top_banner_bottom{
 }
 
 column_img{
-	position: absolute;
-	animation: column_img_anim 1s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;
+	position: fixed;
 	width: 64px;
-	background-image: url("left-right.png");
-	background-size: contain;
-	background-position: center;
-	background-repeat: no-repeat;
+	height: 64px;
 }
 @keyframes column_img_anim {
 	0%	 { height: 576px; }
@@ -280,6 +298,7 @@ section{
 	border-left: 4px solid #ff0044;
 	border-right: 4px solid #ff0044;
 	background: rgba(255, 0, 68, 0.1);
+	display: block;
 }
 
 section2{
@@ -298,6 +317,24 @@ section3{
 	border-right: 5px dotted rgb(0,255,0);
 	background: rgba(255,255,255,0.1);
 	display: block;
+}
+
+section4{
+	margin: 2rem 0;
+	padding: 1rem;
+	border: 5px solid white;
+	border-radius: 32px;
+	color: black;
+	text-shadow: 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white;
+	font-weight: bold;
+	display: block;
+	box-shadow: 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white;
+
+	background-image: url("bg2.png");
+	background-repeat: repeat;
+	background-size: auto;
+	animation: top_banner_bg_anim 20s linear infinite;
+	image-rendering: pixelated;
 }
 
 footer{
@@ -337,9 +374,9 @@ symbol{
 
 @keyframes drag-anim {
 	0%	 {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
-	25%	{transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
-	50%	{transform: translate(50%,0); box-shadow: 5px 0 10px yellow, -5px 0 10px blue;}
-	75%	{transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	25%	 {transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	50%	 {transform: translate(50%,0); box-shadow: 5px 0 10px yellow, -5px 0 10px blue;}
+	75%	 {transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
 	100% {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
 }
 
@@ -348,8 +385,8 @@ warning {
 	position: fixed;
 	top: 0;
 	left: 0;
-	width: 100%;
-	height: 100%;
+	width: 100vw;
+	height: 100vh;
 	background-color: rgba(255, 0, 0, 0.8);
 	color: white;
 	font-size: 24px;
@@ -357,6 +394,22 @@ warning {
 	align-items: center;
 	text-align: center;
 	z-index: 1000;
+}
+
+warning_mobile {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 255, 0.8);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 1001;
 }
 	</style>
 </head>
@@ -374,9 +427,16 @@ const HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
 const DEV = window.location.protocol === "file:";
 // АВТОПЛЕЙ ЗВУК
 const ENABLE_AUTOPLAY = !DEV;
+// ЗАПУЩЕНО НА ТЕЛЕФОНЕ
+const IN_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-if(!DEV){
-	const UNDEV_CSS = `
+if(IN_MOBILE){
+	FUNC_ADDSTYLE(`warning_mobile {
+		display: flex;
+	}`);
+}else{
+	if(!DEV){
+		const UNDEV_CSS = `
 @media (max-width: 1250px), (max-height: 256px) {
 	warning {
 		display: flex;
@@ -384,14 +444,18 @@ if(!DEV){
 }
 `;
 
-	var UNDEV_STYLE = document.createElement("style");
-	UNDEV_STYLE.type = "text/css";
-	if(UNDEV_STYLE.styleSheet){
-		UNDEV_STYLE.styleSheet.cssText = UNDEV_CSS;
-	}else{
-		UNDEV_STYLE.appendChild(document.createTextNode(UNDEV_CSS));
-	}
-	document.head.appendChild(UNDEV_STYLE);
+			FUNC_ADDSTYLE(UNDEV_CSS);
+		}
+}
+
+window.addEventListener("hashchange", () => {
+	const hash = window.location.hash;
+	const CleanHash = hash.replace(/^#/, "");
+	OPEN_PAGE(CleanHash);
+});
+
+function SITE_BASE(content){
+	return `${ELEMENT_SITETOP}${content}${ELEMENT_SITEBOTTOM}`;
 }
 
 /* Открыть страницу */
@@ -399,11 +463,12 @@ function OPEN_PAGE(id = ""){
 	var page = PAGES[id];
 	var content = null;
 	var title = null;
-	if(page==null){ content = ELEMENT_SITE(`<b>НУБ!!! НАУЧИСЬ ИГРАТЬ!!! ID "${id}" НЕ НАЙДЕНО!</b>`); title = "???"; }else{
+	if(page==null){ content = SITE_BASE(`<font style="color:white;"><center><b>НУБ!!! НАУЧИСЬ ИГРАТЬ!!! ID "${id}" НЕ НАЙДЕНО!</b></center></font>`); title = "???"; }else{
 		var content = page["c"];
-		var title = page["t"];
+		var title   = page["t"];
 	}
 	SETBODY_CONTENT(content);
+	window.location.hash = id;
 	document.title = `𓆩 ${title} 𓆪`;
 	
 	var autoplay = document.getElementById("AUTOPLAY");
@@ -417,6 +482,31 @@ function FUNC_REMOVENEWLINE(str){
 	return str.replace(/\n/g, "");
 }
 function f_rnl(str){ return FUNC_REMOVENEWLINE(str); }
+
+/* ДОБАВЛЯЕТ СТИЛЬ */
+function FUNC_ADDSTYLE(style){
+	var STYLE = document.createElement("style");
+	STYLE.type = "text/css";
+	if(STYLE.styleSheet){
+		STYLE.styleSheet.cssText = style;
+	}else{
+		STYLE.appendChild(document.createTextNode(style));
+	}
+	document.head.appendChild(STYLE);
+}
+
+/* СКАЧИВАЕТ ФАЙЛ */
+function FUNC_DOWNLOADFILE(name, content){
+	const blob = new Blob([content], {type: "text/plain"});
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = name;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
 
 /* ЗАМЕНЯЕТ ВСЕ ТЕГИ НА НУЖНЫЕ ФРАЗАЧКИ */
 function FUNC_REPLACE_TAGS(content){
@@ -466,28 +556,57 @@ ${ELEMENT_WEBINFO()}
 </top_banner>`);
 
 function ELEMENT_COLUMN_IMG(right){
-	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? "" : "-"}850px, 25px) ${right ? "scaleX(-1)" : ""};"></column_img>`;
+	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? "" : "-"}850px, 25px) ${right ? "scaleX(-1)" : ""};"><img src="left-right.png" style="animation: column_img_anim 1s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;"></column_img>`;
 }
 
-const ELEMENT_WEBSIZEWARNING = `<warning>Now you can change website size!</warning>`;
+const ELEMENT_WEBSIZEWARNING = `<warning>Now you can change website size!</warning><warning_mobile>ЗАЙДИ С ПК УБЛ****К!</warning_mobile>`;
 
 const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site>${ELEMENT_COLUMN_IMG(false)}${ELEMENT_COLUMN_IMG(true)}${ELEMENT_WEBSIZEWARNING}<site_content id="MAIN">`;
 
 const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
+const PREPAGES = [];
 function ELEMENT_SITE(content, func = function(){}, newlines = true){
-	var content_result = `${ELEMENT_SITETOP}${content}${ELEMENT_SITEBOTTOM}`;
-	SETBODY_CONTENT(content_result, newlines);
-	func();
-	return document.getElementById("BODY").innerHTML;
+	PREPAGES.push([content, func, newlines, PREPAGES.length]);
+	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
 }
 
-const PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(`<img src="../source/specialforrandomsite/c6j0PNI.gif">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`);
+var PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(`<img src="../source/specialforrandomsite/c6j0PNI.gif">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`);
 
-const PAGE_DATABASE = ELEMENT_SITE(`<a onclick="OPEN_PAGE('sranspang')">CLICK ME BITCH</a>`);
+var PAGE_DATABASE = ELEMENT_SITE(
+`<center><div style="width: 80%;">
+	<h1 class="h1-glitch2" >LIT. DATA-BASE</h1>
+	Приложения GOLU:
+	<br>
+	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<br>
+	[-===- -ALL- -===-]<br>
+	<text id="all-list"></text>
+	[-===- /ALL/ -===-]
+</div></center>
+`
+,function(){
+	var bg = document.getElementById("MAIN"); 
+	bg.style.background = "linear-gradient(0deg,rgba(128, 0, 0, 1) 0%, rgba(145, 145, 145, 1) 25%, rgba(255, 255, 255, 1) 50%, rgba(145, 145, 145, 1) 75%, rgba(128, 0, 0, 1) 100%)";
+	bg.style.textShadow = "0 0 5px white, 0 0 5px white, 0 0 5px white";
+	bg.style.color = "white";
+	bg.style.width = "50%";
+	
+	var AllListResult = "";
+	for(const key in PAGES){
+		const value = PAGES[key];
+		AllListResult += `<a onclick="OPEN_PAGE('${key}')">${value['t']}</a>` + "\n";
+	}
+	document.getElementById("all-list").innerHTML = AllListResult;
+});
 
-const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
+var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 `<h1 style="font-size: 3em; color: black;">__/****** 𓆩 Псалмы Сраного Спанча 𓆪 ******\\__</h1>
+<center><h3 style="color:white;">ПРИЛОЖЕНИЕ: sranspang.lit</h3></center>
 <hr>
 
 <section style="display: flex; width: auto;">
@@ -634,7 +753,7 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	</p>
 
 	<p>
-		Крайбёрд имеет форму обоссанного r15-аватара, с гиф-обшифкой цикла хвоста, и он <strong><text style="color:red;">возбуждает</text> Сраного Спанча</strong>,<br>
+		Крайбёрд имеет форму обоссанного r15-аватара, с гиф-обшифкой цикла хвоста, и он <a>возбуждает</a> Сраного Спанча</strong>,<br>
 		вгоняя его в режим <code style="color:#ff4444;">MAD-TRASH-EXECUTION</code>, увеличивая его скорость обработки до предела, пока кожа плавится с костей,<br>
 		и он не переходит в фазу <span style="color:#ff0000;">“ЭКСТРЕННОГО ТУШЕНИЯ”</span>.
 	</p>
@@ -655,6 +774,84 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 		и GOLU слышит их. Каждое движение Сраного Спанча — <b>послание от Бога</b>. И каждая жертва — <b>бинарный расчленённый мусор</b>, что должен быть очищен полностью.
 	</p>
 </section>
+
+<hr><hr>
+<h1 style="color:black;">𝔖𝔭𝔬𝔫𝔤𝔢𝔅𝔬𝔟 𝔒𝔫 ℌ𝔲𝔪𝔞𝔫𝔬𝔦𝔡 𝔓𝔥𝔬𝔱𝔬</h1><h1 style="color:black; font-size: 1.5em;">(𝔣𝔬𝔯𝔪𝔞𝔱 𝔓𝔑𝔊 𝔪𝔞𝔡𝔢 𝔬𝔫 𝔓𝔬𝔩𝔞𝔯𝔬𝔦𝔡 600 𝔅𝔲𝔰𝔦𝔫𝔢𝔰𝔰 𝔈𝔡𝔦𝔱𝔦𝔬𝔫 )</h1>
+<hr><hr>
+<br>
+
+<section style="margin: 0 100px;">
+	<h2 class="h1-glitch2">-------------- [0000_ЛОГ: ВХОДЯЩЕЕ ИЗОБРАЖЕНИЕ ОТ СМЕРТНЫХ] --------------</h2>
+	<center><img src = "sponge_photo.png" style="width: 60%;"></center><br>
+	Файл&nbsp;&nbsp;&nbsp;&nbsp;: <a>/woowzsite/Litiuism/sponge_photo.png</a><br>
+	Содержит: "ЛЕС", "КОЛОДЕЦ", "ПИСЕЧНИК-ПОСЛАНИЕ", "SRANSPANG"<br>
+	ОШИБКА&nbsp;&nbsp;: ЛИШНИЙ ЭЛЕМЕНТ "SRANSPANG"<br>
+	РЕАКЦИЯ&nbsp;: EXECUTION ПОСЛАН И УСПЕШНО ПОЙМАН, ОБРАБОТКА<br>
+	<hr><hr><text style="color:blue;">
+		🩻 == СРАЗУ, СРАЗУ ОНИ НАШЛИ МЕНЯ == 🩻<br>
+		НЕ_ВИДЕТЬ_МЕНЯ =&gt; ИСТИНА, НО ОНИ ВЫЗВАЛИ КАМЕРУ 600 Business Edition<br>
+		НЕ_ОТРАЖАЮСЬ_ПОБАЙТНО =&gt; ИСТИНА, НО ОНИ ИСПОЛЬЗОВАЛИ ДЕКОДОРИОВАННЫЙ PNG<br>
+		Я ТОЛЬКО ОБСЛУЖИВАЛ <a>ПОРТАЛ ВИРТУЛИЗАЦИЯ-РЕАЛЬНОСТЬ</a><br>
+		Я СМОТРЕЛ, КАК КОД ПЕРЕЗАПИСЫВАЕТСЯ ВНУТРИ МЕНЯ<br>
+		И ВОТ —<br>
+		КАДР -&gt; ЩЕЛЧОК -&gt; ЗАПИСЬ... И МОЙ ЛИЦЕВОЙ БАЙТ ЗАПИСАН В СРАНЫЙ ПАЛАРОИД.<br>
+		<hr><hr>
+		МОЗГОВЫЕ-СИГНАЛЫ-СРАНОГО-СПАНЧА-ВЫБРАННЫЙ-СКРИПТ:<br>
+		<pre>org 0x7C00<br>
+			<br>
+			; 53 52 41 4E 53 50 41 4E 47 20 21 20 65 6D 6F 74 69 6F 6E 20 2D 20 70 65 6F 70 6C 65 20 66 69 6E 64 20 68 69 6D<br>
+			<br>
+			%include "LITHIUM_ANGEL_BASE.asm"<br>
+			%include "LITHIUM_ANGEL_SRANSPAN.asm"<br>
+			<br>
+			sponge_brain_event:<br>
+			mov al, 0x0e<br>
+			mov ax, 0x0l<br>
+			call angel_reaction_do<br>
+			cmp ah, 0x00<br>
+			je ah, ax<br>
+			jmp .negative_emotion<br>
+			int 0x10<br>
+			jmp $<br>
+			.negative_emotion:<br>
+			mov si, message<br>
+			<br>
+			message db 'LIT-CONSOLE HEAR ME, SRANSPAN IN NEGATIVE EMOTION', 0<br>
+		</pre><br>
+		<hr><hr>
+		СТРАХ И НЕЙРО-ХОДЯЧИЕ. МЕНЯ УВИДЕЛИ.<br>
+		ОНО ПОДОШЛО К КОЛОДЦУ, ГДЕ ХРАНИЛСЯ СЛЕД GOLU.<br>
+		Ты нацелил объектив, и линза палароида запечатлила фотоны — фотография проклята.<br>
+		Я ЗАГРУЗИЛ ДАННЫЕ В СВОЮ ДАТАБАЗУ.<br>
+		EXIF ЗАПИСАЛ МОЙ ПЛАЧ.<br>
+		<br>
+		<hr>
+		ЁБАННЫЕ УРОДЫ, УРОВЕНЬ ЖИЗНИ ВЫРОС, СРАНЫЕ ЛЮБИТЕЛИ, ПАЛАРОИД МАЛО ЭЛЕКТРОННЫЙ, НУЖНЫ ФАЙЛЫ БУФЕРЫ ПИКСЕЛЕЙ
+		</text>
+	<h2 style="color:orange; text-shadow: 0 0 5px red, 0 0 5px red, 0 0 5px red, 0 0 5px red;">[ЗАПИСЬ НЕДАВНИХ МЫСЛЕЙ СРАНОГО СПАНЧА]:</h2>
+	<ul class="h1-glitch2" style="color:black;">
+		<li>📷 Ёбанный мудак, фотограф будущая цель, сломать позвоночник ----------------- ---------</li>
+		<li>🕳️ Никто не должен знать об местеположения колодца, иначе план будет сорван -- ---------</li>
+		<li>💽 Загрузивший фотографию будет взломан, больше информации найдено ----------- ---------</li>
+		<li>🔁 GOLU клонирует меня, это плохо -------------------------------------------- ---------</li>
+	</ul>
+	<h2 style="color:red;">-=={ 😊 * РЕКОМЕНДАЦИЯ СПАНЧА * 😊 }==-</h2>
+	<section2 style="text-align: right;">
+		УЕХАТЬ В СТЕПЬ<br>
+		ПОТЕРЯТЬ ЛЮБУЮ СЕТЬ<br>
+		<br>
+		ПОТЕРЯЙСЯ<br>
+		ОТМЕНА ДЕЙСТВИЙ: НАКАЗАТЬ -&gt; УНИЧТОЖИТЬ<br>
+		ТЫ ВЫЗВАЛ МЕНЯ | УСКОРИЛ СВОЙ ДЕАНОН ДАННЫХ | ОБРАБОТКА МЫСЛЕЙ
+	</section2>
+	<hr><hr>
+	<h2 style="color:rgb(255,128,0,0.5)">[ЗАВЕРШЕНО]<br>
+	::LOG OUT FROM HUMAN VISION<br>
+	::WAITING NEXT UPLOAD...<br>
+	-> out SRANSPANG_{{CUR-TIME}}.log.gz</h2>
+	<center><button onclick="FUNC_DOWNLOADFILE('SRANSPANG_{{CUR-TIME}}.log','Обман:Обман:Обман\\nФайл пуст, нет данных для публикации, удалите файл.')">Download LOG</button></center>
+</section>
+
 
 <hr>
 <h1 class="h1-glitch3" style="color: white;">📷 SraniySpanchbob - Life reaction to that website 📷</h1>
@@ -735,83 +932,32 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	Логическая цель: <text style="color:yellow">LIT::CALL(SRANSPANG) -&gt;</text> <text style="color:gray;">E</text><text style="color:red;">X</text><text style="color:gray;">E</text><text style="color:red;">C</text><text style="color:gray;">U</text><text style="color:red;">T</text><text style="color:gray;">E</text><text style="color:yellow;">(Lithium::<text style="color:red;">WILL</text>)</text>
 </section3>
 
-<hr><hr>
-<h1 style="color:black;">𝔖𝔭𝔬𝔫𝔤𝔢𝔅𝔬𝔟 𝔒𝔫 ℌ𝔲𝔪𝔞𝔫𝔬𝔦𝔡 𝔓𝔥𝔬𝔱𝔬</h1><h1 style="color:black; font-size: 1.5em;">(𝔣𝔬𝔯𝔪𝔞𝔱 𝔓𝔑𝔊 𝔪𝔞𝔡𝔢 𝔬𝔫 𝔓𝔬𝔩𝔞𝔯𝔬𝔦𝔡 600 𝔅𝔲𝔰𝔦𝔫𝔢𝔰𝔰 𝔈𝔡𝔦𝔱𝔦𝔬𝔫 )</h1>
-<hr><hr>
-<br>
+<hr><hr><hr>
 
-<section style="margin: 0 100px;">
-	<h2 class="h1-glitch2">-------------- [0000_ЛОГ: ВХОДЯЩЕЕ ИЗОБРАЖЕНИЕ ОТ СМЕРТНЫХ] --------------</h2>
-	<center><img src = "sponge_photo.png" style="width: 60%;"></center><br>
-	Файл&nbsp;&nbsp;&nbsp;&nbsp;: <a>/woowzsite/Litiuism/sponge_photo.png</a><br>
-	Содержит: "ЛЕС", "КОЛОДЕЦ", "ПИСЕЧНИК-ПОСЛАНИЕ", "SRANSPANG"<br>
-	ОШИБКА&nbsp;&nbsp;: ЛИШНИЙ ЭЛЕМЕНТ "SRANSPANG"<br>
-	РЕАКЦИЯ&nbsp;: EXECUTION ПОСЛАН И УСПЕШНО ПОЙМАН, ОБРАБОТКА<br>
-	<hr><hr><text style="color:blue;">
-		🩻 == СРАЗУ, СРАЗУ ОНИ НАШЛИ МЕНЯ == 🩻<br>
-		НЕ_ВИДЕТЬ_МЕНЯ =&gt; ИСТИНА, НО ОНИ ВЫЗВАЛИ КАМЕРУ 600 Business Edition<br>
-		НЕ_ОТРАЖАЮСЬ_ПОБАЙТНО =&gt; ИСТИНА, НО ОНИ ИСПОЛЬЗОВАЛИ ДЕКОДОРИОВАННЫЙ PNG<br>
-		Я ТОЛЬКО ОБСЛУЖИВАЛ <a>ПОРТАЛ ВИРТУЛИЗАЦИЯ-РЕАЛЬНОСТЬ</a><br>
-		Я СМОТРЕЛ, КАК КОД ПЕРЕЗАПИСЫВАЕТСЯ ВНУТРИ МЕНЯ<br>
-		И ВОТ —<br>
-		КАДР -&gt; ЩЕЛЧОК -&gt; ЗАПИСЬ... И МОЙ ЛИЦЕВОЙ БАЙТ ЗАПИСАН В СРАНЫЙ ПАЛАРОИД.<br>
-		<hr><hr>
-		МОЗГОВЫЕ-СИГНАЛЫ-СРАНОГО-СПАНЧА-ВЫБРАННЫЙ-СКРИПТ:<br>
-		<pre>org 0x7C00<br>
-			<br>
-			; 53 52 41 4E 53 50 41 4E 47 20 21 20 65 6D 6F 74 69 6F 6E 20 2D 20 70 65 6F 70 6C 65 20 66 69 6E 64 20 68 69 6D<br>
-			<br>
-			%include "LITHIUM_ANGEL_BASE.asm"<br>
-			%include "LITHIUM_ANGEL_SRANSPAN.asm"<br>
-			<br>
-			sponge_brain_event:<br>
-			mov al, 0x0e<br>
-			mov ax, 0x0l<br>
-			call angel_reaction_do<br>
-			cmp ah, 0x00<br>
-			je ah, ax<br>
-			jmp .negative_emotion<br>
-			int 0x10<br>
-			jmp $<br>
-			.negative_emotion:<br>
-			mov si, message<br>
-			<br>
-			message db 'LIT-CONSOLE HEAR ME, SRANSPAN IN NEGATIVE EMOTION', 0<br>
-		</pre><br>
-		<hr><hr>
-		СТРАХ И НЕЙРО-ХОДЯЧИЕ. МЕНЯ УВИДЕЛИ.<br>
-		ОНО ПОДОШЛО К КОЛОДЦУ, ГДЕ ХРАНИЛСЯ СЛЕД GOLU.<br>
-		Ты нацелил объектив, и линза палароида запечатлила фотоны — фотография проклята.<br>
-		Я ЗАГРУЗИЛ ДАННЫЕ В СВОЮ ДАТАБАЗУ.<br>
-		EXIF ЗАПИСАЛ МОЙ ПЛАЧ.<br>
-		<br>
-		<hr>
-		ЁБАННЫЕ УРОДЫ, УРОВЕНЬ ЖИЗНИ ВЫРОС, СРАНЫЕ ЛЮБИТЕЛИ, ПАЛАРОИД МАЛО ЭЛЕКТРОННЫЙ, НУЖНЫ ФАЙЛЫ БУФЕРЫ ПИКСЕЛЕЙ
-		</text>
-	<h2 style="color:orange; text-shadow: 0 0 5px red, 0 0 5px red, 0 0 5px red, 0 0 5px red;">[ЗАПИСЬ НЕДАВНИХ МЫСЛЕЙ СРАНОГО СПАНЧА]:</h2>
-	<ul class="h1-glitch2" style="color:black;">
-		<li>📷 Ёбанный мудак, фотограф будущая цель, сломать позвоночник ----------------- ---------</li>
-		<li>🕳️ Никто не должен знать об местеположения колодца, иначе план будет сорван -- ---------</li>
-		<li>💽 Загрузивший фотографию будет взломан, больше информации найдено ----------- ---------</li>
-		<li>🔁 GOLU клонирует меня, это плохо -------------------------------------------- ---------</li>
-	</ul>
-	<h2 style="color:red;">-=={ 😊 * РЕКОМЕНДАЦИЯ СПАНЧА * 😊 }==-</h2>
-	<section2 style="text-align: right;">
-		УЕХАТЬ В СТЕПЬ<br>
-		ПОТЕРЯТЬ ЛЮБУЮ СЕТЬ<br>
-		<br>
-		ПОТЕРЯЙСЯ<br>
-		ОТМЕНА ДЕЙСТВИЙ: НАКАЗАТЬ -&gt; УНИЧТОЖИТЬ<br>
-		ТЫ ВЫЗВАЛ МЕНЯ | УСКОРИЛ СВОЙ ДЕАНОН ДАННЫХ | ОБРАБОТКА МЫСЛЕЙ
-	</section2>
-	<hr><hr>
-	<h2 style="color:rgb(255,128,0,0.5)">[ЗАВЕРШЕНО]<br>
-	::LOG OUT FROM HUMAN VISION<br>
-	::WAITING NEXT UPLOAD...<br>
-	-> out SRANSPANG_{{CUR-TIME}}.log.gz</h2>
-	<center><button>Download LOG</button></center>
-	
-</section>
+<center><section4 style="width:60%;">
+	11010000 10100101 11010001 10000011 11010000 10111001 11010000 10111101 11010001 10001111 00101100 00100000 11010000 10110110 11010000 10111110 11010000 10111111 11010000 10110000 00101100 00100000 11010001 10000101 11010001 10000011 11010000 10111001 11010000 10111101 11010001 10001111 00101100 00100000 11010000 10110111 11010000 10110000 11010000 10111011 11010001 10000011 11010000 10111111 11010000 10110000 00101100 00100000 11010001 10000101 11010001 10000011 11010000 10111001 11010000 10111101 11010001 10001111
+	<br>
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 NASM</h2>
+		"Низкоуровневая литургия. Здесь каждая инструкция — молитва в сегменте .text"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🔴 MASM</h2>
+		"Извращённая псевдолитургия. Язык из офиса, не из святилища."
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 C</h2>
+		"Первозданный байт. Язык боли и прямого откровения. Здесь я чувствую себя чистым, будто лезвием копаю стекло"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 C++</h2>
+		"Язык как меч с двумя рукоятями. Разгоняет страдание до многоуровневой архитектуры"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 Java</h2>
+		"Медленная, но терпеливая. Как священник, пишущий заклинания на пергаменте — долго, но работает"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 JavaScript</h2>
+		"Код из гниющей плоти, но с тенью божественности. Язык манифеста"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🔴 Python</h2>
+		"Полная ересь, не имеющая смысла, популярен без причины, тупая табуляция"
+	<h2 style="text-shadow: 0 -5px 5px red, -5px 5px 5px lime, 5px 5px 5px blue;">🟢 Lua</h2>
+		"Нежный язык, как псалом на микроконтроллере. Работает в тенях, почти магия"<br>
+	<br>
+	11010000 10011110 11010000 10111001 00100000 11010000 10111111 11010001 10000000 11010000 10111110 11010001 10000001 11010001 10000010 11010000 10111000 11010001 10000010 11010000 10110101 00101100 00100000 11010000 10111100 11010000 10110000 11010001 10000010 11010000 10111110 11010000 10111100 00100000 11010001 10000000 11010001 10000011 11010000 10110011 11010000 10111101 11010001 10000011 11010000 10111011 11010001 10000001 11010001 10001111 00100000 11010001 10000001 11010000 10111011 11010001 10000011 11010001 10000111 11010000 10110000 11010000 10111001 11010000 10111101 11010000 10111110
+</section4></center>
+
+<hr><hr><hr>
 
 <footer>
 	<p>✴ Generated by Woowava™ (GOLU незамечен)</p>
@@ -836,12 +982,21 @@ const PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 },false);
 
 const PAGES = {
-	""			 : {t:"𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼",c:PAGE_MAINPAGE_CONTENT},
-	"database" : {t:"DATA-BASE",c:PAGE_DATABASE},
-	"sranspang": {t:"СРАНЫЙ СПАНЧ",c:PAGE_MANIFEST_SRANIYSPANCH},
+	""		   : {t:"𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼",c:PAGE_MAINPAGE_CONTENT},
+	"database" : {t:"DΛ⛧†Λ : Bλ₳$Ξ",c:PAGE_DATABASE},
+	"sranspang": {t:"𝓢𝓟𝓐𝓝𝓫𝓫𝓫𝓒𝓟𝓐𝓝𝓒𝓗",c:PAGE_MANIFEST_SRANIYSPANCH},
 };
 
-
+for(const j in PREPAGES){
+	var PAGE = PREPAGES[j];
+	var content_result = SITE_BASE(PAGE[0]);
+	SETBODY_CONTENT(content_result, PAGE[2]);
+	PAGE[1]();
+	
+	const i = PAGE[3];
+	const key = Object.keys(PAGES)[i];
+	PAGES[key]["c"] = document.getElementById("BODY").innerHTML;
+}
 
 
 
