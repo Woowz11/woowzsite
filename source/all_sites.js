@@ -118,7 +118,7 @@ var all_sites = [
       ]
     },
     {
-      "href": "quaere",
+      "href": "quare",
       "name": "Quare Search",
       "catalog": "quare",
       "hide": false,

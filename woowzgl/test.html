@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Canvas</title>
+    <style>
+        canvas {
+			background-image: url("../source/transparent.png");
+            background-repeat: repeat;
+            border: 1px solid black;
+        }
+    </style>
+	<script src="woowzgl.js"></script>
+</head>
+<body>
+    <canvas id="testCanvas" width="500" height="500"></canvas>
+	<button onclick="switch_();">switch</button>
+	<text id="has">false</text>
+	<text id="fps">?</text>
+	<input id="i-w" type="number" step="1" min="1">
+	<input id="i-h" type="number" step="1" min="1">
+</body>
+</html>
+
+<script>
+document.getElementById("i-w").addEventListener("input", function(e){
+	document.getElementById("testCanvas").width = parseInt(e.target.value, 10);
+});
+document.getElementById("i-h").addEventListener("input", function(e){
+	document.getElementById("testCanvas").height = parseInt(e.target.value, 10);
+});
+document.getElementById("i-w").value = document.getElementById("testCanvas").width;
+document.getElementById("i-h").value = document.getElementById("testCanvas").height;
+
+var has = false;
+function switch_(){
+	if(has){
+		wogl.RemoveCanvas(document.getElementById("testCanvas"));
+	}else{
+		wogl.AddCanvas(document.getElementById("testCanvas"));
+		
+		wogl.SetClearPixel(25,63,[255,0,0,255]);
+	}
+	has = !has;
+	document.getElementById("has").innerText = has;
+}
+
+var fps_label = document.getElementById("fps");
+function setFPS(){
+	fps_label.innerText = wogl.GetFPS();
+	requestAnimationFrame(setFPS);
+}
+setFPS();
+</script>
