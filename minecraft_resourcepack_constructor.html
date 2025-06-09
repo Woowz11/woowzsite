@@ -1,0 +1,412 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>MRC</title>
+<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+<style>
+body{
+	margin: 0;
+}
+
+img{
+	image-rendering: pixelated;
+}
+
+*:not(input)::selection{
+	background: currentBackgroundColor;
+	color     : currentColor;
+}
+
+button{
+	cursor: pointer;
+}
+
+/* =================================== */
+
+#WORKSPACE{
+	display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 10px;
+	width:50vw;
+	height:100vh;
+	cursor:grab;
+	box-sizing: border-box;
+	z-index:5;
+	text-shadow: 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white, 0 0 5px white;
+}
+
+#WORKSPACE-INFO{
+	display: inherit;
+}
+</style>
+
+<body>
+	<input type="file" id="FILE_PROJECT_INPUT" accept=".mrc-proj" style="display: none;">
+	<div id="BODY"></div>
+</body>
+
+<script>
+// ПАК
+
+// Название пака
+var P_NAME = "New MRC ResourcePack";
+
+//===========================================
+// САЙТ
+
+function log  (message){ console.log  ('%c%s', 'color: white; font-weight: normal;', message); }
+function warn (message){ console.warn ('%c%s', 'color: yellow; font-weight: bold;' , message); }
+function error(message){ console.error('%c%s', 'color: red; font-weight: bold;'    , message); }
+function fatal(message){ const style = 'color: white; background-color: red; font-weight: bold; padding: 4px; border-radius: 4px;'; console.error('%c%s', style, message); alert('Fatal error: ' + message); }
+
+const BODY = document.getElementById("BODY");
+
+/* Проект сохранён? */
+var SAVED = true;
+
+const FileExtension_Project  = ".mrc-proj";
+const FileExtension_Compiled = ".mrc"     ;
+var CurrentPage = "";
+
+const PAGE_STARTPAGE =
+`<button onclick="editor_create();">СОЗДАТЬ</button><br><button onclick="editor_open();">ОТКРЫТЬ</button>`;
+
+const PAGE_EDITOR =
+`<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:none;" id="TOOL-WINDOW"></panel>
+<div style="display: flex; background-color:lightgray; background-image:url('source/grid2.png'); image-rendering: pixelated; transition: all 0.1s ease;" id="PAGE">
+	<panel style="position:fixed; width: 5px; height: 5px; pointer-events: none;" id="WORKSPACE-CONTENT"></panel>
+	<panel style="display:block; width:25vw; height:100vh; background-color:white; border-right:3px solid black; z-index:5;">
+		<center style="display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+			<button onclick="editor_open_project_settings();">Настройки проекта</button>
+			<br>
+			<button style="position: fixed; bottom: 20px;" onclick="editor_save();">Сохранить</button>
+		</center>
+	</panel>
+	<panel id="WORKSPACE">
+		<!-- R/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-start;">
+			<text id="I-MS">?</text>
+		</panel>
+
+		<!-- C/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: center;    ">
+			<text style="color:lime;">+Y</text>
+		</panel>
+
+		<!-- L/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-end;  ">
+			<text>X: <input id="I-POS-X" type="number" step="1" pattern="\d*" value="0"></text>
+			<text>Y: <input id="I-POS-Y" type="number" step="1" pattern="\d*" value="0"></text>
+			<text>S: <input id="I-SCALE" type="number" step="0.0001" value="1"></text>
+			<button onclick="editor_moveworkspace(); editor_scaleworkspace();">HOME</button>
+		</panel>
+
+		<!-- R/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-start;">
+			<text style="color:red;">-X</text>
+		</panel>
+
+		<!-- C/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: center;    "></panel>
+
+		<!-- L/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-end;  ">
+			<text style="color:red;">+X</text>
+		</panel>
+
+		<!-- R/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-start;">
+		</panel>
+
+		<!-- C/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: center;    ">
+			<text style="color:lime;">-Y</text>
+		</panel>
+
+		<!-- L/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-end;  ">
+		</panel>
+	</panel>
+	<panel style="display:block; width:25vw; height:100vh; background-color:white; border-left:3px solid black; z-index:5;">
+
+	</panel>
+</div>`;
+
+function editor_create(){
+	page("e");
+}
+
+const FILE_PROJECT_INPUT = document.getElementById("FILE_PROJECT_INPUT");
+FILE_PROJECT_INPUT.addEventListener("change", function(e) {
+	if(e.target.files.length > 0){
+		const ProjectFile = e.target.files[0];
+		if(ProjectFile.name.endsWith(FileExtension_Project)){
+			log("Попытка открытия проекта [${ProjectFile.name}]!");
+			page("e");
+		}else{
+			fatal(`Выбранный файл в виде проекта, не является с форматом "${FileExtension_Project}"!\nFILE_PROJECT_INPUT->change(${ProjectFile.name});`);
+		}
+	}
+});
+function editor_open(){
+	FILE_PROJECT_INPUT.click();
+}
+
+function editor_make_unsave(){
+	if(SAVED){
+		SAVED = false;
+		
+		document.title = "MRC*";
+	}
+}
+
+async function editor_save(){
+	if(!SAVED){
+		const zip = new JSZip();
+		
+		//CONTENT ->
+		
+		zip.file("ProjectSettings",JSON.stringify({
+			"Name": P_NAME
+		},null,2));
+		
+		//<-
+		
+		const content = await zip.generateAsync({ type: "blob" });
+		const url = URL.createObjectURL(content);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = P_NAME + FileExtension_Project;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	
+		SAVED = true;
+		
+		document.title = "MRC";
+	}
+}
+
+const WindowWS = 1920;
+const WindowHS =  916;
+const WindowARS = WindowWS/WindowHS;
+
+var WindowW = window.innerWidth;
+var WindowH = window.innerHeight;
+window.addEventListener("resize", function(e){
+	var OldWindowW = WindowW;
+	var OldWindowH = WindowH;
+	WindowW = window.innerWidth;
+	WindowH = window.innerHeight;
+
+	var sx = WindowW/OldWindowW;
+	var sy = WindowH/OldWindowH;
+
+	var ar  = WindowW/WindowH;
+	var ss = ar/WindowARS;
+
+	if(CurrentPage==="e"){
+		editor_moveworkspace(WorkspaceX * sx, WorkspaceY * sy);
+	}
+})
+
+function calculate_background_position(){
+	var x = WorkspaceX;
+	x += WindowW/2;
+	var xn = WorkspaceX;
+	xn -= WindowW/2;
+	var y = WorkspaceY;
+	y += WindowH/2;
+
+	return [x,y,xn];
+}
+
+function calculate_elements_scale(){
+	var result = 1/WorkspaceS;
+	result *= 14*8;
+	result *= (WindowW/WindowH)/WindowARS;
+	return result;
+}
+
+var WorkspaceX = 0;
+var WorkspaceY = 0;
+/* Двигать рабочее пространство */
+function editor_moveworkspace(newx = 0, newy = 0){
+	WorkspaceX = newx;
+	WorkspaceY = newy;
+
+	var pos = calculate_background_position();
+	PAGE.style.backgroundPosition = `right ${pos[0]}px top ${pos[1]}px`;
+
+	document.getElementById("WORKSPACE-CONTENT").style.transform = `translate(${-pos[2]}px, ${pos[1]}px) scale(${calculate_elements_scale()}%)`;
+
+	document.getElementById("I-POS-X").value = WorkspaceX;
+	document.getElementById("I-POS-Y").value = WorkspaceY;
+}
+
+var WorkspaceS = 1;
+function editor_scaleworkspace(news = 1){
+	WorkspaceS = news;
+	PAGE.style.backgroundSize = `${(1/WorkspaceS)*14*4}%`
+
+	var pos = calculate_background_position();
+	PAGE.style.backgroundPosition = `right ${pos[0]}px top ${pos[1]}px`;
+
+	document.getElementById("WORKSPACE-CONTENT").style.transform = `translate(${-pos[2]}px, ${pos[1]}px) scale(${calculate_elements_scale()}%)`;
+
+	document.getElementById("I-SCALE").value = WorkspaceS;
+}
+
+/* Добавить элемент на рабочее пространство */
+function editor_add_element(id = null,style = null,content = null,posX = null,posY = null){
+	if(id     ===null){id     ="WORKSPACE-ELEMENT"};
+	if(style  ===null){style  =""};
+	if(content===null){content=""};
+	if(posX   ===null){posX   =0 };
+	if(posY   ===null){posY   =0 };
+
+	document.getElementById("WORKSPACE-CONTENT").innerHTML += `<element id="${id}" style="${style}">${content}</element>`;
+}
+
+function CLOSE_TOOLWINDOW(){
+	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
+	TOOLWINDOW.style.display = "none";
+	TOOLWINDOW.innerHTML = "";
+}
+
+function editor_open_project_settings(){
+	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
+	TOOLWINDOW.innerHTML = 
+`<div style="background-color:white; width:40vw; height:90vh; margin-left:30vw; margin-top:5vh;">
+	<input type="text" id="I-PROJECTNAME" maxlength="50" placeholder="Название проекта" value="${P_NAME}"><br>
+	<button onclick="CLOSE_TOOLWINDOW();">Закрыть</button>
+</div>`;
+	
+	document.getElementById("I-PROJECTNAME").addEventListener("input", function(e){
+		const v = event.target.value.replace(/[^A-Za-z0-9 _]/g, '');
+		e.target.value = v;
+		P_NAME = v;
+		editor_make_unsave();
+	});
+	
+	TOOLWINDOW.style.display = "unset";
+}
+
+function INSTALL_PAGE_EDITOR(){
+	var WORKSPACE = document.getElementById("WORKSPACE");
+	var PAGE = document.getElementById("PAGE");
+
+	var MouseDown = false;
+	var ClickX = 0, ClickY = 0;
+	PAGE.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+	WORKSPACE.addEventListener("mousedown", function(e){
+		if(e.button === 2 && !MouseDown){ MouseDown = true; ClickX = e.clientX; ClickY = e.clientY;
+			BODY.style.cursor = "grabbing";
+			WORKSPACE.style.cursor = "grabbing";
+		}
+	});
+	PAGE.addEventListener("mouseup", function(e){
+		if(e.button === 2){ MouseDown = false;
+			BODY.style.cursor = "default";
+			WORKSPACE.style.cursor = "grab";
+		}
+	});
+	PAGE.addEventListener("mousemove", function(e){
+		if(MouseDown){
+			const dx = e.clientX - ClickX;
+			const dy = e.clientY - ClickY;
+
+			WorkspaceX -= dx;
+			WorkspaceY += dy;
+
+			ClickX = e.clientX;
+			ClickY = e.clientY;
+
+			editor_moveworkspace(WorkspaceX, WorkspaceY);
+		}
+	});
+	WORKSPACE.addEventListener("wheel", function(e){
+		e.preventDefault();
+
+		WorkspaceS *= e.deltaY > 0 ? 1.1 : 0.9;
+		editor_scaleworkspace(WorkspaceS);
+	});
+
+	editor_moveworkspace(); editor_scaleworkspace();
+
+	document.getElementById("I-POS-X").addEventListener("input", function(e){
+		const v = parseInt(e.target.value,10);
+		if(isNaN(v)){
+			e.target.value = "";
+		}else{
+			e.target.value = v;
+			editor_moveworkspace(v, WorkspaceY);
+		}
+	});
+	document.getElementById("I-POS-Y").addEventListener("input", function(e){
+		const v = parseInt(e.target.value,10);
+		if(isNaN(v)){
+			e.target.value = "";
+		}else{
+			e.target.value = v;
+			editor_moveworkspace(WorkspaceX, v);
+		}
+	});
+	document.getElementById("I-SCALE").addEventListener("input", function(e){
+		const v = parseFloat(e.target.value);
+		if(isNaN(v)){
+			e.target.value = "";
+		}else{
+			v = Math.abs(v);
+			if(v===0){v=1;}
+			e.target.value = v;
+			editor_scaleworkspace(v);
+		}
+	});
+
+	editor_add_element("EL-CENTER",null,`<img style="width: 64px; height: 64px; transform: translate(-46.25%,-46.25%);" src="source/center.png">`,0,0);
+}
+document.addEventListener("keydown", function(e){
+	if(CurrentPage==="e"){
+		if(e.key === "Home"){ editor_moveworkspace(); editor_scaleworkspace(); }
+	}
+});
+window.addEventListener("beforeunload",function(e){
+	if(CurrentPage==="e" && !SAVED){
+		e.preventDefault();
+		e.returnValue = "";
+	}
+});
+
+function page(id){
+	var result = "ERROR";
+	var func = function(){};
+	CurrentPage = id;
+	if(id==="e"){
+		result = PAGE_EDITOR;
+		func = INSTALL_PAGE_EDITOR;
+	}else{
+		result = PAGE_STARTPAGE;
+		CurrentPage = "";
+	}
+	BODY.innerHTML = result;
+	func();
+}
+
+var MS_LastTime = performance.now();
+var MS = -1;
+var MS_Count = 0;
+function RenderLoop(){
+	MS_Count++;
+
+	var Now = performance.now();
+	MS = Now - MS_LastTime;
+	MS_LastTime = Now;
+
+	if(MS_Count>5){
+		var ms_label = document.getElementById("I-MS");
+		if(ms_label){ ms_label.innerText = `${MS} ms (норм:16-18)`; }
+		MS_Count = 0;
+	}
+
+	requestAnimationFrame(RenderLoop);
+}
+requestAnimationFrame(RenderLoop);
+
+//=============================
+page();
+</script>

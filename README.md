@@ -1,6 +1,6 @@
 # Интересные сайты
 
-* [Поиск сайтов](https://woowz11.github.io/woowzsite/quaere.html) 
+* [Поиск сайтов](https://woowz11.github.io/woowzsite/quare.html) 
 * [Все файлы сайтов](https://woowz11.github.io/woowzsite/woowzsite_files.html) 
 * [Рандомизированный сайт](https://woowz11.github.io/woowzsite/random.html) 
 * [Друзья Woowz11](https://woowz11.github.io/woowzsite/woowz_friends_tierlist.html) 

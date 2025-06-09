@@ -117,7 +117,7 @@ div{
 			<div style="float: right"><input type="range" min="0.2" max="2" step="0.01" value="0.5" id="range"><font class="white-font">Размер ячеек</font> <button onclick="ChangeSize(true);">Сбросить</button></div>
 			</div>
 		<div style="margin-bottom:10px;padding:5px;background-color:rgba(0,0,0,0.2);"><hr><div style="display:flex;">
-			<div style="margin-left:12.5%;"><div style="width:200px;height:200px;background-color:rgb(0,0,0,0.2);align-items: center;display: flex;justify-content: center;" id="rand-i"></div><center><button onclick="Button_Rand('i');">Случайная<br>картинка</button></center></div>
+			<div style="margin-left:12.5%;"><div class="div-image" style="width:200px;height:200px;background-color:rgb(0,0,0,0.2);align-items: center;display: flex;justify-content: center;" id="rand-i"></div><center><button onclick="Button_Rand('i');">Случайная<br>картинка</button></center></div>
 			<div style="margin-left:auto;"><div style="width:200px;height:200px;background-color:rgb(0,0,0,0.2);align-items: center;display: flex;justify-content: center;" id="rand-v"></div><center><button onclick="Button_Rand('v');">Случайное<br>видео</button></div>
 			<div style="margin-left:auto;margin-right:12.5%;"><div style="width:200px;height:200px;align-items: center;display: flex;justify-content: center;" id="rand-a"></div><center><button onclick="Button_Rand('a');">Случайное<br>аудио</button></div>
 		</div><hr></div>
@@ -143,14 +143,15 @@ div{
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
 	var types = {
-		"idk": "<font style='color:red;'>UNKNOWN</font>",
-		"png": "PNG",
-		"jpg": "JPEG",
-		"gif": "GIF",
-		"ico": "ICON",
-		"cur": "CURSOR",
-		"mp4": "VIDEO",
-		"mp3": "AUDIO",
+		"idk" : "<font style='color:red;'>?</font>",
+		"png" : "PNG",
+		"jpg" : "JPEG",
+		"gif" : "GIF",
+		"webp": "WEBP",
+		"ico" : "ICON",
+		"cur" : "CURSOR",
+		"mp4" : "VIDEO",
+		"mp3" : "AUDIO",
 	}
 	
 	function Button_Rand(id){
@@ -158,7 +159,7 @@ div{
 		if(id==="i"){
 			const images = GetAllWoowzsiteImages();
 			const image = images[Math.floor(Math.random() * images.length)];
-			Container.innerHTML = `<img style="width:100%;height:100%;object-fit:contain;" src="${image}">`;
+			Container.innerHTML = `<img class="image" style="width:100%;height:100%;object-fit:contain;" src="${image}">`;
 		}else if(id==="v"){
 			const videos = WoowzsiteSourceVideos;
 			const video = videos[Math.floor(Math.random() * videos.length)];
@@ -195,7 +196,7 @@ div{
 		var cur = "url('"+cur_+"'),auto";
 		var cur_point = cur;
 		if(cur_=="default"){
-			cur = "default";
+			cur       = "default";
 			cur_point = "pointer";
 		}
 		styleElement.innerHTML = `
@@ -260,6 +261,19 @@ select{
 		document.head.appendChild(styleElement);
 	}
 	
+	function gettype(src){
+		var type = "idk"
+		if(src.includes(".png" )){type="png"}
+		if(src.includes(".jpg" )||src.includes(".jpeg")){type="jpg"}
+		if(src.includes(".gif" )){type="gif"}
+		if(src.includes(".webp")){type="webp"}
+		if(src.includes(".ico" )){type="ico"}
+		if(src.includes(".cur" )){type="cur"}
+		if(src.includes(".mp4" )||src.includes(".mov")){type="mp4"}
+		if(src.includes(".mp3" )){type="mp3"}
+		return type;
+	}
+	
 	var range = document.getElementById("range");
 	function ChangeSize(reset){
 		var newsize = range.value;
@@ -298,27 +312,22 @@ select{
 				document.title = "Woowzsites Files ("+(fullcounts[1]+1)+"/"+(fullcounts[0])+")";
 			}
 		
-			var type = "idk"
-			if(src.includes(".png")){type="png"}
-			if(src.includes(".jpg")){type="jpg"}
-			if(src.includes(".gif")){type="gif"}
-			if(src.includes(".ico")){type="ico"}
-			if(src.includes(".cur")){type="cur"}
-			if(src.includes(".mp4")||src.includes(".mov")){type="mp4"}
-			if(src.includes(".mp3")){type="mp3"}
+			var type = gettype(src);
 		
-			var x = that.width;
+			var x = that.width ;
 			var y = that.height;
-			var time = new Date().getTime() - starttime[src];
+			var time     = new Date().getTime() - starttime[src];
 			var time_col = "black";
-			if(time>1000){time_col="green";}
-			if(time>200){time_col="orange";}
-			if(time>3000){time_col="red";}
-			if(time>4000){time_col="magenta";}
-			if(time>5000){time_col="white; background-color:black";}
-			if(time>50000){time_col="yellow; background-color:black";}
+			
+			if(time>200   ){time_col="lime";                          }
+			if(time>1000  ){time_col="orange";                        }
+			if(time>3000  ){time_col="red";                           }
+			if(time>4000  ){time_col="magenta";                       }
+			if(time>5000  ){time_col="white; background-color:black"; }
+			if(time>50000 ){time_col="yellow; background-color:black";}
 			if(time>100000){time_col="orange; background-color:black";}
-			if(time>200000){time_col="red; background-color:black";}
+			if(time>200000){time_col="red; background-color:black";   }
+			
 			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image`+(type=="mp3"?"-short":"")+`" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
 			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}#t=0.1" type="video/mp4"></video>`
@@ -330,7 +339,7 @@ select{
 			)+`
 			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (`+types[type]+`)<br>
 			<font style="color:${time_col};">${time}</font>ms<br>`+
-			((type=="png"||type=="jpg"||type=="gif")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
+			((type=="png"||type=="jpg"||type=="gif"||type=="webp")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
 			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
 			((type=="cur")?`<button onclick="ChangeCursor('${src}');">Установить курсор</button>`:``)+
 			((type=="mp3")?`<button onclick="window.open('${src}', '_blank');">Открыть в новой вкладке</button>`:``)
@@ -367,14 +376,7 @@ select{
 		for(let src of tabl){
 			starttime[src] = new Date().getTime();
 			
-			var type = "idk"
-			if(src.includes(".png")){type="png"}
-			if(src.includes(".jpg")){type="jpg"}
-			if(src.includes(".gif")){type="gif"}
-			if(src.includes(".ico")){type="ico"}
-			if(src.includes(".cur")){type="cur"}
-			if(src.includes(".mp4")||src.includes(".mov")){type="mp4"}
-			if(src.includes(".mp3")){type="mp3"}
+			var type = gettype(src);
 
 			if(type=="mp4"||type=="mp3"){
 				var media = document.createElement(type=="mp4"?'video':'audio');
@@ -453,6 +455,7 @@ select{
 		"corrupted_minecraft/*.png"    :WoowzsiteSourceCorruptedMinecraft,
 		"alchemy/*.png"        		   :WoowzsiteSourceAlchemy,
 		"Lituism/*.png"        		   :WoowzsiteLituism,
+		"art/*"                        :LithiumArts,
 		"woowzcore/source/*.png"       :WoowzsiteSourceWoowzcore,
 		"source/bloodraw/*.png"        :WoowzsiteSourceBloodraw,
 		"bloodraw/skineditor/*"        :GetAllBloodrawSkinEditor(),
