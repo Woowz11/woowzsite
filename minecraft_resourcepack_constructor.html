@@ -9,6 +9,10 @@ body{
 	margin: 0;
 }
 
+body, input, button{
+	font-family: Consolas, monospace;
+}
+
 img{
 	image-rendering: pixelated;
 }
@@ -18,7 +22,7 @@ img{
 	color     : currentColor;
 }
 
-button{
+button:not(:disabled){
 	cursor: pointer;
 }
 
@@ -44,6 +48,7 @@ button{
 
 <body>
 	<input type="file" id="FILE_PROJECT_INPUT" accept=".mrc-proj" style="display: none;">
+	<input type="file" id="FILE_INPUT" style="display: none;">
 	<div id="BODY"></div>
 </body>
 
@@ -51,15 +56,27 @@ button{
 // ПАК
 
 // Название пака
-var P_NAME = "New MRC ResourcePack";
+var P_NAME = "New MRC Project";
+// Автор пака
+var P_AUTHOR = "";
+// Лицензия пака
+var P_LICENSE = "";
+
+// Категории
+var P_CATEGORIES = ["Новое","Остальное"];
+// Файлы
+var P_FILES = {};
 
 //===========================================
 // САЙТ
 
-function log  (message){ console.log  ('%c%s', 'color: white; font-weight: normal;', message); }
-function warn (message){ console.warn ('%c%s', 'color: yellow; font-weight: bold;' , message); }
-function error(message){ console.error('%c%s', 'color: red; font-weight: bold;'    , message); }
-function fatal(message){ const style = 'color: white; background-color: red; font-weight: bold; padding: 4px; border-radius: 4px;'; console.error('%c%s', style, message); alert('Fatal error: ' + message); }
+const VERSION = "0";
+
+function stackline(){ const err = new Error(); var line = err.stack.split('\n')[2]; const match = line.match(/\d+:\d+/g); if(match){ return `${match[0]}`; } return line; }
+function log  (message){ var m = message;  message = `${message} <${stackline()}>`; console.log  (typeof m === "object" ? m : message); }
+function warn (message){ message = `${message} <${stackline()}>`; console.warn ("%c%s", "color: yellow; font-weight: bold;" , message); }
+function error(message){ message = `${message} <${stackline()}>`; console.error("%c%s", "color: red; font-weight: bold;"    , message); }
+function fatal(message){ message = `${message} <${stackline()}>`; const style = "color: white; background-color: red; font-weight: bold; padding: 4px; border-radius: 4px;"; console.error("%c%s", style, message); alert("Fatal: " + message); }
 
 const BODY = document.getElementById("BODY");
 
@@ -71,7 +88,12 @@ const FileExtension_Compiled = ".mrc"     ;
 var CurrentPage = "";
 
 const PAGE_STARTPAGE =
-`<button onclick="editor_create();">СОЗДАТЬ</button><br><button onclick="editor_open();">ОТКРЫТЬ</button>`;
+`<center>
+	<h1>MRC ${VERSION}</h1>
+	<button onclick="editor_create();">СОЗДАТЬ</button>
+	<br>
+<button onclick="editor_open();">ОТКРЫТЬ</button>
+</center>`;
 
 const PAGE_EDITOR =
 `<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:none;" id="TOOL-WINDOW"></panel>
@@ -81,7 +103,10 @@ const PAGE_EDITOR =
 		<center style="display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
 			<button onclick="editor_open_project_settings();">Настройки проекта</button>
 			<br>
-			<button style="position: fixed; bottom: 20px;" onclick="editor_save();">Сохранить</button>
+			<button onclick="editor_open_project_files();">Файлы</button>
+			<br>
+			<button style="position: fixed; bottom: 40px;" onclick="editor_save();" id="SAVE" disabled>Сохранить</button>
+			<button style="position: fixed; bottom: 20px;" onclick="fatal('в разработке!!!');">Скомпилировать</button>
 		</center>
 	</panel>
 	<panel id="WORKSPACE">
@@ -132,12 +157,16 @@ function editor_create(){
 const FILE_PROJECT_INPUT = document.getElementById("FILE_PROJECT_INPUT");
 FILE_PROJECT_INPUT.addEventListener("change", function(e) {
 	if(e.target.files.length > 0){
-		const ProjectFile = e.target.files[0];
-		if(ProjectFile.name.endsWith(FileExtension_Project)){
-			log("Попытка открытия проекта [${ProjectFile.name}]!");
-			page("e");
+		if(e.target.files.length === 1){
+			const ProjectFile = e.target.files[0];
+			if(ProjectFile.name.endsWith(FileExtension_Project)){
+				log(`Попытка открытия проекта [${ProjectFile.name}]!`);
+				editor_load(ProjectFile);
+			}else{
+				fatal(`Выбранный файл в виде проекта, не является с форматом "${FileExtension_Project}"!\nFILE_PROJECT_INPUT->change(${ProjectFile.name});`);
+			}
 		}else{
-			fatal(`Выбранный файл в виде проекта, не является с форматом "${FileExtension_Project}"!\nFILE_PROJECT_INPUT->change(${ProjectFile.name});`);
+			fatal(`Выбрано несколько проектов! Нужно выбрать 1!\nFILE_PROJECT_INPUT->change(${ProjectFile.name});`);
 		}
 	}
 });
@@ -149,35 +178,83 @@ function editor_make_unsave(){
 	if(SAVED){
 		SAVED = false;
 		
+		document.getElementById("SAVE").disabled = false;
 		document.title = "MRC*";
 	}
 }
 
 async function editor_save(){
 	if(!SAVED){
-		const zip = new JSZip();
+		try{
+			function checkstring(s,sn,ifempty = null){ if(!s || s.trim()===""){ if(ifempty!=null){ return ifempty; }else{ throw new Error(`строка "${sn}" пустая!`); } } return s; }
+		
+			checkstring(P_NAME   ,"Название проекта");
+			P_AUTHOR  = checkstring(P_AUTHOR ,"Автор проекта"   ,"Anonymous"    );
+			P_LICENSE = checkstring(P_LICENSE,"Лицензия проекта","Not specified");
+		
+			const zip = new JSZip();
+			
+			//CONTENT ->
+			
+			zip.file("ProjectSettings", JSON.stringify({
+				"Name": P_NAME,
+				"Author": P_AUTHOR,
+				"License": P_LICENSE,
+				"MRC_Version": VERSION,
+				"Categories": P_CATEGORIES
+			}, null, 2));
+			
+			//<-
+			
+			const content = await zip.generateAsync({ type: "blob" });
+			const url = URL.createObjectURL(content);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = P_NAME + FileExtension_Project;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		
+			SAVED = true;
+			
+			document.getElementById("SAVE").disabled = true;
+			document.title = "MRC";
+		}catch(e){
+			fatal(`Не получилось сохранить проект, ${e}`);
+		}
+	}
+}
+
+async function editor_load(file){
+	try{
+		const zip = await JSZip.loadAsync(file);
+		
+		async function checkfile(f,s){ if(!f){ throw new Error(`Файл "${s}" не найден!`); } var c = await f.async("text"); return c; }
+		function checkkey(tabl,k,notfound = "NotFound"){ if(!tabl[k]){ warn(`Не найден ключ "${k}" в файле!`); return notfound; } return tabl[k]; }
+		
+		const ProjectSettings_File = zip.file("ProjectSettings");
+		const ProjectSettings_Content = await checkfile(ProjectSettings_File, "ProjectSettings");
+		const ProjectSettings = JSON.parse(ProjectSettings_Content);
+		
+		log("Настройки проекта:");
+		log(ProjectSettings);
 		
 		//CONTENT ->
 		
-		zip.file("ProjectSettings",JSON.stringify({
-			"Name": P_NAME
-		},null,2));
+		P_NAME    = checkkey(ProjectSettings,"Name");
+		P_AUTHOR  = checkkey(ProjectSettings,"Author");
+		P_LICENSE = checkkey(ProjectSettings,"License");
+		var MRC_Version = checkkey(ProjectSettings,"MRC_Version","-1");
+		P_CATEGORIES = checkkey(ProjectSettings,"Categories",["NotFound"]);
 		
 		//<-
 		
-		const content = await zip.generateAsync({ type: "blob" });
-		const url = URL.createObjectURL(content);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = P_NAME + FileExtension_Project;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	
-		SAVED = true;
+		if(MRC_Version!==VERSION){ fatal(`Версия проекта отличается от новой версии, возможны ошибки! ${MRC_Version} != ${VERSION}`); }
 		
-		document.title = "MRC";
+		page("e");
+	}catch(e){
+		fatal(`Не получилось загрузить проект, ${e}`);
 	}
 }
 
@@ -271,17 +348,382 @@ function CLOSE_TOOLWINDOW(){
 function editor_open_project_settings(){
 	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
 	TOOLWINDOW.innerHTML = 
-`<div style="background-color:white; width:40vw; height:90vh; margin-left:30vw; margin-top:5vh;">
-	<input type="text" id="I-PROJECTNAME" maxlength="50" placeholder="Название проекта" value="${P_NAME}"><br>
-	<button onclick="CLOSE_TOOLWINDOW();">Закрыть</button>
-</div>`;
+`<div style="background-color:white; width:40vw; height:30vh; margin-left:30vw; margin-top:35vh; padding:32px; box-sizing: border-box;">
+	Название:~<input type="text" id="I-PROJECTNAME"    maxlength="50" placeholder="New MRC Project" value="${P_NAME}" style="width:80%;"><br>
+	Автор:~~~~<input type="text" id="I-PROJECTAUTHOR"  maxlength="50" placeholder="Anonymous" value="${P_AUTHOR}" style="width:80%;"><br>
+	Лицензия:~<input type="text" id="I-PROJECTLICENSE" maxlength="50" placeholder="Not specified" value="${P_LICENSE}" style="width:80%;"><br>
+	
+	<br>
+	
+	<center><button onclick="CLOSE_TOOLWINDOW();">Закрыть</button></center>
+</div>`.replace(/~/g,"&nbsp;");
 	
 	document.getElementById("I-PROJECTNAME").addEventListener("input", function(e){
-		const v = event.target.value.replace(/[^A-Za-z0-9 _]/g, '');
+		const v = e.target.value.replace(/[^A-Za-z0-9 _]/g, '');
 		e.target.value = v;
 		P_NAME = v;
 		editor_make_unsave();
 	});
+	document.getElementById("I-PROJECTAUTHOR").addEventListener("input", function(e){
+		const v = e.target.value.replace(/["\\]/g, '');
+		e.target.value = v;
+		P_AUTHOR = v;
+		editor_make_unsave();
+	});
+	document.getElementById("I-PROJECTLICENSE").addEventListener("input", function(e){
+		const v = e.target.value.replace(/["\\]/g, '');
+		e.target.value = v;
+		P_LICENSE = v;
+		editor_make_unsave();
+	});
+	
+	TOOLWINDOW.style.display = "unset";
+}
+
+function editor_open_project_files_refresh(){
+	document.getElementById("I-FILE-TABLE").innerHTML = "";
+	if(!P_FILES[P_CATEGORIES[SelectedCategory]]){ P_FILES[P_CATEGORIES[SelectedCategory]] = []; }
+	var total = 0;
+	var total_there = 0;
+	for(var category in P_FILES){
+		var files = P_FILES[category];
+		total += files.length;
+		if(category === P_CATEGORIES[SelectedCategory]){
+			total_there = files.length;
+			for(var i = 0; i < files.length; i++){
+				editor_open_project_files_addfile(files[i],category,i);
+			}
+		}
+	}
+	
+	document.getElementById("I-FILES-TOTAL").innerText = total;
+	document.getElementById("I-FILES-TOTAL-THERE").innerText = total_there;
+}
+function editor_open_project_files_remove(i){
+	P_FILES[P_CATEGORIES[SelectedCategory]].splice(i, 1);
+
+	editor_open_project_files_refresh();
+	editor_make_unsave();
+}
+function editor_open_project_files_movefile(i,arrow){
+	var newi = 0;
+	switch(arrow){
+		case 1 /* ← */: newi = i - 1 ; break;
+		case 2 /* ↓ */: newi = i + 12; break; 
+		case 3 /* ↑ */: newi = i - 12; break;
+		case 4 /* → */: newi = i + 1 ; break;
+		default: break;
+	}
+	
+	var files = P_FILES[P_CATEGORIES[SelectedCategory]];
+	if(newi >= 0 && newi < files.length){
+		var old = files[newi];
+		files[newi] = files[i];
+		files[i] = old;
+		editor_open_project_files_refresh();
+		editor_make_unsave();
+	}
+}
+function editor_open_project_files_addfile(f,category,i){
+	var files_table = document.getElementById("I-FILE-TABLE");
+	
+	var element = document.createElement("file");
+	
+	element.style.backgroundColor = "rgba(255,255,255,0.9)";
+	element.style.width = "125px";
+	element.style.height = "140px";
+	element.style.overflow = "hidden";
+	
+	var icon = "";
+	
+	if(f["Type"]==="texture"){
+		var url = f["URL"];
+		if(!url){
+			const blob = new Blob([new Uint8Array(f["Content"])], { type: "image/png" });
+			f["URL"] = URL.createObjectURL(blob);
+		}
+	
+		icon = `<center style="width:100%; height:100%;"><img style="height:100%; width:100%;" src="${f["URL"]}"></center>`;
+	}
+	
+	element.innerHTML = 
+	`<div style="background-image:url('source/transparent.png'); width:100%; height:85%; cursor:help;" title="${category}/${f["Name"]}">${icon}</div>
+	<button onclick="editor_open_project_files_movefile(${i},1);">←</button><button onclick="editor_open_project_files_movefile(${i},2);">↓</button><button onclick="editor_open_project_files_movefile(${i},3);">↑</button><button onclick="editor_open_project_files_movefile(${i},4);">→</button><button style="font-size:0.5em;" title="Редактировать">✏️</button><button style="font-size:0.5em;" title="Удалить" onclick="editor_open_project_files_remove(${i});">🗑️</button>`;
+	
+	files_table.appendChild(element);
+}
+function editor_open_project_files_open(t){
+	var input = document.getElementById("FILE_INPUT");
+	
+	//Очистка от ивентов
+	const newinput = input.cloneNode(true);
+	input.parentNode.replaceChild(newinput, input);
+	input = newinput;
+	
+	function addfile(id,file){
+		if(!P_FILES[P_CATEGORIES[0]]){ P_FILES[P_CATEGORIES[0]] = []; }
+		
+		const reader = new FileReader();
+		var ThatByteArray = false;
+		reader.onload = function(e){
+			var content = e.target.result;
+			var result = {
+				"Name"   : file.name,
+				"Type"   : id,
+				"Length" : (ThatByteArray ? content.byteLength : content.length),
+				"URL"    : null,
+				"Content": content
+			};
+			P_FILES[P_CATEGORIES[0]].push(result);
+			
+			if(SelectedCategory===0){
+				editor_open_project_files_refresh();
+			}
+			editor_make_unsave();
+		};
+		if(id=="texture"||id=="sound"){
+			ThatByteArray = true;
+			reader.readAsArrayBuffer(file);
+		}else{
+			reader.readAsText(file, "UTF-8");
+		}
+	}
+	
+	if(t==="i"){
+		input.accept = ".png";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".png")){
+					log(`Добавлено изображение [${ProjectFile.name}]!`);
+					addfile("texture",ProjectFile);
+				}else{
+					fatal(`Выбранный файл, не является с форматом ".png"!`);
+				}
+			}
+		});
+	}else if(t==="s"){
+		input.accept = ".ogg";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".ogg")){
+					log(`Добавлен звук [${ProjectFile.name}]!`);
+					addfile("sound",ProjectFile);
+				}else{
+					fatal(`Выбранный файл, не является с форматом ".ogg"!`);
+				}
+			}
+		});
+	}else{
+		input.accept = "";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".png")||ProjectFile.name.endsWith(".ogg")){
+					fatal(`Выбранный файл, с форматом ".png" или ".ogg"! (выберите другие кнопки)`);
+				}else{
+					log(`Добавлен файл [${ProjectFile.name}]!`);
+					addfile("other",ProjectFile);
+				}
+			}
+		});
+	}
+	input.click();
+}
+var SelectedCategory = -1;
+function editor_open_project_files_category_open(i){
+	if(SelectedCategory!==i){
+		if(SelectedCategory!=-1){
+			document.getElementById(`I-CATEGORY-${SelectedCategory}`).disabled = false;
+		}
+		SelectedCategory = i;
+		
+		document.getElementById(`I-CATEGORY-${i}`).disabled = true;
+		
+		editor_open_project_files_refresh();
+	}
+}
+function editor_open_project_files(){
+	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
+	TOOLWINDOW.innerHTML = 
+`<div style="background-color:white; width:90vw; height:90vh; margin-left:5vw; margin-top:5vh; padding:32px; box-sizing: border-box;">
+	Добавить: <button onclick="editor_open_project_files_open('i');">Изображение (.png)</button><button onclick="editor_open_project_files_open('s');">Звук (.ogg)</button><button onclick="editor_open_project_files_open();">Остальное</button>
+	<br><br>
+	<div style="width:95%; margin-left:2.5%; height:85%; background-color:rgba(0,0,0,0.25); display:flex; flex-direction:column;">
+		<div style="width:100%; background-color:rgba(255,255,255,0.5);" id="I-CATEGORIES"></div>
+		<div style="width:100%; flex:1; overflow-y:scroll; display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: 1fr; grid-gap: 5px; padding:5px;" id="I-FILE-TABLE"></div>
+		<div style="width:100%; height: 1.25em; background-color:rgba(255,255,255,0.5);">
+			Файлов всего: <text id="I-FILES-TOTAL">?</text> | 
+			Файлов тут: <text id="I-FILES-TOTAL-THERE">?</text> | 
+			<button>Всё тут переместить</button> | <button>Всё тут удалить</button> | 
+			<button onclick="log(P_CATEGORIES);log(P_FILES);">DEBUG INFO</button>
+		</div>
+	</div>
+	<br>
+	<center><button onclick="CLOSE_TOOLWINDOW(); SelectedCategory=-1;">Закрыть</button></center>
+</div>`;
+	
+	var result_categ = `<button onclick="editor_open_project_categories(); SelectedCategory = -1;" title="Редактировать категории">✏️</button> `;
+	for(var i = 0; i < P_CATEGORIES.length; i++){
+		var category = P_CATEGORIES[i];
+		result_categ += `<button onclick="editor_open_project_files_category_open(${i});" id="I-CATEGORY-${i}">${i+1} : ${category}</button>`;
+	}
+	document.getElementById("I-CATEGORIES").innerHTML = result_categ;
+	
+	editor_open_project_files_category_open(0);
+	
+	TOOLWINDOW.style.display = "unset";
+}
+
+function editor_open_project_categories_delete(i){
+	var files = P_FILES[P_CATEGORIES[i]];
+	if(!files || files.length === 0){
+		var category = P_CATEGORIES[i];
+		if(P_FILES[category]){ delete P_FILES[category]; }
+		P_CATEGORIES.splice(i, 1);
+		editor_open_project_categories_refresh();
+		editor_make_unsave();
+	}else{
+		fatal("Нельзя удалить категорию, потому-что в ней есть файлы!");
+	}
+}
+function editor_open_project_categories_refresh(){
+	var ic = document.getElementById("I-CATEGORIES");
+	
+	function addcategory_topanel(i){
+		var category = P_CATEGORIES[i];
+		
+		var result = document.createElement("div");
+		result.style.width = "100%";
+		result.style.backgroundColor = `rgba(255,255,255,${i%2===0?0.5:0.3})`;
+		
+        result.appendChild(document.createTextNode(`${(i+1)<10?"0":""}${i+1} `));
+
+        var downButton = document.createElement("button");
+        downButton.textContent = "↓";
+		var downresult = i+2;
+		if(i==P_CATEGORIES.length-1){ downresult = 1; }
+		downButton.title = `Переместить на ${downresult < 10 ? "0" : ""}${downresult}`;
+        downButton.onclick = function() {
+            editor_open_project_categories_move(category, false);
+        };
+        result.appendChild(downButton);
+		
+		var upButton = document.createElement("button");
+        upButton.textContent = "↑";
+		var upresult = i;
+		if(i==0){ upresult = P_CATEGORIES.length; }
+		upButton.title = `Переместить на ${upresult < 10 ? "0" : ""}${upresult}`;
+        upButton.onclick = function() {
+            editor_open_project_categories_move(category, true);
+        };
+        result.appendChild(upButton);
+		
+		result.appendChild(document.createTextNode(" "));
+
+        var input = document.createElement("input");
+        input.type = "text";
+        input.value = category;
+        input.style.width = "60%";
+		input.maxLength = "30";
+        input.id = `I-INPUT-${i}`;
+		input.addEventListener("input", function(e){
+			const v = e.target.value.replace(/[^A-Za-z0-9 _А-Яа-яЁё]/g, '');
+			e.target.value = v;
+			P_CATEGORIES[i] = v;
+			editor_make_unsave();
+		});
+		input.addEventListener("blur", function(e){
+			editor_open_project_categories_refresh();
+		});
+		result.appendChild(input);
+		
+		result.appendChild(document.createTextNode(" "));
+		
+		var deleteButton = document.createElement("button");
+		deleteButton.textContent = "🗑️";
+		deleteButton.onclick = function(){
+			editor_open_project_categories_delete(i);
+		}
+		result.appendChild(deleteButton);
+		
+		ic.appendChild(result);
+	}
+	
+	ic.innerHTML = "";
+	for(var i = 0; i < P_CATEGORIES.length; i++){
+		addcategory_topanel(i);
+	}
+	
+	document.getElementById("I-CATEGORIES-COUNT").innerText = P_CATEGORIES.length;
+}
+function editor_open_project_categories_move(category,up){
+	const i = P_CATEGORIES.indexOf(category);
+	
+	if(up){
+		if(i===0){
+			P_CATEGORIES.splice(i,1);
+			P_CATEGORIES.push(category);
+		}else{
+			P_CATEGORIES.splice(i,1);
+			P_CATEGORIES.splice(i - 1, 0, category);
+		}
+	}else{
+		if(i===P_CATEGORIES.length - 1){
+			P_CATEGORIES.splice(i,1);
+			P_CATEGORIES.unshift(category);
+		}else{
+			P_CATEGORIES.splice(i,1);
+			P_CATEGORIES.splice(i + 1, 0, category);
+		}
+	}
+
+	editor_open_project_categories_refresh();
+	editor_make_unsave();
+}
+function editor_open_project_categories_create(){
+	if(P_CATEGORIES.length < 30){
+		P_CATEGORIES.push(`Новая категория (${P_CATEGORIES.length+1})`);
+		editor_open_project_categories_refresh();
+		editor_make_unsave();
+	}
+}
+function editor_open_project_categories_back(){
+	if(P_CATEGORIES.length > 0){
+		var hasduplicates = false;
+	
+		var seen = {};
+		for(var i = 0; i < P_CATEGORIES.length; i++){
+			var category = P_CATEGORIES[i];
+			if(seen[category]){ hasduplicates = true; }
+			seen[category] = true;
+		}
+	
+		if(!hasduplicates){
+			editor_open_project_files();
+		}else{
+			fatal("Есть повторяющиеся категории!");
+		}
+	}else{
+		fatal("Нужно имееть хотя-бы одну категорию!");
+	}
+}
+function editor_open_project_categories(){
+	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
+	TOOLWINDOW.innerHTML = 
+`<div style="background-color:white; width:20vw; height:80vh; margin-left:40vw; margin-top:5vh; padding:16px; box-sizing: border-box;">
+	<center>В 1-ю категорию будут добавляться новые файлы!</center><br>
+	<div style="width:95%; margin-left:2.5%; height:75%; background-color:rgba(0,0,0,0.25); overflow-y:scroll;" id="I-CATEGORIES"></div>
+	<br>
+	<center><text>Категорий: <text id="I-CATEGORIES-COUNT">?</text></text></center>
+	<br>
+	<center><button onclick="editor_open_project_categories_create();">Добавить</button></center>
+	<br>
+	<center><button onclick="editor_open_project_categories_back();">Закрыть</button></center>
+</div>`;
+	
+	editor_open_project_categories_refresh();
 	
 	TOOLWINDOW.style.display = "unset";
 }
