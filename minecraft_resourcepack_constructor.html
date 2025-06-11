@@ -52,6 +52,7 @@ button:not(:disabled){
 	<div style="width:100%; height:100%; display: flow-root;" id="BODY"></div>
 	<input type="file" id="FILE_PROJECT_INPUT" accept=".mrc-proj" style="display: none;">
 	<input type="file" id="FILE_INPUT" style="display: none;">
+	<input type="file" id="FILE_REPLACE" style="display: none;">
 </body>
 
 <script>
@@ -72,7 +73,7 @@ var P_FILES = {};
 //===========================================
 // САЙТ
 
-const VERSION = "1";
+const VERSION = "2";
 
 var errorhas = false;
 function detecterror(){
@@ -319,10 +320,12 @@ async function editor_load(file){
 		log("Настройки проекта:");
 		log(ProjectSettings);
 		
+		var MRC_Version = checkkey(ProjectSettings,"MRC_Version","-1");
+		if(MRC_Version!==VERSION){ fatal(`Версия проекта отличается от новой версии, возможны ошибки! ${MRC_Version} != ${VERSION}`); }
+		
 		P_NAME    = checkkey(ProjectSettings,"Name");
 		P_AUTHOR  = checkkey(ProjectSettings,"Author");
 		P_LICENSE = checkkey(ProjectSettings,"License");
-		var MRC_Version = checkkey(ProjectSettings,"MRC_Version","-1");
 		P_CATEGORIES = checkkey(ProjectSettings,"Categories",["NotFound"]);
 		
 		var files_all = checkkey(ProjectSettings,"Files",{});
@@ -366,8 +369,6 @@ async function editor_load(file){
 			for (var category in P_FILES) {
 				P_FILES[category].sort((a,b) => a["ID"] - b["ID"]);
 			}
-		
-			if(MRC_Version!==VERSION){ fatal(`Версия проекта отличается от новой версии, возможны ошибки! ${MRC_Version} != ${VERSION}`); }
 		
 			page("e");
 		})
@@ -503,6 +504,10 @@ function editor_open_project_settings(){
 }
 
 function editor_open_project_files_refresh(){
+	if(editor_open_project_files_context_menu!=null){
+		editor_open_project_files_context_menu.remove();
+	}
+
 	document.getElementById("I-FILE-TABLE").innerHTML = "";
 	if(!P_FILES[P_CATEGORIES[SelectedCategory]]){ P_FILES[P_CATEGORIES[SelectedCategory]] = []; }
 	var total = 0;
@@ -518,7 +523,7 @@ function editor_open_project_files_refresh(){
 		}
 	}
 	
-	document.getElementById("I-FILES-TOTAL").innerText = total;
+	document.getElementById("I-FILES-TOTAL"      ).innerText = total;
 	document.getElementById("I-FILES-TOTAL-THERE").innerText = total_there;
 }
 function editor_open_project_files_remove_all(){
@@ -576,6 +581,128 @@ function editor_open_project_files_movefile(i,arrow){
 		editor_make_unsave();
 	}
 }
+function editor_open_project_files_replace(i,andname){
+	var input = document.getElementById("FILE_REPLACE");
+	
+	//Очистка от ивентов
+	const newinput = input.cloneNode(true);
+	input.parentNode.replaceChild(newinput, input);
+	input = newinput;
+	
+	var files = P_FILES[P_CATEGORIES[SelectedCategory]];
+	var file = files[i];
+	
+	function replacefile(newfile){
+		var name = andname ? newfile.name.replace(/[^\x00-\x7F]/g, "-") : file["Name"];
+		
+		const hasduplicates = andname ? files.some(item => item.Name === name) : false;
+		
+		if(hasduplicates){
+			fatal(`Файл с таким именем [${name}] уже есть!`);
+		}else{
+			const reader = new FileReader();
+			var ThatByteArray = file["ContentType"];
+			reader.onload = function(e){
+				file["Name"] = name;
+				var content = e.target.result;
+				file["Size"] = (ThatByteArray ? content.byteLength : content.length);
+				if(file["URL"]){ URL.revokeObjectURL(file["URL"]); }
+				file["URL"] = null;
+				file["Content"] = content;
+				if(file["Type"]==="texture"){
+					get_png_dimension(content).then(dimension => {
+						file["Dimension"] = dimension;
+					
+						editor_open_project_files_refresh();
+						editor_make_unsave();
+					}).catch(e => {
+						fatal(`Не получилось определить размер изображения [${file["Name"]}]! addfile(${id},${file});`);
+					})
+				}else{
+					file["Dimension"] = null;
+				
+					editor_open_project_files_refresh();
+					editor_make_unsave();
+				}
+			};
+			if(ThatByteArray){
+				reader.readAsArrayBuffer(newfile);
+			}else{
+				reader.readAsText(newfile, "UTF-8");
+			}
+		}
+	}
+	
+	if(file["Type"]==="texture"){
+		input.accept = ".png";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".png")){
+					log(`Заменено изображение [${file.name}]!`);
+					replacefile(ProjectFile);
+				}else{
+					fatal(`Выбранный файл, не является с форматом ".png"!`);
+				}
+			}
+		});
+	}else if(file["Type"]==="sound"){
+		input.accept = ".ogg";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".ogg")){
+					log(`Заменён звук [${Pfile.name}]!`);
+					replacefile(ProjectFile);
+				}else{
+					fatal(`Выбранный файл, не является с форматом ".ogg"!`);
+				}
+			}
+		});
+	}else{
+		input.accept = "";
+		input.addEventListener("change", function(e) {
+			if(e.target.files.length === 1){
+				const ProjectFile = e.target.files[0];
+				if(ProjectFile.name.endsWith(".png")||ProjectFile.name.endsWith(".ogg")){
+					fatal(`Выбранный файл, с форматом ".png" или ".ogg"! (выберите другие кнопки)`);
+				}else{
+					log(`Заменён файл [${file.name}]!`);
+					replacefile(ProjectFile);
+				}
+			}
+		});
+	}
+	input.click();
+}
+function editor_open_project_files_download_file(i){
+	var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
+	var url = file["URL"];
+	if(!url){
+		var t = "text/plain;charset=utf-8"
+	
+		if(file["Type"]==="texture"){
+			t = "image/png";
+		}else if(file["Type"]==="texture"){
+			//t = ""
+		}
+	
+		var blob = new Blob([file["Content"]], { type: t });
+		url = URL.createObjectURL(blob);
+	}
+	
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = file["Name"];
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	
+	if(editor_open_project_files_context_menu!=null){
+		editor_open_project_files_context_menu.remove();
+	}
+}
+var editor_open_project_files_context_menu = null;
 function editor_open_project_files_addfile(f,category,i){
 	var files_table = document.getElementById("I-FILE-TABLE");
 	
@@ -607,6 +734,34 @@ function editor_open_project_files_addfile(f,category,i){
 	`<div style="background-image:url('source/transparent.png'); width:100%; height:85%; cursor:help;" title="${title}">${icon}</div>
 	<button onclick="editor_open_project_files_movefile(${i},1);">←</button><button onclick="editor_open_project_files_movefile(${i},2);">↓</button><button onclick="editor_open_project_files_movefile(${i},3);">↑</button><button onclick="editor_open_project_files_movefile(${i},4);">→</button><button style="font-size:0.5em;" title="Редактировать">✏️</button><button style="font-size:0.5em;" title="Удалить" onclick="editor_open_project_files_remove(${i});">🗑️</button>`;
 	
+	element.addEventListener("contextmenu", function(e){ e.preventDefault(); 
+		if(editor_open_project_files_context_menu!=null){
+			editor_open_project_files_context_menu.remove();
+		}
+		editor_open_project_files_context_menu = document.createElement("contextmenu");
+		editor_open_project_files_context_menu.style.backgroundColor = "rgb(250,250,250)";
+		editor_open_project_files_context_menu.style.width = "300px";
+		editor_open_project_files_context_menu.style.height = "500px";
+		editor_open_project_files_context_menu.style.display = "flex";
+		editor_open_project_files_context_menu.style.flexDirection = "column";
+		editor_open_project_files_context_menu.style.position = "fixed";
+		editor_open_project_files_context_menu.style.left = `${e.pageX}px`;
+		editor_open_project_files_context_menu.style.top  = `${e.pageY}px`;
+		editor_open_project_files_context_menu.style.zIndex = "3000";
+		
+		editor_open_project_files_context_menu.innerHTML = 
+		`<center>${f["Name"]}</center>
+		<button>Редактировать</button>
+		<div style="display:flex;"><button style="flex:1;" title="Заменяет только содержимое файла" onclick="editor_open_project_files_replace(${i},false);">Заменить содержимое</button><button style="flex:1;" title="Заменяет содержимое и название файла" onclick="editor_open_project_files_replace(${i},true);">Заменить<br>весь файл</button></div>
+		<button>Перенести</button>
+		<button onclick="editor_open_project_files_download_file(${i});">Скачать</button>
+		<button onclick="editor_open_project_files_remove(${i});">Удалить</button>
+		<button onclick="log(P_FILES[P_CATEGORIES[SelectedCategory]][${i}]);">DEBUG INFO</button>
+		`;
+		
+		BODY.appendChild(editor_open_project_files_context_menu);
+	});
+	
 	files_table.appendChild(element);
 }
 function editor_open_project_files_open(t){
@@ -617,11 +772,25 @@ function editor_open_project_files_open(t){
 	input.parentNode.replaceChild(newinput, input);
 	input = newinput;
 	
-	function addfile(id,file){
+	function addfile(id,file,i = null){
 		if(!P_FILES[P_CATEGORIES[SelectedCategory]]){ P_FILES[P_CATEGORIES[SelectedCategory]] = []; }
 		
 		var files = P_FILES[P_CATEGORIES[SelectedCategory]];
 		var name = file.name.replace(/[^\x00-\x7F]/g, "-");
+		
+		if(i!=null){
+			var lastdot = name.lastIndexOf(".");
+			var name_base,name_extension;
+			if (lastdot !== -1) {
+				name_base      = name.substring(0, lastdot);
+				name_extension = name.substring(   lastdot);
+			} else {
+				name_base      = name;
+				name_extension = "";
+			}
+			
+			name = name_base + (i+1) + name_extension;
+		}
 		
 		const hasduplicates = files.some(item => item.Name === name);
 		
@@ -668,14 +837,21 @@ function editor_open_project_files_open(t){
 		}
 	}
 	
+	var debug_morefiles = document.getElementById("I-DEBUG-MOREFILES").checked;
 	if(t==="i"){
 		input.accept = ".png";
 		input.addEventListener("change", function(e) {
 			if(e.target.files.length === 1){
 				const ProjectFile = e.target.files[0];
 				if(ProjectFile.name.endsWith(".png")){
-					log(`Добавлено изображение [${ProjectFile.name}]!`);
-					addfile("texture",ProjectFile);
+					log(`Добавлено изображение [${ProjectFile.name}]${debug_morefiles?" 12 раз":""}!`);
+					if(debug_morefiles){
+						for(var i = 0; i < 12; i++){
+							addfile("texture",ProjectFile,i);
+						}
+					}else{
+						addfile("texture",ProjectFile);
+					}
 				}else{
 					fatal(`Выбранный файл, не является с форматом ".png"!`);
 				}
@@ -687,8 +863,14 @@ function editor_open_project_files_open(t){
 			if(e.target.files.length === 1){
 				const ProjectFile = e.target.files[0];
 				if(ProjectFile.name.endsWith(".ogg")){
-					log(`Добавлен звук [${ProjectFile.name}]!`);
-					addfile("sound",ProjectFile);
+					log(`Добавлен звук [${ProjectFile.name}]${debug_morefiles?" 12 раз":""}!`);
+					if(debug_morefiles){
+						for(var i = 0; i < 12; i++){
+							addfile("sound",ProjectFile,i);
+						}
+					}else{
+						addfile("sound",ProjectFile);
+					}
 				}else{
 					fatal(`Выбранный файл, не является с форматом ".ogg"!`);
 				}
@@ -702,8 +884,14 @@ function editor_open_project_files_open(t){
 				if(ProjectFile.name.endsWith(".png")||ProjectFile.name.endsWith(".ogg")){
 					fatal(`Выбранный файл, с форматом ".png" или ".ogg"! (выберите другие кнопки)`);
 				}else{
-					log(`Добавлен файл [${ProjectFile.name}]!`);
-					addfile("other",ProjectFile);
+					log(`Добавлен файл [${ProjectFile.name}]${debug_morefiles?" 12 раз":""}!`);
+					if(debug_morefiles){
+						for(var i = 0; i < 12; i++){
+							addfile("other",ProjectFile,i);
+						}
+					}else{
+						addfile("other",ProjectFile);
+					}
 				}
 			}
 		});
@@ -739,6 +927,7 @@ function editor_open_project_files(){
 			Файлов тут: <text id="I-FILES-TOTAL-THERE">?</text> | 
 			<button>Всё тут переместить</button> | <button onclick="editor_open_project_files_remove_all();">Всё тут удалить</button> | 
 			<button onclick="log(P_CATEGORIES);log(P_FILES);">DEBUG INFO</button>
+			<input type="checkbox" title="Добавляет сразу 12 файлов, а не 1" id="I-DEBUG-MOREFILES">
 		</div>
 	</div>
 	<br>
@@ -992,6 +1181,13 @@ function INSTALL_PAGE_EDITOR(){
 document.addEventListener("keydown", function(e){
 	if(CurrentPage==="e"){
 		if(e.key === "Home"){ editor_moveworkspace(); editor_scaleworkspace(); }
+	}
+});
+document.addEventListener("mousedown", function(e){
+	if(editor_open_project_files_context_menu){
+		if(!editor_open_project_files_context_menu.contains(e.target)){
+			editor_open_project_files_context_menu.remove();
+		}
 	}
 });
 window.addEventListener("beforeunload",function(e){
