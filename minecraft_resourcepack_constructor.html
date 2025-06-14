@@ -11,7 +11,7 @@ body{
 	margin: 0;
 }
 
-body, input, button{
+html, body, input, button, select, div, text{
 	font-family: Consolas, monospace;
 }
 
@@ -24,7 +24,7 @@ img{
 	color     : currentColor;
 }
 
-button:not(:disabled){
+button:not(:disabled), select{
 	cursor: pointer;
 }
 
@@ -49,6 +49,7 @@ button:not(:disabled){
 </style>
 
 <body>
+	<div style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:2000; display:flex; justify-content: center; align-items: center; color:white; font-size:2em; flex-direction:column; display:none;" id="LOADING">?</div>
 	<div style="width:100%; height:100%; display: flow-root;" id="BODY"></div>
 	<input type="file" id="FILE_PROJECT_INPUT" accept=".mrc-proj" style="display: none;">
 	<input type="file" id="FILE_INPUT" style="display: none;">
@@ -102,8 +103,7 @@ const FileExtension_Compiled = ".mrc"     ;
 var CurrentPage = "";
 
 const PAGE_STARTPAGE =
-`<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:flex; justify-content: center; align-items: center; color:white; font-size:2em; display:none;" id="LOADING">Загружается проект...</panel>
-<center id="STARTPAGE" style="width:100vw; height:100vh;">
+`<center id="STARTPAGE" style="width:100vw; height:100vh;">
 	<br>
 	<text style="font-size:3em;">MRC ${VERSION}</text>
 	<br><br>
@@ -113,22 +113,24 @@ const PAGE_STARTPAGE =
 </center>`;
 
 const PAGE_EDITOR =
-`<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:2000; display:flex; justify-content: center; align-items: center; color:white; font-size:2em; display:none;" id="LOADING">?</panel>
-<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:none;" id="TOOL-WINDOW"></panel>
+`<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:none;" id="TOOL-WINDOW"></panel>
 <div style="display: flex; background-color:lightgray; background-image:url('source/grid2.png'); image-rendering: pixelated; transition: all 0.1s ease;" id="PAGE">
 	<panel style="position:fixed; width: 5px; height: 5px; pointer-events: none;" id="WORKSPACE-CONTENT"></panel>
 	<panel style="display:block; width:25vw; height:100vh; background-color:white; border-right:3px solid black; z-index:5;">
-		<center style="display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+		<center style="height:100%;">
 			<button style="margin-top:20px;" onclick="editor_open_project_settings();">Настройки проекта</button>
 			<br>
 			<button onclick="editor_open_project_files();">Файлы</button>
+			<br><br>
+			<div style="background-color:rgba(0,0,0,0.25); width:95%; height:80%;" id="TOOL"></div>
+			<br><br>
+			<button onclick="editor_save();" id="SAVE" disabled>Сохранить</button>
 			<br>
-			<button style="position: fixed; bottom: 40px;" onclick="editor_save();" id="SAVE" disabled>Сохранить</button>
-			<button style="position: fixed; bottom: 20px;" onclick="fatal('в разработке!!!');">Скомпилировать</button>
+			<button onclick="fatal('в разработке!!!');">Скомпилировать</button>
 		</center>
 	</panel>
 	<panel id="WORKSPACE">
-		<!-- R/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-start;">
+		<!-- L/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-start;">
 			<text id="I-MS">?</text>
 		</panel>
 
@@ -136,31 +138,32 @@ const PAGE_EDITOR =
 			<text style="color:lime;">+Y</text>
 		</panel>
 
-		<!-- L/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-end;  ">
+		<!-- R/T --> <panel id="WORKSPACE-INFO" style="align-items: flex-start; justify-content: flex-end;  ">
 			<text>X: <input id="I-POS-X" type="number" step="1" pattern="\d*" value="0"></text>
 			<text>Y: <input id="I-POS-Y" type="number" step="1" pattern="\d*" value="0"></text>
 			<text>S: <input id="I-SCALE" type="number" step="0.0001" value="1"></text>
 			<button onclick="editor_moveworkspace(); editor_scaleworkspace();">HOME</button>
 		</panel>
 
-		<!-- R/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-start;">
+		<!-- L/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-start;">
 			<text style="color:red;">-X</text>
 		</panel>
 
 		<!-- C/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: center;    "></panel>
 
-		<!-- L/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-end;  ">
+		<!-- R/C --> <panel id="WORKSPACE-INFO" style="align-items: center;     justify-content: flex-end;  ">
 			<text style="color:red;">+X</text>
 		</panel>
 
-		<!-- R/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-start;">
+		<!-- L/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-start;">
+			<text id="I-IN-EDIT">?</text>
 		</panel>
 
 		<!-- C/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: center;    ">
 			<text style="color:lime;">-Y</text>
 		</panel>
 
-		<!-- L/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-end;  ">
+		<!-- R/B --> <panel id="WORKSPACE-INFO" style="align-items: flex-end;   justify-content: flex-end;  ">
 		</panel>
 	</panel>
 	<panel style="display:block; width:25vw; height:100vh; background-color:white; border-left:3px solid black; z-index:5;">
@@ -236,7 +239,12 @@ function get_png_dimension(content){
 async function editor_save(){
 	if(!SAVED){
 		var loading = document.getElementById("LOADING");
-		loading.innerText = "Сохраняется...";
+		loading.innerHTML = 
+		`<text>Сохраняется...</text>
+		<text style="color:transparent;">.</text>
+		<text>Добавлено файлов: <text id="LOADING-PROGRESS">?</text> / <text id="LOADING-PROGRESS-TOTAL">?</text></text>
+		<text>Сжимается: <text id="LOADING-PROGRESS-ZIP">?</text>%</text>
+		<text>(<text id="LOADING-PROGRESS-FILE">?</text>)</text>`;
 		loading.style.display = "flex";
 		try{
 			function checkstring(s,sn,ifempty = null){ if(!s || s.trim()===""){ if(ifempty!=null){ return ifempty; }else{ throw new Error(`строка "${sn}" пустая!`); } } return s; }
@@ -246,6 +254,8 @@ async function editor_save(){
 			P_LICENSE = checkstring(P_LICENSE,"Лицензия проекта","Not specified");
 		
 			const zip = new JSZip();
+			
+			var zip_content_result = [];
 			
 			//CONTENT ->
 			
@@ -257,46 +267,79 @@ async function editor_save(){
 				files[category] = [];
 				var category_folder = content.folder(category);
 				for(var i = 0; i < P_FILES[category].length; i++){
-					var file = P_FILES[category][i];
+					var file = { ...P_FILES[category][i] };
 					var file_content = file["Content"];
 					if(file["ContentType"]==="byte"){
 						file_content = new Uint8Array(file_content);
 					}
-					category_folder.file(file["Name"],file_content);
 					delete file["Content"  ];
 					delete file["Size"     ];
 					delete file["Dimension"];
 					delete file["URL"      ];
+					delete file["Category" ];
+					zip_content_result.push([category_folder,file["Name"],file_content]);
 					files[category].push(file);
 				}
 			}
 			
-			zip.file("ProjectSettings", JSON.stringify({
+			zip_content_result.push([zip,"ProjectSettings", JSON.stringify({
 				"Name": P_NAME,
 				"Author": P_AUTHOR,
 				"License": P_LICENSE,
 				"MRC_Version": VERSION,
 				"Categories": P_CATEGORIES,
 				"Files": files
-			}, null, 2));
+			}, null, 2)]);
 			
 			//<-
 			
-			const zip_content = await zip.generateAsync({ type: "blob" });
-			const url = URL.createObjectURL(zip_content);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = P_NAME + FileExtension_Project;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-		
-			SAVED = true;
+			async function createzip(){
+				const totalfiles = zip_content_result.length;
+				document.getElementById("LOADING-PROGRESS-TOTAL").innerText = totalfiles;
+				var addedfiles = 0;
+				
+				const loadingprogess = document.getElementById("LOADING-PROGRESS");
+				for(var i = 0; i < totalfiles; i++){
+					var file = zip_content_result[i];
+					file[0].file(file[1],file[2]);
+					addedfiles++;
+					loadingprogess.innerText = addedfiles;
+				}
+			}
 			
-			document.getElementById("SAVE").disabled = true;
-			document.title = "MRC";
-			loading.style.display = "none";
+			async function createzip2(){
+				const loadingprogess = document.getElementById("LOADING-PROGRESS-ZIP");
+				const loadingprogess2 = document.getElementById("LOADING-PROGRESS-FILE");
+				
+				const zip_content = await zip.generateAsync({
+					type: "blob",
+					compression: "DEFLATE",
+					compressionOptions: { level: 6 }
+				}, function updateCallback(metadata){
+					const currentfile = metadata.currentFile || "Все файлы загружены!";
+					loadingprogess2.innerText = currentfile;
+					loadingprogess.innerText = metadata.percent.toFixed(2);
+				});
+				
+				return zip_content;
+			}
+			
+			createzip().then(() => { return createzip2(); }).then((zip_content) => {
+				const url = URL.createObjectURL(zip_content);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = P_NAME + FileExtension_Project;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			
+				SAVED = true;
+				
+				document.getElementById("SAVE").disabled = true;
+				document.title = "MRC";
+				loading.style.display = "none";
+			})
 		}catch(e){
 			loading.style.display = "none";
 			fatal(`Не получилось сохранить проект, ${e}`);
@@ -306,6 +349,8 @@ async function editor_save(){
 
 async function editor_load(file){
 	var loading = document.getElementById("LOADING");
+	loading.innerHTML = 
+	`<text>Загружается...</text>`;
 	loading.style.display = "flex";
 	try{
 		const zip = await JSZip.loadAsync(file);
@@ -341,9 +386,10 @@ async function editor_load(file){
 					var promises = files.map(async (file) => {
 						var file_content = file["ContentType"] === "text" ? await category_folder.file(file["Name"]).async("text") : await category_folder.file(file["Name"]).async("uint8array");
 
-						file["URL"    ] = null;
-						file["Content"] = file_content;
-						file["Size"   ] = file["ContentType"] === "byte" ? file_content.byteLength : file_content.length;
+						file["URL"     ] = null;
+						file["Content" ] = file_content;
+						file["Size"    ] = file["ContentType"] === "byte" ? file_content.byteLength : file_content.length;
+						file["Category"] = category;
 
 						if (file["Type"] === "texture") {
 							try {
@@ -373,6 +419,8 @@ async function editor_load(file){
 			page("e");
 		})
 		.catch(e => {
+			loading.style.display = "none";
+			error(e);
 			fatal(`Произошла ошибка при загрузке файлов!`);
 		});
 	}catch(e){
@@ -459,13 +507,57 @@ function editor_add_element(id = null,style = null,content = null,posX = null,po
 	if(posX    === null){posX    = 0 };
 	if(posY    === null){posY    = 0 };
 
-	document.getElementById("WORKSPACE-CONTENT").innerHTML += `<element id="${id}" style="${style}">${content}</element>`;
+	document.getElementById("WORKSPACE-CONTENT").innerHTML += `<element id="${id}" style="position:absolute; ${style}">${content}</element>`;
 }
 
 function CLOSE_TOOLWINDOW(){
 	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
 	TOOLWINDOW.style.display = "none";
 	TOOLWINDOW.innerHTML = "";
+	SelectedCategory = -1;
+}
+
+function editor_stopeditfile(){
+	document.getElementById("I-IN-EDIT").innerHTML = "<i>Ничего не редактируется...</i>";
+	
+	if(inedit){
+		const element = document.getElementById("EL-IN-EDIT");
+		element.remove();
+	}
+	
+	inedit = null;
+	
+	document.getElementById("TOOL").innerHTML = `<i>Выберите файл, что-бы его редактировать</i>`;
+}
+
+var inedit = null;
+function editor_editfile(i){
+	if(editor_open_project_files_context_menu!=null){
+		editor_open_project_files_context_menu.remove();
+	}
+	var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
+	
+	if(inedit&&file["Name"]===inedit["Name"]&&file["Category"]===inedit["Category"]){
+		fatal(`Уже редактируется этот файл [${file["Name"]}]!`);
+	}else{	
+		if(inedit){
+			editor_stopeditfile();
+		}
+		
+		inedit = file;
+		log(`Редактируется файл [${file["Name"]}]!`);
+		CLOSE_TOOLWINDOW();
+		document.getElementById("I-IN-EDIT").innerHTML = `${file["Category"]}/${file["Name"]} [${file["Type"]}]`;
+		
+		if(!file["URL"]){
+			file["URL"] = createurl(file);
+		}
+		editor_add_element("EL-IN-EDIT",null,`<img style="width: ${file["Dimension"][0]}px; height: ${file["Dimension"][1]}px; transform: translate(-46.25%,-46.25%) scale(${(file["Dimension"][0]/64)*200}%, ${(file["Dimension"][1]/64)*200}%);" src="${file["URL"]}">`,0,0);
+	
+		document.getElementById("TOOL").innerHTML = 
+		`<b>${file["Name"]}</b><br>
+		<button onclick="editor_stopeditfile();">Завершить редактирование</button>`;
+	}
 }
 
 function editor_open_project_settings(){
@@ -525,6 +617,12 @@ function editor_open_project_files_refresh(){
 	
 	document.getElementById("I-FILES-TOTAL"      ).innerText = total;
 	document.getElementById("I-FILES-TOTAL-THERE").innerText = total_there;
+	
+	var select = "";
+	for(category of P_CATEGORIES){
+		select += `<option value="${category}"${P_CATEGORIES[SelectedCategory]===category?" selected":""}>${category}</option>`;
+	}
+	document.getElementById("I-SELECT-CATEGORY").innerHTML = select;
 }
 function editor_open_project_files_remove_all(){
 	const conf = confirm(`Вы действительно хотите всё удалить в категории [${P_CATEGORIES[SelectedCategory]}]?`);
@@ -534,10 +632,18 @@ function editor_open_project_files_remove_all(){
 			var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
 			if(file["URL"]){ URL.revokeObjectURL(file["URL"]); }
 		}
-		P_FILES[P_CATEGORIES[SelectedCategory]] = [];
+		delete P_FILES[P_CATEGORIES[SelectedCategory]];
 
 		editor_open_project_files_refresh();
 		editor_make_unsave();
+	}
+}
+function editor_open_project_files_remove_base(i){
+	var files = P_FILES[P_CATEGORIES[SelectedCategory]];
+	files.splice(i, 1);
+
+	for (let j = i; j < files.length; j++) {
+		files[j]["ID"] -= 1;
 	}
 }
 function editor_open_project_files_remove(i){
@@ -547,12 +653,7 @@ function editor_open_project_files_remove(i){
 		var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
 		if(file["URL"]){ URL.revokeObjectURL(file["URL"]); }
 	
-		var files = P_FILES[P_CATEGORIES[SelectedCategory]];
-		files.splice(i, 1);
-
-		for (let j = i; j < files.length; j++) {
-			files[j]["ID"] -= 1;
-		}
+		editor_open_project_files_remove_base(i);
 
 		editor_open_project_files_refresh();
 		editor_make_unsave();
@@ -675,24 +776,26 @@ function editor_open_project_files_replace(i,andname){
 	}
 	input.click();
 }
+function createurl(file){
+	var t = "text/plain;charset=utf-8"
+	
+	if(file["Type"]==="texture"){
+		t = "image/png";
+	}else if(file["Type"]==="texture"){
+		//t = ""
+	}
+
+	var blob = new Blob([file["Content"]], { type: t });
+	return URL.createObjectURL(blob);
+}
 function editor_open_project_files_download_file(i){
 	var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
-	var url = file["URL"];
-	if(!url){
-		var t = "text/plain;charset=utf-8"
-	
-		if(file["Type"]==="texture"){
-			t = "image/png";
-		}else if(file["Type"]==="texture"){
-			//t = ""
-		}
-	
-		var blob = new Blob([file["Content"]], { type: t });
-		url = URL.createObjectURL(blob);
+	if(!file["URL"]){
+		file["URL"] = createurl(file);
 	}
 	
 	const a = document.createElement("a");
-	a.href = url;
+	a.href = file["URL"];
 	a.download = file["Name"];
 	document.body.appendChild(a);
 	a.click();
@@ -718,11 +821,12 @@ function editor_open_project_files_addfile(f,category,i){
 	if(f["Type"]==="texture"){
 		var url = f["URL"];
 		if(!url){
-			const blob = new Blob([new Uint8Array(f["Content"])], { type: "image/png" });
-			f["URL"] = URL.createObjectURL(blob);
+			f["URL"] = createurl(f);
 		}
 	
 		icon = `<center style="width:100%; height:100%;"><img style="height:100%; width:100%;" src="${f["URL"]}"></center>`;
+	}else{
+		icon = `<center style="width:100%; height:100%; position: relative; overflow:hidden;"><img style="height:100%; width:100%;" src="ge/file.png"><div style="position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);">${f["Name"]}</div></center>`;
 	}
 	
 	var title = `${category}/${f["Name"]}`;
@@ -731,35 +835,65 @@ function editor_open_project_files_addfile(f,category,i){
 	}
 	
 	element.innerHTML = 
-	`<div style="background-image:url('source/transparent.png'); width:100%; height:85%; cursor:help;" title="${title}">${icon}</div>
-	<button onclick="editor_open_project_files_movefile(${i},1);">←</button><button onclick="editor_open_project_files_movefile(${i},2);">↓</button><button onclick="editor_open_project_files_movefile(${i},3);">↑</button><button onclick="editor_open_project_files_movefile(${i},4);">→</button><button style="font-size:0.5em;" title="Редактировать">✏️</button><button style="font-size:0.5em;" title="Удалить" onclick="editor_open_project_files_remove(${i});">🗑️</button>`;
+	`<div style="${f["Type"]==="texture"?"background-image:url('source/transparent.png');":""} width:100%; height:85%; cursor:help;" title="${title}">${icon}</div>
+	<button onclick="editor_open_project_files_movefile(${i},1);">←</button><button onclick="editor_open_project_files_movefile(${i},2);">↓</button><button onclick="editor_open_project_files_movefile(${i},3);">↑</button><button onclick="editor_open_project_files_movefile(${i},4);">→</button><button style="font-size:0.5em;" title="Редактировать" onclick="editor_editfile(${i});">✏️</button><button style="font-size:0.5em;" title="Удалить" onclick="editor_open_project_files_remove(${i});">🗑️</button>`;
 	
-	element.addEventListener("contextmenu", function(e){ e.preventDefault(); 
-		if(editor_open_project_files_context_menu!=null){
-			editor_open_project_files_context_menu.remove();
+	element.addEventListener("contextmenu", function(e){ 
+		if(!e.shiftKey){
+			e.preventDefault(); 
+			if(editor_open_project_files_context_menu!=null){
+				editor_open_project_files_context_menu.remove();
+			}
+			
+			editor_open_project_files_context_menu = document.createElement("contextmenu");
+			editor_open_project_files_context_menu.style.backgroundColor = "rgb(250,250,250)";
+			editor_open_project_files_context_menu.style.width = "300px";
+			editor_open_project_files_context_menu.style.height = "500px";
+			editor_open_project_files_context_menu.style.display = "flex";
+			editor_open_project_files_context_menu.style.flexDirection = "column";
+			editor_open_project_files_context_menu.style.position = "fixed";
+			editor_open_project_files_context_menu.style.left = `${e.pageX}px`;
+			editor_open_project_files_context_menu.style.top  = `${e.pageY}px`;
+			editor_open_project_files_context_menu.style.zIndex = "3000";
+			
+			var select = "";
+			for(category of P_CATEGORIES){
+				select += `<option value="${category}"${P_CATEGORIES[SelectedCategory]===category?" selected":""}>${category}</option>`;
+			}
+			
+			editor_open_project_files_context_menu.innerHTML = 
+			`<center>${f["Name"]}</center>
+			<button onclick="editor_editfile(${i});">Редактировать</button>
+			<div style="display:flex;"><button style="flex:1;" title="Заменяет только содержимое файла" onclick="editor_open_project_files_replace(${i},false);">Заменить содержимое</button><button style="flex:1;" title="Заменяет содержимое и название файла" onclick="editor_open_project_files_replace(${i},true);">Заменить<br>весь файл</button></div>
+			<select id="I-CONTEXT-SELECTCATEGORY">${select}</select>
+			<button onclick="editor_open_project_files_download_file(${i});">Скачать</button>
+			<button onclick="editor_open_project_files_remove(${i});">Удалить</button>
+			<button onclick="log(P_FILES[P_CATEGORIES[SelectedCategory]][${i}]);">DEBUG INFO</button>
+			`;
+			
+			BODY.appendChild(editor_open_project_files_context_menu);
+			
+			document.getElementById("I-CONTEXT-SELECTCATEGORY").addEventListener("change", function() {
+				var selected = this.value;
+				if(selected !== P_CATEGORIES[SelectedCategory]){
+					if(!P_FILES[selected]){ P_FILES[selected] = []; }
+					const hasduplicates = P_FILES[selected].some(item => item.Name === f["Name"]);
+		
+					if(hasduplicates){
+						fatal(`Файл с таким именем [${f["Name"]}] уже есть в указанной категории!`);
+						this.value = P_CATEGORIES[SelectedCategory];
+					}else{
+						editor_open_project_files_remove_base(f["ID"]);
+						f["ID"      ] = P_FILES[selected].length;
+						f["Category"] = selected;
+						P_FILES[selected].push(f);
+						
+						editor_open_project_files_refresh();
+						editor_make_unsave();
+					}
+				}
+			});
 		}
-		editor_open_project_files_context_menu = document.createElement("contextmenu");
-		editor_open_project_files_context_menu.style.backgroundColor = "rgb(250,250,250)";
-		editor_open_project_files_context_menu.style.width = "300px";
-		editor_open_project_files_context_menu.style.height = "500px";
-		editor_open_project_files_context_menu.style.display = "flex";
-		editor_open_project_files_context_menu.style.flexDirection = "column";
-		editor_open_project_files_context_menu.style.position = "fixed";
-		editor_open_project_files_context_menu.style.left = `${e.pageX}px`;
-		editor_open_project_files_context_menu.style.top  = `${e.pageY}px`;
-		editor_open_project_files_context_menu.style.zIndex = "3000";
-		
-		editor_open_project_files_context_menu.innerHTML = 
-		`<center>${f["Name"]}</center>
-		<button>Редактировать</button>
-		<div style="display:flex;"><button style="flex:1;" title="Заменяет только содержимое файла" onclick="editor_open_project_files_replace(${i},false);">Заменить содержимое</button><button style="flex:1;" title="Заменяет содержимое и название файла" onclick="editor_open_project_files_replace(${i},true);">Заменить<br>весь файл</button></div>
-		<button>Перенести</button>
-		<button onclick="editor_open_project_files_download_file(${i});">Скачать</button>
-		<button onclick="editor_open_project_files_remove(${i});">Удалить</button>
-		<button onclick="log(P_FILES[P_CATEGORIES[SelectedCategory]][${i}]);">DEBUG INFO</button>
-		`;
-		
-		BODY.appendChild(editor_open_project_files_context_menu);
 	});
 	
 	files_table.appendChild(element);
@@ -807,6 +941,7 @@ function editor_open_project_files_open(t){
 					"Size"       : (ThatByteArray ? content.byteLength : content.length),
 					"ContentType": (ThatByteArray ? "byte" : "text"),
 					"URL"        : null,
+					"Category"   : P_CATEGORIES[SelectedCategory],
 					"ID"         : P_FILES[P_CATEGORIES[SelectedCategory]].length,
 					"Content"    : content
 				};
@@ -925,7 +1060,7 @@ function editor_open_project_files(){
 		<div style="width:100%; height: 1.25em; background-color:rgba(255,255,255,0.5);">
 			Файлов всего: <text id="I-FILES-TOTAL">?</text> | 
 			Файлов тут: <text id="I-FILES-TOTAL-THERE">?</text> | 
-			<button>Всё тут переместить</button> | <button onclick="editor_open_project_files_remove_all();">Всё тут удалить</button> | 
+			<select id="I-SELECT-CATEGORY"></select> | <button onclick="editor_open_project_files_remove_all();">Всё тут удалить</button> | 
 			<button onclick="log(P_CATEGORIES);log(P_FILES);">DEBUG INFO</button>
 			<input type="checkbox" title="Добавляет сразу 12 файлов, а не 1" id="I-DEBUG-MOREFILES">
 		</div>
@@ -942,6 +1077,50 @@ function editor_open_project_files(){
 	document.getElementById("I-CATEGORIES").innerHTML = result_categ;
 	
 	editor_open_project_files_category_open(0);
+	
+	document.getElementById("I-SELECT-CATEGORY").addEventListener("change", function(){
+		var selected = this.value;
+		if(selected !== P_CATEGORIES[SelectedCategory]){
+			const conf = confirm(`Вы действительно хотите всё переместить из категории [${P_CATEGORIES[SelectedCategory]}] в [${selected}]?`);
+			
+			if(conf){
+				var files  = P_FILES[P_CATEGORIES[SelectedCategory]];
+				if(!P_FILES[selected]){ P_FILES[selected] = []; }
+				var files2 = P_FILES[selected];
+				
+				var hasduplicates = false;
+				
+				for(var i = 0; i < files.length; i++){
+					var f = files[i];
+					if(files2.some(item => item.Name === f["Name"])){
+						hasduplicates = true;
+						break;
+					}
+				}
+			
+				if(hasduplicates){
+					fatal(`Файл с таким именем [${f["Name"]}] уже есть в указанной категории!`);
+				}else{
+					for(var i = 0; i < files.length; i++){
+						var f = files[i];
+						f["ID"      ] = files2.length;
+						f["Category"] = selected;
+						files2.push(f);
+					}
+					
+					for(var i = 0; i < files.length; i++){
+						var f = files[i];
+						if(f["URL"]){ URL.revokeObjectURL(f["URL"]); }
+					}
+					delete P_FILES[P_CATEGORIES[SelectedCategory]];
+					
+					editor_open_project_files_refresh();
+					editor_make_unsave();
+				}
+				this.value = P_CATEGORIES[SelectedCategory];
+			}
+		}
+	});
 	
 	TOOLWINDOW.style.display = "unset";
 }
@@ -1005,6 +1184,9 @@ function editor_open_project_categories_refresh(){
 			P_CATEGORIES[i] = v;
 			var files = P_FILES[oldcategory];
 			if(files){
+				for(var j = 0; j < files.length; j++){
+					files[j]["Category"] = v;
+				}
 				delete P_FILES[oldcategory];
 				P_FILES[v] = files;
 			}
@@ -1109,7 +1291,7 @@ function INSTALL_PAGE_EDITOR(){
 
 	var MouseDown = false;
 	var ClickX = 0, ClickY = 0;
-	PAGE.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+	PAGE.addEventListener("contextmenu", function(e){ if(!e.shiftKey){ e.preventDefault(); } });
 	WORKSPACE.addEventListener("mousedown", function(e){
 		if(e.button === 2 && !MouseDown){ MouseDown = true; ClickX = e.clientX; ClickY = e.clientY;
 			BODY.style.cursor = "grabbing";
@@ -1176,6 +1358,8 @@ function INSTALL_PAGE_EDITOR(){
 	});
 
 	editor_add_element("EL-CENTER",null,`<img style="width: 64px; height: 64px; transform: translate(-46.25%,-46.25%);" src="source/center.png">`,0,0);
+	
+	editor_stopeditfile();
 }
 
 document.addEventListener("keydown", function(e){

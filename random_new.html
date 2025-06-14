@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Random Site</title>
+
+<style>
+body{
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	
+	overflow-x: hidden;
+}
+
+randomsection{
+	display: flex;
+	flex-wrap: wrap;
+}
+
+randomitem{
+	flex-grow: 1;
+}
+</style>
+
+<script src="source/source.js"></script>
+<body id="BODY"></body>
+
+<script>
+const HASH = (window.location.href.indexOf("#") !== -1 ? window.location.href.substring(window.location.href.indexOf("#") + 1) : "");
+const AUTORUN = HASH === "auto";
+
+function randomseedtext(){
+	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!\"№;%:?*()_+@#$^&-=|";
+	const length = Math.floor(Math.random() * 28) + 5;
+	var result = "";
+	for (var i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return result;
+}
+
+async function stringtonumber(str){
+	const encoder = new TextEncoder();
+	const data = encoder.encode(str);
+
+	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+	const number = parseInt(hashHex.substring(0, 6), 16) % 100000;
+
+	return number.toString().padStart(5, "0");
+}
+
+var SEED_TEXT = (HASH.length === 0 || AUTORUN ? randomseedtext() : HASH );
+var SEED = 0;
+
+var SEED = 123;
+
+const BODY = document.getElementById("BODY");
+const startpage = 
+`<button onclick="generate();">Сгенерировать</button>`;
+
+function random_seed(seed){ var rand = Math.sin(seed) * 10000; SEED++; return rand - Math.floor(rand); }
+function random(min,max){ return (random_seed(SEED) * (max - min + 1)) + min }
+function getrandom(tabl){ return tabl[Math.floor(random(0, tabl.length - 1))]; }
+
+/* ---------------------------- */
+
+var RANDOM_IMAGES = GetAllWoowzsiteImages();
+
+/* ---------------------------- */
+
+const types = [
+	10,
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+	3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
+	4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+	5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+	6,6,6,6,6,6,
+	7,7,7,7,7,7,7,7,7,7,7,7,
+	8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+	9,9,9,9,9,9,9,9,9,9
+];
+async function generate_item(){
+	/* Виды элементов
+	 - [0 ] Картинка
+	 - [1 ] Изменённая картинка
+	 - [2 ] Текст
+	 - [3 ] Видео
+	 - [4 ] Звук
+	 - [5 ] Пустой элемент (shape)
+	 - [6 ] Окно с другим сайтом
+	 - [7 ] Кнопка с действием
+	 - [8 ] Ссылка
+	 - [9 ] Различные input
+	 - [10] Уникальные элементы
+	*/
+	
+	var type = getrandom(types);
+	var result = "";
+	
+	switch(type){
+		case 0:
+		case 1: 
+			var src = getrandom(RANDOM_IMAGES);
+			result = `<img style="width:100%; height:100%;" src="${src}">`;
+			break;
+		default:
+			result = type;
+			break;
+	}
+	
+	return result;
+}
+
+var savedseedstring = null;
+async function generate(){
+	if(savedseedstring!==SEED_TEXT){ SEED = await stringtonumber(SEED_TEXT); savedseedstring = SEED_TEXT; }
+	console.log(`GENERATE SEED: [${SEED_TEXT}] - [${SEED}]`);
+
+	var inner = document.createElement("div");
+	inner.style.width = "100%";
+	inner.style.height = "100%";
+	
+	function getRandomColor() {
+		const letters = '0123456789ABCDEF';
+		let color = '#';
+		for (let i = 0; i < 6; i++) {
+			color += letters[Math.floor(Math.random() * 16)];
+		}
+		return color;
+	}
+	
+	/* Всего элементов */
+	var total = Math.floor(random(100,3000));
+	
+	var layer = 0;
+	async function generate_layer(){
+		var result = "";
+	
+		for(var i = 0; i < total; i++){
+			var w = random(32,512);
+			var h = random(32,512);
+			var x = random(-32,32);
+			var y = random(-128,128);
+			var content = await generate_item();
+			result += `<randomitem id="${layer}-${i}" style="width:${w}px; height:${h}px; transform: translate(${x}px, ${y}px);">${content}</randomitem>`;
+		}
+		
+		layer++;
+		inner.innerHTML += `<randomsection style="position:absolute; width:100%; height:100%;">${result}</randomsection>`;
+	}
+	await generate_layer();
+	await generate_layer();
+	await generate_layer();
+	
+	BODY.innerHTML = "";
+	BODY.appendChild(inner);
+}
+
+if(AUTORUN){
+	generate();
+}else{
+	BODY.innerHTML = startpage;
+}
+
+</script>
