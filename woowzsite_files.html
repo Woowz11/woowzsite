@@ -6,7 +6,7 @@
 <style>
 @font-face{ font-family:"Comfortaa"; src: url("source/Comfortaa.ttf")format('opentype'); }
 
-:root {
+:root{
 	--a-outline: rgb(64,64,0);
 	--a-outline-hover: rgb(64,0,0);
 }
@@ -17,8 +17,12 @@ html{
 	font-family: Comfortaa;
 }
 
-body {
+body{
     overflow-x: hidden;
+}
+
+.short-scroll *{
+	scrollbar-width: thin;
 }
 
 .white-font{
@@ -133,12 +137,12 @@ div{
 <script>
 	var disable = false;
 
-	var mem_prikol_one_category = Math.random()>0.95;
-	var mem_prikol_screamer = Math.random()>0.95;
-	var mem_prikol_more_category = Math.random()>0.95 && !mem_prikol_more_category;
-	var mem_prikol_random_category = Math.random()>0.95;
-	var mem_prikol_peremeshat = Math.random()>0.95;
-	var mem_prikol_fullrandom = Math.random()>0.95;
+	var mem_prikol_one_category    = Math.random() > 0.95;
+	var mem_prikol_screamer        = false;//Math.random() > 0.95;
+	var mem_prikol_more_category   = Math.random() > 0.95 && !mem_prikol_more_category;
+	var mem_prikol_random_category = Math.random() > 0.95;
+	var mem_prikol_peremeshat      = Math.random() > 0.95;
+	var mem_prikol_fullrandom      = Math.random() > 0.95;
 
 	var explorer = document.getElementById("explorer")
 	var starttime = {};
@@ -156,11 +160,11 @@ div{
 	
 	function Button_Rand(id){
 		const Container = document.getElementById("rand-"+id);
-		if(id==="i"){
+		if(id === "i"){
 			const images = GetAllWoowzsiteImages();
 			const image = images[Math.floor(Math.random() * images.length)];
 			Container.innerHTML = `<img class="image" style="width:100%;height:100%;object-fit:contain;" src="${image}">`;
-		}else if(id==="v"){
+		}else if(id === "v"){
 			const videos = WoowzsiteSourceVideos;
 			const video = videos[Math.floor(Math.random() * videos.length)];
 			Container.innerHTML = `<video style="width:100%;height:100%;object-fit:contain;" controls="" loop="" src="${video}"></video>`;
@@ -175,7 +179,7 @@ div{
 	Button_Rand("a");
 	
 	async function CopyToClipboard(text) {
-		console.log("Copy ["+text+"]");
+		console.log(`Copy [${text}]`);
 		try {
 			await navigator.clipboard.writeText(text);
 		} catch (error) {
@@ -193,41 +197,19 @@ div{
 	
 	function ChangeCursor(cur_){
 		var styleElement = document.createElement('style');
-		var cur = "url('"+cur_+"'),auto";
+		var cur = `url('${cur_}') , auto`;
 		var cur_point = cur;
-		if(cur_=="default"){
+		if(cur_ === "default"){
 			cur       = "default";
 			cur_point = "pointer";
 		}
-		styleElement.innerHTML = `
-html {
-	cursor:`+cur+`;
-}
-body {
-	cursor:`+cur+`;
-}
-div {
-	cursor:`+cur+`;
-}
-button {
-	cursor:`+cur_point+`;
-}
-font {
-	cursor:`+cur+`;
-}
-.white-font {
-	cursor:`+cur+`;
-}
-input{
-	cursor:`+cur_point+`;
-}
-select{
-	cursor:`+cur_point+`;
-}
-a{
-	cursor:`+cur_point+`;
-}
-		`;
+		styleElement.innerHTML = 
+		`html, body, div, font, .white-font {
+			cursor: ${cur};
+		}
+		button, input, select, a{
+			cursor: ${cur_point};
+		}`;
 
 		document.head.appendChild(styleElement);
 	}
@@ -235,42 +217,42 @@ a{
 	function ChangeStyle(clas,styl,hasdot){
 		if(hasdot==null){hasdot=true;}
 		var styleElement = document.createElement('style');
-		styleElement.innerHTML = `
-`+(hasdot?".":"")+`${clas} {
-	${styl}
-}
-		`;
+		styleElement.innerHTML = 
+		`${hasdot ? "." : ""}${clas} {
+			${styl}
+		}`;
 
 		document.head.appendChild(styleElement);
 	}
 	
 	function ChangeFont(font){
 		var styleElement = document.createElement('style');
-		styleElement.innerHTML = `
-html {
-	font-family:${font};
-}
-button{
-	font-family:${font};
-}
-select{
-	font-family:${font};
-}
-		`;
+		styleElement.innerHTML = 
+		`html {
+			font-family:${font};
+		}
+		button{
+			font-family:${font};
+		}
+		select{
+			font-family:${font};
+		}`;
 
 		document.head.appendChild(styleElement);
 	}
 	
 	function gettype(src){
-		var type = "idk"
-		if(src.includes(".png" )){type="png"}
-		if(src.includes(".jpg" )||src.includes(".jpeg")){type="jpg"}
-		if(src.includes(".gif" )){type="gif"}
-		if(src.includes(".webp")){type="webp"}
-		if(src.includes(".ico" )){type="ico"}
-		if(src.includes(".cur" )){type="cur"}
-		if(src.includes(".mp4" )||src.includes(".mov")){type="mp4"}
-		if(src.includes(".mp3" )){type="mp3"}
+		var type = "idk";
+		
+		if(src.includes(".png" )                         ){type = "png" ;}
+		if(src.includes(".jpg" ) || src.includes(".jpeg")){type = "jpg" ;}
+		if(src.includes(".gif" )                         ){type = "gif" ;}
+		if(src.includes(".webp")                         ){type = "webp";}
+		if(src.includes(".ico" )                         ){type = "ico" ;}
+		if(src.includes(".cur" )                         ){type = "cur" ;}
+		if(src.includes(".mp4" ) || src.includes(".mov") ){type = "mp4" ;}
+		if(src.includes(".mp3" )                         ){type = "mp3" ;}
+		
 		return type;
 	}
 	
@@ -282,34 +264,30 @@ select{
 			newsize = default_value;
 			range.value = newsize;
 		}
-		ChangeStyle("grid-size",`grid-template-columns: repeat(auto-fill, minmax(`+Math.floor(newsize/default_value*300)+`px, 1fr));`);
-		ChangeStyle("div-image",`height:`+Math.floor(newsize/default_value*350)+`px;`);
-		ChangeStyle("div-image-short",`height:`+Math.floor(newsize/default_value*50)+`px;`);
+		ChangeStyle("grid-size",`grid-template-columns: repeat(auto-fill, minmax(${Math.floor(newsize/default_value*300)}px, 1fr));`);
+		ChangeStyle("div-image",`height: ${Math.floor(newsize/default_value*350)}px;`);
+		ChangeStyle("div-image-short",`height: ${Math.floor(newsize/default_value*50)}px;`);
 	}
 	range.addEventListener("input",ChangeSize);
 	
-	var counts = {}
-	var fullcounts = [0,0]
+	var counts = {};
+	var fullcounts = [0, 0];
 	function GenerateTable(text,tabl){
-		if(disable){return;}
-		
-		if(document.getElementById(text+"-br")!=null){
-			document.getElementById(text+"-br").remove();
-		}else{
-			return;
-		}
+		if(disable){ return; }
+		if(document.getElementById(text+"-br")){ document.getElementById(text+"-br").remove(); }else{ return; }
 
 		counts[text] = [tabl.length,0];
 		fullcounts = [fullcounts[0]+tabl.length,fullcounts[1]];
 		document.getElementById("total-all").innerHTML = fullcounts[0];
-		var result = `<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/`+tabl.length+`) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif" loading="eager"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
+		var result = 
+		`<font class="white-font" style="font-size:5em;">${text} <font style="font-size:0.5em;">(<font id="${text}-loaded">?</font>/${tabl.length}) <font id="${text}-proc">?</font>%</font> <font id="${text}-img"><img style="height:0.5em;" src="source/loading.gif" loading="eager"></font></font><br><div class="grid-size" id="${text}" style="display: grid; gap: 10px;">`
 		
-		function LoadSource(that,src,text,type){
-			document.getElementById("finish-ms").innerHTML = (new Date() - compiletimestart)/1000 + "sec";
-			if(fullcounts[0]==fullcounts[1]+1){
-				document.title = "Woowzsites Files";
+		function LoadSource(that, src, text, type){
+			document.getElementById("finish-ms").innerHTML = `${(new Date() - compiletimestart) / 1000} sec`;
+			if(fullcounts[0] === fullcounts[1] + 1){
+				document.title = `Woowzsites Files`;
 			}else{
-				document.title = "Woowzsites Files ("+(fullcounts[1]+1)+"/"+(fullcounts[0])+")";
+				document.title = `Woowzsites Files (${fullcounts[1] + 1}/${fullcounts[0]})`;
 			}
 		
 			var type = gettype(src);
@@ -319,40 +297,40 @@ select{
 			var time     = new Date().getTime() - starttime[src];
 			var time_col = "black";
 			
-			if(time>200   ){time_col="lime";                          }
-			if(time>1000  ){time_col="orange";                        }
-			if(time>3000  ){time_col="red";                           }
-			if(time>4000  ){time_col="magenta";                       }
-			if(time>5000  ){time_col="white; background-color:black"; }
-			if(time>50000 ){time_col="yellow; background-color:black";}
-			if(time>100000){time_col="orange; background-color:black";}
-			if(time>200000){time_col="red; background-color:black";   }
+			if(time > 200   ){time_col = "lime"                          ;}
+			if(time > 1000  ){time_col = "orange"                        ;}
+			if(time > 3000  ){time_col = "red"                           ;}
+			if(time > 4000  ){time_col = "magenta"                       ;}
+			if(time > 5000  ){time_col = "white; background-color:black" ;}
+			if(time > 50000 ){time_col = "yellow; background-color:black";}
+			if(time > 100000){time_col = "orange; background-color:black";}
+			if(time > 200000){time_col = "red; background-color:black"   ;}
 			
-			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="${src}"><div class="div-image${type=="mp3"?"-short":""}" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
+			document.getElementById(text).innerHTML += (`<div class="grid-element" id="${src}"><div class="div-image${type=="mp3"?"-short":""}" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
 			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}#t=0.1" type="video/mp4"></video>`
 			:
 				(type=="mp3")?
 				`<audio style="width:100%; height: 100%;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}" type="audio/mpeg"></audio>`
 				:
-				`<img class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
+				`<img title="Открыть в новой вкладке" class="image" style="min-width:100px; max-width:100%; max-height:100%;" src="${src}">`
 			)+`
-			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');" title="${src}">${src}</font><br>
+			</div><div class="short-scroll" style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y: hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');" title="${src}">${src}</font><br>
 			<font style="color:${time_col};">${time}</font>ms (${types[type]})<br>`+
 			((type=="png"||type=="jpg"||type=="gif"||type=="webp")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
 			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
 			((type=="cur")?`<button onclick="ChangeCursor('${src}');">Установить курсор</button>`:``)+
 			((type=="mp3")?`<button onclick="window.open('${src}', '_blank');">Открыть в новой вкладке</button>`:``)
 			+`</div></div></div>`)
-			var c = counts[text][1]+1;
-			counts[text] = [counts[text][0],c]
-			document.getElementById(text+"-loaded").innerHTML = c
-			document.getElementById(text+"-proc").innerHTML = Math.floor((c/counts[text][0])*10000)/100
-			if(c >= counts[text][0]){document.getElementById(text+"-img").innerHTML=""}
+			var c = counts[text][1] + 1;
+			counts[text] = [counts[text][0],c];
+			document.getElementById(`${text}-loaded`).innerHTML = c;
+			document.getElementById(`${text}-proc`).innerHTML = Math.floor((c / counts[text][0]) * 10000) / 100;
+			if(c >= counts[text][0]){ document.getElementById(`${text}-img`).innerHTML = "" }
 
-			fullcounts = [fullcounts[0],fullcounts[1]+1];
+			fullcounts = [fullcounts[0], fullcounts[1] + 1];
 			document.getElementById("total-loading").innerHTML = fullcounts[1];
-			document.getElementById("total-proc").innerHTML = Math.floor((fullcounts[1]/fullcounts[0])*10000)/100;
+			document.getElementById("total-proc").innerHTML = Math.floor((fullcounts[1] / fullcounts[0]) * 10000) / 100;
 				
 			var parentElement = document.getElementById(text);
 			var childElements = Array.from(parentElement.querySelectorAll('.grid-element'));
@@ -368,7 +346,7 @@ select{
 			});
 		}
 		function OnError(src,text){
-			document.getElementById(text).innerHTML = document.getElementById(text).innerHTML + (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
+			document.getElementById(text).innerHTML += (`<div class="grid-element" id="!!!!!!ERROR"><div class="div-image" style="background-size: auto; background-repeat: repeat; min-height:300px; height:350px; display:flex; justify-content: center; align-items: center;">
 			<img class="image" style="width:100%; height:100%;" src="source/onerror.png" loading="eager">
 			</div><div style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y:hidden; overflow-x: auto;"><font style="cursor:pointer;" onclick="CopyToClipboard('${src}');">${src}</font> (<font style='color:red;'>ERROR</font>)</div></div></div>`)
 		}
@@ -378,44 +356,43 @@ select{
 			
 			var type = gettype(src);
 
-			if(type=="mp4"||type=="mp3"){
-				var media = document.createElement(type=="mp4"?'video':'audio');
-				media.onloadedmetadata = function() { LoadSource(media,src,text); };
-				media.onerror = function() { OnError(src,text); };
+			if(type=="mp4" || type=="mp3"){
+				var media = document.createElement(type=="mp4" ? "video" : "audio");
+				media.onloadedmetadata = function() { LoadSource(media, src, text); };
+				media.onerror = function() { OnError(src, text); };
 				media.src = src;
 			}else{
 				var img = new Image();
-				img.onload = function(){ LoadSource(img,src,text); }
-				img.onerror = function(){ OnError(src,text); }
+				img.onload  = function(){ LoadSource(img, src, text); }
+				img.onerror = function(){ OnError(src, text); }
 				img.src = src;
 			}
 		}
 		
-		result = result + `</div><br>`
+		result += `</div><br>`
 		var newel = document.createElement("resourcechecker");
 		newel.innerHTML = result;
-		var oldel = document.getElementById(text+"-preloader");
-		oldel.parentNode.replaceChild(newel,oldel);
+		var oldel = document.getElementById(`${text}-preloader`);
+		oldel.parentNode.replaceChild(newel, oldel);
 	}
 	function GenerateTableSites(){
-		var result = `<font class="white-font" style="font-size:5em;">Публичные сайты <font style="font-size:0.5em;">(`+all_sites.length+`)</font></font><br>
-		<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 10px; cursor:default;">
-		`
+		var result = `<font class="white-font" style="font-size:5em;">Публичные сайты <font style="font-size:0.5em;">(${all_sites.length})</font></font><br>
+		<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 10px; cursor:default;">`;
 			
 		for(var src of all_sites){
 			var tags = "";
 			var tag_ = 0;
 			for(var tag of src["tags"]){
-				tags += ((tag_==0?"":", ")+"<font class='src' style='cursor:text;'>"+(tag==""?"<i>NULL</i>":tag)+"</font>");
+				tags += `${tag_ === 0 ? "" : ", "}<font class='src' style='cursor:text;'>${tag === "" ? "<i>NULL</i>" : tag}</font>`;
 				tag_++;
 			}
 			result += `<div style="width:100%; height:200px; background-color:rgb(250,250,250); border-radius: 20px;"><div style="padding:10px;"><img style="height:28px; " src="source/`+(src["icon"]==null?"none":src["icon"])+`.ico"> <font style="font-size:1.75em;"><b>`+src["name"]+`</b></font><br><br>
-			<b><a style="font-size:1.5em;" href="`+src["href"]+`.html">`+src["href"]+`</a></b><br><br>
+			<b><a style="font-size:1.5em;" href="${src["href"]}.html">${src["href"]}</a></b><br><br>
 			<font>Теги: ${tags}</font></div></div>`
 		}
 			
-		result = result + `</div><br>`
-		explorer.innerHTML = explorer.innerHTML + result
+		result += `</div><br>`;
+		explorer.innerHTML += result;
 	}
 	function GenerateTableCustom(text,tabl,codefirst,code,codelast,func,func_src){
 		tabl.sort();

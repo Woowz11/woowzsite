@@ -89,6 +89,44 @@ input[type="checkbox"]{
 	pointer-events: none;
 }
 
+warning_screensize {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(255, 0, 0, 1);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 10000;
+}
+
+@media (max-width: 1000px), (max-height: 600px) {
+	warning_screensize {
+		display: flex;
+	}
+}
+
+warning_mobile {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 255, 1);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 10001;
+}
+
 /*-------------------------------------------------------------------------*/
 
 .rotate-slow{
@@ -169,6 +207,9 @@ input[type="checkbox"]{
 	filter: drop-shadow(0px 0px 30px rgba(0,0,0,1)) drop-shadow(0px 0px 30px rgba(0,0,0,1));
 	animation: bog 60s linear infinite;
 }
+.dark2 {
+	filter: drop-shadow(0px 0px 30px rgba(0,0,0,1)) drop-shadow(0px 0px 30px rgba(0,0,0,1));
+}
 
 .bog {
 	filter: drop-shadow(0px 0px 5px rgba(255,255,255,1)) drop-shadow(0px 0px 5px rgba(255,255,0,1));
@@ -248,6 +289,12 @@ input[type="checkbox"]{
 .glow-lime {
 	filter: drop-shadow(0px 0px 100px rgba(0,255,0,1)) drop-shadow(0px 0px 30px rgba(0,255,0,1));
 }
+.glow-red {
+	filter: drop-shadow(0px 0px 100px rgba(255,0,0,1)) drop-shadow(0px 0px 30px rgba(255,0,0,1));
+}
+.glow-orange {
+	filter: drop-shadow(0px 0px 100px rgba(255,128,0,1)) drop-shadow(0px 0px 30px rgba(255,128,0,1));
+}
 
 .hot {
 	filter: drop-shadow(0px 0px 50px rgba(255,0,0,1));
@@ -259,10 +306,12 @@ input[type="checkbox"]{
 </style>
 
 <body>
+	<warning_screensize>Измените размер экрана, что-бы играть в игру!</warning_screensize>
+	<warning_mobile>Игра не работает с телефона!</warning_mobile>
+
 	<div id="mainmenu" style="position:fixed; background-image:url('source/wall.png'); width:100vw; height:100vh; text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.4); z-index:3000;">
 		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:5vh; font-size:5em; white-space: nowrap;"><b>⚗️ Woowz Alchemy ⚗️</b></font>
 		<font style="position:fixed; right:50%; transform: translateX(50%); margin-top:17vh; font-size:3em; white-space: nowrap;"><b>Версия: <font id="version">?.?.?</font></b></font>
-		<font id="phone-warn" style="position:fixed; right:50%; transform: translateX(50%); margin-top:23vh; font-size:2.5vw; white-space: nowrap; color:red; display:none;"><b>Игра может странно работать на мобильных устройствах!</b></font>
 		
 		<div style="position:fixed; right:50%; transform: translateX(50%); bottom:30%;">
 			<button style="width:30vw; min-width:500px; margin-top:30px;" onclick="StartGame(null);">Начать новую игру</button><br>
@@ -270,10 +319,10 @@ input[type="checkbox"]{
 			<button style="width:30vw; min-width:500px; margin-top:30px;" disabled>Настройки</button>
 		</div>
 		
-		<div style="position:fixed; right:50px; bottom:7%;">
-			<textarea id="generated-recipes" style="width:30vw; height:80vh; resize:none; overflow-y:scroll; word-wrap:normal; display:none;" spellcheck="false" rows="4" colds="50" readonly></textarea><br>
+		<div style="position:fixed; right:50px; bottom:60px; width:30vw; height:92vh;">
+			<textarea id="generated-recipes" style="height:85%; width:100%; resize:none; overflow:scroll; word-wrap:normal; display:none;" spellcheck="false" rows="4" colds="50" readonly></textarea><br>
 			<font id="error" style="color:red; font-size:1.2em; display:none;"><b>ОШИБКА ПРИ КОМПИЛЯЦИИ РЕЦЕПТОВ! СМ. F12</b></font><br>
-			<div style="width:30vw; white-space:wrap; margin-top:10px; background-color:black;"><font style="color:red; font-size:1.2em;"><b id="error-text"></b></font></div>
+			<div style="white-space:wrap; margin-top:10px; background-color:black;"><font style="color:yellow; font-size:1.2em;"><b id="error-text"></b></font></div>
 		</div>
 		
 		<font style="position:fixed; right:10px; bottom:10px; font-size:2em; white-space: nowrap;">Сделано Woowz11</font>
@@ -310,12 +359,18 @@ input[type="checkbox"]{
 	
 	<font style="position:fixed; right:10px; top:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>Woowz Alchemy<br>Версия: <font id="version">?.?.?</font><br><font id="dev" style="color:red;"></font></b></font>
 	
-	<font id="fps-font" style="position:fixed; left:37%; top:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: left;"><b>FPS: <font id="fps">?</font></b></font>
+	<font id="fps-font" style="position:fixed; left:37%; top:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: left;"><b>MS: <font id="fps">?</font></b></font>
 	
-	<div style="position:fixed; left:37%; bottom:10px; font-size:1.5em; white-space: nowrap; z-index:-1; text-align: left; color:rgba(0,0,0,0.3);">
-		<font><b id="last3" style="opacity:0.3"></b></font><br>
-		<font><b id="last2" style="opacity:0.6"></b></font><br>
-		<font><b id="last1"></b></font><br>
+	<div style="position:fixed; left:37%; bottom:10px; font-size:1.5em; white-space: nowrap; text-align: left; color:rgba(0,0,0,0.3);">
+		<b id="last5" style="opacity:0.2"></b>
+		<br>
+		<b id="last4" style="opacity:0.4"></b>
+		<br>
+		<b id="last3" style="opacity:0.6"></b>
+		<br>
+		<b id="last2" style="opacity:0.8"></b>
+		<br>
+		<b id="last1"></b>
 	</div>
 	
 	<font style="position:fixed; right:10px; bottom:10px; font-size:1.5em; white-space: nowrap; z-index:-1; color:rgba(0,0,0,0.3); text-align: center;"><b>На сцене: <font id="total-in-table">0</font><br>Элементов: <font id="open-elements">?</font>/<font id="total-elements">?</font><br>Рецептов: <font id="open-recipes">0</font>/<font id="total-recipes">?</font></b></font>
@@ -340,9 +395,10 @@ var DevMode = true;
 
 /*Настройки*/
 
-var EnableClasses      = true; /*true*/ /*Включает визуальные эффекты элементам*/
-var ShowClosedElements = true; /*true*/ /*Включает отображение звёздочек рядом с элементами, что обозначает что это конечный элемент или рецепты закончились*/
-var ShowFPS            = true; /*true*/ /*Отображать фпс или нет*/
+var EnableClasses      = 1   ; // 0 [0-2] : Включает визуальные эффекты элементам [0 - Влючает всё, 1 - Включает только на рабочем столе, 2 - Выключает всё]
+var ShowClosedElements = true; // true    : Включает отображение звёздочек рядом с элементами, что обозначает что это конечный элемент или рецепты закончились
+var ShowFPS            = true; // true    : Отображать фпс или нет
+var CompactElements    = 0   ; // 0 [0-2] : Делает элементы в инвенторе простыми внешним видом [0 - Выключено, 1 - Случайные цвета, 2 - Радужные цвета]
 
 /*=========*/
 
@@ -358,17 +414,23 @@ var needsave = false;
 var thatLocalFile = window.location.protocol === "file:";
 var thatPhone = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 if(thatPhone){
-	document.getElementById("phone-warn").style.display = "unset";
+	var style = `warning_mobile {
+		display: flex;
+	}`;
+	var STYLE = document.createElement("style");
+	STYLE.type = "text/css";
+	if(STYLE.styleSheet){
+		STYLE.styleSheet.cssText = style;
+	}else{
+		STYLE.appendChild(document.createTextNode(style));
+	}
+	document.head.appendChild(STYLE);
 }
 if(!thatLocalFile){
 	if(DevMode){
 		DevMode = false;
 	}
 }
-
-var last_recipe1 = "";
-var last_recipe2 = "";
-var last_recipe3 = "";
 
 var InToolWindow = false;
 
@@ -387,6 +449,8 @@ if(!ShowFPS){
 var sort_alphaphyte = false;
 var search_applying = false;
 
+document.getElementById("sort-checkbox").checked = false;
+
 var MouseOffsetX = 0; var MouseOffsetY = 0;
 
 function SortAlphaphyte(){
@@ -398,27 +462,57 @@ function SortAlphaphyte(){
 	elements.forEach(el => grid.appendChild(el));
 }
 
-function UpdateLastRecipeFonts(newrecipe, new_){
+var last_recipe5 = "";
+var last_recipe4 = "";
+var last_recipe3 = "";
+var last_recipe2 = "";
+var last_recipe1 = "";
+function UpdateLastRecipeFonts(newrecipe, new_el, new_r, text_ = null){
+	var res = "";
 	if(newrecipe === ""){
-		last_recipe1 = "";
-		last_recipe2 = "";
+		last_recipe5 = "";
+		last_recipe4 = "";
 		last_recipe3 = "";
+		last_recipe2 = "";
+		last_recipe1 = "";
 	}else{
-		var elements = newrecipe.split("+");
-		var results = RecipesDatas[newrecipe];
-		var text = `${ElementsDatas[elements[0]]["Name"]} + ${ElementsDatas[elements[1]]["Name"]} = `;
-		var s = false;
-		for(var el of results){
-			text += (s ? ", " : "") + ElementsDatas[el]["Name"];
-			s = true;
+		if(text_){
+			last_recipe5 = last_recipe4;
+			last_recipe4 = last_recipe3;
+			last_recipe3 = last_recipe2;
+			last_recipe2 = last_recipe1;
+			last_recipe1 = text_;
+			res = text_;
+		}else{
+			var elements = newrecipe.split("+");
+			var results = RecipesDatas[newrecipe];
+			var text = `${ElementsDatas[elements[0]]["Name"]} + ${ElementsDatas[elements[1]]["Name"]} = `;
+			var s = false;
+			for(var el of results){
+				text += (s ? ", " : "") + ElementsDatas[el]["Name"];
+				s = true;
+			}
+			last_recipe5 = last_recipe4;
+			last_recipe4 = last_recipe3;
+			last_recipe3 = last_recipe2;
+			last_recipe2 = last_recipe1;
+			last_recipe1 = text;
+			if(text.length > 60){
+				text = text.substring(0,57) + "...";
+			}
+			res = (new_el || new_r ? `<text style="color:red;">${new_el ? "E" : "R"}</text> ` : "") + text;
 		}
-		last_recipe3 = last_recipe2;
-		last_recipe2 = last_recipe1;
-		last_recipe1 = (new_ ? `<text style="color:red;">!</text> ` : "") + text;
 	}
-	document.getElementById("last1").innerHTML = last_recipe1;
-	document.getElementById("last2").innerHTML = last_recipe2;
-	document.getElementById("last3").innerHTML = last_recipe3;
+	document.getElementById("last5").innerHTML = document.getElementById("last4").innerHTML;
+	document.getElementById("last5").title = last_recipe5;
+	document.getElementById("last4").innerHTML = document.getElementById("last3").innerHTML;
+	document.getElementById("last4").title = last_recipe4;
+	document.getElementById("last3").innerHTML = document.getElementById("last2").innerHTML;
+	document.getElementById("last3").title = last_recipe3;
+	document.getElementById("last2").innerHTML = document.getElementById("last1").innerHTML;
+	document.getElementById("last2").title = last_recipe2;
+	document.getElementById("last1").innerHTML = res;
+	document.getElementById("last1").title = last_recipe1;
 }
 
 function ChangeSortAlphaphyte(){
@@ -428,7 +522,6 @@ function ChangeSortAlphaphyte(){
 	}else{
 		var grid = document.getElementById("inventory");
 		var elements = Array.from(grid.children);
-		console.log(OpenElements);
 		
 		elements.sort((a,b) => OpenElements[a.getAttribute("elementid")] - OpenElements[b.getAttribute("elementid")]);
 		
@@ -511,18 +604,22 @@ function CheckRecipe(id1,id2){
 	var recipe = `${id1}+${id2}`;
 	result = RecipesDatas[recipe];
 	if(!result){recipe = `${id2}+${id1}`; result = RecipesDatas[recipe];}
+	var new_el = false;
+	var new_r = false;
 	if(result){
-		var new_ = false;
 		for(var el of result){
 			if(OpenElements[el] == null){
 				AddElementToInventory(el);
-				new_ = true;
+				new_el = true;
 			}
 		}
-		UpdateLastRecipeFonts(recipe, new_);
 	}
 	if(!OpenRecipes[recipe] && result){
 		AddRecipe(recipe,result);
+		new_r = true;
+	}
+	if(result){
+		UpdateLastRecipeFonts(recipe, new_el, new_r);
 	}
 	return result;
 }
@@ -642,7 +739,7 @@ function AddElementToTable(id, posx, posy, z_top){
 	var result = 
 	`<div id="${elid}" class="element" elementid="${id}" style="position:fixed; left:${posx}px; top:${posy}px; width:100px; height:100px; z-index:2000; ${shadow ? "filter: drop-shadow(0px 0px 5px rgba(0,0,0,0.5));" : ""}" title="${ElementsDatas[id]["Name"]}">
 		<div style="pointer-events: none; transform: scale(${scale});">
-			<img ${ElementsDatas[id]["Class"] == null || EnableClasses == false ? "" : "class=\"" + ElementsDatas[id]["Class"] + "\""} style="width:100px; height:100px; border-radius: 20%; cursor:pointer;" draggable="false" title="${ElementsDatas[id]["Name"]}" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.${ElementsDatas[id]["Gif"] == true ? "gif" : "png"}">
+			<img ${ElementsDatas[id]["Class"] == null || EnableClasses > 1 ? "" : "class=\"" + ElementsDatas[id]["Class"] + "\""} style="width:100px; height:100px; border-radius: 20%; cursor:pointer;" draggable="false" title="${ElementsDatas[id]["Name"]}" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.${ElementsDatas[id]["Gif"] == true ? "gif" : "png"}">
 		</div>
 	</div>`;
 	document.getElementById("table").innerHTML += result;
@@ -759,27 +856,24 @@ function PerSecond(){
 setInterval(PerSecond,1000);
 
 var fps_font = document.getElementById("fps");
-let lastCalledTime = performance.now();
-let delta = 0;
-let fps_count = 0;
-var fps = 0;
-var fps_result = 0;
-function CalculateFPS() {
-	if(ShowFPS){
-		const now = performance.now();
-		delta = (now - lastCalledTime) / 1000;
-		lastCalledTime = now;
-		fps = 1 / delta;
+var MS_LastTime = performance.now();
+var MS = -1;
+var MS_Count = 0;
+function RenderLoop(){
+	MS_Count++;
 
-		fps_count++;
-		if(fps_count > 10){fps_result = fps; fps_count = 0;}
+	var Now = performance.now();
+	MS = Now - MS_LastTime;
+	MS_LastTime = Now;
 
-		fps_font.innerHTML = fps_result.toFixed(1);
+	if(MS_Count>5){
+		if(fps_font){ fps_font.innerText = `${MS} ms`; }
+		MS_Count = 0;
 	}
 
-    requestAnimationFrame(CalculateFPS);
+	requestAnimationFrame(RenderLoop);
 }
-CalculateFPS();
+requestAnimationFrame(RenderLoop);
 
 function DebugOpenAll(){
 	if(DevMode){
@@ -823,7 +917,7 @@ function StartGame(save){
 
 function StartGameWithSave(){
 	var save = localStorage.getItem("alchemy_save");
-	StartGame((save==null?null:save));
+	StartGame(!save ? null : save);
 }
 
 function GetElementFromInventory(event,id,justclick,el){
@@ -875,20 +969,24 @@ function GoToMainMenu(){
 }
 
 function SaveGame(){
-	var save_recipes = "";
-	
-	for(var recipeid in OpenRecipes){
-		save_recipes += ((save_recipes==""?"":",") + recipeid)
+	if(needsave){
+		var save_recipes = "";
+		
+		for(var recipeid in OpenRecipes){
+			save_recipes += ((save_recipes==""?"":",") + recipeid)
+		}
+		
+		if(DevMode){
+			console.log("Сохранено:",save_recipes);
+		}
+		localStorage.setItem("alchemy_save",save_recipes)
+		
+		needsave = false;
+		document.getElementById("save").style.display = "none";
+		document.title = "Woowz Alchemy";
+		
+		UpdateLastRecipeFonts(null,null,null,"Игра сохранена!");
 	}
-	
-	if(DevMode){
-		console.log("Сохранено:",save_recipes);
-	}
-	localStorage.setItem("alchemy_save",save_recipes)
-	
-	needsave = false;
-	document.getElementById("save").style.display = "none";
-	document.title = "Woowz Alchemy";
 }
 
 function EnableToolWindow(Inner){
@@ -931,18 +1029,87 @@ function Recipes(){
 	);
 }
 
+var sortedalp = null;
+
+function RefreshElementsInInventory(){
+	if(CompactElements > 1){
+		for(var i in sortedalp){
+			var el = sortedalp[i];
+			var id = el["ID"];
+			
+			var el_ = document.getElementById(`${id}-COMPACTICON`);
+			if(el_){
+				const key = i / AlchemyElements.length; 
+					
+				const colors = [
+					{ r: 255, g: 0  , b: 0  },
+					{ r: 255, g: 128, b: 0  },
+					{ r: 255, g: 255, b: 0  },
+					{ r: 128, g: 255, b: 0  },
+					{ r: 0  , g: 255, b: 0  },
+					{ r: 0  , g: 255, b: 128},
+					{ r: 0  , g: 255, b: 255},
+					{ r: 0  , g: 128, b: 255},
+					{ r: 0  , g: 0  , b: 255},
+					{ r: 128, g: 0  , b: 255},
+					{ r: 255, g: 0  , b: 255},
+					{ r: 255, g: 0  , b: 128},
+					{ r: 255, g: 255, b: 255},
+					{ r: 192, g: 192, b: 192},
+					{ r: 128, g: 128, b: 128},
+					{ r: 64 , g: 64 , b: 64 },
+					{ r: 0  , g: 0  , b: 0  },
+				];
+				
+				const segmentCount = colors.length - 1;
+				const segmentSize = 1 / segmentCount;
+				const segmentIndex = Math.min(Math.floor(key / segmentSize), segmentCount - 1);
+				const segmentKey = (key - segmentIndex * segmentSize) / segmentSize;
+				const startColor = colors[segmentIndex];
+				const endColor = colors[segmentIndex + 1];
+				const r = Math.round(startColor.r + (endColor.r - startColor.r) * segmentKey);
+				const g = Math.round(startColor.g + (endColor.g - startColor.g) * segmentKey);
+				const b = Math.round(startColor.b + (endColor.b - startColor.b) * segmentKey);
+
+				const toHex = (c) => {
+					const hex = c.toString(16);
+					return hex.length === 1 ? "0" + hex : hex;
+				};
+				
+				el_.style.backgroundColor = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+			}
+		}
+	}
+}
+
 function AddElementToInventory(id){
-	if(OpenElements[id]==null){
+	if(!OpenElements[id]){
 		var name = ElementsDatas[id]["Name"];
-		var scale = ElementsDatas[id]["Scale"] || 1;
+		var scale = CompactElements > 0 ? 1 : ElementsDatas[id]["Scale"] || 1;
 		var shadow = ElementsDatas[id]["Shadow"] || true;
+		var content = `<img ${ElementsDatas[id]["Class"] == null || EnableClasses > 0 ? "" : "class=\"" + ElementsDatas[id]["Class"] + "\""} style="width:50px; height:50px; border-radius: 20%" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.${ElementsDatas[id]["Gif"] == true ? "gif" : "png" }">`;
+		if(CompactElements > 0){
+			function getcolor(){
+				var hash = 0;
+				for (var i = 0; i < name.length; i++) {
+					hash = name.charCodeAt(i) + ((hash << 5) - hash);
+				}
+				const color_ = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+				return "#" + "0".repeat(6 - color_.length) + color_;
+			}
+			const color = getcolor();
+		
+			var fontscale = 4.0 / name.length;
+			content = `<div id="${id}-COMPACTICON" style="width:50px; height:50px; border-radius: 20%; background-color: ${color}; overflow:hidden; display: flex; justify-content: center; align-items: center; text-align: center; word-wrap: break-word; overflow-wrap: break-word; font-size:${fontscale}em; text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;">${name}</div>`;
+		}
+		
 		var result = 
 		`<div id="got" class="elementbase" elementid="${id}" title="${name}">
 			<div class="element" style="z-index: ${500 - Object.keys(OpenElements).length}; ${shadow ? "filter: drop-shadow(0px 0px 2.5px rgba(0,0,0,0.5));" : ""}">
 				<img id="${id}_END"  src="alchemy/that_end2.png" style="position:fixed; width:50px; height:50px; z-index:10; pointer-events:none; display:none;">
 				<img id="${id}_END2" src="alchemy/that_end.png" style="position:fixed; width:50px; height:50px; z-index:10; pointer-events:none; display:none;">
 				<div style="position:fixed; width:50px; height:50px; pointer-events:none; transform: scale(${scale});">
-					<img ${ElementsDatas[id]["Class"] == null || EnableClasses == false ? "" : "class=\"" + ElementsDatas[id]["Class"] + "\""} style="width:50px; height:50px; border-radius: 20%" draggable="false" onerror="this.src='alchemy/dev.png';" src="alchemy/${id}.${ElementsDatas[id]["Gif"] == true ? "gif" : "png" }">
+					${content}
 				</div>
 			</div>
 		</div>`;
@@ -953,6 +1120,8 @@ function AddElementToInventory(id){
 			SortAlphaphyte();
 		}
 		ApplySearch();
+		
+		RefreshElementsInInventory();
 	}
 	var hascraft = false;
 	for(var recipe in RecipesDatas){
@@ -971,6 +1140,8 @@ function LOADOTHERSCRIPT(){
 	document.getElementById("total-elements").innerText = AlchemyElements.length;
 	document.getElementById("total-recipes").innerText = AlchemyRecipes.length;
 
+	sortedalp = AlchemyElements.sort((a,b) => a.Name.localeCompare(b.Name));
+
 	for(var eldata of AlchemyElements){
 		ElementsDatas[eldata["ID"]] = eldata;
 	}
@@ -985,12 +1156,12 @@ function LOADOTHERSCRIPT(){
 		
 		let values = {};
 		var AlchemyRecipesWet_ = [];
+		var error = false;
 		for (let str of AlchemyRecipesWet) {
 			str = str.toLowerCase();
 			let parts = str.split("=");
 			let parts2 = parts[0].split("+");
 
-			var error = false;
 			if(!ElementsDatas[parts2[0]] && !/\{.*\}/.test(parts2[0])){
 				error = `РЕЦЕПТ (${str}) НЕ МОЖЕТ БЫТЬ ДОБАВЛЕН, ПОСКОЛЬКУ ПЕРВЫЙ ЭЛЕМЕНТ (${parts2[0]}) НЕИЗВЕСТЕН!`;
 			}
@@ -1077,7 +1248,11 @@ function LOADOTHERSCRIPT(){
 			if(t >= t_max){ t = 0;}
 		}
 		
-		document.getElementById("generated-recipes").innerHTML = wetrecipesresult.slice(0, -1) + "\n";
+		if(error !== false){
+			document.getElementById("generated-recipes").innerHTML = "ОШИБКА ПРИ КОМПИЛЯЦИИ...";
+		}else{
+			document.getElementById("generated-recipes").innerHTML = wetrecipesresult.slice(0, -1) + "\n";
+		}
 	}
 
 }

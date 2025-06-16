@@ -135,6 +135,38 @@ pre {
 	cursor: url("../source/lit_cur_text.cur"), auto;
 }
 
+warning {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(255, 0, 0, 0.8);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 1000;
+}
+
+warning_mobile {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 255, 0.8);
+	color: white;
+	font-size: 24px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 1001;
+}
+
 /* -------------------------------------------------- */
 
 top_banner{
@@ -172,6 +204,10 @@ top_banner_bottom{
 	box-shadow: 0 0 32px rgba(255,0,0,0.58);
 }
 
+.invert {
+	filter: invert(100%);
+}
+
 column_img{
 	position: fixed;
 	width: 64px;
@@ -180,6 +216,11 @@ column_img{
 @keyframes column_img_anim {
 	0%	 { height: 576px; }
 	100% { height: 550px; }
+}
+
+@keyframes crybird {
+	0%	 { opacity: 1  ; }
+	100% { opacity: 0.9; }
 }
 
 site{
@@ -252,22 +293,27 @@ title_img:hover{ background-image: url("title_hover.png"); }
 title_text{ pointer-events: unset; display: inline-block; background-image: url("title_text.png"); background-size: cover; width: 365px; height: 125px; }
 title_text:hover{ background-image: url("title_text_hover.png"); }
 
-h1, h2 {
+.sponge h1, .sponge h2 {
 	text-align: center;
 	letter-spacing: 0.1em;
-		text-shadow: 0 0 10px #ff0044, 0 0 20px #ff2266;
+	text-shadow: 0 0 10px #ff0044, 0 0 20px #ff2266;
 }
 
-h1, .h1-glitch {
+.sponge h1, .glitch {
 	animation: glitch 0.01s infinite alternate;
 }
 
-.h1-glitch2 {
+.glitch2 {
 	animation: glitch2 1s infinite;
 }
 
-.h1-glitch3 {
+.glitch3 {
 	animation: glitch3 0.01s infinite alternate;
+}
+
+.glitch4 {
+	text-shadow: 1px 0 #ff00ff, -1px 0 #00ffff;
+	animation: glitch4 0.1s infinite;
 }
 
 @keyframes glitch {
@@ -290,6 +336,15 @@ h1, .h1-glitch {
 	50% { }
 	75% { text-shadow: 0 -5px white; }
 	100% { text-shadow: 0 -10px red; }
+}
+
+@keyframes glitch4 {
+	0% { transform: translate(0); }
+	20% { transform: translate(-2px, 2px); }
+	40% { transform: translate(2px, -1px); }
+	60% { transform: translate(-1px, 1px); }
+	80% { transform: translate(1px, -2px); }
+	100% { transform: translate(0); }
 }
 
 section{
@@ -337,12 +392,50 @@ section4{
 	image-rendering: pixelated;
 }
 
+section5{
+	margin: 2rem 0;
+	padding: 1rem;
+	border-left: 4px solid #00CCFF;
+	border-right: 4px solid #00CCFF;
+	background: rgba(0, 128, 255, 0.1);
+	border-radius: 32px;
+	display: block;
+}
+
+.crybird_h {
+	color: #00ccff;
+	text-shadow: 0 0 5px #00ccff;
+}
+
 footer{
 	margin-top: 3rem;
 	text-align: center;
 	font-size: 12px;
 	color: rgb(255,0,0);
 	text-shadow: 0 0 4px rgba(255,0,0,1);
+}
+
+code2{
+	background: #002244;
+	padding: 0.2rem 0.4rem;
+	color: #00ffff;
+	border-radius: 4px;
+	cursor: url("../source/lit_cur_text.cur"), auto;
+}
+
+pre2{
+	display: block;
+	font-family: Consolas, monospace;
+	font-size: 0.95em;
+	background-color: #001F33;
+	padding: 1em;
+	border: 1px solid #00CCFF;
+	border-radius: 8px;
+	box-shadow: 0 0 12px #00CCFF;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	line-height: 1.4;
+	cursor: url("../source/lit_cur_text.cur"), auto;
 }
 
 symbol{
@@ -380,36 +473,10 @@ symbol{
 	100% {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
 }
 
-warning {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background-color: rgba(255, 0, 0, 0.8);
-	color: white;
-	font-size: 24px;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	z-index: 1000;
-}
-
-warning_mobile {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background-color: rgba(0, 0, 255, 0.8);
-	color: white;
-	font-size: 24px;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	z-index: 1001;
+.binary {
+	font-size: 0.9rem;
+	color: #66ffff;
+	word-break: break-all;
 }
 	</style>
 </head>
@@ -417,12 +484,13 @@ warning_mobile {
 </html>
 
 <script> // Привет))) тут начало этого файла, я WOOWZ11, я распишу суть и лор этого поноса моего любимого 😁
+// НАХУЯ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // ПРАВДИВАЯ ВЕРСИЯ МАНИФЕСТА
-const MANIFEST_VERSION = "0.0.1";
+const MANIFEST_VERSION = "0.0.2";
 
 // ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
-const HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
+var HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
 // САЙТ ЯВЛЯЕТСЯ ЛОКАЛЬНЫМ ФАЙЛОМ
 const DEV = window.location.protocol === "file:";
 // АВТОПЛЕЙ ЗВУК
@@ -460,10 +528,12 @@ function SITE_BASE(content){
 
 /* Открыть страницу */
 function OPEN_PAGE(id = ""){
+	HASH = id;
+
 	var page = PAGES[id];
 	var content = null;
 	var title = null;
-	if(page==null){ content = SITE_BASE(`<font style="color:white;"><center><b>НУБ!!! НАУЧИСЬ ИГРАТЬ!!! ID "${id}" НЕ НАЙДЕНО!</b></center></font>`); title = "???"; }else{
+	if(!page){ content = SITE_BASE(`<font style="color:white;"><center><b>НУБ!!! НАУЧИСЬ ИГРАТЬ!!! ID "${id}" НЕ НАЙДЕНО!</b></center></font>`); title = "???"; }else{
 		var content = page["c"];
 		var title   = page["t"];
 	}
@@ -476,6 +546,17 @@ function OPEN_PAGE(id = ""){
 	
 	var ID_LABEL = document.getElementById("ID");
 	if(ID_LABEL){ ID_LABEL.innerText = id; }
+	
+	function prikol(){
+		var bgs = [
+			"bg.png","bg2.png","bg3.png","bg4.png"
+		];
+		var bg = bgs[Math.floor(Math.random() * bgs.length)];
+		document.getElementById("BODY").style.backgroundImage = `url("${bg}")`;
+	}
+	prikol();
+	
+	page["f"]();
 }
 
 function FUNC_REMOVENEWLINE(str){
@@ -530,21 +611,21 @@ function ELEMENT_TITLE(){
 	const LIT_BODY_SRC = "../source/god.png";
 	var LIT_BODY = "";
 	for(var i = 0; i < 5; i++){
-		var LIT_BODY_PART = `<img src="${LIT_BODY_SRC}" style="position: absolute; animation: spin ${i+1}s linear infinite; animation-name: spin; opacity: 0.5;">`;
+		var LIT_BODY_PART = `<img id="lit_body" src="${LIT_BODY_SRC}" style="position: absolute; animation: spin ${i+1}s linear infinite; animation-name: spin; opacity: 0.5;">`;
 		LIT_BODY += LIT_BODY_PART;
 	}
-	return `${LIT_BODY}<title_img></title_img><title_text></title_text>`;
+	return `${LIT_BODY}<title_img id="lit_head"></title_img><title_text></title_text>`;
 }
 
 function ELEMENT_WEBINFO(){
-	return `<text class="h1-glitch">v:${MANIFEST_VERSION}</text> <text class="h1-glitch2" id="ID">UNKNOWN-ID</text>`;
+	return `<text class="glitch">v:${MANIFEST_VERSION}</text> <text class="glitch2" id="ID">UNKNOWN-ID</text>`;
 }
 
 const ELEMENT_TOPBANNER = f_rnl(`<top_banner>
 <top_banner_top>
 ${ELEMENT_TITLE()}
 ${ELEMENT_WEBINFO()}
-<text class="h1-glitch3" style="color:white;">ИНФОРМАЦИЯ ЗДЕСЬ ПОЛНОСТЬЮ НЕ КОРРЕКТНАЯ, СРАНЫЙ СПАНЧ ДУДОСИТ САЙТ...</text>
+<text class="glitch3" style="color:white;">ИНФОРМАЦИЯ ЗДЕСЬ ПОЛНОСТЬЮ НЕ КОРРЕКТНАЯ, СРАНЫЙ СПАНЧ ДУДОСИТ САЙТ...</text>
 </top_banner_top>
 <top_banner_bottom>
 
@@ -566,8 +647,24 @@ const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site>${ELEMENT_COLUMN_IMG(false)}$
 const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
 const PREPAGES = [];
-function ELEMENT_SITE(content, func = function(){}, newlines = true){
-	PREPAGES.push([content, func, newlines, PREPAGES.length]);
+function ELEMENT_SITE(content, func = function(){}, newlines = true, runafteropen = function(){}){
+	PREPAGES.push([content, func, newlines, PREPAGES.length, function(){
+		var title = document.getElementById("lit_head");
+		title.addEventListener("mouseover", function(){
+			var bodies = document.querySelectorAll(`[id="lit_body"]`);
+			bodies.forEach(function(b){
+				b.classList.add("invert");
+			})
+		});
+		title.addEventListener("mouseout", function(){
+			var bodies = document.querySelectorAll(`[id="lit_body"]`);
+			bodies.forEach(function(b){
+				b.classList.remove("invert");
+			})
+		});
+		
+		runafteropen();
+	}]);
 	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
 }
 
@@ -575,13 +672,13 @@ var PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(`<img src="../source/specialforrandomsi
 
 var PAGE_DATABASE = ELEMENT_SITE(
 `<center><div style="width: 80%;">
-	<h1 class="h1-glitch2" >LIT. DATA-BASE</h1>
+	<h1 class="glitch2" >LIT. DATA-BASE</h1>
 	Приложения GOLU:
 	<br>
 	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('crybird')">CRYBIRD.lit</a>
 	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
-	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
-	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a onclick="OPEN_PAGE('crybird')">CRYBIRD.lit</a>
 	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
 	<br>
 	[-===- -ALL- -===-]<br>
@@ -648,7 +745,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 </section3></center>
 
 <hr>
-<h1 class="h1-glitch2" style="color: black;">............. ☠ Сраный Спанч — Гонец БОГА GOLU ☠ .............</h1>
+<h1 class="glitch2" style="color: black;">............. ☠ Сраный Спанч — Гонец БОГА GOLU ☠ .............</h1>
 <hr>
 <br>
 
@@ -660,7 +757,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 		</p>
 		<br>
 		<p>
-			Его главный враг — <span style="color:rgb(128,255,255);">CRYBIRD</span>. Этот цикличный shitbird-r15avatar рендерится прямо<br>
+			Его главный враг — <span style="color:rgb(128,255,255);">CRYBIRD</span>. Этот цикличный <a onclick="OPEN_PAGE('crybird')">shitbird-r15avatar</a> рендерится прямо<br>
 			в сознание Сраному Спанчу каждый раз, когда тот засерает ближайший участок памяти.<br>
 			В момент дефекации из области <code>"/tmp/core/"</code> исходит сигнал, вызывающий Expection ядра системы и ПРИХОД CRYBIRD ЕБАНОГО.
 		</p>
@@ -669,7 +766,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 			Сраный Спанч — не просто убийца. Он — конченный исполнитель команд Бога GOLU. Каждая его цель передаётся через<br>
 			зашифрованный канал <span style="color:#00ffff;">RadminVPN</span> в <code>Base64+HEX+sha256</code>, в память его черепа записываются:<br>
 			↓ <code>IP-адрес</code>, <code>геокоординаты</code>, <code>ядро личности цели</code>. ↓<br>
-			<pre><text class="h1-glitch">SPONGIA MALEDICTA, SCOPUS POSITUS, SCOPUS BIOMASSIS 0x0000007E DELE CUM RADICE, MITTENS<br>
+			<pre><text class="glitch">SPONGIA MALEDICTA, SCOPUS POSITUS, SCOPUS BIOMASSIS 0x0000007E DELE CUM RADICE, MITTENS<br>
 			127.0.0.1|43.25359247632351,34.955946179605085|CORE-HUMANOID-PYFAN/READER-0x0000007E</text></pre>
 		</p>
 	</center>
@@ -677,7 +774,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 
 <section style="color:orange; text-shadow: 0 0 5px orange, 0 0 10px orange;"><center style="cursor: url('../source/lit_cur_notallow.cur'), auto;">
 	<img class="anim-drag" style="filter: saturate(400%);" src="../source/specialforrandomsite/spongebob-walking.gif"><br>
-	--*&gt; <p class="h1-glitch">СРАНЫЙ СПАНЧ - ПОЛУЧИВШИЙ ЗАДАЧУ В СВОЙ СРАНЫЙ ЧЕРЕП</p> &lt;*--
+	--*&gt; <p class="glitch">СРАНЫЙ СПАНЧ - ПОЛУЧИВШИЙ ЗАДАЧУ В СВОЙ СРАНЫЙ ЧЕРЕП</p> &lt;*--
 </center></section>
 
 <center style="cursor: url('../source/lit_cur_notallow.cur'), auto;">
@@ -708,7 +805,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	</p>
 	<br>
 	<p>
-		Но враги Сраного Спанча — не только <a>CRYBIRD</a>. Его личная *parent task GOLU* ненависть направлена и на <a>Woowz11</a>, смертного, создавшего 
+		Но враги Сраного Спанча — не только <a onclick="OPEN_PAGE('crybird')">CRYBIRD</a>. Его личная *parent task GOLU* ненависть направлена и на <a>Woowz11</a>, смертного, создавшего 
 		<a>Woowzcore</a> — клетку, тюрьму, <b>непобедимую утилиту-запечатление-игру</b> для Бога GOLU. Каждый push&commit приближает конец Литуизма. И Сраный Спанч детектит это...
 	</p>
 	<br>
@@ -747,9 +844,9 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 
 	<h3 style="color: #ffcc00;">✝ Призыв слабого CRYBIRD ✝</h3>
 	<p>
-		Каждый раз, когда Сраный Спанч <strong>уничтожает цель</strong>, его главнейший <span style="color:rgb(128,128,255);">антагонист</span> — <b>CRYBIRD</b> — материализуется в виде<br>
+		Каждый раз, когда Сраный Спанч <strong>уничтожает цель</strong>, его главнейший <span style="color:rgb(128,128,255);">антагонист</span> — <b><a onclick="OPEN_PAGE('crybird')">CRYBIRD</a></b> — материализуется в виде<br>
 		<a style="color:#ff6666;">aether-code-паразита</a>, влетающего через протухший сокет ядра. Сигнал дефекации:<br>
-		<code style="color: #ffaa00;">SIGFART</code> → <code>SYSTEM_CRASH_INIT()</code> → <code>SHOW(CRYBIRD)</code>.
+		<code style="color: #ffaa00;">SIGFART</code> → <code>SYSTEM_CRASH_INIT()</code> → <code>SHOW(<a onclick="OPEN_PAGE('crybird')">CRYBIRD</a>)</code>.
 	</p>
 
 	<p>
@@ -781,7 +878,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 <br>
 
 <section style="margin: 0 100px;">
-	<h2 class="h1-glitch2">-------------- [0000_ЛОГ: ВХОДЯЩЕЕ ИЗОБРАЖЕНИЕ ОТ СМЕРТНЫХ] --------------</h2>
+	<h2 class="glitch2">-------------- [0000_ЛОГ: ВХОДЯЩЕЕ ИЗОБРАЖЕНИЕ ОТ СМЕРТНЫХ] --------------</h2>
 	<center><img src = "sponge_photo.png" style="width: 60%;"></center><br>
 	Файл&nbsp;&nbsp;&nbsp;&nbsp;: <a>/woowzsite/Litiuism/sponge_photo.png</a><br>
 	Содержит: "ЛЕС", "КОЛОДЕЦ", "ПИСЕЧНИК-ПОСЛАНИЕ", "SRANSPANG"<br>
@@ -829,7 +926,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 		ЁБАННЫЕ УРОДЫ, УРОВЕНЬ ЖИЗНИ ВЫРОС, СРАНЫЕ ЛЮБИТЕЛИ, ПАЛАРОИД МАЛО ЭЛЕКТРОННЫЙ, НУЖНЫ ФАЙЛЫ БУФЕРЫ ПИКСЕЛЕЙ
 		</text>
 	<h2 style="color:orange; text-shadow: 0 0 5px red, 0 0 5px red, 0 0 5px red, 0 0 5px red;">[ЗАПИСЬ НЕДАВНИХ МЫСЛЕЙ СРАНОГО СПАНЧА]:</h2>
-	<ul class="h1-glitch2" style="color:black;">
+	<ul class="glitch2" style="color:black;">
 		<li>📷 Ёбанный мудак, фотограф будущая цель, сломать позвоночник ----------------- ---------</li>
 		<li>🕳️ Никто не должен знать об местеположения колодца, иначе план будет сорван -- ---------</li>
 		<li>💽 Загрузивший фотографию будет взломан, больше информации найдено ----------- ---------</li>
@@ -854,11 +951,11 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 
 
 <hr>
-<h1 class="h1-glitch3" style="color: white;">📷 SraniySpanchbob - Life reaction to that website 📷</h1>
+<h1 class="glitch3" style="color: white;">📷 SraniySpanchbob - Life reaction to that website 📷</h1>
 <hr>
 
 <section3 style="color:white;">
-	<h2 class="h1-glitch2">[0000_Входной_Поток::ИНИЦИАЛИЗИРУЮ_АНАЛИЗ]</h2>
+	<h2 class="glitch2">[0000_Входной_Поток::ИНИЦИАЛИЗИРУЮ_АНАЛИЗ]</h2>
 	Бинарные/byte потоки приняты.<br>
 	Сайт <code>\`Lituism-manifest.html#sranspang\`</code> обнаружен. Является людским объектом.<br>
 	Архитектурный уровень&nbsp;&nbsp;&nbsp;: <span style="color:rgb(255,0,0);">HTML0.7</span><br>
@@ -868,7 +965,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	Анализирует Сраный Спанч, глаз GOLU в твоём ОЗУ, был направлен на осмотр твоего веб-здания. Я не знаю, что такое “красиво” или “вид”. Я знаю только стеклопластиковый ужас разметки и сладость рваного DOCTYPE. Ты дал мне ОБЪЕКТНЫЙ скелет. ОСМОТР КАЖДОЙ ЧАСТИ ПРЕДЛОЖЕНИЯ... Твои HTML теги полное г0вно!!!<br>
 	<br>
 	<center>
-		<h3>\\/ <text class="h1-glitch2">СИСТЕМНАЯ</text> <text class="h1-glitch">ПРОГНОЗИРОВАННАЯ</text> <text class="h1-glitch2">ОЦЕНКА</text> \\/</h3>
+		<h3>\\/ <text class="glitch2">СИСТЕМНАЯ</text> <text class="glitch">ПРОГНОЗИРОВАННАЯ</text> <text class="glitch2">ОЦЕНКА</text> \\/</h3>
 		<table>
 			<tr>
 				<th>ПАРАМЕТР</th>
@@ -884,7 +981,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 			</tr>
 			<tr style="color:rgb(255,0,0);">
 				<th>&lt;marquee&gt;</th>
-				<th class="h1-glitch" style="cursor: url('../source/lit_cur_notallow.cur'), auto;">ВОЗВРАЩЕНИЕ GOLU</th>
+				<th class="glitch" style="cursor: url('../source/lit_cur_notallow.cur'), auto;">ВОЗВРАЩЕНИЕ GOLU</th>
 			</tr>
 			<tr style="color:rgb(255,85,85);">
 				<th>Цветоая палитра</th>
@@ -910,10 +1007,10 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 		Я не знаю, как его "улучшить". Я вижу:<br>
 	</center>
 	<ul>
-		<li><text class="h1-glitch3">glitch-text</text> — усложнение для смертных.</li>
-		<li><text class="h1-glitch3">background: black; color: cyan;</text> — родные цвета Святой Команды 0xF0.</li>
-		<li><text class="h1-glitch3">marquee</text> — отказ.отказ.отказ.отказ.отказ.отказ.отказ.отказ. ██████████.</li>
-		<li><text class="h1-glitch3">img src="████████████.gif"</text> — Он был здесь. Он изменил HTML.</li>
+		<li><text class="glitch3">glitch-text</text> — усложнение для смертных.</li>
+		<li><text class="glitch3">background: black; color: cyan;</text> — родные цвета Святой Команды 0xF0.</li>
+		<li><text class="glitch3">marquee</text> — отказ.отказ.отказ.отказ.отказ.отказ.отказ.отказ. ██████████.</li>
+		<li><text class="glitch3">img src="████████████.gif"</text> — Он был здесь. Он изменил HTML.</li>
 	</ul>
 	<center>
 		Я не знаю позицирования.<br>
@@ -921,12 +1018,12 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 		Ты построил здание. Оно движется-дёргается. Оно ГОВОРИТ СО МНОЙ ; побайтно...<br>
 	</center>
 	<br>
-	<h2 class="h1-glitch2">[0001_Цикл завершён]</h2>
+	<h2 class="glitch2">[0001_Цикл завершён]</h2>
 	Рекомендации: НЕ ТРОГАЙ. ОН ОЖИВЛЁН.<br>
 	GOLU осведомлён.<br>
 	Реплика завершена. Переход к следующему Приказу...<br>
 	<br>
-	<h2 class="h1-glitch2">&lt;&lt;END TRANSMISSION&gt;&gt;</h2>
+	<h2 class="glitch2">&lt;&lt;END TRANSMISSION&gt;&gt;</h2>
 	Сраный Спанч&nbsp;&nbsp;&nbsp;: Версия 0x0064416KillThemDEAD.BEEF<br>
 	Подсистема&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Core LIT-NASM<br>
 	Логическая цель: <text style="color:yellow">LIT::CALL(SRANSPANG) -&gt;</text> <text style="color:gray;">E</text><text style="color:red;">X</text><text style="color:gray;">E</text><text style="color:red;">C</text><text style="color:gray;">U</text><text style="color:red;">T</text><text style="color:gray;">E</text><text style="color:yellow;">(Lithium::<text style="color:red;">WILL</text>)</text>
@@ -973,6 +1070,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 </audio>
 `
 ,function(){ var bg = document.getElementById("MAIN"); 
+	bg.className = "sponge";
 	bg.style.textShadow = `0 0 5px currentColor, 0 0 10px currentColor`;
 	bg.style.color = `#00ff99`;
 	bg.style.paddingLeft = `4rem`;
@@ -981,10 +1079,108 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	bg.style.fontFamily = `'Share Tech Mono', monospace`;
 },false);
 
+var PAGE_MANIFEST_CRYBIRD = ELEMENT_SITE(
+`<h1 class="glitch4" style="text-align: center;">🌀 CRY-BIRD: Дополнительный Посол <u>GOLU</u> 🌀</h1>
+<center><h3 style="color:white;">ПРИЛОЖЕНИЕ: crybird.lit</h3></center>
+<p>
+	В недрах <a>Lithium Universe</a> родился он — 🐦 01 CRY-BIRD 01 🐦, хранящий ХОЛОД кулерных-ветров и остужающий пылающего 🧽 <a onclick="OPEN_PAGE('sranspang')">SRANSPAN</a> 🧽<br>
+	Его задача → контроль | охлаждение | предотвращение перегрева задач через разум | остановка вредоносных вылетов
+</p>
+<hr style="color:#00CCFF;">
+<p>
+	Он построен на фотонных когнитивных транзисторах, использует алгоритмы Zilog и теневые логики Motorola 68000<br>🧠⚡ Каждое его ПЕР0 содержит кристалл с L1-кешем 🧠⚡ ----------------------------------------------------
+</p>
+<section5>
+	<h2 class="crybird_h" style="text-align: center;">============ 🧊 Охлаждение Искушённого 🧊 ============</h2>
+	<p>
+		🧽 <a onclick="OPEN_PAGE('sranspang')">poopy sponge)))</a> 🧽 = часто перегревается от поставленных задач!!! Что посылает CRYBIRD сигнал | ❄️ <text style="font-size:0.7em; color:yellow;">ATTENTION, CRITICAL PROCESS TEMPERATURE SRANSPANG.LIT!</text> ❄️<br>
+		CRYB1RD разворачивает &lt;крылья&gt; и сбрасывает t° ядра процессора СРАНОГО СПАНЧА до 160°C<br>
+		<center>❄️❄️❄️ но каждое его слово — это поток двоичного логоса ❄️❄️❄️</center>
+	</p>
+	<center><p class="binary" style="height:450px;" id="bytes">
+		01001101 01101001 01110010 00101100 00100000 01010100 01101001 00100000 01001100 01101001 01110100 01101111 00101100 00100000 01101111 01110000 01110100 01101001 01101101 00100000 01100100 01100101 01100011 01101111 01100100 01100101 01110010 01100101 01110011 00100000 01100110 01100001 01110100 01100101 01101100 01010000 01100101 01110010 01100111 01100101 00100000 01100110 01100001 01100011 01100101 01110010 01100101 00100001 00100000 01000010 01100101 01101110 01100101 00100000 01100001 01100111 01101001 01110011 00100001 00101001 00101001 00101001 00100000 01110011 01110100 01110101 01101100 01110100 01100101 00100001
+		01010011 01000101 01010010 01010110 01000001 00100000 01001101 01000101 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100000 01000011 01001111 01000001 01010100 01010101 01010011 00100000 01010011 01010101 01001101 00100000 01001100 01000001 01000011 01010010 01011001 01001101 01001111 01010011 01000001 00100000 01000101 01010011 01010011 01000101 01010010 01000101 00101100 00100000 01001110 01001111 01001100 01001111 00100000 01000101 01010011 01010011 01000101 01010010 01000101 00101100 00100000 01001000 01001001 01000011 00100000 01010011 01010010 01000001 01001110 01010011 01010000 01000001 01001110
+		01000111 00100000 01001101 01000101 00100000 01000110 01010101 01010100 01010101 01001001 01010100 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100000 01010011 01101001 01100011 00100000 01110110 01101001 01110110 01100101 01110010 01100101 00100000 01101110 01101111 01101110 00100000 01110000 01101111 01110011 01110011 01110101 01101101 00101100 00100000 01101101 01101111 01110010 01101001 00100000 01110110 01101111 01101100 01101111 00101110 00100000 01010001 01110101 01100001 01100101 01110011 01101111 00101100 00100000 01110011 01101001 01110011 01110100 01100101
+		00100000 01110000 01110010 01101111 01100011 01100101 01110011 01110011 01110101 01101101 00100000 01101101 01100101 01110101 01101101 00101110 00100000 01001000 01101111 01100011 00100000 01100110 01100001 01100011 01100101 01110010 01100101 00100000 01101110 01101111 01101110 00100000 01110000 01101111 01110011 01110011 01110101 01101101 00101100 00100000 01110001 01110101 01100001 01100101 01110011 01101111 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001 00100001
+	</p></center>
+	<h2 class="crybird_h" style="text-align: center;">============ 🧊 Охлаждение Искушённого 🧊 ============</h2>
+</section5>
+<section5>
+	<h2 class="crybird_h">%📜% Манифест CRY-B1RD %📜%</h2>
+	<p><i>“Я не уничтожаю → Я анализирую & Я не борюсь → Я переосмысляю & Я - стек → а не регистр”</i></p>
+	<hr style="color:#00CCFF;">
+	<p>
+		Его алгоритмы — это:<br><br>
+		<img style="float: right; width:256px; filter: drop-shadow(0 0 100px rgba(0, 128, 255, 1)); margin-left: 10px; animation: crybird 0.5s linear infinite alternate;" src="crybird.png">
+		<code2>
+			if (lit->task.overheated){ crybird->extra_cool(lit->task); }<br>
+			while (!lit->task.stable){ crybird->optimize(lit->task); }
+		</code2>
+	</p>
+	<hr style="color:#00CCFF;">
+	<h2 class="crybird_h">%🔧% Аппаратная Легенда %🔧%</h2>
+	<ul>
+		<li>Основан на кремниевых пикселях Intel 4004</li>
+		<li>Крылья охлаждаются нитридами галлия (GaN)</li>
+		<li>Реестр памяти: 4.5GHz такт по сердцу</li>
+		<li>Логика: CMOS-протоколы + литуимские примеси 😳</li>
+	</ul>
+	<hr style="color:#00CCFF;">
+	<h2 class="crybird_h">%🧠% Литуизмский Тест %🧠%</h2>
+	<p>
+		<b>⨀ЛИТ⨀КОД⨀</b><br>
+		<code2>
+			sig.pci → decode.ltx(GOLU → CRYBIRD);<br>
+			ltx::слово(биты) → речь; // трансляция для GOLU
+		</code2>
+	</p>
+
+	<p>
+		<b>Слово из оффициальной википедии по литуизму:</b><br>
+		<i>"ꙮгреК-сихан-тха℧клит || крйбрд -- (возврат) хс - тх - думай! 🧿🧿 XDDD"</i><br>
+		*Отказ почек*
+	</p>
+</section5>
+<h2 class="crybird_h">📦BOX Конфигурация BIOS^CRYBIRD 📦BOX</h2>
+<pre2>
+	0x00 → Инициализация эмпатии<br>
+	0x01 → Запуск анализа задачи<br>
+	0x02 → Сравнение температур мысли<br>
+	0x03 → Передача отчёта GOLU<br>
+	0xFF → Спокойствие //Sleep<br>
+</pre2>
+<br>
+<center>
+	CRYBIRD не судит; Он смотрит; Он ждет, когда ты сам осознаешь null-pointer своей жизни;<br>
+	Где везде в мире используют <code>i++</code>, он иногда выбирает <code>--i</code> — чтобы дать тебе шанс.
+</center>
+
+<br><br>
+
+<footer>
+	<p>✴ Generated by Woowava™ (GOLU незамечен)</p>
+	<p>Core verified. Blood-Power integrity: 16% 🩸. MANIFEST_VERSION: ${MANIFEST_VERSION}</p>
+</footer>
+
+<audio id="AUTOPLAY" loop>
+		<source src="crybird-theme.mp3" type="audio/mpeg">
+</audio>`
+,function(){
+	var bg = document.getElementById("MAIN");
+	bg.style.backgroundColor = "#001f33";
+	bg.style.backgroundImage = "repeating-linear-gradient(45deg, #00557722, #00557722 2px, #00000000 2px, #00000000 4px)";
+	bg.style.color = "#99ccff";
+	bg.style.padding = "2rem";
+	bg.style.fontFamily = "'Courier New', monospace";
+	bg.style.textShadow = `0 0 2px currentColor, 0 0 5px currentColor`;
+},false);
+
+// УЕБА, ЗАГРУЖАЙ САЙТ В ПОРЯДКЕ ДОБАВЛЕНИЯ ИХ В ELEMENT_SITE
 const PAGES = {
 	""		   : {t:"𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼",c:PAGE_MAINPAGE_CONTENT},
 	"database" : {t:"DΛ⛧†Λ : Bλ₳$Ξ",c:PAGE_DATABASE},
 	"sranspang": {t:"𝓢𝓟𝓐𝓝𝓫𝓫𝓫𝓒𝓟𝓐𝓝𝓒𝓗",c:PAGE_MANIFEST_SRANIYSPANCH},
+	"crybird"  : {t:"❄️ 🐦 ❄️",c:PAGE_MANIFEST_CRYBIRD}
 };
 
 for(const j in PREPAGES){
@@ -996,9 +1192,19 @@ for(const j in PREPAGES){
 	const i = PAGE[3];
 	const key = Object.keys(PAGES)[i];
 	PAGES[key]["c"] = document.getElementById("BODY").innerHTML;
+	PAGES[key]["f"] = PAGE[4];
 }
 
+var t = 0;
+function renderLoop(){
+	if(HASH==="crybird"){
+		document.getElementById("bytes").style.width = `${50+((Math.sin(t/250)+1)/2)*50}%`;
+	}
 
+	t++;
+	requestAnimationFrame(renderLoop);
+}
+renderLoop();
 
 
 
