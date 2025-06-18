@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
-<title>MRC</title>
-<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
+<title>MRC BROKEN TITLE</title>
+<link rel="icon" type="image/x-icon" href="source/eyes.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 
 <style>
@@ -74,7 +74,7 @@ var P_FILES = {};
 //===========================================
 // САЙТ
 
-const VERSION = "2";
+const VERSION = "3";
 
 var errorhas = false;
 function detecterror(){
@@ -114,7 +114,7 @@ const PAGE_STARTPAGE =
 
 const PAGE_EDITOR =
 `<panel style="position:fixed; width:100vw; height:100vh; background-color:rgba(0,0,0,0.5); z-index:1000; display:none;" id="TOOL-WINDOW"></panel>
-<div style="display: flex; background-color:lightgray; background-image:url('source/grid2.png'); image-rendering: pixelated; transition: all 0.1s ease;" id="PAGE">
+<div style="display: flex; background-color:lightgray; background-image:url('source/grid2.png'); image-rendering: pixelated;" id="PAGE">
 	<panel style="position:fixed; width: 5px; height: 5px; pointer-events: none;" id="WORKSPACE-CONTENT"></panel>
 	<panel style="display:block; width:25vw; height:100vh; background-color:white; border-right:3px solid black; z-index:5;">
 		<center style="height:100%;">
@@ -207,12 +207,21 @@ function editor_open(){
 	FILE_PROJECT_INPUT.click();
 }
 
+function refresh_title(){
+	var result = `MRC ${VERSION}`;
+	
+	if(!SAVED){ result += "*"; }
+	
+	document.title = result;
+}
+refresh_title();
+
 function editor_make_unsave(){
 	if(SAVED){
 		SAVED = false;
 		
 		document.getElementById("SAVE").disabled = false;
-		document.title = "MRC*";
+		refresh_title();
 	}
 }
 
@@ -337,7 +346,7 @@ async function editor_save(){
 				SAVED = true;
 				
 				document.getElementById("SAVE").disabled = true;
-				document.title = "MRC";
+				refresh_title();
 				loading.style.display = "none";
 			})
 		}catch(e){
@@ -415,7 +424,8 @@ async function editor_load(file){
 			for (var category in P_FILES) {
 				P_FILES[category].sort((a,b) => a["ID"] - b["ID"]);
 			}
-		
+			log("Проект загружен!");
+			loading.style.display = "none";
 			page("e");
 		})
 		.catch(e => {
@@ -431,7 +441,7 @@ async function editor_load(file){
 
 const WindowWS = 1920;
 const WindowHS =  916;
-const WindowARS = WindowWS/WindowHS;
+const WindowARS = WindowWS / WindowHS;
 
 var WindowW = window.innerWidth;
 var WindowH = window.innerHeight;
@@ -441,33 +451,52 @@ window.addEventListener("resize", function(e){
 	WindowW = window.innerWidth;
 	WindowH = window.innerHeight;
 
-	var sx = WindowW/OldWindowW;
-	var sy = WindowH/OldWindowH;
+	var sx = WindowW / OldWindowW;
+	var sy = WindowH / OldWindowH;
 
-	var ar  = WindowW/WindowH;
-	var ss = ar/WindowARS;
+	var ar  = WindowW / WindowH;
+	var ss = ar / WindowARS;
 
-	if(CurrentPage==="e"){
+	if(CurrentPage === "e"){
 		editor_moveworkspace(WorkspaceX * sx, WorkspaceY * sy);
 	}
 })
 
 function calculate_background_position(){
-	var x =  WorkspaceX;
-	   x +=  WindowW/2 ;
-	var xn = WorkspaceX;
-	   xn -= WindowW/2 ;
-	var y =  WorkspaceY;
-	   y +=  WindowH/2 ;
+	var wx = WorkspaceX - 2.5;
+	wx /= WorkspaceS;
+	var wy = WorkspaceY + 2.5;
+	wy /= WorkspaceS;
+	var ww = WindowW;
+	var wh = WindowH;
 
-	return [x,y,xn];
+	var x =  wx;
+	   x +=  ww / 2;
+	var xn = wx;
+	   xn -= ww / 2;
+	var y =  wy;
+	   y +=  wh / 2;
+
+	return [x, y, xn];
 }
 
+const pixelsize = 14 * 8;
 function calculate_elements_scale(){
-	var result = 1/WorkspaceS;
-	result *= 14*8;
-	result *= (WindowW/WindowH)/WindowARS;
+	var result = 1 / WorkspaceS;
+	result *= pixelsize;
+	result *= (WindowW / WindowH) / WindowARS;
 	return result;
+}
+
+function editor_updateworkspace(){
+	var pos = calculate_background_position();
+	PAGE.style.backgroundPosition = `right ${pos[0]}px top ${pos[1]}px`;
+
+	document.getElementById("WORKSPACE-CONTENT").style.transform = `translate(${-pos[2]}px, ${pos[1]}px) scale(${calculate_elements_scale()}%)`;
+
+	document.getElementById("I-POS-X").value = WorkspaceX;
+	document.getElementById("I-POS-Y").value = WorkspaceY;
+	document.getElementById("I-SCALE").value = WorkspaceS;
 }
 
 var WorkspaceX = 0;
@@ -476,27 +505,17 @@ var WorkspaceY = 0;
 function editor_moveworkspace(newx = 0, newy = 0){
 	WorkspaceX = newx;
 	WorkspaceY = newy;
-
-	var pos = calculate_background_position();
-	PAGE.style.backgroundPosition = `right ${pos[0]}px top ${pos[1]}px`;
-
-	document.getElementById("WORKSPACE-CONTENT").style.transform = `translate(${-pos[2]}px, ${pos[1]}px) scale(${calculate_elements_scale()}%)`;
-
-	document.getElementById("I-POS-X").value = WorkspaceX;
-	document.getElementById("I-POS-Y").value = WorkspaceY;
+	
+	editor_updateworkspace();
 }
 
 var WorkspaceS = 1;
+/* Масштаб рабочего пространства */
 function editor_scaleworkspace(news = 1){
 	WorkspaceS = news;
 	PAGE.style.backgroundSize = `${(1/WorkspaceS)*14*4}%`
-
-	var pos = calculate_background_position();
-	PAGE.style.backgroundPosition = `right ${pos[0]}px top ${pos[1]}px`;
-
-	document.getElementById("WORKSPACE-CONTENT").style.transform = `translate(${-pos[2]}px, ${pos[1]}px) scale(${calculate_elements_scale()}%)`;
-
-	document.getElementById("I-SCALE").value = WorkspaceS;
+	
+	editor_updateworkspace();
 }
 
 /* Добавить элемент на рабочее пространство */
@@ -532,12 +551,12 @@ function editor_stopeditfile(){
 
 var inedit = null;
 function editor_editfile(i){
-	if(editor_open_project_files_context_menu!=null){
+	if(editor_open_project_files_context_menu){
 		editor_open_project_files_context_menu.remove();
 	}
 	var file = P_FILES[P_CATEGORIES[SelectedCategory]][i];
 	
-	if(inedit&&file["Name"]===inedit["Name"]&&file["Category"]===inedit["Category"]){
+	if(inedit && file["Name"] === inedit["Name"] && file["Category"] === inedit["Category"]){
 		fatal(`Уже редактируется этот файл [${file["Name"]}]!`);
 	}else{	
 		if(inedit){
@@ -552,11 +571,278 @@ function editor_editfile(i){
 		if(!file["URL"]){
 			file["URL"] = createurl(file);
 		}
-		editor_add_element("EL-IN-EDIT",null,`<img style="width: ${file["Dimension"][0]}px; height: ${file["Dimension"][1]}px; transform: translate(-46.25%,-46.25%) scale(${(file["Dimension"][0]/64)*200}%, ${(file["Dimension"][1]/64)*200}%);" src="${file["URL"]}">`,0,0);
+		
+		var positionX = -50;
+		var positionY = -50;
+		var scaleX = 100 * 3.95;
+		var scaleY = 100 * 3.95;
+		editor_add_element("EL-IN-EDIT", null, `<div style="width: ${file["Dimension"][0]}px; height: ${file["Dimension"][1]}px; transform: translate(${positionX}%,${positionY}%) scale(${scaleX}%, ${scaleY}%);"><div id="EL-IN-EDIT-ZONES" style="position:absolute; width:100%; height:100%;"></div><img style="width:100%; height:100%; box-shadow: 0 0 0 1px black;" src="${file["URL"]}"></div>`,0,0);
 	
 		document.getElementById("TOOL").innerHTML = 
 		`<b>${file["Name"]}</b><br>
-		<button onclick="editor_stopeditfile();">Завершить редактирование</button>`;
+		<button onclick="editor_stopeditfile();">Завершить редактирование</button><br>
+		<div style="display: flex; justify-content: center;">Прозрачность [<text id="I-OPACITY">1.00</text>]:<input id="INPUT-OPACITY" type="range" min="0" max="1" step="0.01" value="1"></div>
+		<div>Зоны<br>
+			<div style="background-color:rgba(0,0,0,0.25); width:90%; height:200px; overflow-y:scroll;" id="ZONES" ></div>
+			<button id="BUTTON-ADD-ZONE">Добавить зону</button>
+			<button id="BUTTON-DELETE-ALL-ZONE">Удалить все зоны</button>
+		</div>`;
+		
+		var el = document.getElementById("EL-IN-EDIT");
+		
+		function refresh_zones(){
+			var el_zones_2 = document.getElementById("EL-IN-EDIT-ZONES");
+			el_zones_2.innerHTML = "";
+		
+			var el_zones = document.getElementById("ZONES");
+			el_zones.innerHTML = "";
+			var zones = inedit["Zones"];
+			
+			for(var i_ = 0; i_ < zones.length; i_++){
+				(function(i){
+					var zone = zones[i];
+					var z = document.createElement("div");
+					z.style.width = "100%";
+					z.style.backgroundColor = `rgba(255,255,255,${i % 2 == 0 ? 0.3 : 0.5})`;
+					z.style.display = "flex";
+					
+					var integer = !zone[1];
+					
+					function getcolor(){
+						var letters = "0123456789ABCDEF";
+						var color = "#";
+						for (var i = 0; i < 6; i++) {
+							color += letters[Math.floor(Math.random() * 16)];
+						}
+						return color;
+					}
+					
+					function getTextColor(hex) {
+						hex = hex.replace("#", "");
+
+						var r = parseInt(hex.substring(0, 2), 16);
+						var g = parseInt(hex.substring(2, 4), 16);
+						var b = parseInt(hex.substring(4, 6), 16);
+
+						var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+						return brightness > 128 ? "#000000" : "#FFFFFF";
+					}
+					
+					var zone_color = getcolor();
+					var zone_color_text = getTextColor(zone_color);
+					var zone_color_background = zone_color + "40";
+					
+					z.innerHTML = 
+					`<input id="I-ZONEEDIT-${i}-NAME" type="text" style="background-color:${zone_color}; color:${zone_color_text}; flex: 1 1 auto; min-width: 0;">
+					<input  id="I-ZONEEDIT-${i}-PROC" type="checkbox" style="flex: 1 0 auto; min-width: 0;">
+					<input  id="I-ZONEEDIT-${i}-L" type="number" step="${integer ? 1 : 0.01}" style="flex: 1 2 auto; min-width: 0;">
+					<input  id="I-ZONEEDIT-${i}-T" type="number" step="${integer ? 1 : 0.01}" style="flex: 1 2 auto; min-width: 0;">
+					<input  id="I-ZONEEDIT-${i}-R" type="number" step="${integer ? 1 : 0.01}" style="flex: 1 2 auto; min-width: 0;">
+					<input  id="I-ZONEEDIT-${i}-B" type="number" step="${integer ? 1 : 0.01}" style="flex: 1 2 auto; min-width: 0;">
+					<button id="I-ZONEEDIT-${i}-DEL">🗑️</button style="flex: 1 2 auto; min-width: 0;">`;
+					
+					el_zones.appendChild(z);
+					
+					document.getElementById(`I-ZONEEDIT-${i}-NAME`).value = zone[0];
+					document.getElementById(`I-ZONEEDIT-${i}-PROC`).checked = zone[1];
+					document.getElementById(`I-ZONEEDIT-${i}-L`   ).value = zone[2];
+					document.getElementById(`I-ZONEEDIT-${i}-T`   ).value = zone[3];
+					document.getElementById(`I-ZONEEDIT-${i}-R`   ).value = zone[4];
+					document.getElementById(`I-ZONEEDIT-${i}-B`   ).value = zone[5];
+					
+					document.getElementById(`I-ZONEEDIT-${i}-NAME`).addEventListener("input", function(){
+						var regex = /[^a-zA-Z0-9-_.\s]/g;
+						var v = this.value;
+						
+						if(regex.test(v)){
+							v = v.replace(regex, "");
+						}
+						
+						this.value = v;
+						
+						inedit["Zones"][i][0] = v;
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-NAME`).addEventListener("blur", function(){
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-PROC`).addEventListener("change", function(){
+						inedit["Zones"][i][1] = this.checked;
+						var l = 0;
+						var t = 0;
+						var r = 1;
+						var b = 1;
+						if(!this.checked){
+							r = inedit["Dimension"][0];
+							b = inedit["Dimension"][1];
+						}
+						
+						inedit["Zones"][i][2] = l;
+						inedit["Zones"][i][3] = t;
+						inedit["Zones"][i][4] = r;
+						inedit["Zones"][i][5] = b;
+						
+						document.getElementById(`I-ZONEEDIT-${i}-L`).value = l;
+						document.getElementById(`I-ZONEEDIT-${i}-T`).value = t;
+						document.getElementById(`I-ZONEEDIT-${i}-R`).value = r;
+						document.getElementById(`I-ZONEEDIT-${i}-B`).value = b;
+						
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-L`).addEventListener("input", function(){
+						var v = parseFloat(this.value);
+						var max = inedit["Zones"][i][4] - (integer ? 1 : 0.01);
+						
+						if(isNaN(v) || v < 0){
+							v = 0;
+						}else if(v > max){
+							v = max;
+						}
+						
+						if(integer){
+							v = Math.floor(v);
+						}
+						
+						this.value = v;
+						inedit["Zones"][i][2] = v;
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-L`).addEventListener("blur", function(){
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-L`).addEventListener("mouseup", function(){
+						if(document.activeElement !== this){
+							refresh_zones();
+						}
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-T`).addEventListener("input", function(){
+						var v = parseFloat(this.value);
+						var max = inedit["Zones"][i][5] - (integer ? 1 : 0.01);
+						
+						if(isNaN(v) || v < 0){
+							v = 0;
+						}else if(v > max){
+							v = max;
+						}
+						
+						if(integer){
+							v = Math.floor(v);
+						}
+						
+						this.value = v;
+						inedit["Zones"][i][3] = v;
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-T`).addEventListener("blur", function(){
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-T`).addEventListener("mouseup", function(){
+						if(document.activeElement !== this){
+							refresh_zones();
+						}
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-R`).addEventListener("input", function(){
+						var v = parseFloat(this.value);
+						var max = integer ? inedit["Dimension"][0] : 1;
+						var min = inedit["Zones"][i][2] + (integer ? 1 : 0.01);
+						
+						if(isNaN(v) || v < min){
+							v = min;
+						}else if(v > max){
+							v = max;
+						}
+						
+						if(integer){
+							v = Math.floor(v);
+						}
+						
+						this.value = v;
+						inedit["Zones"][i][4] = v;
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-R`).addEventListener("blur", function(){
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-R`).addEventListener("mouseup", function(){
+						if(document.activeElement !== this){
+							refresh_zones();
+						}
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-B`).addEventListener("input", function(){
+						var v = parseFloat(this.value);
+						var max = integer ? inedit["Dimension"][0] : 1;
+						var min = inedit["Zones"][i][3] + (integer ? 1 : 0.01);
+						
+						if(isNaN(v) || v < min){
+							v = min;
+						}else if(v > max){
+							v = max;
+						}
+						
+						if(integer){
+							v = Math.floor(v);
+						}
+						
+						this.value = v;
+						inedit["Zones"][i][5] = v;
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-B`).addEventListener("blur", function(){
+						refresh_zones();
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-B`).addEventListener("mouseup", function(){
+						if(document.activeElement !== this){
+							refresh_zones();
+						}
+					});
+					document.getElementById(`I-ZONEEDIT-${i}-DEL`).addEventListener("click", function(){
+						const conf = confirm(`Вы действительно хотите удалить зону [${inedit["Zones"][i][0]}]?`);
+						
+						if(conf){
+							inedit["Zones"].splice(i, 1);
+							refresh_zones();
+						}
+					});
+					
+					var lt = [zone[2],zone[3]];
+					var rb = [zone[4],zone[5]];
+					
+					if(!integer){
+						lt[0] *= 100;
+						lt[1] *= 100;
+						rb[0] *= 100;
+						rb[1] *= 100;
+					}
+					
+					var wh = [rb[0]-lt[0],rb[1]-lt[1]];
+					
+					var zone_name = inedit["Zones"][i][0];
+					
+					var fontsize = ((inedit["Dimension"][0]/9)/zone_name.length) * (wh[0]/(integer ? inedit["Dimension"][0] : 100));
+					
+					el_zones_2.innerHTML += 
+					`<div style="position:absolute; display:flex; justify-content:center; align-items:center; font-size:${fontsize}em; background-color:${zone_color_background}; box-shadow: inset 0 0 0 0.2px ${zone_color}; text-shadow: 0.2px 0 0px ${zone_color_text}, 0px 0.2px 0px ${zone_color_text}, -0.2px 0 0px ${zone_color_text}, 0px -0.2px 0px ${zone_color_text}; color:${zone_color}; left:${lt[0]}${integer ? "px" : "%"}; top:${lt[1]}${integer ? "px" : "%"}; width:${wh[0]}${integer ? "px" : "%"}; height:${wh[1]}${integer ? "px" : "%"};">${zone_name}</div>`;
+				})(i_);
+			}
+		}
+		
+		document.getElementById("BUTTON-ADD-ZONE").addEventListener("click", function(){
+			inedit["Zones"].push([`${inedit["ClearName"]}_${inedit["Zones"].length}`, true, 0, 0, 1, 1]);
+			refresh_zones();
+		});
+		document.getElementById("BUTTON-DELETE-ALL-ZONE").addEventListener("click", function(){
+			const conf = confirm(`Вы действительно хотите все удалить зоны?`);
+			
+			if(conf){
+				inedit["Zones"] = [];
+				refresh_zones();
+			}
+		});
+		
+		var opacity_slider = document.getElementById("INPUT-OPACITY");
+		opacity_slider.addEventListener("input", function(){
+			var v = parseFloat(this.value);
+			document.getElementById("I-OPACITY").innerText = v.toFixed(2);
+			
+			el.style.opacity = v;
+		});
+		
+		refresh_zones();
 	}
 }
 
@@ -818,7 +1104,7 @@ function editor_open_project_files_addfile(f,category,i){
 	
 	var icon = "";
 	
-	if(f["Type"]==="texture"){
+	if(f["Type"] === "texture"){
 		var url = f["URL"];
 		if(!url){
 			f["URL"] = createurl(f);
@@ -845,16 +1131,16 @@ function editor_open_project_files_addfile(f,category,i){
 				editor_open_project_files_context_menu.remove();
 			}
 			
-			editor_open_project_files_context_menu = document.createElement("contextmenu");
+			editor_open_project_files_context_menu                       = document.createElement("contextmenu");
 			editor_open_project_files_context_menu.style.backgroundColor = "rgb(250,250,250)";
-			editor_open_project_files_context_menu.style.width = "300px";
-			editor_open_project_files_context_menu.style.height = "500px";
-			editor_open_project_files_context_menu.style.display = "flex";
-			editor_open_project_files_context_menu.style.flexDirection = "column";
-			editor_open_project_files_context_menu.style.position = "fixed";
-			editor_open_project_files_context_menu.style.left = `${e.pageX}px`;
-			editor_open_project_files_context_menu.style.top  = `${e.pageY}px`;
-			editor_open_project_files_context_menu.style.zIndex = "3000";
+			editor_open_project_files_context_menu.style.width           = "300px";
+			editor_open_project_files_context_menu.style.height          = "500px";
+			editor_open_project_files_context_menu.style.display         = "flex";
+			editor_open_project_files_context_menu.style.flexDirection   = "column";
+			editor_open_project_files_context_menu.style.position        = "fixed";
+			editor_open_project_files_context_menu.style.left            = `${e.pageX}px`;
+			editor_open_project_files_context_menu.style.top             = `${e.pageY}px`;
+			editor_open_project_files_context_menu.style.zIndex          = "3000";
 			
 			var select = "";
 			for(category of P_CATEGORIES){
@@ -912,17 +1198,17 @@ function editor_open_project_files_open(t){
 		var files = P_FILES[P_CATEGORIES[SelectedCategory]];
 		var name = file.name.replace(/[^\x00-\x7F]/g, "-");
 		
-		if(i!=null){
-			var lastdot = name.lastIndexOf(".");
-			var name_base,name_extension;
-			if (lastdot !== -1) {
-				name_base      = name.substring(0, lastdot);
-				name_extension = name.substring(   lastdot);
-			} else {
-				name_base      = name;
-				name_extension = "";
-			}
-			
+		var lastdot = name.lastIndexOf(".");
+		var clearname, name_extension;
+		if (lastdot !== -1) {
+			clearname      = name.substring(0, lastdot);
+			name_extension = name.substring(   lastdot);
+		} else {
+			clearname      = name;
+			name_extension = "";
+		}
+		
+		if(i){
 			name = name_base + (i+1) + name_extension;
 		}
 		
@@ -937,15 +1223,17 @@ function editor_open_project_files_open(t){
 				var content = e.target.result;
 				var result = {
 					"Name"       : name,
+					"ClearName"  : clearname,
 					"Type"       : id,
 					"Size"       : (ThatByteArray ? content.byteLength : content.length),
 					"ContentType": (ThatByteArray ? "byte" : "text"),
 					"URL"        : null,
 					"Category"   : P_CATEGORIES[SelectedCategory],
 					"ID"         : P_FILES[P_CATEGORIES[SelectedCategory]].length,
+					"Zones"      : [[clearname, true, 0, 0, 1, 1]],
 					"Content"    : content
 				};
-				if(id==="texture"){
+				if(id === "texture"){
 					get_png_dimension(content).then(dimension => {
 						result["Dimension"] = dimension;
 						P_FILES[P_CATEGORIES[SelectedCategory]].push(result);
@@ -973,7 +1261,7 @@ function editor_open_project_files_open(t){
 	}
 	
 	var debug_morefiles = document.getElementById("I-DEBUG-MOREFILES").checked;
-	if(t==="i"){
+	if(t === "i"){
 		input.accept = ".png";
 		input.addEventListener("change", function(e) {
 			if(e.target.files.length === 1){
@@ -992,7 +1280,7 @@ function editor_open_project_files_open(t){
 				}
 			}
 		});
-	}else if(t==="s"){
+	}else if(t === "s"){
 		input.accept = ".ogg";
 		input.addEventListener("change", function(e) {
 			if(e.target.files.length === 1){
@@ -1047,6 +1335,8 @@ function editor_open_project_files_category_open(i){
 	}
 }
 function editor_open_project_files(){
+	editor_stopeditfile();
+
 	var TOOLWINDOW = document.getElementById("TOOL-WINDOW");
 	TOOLWINDOW.innerHTML = 
 `<div style="background-color:white; width:90vw; height:90vh; margin-left:5vw; margin-top:5vh; padding:32px; box-sizing: border-box;">
@@ -1309,8 +1599,8 @@ function INSTALL_PAGE_EDITOR(){
 			const dx = e.clientX - ClickX;
 			const dy = e.clientY - ClickY;
 
-			WorkspaceX -= dx;
-			WorkspaceY += dy;
+			WorkspaceX -= dx * WorkspaceS;
+			WorkspaceY += dy * WorkspaceS;
 
 			ClickX = e.clientX;
 			ClickY = e.clientY;
@@ -1328,7 +1618,7 @@ function INSTALL_PAGE_EDITOR(){
 	editor_moveworkspace(); editor_scaleworkspace();
 
 	document.getElementById("I-POS-X").addEventListener("input", function(e){
-		const v = parseInt(e.target.value,10);
+		var v = parseInt(e.target.value,10);
 		if(isNaN(v)){
 			e.target.value = "";
 		}else{
@@ -1337,7 +1627,7 @@ function INSTALL_PAGE_EDITOR(){
 		}
 	});
 	document.getElementById("I-POS-Y").addEventListener("input", function(e){
-		const v = parseInt(e.target.value,10);
+		var v = parseInt(e.target.value,10);
 		if(isNaN(v)){
 			e.target.value = "";
 		}else{
@@ -1346,7 +1636,7 @@ function INSTALL_PAGE_EDITOR(){
 		}
 	});
 	document.getElementById("I-SCALE").addEventListener("input", function(e){
-		const v = parseFloat(e.target.value);
+		var v = parseFloat(e.target.value);
 		if(isNaN(v)){
 			e.target.value = "";
 		}else{

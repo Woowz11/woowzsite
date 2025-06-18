@@ -41,7 +41,7 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"cacaat","omg..","out of memory!","squid","mabkrosm","worms revolution","daty","mine2","hororr","s","neighbor_dog","teftela","le-Lego","coockie",
 	"PAVEL","e6222ea2-92f7-4005-a436-289a9370e03b","37171e31-de56-4637-a31c-8c0b1c0bd4db","horny","Z","brin","tttttttttt","tttt","wwwwwe","dla-slaboymnogo-normalno",
 	"ass","Beispiel_System32_Ordner_mit_DLL_Dateie_2020-10-12-16-07-26","lob","heartbeat","real","opengl","hackman","mine-mine","comic","assembly",
-	"img-GlWt4J","no","niga","pro","doudou2","think-about-this","reality","we_know_you","image0","kiki","mops"
+	"img-GlWt4J","no","niga","pro","doudou2","think-about-this","reality","we_know_you","image0","kiki","mops","kill"
 ],"source/specialforrandomsite/",".png"),AddFullnessToTable([
 	"swag","whasapa2","hq720","images","8f5b846b77ca5e3d6cf4cae08416c31a","20250328_094038","A83-0825","tragedy-rule-v0-mb8il71vtqze1"
 ],"source/specialforrandomsite/",".jpg")),AddFullnessToTable([
@@ -92,7 +92,7 @@ WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
 WoowzsiteSourceAudios = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"ВЫЙТИ НА УЛИЦУ ТАМ ЙОБАНЫ ЛОС","spongebob-asking-are-you-pooping-made-with","Morning-Flower","s","Cheetahmen","Toilet-story","Mr. Trololo original upload","idiotic music","otkroi-glazki",
 	"寻梦高粱红","Qahwah.Bootleg (feat. ilyhiryu)","gabber.bootleg","spo","what-the-song1","what-the-song2","what-the-song3","It's PINEAPPLE piizza tami(1)","28_M_Necro","NO",
-	"TROLL_HIT_4"
+	"TROLL_HIT_4","cringe-music"
 ],"source/specialforrandomsite/",".mp3"),AddFullnessToTable([
 	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist","open"
 ],"source/",".mp3")),[
