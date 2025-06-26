@@ -1,0 +1,62 @@
+<!-- Сайт следует лицензии WoowzsiteConstruction & Woowzwiki -->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Шаблонная часть для WoowzsiteConstruction & Woowzwiki -->
+		<meta charset="utf-8">
+		<script src='lib/lib.js'></script>
+		<script src='woowzsiteconstruction/base.js'></script>
+		<script src='woowzwiki/base.js'></script>
+		<!-- ----------------------------------------- -->
+	</head>
+</html>
+
+<script>
+var info = {
+	Name: "WhiteSponge",
+	Version: "0.0.0",
+	Author: "Woowz11",
+	Icon: "source/whitesponge.ico",
+	StartPage: "start"
+}
+
+WWSetInfo(info);
+WWAddPage("start",null,"Начало",{"Page":
+`Абабаба нужно создать новую вики... а мне не до новой вики...... я делаю whitesponge`});
+
+WWAddTitle("lua",null,"Lua",{Open:true});
+WWAddTitle("functions","lua","Функции");
+WWAddTitle("constant","lua","Константы");
+
+/* Типы переменных
+o - любого типа
+*/
+
+function WW_Func(Name, Args, Desc, Example){
+	var page = 
+	`<center><br><text style="font-size:2em;">${Name}()</text><br>
+	${Args}
+	<hr>
+	${Desc}
+	<hr>
+	<code>${Example}</code>
+	</center>`;
+	
+	WWAddPage(Name,"functions",`${Name}()`,{"Page":page});
+}
+function WW_Const(Name){
+	var page = 
+	`Constant.${Name}`;
+	
+	WWAddPage(Name,"constant",`Constant.${Name}`,{"Page":page});
+}
+
+WW_Func("Log.Info" , "o Сообщение", "Отправляет 'Сообщение' в консоль", `Log.Info("Info Message")`);
+WW_Func("Log.Debug", "o Сообщение", "Отправляет 'Сообщение' в консоль отладочного характера", `Log.Debug("Debug Message")`);
+WW_Func("Log.Warn" , "o Предупреждение", "Отправляет 'Предупреждение' в консоль", `Log.Warn("Warn Message")`);
+WW_Func("Log.Error", "o Ошибка", "Отправляет 'Ошибка' в консоль", `Log.Error("Error Message")`);
+
+WW_Const("Version");
+
+WWCreateWiki();
+</script>

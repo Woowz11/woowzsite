@@ -64,7 +64,7 @@ WoowzsiteSourceImagesGIF = AddFullnessToTable([
 
 WoowzsiteSourceIcons = AddFullnessToTable([
 	"woowz11","click","text","woowzengine","q","cat","cube","ai-galery","none","dead","wcom","gear","a","terminal","cssjs","blank","folder","idk","search3","test","bloodeye_old",
-	"ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull","wsc","ww","wm_category","chrome","al","lu"
+	"ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull","wsc","ww","wm_category","chrome","al","lu","whitesponge"
 ],"source/",".ico")
 
 WoowzsiteSourceCursors = AddFullnessToTable([
