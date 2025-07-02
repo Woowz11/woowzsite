@@ -27,36 +27,138 @@ WWAddPage("start",null,"Начало",{"Page":
 WWAddTitle("lua",null,"Lua",{Open:true});
 WWAddTitle("functions","lua","Функции");
 WWAddTitle("constant","lua","Константы");
+WWAddTitle("events","lua","Ивенты");
 
 /* Типы переменных
 o - любого типа
+s - строка
+n - число
+i - целое число
+b - булеан
+f - функция
 */
 
-function WW_Func(Name, Args, Desc, Example){
+function WW_Func(Name, Args, Desc, Return, Example){
+	if(Return===null){ Return = "nil"; }
+
+	function extractValuestypes(){
+		const parts = Args.split(',');
+		return parts.map(part => part.trim()[0]);
+	}
+	var valuestypes = extractValuestypes();
+
 	var page = 
-	`<center><br><text style="font-size:2em;">${Name}()</text><br>
+	`<center><br><text style="font-size:2em;">${Name}(${valuestypes})</text><br>
 	${Args}
 	<hr>
 	${Desc}
 	<hr>
-	<code>${Example}</code>
+	return ${Return}
+	</center>
+	<hr>
+	<code>${Example}</code>`;
+	
+	WWAddPage(Name,"functions",`${Name}(${valuestypes})`,{"Page":page});
+}
+function WW_Const(Name, Value, Desc, Example){
+	var page = 
+	`<center><br><text style="font-size:2em;">${Name}</text><br>
+	<hr>
+	${Value}
+	<hr>
+	${Desc}
 	</center>`;
 	
-	WWAddPage(Name,"functions",`${Name}()`,{"Page":page});
+	WWAddPage(Name,"constant",`${Name}`,{"Page":page});
 }
-function WW_Const(Name){
+function WW_Event(Name, ID, Args = null, Desc, Example = null){
 	var page = 
-	`Constant.${Name}`;
+	`<center><br><text style="font-size:2em;">Events.ID.${Name}</text><br>
+	<hr>
+	i ${ID}
+	<hr>${Args === null ? "" : Args + "<hr>"}
+	${Desc}
+	</center>
+	${Example === null ? "" : "<hr><code>" + Example + "</code>"}`;
 	
-	WWAddPage(Name,"constant",`Constant.${Name}`,{"Page":page});
+	WWAddPage(Name,"events",`${Name}`,{"Page":page});
 }
 
-WW_Func("Log.Info" , "o Сообщение", "Отправляет 'Сообщение' в консоль", `Log.Info("Info Message")`);
-WW_Func("Log.Debug", "o Сообщение", "Отправляет 'Сообщение' в консоль отладочного характера", `Log.Debug("Debug Message")`);
-WW_Func("Log.Warn" , "o Предупреждение", "Отправляет 'Предупреждение' в консоль", `Log.Warn("Warn Message")`);
-WW_Func("Log.Error", "o Ошибка", "Отправляет 'Ошибка' в консоль", `Log.Error("Error Message")`);
+const keys = [[-1, "не найденная клавиша", "NotFound"],[0, "0", "Num0"],[1, "1", "Num1"],[2, "2", "Num2"],[3, "3", "Num3"],[4, "4", "Num4"],[5, "5", "Num5"],[6, "6", "Num6"],[7, "7", "Num7"],[8, "8", "Num8"],[9, "9", "Num9"],[10, "-", "Minus"],[11, "+", "Plus"],[12, "/", "Slash"],[13, "backspace", "Backspace"],[14, "~/ё", "Tilde"],[20, "a/ф", "A"],[21, "b/и", "B"],[22, "c/с", "C"],[23, "d/в", "D"],[24, "e/у", "E"],[25, "f/а", "F"],[26, "g/п", "G"],[27, "h/р", "H"],[28, "i/ш", "I"],[29, "j/о", "J"],[30, "k/л", "K"],[31, "l/д", "L"],[32, "m/ь", "M"],[33, "n/т", "N"],[34, "o/щ", "O"],[35, "p/з", "P"],[36, "q/й", "Q"],[37, "r/к", "R"],[38, "s/ы", "S"],[39, "t/е", "T"],[40, "u/г", "U"],[41, "v/м", "V"],[42, "w/ц", "W"],[43, "x/ч", "X"],[44, "y/н", "Y"],[45, "z/я", "Z"],[46, "[/х", "LeftBrace"],[47, "]/ъ", "RightBrace"],[48, ";/ж", "Colon"],[49, "'/э", "Mark"],[50, ",/б", "Less"],[51, "./ю", "Greater"],[52, "?/,", "Question"],[61, "F1", "F1"],[62, "F2", "F2"],[63, "F3", "F3"],[64, "F4", "F4"],[65, "F5", "F5"],[66, "F6", "F6"],[67, "F7", "F7"],[68, "F8", "F8"],[69, "F9", "F9"],[70, "F10", "F10"],[71, "F11", "F11"],[72, "F12", "F12"],[80, "esc", "Esc"],[81, "таб", "Tab"],[82, "capslock", "CapsLock"],[83, "правый shift", "RightShift"],[84, "левый shift", "LeftShift"],[85, "правый control", "RightControl"],[86, "левый control", "LeftControl"],[87, "правый alt", "RightAlt"],[88, "левый alt", "LeftAlt"],[89, "правый специальный", "RightSpecial"],[90, "левый специальный", "LeftSpecial"],[91, "пробел", "Space"],[92, "↵", "Enter"],[93, "insert", "Insert"],[94, "удалить", "Delete"],[100, "home", "Home"],[101, "end", "End"],[102, "page up", "PageUp"],[103, "page down", "PageDown"],[104, "→", "Right"],[105, "←", "Left"],[106, "↑", "Up"],[107, "↓", "Down"],[110, "снимок экрана", "PrintScreen"],[111, "scroll lock", "ScrollLock"],[112, "pause break", "PauseBreak"],[113, "меню", "Menu"],[120, "Нумпад 0", "Pad0"],[121, "Нумпад 1", "Pad1"],[122, "Нумпад 2", "Pad2"],[123, "Нумпад 3", "Pad3"],[124, "Нумпад 4", "Pad4"],[125, "Нумпад 5", "Pad5"],[126, "Нумпад 6", "Pad6"],[127, "Нумпад 7", "Pad7"],[128, "Нумпад 8", "Pad8"],[129, "Нумпад 9", "Pad9"],[130, "Нумпад /", "PadSlash"],[131, "Нумпад *", "PadAsterisk"],[132, "Нумпад -", "PadMinus"],[133, "Нумпад +", "PadPlus"],[134, "Нумпад ↵", "PadEnter"],[135, "Нумпад удалить", "PadDel"],[136, "Нумпад lock", "PadLock"],[140, "громкость +", "VolumeUp"],[141, "громкость -", "VolumeDown"],[142, "без звука", "Mute"],[143, "▶/⏸", "PlayPause"],[144, "стоп", "Stop"],[145, "прошлый", "Previous"],[146, "следующий", "Next"]];
+var keys_page = `<center><table><caption>Таблица клавиш</caption><thead><tr><th>ID</th><th>Lua</th><th>Название клавиши</th></tr></thead><tbody>`;
+for(const key of keys){
+	keys_page += `<tr><td>${key[0]}</td><td>Keys.${key[2]}</td><td>${key[1]}</td></tr></center>`; 
+}
+keys_page += `</tbody></table>`;
+WWAddPage("keys","constant","Keys.*",{"Page":keys_page})
 
-WW_Const("Version");
+WW_Func("Keys.GetName" , "i 'ID клавиши'", "Возвращает описание клавиши 'ID клавиши'", "s 'Название клавиши'",
+`Events.Set(Events.ID.KeyboardBase, function(e)
+	Log.Info(Keys.GetName(e.Key))
+end)`);
+
+WW_Const("Keys.KeyDown", "i 1", "Клавиша нажата");
+WW_Const("Keys.KeyPress", "i 2", "Клавиша зажата");
+WW_Const("Keys.KeyUp", "i 0", "Клавиша отжата");
+
+WW_Func("Log.Info" , "o 'Сообщение'", "Отправляет 'Сообщение' в консоль", "o 'Сообщение'", `Log.Info("Info Message")`);
+WW_Func("Log.Debug", "o 'Сообщение'", "Отправляет 'Сообщение' в консоль отладочного характера", "o 'Сообщение'", `Log.Debug("Debug Message")`);
+WW_Func("Log.Warn" , "o 'Предупреждение'", "Отправляет 'Предупреждение' в консоль", "o 'Сообщение'", `Log.Warn("Warn Message")`);
+WW_Func("Log.Error", "o 'Ошибка'", "Отправляет 'Ошибка' в консоль", "o 'Сообщение'", `Log.Error("Error Message")`);
+
+WW_Const("WhiteSponge.Version", "s 'Версия'", "Возвращает 'Версия' WhiteSponge");
+WW_Const("WhiteSponge.Author", "s \"Woowz11\"", "Возвращает никнейм автора WhiteSponge");
+
+WW_Const("Minecraft.Version", "s 'Версия'", "Возвращает 'Версия' Minecraft");
+WW_Const("Minecraft.VersionNumber", "n 'Версия'", "Возвращает 'Версия' Minecraft в виде числа<br>Пример: \"1.21.4\" = 1214");
+WW_Const("Minecraft.OnServer", "b 'На стороне сервера?'", "'На стороне сервера?' равен true, если Minecraft запущен на стороне сервера");
+
+WW_Func("Math.Abs", "n 'Число'", "Возвращает 'Абсолютное число' от 'Число'", "n 'Абсолютное число'", `Log.Info(Math.Abs(-5)) --будет: 5`);
+WW_Const("Math.PI", "n 3.141592653589793", "Возвращает число пи");
+WW_Const("Math.E", "n 2.718281828459045", "Возвращает основание натурального логарифма");
+
+WW_Const("Mod.ID", "s 'ID'", "Возвращает 'ID' мода, внутри которого вызывается функция");
+WW_Const("Mod.Name", "s 'Имя'", "Возвращает 'Ммя' мода, внутри которого вызывается функция");
+WW_Const("Mod.Version", "s 'Версия'", "Возвращает 'Версия' мода, внутри которого вызывается функция");
+WW_Const("Mod.Author", "s 'Автор'", "Возвращает 'Автор' мода, внутри которого вызывается функция");
+WW_Const("Mod.Description", "s 'Описание'", "Возвращает 'Описание' мода, внутри которого вызывается функция");
+WW_Const("Mod.License", "s 'Лицензия'", "Возвращает 'Лицензия' мода, внутри которого вызывается функция");
+WW_Const("Mod.Contact", "s 'Контакт'", "Возвращает 'Контакт' мода, внутри которого вызывается функция");
+WW_Const("Mod.Links", "s 'Ссылки'", "Возвращает 'Ссылки' мода, внутри которого вызывается функция");
+
+WW_Func("ToString", "o 'Объект'", "Превращает 'Объект' в строку<br>Подходит для таблиц и чисел", "s 'Строка'", 
+`Log.Info(ToString({"test", true, 0.5, {"1.123","2.321","3.213"}}))
+--[[
+{
+  [1] = "test",
+  [2] = true,
+  [3] = 0.5,
+  [4] = {
+    [1] = 1.123,
+    [2] = 2.321,
+    [3] = 3.213,
+  },
+}
+]]`);
+
+WW_Func("Events.Set", "i 'ID ивента', f 'Функция'", "Устанавливает 'функция' ивенту 'ID ивента' для мода внутри которого вызывается функция<br>Типы ивентов смотрите в Events.ID.*", "b 'Возвращает false, если ивента не было'",
+`Events.Set(Events.ID.GameCycle, function()
+	Log.Info("cycle")
+end)`);
+WW_Event("Dev", -1, null, "Не используйте! Используется для тестирования новых ивентов", null);
+WW_Event("GameCycle", 0, null, "Вызывает функцию каждый кадр игры",
+`Events.Set(Events.ID.GameCycle, function()
+	Log.Info("cycle")
+end)`);
+WW_Event("KeyboardBase", 1, "'Key' [i] Нажатая клавиша, 'Action' [i] Действие", "Вызывает функцию при нажатии, зажатии, отжатии клавиши",
+`Events.Set(Events.ID.KeyboardBase, function(e)
+	if(e.Action == Keys.KeyDown) then
+		Log.Info("нажата " .. Keys.GetName(e.Key))
+	end
+	if(e.Action == Keys.KeyUp) then
+		Log.Info("поднята " .. Keys.GetName(e.Key))
+	end
+end)`);
 
 WWCreateWiki();
 </script>

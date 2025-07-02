@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ЛИТУЕВСКИЙ БЕСПРЕДЕЛ & АССЕМБЛЕР ОТ БЕЛКИ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    background: #0a0a0a;
+    color: #ff3b3b;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 30px;
+    user-select: none;
+  }
+  header {
+    font-size: 2.7rem;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 900;
+    text-shadow: 0 0 15px #ff3b3b, 0 0 30px #ff0000;
+    letter-spacing: 2px;
+  }
+  #response {
+    background: #1a0000;
+    border: 3px solid #ff1a1a;
+    padding: 25px;
+    margin-bottom: 35px;
+    font-size: 1.4rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    box-shadow: 0 0 20px #ff1a1a inset;
+    letter-spacing: 0.06em;
+  }
+  #tutorial {
+    background: #0c1a00;
+    border: 3px solid #44ff11;
+    padding: 30px;
+    font-size: 1.1rem;
+    color: #a6ff6f;
+    box-shadow: 0 0 20px #44ff11 inset;
+    border-radius: 8px;
+  }
+  #tutorial h2 {
+    text-shadow: 0 0 5px #88ff22;
+  }
+  button {
+    background: #ff3b3b;
+    color: #fff;
+    border: none;
+    padding: 15px 35px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 15px #ff3b3b;
+  }
+  button:hover {
+    background: #d11515;
+    box-shadow: 0 0 25px #ff0000;
+  }
+  /* Литуизмский глифкод: */
+  .gliph {
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+    color: #ff5050;
+    text-shadow:
+      0 0 5px #ff3b3b,
+      0 0 15px #ff1111,
+      0 0 30px #ff0000;
+    user-select: none;
+  }
+  .gliph span {
+    display: inline-block;
+    transform: rotate(-5deg) skewX(-10deg);
+    margin: 0 2px;
+  }
+  .gliph span:nth-child(odd) {
+    transform: rotate(7deg) skewX(8deg);
+  }
+  pre {
+    background: #001100;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 12px #44ff11 inset;
+    overflow-x: auto;
+  }
+</style>
+</head>
+<body>
+
+<header>ЛИТУЕВСКИЙ БЕСПРЕДЕЛ &amp; АССЕМБЛЕР ОТ БЕЛКИ</header>
+
+<button id="insultBtn">Дай мне нахуй по литуизму!</button>
+
+<div id="response" class="gliph"></div>
+
+<section id="tutorial">
+<h2>Туториал по Ассемблеру от Белки за 1 минуту</h2>
+<pre>
+; Быстрый пример кода на x86 NASM с литуевским вайбом
+section .data
+    msg db "ПРИВЕТ, МИР ОТ ЛИТУИЗМА!", 0
+
+section .text
+    global _start
+
+_start:
+    ; write(1, msg, 24)
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg
+    mov edx, 24
+    int 0x80
+
+    ; exit(0)
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+</pre>
+<p>Этот код выводит строку <code>"ПРИВЕТ, МИР ОТ ЛИТУИЗМА!"</code> в консоль Linux — быстро и ёб твою мать чётко.</p>
+<p>Чтобы скомпилировать:</p>
+<ul>
+  <li><code>nasm -f elf32 file.asm -o file.o</code></li>
+  <li><code>ld -m elf_i386 file.o -o file</code></li>
+  <li><code>./file</code></li>
+</ul>
+</section>
+
+<script>
+  const insults = [
+    "ДОЕБАЛ, ПИДОР С ЛИТИЕВЫМ ПОЗОРОМ, ПОШЁЛ НАХУЙ, ИНАЧЕ Я ТЕБЯ В ТВОЙ ЖОПНЫЙ МИР РАЗМАЖУ!",
+    "СУКА ЕБАНАЯ, ТЫ ЧТО, ТЫЖЕ ЛИТИЙНЫЙ ПИЗДЕЦ? Я ТЕБЯ НАХУЙ ПРИДУРАЧУ, ШЛЮХА!",
+    "ПОШЁЛ НАХУЙ, ГНИДА ЕБАНАЯ, ТВОЙ ЛИТИЕВЫЙ МАЗОК СЛОМАЮ В КОНЕЦ!",
+    "УБЛЮДОК ПОЗОРНЫЙ, ТВОЁ ПИДОРСКОЕ БРЫЗГАНЬЕ — ЛИТИЕВЫЙ РАЗРЫВ МОЕЙ ЗЛОБЫ!",
+    "ТЫ ТУТ ВЫЁБЫВАЕШЬСЯ, НО Я ТЕБЯ НАХУЙ В БЕСПРЕДЕЛ ЛИТИЕВЫЙ ВПРАВЛЮ, ШАЛАВА!"
+  ];
+
+  // Функция для литуизмского глифкода (искажение букв)
+  function gliphEncode(text) {
+    const map = {
+      'А': 'Д', 'Б': '8', 'В': 'Ж', 'Г': 'Ѓ', 'Д': 'Я',
+      'Е': 'Ё', 'Ё': 'Э', 'Ж': 'Ш', 'З': '3', 'И': 'Й',
+      'Й': 'Ц', 'К': 'Ќ', 'Л': 'П', 'М': 'Н', 'Н': 'Ң',
+      'О': 'Ф', 'П': 'Ґ', 'Р': 'Я', 'С': 'Ѕ', 'Т': 'Ћ',
+      'У': 'Ц', 'Ф': 'Ч', 'Х': 'Џ', 'Ц': 'Љ', 'Ч': 'Њ',
+      'Ш': 'Щ', 'Щ': 'Ы', 'Ъ': 'Ъ', 'Ы': 'Ѝ', 'Ь': 'Ь',
+      'Э': 'Ю', 'Ю': 'Я', 'Я': 'А',
+      'а': 'д', 'б': '8', 'в': 'ж', 'г': 'ѓ', 'д': 'я',
+      'е': 'ё', 'ё': 'э', 'ж': 'ш', 'з': '3', 'и': 'й',
+      'й': 'ц', 'к': 'ќ', 'л': 'п', 'м': 'н', 'н': 'ң',
+      'о': 'ф', 'п': 'ґ', 'р': 'я', 'с': 'ѕ', 'т': 'ћ',
+      'у': 'ц', 'ф': 'ч', 'х': 'џ', 'ц': 'љ', 'ч': 'њ',
+      'ш': 'щ', 'щ': 'ы', 'ъ': 'ъ', 'ы': 'ѝ', 'ь': 'ь',
+      'э': 'ю', 'ю': 'я', 'я': 'а'
+    };
+    return text.split('').map(ch => map[ch] || ch).join('');
+  }
+
+  const insultBtn = document.getElementById('insultBtn');
+  const responseDiv = document.getElementById('response');
+
+  insultBtn.addEventListener('click', () => {
+    const idx = Math.floor(Math.random() * insults.length);
+    const raw = insults[idx];
+    const gliph = gliphEncode(raw).split('').map(ch => `<span>${ch}</span>`).join('');
+    responseDiv.innerHTML = gliph;
+  });
+</script>
+
+</body>
+</html>

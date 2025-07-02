@@ -191,6 +191,26 @@ function WWCreateWiki(){
 	.Page::selection, .Page *::selection{
 		background-color:yellow;
 	}
+	
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		max-width: 600px;
+	}
+	th, td {
+		border: 1px solid #333;
+		padding: 6px 10px;
+		text-align: left;
+		font-family: monospace;
+	}
+	th {
+		background-color: #f0f0f0;
+	}
+	caption {
+		font-weight: bold;
+		margin-bottom: 10px;
+		font-size: 1.2em;
+	}
 	`,
 
 	"StartPage":
@@ -201,16 +221,14 @@ function WWCreateWiki(){
 <block id="List" style="height:calc(100vh - 100px); width:379px; background-color:rgba(0,0,0,0.05); overflow-y:scroll; overflow-x:hidden; padding-left:5px;">
 
 </block>
-<block style="height:calc(100vh - 100px); width:calc(100vw - 384px * 2); min-height:100%; background-color:transparent; overflow-y:auto;overflow-x:auto;">
-	<block id="PageID" style="min-width:100%; height: 3%; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);">???</block><br>
-	<block id="PageParent" style="min-width:100%; min-height:calc(100% - 3%); padding: 10px; box-sizing: border-box; background-color:rgba(0,0,0,0.025);">
-		<block class="Page" id="Page" style="min-width:100%;">
-			На этой википедии нету ни одной страницы!<br>Если вы не знаете как их сделать,<br>прочтите это <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">документация по Woowzwiki</a>
+	<block style="height:calc(100vh - 100px); width:calc(100vw - 384px); min-height:100%; background-color:transparent; overflow-y:auto;overflow-x:auto;">
+		<block id="PageID" style="min-width:100%; height: 3%; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);">???</block><br>
+		<block id="PageParent" style="min-width:100%; min-height:calc(100% - 3%); padding: 10px; box-sizing: border-box; background-color:rgba(0,0,0,0.025);">
+			<block class="Page" id="Page" style="min-width:100%;">
+				На этой википедии нету ни одной страницы!<br>Если вы не знаете как их сделать,<br>прочтите это <a href="https://woowz11.github.io/woowzsite/woowzwiki_wiki.html">документация по Woowzwiki</a>
+			</block>
 		</block>
 	</block>
-</block>
-<block style="height:calc(100vh - 100px); width:384px; background-color:rgba(0,0,0,0.05); overflow-y:auto;overflow-x:hidden;">
-Скоро...
 </block>
 `
 

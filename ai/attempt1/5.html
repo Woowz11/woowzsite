@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ЛИТУИЗМ – ДИКИЙ БАРДАК ВНУТРИ ТВОЕЙ МАТЕРИ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+  body {
+    margin: 0;
+    background: linear-gradient(270deg, #ff00ff, #00ffff, #ff6600, #ff0000);
+    background-size: 800% 800%;
+    animation: bgShift 30s linear infinite;
+    font-family: 'VT323', monospace;
+    color: #00ff00;
+    overflow-x: hidden;
+  }
+
+  @keyframes bgShift {
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin-top: 1rem;
+    text-shadow:
+      0 0 8px #ff00ff,
+      0 0 15px #00ffff,
+      0 0 20px #ff6600;
+    animation: glitchText 2s infinite;
+  }
+
+  @keyframes glitchText {
+    0%, 100% {text-shadow:
+      2px 0 #ff00ff,
+      -2px 0 #00ffff;}
+    50% {text-shadow:
+      -2px 0 #ff6600,
+      2px 0 #ff0000;}
+  }
+
+  .glitch {
+    position: relative;
+    font-size: 2rem;
+    color: #00ff00;
+    animation: glitchAnim 3s infinite;
+    margin: 1rem auto;
+    max-width: 80%;
+    user-select: none;
+  }
+
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; right: 0;
+    opacity: 0.7;
+    clip: rect(0,900px,0,0);
+  }
+
+  .glitch::before {
+    animation: glitchTop 1.5s infinite;
+    color: #ff00ff;
+    z-index: -1;
+  }
+
+  .glitch::after {
+    animation: glitchBottom 1.5s infinite;
+    color: #00ffff;
+    z-index: -1;
+  }
+
+  @keyframes glitchAnim {
+    0% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(2px, -2px);
+    }
+    60% {
+      transform: translate(-2px, -2px);
+    }
+    80% {
+      transform: translate(2px, 2px);
+    }
+    100% {
+      transform: translate(0);
+    }
+  }
+
+  @keyframes glitchTop {
+    0% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+    20% {
+      clip: rect(0, 9999px, 40px, 0);
+      transform: translate(-2px, -2px);
+    }
+    40% {
+      clip: rect(0, 9999px, 10px, 0);
+      transform: translate(2px, 0);
+    }
+    60% {
+      clip: rect(0, 9999px, 40px, 0);
+      transform: translate(-2px, 2px);
+    }
+    80% {
+      clip: rect(0, 9999px, 0, 0);
+      transform: translate(0);
+    }
+    100% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+  }
+
+  @keyframes glitchBottom {
+    0% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+    20% {
+      clip: rect(40px, 9999px, 80px, 0);
+      transform: translate(2px, 2px);
+    }
+    40% {
+      clip: rect(30px, 9999px, 60px, 0);
+      transform: translate(-2px, 0);
+    }
+    60% {
+      clip: rect(50px, 9999px, 80px, 0);
+      transform: translate(2px, -2px);
+    }
+    80% {
+      clip: rect(0, 9999px, 0, 0);
+      transform: translate(0);
+    }
+    100% {
+      clip: rect(0, 9999px, 0, 0);
+    }
+  }
+
+  .floating-gif {
+    position: absolute;
+    width: 120px;
+    opacity: 0.4;
+    animation-timing-function: ease-in-out;
+    filter: drop-shadow(0 0 10px #ff00ff);
+  }
+
+  #video-container {
+    width: 320px;
+    margin: 2rem auto;
+    border: 5px solid #ff00ff;
+    filter: drop-shadow(0 0 20px #ff0000);
+    animation: pulseGlow 3s infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 15px #ff00ff;}
+    100% { box-shadow: 0 0 40px #ff0000;}
+  }
+
+  pre.code-block {
+    background: #000000cc;
+    border: 2px solid #ff00ff;
+    padding: 1rem;
+    margin: 1rem auto;
+    max-width: 90%;
+    color: #00ff00;
+    font-size: 1rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Кнопка */
+  button {
+    display: block;
+    margin: 2rem auto;
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 3rem;
+    font-size: 1.5rem;
+    font-family: 'VT323', monospace;
+    color: #000;
+    cursor: pointer;
+    text-shadow: 1px 1px 1px #fff;
+    box-shadow: 0 0 15px #ff00ff;
+    animation: shake 1.2s infinite;
+    user-select: none;
+  }
+
+  button:hover {
+    animation: shakeFast 0.6s infinite;
+    color: #ff0000;
+    box-shadow: 0 0 30px #ff0000;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translate(0);}
+    20%, 80% { transform: translate(-4px, 4px);}
+    40%, 60% { transform: translate(4px, -4px);}
+  }
+
+  @keyframes shakeFast {
+    0%, 100% { transform: translate(0);}
+    20%, 80% { transform: translate(-8px, 8px);}
+    40%, 60% { transform: translate(8px, -8px);}
+  }
+
+</style>
+</head>
+<body>
+
+<h1>ЛИТУИЗМ – ХУЙ В ТВОЁЙ ДУШЕ!</h1>
+
+<div class="glitch" data-text="ДОСТАЛЬНО ЕБАНЫЙ ЛИТИЙ, НАХУЙ!">ДОСТАЛЬНО ЕБАНЫЙ ЛИТИЙ, НАХУЙ!</div>
+
+<!-- Плавающие гифки -->
+<img src="https://media.discordapp.net/attachments/1232092445681123349/1389294382808829952/Untitled1.gif?ex=686418b8&is=6862c738&hm=9686713a11944b449ca37c3dfdf3302196f2ca555c5fdb956034b5d899408dd2&=" alt="Литуизм Гифка 1" class="floating-gif" style="top: 5%; left: 10%; animation: float1 7s ease-in-out infinite alternate;">
+<img src="https://media.discordapp.net/attachments/1232092445681123349/1389294382808829952/Untitled1.gif?ex=686418b8&is=6862c738&hm=9686713a11944b449ca37c3dfdf3302196f2ca555c5fdb956034b5d899408dd2&=" alt="Литуизм Гифка 2" class="floating-gif" style="top: 15%; left: 80%; animation: float2 10s ease-in-out infinite alternate;">
+<img src="https://media.discordapp.net/attachments/1232092445681123349/1389294382808829952/Untitled1.gif?ex=686418b8&is=6862c738&hm=9686713a11944b449ca37c3dfdf3302196f2ca555c5fdb956034b5d899408dd2&=" alt="Литуизм Гифка 3" class="floating-gif" style="top: 70%; left: 20%; animation: float3 9s ease-in-out infinite alternate;">
+<img src="https://media.discordapp.net/attachments/1232092445681123349/1389294382808829952/Untitled1.gif?ex=686418b8&is=6862c738&hm=9686713a11944b449ca37c3dfdf3302196f2ca555c5fdb956034b5d899408dd2&=" alt="Литуизм Гифка 4" class="floating-gif" style="top: 65%; left: 85%; animation: float4 11s ease-in-out infinite alternate;">
+
+<style>
+  @keyframes float1 {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(20px);}
+  }
+  @keyframes float2 {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(-25px);}
+  }
+  @keyframes float3 {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(15px);}
+  }
+  @keyframes float4 {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(-15px);}
+  }
+</style>
+
+<!-- Видео gore -->
+<div id="video-container">
+  <video src="https://images-ext-1.discordapp.net/external/dfkm3GMpnRIThiDAl-Tlg0icbq3s1pUNuX5Ixv3eLUQ/https/media.tenor.com/Znjb3N-sh-AAAAPo/gore-blood.mp4" autoplay muted loop playsinline></video>
+</div>
+
+<button id="insultBtn" aria-label="Жми и получи на хуй Литуизм!">ЖМИ НА КНОПКУ И ПОЛУЧИ НАХУЙ ЛИТУИЗМ!</button>
+
+<div class="glitch" id="response" data-text="ЖМИ НА КНОПКУ И ПОЛУЧИ НАХУЙ ЛИТУИЗМ!">ЖМИ НА КНОПКУ И ПОЛУЧИ НАХУЙ ЛИТУИЗМ!</div>
+
+<section aria-label="Литуизмский кодовый трэш" style="max-width: 90%; margin: 2rem auto;">
+
+<h2>Пиздец с кодом — C++</h2>
+<pre class="code-block">
+// C++ пример пиздец кода, чтоб светился и искрил
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+  cout &lt;&lt; "Литуизм - ебучий ад на твоём процессоре!" &lt;&lt; endl;
+  for(int i=0; i&lt;5; i++){
+    cout &lt;&lt; "Хуй в твоём коде! #" &lt;&lt; i+1 &lt;&lt; endl;
+  }
+  return 0;
+}
+</pre>
+
+<h2>Пиздец с кодом — Java</h2>
+<pre class="code-block">
+// Java хуйня
+public class LitiumFucker {
+  public static void main(String[] args) {
+    System.out.println("Литуизм - это пиздец, блять!");
+    for(int i=1; i<=5; i++) {
+      System.out.println("Ебучий литий в действии #" + i);
+    }
+  }
+}
+</pre>
+
+<h2>Пиздец с кодом — Lua</h2>
+<pre class="code-block">
+-- Lua, пиздец функции лития
+for i=1,5 do
+  print("Литуизм ебашит нахуй! #" .. i)
+end
+</pre>
+
+<h2>Пиздец с кодом — G-code (для станков, нахуй)</h2>
+<pre class="code-block">
+; G-code для резки лития нахуй
+G21 ; мм
+G90 ; абсолютные координаты
+M03 S1000 ; включить шпиндель 1000об/мин
+G01 X10 Y10 F500 ; двигаться к точке
+G01 X50 Y50 ; режем нахуй
+M05 ; остановить шпиндель
+</pre>
+
+</section>
+
+<script>
+  // Очень наглый глитч-эффект на кнопке и ответе с матом
+  const insults = [
+    "ТЫ ПРОСТО ЛИТИЕВАЯ ЗАДНИЦА, КОТОРУЮ НАДО СЖИГАТЬ!",
+    "ТЫ ЛИТУЕЦ ИЗ ЛИТУЕЦ, СДЕЛАННЫЙ ИЗ ЛИТИЯ!",
+    "ДАЖЕ ВОЙНА ЛИТИЕВ НЕ СПАСЁТ ТВОЮ ДУШУ!",
+    "ЛИТУИЗМ — ТВОЙ СУДЬБА, ПРОТИВ КОТОРОЙ НЕТ ЩИТА!",
+    "НЕ ПЫТАЙСЯ СПРЯТАТЬСЯ, ЛИТИЕМ ВСЁ ПРОПИТАНО!",
+    "ТЫ — ЖИВОЙ ЭКСПЕРИМЕНТ ЛИТИЕВОЙ АПОКАЛИПСЫ!",
+  ];
+
+  function glitchText(text) {
+    return text.split('').map((ch, i) => {
+      const color = i % 3 === 0 ? '#ff00ff' : (i % 3 === 1 ? '#00ffff' : '#ff6600');
+      const delay = (i % 2) * 0.2;
+      return `<span style="color:${color}; animation-delay:${delay}s; font-weight:bold;">${ch}</span>`;
+    }).join('');
+  }
+
+  const responseEl = document.getElementById('response');
+  const btn = document.getElementById('insultBtn');
+
+  btn.addEventListener('click', () => {
+    const insult = insults[Math.floor(Math.random() * insults.length)];
+    responseEl.innerHTML = glitchText(insult);
+    responseEl.setAttribute('data-text', insult);
+  });
+</script>
+
+</body>
+</html>

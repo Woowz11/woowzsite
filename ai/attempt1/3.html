@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ЛИТУЕВСКИЙ БЕСПРЕДЕЛ & АССЕМБЛЕР ОТ БЕЛКИ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    background: #0a0a0a;
+    color: #ff3b3b;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 30px;
+    user-select: none;
+    overflow-x: hidden;
+  }
+  header {
+    font-size: 2.7rem;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 900;
+    text-shadow: 0 0 15px #ff3b3b, 0 0 30px #ff0000;
+    letter-spacing: 2px;
+    animation: flicker 2s infinite;
+  }
+  #response {
+    background: #1a0000;
+    border: 3px solid #ff1a1a;
+    padding: 25px;
+    margin-bottom: 35px;
+    font-size: 1.4rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    box-shadow: 0 0 20px #ff1a1a inset;
+    letter-spacing: 0.06em;
+    filter: drop-shadow(0 0 4px #ff0000);
+    animation: glitch 1.5s infinite;
+  }
+  #tutorial {
+    background: #0c1a00;
+    border: 3px solid #44ff11;
+    padding: 30px;
+    font-size: 1.1rem;
+    color: #a6ff6f;
+    box-shadow: 0 0 20px #44ff11 inset;
+    border-radius: 8px;
+    margin-bottom: 40px;
+  }
+  #tutorial h2 {
+    text-shadow: 0 0 5px #88ff22;
+  }
+  button {
+    background: #ff3b3b;
+    color: #fff;
+    border: none;
+    padding: 15px 35px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 15px #ff3b3b;
+  }
+  button:hover {
+    background: #d11515;
+    box-shadow: 0 0 25px #ff0000;
+  }
+  /* Литуизмский глифкод */
+  .gliph {
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+    color: #ff5050;
+    text-shadow:
+      0 0 5px #ff3b3b,
+      0 0 15px #ff1111,
+      0 0 30px #ff0000;
+    user-select: none;
+  }
+  .gliph span {
+    display: inline-block;
+    transform-origin: center;
+    animation: glitchSpan 2s infinite;
+    margin: 0 2px;
+  }
+  .gliph span:nth-child(odd) {
+    animation-delay: 0.3s;
+  }
+  .gliph span:nth-child(even) {
+    animation-delay: 0.6s;
+  }
+  /* GIF контейнер */
+  #gif-container {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  #gif-container img {
+    max-width: 400px;
+    width: 90vw;
+    border: 5px solid #ff3b3b;
+    border-radius: 15px;
+    box-shadow: 0 0 30px #ff0000 inset;
+    animation: pulse 3s infinite ease-in-out;
+  }
+  /* Анимации */
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 15px #ff3b3b, 0 0 30px #ff0000;
+    }
+    20%, 22%, 24%, 55% {
+      opacity: 0.6;
+      text-shadow: none;
+    }
+  }
+  @keyframes glitch {
+    0% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    20% {
+      text-shadow:
+        3px 0 red,
+        -3px 0 cyan;
+    }
+    40% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    60% {
+      text-shadow:
+        4px 0 red,
+        -4px 0 cyan;
+    }
+    80% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    100% {
+      text-shadow:
+        3px 0 red,
+        -3px 0 cyan;
+    }
+  }
+  @keyframes glitchSpan {
+    0%, 100% {
+      transform: rotate(0deg) skewX(0deg);
+      color: #ff5050;
+      filter: drop-shadow(0 0 6px #ff1111);
+    }
+    50% {
+      transform: rotate(5deg) skewX(10deg);
+      color: #ff0000;
+      filter: drop-shadow(0 0 12px #ff0000);
+    }
+  }
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 30px #ff0000 inset;
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 50px #ff6600 inset;
+      transform: scale(1.05);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>ЛИТУЕВСКИЙ БЕСПРЕДЕЛ &amp; АССЕМБЛЕР ОТ БЕЛКИ</header>
+
+<div id="gif-container">
+  <img src="https://media.discordapp.net/attachments/1232092445681123349/1389294382808829952/Untitled1.gif?ex=686418b8&is=6862c738&hm=9686713a11944b449ca37c3dfdf3302196f2ca555c5fdb956034b5d899408dd2&=" alt="Литуизм Гифка" />
+</div>
+
+<button id="insultBtn">Дай мне нахуй по литуизму!</button>
+
+<div id="response" class="gliph"></div>
+
+<section id="tutorial">
+<h2>Туториал по Ассемблеру от Белки за 1 минуту</h2>
+<pre>
+; Быстрый пример кода на x86 NASM с литуевским вайбом
+section .data
+    msg db "ПРИВЕТ, МИР ОТ ЛИТУИЗМА!", 0
+
+section .text
+    global _start
+
+_start:
+    ; write(1, msg, 24)
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg
+    mov edx, 24
+    int 0x80
+
+    ; exit(0)
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+</pre>
+<p>Этот код выводит строку <code>"ПРИВЕТ, МИР ОТ ЛИТУИЗМА!"</code> в консоль Linux — быстро и ёб твою мать чётко.</p>
+<p>Чтобы скомпилировать:</p>
+<ul>
+  <li><code>nasm -f elf32 file.asm -o file.o</code></li>
+  <li><code>ld -m elf_i386 file.o -o file</code></li>
+  <li><code>./file</code></li>
+</ul>
+</section>
+
+<script>
+  const insults = [
+    "ДОЕБАЛ, ПИДОР С ЛИТИЕВЫМ ПОЗОРОМ, ПОШЁЛ НАХУЙ, ИНАЧЕ Я ТЕБЯ В ТВОЙ ЖОПНЫЙ МИР РАЗМАЖУ!",
+    "СУКА ЕБАНАЯ, ТЫ ЧТО, ТЫЖЕ ЛИТИЙНЫЙ ПИЗДЕЦ? Я ТЕБЯ НАХУЙ ПРИДУРАЧУ, ШЛЮХА!",
+    "ПОШЁЛ НАХУЙ, ГНИДА ЕБАНАЯ, ТВОЙ ЛИТИЕВЫЙ МАЗОК СЛОМАЮ В КОНЕЦ!",
+    "УБЛЮДОК ПОЗОРНЫЙ, ТВОЁ ПИДОРСКОЕ БРЫЗГАНЬЕ — ЛИТИЕВЫЙ РАЗРЫВ МОЕЙ ЗЛОБЫ!",
+    "ТЫ ТУТ ВЫЁБЫВАЕШЬСЯ? ТЫ ПРОСТО ЛИТИЕВАЯ ЗАДНИЦА, КОТОРУЮ НАДО СЖИГАТЬ!",
+  ];
+
+  function glitchText(text) {
+    return text.split('').map((ch, i) => `<span style="animation-delay:${(i%2)*0.3}s">${ch}</span>`).join('');
+  }
+
+  const responseEl = document.getElementById('response');
+  const btn = document.getElementById('insultBtn');
+
+  btn.addEventListener('click', () => {
+    const insult = insults[Math.floor(Math.random() * insults.length)];
+    responseEl.innerHTML = glitchText(insult);
+  });
+
+  // Начальное сообщение
+  responseEl.innerHTML = glitchText("ЖМИ НА КНОПКУ И ПОЛУЧИ НАХУЙ ЛИТУИЗМ!");
+</script>
+
+</body>
+</html>

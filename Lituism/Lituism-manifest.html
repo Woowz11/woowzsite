@@ -1175,12 +1175,19 @@ var PAGE_MANIFEST_CRYBIRD = ELEMENT_SITE(
 	bg.style.textShadow = `0 0 2px currentColor, 0 0 5px currentColor`;
 },false);
 
+var PAGE_MANIFEST_TRASH1 = ELEMENT_SITE(`
+`
+,function(){ var bg = document.getElementById("MAIN"); 
+
+},false);
+
 // УЕБА, ЗАГРУЖАЙ САЙТ В ПОРЯДКЕ ДОБАВЛЕНИЯ ИХ В ELEMENT_SITE
 const PAGES = {
 	""		   : {t:"𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼",c:PAGE_MAINPAGE_CONTENT},
 	"database" : {t:"DΛ⛧†Λ : Bλ₳$Ξ",c:PAGE_DATABASE},
 	"sranspang": {t:"𝓢𝓟𝓐𝓝𝓫𝓫𝓫𝓒𝓟𝓐𝓝𝓒𝓗",c:PAGE_MANIFEST_SRANIYSPANCH},
-	"crybird"  : {t:"❄️ 🐦 ❄️",c:PAGE_MANIFEST_CRYBIRD}
+	"crybird"  : {t:"❄️ 🐦 ❄️",c:PAGE_MANIFEST_CRYBIRD},
+	"trash"    : {t:"trash",c:PAGE_MANIFEST_TRASH1}
 };
 
 for(const j in PREPAGES){

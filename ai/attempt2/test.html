@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пример интерфейса</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #007BFF;
+        }
+        .message {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #d9534f;
+        }
+        /* Стили для различных элементов */
+        input[type="text"], input[type="email"], textarea, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .checkbox-group label, .radio-group label {
+            margin-right: 15px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Пример сайта с элементами интерфейса</h1>
+        <nav>
+            <ul>
+                <li><a href="#forms">Формы</a></li>
+                <li><a href="#buttons">Кнопки</a></li>
+                <li><a href="#lists">Списки</a></li>
+                <li><a href="#table">Таблица</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <p class="message">Туториал по ассемблеру NASM от Белки</p>
+    </div>
+
+    <div class="container" id="forms">
+        <h2>Элементы форм</h2>
+        <form>
+            <label for="textInput">Текстовое поле:</label>
+            <input type="text" id="textInput" name="textInput" placeholder="Введите текст"><br>
+
+            <label for="emailInput">Email:</label>
+            <input type="email" id="emailInput" name="emailInput" placeholder="your@example.com"><br>
+
+            <label for="textareaInput">Многострочное текстовое поле:</label>
+            <textarea id="textareaInput" name="textareaInput" rows="4" placeholder="Введите ваш комментарий"></textarea><br>
+
+            <label for="selectOption">Выпадающий список:</label>
+            <select id="selectOption" name="selectOption">
+                <option value="option1">Опция 1</option>
+                <option value="option2">Опция 2</option>
+                <option value="option3">Опция 3</option>
+            </select><br><br>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="checkbox1" value="check1"> Чекбокс 1
+                </label>
+                <label>
+                    <input type="checkbox" name="checkbox2" value="check2"> Чекбокс 2
+                </label>
+            </div><br>
+
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="radioOption" value="radio1"> Радио-кнопка 1
+                </label>
+                <label>
+                    <input type="radio" name="radioOption" value="radio2"> Радио-кнопка 2
+                </label>
+            </div><br>
+
+            <button type="submit">Отправить форму</button>
+        </form>
+    </div>
+
+    <div class="container" id="buttons">
+        <h2>Кнопки</h2>
+        <button>Обычная кнопка</button>
+        <button style="background-color: #17a2b8;">Информационная кнопка</button>
+        <button style="background-color: #dc3545;">Кнопка удаления</button>
+    </div>
+
+    <div class="container" id="lists">
+        <h2>Списки</h2>
+        <h3>Неупорядоченный список</h3>
+        <ul>
+            <li>Элемент списка 1</li>
+            <li>Элемент списка 2</li>
+            <li>Элемент списка 3</li>
+        </ul>
+
+        <h3>Упорядоченный список</h3>
+        <ol>
+            <li>Первый пункт</li>
+            <li>Второй пункт</li>
+            <li>Третий пункт</li>
+        </ol>
+    </div>
+
+    <div class="container" id="table">
+        <h2>Таблица</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Заголовок 1</th>
+                    <th>Заголовок 2</th>
+                    <th>Заголовок 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Данные 1.1</td>
+                    <td>Данные 1.2</td>
+                    <td>Данные 1.3</td>
+                </tr>
+                <tr>
+                    <td>Данные 2.1</td>
+                    <td>Данные 2.2</td>
+                    <td>Данные 2.3</td>
+                </tr>
+                <tr>
+                    <td>Данные 3.1</td>
+                    <td>Данные 3.2</td>
+                    <td>Данные 3.3</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,14 +1,16 @@
-function AddFullnessToTable(tabl,whataddpered,whataddsad){
-	if(whataddpered==null){whataddpered=""} if(whataddsad==null){whataddsad=""}
-	var newtabl = []
+function AddFullnessToTable(tabl, left = "", right = ""){
+	if (left == null){left = ""}
+	if (right   == null){right   = ""}
+	var result = []
 	for (let str of tabl){
-		newtabl.push(whataddpered+str+whataddsad)
+		result.push(left + str + right)
 	}
-	return newtabl
+	return result
 }
-function AddTableToTable(tabl1,tabl2){
-	return tabl1.concat(tabl2);
+function AddTableToTable(A,B){
+	return A.concat(B);
 }
+
 /*__________________________________________________________________________________________________*/
 
 /* CMD команда на поиск файлов (пример, типа gif): dir /b /a-d *.gif    */
@@ -51,7 +53,7 @@ WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"ai1","ai2","ai3","ai4","le_pedo","tresh","ezgif-5-8da35159bb","popa","horse","megadoff","megadoff2","megadoo33333","result","image0","explode-please",
 	"woah","SPOILER_more","twitter_1895217911683522717","64ac0bf08aa29b4f","torch","ezgif-2-baf276abda","hyha","help-yeah","Lets_take_a_look_off","hotline-miami","c6j0PNI",
 	"spongebob-walking","prosto-chydo","CgsUwNSl","you","yes","frog","xuL4tZV0R_VlZcdWIw_rsfpl57383PjBsLx3jTZt9bDf7BV68Px8dYJBsUWhtKUV3J2IO5GaML5hYmw__2BOC1E2","image1",
-	"papa","sticker","emotion","semen_dead_body","you_megapocus"
+	"papa","sticker","emotion","semen_dead_body","you_megapocus","Untitled1","download_cpy","3dgifmaker20605"
 ],"source/specialforrandomsite/",".gif"))
 
 WoowzsiteSourceImagesJPG = AddFullnessToTable([
@@ -323,7 +325,8 @@ BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
-	return AddTableToTable(WoowzsiteSourceImagesPNG,
+	return 
+	AddTableToTable(WoowzsiteSourceImagesPNG,
 	AddTableToTable(WoowzsiteSourceImagesJPG,
 	AddTableToTable(WoowzsiteSourceImagesGIF,
 	AddTableToTable(WoowzsiteSourceDiscordAvatars,
@@ -340,15 +343,21 @@ function GetAllWoowzsite(){
 	AddTableToTable(GetAllBloodrawSkinEditor(),
 	AddTableToTable(GitExplorerSource,
 	AddTableToTable(WoowzsiteLituism,
-	AddTableToTable(WoowzsiteSourceWoowzcore,LithiumArts))))))))))))))))));
+	AddTableToTable(WoowzsiteSourceWoowzcore,
+					LithiumArts
+	))))))))))))))))));
 }
 
 function GetAllWoowzsiteAudios(){
-	return AddTableToTable(WoowzsiteSourceAudios,WoowzcoreMusics);
+	return AddTableToTable(
+		WoowzsiteSourceAudios,
+		WoowzcoreMusics
+	);
 }
 
 function GetAllBloodrawSkinEditor(){
-	return AddTableToTable(BloodrawSkinEditorBody,
+	return 
+	AddTableToTable(BloodrawSkinEditorBody,
 	AddTableToTable(BloodrawSkinEditorBoots,
 	AddTableToTable(BloodrawSkinEditorCloths,
 	AddTableToTable(BloodrawSkinEditorHats,
@@ -359,31 +368,33 @@ function GetAllBloodrawSkinEditor(){
 	AddTableToTable(BloodrawSkinEditorTattoo,
 	AddTableToTable(BloodrawSkinEditorUnderpants,
 	AddTableToTable(BloodrawSkinEditorGradientsHairs,
-	AddTableToTable(BloodrawSkinEditorGradientsSkins,BloodrawSkinEditorUpperdecor))))))))))));
+	AddTableToTable(BloodrawSkinEditorGradientsSkins,
+					BloodrawSkinEditorUpperdecor
+	))))))))))));
 }
 
 function GetAllWoowzsiteImages(){
 	var tabl = GetAllWoowzsite();
-	var tabl_ = [];
+	var result = [];
 	for(var src of tabl){
 		src = src.toLowerCase();
-		if(src.includes(".png")||src.includes(".jpg")||src.includes(".jpeg")||src.includes(".gif")||src.includes(".webp")){
-			tabl_.push(src);
+		if(src.includes(".png") || src.includes(".jpg") || src.includes(".jpeg") || src.includes(".gif") || src.includes(".webp")){
+			result.push(src);
 		}
 	}
-	return tabl_;
+	return result;
 }
 
 function GetAllWoowzsiteIcons(){
 	var tabl = GetAllWoowzsite();
-	var tabl_ = [];
+	var result = [];
 	for(var src of tabl){
 		src = src.toLowerCase();
 		if(src.includes(".ico")){
-			tabl_.push(src);
+			result.push(src);
 		}
 	}
-	return tabl_;
+	return result;
 }
 
 /*__________________________________________________________________________________________________*/
@@ -474,4 +485,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
 🟫🟫🟫🟫🟫⬜🟥⬜🟫🟫🟫🟫🟫
 ⬛⬛🟫⬛⬛⬜🟥⬜⬛⬛🟫⬛⬛СРАНЫЙ СПАНЧ))))))))))) ТОТ САМЫЙ
 🟫🟫🟫🟫🟫🟫🟥🟫🟫🟫🟫🟫🟫ЗНАЕТЕ ТАКОГО??? НУ У ВАС ЗА ОКНОМ СТОИТ СЕЙЧАС)))))
-кастеризация ---- 🟥 ----- пастеризация`]
+кастеризация ---- 🟥 ----- пастеризация`,"This tutorial focuses on creating a GCC cross-compiler for your own operating system.","crt0.o","libc","Ты в классической \"куриной-или-яйца\" ситуации",
+"срал","ебал","x86_64-elf","blob","слился","ясно","пасмурно","фу","демку","демка","ой","упс","так","как так","ща","уйду","сейчас","терминал","косой"]
