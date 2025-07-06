@@ -325,8 +325,7 @@ BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
-	return 
-	AddTableToTable(WoowzsiteSourceImagesPNG,
+	return AddTableToTable(WoowzsiteSourceImagesPNG,
 	AddTableToTable(WoowzsiteSourceImagesJPG,
 	AddTableToTable(WoowzsiteSourceImagesGIF,
 	AddTableToTable(WoowzsiteSourceDiscordAvatars,
@@ -356,8 +355,7 @@ function GetAllWoowzsiteAudios(){
 }
 
 function GetAllBloodrawSkinEditor(){
-	return 
-	AddTableToTable(BloodrawSkinEditorBody,
+	return AddTableToTable(BloodrawSkinEditorBody,
 	AddTableToTable(BloodrawSkinEditorBoots,
 	AddTableToTable(BloodrawSkinEditorCloths,
 	AddTableToTable(BloodrawSkinEditorHats,
