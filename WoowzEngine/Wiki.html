@@ -7,7 +7,31 @@
 	<title>WoowzEngine загрузка...</title>
 	<link rel="icon" href="icon.ico" type="image/x-icon" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/themes/vue.css" />
+	<link rel="stylesheet" href="../highlight/styles/atom-one-dark.css" />
 </head>
+
+<style>
+
+.markdown-section{
+	max-width: 95%;
+}
+
+/* Ползунок слева у sidebar */
+.sidebar {
+  direction: rtl;
+  overflow-y: scroll;
+}
+.sidebar > * {
+  direction: ltr;
+}
+
+/* Тонкий ползунок */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100,100,100,0.5) transparent;
+}
+
+</style>
 
 <body>
 	<div id="app"></div>
@@ -23,18 +47,39 @@
 		auto2top: true,
 		search: true,
 		darkTheme: true,
-		
-		plugins: [ function(hook, vm) {
-			hook.doneEach(function() {
-					console.log('Страница загружена:', vm.route.path);
+		plugins: [
+			function(hook) {
+				hook.doneEach(() => {
+					document.querySelectorAll('pre code').forEach(block => {
+						hljs.highlightElement(block);
+					});
+					
+					function Replace(Key, Value){
+						const pattern = new RegExp(`\\{${Key}\\}`, 'g');
+						const root = document.getElementById('app') || document.body;
+
+						function walk(node) {
+							if (node.nodeType === Node.TEXT_NODE) {
+								node.textContent = node.textContent.replace(pattern, Value);
+							} else {
+								node.childNodes.forEach(walk);
+							}
+						}
+
+						walk(root);
+					}
+					Replace("WoowzEngineVersion", window.WoowzEngineVersion);
 				});
 			}
 		]
 	};
 	</script>
-
+	
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+	<script src="../highlight/highlight.min.js"></script>
+
+
 	
 	<!--<footer style="text-align:center; padding:10px; background:#222; color:#fff;">
 		&copy; 2025 WoowzEngine. Все права защищены. (WIP)
