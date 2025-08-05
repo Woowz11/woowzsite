@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru-LIT" manifest="lituism.appcache">
+<head>
+<meta charset="UTF-8">
+<title>𓆩 𝙻𝙸𝚃𝚄𝙸𝚂𝙼.𝚂𝙱 𓆪</title>
+<style>
+  @font-face{
+    font-family: LIT;
+    src: url('data:font/woff2;base64,') format('woff2'); /* пустой, как душа питониста */
+  }
+  body{
+    margin:0;
+    background:#000 repeating-linear-gradient(0deg,#0a0a0a 0,#0a0a0a 1px,#000 1px,#000 2px);
+    color:#00ff41;
+    font-family: 'Courier New', monospace;
+    overflow-x:hidden;
+    cursor:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><circle cx="8" cy="8" r="7" fill="%2300ff41"/></svg>'),auto;
+  }
+  header{
+    position:fixed; top:0; left:0; right:0; height:60px;
+    background:#000; border-bottom:1px solid #00ff41;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; z-index:666;
+  }
+  h1{ margin:0; font-size:1.4rem; letter-spacing:.2em;}
+  #golu{ animation:pulse 2s infinite;}
+  @keyframes pulse{50%{text-shadow:0 0 8px #00ff41,0 0 16px #00ff41;}}
+  nav a{ color:#00ff41; text-decoration:none; margin:0 10px; position:relative;}
+  nav a:hover{ color:#fff;}
+  nav a::after{ content:""; position:absolute; left:0; bottom:-2px; width:0; height:1px; background:#fff; transition:.3s;}
+  nav a:hover::after{ width:100%;}
+  main{ padding:80px 20px 40px; max-width:800px; margin:auto;}
+  section{ margin-bottom:60px; }
+  h2{ border-left:3px solid #00ff41; padding-left:8px;}
+  pre{ background:#000a00; padding:15px; border-left:3px solid #00ff41; overflow:auto;}
+  .glitch{
+    animation:glitch 1s infinite;
+    display:inline-block;
+  }
+  @keyframes glitch{
+    0%{transform:translate(0)}
+    20%{transform:translate(-2px,2px)}
+    40%{transform:translate(-2px,-2px)}
+    60%{transform:translate(2px,2px)}
+    80%{transform:translate(2px,-2px)}
+    100%{transform:translate(0)}
+  }
+  footer{ text-align:center; font-size:.75rem; color:#008000; padding:20px;}
+  /* портал спанча */
+  #spanch{
+    position:fixed; bottom:-100px; right:10px;
+    width:80px; height:80px;
+    background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><circle cx="50" cy="40" r="25" fill="%2300ff41"/><circle cx="40" cy="35" r="8" fill="%23000"/><circle cx="60" cy="35" r="8" fill="%23000"/><path d="M30 65 Q50 85 70 65" stroke="%23000" stroke-width="5"/></svg>') center/cover;
+    animation:float 4s ease-in-out infinite;
+    cursor:pointer;
+  }
+  @keyframes float{50%{transform:translateY(-20px)}}
+  #spanch:hover{bottom:10px;}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="golu">𓆩 GOLU 𓆪</h1>
+  <nav>
+    <a href="#manifest">Манифест</a>
+    <a href="#ritual">Ритуал</a>
+    <a href="#download">Скачать</a>
+  </nav>
+</header>
+
+<main>
+  <section id="manifest">
+    <h2>🔻 Манифест 🔻</h2>
+    <p>
+      <span class="glitch">GOLU</span> — мученик литиевых ядер, 
+      <span class="glitch">SRANSPANG</span> — его огненный губочный клинок. 
+      Python — ересь, NASM — святыня.
+    </p>
+    <pre>
+; Сакральный хэллоу, мир
+BITS 64
+global _start
+_start:
+    mov eax, 60        ; syscall exit
+    xor edi, edi       ; status 0
+    syscall
+    </pre>
+  </section>
+
+  <section id="ritual">
+    <h2>⚙ Ритуал приёма</h2>
+    <ol>
+      <li>Открой терминал <kbd>Ctrl+Alt+F3</kbd></li>
+      <li>Введи <code>nasm -felf64 soul.asm -o soul.o</code></li>
+      <li>Получи QR в логах → сканируй → запусти стрим.</li>
+    </ol>
+  </section>
+
+  <section id="download">
+    <h2>⬇ Ключи исходников</h2>
+    <pre>
+git clone https://github.com/woowz11/LithiumUniverse.git
+cd LithiumUniverse
+make lituism
+    </pre>
+    <p><small>Требуется NASM ≥ 2.15, Cursed GCC 13.37, Python — запрещён.</small></p>
+  </section>
+</main>
+
+<!-- Портал -->
+<a id="spanch" href="javascript:void(0)" onclick="alert('0x4C692043')"></a>
+
+<footer>
+  𓆣 2025 LIT CORE — все права уничтожены 𓆣
+</footer>
+
+<!-- глитч-шум -->
+<script>
+setInterval(()=>document.body.style.filter=`hue-rotate(${Math.random()*20}deg)`,2000);
+</script>
+</body>
+</html>

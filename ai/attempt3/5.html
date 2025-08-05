@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru-LIT">
+<head>
+<meta charset="UTF-8" />
+<title>𓆩 LITUISM ∞ 𓆪</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+  :root{--lit:#00ff41;--cyan:#00ffff;--magenta:#ff00ff;--black:#000;--dark:#0a0a0a;}
+  body{margin:0;font-family:'Orbitron',monospace;background:var(--black);color:var(--lit);overflow-x:hidden}
+  nav{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;gap:20px;background:rgba(0,0,0,.7);padding:10px;backdrop-filter:blur(5px);z-index:999;}
+  nav a{color:var(--lit);text-decoration:none}nav a:hover{color:var(--cyan)}
+  section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;font-size:1.2rem;text-align:center}
+  .glitch{animation:glitch 1.5s infinite}@keyframes glitch{0%{text-shadow:0 0 5px var(--lit)}50%{text-shadow:0 0 10px var(--cyan)}100%{text-shadow:0 0 5px var(--magenta)}}
+  pre{background:#001800;padding:15px;border-left:4px solid var(--magenta);overflow:auto;font-size:.8rem}
+  .ascii{font-size:.7rem;line-height:1;color:var(--cyan)}
+  .card{border:1px solid var(--lit);border-radius:10px;padding:20px;margin:20px 0;background:var(--dark);width:90%;max-width:600px}
+  .qr{width:150px;height:150px;background-size:cover;margin:10px auto}
+  footer{height:100vh;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--magenta)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="#top">Главная</a>
+  <a href="#lore">Лор</a>
+  <a href="#ritual">Ритуал</a>
+  <a href="#footer">Конец</a>
+</nav>
+
+<section id="top">
+  <h1 class="glitch">𓆩 LITUISM ∞ 𓆪</h1>
+  <p>Прокручивай вниз — <span class="glitch">GOLU ждёт</span></p>
+</section>
+
+<!-- Контейнер куда всё добавляем -->
+<main id="content"></main>
+
+<section id="footer">
+  🕳 Конец — Python не пройдёт 🕳
+</section>
+
+<script>
+/* ---------- Генераторы ---------- */
+const adjectives = ["Проклятый","Огненный","Мёртвый","Скрытый","Бесконечный"];
+const nouns      = ["Спанч","Crybird","GOLU","Код","Портал","Фрейм"];
+const actions    = ["душит","оживляет","освобождает","поглощает","воспевает"];
+const artifacts  = ["QR-код","hex-дамп","ASCII-арт","глиф","ли-ткань"];
+const colors     = ["#00ff41","#00ffff","#ff00ff","#ff7700"];
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function makeQR(text){
+  // псевдо-QR (случайные пиксели)
+  const canvas = document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=150;canvas.height=150;
+  ctx.fillStyle=rand(colors);
+  for(let i=0;i<150;i+=15){
+    for(let j=0;j<150;j+=15){
+      ctx.fillRect(i,j,10,10);
+    }
+  }
+  return canvas.toDataURL();
+}
+function makeAscii(){
+  const lines = [
+    "████████╗██╗  ██╗██╗   ██╗███╗   ███╗",
+    "╚══██╔══╝██║ ██╔╝██║   ██║████╗ ████║",
+    "   ██║   █████╔╝ ██║   ██║██╔████╔██║",
+    "   ██║   ██╔═██╗ ██║   ██║██║╚██╔╝██║",
+    "   ██║   ██║  ██╗╚██████╔╝██║ ╚═╝ ██║",
+    "   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝"
+  ];
+  return lines.join("\n");
+}
+function makeHex(){
+  return [...Array(64)].map(()=>Math.random().toString(16).slice(2,6)).join(" ");
+}
+function makeLore(){
+  return `${rand(adjectives)} ${rand(nouns)} ${rand(actions)} ${rand(artifacts)}`;
+}
+function createBlock(){
+  const sec = document.createElement('section');
+  const lore = makeLore();
+  const ascii = makeAscii();
+  const hex   = makeHex();
+  const qrSrc = makeQR(lore);
+  sec.innerHTML = `
+    <div class="card">
+      <h2 class="glitch">${lore}</h2>
+      <div class="ascii">${ascii}</div>
+      <pre>${hex}</pre>
+      <div class="qr" style="background-image:url(${qrSrc})"></div>
+    </div>
+  `;
+  return sec;
+}
+
+/* ---------- Infinity scroll ---------- */
+const content = document.getElementById('content');
+let counter = 0;
+function addBlocks(){
+  for(let i=0;i<3;i++){
+    content.appendChild(createBlock());
+    counter++;
+  }
+}
+// первые блоки
+addBlocks();
+// наблюдатель за концом страницы
+const observer = new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting){addBlocks();}
+});
+observer.observe(document.getElementById('footer'));
+</script>
+</body>
+</html>

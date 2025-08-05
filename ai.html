@@ -1,112 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hugging Face AI Demo</title>
-<style>
-  body {
-    max-width: 600px;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    padding: 20px;
-  }
-  textarea {
-    width: 100%;
-    height: 100px;
-    font-size: 16px;
-    padding: 10px;
-  }
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  #output {
-    margin-top: 20px;
-    padding: 15px;
-    background: white;
-    border-radius: 6px;
-    min-height: 80px;
-    white-space: pre-wrap;
-    box-shadow: 0 0 5px #ccc;
-  }
-  #loading {
-    display: none;
-    margin-top: 10px;
-    color: #666;
-  }
-</style>
+  <meta charset="utf-8" />
+  <title>Просто AI – тестовый сайт</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+	:root {
+		--bg: #ffffff;
+		--card: #ffffff;
+		--accent: #e60023;
+		--accent-dark: #c50021;
+		--text: #1a1a1a;
+		--border: #e5e5e5;
+		--user-bg: #ffe5e9;
+		--assistant-bg: #f7f7f7;
+	}
+	*{box-sizing:border-box}
+	body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:10px}
+	.chat-card{max-width:640px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;height:92vh;max-height:700px}
+	header{background:var(--accent);color:#fff;padding:15px 25px;font-weight:600;font-size:1.1rem;text-align:center;letter-spacing:.5px}
+	.messages{flex:1;padding:15px 25px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+	.msg{padding:10px 14px;border-radius:12px;max-width:85%;word-break:break-word;font-size:.95rem}
+	.user{align-self:flex-end;background:var(--user-bg)}
+	.ai{align-self:flex-start;background:var(--assistant-bg)}
+	.status{color:#666;font-size:.9rem;margin-top:4px}
+	.input-area{border-top:1px solid var(--border);padding:15px 25px;display:flex;flex-direction:column;gap:10px}
+	textarea{resize:none;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:1rem;height:90px}
+	textarea:focus{outline:none;border-color:var(--accent)}
+	.btn{align-self:flex-end;background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:.9rem;cursor:pointer}
+	.btn:disabled{opacity:.6;cursor:not-allowed}
+	footer{font-size:.7rem;color:#999;text-align:center;padding:8px}
+  </style>
 </head>
 <body>
+  <div class="chat-card">
+	<header>Просто AI – тестовый сайт</header>
 
-<h1>Hugging Face GPT-2 Demo</h1>
+	<div id="messages" class="messages"></div>
 
-<textarea id="prompt" placeholder="Введите текст для генерации..."></textarea>
-<br />
-<button id="generateBtn">Сгенерировать</button>
+	<div class="input-area">
+		<textarea id="q" placeholder="Ваш вопрос…"></textarea>
+		<button id="sendBtn" class="btn" disabled>Отправить</button>
+	</div>
 
-<div id="loading">Загрузка...</div>
-<div id="output"></div>
+	<footer>Это тестовый сайт для проверки AI, история хранится только в текущей вкладке.</footer>
+  </div>
 
-<script>
-  const token = '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';
-  const model = 'distilgpt2';  // рабочая публичная модель
+  <!-- подключаем обновлённый модуль -->
+  <script src="source/ai.js"></script>
 
-  const promptEl = document.getElementById('prompt');
-  const outputEl = document.getElementById('output');
-  const loadingEl = document.getElementById('loading');
-  const btn = document.getElementById('generateBtn');
+  <!-- инициализация -->
+  <script>
+	const messagesDiv = document.getElementById('messages');
+	const qInput		= document.getElementById('q');
+	const sendBtn	 = document.getElementById('sendBtn');
 
-  async function queryHuggingFace(prompt) {
-    loadingEl.style.display = 'block';
-    outputEl.textContent = '';
-    try {
-      const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ inputs: prompt, options: { wait_for_model: true } })
-      });
+	// стартовая память: пустая (можно передать массив строк)
+	const bot = new WoowzAI([
+		 { role: 'system', content: 'Ты мастер HTML и только HTML, ты пантуешься HTML, но ты не знаешь других языков, ты не знаешь js и т.д, только HTML' }
+	], { remember: true });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ошибка API: ${response.status} ${errorText}`);
-      }
+	function addMessage(role, text) {
+		const div = document.createElement('div');
+		div.className = `msg ${role}`;
+		div.textContent = text;
+		messagesDiv.appendChild(div);
+		messagesDiv.scrollTop = messagesDiv.scrollHeight;
+	}
 
-      const data = await response.json();
+	// приветствие
+	addMessage('ai', 'Привет! ЗАДАЙ МНЕ ВОПРОС.');
 
-      if (data.error) {
-        throw new Error(`Ошибка модели: ${data.error}`);
-      }
+	async function sendMessage() {
+		const q = qInput.value.trim();
+		if (!q) return;
+		sendBtn.disabled = true;
 
-      if (Array.isArray(data)) {
-        outputEl.textContent = data[0].generated_text || JSON.stringify(data[0]);
-      } else if (data.generated_text) {
-        outputEl.textContent = data.generated_text;
-      } else {
-        outputEl.textContent = JSON.stringify(data);
-      }
-    } catch (err) {
-      outputEl.textContent = err.message;
-    } finally {
-      loadingEl.style.display = 'none';
-    }
-  }
+		addMessage('user', q);
 
-  btn.addEventListener('click', () => {
-    const prompt = promptEl.value.trim();
-    if (!prompt) {
-      alert('Введите текст!');
-      return;
-    }
-    queryHuggingFace(prompt);
-  });
-</script>
+		let answer = '';
+		const placeholder = document.createElement('div');
+		placeholder.className = 'msg ai status';
+		placeholder.textContent = 'Думаю…';
+		messagesDiv.appendChild(placeholder);
+		messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
+		qInput.value = '';
+
+		try {
+		  await bot.send(q, {
+			onChunk: (delta) => {
+				answer += delta;
+				placeholder.textContent = answer;
+				messagesDiv.scrollTop = messagesDiv.scrollHeight;
+			},
+			onDone: () => placeholder.classList.remove('status'),
+			onStage: (stage) => {
+				if (stage === 'thinking') placeholder.textContent = 'Думаю…';
+			}
+		  });
+		} catch (err) {
+		  placeholder.textContent = 'Ошибка: ' + err.message;
+		} finally {
+		  sendBtn.disabled = false;
+		}
+	}
+
+	sendBtn.onclick = sendMessage;
+	sendBtn.disabled = false;
+  </script>
 </body>
 </html>

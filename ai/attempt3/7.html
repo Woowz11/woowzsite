@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru-LIT">
+<head>
+<meta charset="UTF-8" />
+<title>𓆩 LITUISM.EXE 𓆪</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=VT323&display=swap');
+  :root{--lit:#00ff41;--cyan:#00ffff;--magenta:#ff00ff;--blood:#8b0000}
+  body{margin:0;background:#000;color:var(--lit);font-family:'Orbitron',monospace;overflow:hidden}
+  /* Терминал */
+  #terminal{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    background:#000;padding:20px;font-family:'VT323',monospace;font-size:1.5rem;line-height:1.2
+  }
+  #screen{flex:1;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+  #input{background:#000;border:none;color:var(--lit);outline:none}
+  /* Глитч-экран */
+  .glitch{
+    animation:glitch .5s infinite alternate;
+    text-shadow:0 0 5px var(--lit),0 0 10px var(--cyan)
+  }
+  @keyframes glitch{
+    0%{transform:translate(0)}50%{transform:translate(-2px,2px)}
+  }
+  /* Скрытый режим */
+  .hidden{display:none}
+  /* Партиклы */
+  .particle{position:absolute;border-radius:50%;opacity:.7;animation:fly 6s linear infinite}
+  @keyframes fly{from{transform:translateY(110vh)}to{transform:translateY(-10vh)}}
+</style>
+</head>
+<body>
+<div id="terminal">
+  <div id="screen" class="glitch"></div>
+  <input id="input" autocomplete="off" placeholder="Введи ритуал..." />
+</div>
+
+<script>
+/* ---------- Система событий ---------- */
+const screen = document.getElementById('screen');
+const input  = document.getElementById('input');
+let scrollCounter = 0;
+let secretUnlocked = false;
+
+/* ---------- Утилиты ---------- */
+const colors = ["#00ff41","#00ffff","#ff00ff","#ff7700","#8b0000"];
+const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const print = txt => screen.textContent += txt + "\n";
+const cls = () => screen.textContent = '';
+
+/* ---------- Интерактив ---------- */
+input.addEventListener('keydown',async e=>{
+  if(e.key==="Enter"){
+    const cmd = input.value.trim().toLowerCase();
+    input.value="";
+    await execute(cmd);
+  }
+});
+document.addEventListener('wheel',()=>{
+  scrollCounter++;
+  if(scrollCounter%7===0) triggerRandomEvent();
+});
+
+/* ---------- Команды ---------- */
+async function execute(cmd){
+  switch(cmd){
+    case "help":
+      print("Rituals available:");
+      print("  lituism   — запустить культ");
+      print("  secret    — открыть секрет");
+      print("  clear     — очистить");
+      print("  python    — ересь!");
+      break;
+    case "lituism":
+      await ritual();
+      break;
+    case "secret":
+      await secret();
+      break;
+    case "clear":
+      cls();
+      break;
+    case "python":
+      await curse();
+      break;
+    default:
+      print("Неизвестный ритуал");
+  }
+  screen.scrollTop = screen.scrollHeight;
+}
+
+/* ---------- Ритуалы ---------- */
+async function ritual(){
+  cls();
+  for(let i=0;i<10;i++){
+    print(`[LIT] ${rand(["GOLU","Crybird","Spanch"])} ${rand(["душит","оживляет","кодирует"])} ${rand(["Python","hex","QR"])}...`);
+    await sleep(200);
+  }
+  print("Ритуал завершён. Ты внутри.");
+}
+
+async function curse(){
+  for(let i=0;i<20;i++){
+    print("PYTHON DETECTED — ERASE MEMORY");
+    document.body.style.background = rand(colors);
+    await sleep(50);
+  }
+  await sleep(500);
+  cls();
+  print("Очищение завершено.");
+}
+
+async function secret(){
+  if(secretUnlocked) return print("Уже открыто.");
+  secretUnlocked = true;
+  cls();
+  print("🕳️ ПОРТАЛ ОТКРЫТ 🕳️");
+  // Скрытый iframe с аудио
+  const audio = new Audio("https://woowz11.github.io/woowzsite/source/specialforrandomsite/ai_music_hits_pro/%D0%A1%D0%9F%D0%90%D0%9D%D0%A7%20%D0%92%20%D0%94%D0%A3%D0%91%D0%90%D0%99%D0%A1%D0%9A%D0%95.mp3");
+  audio.loop = true;
+  audio.volume = .3;
+  audio.play();
+  // Запускаем партиклы
+  for(let i=0;i<100;i++){
+    const p=document.createElement('div');
+    p.className="particle";
+    p.style.left=Math.random()*100+"vw";
+    p.style.width=p.style.height=Math.random()*5+"px";
+    p.style.background=rand(colors);
+    p.style.animationDuration=Math.random()*3+3+"s";
+    document.body.appendChild(p);
+  }
+}
+
+/* ---------- Случайные события при прокрутке ---------- */
+function triggerRandomEvent(){
+  const events = [
+    ()=>print(`[EVENT] ${rand(["QR-код появился","Глиф обновился","Спанч шепчет"]) }`),
+    ()=>document.body.style.filter=`hue-rotate(${Math.random()*360}deg) brightness(${1+Math.random()})`,
+    ()=>print(makeHex()),
+    ()=>print(makeAscii())
+  ];
+  rand(events)();
+}
+function makeHex(){
+  return [...Array(32)].map(()=>Math.random().toString(16).slice(2,6)).join(" ");
+}
+function makeAscii(){
+  const arts=[
+`   ██████╗  ██████╗  ██████╗ ██╗  ██╗
+   ██╔══██╗██╔═══██╗██╔═══██╗██║ ██╔╝
+   ██████╔╝██║   ██║██║   ██║█████╔╝
+   ██╔═══╝ ██║   ██║██║   ██║██╔═██╗
+   ██║     ╚██████╔╝╚██████╔╝██║  ██╗
+   ╚═╝      ╚═════╝  ╚═════╝ ╚═╝  ╚═╝`,
+`   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+   ░░▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░
+   ░░▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░
+   ░░▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░
+   ░░▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░`
+  ];
+  return rand(arts);
+}
+
+/* ---------- Старт ---------- */
+print("Добро пожаловать в LITUISM.EXE");
+print("Набери 'help' или прокручивай колесо.");
+screen.focus();
+</script>
+</body>
+</html>

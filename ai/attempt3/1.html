@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru-LIT">
+<head>
+<meta charset="UTF-8" />
+<title>𓆩 LIT-PORTAL 2.0 𓆪</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<script src="https://woowz11.github.io/woowzsite/source/source.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=VT323&display=swap');
+  :root{--lit:#00ff41;--cyan:#00ffff;--magenta:#ff00ff;--blood:#8b0000;--black:#000}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Orbitron','Courier New',monospace;background:var(--black);color:var(--lit);overflow-x:hidden}
+  #canvas{position:fixed;top:0;left:0;z-index:-1}
+  nav{position:fixed;top:0;left:0;right:0;display:flex;gap:1rem;justify-content:center;background:rgba(0,0,0,.5);padding:.5rem;z-index:999}
+  nav a{color:var(--lit);text-decoration:none;font-size:.9rem;transition:.3s}nav a:hover{color:var(--cyan)}
+  section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;text-align:center}
+  h1{font-size:4rem;font-weight:900;letter-spacing:.2em;text-shadow:0 0 10px var(--lit),0 0 20px var(--cyan)}
+  h2{font-size:2rem;margin-bottom:1rem}
+  .glitch{animation:glitch .8s infinite}
+  @keyframes glitch{0%{text-shadow:0 0 3px var(--lit)}50%{text-shadow:0 0 6px var(--magenta)}}
+  .card{border:1px solid var(--lit);border-radius:10px;padding:1.5rem;background:linear-gradient(135deg,#000a00,#001800);margin:1rem;max-width:300px}
+  .card img{width:100%;border-radius:5px}
+  #terminal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:var(--lit);font-family:'VT323',monospace;font-size:1.4rem;display:none;flex-direction:column;padding:1rem;z-index:1000}
+  #screen{flex:1;overflow-y:auto}
+  #cmd{outline:none;background:transparent;border:none;color:var(--lit)}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<nav>
+  <a href="#intro">Вход</a>
+  <a href="#gallery">Арты</a>
+  <a href="#ritual">Ритуал</a>
+  <button id="toggler" style="background:transparent;color:var(--lit);border:none;font:inherit;cursor:pointer">Терминал</button>
+</nav>
+
+<section id="intro">
+  <h1 class="glitch">𓆩 LIT-PORTAL 2.0 𓆪</h1>
+  <p>Нажми <kbd>Space</kbd> → вызови <kbd>Spanch</kbd></p>
+</section>
+
+<section id="gallery">
+  <h2>Галерея глитчей</h2>
+  <div id="gallery-container"></div>
+</section>
+
+<section id="ritual">
+  <h2>Ритуал приёма</h2>
+  <button id="ritual-btn" class="glitch">Нажми и стань частью кода</button>
+</section>
+
+<div id="terminal">
+  <div id="screen"></div>
+  <input id="cmd" placeholder="Введи ритуал..." autocomplete="off">
+</div>
+
+<script>
+/* ---------- ФОН ---------- */
+const cvs=document.getElementById('canvas'),ctx=cvs.getContext('2d');
+function resize(){cvs.width=innerWidth;cvs.height=innerHeight}resize();window.addEventListener('resize',resize);
+const words=WoowzsiteWords;//["Python","NASM","Spanch","Crybird","GOLU","Литий","Баг","Глиф","QR","Буфер"];
+const particles=[];
+for(let i=0;i<200;i++) particles.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,word:words[Math.round(Math.random()*words.length)]});
+function animate(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>cvs.width) p.vx*=-1;
+    if(p.y<0||p.y>cvs.height) p.vy*=-1;
+    ctx.fillStyle='#00ff41';ctx.font='14px Orbitron';ctx.fillText(p.word,p.x,p.y);
+  });
+  requestAnimationFrame(animate);
+}animate();
+
+/* ---------- Галерея (локальные картинки) ---------- */
+const gallery=document.getElementById('gallery-container');
+const images=[
+  'https://woowz11.github.io/woowzsite/source/god.png',
+  'https://woowz11.github.io/woowzsite/source/art/dayface.png',
+  'https://woowz11.github.io/woowzsite/Lituism/bg.png',
+  'https://woowz11.github.io/woowzsite/Lituism/crybird.png'
+];
+images.forEach(src=>{
+  const img=new Image();img.src=src;img.className='card';img.alt='artifact';
+  gallery.appendChild(img);
+});
+
+/* ---------- Ритуал ---------- */
+document.getElementById('ritual-btn').addEventListener('click',()=>{
+  const audio=new Audio('https://woowz11.github.io/woowzsite/source/specialforrandomsite/ai_music_hits_pro/%D0%AF%20%D0%A5%D0%9E%D0%A7%D0%A3%20%D0%A1%D0%A2%D0%90%D0%A2%D0%AC%20%D0%98%D0%93%D0%A0%D0%9E%D0%99.mp3');
+  audio.play();
+  document.body.style.filter=`hue-rotate(${Math.random()*360}deg)`;
+});
+
+/* ---------- Терминал ---------- */
+const terminal=document.getElementById('terminal');
+const screen=document.getElementById('screen');
+const cmd=document.getElementById('cmd');
+document.getElementById('toggler').addEventListener('click',()=>{
+  terminal.style.display=terminal.style.display==='flex'?'none':'flex';
+});
+function print(txt){screen.textContent+=txt+'\n';}
+cmd.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const c=cmd.value.trim().toLowerCase();
+    cmd.value='';
+    switch(c){
+      case 'help':print('Commands: lituism | python | clear');break;
+      case 'lituism':print('GOLU принял тебя');break;
+      case 'python':print('ERASE MEMORY');document.body.style.background='var(--blood)';break;
+      case 'clear':screen.textContent='';break;
+      default:print('Неизвестный ритуал');break;
+    }
+  }
+});
+
+/* ---------- Spacebar Easter Egg ---------- */
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    e.preventDefault();
+    const audio=new Audio('https://woowz11.github.io/woowzsite/source/specialforrandomsite/ai_music_hits_pro/v1d3C@ll.z0v.k0RR.mp3');
+    audio.play();
+    document.body.classList.add('glitch');
+    setTimeout(()=>document.body.classList.remove('glitch'),2000);
+  }
+});
+</script>
+</body>
+</html>

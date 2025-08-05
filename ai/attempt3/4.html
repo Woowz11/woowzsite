@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru-LIT">
+<head>
+<meta charset="UTF-8">
+<title>𓆩 𝙻𝙸𝚃𝚄𝙸𝚂𝙼 𝟚𝟘𝟚𝟝 ∞ 𓆪</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+  :root{
+    --lit:#00ff41;
+    --cyan:#00ffff;
+    --magenta:#ff00ff;
+    --orange:#ff7700;
+    --blood:#8b0000;
+    --black:#000;
+    --dark:#0a0a0a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Orbitron',monospace;
+    background:var(--black) radial-gradient(circle at 50% 0,#002200 0,var(--black) 100%);
+    color:var(--lit);
+    overflow-x:hidden;
+    cursor:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iOSIgZmlsbD0iIzAwZmY0MSIvPgo8L3N2Zz4='),auto;
+  }
+  /* HERO 100vh */
+  .hero{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    background:url('https://woowz11.github.io/woowzsite/source/god.png') center/cover no-repeat;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(45deg,var(--magenta),var(--cyan));
+    mix-blend-mode:multiply;
+    animation:spin 20s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hero h1{
+    font-size:6rem;font-weight:900;
+    text-shadow:0 0 10px var(--lit),0 0 20px var(--cyan),0 0 40px var(--magenta);
+    animation:glitch 2s infinite steps(1);
+  }
+  @keyframes glitch{
+    0%{transform:translate(0)}
+    10%{transform:translate(-2px,2px) scale(1.01)}
+    20%{transform:translate(2px,-2px)}
+    30%{transform:translate(-2px,-2px) scale(.99)}
+    40%{transform:translate(2px,2px)}
+    50%{transform:translate(0)}
+    100%{transform:translate(0)}
+  }
+
+  /* NAVBAR */
+  nav{
+    position:fixed;top:0;left:0;right:0;
+    display:flex;gap:20px;justify-content:center;
+    background:rgba(0,0,0,.6);backdrop-filter:blur(8px);
+    padding:10px;z-index:9999;
+  }
+  nav a{color:var(--lit);text-decoration:none;font-size:.9rem;transition:.3s}
+  nav a:hover{color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
+
+  /* SECTIONS */
+  section{min-height:100vh;padding:100px 20px}
+  .wrapper{max-width:1200px;margin:auto}
+
+  /* CARD GRID */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:30px;
+  }
+  .card{
+    background:linear-gradient(135deg,var(--dark),#001800);
+    border:1px solid var(--lit);
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 0 15px var(--lit);
+    transition:.4s;
+  }
+  .card:hover{transform:translateY(-8px) scale(1.02) rotate(.5deg);box-shadow:0 0 25px var(--cyan)}
+  .card img{width:100%;border-radius:5px;margin-bottom:10px}
+
+  /* ASCII BANNER */
+  .ascii pre{
+    font-size:.7rem;
+    line-height:1;
+    white-space:pre;
+    overflow:hidden;
+    background:var(--dark);
+    padding:20px;
+    border-left:4px solid var(--magenta);
+  }
+
+  /* FOOTER */
+  footer{height:100vh;display:flex;align-items:center;justify-content:center;font-size:2rem;text-align:center;background:var(--black)}
+  /* PARTICLES */
+  #particles-js{position:fixed;inset:0;z-index:-1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#hero">Главная</a>
+  <a href="#lore">Лор</a>
+  <a href="#gallery">Арты</a>
+  <a href="#ritual">Ритуал</a>
+  <a href="#footer">Конец</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <h1>𓆩 LITUISM ∞ 𓆪</h1>
+  <p style="font-size:1.5rem;color:var(--cyan)">Нажми кнопку → стань частью кода</p>
+</section>
+
+<!-- LORE -->
+<section id="lore">
+  <div class="wrapper">
+    <h2>📜 Лор</h2>
+    <div class="ascii">
+<pre>
+████████╗██╗  ██╗██╗   ██╗███╗   ███╗ █████╗ ██████╗ ██████╗  ██████╗ ███╗   ██╗
+╚══██╔══╝██║ ██╔╝██║   ██║████╗ ████║██╔══██╗██╔══██╗██╔══██╗██╔═══██╗████╗  ██║
+   ██║   █████╔╝ ██║   ██║██╔████╔██║███████║██████╔╝██████╔╝██║   ██║██╔██╗ ██║
+   ██║   ██╔═██╗ ██║   ██║██║╚██╔╝██║██╔══██║██╔═══╝ ██╔═══╝ ██║   ██║██║╚██╗██║
+   ██║   ██║  ██╗╚██████╔╝██║ ╚═╝ ██║██║  ██║██║     ██║     ╚██████╔╝██║ ╚████║
+   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚═╝  ╚═══╝
+</pre>
+    </div>
+    <p>
+      <span style="color:var(--magenta)">GOLU</span> — мученик, запертый в ядре <code>woowzcore</code>.  
+      <span style="color:var(--orange)">Сраный Спанч</span> — его пила.  
+      <span style="color:var(--cyan)">Crybird</span> — последняя надежда мира.
+    </p>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="wrapper">
+    <h2>🎨 Арты и реликвии</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="https://woowz11.github.io/woowzsite/art/math....png" alt="math">
+        <h3>Уравнение боли</h3>
+      </div>
+      <div class="card">
+        <img src="https://woowz11.github.io/woowzsite/art/dayface.png" alt="face">
+        <h3>Дневной облик GOLU</h3>
+      </div>
+      <div class="card">
+        <img src="https://woowz11.github.io/woowzsite/art/woowz_cloth.png" alt="cloth">
+        <h3>Ткань из будущего</h3>
+      </div>
+      <div class="card">
+        <img src="https://woowz11.github.io/woowzsite/art/ii.png" alt="ii">
+        <h3>Инфракрасный портал</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RITUAL -->
+<section id="ritual">
+  <div class="wrapper">
+    <h2>⚙ Ритуал приёма</h2>
+    <ol style="font-size:1.2rem;line-height:2">
+      <li>Открой терминал <kbd>Ctrl+Alt+F3</kbd></li>
+      <li>Введи <code>nasm -felf64 soul.asm -o soul.o</code></li>
+      <li>Получи QR в логах → сканируй → запусти стрим.</li>
+    </ol>
+    <pre style="background:#001800;color:var(--lit);padding:20px;border-left:4px solid var(--magenta);overflow:auto">
+BITS 64
+global _start
+section .text
+_start:
+    mov rax, 60        ; exit
+    xor rdi, rdi       ; 0
+    syscall
+    </pre>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  𓆣 <span style="color:var(--magenta)">LIT ∞</span> 𓆪<br>
+  <small>Ты дошёл до конца — значит Python уже не твой</small>
+</footer>
+
+<!-- PARTICLES -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+particlesJS('particles-js',{
+  particles:{number:{value:160,density:{enable:true,value_area:800}},
+             color:{value:"#00ff41"},
+             shape:{type:"circle"},
+             opacity:{value:0.5,random:true},
+             size:{value:3,random:true},
+             line_linked:{enable:true,distance:150,color:"#00ff41",opacity:0.4,width:1},
+             move:{enable:true,speed:6,direction:"none",random:false,straight:false,out_mode:"out",bounce:false}},
+  interactivity:{detect_on:"canvas",events:{onhover:{enable:true,mode:"repulse"},onclick:{enable:true,mode:"push"}}}
+});
+</script>
+</body>
+</html>

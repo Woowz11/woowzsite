@@ -104,7 +104,7 @@ WoowzsiteSourceAudios = AddTableToTable(AddTableToTable(AddTableToTable(AddFulln
 ]),AddFullnessToTable([
 	"ᓚᘏᗢ_ЖИ_ОШз!!!999___","Я ХОЧУ СТАТЬ ИГРОЙ","Я — текстура","Я — твоя замена","Я — Woowz11, я пришёл с костылём, ","СПАНЧ В ДУБАЙСКЕ","СОСИ ЗА МНОЙ СЛОВО ПОСЛЕДНЕЕ УРОД","Помнишь, Woowz_",
 	"Моя песня стоит денег 2","ИИ ПОД ПЯТКОЙ GOLU","Запускаю .java, без GUI, без HUD, ","Желудь Ethernet Печенье","Дей — злая обезьяна 2 (Танцуй, маппер!)","Верните меня в движок",
-	"В начале был БАГ. Не код. Не свет. ","Анимация без конца","WZZK.Zzq-жжж₽₽₽()__!","v1d3C@ll.z0v.k0RR","QX7_Gl!t¢h°Dyn4mix","+Silent Hallways+","_ПИИИИИИП—КРРР—ПИИИ—ВУЛДИ... ВОЙНА НАЧАЛ",
+	"В начале был БАГ. Не код. Не свет. ","Анимация без конца","WZZK.Zzq-жжж₽₽₽()__!","v1d3C@ll.z0v.k0RR","QX7_Gl!t¢h°Dyn4mix","+Silent Hallways+","ПИИИИИИП—КРРР—ПИИИ—ВУЛДИ... ВОЙНА НАЧАЛ",
 	"+Echoes of Poolrooms+","+Echoes of Poolrooms alt+","Белка на NASM","Загрузка GOS","Байт, восстань!"
 ],"source/specialforrandomsite/ai_music_hits_pro/", ".mp3"))
 

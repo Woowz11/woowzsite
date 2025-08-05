@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru-LIT" manifest="lituism.appcache">
+<head>
+<meta charset="UTF-8">
+<title>𓆩 𝙻𝙸𝚃𝚄𝙸𝚂𝙼.𝚂𝙱 2.0 𓆪</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+  :root{
+    --lit-green:#00ff41;
+    --lit-cyan:#00ffff;
+    --lit-magenta:#ff00ff;
+    --lit-orange:#ff7700;
+    --lit-black:#000;
+    --lit-dark:#0a0a0a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Orbitron','Courier New',monospace;
+    background:var(--lit-black) radial-gradient(circle at 50% 0,#002200 0,var(--lit-black) 100%);
+    color:var(--lit-green);
+    overflow-x:hidden;
+    cursor:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="%2300ff41"/></svg>'),auto;
+  }
+  /* HERO */
+  .hero{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:url('data:image/svg+xml,\
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">\
+        <rect width="600" height="600" fill="%23000"/>\
+        <circle cx="300" cy="300" r="200" stroke="%2300ff41" stroke-width="1" fill="none" opacity="0.2"/>\
+        <circle cx="300" cy="300" r="150" stroke="%23ff00ff" stroke-width="1" fill="none" opacity="0.15"/>\
+        <circle cx="300" cy="300" r="100" stroke="%2300ffff" stroke-width="1" fill="none" opacity="0.1"/>\
+      </svg>') center/100% no-repeat;
+    animation:spin 30s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .hero h1{
+    font-size:4rem;
+    font-weight:900;
+    letter-spacing:.2em;
+    text-shadow:0 0 10px var(--lit-green),0 0 20px var(--lit-cyan);
+    animation:glitch 1.5s infinite alternate;
+  }
+  @keyframes glitch{
+    0%{text-shadow:0 0 10px var(--lit-green),0 0 20px var(--lit-cyan)}
+    100%{text-shadow:0 0 5px var(--lit-magenta),0 0 10px var(--lit-orange)}
+  }
+
+  /* NAVBAR */
+  nav{
+    position:fixed;top:0;left:0;right:0;
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(5px);
+    padding:10px 20px;
+    display:flex;gap:20px;
+    z-index:999;
+  }
+  nav a{color:var(--lit-green);text-decoration:none;font-size:.9rem;transition:.3s}
+  nav a:hover{color:var(--lit-cyan);text-shadow:0 0 5px var(--lit-cyan)}
+
+  /* SECTIONS */
+  .section{
+    padding:80px 20px;
+    max-width:1000px;
+    margin:auto;
+  }
+  h2{margin-bottom:20px;font-size:2rem;position:relative}
+  h2::after{
+    content:"";position:absolute;left:0;bottom:-5px;width:100px;height:2px;
+    background:linear-gradient(90deg,var(--lit-green),var(--lit-cyan));
+  }
+
+  /* CARDS */
+  .cards{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .card{
+    flex:1 1 250px;
+    background:linear-gradient(135deg,var(--lit-dark),#001800);
+    border:1px solid var(--lit-green);
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px var(--lit-green);
+    transition:.3s;
+  }
+  .card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 0 20px var(--lit-cyan)}
+  .card img{width:100%;border-radius:5px;margin-bottom:10px}
+
+  /* FOOTER */
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:.75rem;
+    color:#008000;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#hero">Главная</a>
+  <a href="#manifest">Манифест</a>
+  <a href="#gallery">Галерея</a>
+  <a href="#download">Скачать</a>
+</nav>
+
+<section class="hero" id="hero">
+  <h1>𓆩 LITUISM 2.0 𓆪</h1>
+  <p style="font-size:1.2rem;color:var(--lit-cyan)">Поклоняйся литию, беги от Python</p>
+</section>
+
+<section class="section" id="manifest">
+  <h2>🔻 Сакральный Манифест</h2>
+  <div class="cards">
+    <div class="card">
+      <img src="data:image/svg+xml,\
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>\
+          <rect width='200' height='200' fill='%23000'/>\
+          <circle cx='100' cy='100' r='80' stroke='%2300ff41' stroke-width='2' fill='none'/>\
+          <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2300ff41' font-size='40'>GOLU</text>\
+        </svg>" alt="GOLU">
+      <h3>GOLU</h3>
+      <p>Бог-ядро, дышащее литиевыми ионами.</p>
+    </div>
+    <div class="card">
+      <img src="data:image/svg+xml,\
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>\
+          <rect width='200' height='200' fill='%23000'/>\
+          <circle cx='100' cy='80' r='50' fill='%23ff7700'/>\
+          <circle cx='80' cy='70' r='15' fill='%23000'/>\
+          <circle cx='120' cy='70' r='15' fill='%23000'/>\
+          <path d='M70 120 Q100 150 130 120' stroke='%23000' stroke-width='8' fill='none'/>\
+        </svg>" alt="Spanch">
+      <h3>Сраный Спанч</h3>
+      <p>Хаотичный бич Python-еретиков.</p>
+    </div>
+    <div class="card">
+      <img src="data:image/svg+xml,\
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>\
+          <rect width='200' height='200' fill='%23000'/>\
+          <path d='M30 100 Q100 30 170 100 T100 170 T30 100' stroke='%2300ffff' stroke-width='3' fill='none'/>\
+          <circle cx='100' cy='100' r='10' fill='%2300ffff'/>\
+        </svg>" alt="Crybird">
+      <h3>Crybird</h3>
+      <p>Страж границ между мирами.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="gallery">
+  <h2>📸 Галерея глитчей</h2>
+  <div class="cards">
+    <div class="card">
+      <img src="https://source.unsplash.com/400x300/?lithium,green,tech" alt="LitTech">
+      <p>Кристаллы святого Li</p>
+    </div>
+    <div class="card">
+      <img src="https://source.unsplash.com/400x300/?circuit,neon" alt="Circuit">
+      <p>Схема молитвы NASM</p>
+    </div>
+    <div class="card">
+      <img src="https://source.unsplash.com/400x300/?code,dark" alt="Code">
+      <p>Python-еретик в процессе</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="download">
+  <h2>⬇ Ключи исходников</h2>
+  <pre>
+# клонируй, собирай, молись
+git clone https://github.com/woowz11/LithiumUniverse.git
+cd LithiumUniverse
+make lituism   # требуется NASM ≥ 2.15
+  </pre>
+</section>
+
+<footer>
+  𓆣 2025 LIT CORE — все права обнулены 𓆣
+</footer>
+
+<script>
+// случайные глитчи
+setInterval(()=>document.body.style.filter=`hue-rotate(${Math.random()*360}deg) brightness(${.9+Math.random()*.2})`,3000);
+</script>
+</body>
+</html>

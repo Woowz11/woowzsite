@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru-LIT">
+<head>
+<meta charset="UTF-8" />
+<title>𓆩 LITUISM ∞.0 — THE GIGA-SITE 𓆪</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Share+Tech+Mono&display=swap');
+  :root{
+    --lit:#00ff41;--cyan:#00ffff;--magenta:#ff00ff;--orange:#ff7700;--blood:#8b0000;
+    --black:#000;--dark:#0a0a0a;--deep:#001100;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Orbitron',monospace;
+    background:radial-gradient(circle at 50% 0,#002200 0,var(--black) 100%);
+    color:var(--lit);
+    overflow-x:hidden;
+  }
+  /* NAVBAR */
+  nav{
+    position:fixed;top:0;left:0;right:0;display:flex;gap:20px;
+    justify-content:center;background:rgba(0,0,0,.7);padding:10px;
+    backdrop-filter:blur(5px);z-index:9999;font-size:.9rem;
+  }
+  nav a{color:var(--lit);text-decoration:none;transition:.3s}
+  nav a:hover{color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
+  /* SECTIONS */
+  section{min-height:100vh;display:flex;flex-direction:column;
+          justify-content:center;align-items:center;padding:60px 20px;font-size:1.2rem}
+  h1{font-size:6rem;font-weight:900;text-shadow:0 0 10px var(--lit),0 0 20px var(--cyan)}
+  h2{font-size:2.5rem;margin-bottom:20px;position:relative}
+  h2::after{content:"";position:absolute;left:0;bottom:-5px;width:100px;height:2px;
+            background:linear-gradient(90deg,var(--lit),var(--magenta))}
+  pre{background:var(--deep);padding:15px;border-left:4px solid var(--magenta);overflow:auto}
+  .ascii{white-space:pre;font-family:'Share Tech Mono';font-size:.6rem;line-height:1;color:var(--cyan)}
+  .card{border:1px solid var(--lit);border-radius:10px;padding:20px;margin:20px 0;
+        background:linear-gradient(135deg,var(--dark),#001800);width:90%;max-width:600px}
+  .qr{width:150px;height:150px;margin:10px auto;background-size:cover;background-repeat:no-repeat}
+  .pulse{animation:pulse 2s infinite}@keyframes pulse{50%{transform:scale(1.05);filter:brightness(1.2)}}
+  .glitch{animation:glitch 2.5s infinite}@keyframes glitch{
+    0%{text-shadow:0 0 5px var(--lit)}20%{text-shadow:0 0 10px var(--magenta)}40%{text-shadow:0 0 15px var(--orange)}60%{text-shadow:0 0 10px var(--cyan)}100%{text-shadow:0 0 5px var(--lit)}}
+  .fade{animation:fade 1s}@keyframes fade{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  .particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+  .blood-bar{height:4px;background:var(--blood);width:0;transition:width .3s}
+  /* PARTICLES */
+  .particle{position:absolute;border-radius:50%;opacity:.8;animation:float 8s infinite linear}
+  @keyframes float{from{transform:translateY(110vh) rotate(0deg)}to{transform:translateY(-10vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav>
+  <a href="#hero">Главная</a>
+  <a href="#lore">Лор</a>
+  <a href="#artifacts">Артефакты</a>
+  <a href="#ritual">Ритуал</a>
+  <a href="#footer">Конец</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <h1 class="glitch">𓆩 LITUISM ∞ 𓆪</h1>
+  <p style="font-size:1.5rem;color:var(--cyan)">Прокручивай вниз — каждый кадр уникален</p>
+</section>
+
+<!-- CONTAINER -->
+<main id="content"></main>
+
+<!-- FOOTER -->
+<section id="footer">
+  <h1>🕳 Конец — Python не пройдёт 🕳</h1>
+</section>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<script>
+/* ---------- БАЗОВЫЕ НАБОРЫ ---------- */
+const adjectives = ["Проклятый","Огненный","Мёртвый","Скрытый","Бесконечный","Квантовый","Багнутый","Пиксельный"];
+const nouns      = ["Спанч","Crybird","GOLU","Код","Портал","Фрейм","Литий","Буфер","Кэш","Триггер"];
+const verbs      = ["душит","оживляет","освобождает","поглощает","воспевает","распаковывает","зашифровывает","обнуляет"];
+const artifacts  = ["QR-код","hex-дамп","ASCII-арт","глиф","ли-ткань","скрипт","сектор","сигнал","баг","глиитч"];
+const colors     = ["#00ff41","#00ffff","#ff00ff","#ff7700","#8b0000"];
+
+/* ---------- УТИЛИТЫ ---------- */
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+/* QR-Canvas */
+function makeQR(text){
+  const c=document.createElement('canvas');const ctx=c.getContext('2d');
+  c.width=c.height=150;ctx.fillStyle=rand(colors);ctx.fillRect(0,0,150,150);
+  ctx.fillStyle=rand(colors);for(let i=0;i<150;i+=randInt(5,15)){
+    for(let j=0;j<150;j+=randInt(5,15)){ctx.fillRect(i,j,randInt(3,10),randInt(3,10));}
+  }
+  return c.toDataURL();
+}
+/* ASCII-арт */
+function makeAscii(){
+  const arts=[
+`  ██████╗ ██╗██╗   ██╗███╗   ███╗ █████╗ ██╗  ██╗
+  ██╔══██╗██║██║   ██║████╗ ████║██╔══██╗╚██╗██╔╝
+  ██████╔╝██║██║   ██║██╔████╔██║███████║ ╚███╔╝
+  ██╔═══╝ ██║██║   ██║██║╚██╔╝██║██╔══██║ ██╔██╗
+  ██║     ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██╔╝ ██╗
+  ╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝`,
+`  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░░░░░░░░░░░░░░▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░░░░░░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░
+  ░░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░
+  ░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░
+  ░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░
+  ░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░
+  ░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+  ];
+  return rand(arts);
+}
+/* HEX-дамп */
+function makeHex(){
+  return [...Array(64)].map(()=>Math.random().toString(16).slice(2,6)).join(" ");
+}
+/* Lore-сентенция */
+function makeLore(){
+  return `${rand(adjectives)} ${rand(nouns)} ${rand(verbs)} ${rand(artifacts)}`;
+}
+/* Случайный цвет */
+function randColor(){return rand(colors);}
+/* Генератор блока */
+function createBlock(){
+  const sec=document.createElement('section');
+  const lore=makeLore();
+  const ascii=makeAscii();
+  const hex=makeHex();
+  const qr=makeQR(lore);
+  const color=randColor();
+  sec.innerHTML=`
+    <div class="card fade">
+      <h2 class="glitch" style="color:${color}">${lore}</h2>
+      <div class="ascii">${ascii}</div>
+      <pre>${hex}</pre>
+      <div class="qr" style="background-image:url(${qr})" title="${lore}"></div>
+      <div class="blood-bar" style="width:${randInt(20,100)}%;background:${color}"></div>
+    </div>
+  `;
+  return sec;
+}
+
+/* ---------- Бесконечная прокрутка ---------- */
+const content=document.getElementById('content');
+function addBlocks(){
+  for(let i=0;i<3;i++)content.appendChild(createBlock());
+}
+addBlocks(); // первые
+const obs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting)addBlocks();
+},{threshold:0.5});
+obs.observe(document.getElementById('footer'));
+
+/* ---------- Партиклы ---------- */
+const pContainer=document.getElementById('particles');
+function createParticle(){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.style.left=randInt(0,100)+'vw';
+  p.style.width=p.style.height=randInt(2,6)+'px';
+  p.style.background=randColor();
+  p.style.animationDuration=randInt(6,12)+'s';
+  pContainer.appendChild(p);
+  setTimeout(()=>p.remove(),12000);
+}
+setInterval(createParticle,300);
+for(let i=0;i<50;i++)createParticle();
+</script>
+</body>
+</html>
