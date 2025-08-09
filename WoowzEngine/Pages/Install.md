@@ -26,7 +26,7 @@
 
 ## Получение WoowzEngine
 
-см. [Получение WoowzEngine](Pages/Get.md)
+см. [Получение WoowzEngine](./Pages/Get.md)
 
 ---
 
