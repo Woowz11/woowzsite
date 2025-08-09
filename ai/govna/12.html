@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Литуизм Визуализация Симфонии</title>
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: monospace;
+    }
+    #start {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      background: rgba(255,0,0,0.8);
+      color: white;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<button id="start">ЗАПУСТИТЬ ЛИТУИСТСКУЮ СИМФОНИЮ</button>
+
+<script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let w, h;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const colorPalette = [
+  '#FF003C', '#FF8C00', '#DAF7A6', '#33FF57',
+  '#00FFFF', '#007BFF', '#AA00FF', '#FF00AA'
+];
+
+const shapes = [];
+function randomColor() {
+  return colorPalette[Math.floor(Math.random() * colorPalette.length)];
+}
+
+function createShape(freq) {
+  return {
+    x: Math.random() * w,
+    y: Math.random() * h,
+    size: 10 + Math.random() * 40,
+    color: randomColor(),
+    dx: (Math.random() - 0.5) * 4,
+    dy: (Math.random() - 0.5) * 4,
+    freq: freq
+  };
+}
+
+// ИНИЦИАЛИЗАЦИЯ МУЗЫКИ
+let synths = [];
+let melodyNotes = ["C4", "E4", "G4", "B4", "C5", "D5", "E5", "G5"];
+let bassNotes = ["C2", "D2", "F2", "G2", "A#1"];
+
+function generateMusic() {
+  const lead = new Tone.Synth().toDestination();
+  const bass = new Tone.MembraneSynth().toDestination();
+  const noise = new Tone.NoiseSynth({ volume: -15 }).toDestination();
+
+  synths.push(lead, bass, noise);
+
+  const leadPart = new Tone.Sequence((time, note) => {
+    lead.triggerAttackRelease(note, 0.25, time);
+    shapes.push(createShape(Tone.Frequency(note).toFrequency()));
+  }, melodyNotes.sort(() => Math.random() - 0.5), "8n").start(0);
+
+  const bassPart = new Tone.Loop((time) => {
+    const note = bassNotes[Math.floor(Math.random() * bassNotes.length)];
+    bass.triggerAttackRelease(note, "8n", time);
+    for (let i = 0; i < 2; i++) shapes.push(createShape(Tone.Frequency(note).toFrequency()));
+  }, "1n").start(0);
+
+  const noisePart = new Tone.Loop((time) => {
+    if (Math.random() > 0.7) noise.triggerAttackRelease("8n", time);
+  }, "2n").start(0);
+}
+
+function drawShape(shape) {
+  ctx.beginPath();
+  ctx.fillStyle = shape.color;
+  ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.002 + shape.freq * 0.01) * 0.5;
+  ctx.arc(shape.x, shape.y, shape.size * Math.sin(Date.now() * 0.002 + shape.freq * 0.005), 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.globalAlpha = 1.0;
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+  ctx.fillRect(0, 0, w, h);
+
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const s = shapes[i];
+    s.x += s.dx;
+    s.y += s.dy;
+    s.size *= 0.98;
+    drawShape(s);
+    if (s.size < 1) shapes.splice(i, 1);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('start').addEventListener('click', async () => {
+  await Tone.start();
+  generateMusic();
+  Tone.Transport.start();
+  animate();
+  document.getElementById('start').remove();
+});
+</script>
+</body>
+</html>

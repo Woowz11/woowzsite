@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<title>Литуизм 2.1 • Аудио-Визуальный Генератор</title>
+<style>
+  :root {
+    --bg:#1a0000;
+    --fg:#ff3b3b;
+    --accent:#ff0000;
+  }
+  body{
+    margin:0;padding:20px;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Consolas',monospace;
+    user-select:none;
+    transition:background .4s;
+  }
+  textarea{
+    width:100%;height:90px;
+    background:#30000055;color:var(--fg);
+    border:1px solid var(--accent);border-radius:4px;
+    font-size:16px;padding:10px;resize:none;
+  }
+  label{margin-right:10px}
+  #speedControl{width:120px}
+  canvas{
+    display:block;margin:20px auto;
+    border:2px solid var(--accent);border-radius:6px;
+    cursor:crosshair;
+  }
+  button{
+    background:var(--accent);color:#fff;border:none;
+    padding:10px 18px;font-size:15px;border-radius:4px;
+    cursor:pointer;margin:8px 4px 0 0;transition:filter .2s;
+  }
+  button:hover{filter:brightness(1.2)}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
+  .info{font-size:13px;opacity:.7;margin-top:6px}
+</style>
+</head>
+<body>
+
+<h1>Литуизм 2.1</h1>
+<textarea id="inputText" placeholder="Введи любые символы, эмодзи, математику… или нажми «🎲»"></textarea>
+
+<div class="toolbar">
+  <label>Скорость:</label>
+  <input type="range" id="speedControl" min="0.2" max="4" step="0.1" value="1"/>
+  <span id="speedValue">1.0</span>x
+
+  <button id="randomBtn" title="Случайный текст">🎲</button>
+  <button id="clearBtn" title="Очистить">🗑️</button>
+
+  <label>Тема:</label>
+  <select id="themeSelect">
+    <option value="red">Красная</option>
+    <option value="purple">Фиолетовая</option>
+    <option value="green">Зелёная</option>
+  </select>
+
+  <button id="savePngBtn">💾 PNG</button>
+  <button id="saveWavBtn">⏺️ WAV</button>
+  <button id="generateBtn">🚀 Генерировать</button>
+</div>
+
+<canvas id="canvas" width="720" height="400"></canvas>
+<div class="info">Всего символов: <span id="charCount">0</span></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+"use strict";
+
+/* ---------- CONFIG ---------- */
+const pixelSize = 8;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const pixelsX = Math.floor(canvas.width / pixelSize);
+const pixelsY = Math.floor(canvas.height / pixelSize);
+let pixels = createPixelGrid();
+let audioCtx, masterGain, recorder, recordedChunks;
+
+/* ---------- THEME ---------- */
+const themes = {
+  red   : { bg:'#1a0000', fg:'#ff3b3b', accent:'#ff0000' },
+  purple: { bg:'#0f001a', fg:'#c961de', accent:'#9c27b0' },
+  green : { bg:'#001a00', fg:'#4caf50', accent:'#00e676' }
+};
+function applyTheme(name){
+  const t = themes[name];
+  document.documentElement.style.setProperty('--bg', t.bg);
+  document.documentElement.style.setProperty('--fg', t.fg);
+  document.documentElement.style.setProperty('--accent', t.accent);
+}
+document.getElementById('themeSelect').addEventListener('change', e => applyTheme(e.target.value));
+
+/* ---------- UTILS ---------- */
+const $ = id => document.getElementById(id);
+function createPixelGrid(){
+  const arr=[];
+  for(let y=0;y<pixelsY;y++){
+    for(let x=0;x<pixelsX;x++){
+      arr.push({x:x*pixelSize,y:y*pixelSize,
+                baseColor:[255,0,0],offsetX:0,offsetY:0});
+    }
+  }
+  return arr;
+}
+function seededRandom(seed){
+  let x = seed % 2147483647;
+  if(x<=0) x += 2147483646;
+  return () => (x = (x*16807) % 2147483647, x/2147483647);
+}
+
+/* ---------- PALETTES ---------- */
+const palettes = {
+  red   : [[255,0,0],[180,20,20],[255,80,80],[200,50,50],[255,40,40],[150,0,0],[220,30,30]],
+  purple: [[148,0,211],[186,85,211],[138,43,226],[75,0,130],[106,90,205],[147,112,219],[123,104,238]],
+  green : [[0,255,0],[34,139,34],[50,205,50],[0,200,0],[0,128,0],[46,125,50],[152,251,152]]
+};
+
+/* ---------- AUDIO ---------- */
+function initAudio(){
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.4;
+  masterGain.connect(audioCtx.destination);
+}
+function playNote(freq,dur,when,type='square',vol=0.2){
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,when);
+  gain.gain.setValueAtTime(0,when);
+  gain.gain.linearRampToValueAtTime(vol,when+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001,when+dur);
+  osc.connect(gain).connect(masterGain);
+  osc.start(when); osc.stop(when+dur);
+}
+function playKick(when){ playNote(120,0.15,when,'sine',0.8); }
+function playHihat(when){ playNote(8000,0.05,when,'square',0.2); }
+
+/* ---------- MUSIC ---------- */
+function generateMusic(text,speed){
+  if(!audioCtx) initAudio();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const dur=0.25/speed;
+  let t=audioCtx.currentTime+0.1;
+  const rng=seededRandom([...text].reduce((a,c)=>a+c.charCodeAt(0),0));
+  for(let i=0;i<text.length;i++){
+    const code=text.charCodeAt(i);
+    const note=110*Math.pow(2,(code%24)/12);
+    playNote(note,dur,t,rng()>0.5?'sawtooth':'square',0.15);
+    if(i%4===0) playKick(t);
+    if(i%2===1) playHihat(t+dur/2);
+    t+=dur*0.9;
+  }
+}
+
+/* ---------- VISUAL EFFECTS ---------- */
+const effects=[
+  /* 0 explode */ (px,seed,time)=>{
+    const rng=seededRandom(seed);
+    const cx=rng()*canvas.width, cy=rng()*canvas.height;
+    px.forEach(p=>{
+      const dx=(p.x-cx)/100,dy=(p.y-cy)/100,dist=Math.sqrt(dx*dx+dy*dy);
+      const amp=Math.sin(time*3+dist*10)*10;
+      p.offsetX=dx*amp;p.offsetY=dy*amp;
+    });
+  },
+  /* 1 tunnel */ (px,seed,time)=>{
+    const cx=canvas.width/2,cy=canvas.height/2;
+    px.forEach(p=>{
+      const dx=p.x-cx,dy=p.y-cy,angle=Math.atan2(dy,dx)+time*0.5;
+      const radius=Math.sqrt(dx*dx+dy*dy);
+      const warp=Math.sin(time*2+radius/20)*20;
+      p.offsetX=Math.cos(angle)*warp;p.offsetY=Math.sin(angle)*warp;
+    });
+  },
+  /* 2 wave */ (px,seed,time)=>{
+    px.forEach((p,i)=>{
+      p.offsetY=Math.sin(p.x/40+time*4+i/100)*15;
+    });
+  },
+  /* 3 swirl */ (px,seed,time)=>{
+    px.forEach(p=>{
+      const cx=canvas.width/2,cy=canvas.height/2;
+      const dx=p.x-cx,dy=p.y-cy;
+      const angle=Math.atan2(dy,dx)+time*2;
+      const radius=50+30*Math.sin(time*1.5+seed);
+      p.offsetX=Math.cos(angle)*radius;
+      p.offsetY=Math.sin(angle)*radius;
+    });
+  },
+  /* 4 grid pulse */ (px,seed,time)=>{
+    px.forEach((p,i)=>{
+      const pulse=0.5+0.5*Math.sin(time*6+Math.floor(i/pixelsX)+seed);
+      p.offsetX=p.x*pulse/30;p.offsetY=p.y*pulse/30;
+    });
+  },
+  /* 5 glitch */ (px,seed,time)=>{
+    px.forEach(p=>{
+      p.offsetX=(Math.random()-0.5)*6;
+      p.offsetY=(Math.random()-0.5)*6;
+    });
+  },
+  /* 6 bloom glow */ (px,seed,time)=>{
+    px.forEach(p=>{
+      const glow=1+0.3*Math.sin(time*3+seed);
+      p.baseColor=p.baseColor.map(c=>Math.min(255,c*glow));
+    });
+  },
+  /* 7 spiral */ (px,seed,time)=>{
+    px.forEach(p=>{
+      const cx=canvas.width/2,cy=canvas.height/2;
+      const dx=p.x-cx,dy=p.y-cy;
+      const radius=Math.sqrt(dx*dx+dy*dy);
+      const angle=Math.atan2(dy,dx)+time*1.2+radius/50;
+      const amp=Math.sin(angle)*20;
+      p.offsetX=Math.cos(angle)*amp;
+      p.offsetY=Math.sin(angle)*amp;
+    });
+  }
+];
+
+/* ---------- ANIMATION ---------- */
+let animText='',animSpeed=1,animTime=0;
+function animate(ts){
+  animTime=ts/1000*animSpeed;
+  if(animText.length===0){drawPixels();requestAnimationFrame(animate);return;}
+  const blockSize=Math.floor(pixels.length/animText.length);
+  const theme=$('themeSelect').value;
+  const palette=palettes[theme];
+  for(let i=0;i<animText.length;i++){
+    const code=animText.charCodeAt(i);
+    const color=palette[code%palette.length];
+    const effect=effects[code%effects.length];
+    const start=i*blockSize,end=Math.min((i+1)*blockSize,pixels.length);
+    for(let j=start;j<end;j++) pixels[j].baseColor=color;
+    effect(pixels.slice(start,end),code,animTime);
+  }
+  drawPixels();
+  requestAnimationFrame(animate);
+}
+function drawPixels(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pixels.forEach(p=>{
+    ctx.fillStyle=`rgb(${p.baseColor[0]},${p.baseColor[1]},${p.baseColor[2]})`;
+    ctx.fillRect(p.x+p.offsetX,p.y+p.offsetY,pixelSize,pixelSize);
+  });
+}
+
+/* ---------- UI ---------- */
+$('speedControl').addEventListener('input',e=>{
+  animSpeed=parseFloat(e.target.value);
+  $('speedValue').textContent=animSpeed.toFixed(1);
+});
+$('inputText').addEventListener('input',()=>{
+  $('charCount').textContent=$('inputText').value.length;
+});
+$('randomBtn').addEventListener('click',()=>{
+  const rnd=()=>String.fromCharCode(33+Math.floor(Math.random()*93));
+  $('inputText').value=Array.from({length:64},rnd).join('');
+  $('charCount').textContent=64;
+});
+$('clearBtn').addEventListener('click',()=>{
+  $('inputText').value='';
+  $('charCount').textContent=0;
+});
+$('generateBtn').addEventListener('click',()=>{
+  const txt=$('inputText').value.trim();
+  if(!txt){alert('Введи текст!');return;}
+  animText=txt;
+  pixels=createPixelGrid();
+  generateMusic(txt,animSpeed);
+});
+$('savePngBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='lituizm.png';
+  a.href=canvas.toDataURL();
+  a.click();
+});
+$('saveWavBtn').addEventListener('click',async()=>{
+  if(!audioCtx) initAudio();
+  const dest=audioCtx.createMediaStreamDestination();
+  masterGain.connect(dest);
+  recorder=new MediaRecorder(dest.stream);
+  recordedChunks=[];
+  recorder.ondataavailable=e=>recordedChunks.push(e.data);
+  recorder.onstop=()=>{
+    const blob=new Blob(recordedChunks,{type:'audio/wav'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='lituizm.wav';a.click();
+  };
+  recorder.start();
+  generateMusic($('inputText').value.trim()||'test',animSpeed);
+  setTimeout(()=>recorder.stop(),4000);
+});
+
+/* ---------- START ---------- */
+requestAnimationFrame(animate);
+});
+</script>
+</body>
+</html>

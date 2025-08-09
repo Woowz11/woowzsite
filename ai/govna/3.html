@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Литуизм: Музыка из Текста + Глитчи</title>
+  <style>
+    body {
+      margin: 0; 
+      background: #220000;
+      color: #ff0000;
+      font-family: "Consolas", monospace;
+      overflow: hidden;
+      user-select: none;
+      display: flex; 
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    h1 {
+      margin: 1rem;
+      text-shadow: 0 0 10px #ff0000;
+    }
+    textarea {
+      width: 80vw;
+      height: 80px;
+      background: #330000;
+      border: 2px solid #ff0000;
+      color: #ff4444;
+      font-size: 18px;
+      padding: 10px;
+      resize: none;
+      outline: none;
+      margin-bottom: 10px;
+      box-shadow: 0 0 10px #ff0000 inset;
+    }
+    button {
+      background: #660000;
+      color: #ff4444;
+      border: 1px solid #ff0000;
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0000;
+      transition: 0.3s;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #aa0000;
+      box-shadow: 0 0 30px #ff0000;
+    }
+    canvas {
+      display: block;
+      background: #110000;
+      box-shadow: 0 0 40px #ff0000;
+      border: 3px solid #ff0000;
+      flex-grow: 1;
+      width: 100vw;
+      height: calc(100vh - 220px);
+    }
+    #curse {
+      font-size: 14px;
+      color: #aa0000;
+      font-style: italic;
+      text-shadow: 0 0 3px #550000;
+      user-select: none;
+      margin-top: 5px;
+      pointer-events: none;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ЛИТУИЗМ: ГЕНЕРАТОР МУЗЫКИ И ГЛИТЧЕЙ ИЗ ТЕКСТА</h1>
+  <textarea id="inputText" placeholder="Пиши, ссаный питух..."></textarea>
+  <button id="startBtn">Начать ритуал</button>
+  <div id="curse">Проклятие питухам загружено и готово!</div>
+  <canvas id="glitchCanvas"></canvas>
+
+  <script>
+    // Инициализация Web Audio API
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let isPlaying = false;
+
+    // Канвас и контекст
+    const canvas = document.getElementById('glitchCanvas');
+    const ctx = canvas.getContext('2d');
+    resizeCanvas();
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - 220;
+    }
+
+    // Генератор звука на основе частоты
+    function playTone(freq, duration, time) {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, time);
+      gainNode.gain.setValueAtTime(0.2, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.start(time);
+      osc.stop(time + duration);
+    }
+
+    // Генератор шума (для глитчевого эффекта)
+    function playNoise(duration, time) {
+      const bufferSize = audioCtx.sampleRate * duration;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.1;
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(0.1, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+      noise.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      noise.start(time);
+      noise.stop(time + duration);
+    }
+
+    // Массив для визуальных глитчей
+    const glitchSquares = [];
+
+    // Функция генерации глитча
+    function generateGlitch() {
+      const size = 20 + Math.random() * 40;
+      glitchSquares.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: size,
+        alpha: 0.2 + Math.random() * 0.4,
+        color: `rgba(255, 0, 0, ${0.2 + Math.random() * 0.6})`,
+        life: 20 + Math.random() * 30
+      });
+    }
+
+    // Отрисовка глитчей
+    function drawGlitches() {
+      glitchSquares.forEach((g, i) => {
+        ctx.fillStyle = g.color;
+        ctx.fillRect(g.x, g.y, g.size, g.size);
+        g.life--;
+        g.alpha *= 0.95;
+        if (g.life <= 0) glitchSquares.splice(i, 1);
+      });
+    }
+
+    // Отрисовка "глаз" в стиле литуизма
+    function drawEye(time, bassLevel) {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 120 + bassLevel * 50 + Math.sin(time / 200) * 20;
+
+      // Основной круг
+      const grad = ctx.createRadialGradient(centerX, centerY, radius * 0.2, centerX, centerY, radius);
+      grad.addColorStop(0, 'rgba(255, 0, 0, 0.95)');
+      grad.addColorStop(1, 'rgba(120, 0, 0, 0.2)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Зрачок
+      const pupilRadius = radius / 3 + bassLevel * 20 + Math.sin(time / 150) * 10;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, pupilRadius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 30, 30, 0.9)`;
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 30;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Глитч-квадраты вокруг глаза
+      for (let i = 0; i < 5; i++) {
+        const x = centerX + Math.random() * radius - radius / 2;
+        const y = centerY + Math.random() * radius - radius / 2;
+        const size = 10 + bassLevel * 40;
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.1 + Math.random() * 0.4})`;
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+
+    // Визуализация и звук из текста
+    function startRitual(text) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (isPlaying) return;
+      isPlaying = true;
+
+      const now = audioCtx.currentTime;
+
+      // Каждая буква задаёт частоту и длительность
+      // Коды символов: a-z, A-Z, 32-126 — нормализуем частоту от 150 до 900 Гц
+      const chars = text.split('');
+      let time = now + 0.1;
+      const totalDuration = 5; // циклический паттерн 5 сек
+
+      function normalizeFreq(charCode) {
+        return 150 + ((charCode - 32) / (126 - 32)) * 750;
+      }
+
+      // Массив для басового уровня (для визуала)
+      let bassLevel = 0;
+
+      // Запускаем цикл звуков из текста с паузами
+      chars.forEach((ch, i) => {
+        const code = ch.charCodeAt(0);
+        const freq = normalizeFreq(code);
+
+        // Варьируем длительность: гласные дольше, согласные короче
+        const vowels = 'aeiouаеёиоуыэюяAEIOUАЕЁИОУЫЭЮЯ';
+        const dur = vowels.includes(ch) ? 0.35 : 0.15;
+
+        playTone(freq, dur, time);
+
+        // Иногда запускаем шум искажения
+        if (Math.random() < 0.15) playNoise(0.2, time);
+
+        // Усреднённый бас для визуала (низкие частоты)
+        bassLevel = 0.3 * bassLevel + 0.7 * (freq < 300 ? 1 : 0);
+
+        time += dur * 0.9;
+      });
+
+      // Визуальный цикл отрисовки
+      let frame = 0;
+      function drawLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Тёмный полупрозрачный фон с артефактами багов
+        ctx.fillStyle = 'rgba(26, 0, 0, 0.12)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Рисуем глаз
+        drawEye(performance.now(), bassLevel);
+
+        // Глитчи
+        if (frame % 3 === 0) generateGlitch();
+        drawGlitches();
+
+        // Красные искажения полос
+        for (let i = 0; i < 15; i++) {
+          const barWidth = canvas.width / 15;
+          const x = i * barWidth;
+          const glitchHeight = Math.random() * 30 + 15;
+          ctx.fillStyle = `rgba(255, 0, 0, ${0.1 + Math.random() * 0.4})`;
+          ctx.fillRect(x, 0, barWidth * 0.8, glitchHeight);
+        }
+
+        // Язвительный текст проклятия внизу
+        ctx.font = "18px 'Consolas', monospace";
+        ctx.fillStyle = '#ff0000';
+        ctx.shadowColor = '#aa0000';
+        ctx.shadowBlur = 5;
+        ctx.textAlign = 'center';
+        ctx.fillText("Пусть ссаные питухи трясутся перед литуизмом!", canvas.width / 2, canvas.height - 30);
+        ctx.shadowBlur = 0;
+
+        frame++;
+        if (isPlaying) requestAnimationFrame(drawLoop);
+      }
+      drawLoop();
+
+      // Авто-стоп через длину музыки + немного запаса
+      setTimeout(() => {
+        isPlaying = false;
+      }, (time - now + 0.5) * 1000);
+    }
+
+    // Обработка кнопки
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const text = document.getElementById('inputText').value.trim();
+      if (text.length === 0) {
+        alert('Введи что-то, ссаный питух!');
+        return;
+      }
+      startRitual(text);
+    });
+
+  </script>
+</body>
+</html>

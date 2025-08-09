@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Генератор лиц Wyldi и Сраного Спанча в стиле Литуизма</title>
+<style>
+  @font-face {
+    font-family: "Lithium";
+    src: url("https://fonts.gstatic.com/s/uncialantiqua/v15/0QIuK9_6F6T1pY8RZ0h8Gk8N1CGD5fVL1f7t.ttf") format("truetype");
+  }
+  body {
+    margin: 0; background: #0b0000; color: #ff1100;
+    font-family: "Lithium", monospace;
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh;
+    user-select: none;
+  }
+  canvas {
+    border: 2px solid #ff1100;
+    background: #1a0000;
+    image-rendering: pixelated;
+  }
+  h1 {
+    margin: 0.5em 0;
+    text-shadow:
+      0 0 5px #ff1100,
+      0 0 10px #ff0000,
+      0 0 20px #ff3300;
+  }
+  #btns {
+    margin-top: 1em;
+  }
+  button {
+    background: #330000;
+    border: 1px solid #ff1100;
+    color: #ff1100;
+    font-family: monospace;
+    font-size: 1.2em;
+    padding: 0.5em 1.2em;
+    margin: 0 0.5em;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  button:hover {
+    background: #ff1100;
+    color: #330000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Генератор лиц Wyldi и Сраного Спанча</h1>
+<canvas id="canvas" width="320" height="320"></canvas>
+
+<div id="btns">
+  <button id="wyldiBtn">Генерировать Wyldi</button>
+  <button id="spanchBtn">Генерировать Сраного Спанча</button>
+</div>
+
+<script>
+// --- Утилиты ---
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+function randChoice(arr) {
+  return arr[randInt(0, arr.length)];
+}
+
+// --- Цвета в стиле Литуизма ---
+const COLORS = {
+  darkRed: '#330000',
+  brightRed: '#ff1100',
+  glitchRed: '#ff3300',
+  shadowRed: '#660000',
+  bloodBlack: '#0b0000',
+
+  spanchGreen: '#33ff00',
+  spanchYellow: '#ffff00',
+  spanchBlack: '#003300'
+};
+
+// --- Функции Wyldi ---
+
+function drawEyeWyldi(ctx, x, y, size, glitchIntensity) {
+  ctx.fillStyle = COLORS.darkRed;
+  ctx.beginPath();
+  ctx.ellipse(x, y, size * 1.2, size * 0.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const irisColors = ['#aa0000', '#cc2200', '#ff4400'];
+  const irisColor = randChoice(irisColors);
+  ctx.fillStyle = irisColor;
+  ctx.beginPath();
+  ctx.ellipse(x + glitchIntensity * 2, y + glitchIntensity * 1.5, size * 0.7, size * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = COLORS.brightRed;
+  const pupilSize = size * 0.3;
+  const offsetX = glitchIntensity * (Math.random() - 0.5);
+  const offsetY = glitchIntensity * (Math.random() - 0.5);
+  ctx.fillRect(x - pupilSize/2 + offsetX, y - pupilSize/2 + offsetY, pupilSize, pupilSize);
+}
+
+function drawMouthWyldi(ctx, x, y, width, height, glitchIntensity) {
+  ctx.strokeStyle = COLORS.brightRed;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const step = width / 6;
+  ctx.moveTo(x - width/2, y);
+  for(let i=1; i<=6; i++) {
+    const glitchY = y + (Math.random() - 0.5) * glitchIntensity * 3;
+    const glitchX = x - width/2 + i * step + (Math.random()-0.5) * glitchIntensity;
+    ctx.lineTo(glitchX, glitchY);
+  }
+  ctx.stroke();
+}
+
+function drawFaceOutlineWyldi(ctx, x, y, radius, glitchIntensity) {
+  ctx.strokeStyle = COLORS.glitchRed;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  for(let angle=0; angle < 2*Math.PI; angle += 0.1) {
+    const r = radius + (Math.sin(angle*20 + glitchIntensity*10) * glitchIntensity * 2);
+    const px = x + r * Math.cos(angle);
+    const py = y + r * Math.sin(angle);
+    if(angle === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.stroke();
+}
+
+function drawGlitchLines(ctx, width, height) {
+  ctx.strokeStyle = COLORS.brightRed;
+  ctx.lineWidth = 1;
+  for(let i=0; i<20; i++) {
+    const y = Math.random() * height;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y + (Math.random() - 0.5) * 10);
+    ctx.stroke();
+  }
+}
+
+function generateWyldiFace() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = COLORS.bloodBlack;
+  ctx.fillRect(0, 0, w, h);
+
+  for(let i=0; i<800; i++) {
+    ctx.fillStyle = `rgba(255,17,17,${Math.random() * 0.04})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, 1,1);
+  }
+  drawGlitchLines(ctx, w, h);
+
+  const centerX = w/2;
+  const centerY = h/2 + 20;
+  const radius = 120;
+  const glitchIntensity = Math.random() * 4 + 2;
+
+  drawFaceOutlineWyldi(ctx, centerX, centerY, radius, glitchIntensity);
+
+  drawEyeWyldi(ctx, centerX - 50 + Math.random()*6, centerY - 30 + Math.random()*4, 25, glitchIntensity);
+  drawEyeWyldi(ctx, centerX + 50 + Math.random()*6, centerY - 25 + Math.random()*4, 28, glitchIntensity);
+
+  drawMouthWyldi(ctx, centerX + (Math.random()*6-3), centerY + 60 + (Math.random()*4-2), 100, 25, glitchIntensity);
+
+  ctx.font = '20px Lithium, monospace';
+  ctx.fillStyle = COLORS.brightRed;
+  const texts = [
+    'W¥LDI',
+    '☠ ⛧ ☣',
+    'GŁITCH Ɏ⚡',
+    'BŁØØD',
+    '⧼░▒▓░⧽',
+    'RX-Ɏ-09'
+  ];
+  for(let i=0; i<texts.length; i++) {
+    const x = centerX + randInt(-120, 100);
+    const y = centerY + randInt(-100, 120);
+    ctx.fillText(texts[i], x, y);
+  }
+}
+
+// --- Функции Сраного Спанча ---
+
+function drawPixelBlock(ctx, x, y, size, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, size, size);
+}
+
+function drawEyeSpanch(ctx, x, y, size) {
+  // Пиксельный квадратный глаз с "коррозией"
+  const block = size / 4;
+  // Белок глаза (ярко-зеленый)
+  for(let i=0; i<4; i++) {
+    for(let j=0; j<3; j++) {
+      drawPixelBlock(ctx, x + i*block, y + j*block, block, COLORS.spanchGreen);
+    }
+  }
+  // Зрачок (жёлтый квадрат)
+  drawPixelBlock(ctx, x + block, y + block, block*2, COLORS.spanchYellow);
+
+  // "Глитч" пиксели (коррозия)
+  if(Math.random() < 0.5) {
+    drawPixelBlock(ctx, x + randInt(0, 4)*block, y + randInt(0, 3)*block, block, COLORS.spanchBlack);
+  }
+}
+
+function drawMouthSpanch(ctx, x, y, width, height) {
+  // Пиксельный рот — простая линия из блоков
+  const block = width / 8;
+  for(let i=0; i<8; i++) {
+    let color = COLORS.spanchYellow;
+    // Иногда ломает блоки (глитч)
+    if(Math.random() < 0.3) color = COLORS.spanchBlack;
+    drawPixelBlock(ctx, x + i*block, y, block, color);
+  }
+}
+
+function drawFaceOutlineSpanch(ctx, x, y, size) {
+  // Квадратное лицо с мелкими искажениями (коррозия)
+  const block = size / 10;
+  for(let i=0; i<10; i++) {
+    for(let j=0; j<10; j++) {
+      // Основной цвет лица
+      let color = COLORS.spanchGreen;
+
+      // Коррозия/глитч (черные пиксели)
+      if(Math.random() < 0.1) color = COLORS.spanchBlack;
+
+      drawPixelBlock(ctx, x + i*block, y + j*block, block, color);
+    }
+  }
+}
+
+function generateSpanchFace() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#001100'; // Тёмный зелёный фон
+  ctx.fillRect(0, 0, w, h);
+
+  // Лёгкий шум
+  for(let i=0; i<600; i++) {
+    ctx.fillStyle = `rgba(51,255,0,${Math.random() * 0.03})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, 1,1);
+  }
+
+  // Коррозия глитч-линиями (горизонтальные)
+  ctx.strokeStyle = COLORS.spanchYellow;
+  ctx.lineWidth = 1;
+  for(let i=0; i<15; i++) {
+    const y = Math.random() * h;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y + (Math.random() - 0.5) * 6);
+    ctx.stroke();
+  }
+
+  const size = 200;
+  const faceX = w/2 - size/2;
+  const faceY = h/2 - size/2;
+
+  drawFaceOutlineSpanch(ctx, faceX, faceY, size);
+
+  drawEyeSpanch(ctx, faceX + 30, faceY + 50, 40);
+  drawEyeSpanch(ctx, faceX + size - 110, faceY + 50, 40);
+
+  drawMouthSpanch(ctx, faceX + 50, faceY + size - 70, 100, 20);
+
+  // Тексты — кислотные символы литуизма
+  ctx.font = '18px Lithium, monospace';
+  ctx.fillStyle = COLORS.spanchYellow;
+  const texts = [
+    'SRS🝗PANCH',
+    '☣ ☢ ☠',
+    'L!TUIZM 3RR0R',
+    'K0RR0S!0N',
+    '⧼▒▓░▒▓░⧽',
+    'RX-SP-07'
+  ];
+  for(let i=0; i<texts.length; i++) {
+    const x = w/2 + randInt(-140, 120);
+    const y = h/2 + randInt(-90, 110);
+    ctx.fillText(texts[i], x, y);
+  }
+}
+
+// --- События кнопок ---
+document.getElementById('wyldiBtn').addEventListener('click', generateWyldiFace);
+document.getElementById('spanchBtn').addEventListener('click', generateSpanchFace);
+
+// Запуск по умолчанию
+generateWyldiFace();
+
+</script>
+
+</body>
+</html>

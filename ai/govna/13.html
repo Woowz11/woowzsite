@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Литуизм: Текст → Музыка → Визуализация</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; background: black; color: white;
+      font-family: monospace;
+      user-select: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #canvas {
+      display: block;
+      background: #111;
+      width: 100vw;
+      height: 80vh;
+    }
+    #input-container {
+      margin-top: 10px;
+      width: 90vw;
+      max-width: 600px;
+      display: flex;
+      justify-content: center;
+    }
+    #input-text {
+      width: 100%;
+      font-size: 18px;
+      background: #222;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      outline: none;
+      border-radius: 6px;
+      letter-spacing: 0.1em;
+    }
+    #instructions {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #ff4444;
+      font-weight: bold;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="instructions">Введи любые буквы — генерируется музыка и анимация!</div>
+  <canvas id="canvas"></canvas>
+  <div id="input-container">
+    <input id="input-text" placeholder="Пиши сюда любые символы..." autofocus autocomplete="off" spellcheck="false" />
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight * 0.8;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const colorPalette = [
+      '#FF003C', '#FF8C00', '#DAF7A6', '#33FF57',
+      '#00FFFF', '#007BFF', '#AA00FF', '#FF00AA'
+    ];
+
+    // Генерация нот из символов — map Unicode к ноте в пределах C3 - B5
+    function charToNote(char) {
+      const baseMidi = 48; // C3 = midi 48
+      const code = char.charCodeAt(0);
+      // Ограничим ноты от 48 до 83 (C3-B5)
+      const midi = baseMidi + (code % 36);
+      return Tone.Frequency(midi, "midi").toNote();
+    }
+
+    // Для плавных кривых и путей
+    class PathPoint {
+      constructor(x, y, color, size) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.size = size;
+        this.life = 1; // 1 full life, уменьшается до 0
+      }
+      update() {
+        this.life -= 0.01;
+        this.size *= 0.98;
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 12;
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    const pathPoints = [];
+    const maxPoints = 100;
+
+    // Мелодия — один синтезатор
+    const synth = new Tone.Synth({
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 1.0 }
+    }).toDestination();
+
+    // Ввод с текстового поля
+    const inputText = document.getElementById('input-text');
+
+    function randomColor() {
+      return colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    }
+
+    // Когда ввод происходит — проигрываем ноту и рисуем точки по времени
+    function onTextInput(e) {
+      const text = e.target.value;
+      if (text.length === 0) return;
+      // Берём последний символ
+      const char = text[text.length - 1];
+      const note = charToNote(char);
+      const freq = Tone.Frequency(note).toFrequency();
+
+      // Запускаем звук
+      synth.triggerAttackRelease(note, "8n");
+
+      // Добавляем точки на путь
+      for (let i = 0; i < 3; i++) {
+        let x = Math.random() * w;
+        let y = Math.random() * h;
+        pathPoints.push(new PathPoint(x, y, randomColor(), 20 + Math.random() * 20));
+        if (pathPoints.length > maxPoints) pathPoints.shift();
+      }
+    }
+
+    inputText.addEventListener('input', onTextInput);
+
+    // Анимация пути — соединяем точки гладкой кривой (катмулл-ром)
+    function drawPath(points) {
+      if (points.length < 3) return;
+
+      ctx.lineWidth = 2;
+      for (let i = 1; i < points.length; i++) {
+        let p0 = points[i - 1];
+        let p1 = points[i];
+        ctx.strokeStyle = p1.color;
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.shadowColor = p1.color;
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // Фон — волны и шум (динамические)
+    function drawBackground(t) {
+      const gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, '#110000');
+      gradient.addColorStop(1, '#330000');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Пульсирующие волны
+      ctx.strokeStyle = 'rgba(255, 0, 0, 0.15)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        let amplitude = 20 + 10 * i;
+        let frequency = 0.005 + 0.001 * i;
+        ctx.moveTo(0, h / 2);
+        for (let x = 0; x < w; x++) {
+          let y = h / 2 + amplitude * Math.sin(x * frequency * 2 * Math.PI + t * 0.005 * (i+1));
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function animate(t = 0) {
+      ctx.clearRect(0, 0, w, h);
+      drawBackground(t);
+
+      // Обновляем и рисуем точки
+      for (let i = pathPoints.length - 1; i >= 0; i--) {
+        const p = pathPoints[i];
+        p.update();
+        if (p.life <= 0 || p.size <= 0.5) {
+          pathPoints.splice(i, 1);
+        } else {
+          p.draw(ctx);
+        }
+      }
+      drawPath(pathPoints);
+
+      requestAnimationFrame(animate);
+    }
+
+    // Запуск Tone.js
+    inputText.addEventListener('focus', async () => {
+      await Tone.start();
+    }, { once: true });
+
+    animate();
+
+  </script>
+</body>
+</html>

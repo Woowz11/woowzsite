@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Литуизм Музыка & Визуализация Ремикс</title>
+<style>
+  body {
+    margin: 0; background: black; color: #ff3300; font-family: 'Courier New', monospace;
+    user-select: none;
+  }
+  #container {
+    display: flex; flex-direction: column; align-items: center; padding: 15px;
+  }
+  textarea, input[type=text] {
+    width: 90%; max-width: 600px; font-size: 18px; padding: 8px; margin: 10px 0;
+    background: #220000; border: 2px solid #ff3300; color: #ff3300;
+  }
+  button, select {
+    font-size: 18px; padding: 10px 15px; margin: 5px; background: #330000;
+    border: 2px solid #ff3300; color: #ff3300; cursor: pointer;
+  }
+  button:hover, select:hover { background: #440000; }
+  canvas {
+    margin-top: 20px; background: black; border: 2px solid #ff3300;
+    max-width: 90vw; max-height: 60vh; display: block;
+  }
+  #effects {
+    margin-top: 10px;
+  }
+  label {
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <h1>🎸 Литуизм Музыкальный Ремиксер + Визуализация 🎨</h1>
+    <label for="fileInput">Загрузить MP3 файл:</label>
+    <input type="file" id="fileInput" accept="audio/mpeg, audio/mp3" />
+    <label for="unicodeInput">Введите Unicode символы для генерации музыки:</label>
+    <textarea id="unicodeInput" rows="3" placeholder="Например: литуимские символы, 𝕯𝖔𝖓𝖙 𝖘𝖙𝖔𝖕, ✨⚡🔥"></textarea>
+    
+    <div id="effects">
+      <label for="effectSelect">Выберите эффект ремикса:</label>
+      <select id="effectSelect">
+        <option value="clean">Чистый звук (Clean)</option>
+        <option value="delay">Эхо (Delay)</option>
+        <option value="distortion">Искажение (Distortion)</option>
+        <option value="lowpass">Фильтр Низких Частот (Lowpass)</option>
+      </select>
+      <button id="playBtn">▶️ Воспроизвести</button>
+      <button id="stopBtn">⏹️ Остановить</button>
+    </div>
+    
+    <canvas id="canvas" width="800" height="400"></canvas>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let audioBuffer = null;
+  let sourceNode = null;
+  let effectNode = null;
+  let analyser = null;
+  let animationId = null;
+
+  const fileInput = document.getElementById('fileInput');
+  const unicodeInput = document.getElementById('unicodeInput');
+  const effectSelect = document.getElementById('effectSelect');
+  const playBtn = document.getElementById('playBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Загрузка файла и декодирование
+  fileInput.addEventListener('change', async (e) => {
+    if (e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    if (!file.type.startsWith('audio')) {
+      alert('Пожалуйста, выберите аудио файл в формате MP3.');
+      return;
+    }
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      console.log('Файл успешно загружен и декодирован');
+    } catch(err) {
+      alert('Ошибка при загрузке аудио: ' + err.message);
+    }
+  });
+
+  // Создаем эффект по выбору
+  function createEffect(type) {
+    if (!audioCtx) return null;
+    switch(type) {
+      case 'delay':
+        const delay = audioCtx.createDelay();
+        delay.delayTime.value = 0.3;
+        const feedback = audioCtx.createGain();
+        feedback.gain.value = 0.5;
+        delay.connect(feedback);
+        feedback.connect(delay);
+        return { input: delay, output: feedback };
+      case 'distortion':
+        const distortion = audioCtx.createWaveShaper();
+        function makeDistortionCurve(amount) {
+          const k = typeof amount === 'number' ? amount : 50,
+            n_samples = 44100,
+            curve = new Float32Array(n_samples);
+          for (let i = 0; i < n_samples; ++i) {
+            const x = i * 2 / n_samples - 1;
+            curve[i] = ((3 + k) * x * 20 * Math.PI / 180) / (Math.PI + k * Math.abs(x));
+          }
+          return curve;
+        }
+        distortion.curve = makeDistortionCurve(400);
+        distortion.oversample = '4x';
+        return distortion;
+      case 'lowpass':
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 800;
+        return filter;
+      case 'clean':
+      default:
+        return null;
+    }
+  }
+
+  // Генерация нот из символов Unicode — по коду символа создаём частоту
+  function generateFrequenciesFromText(text) {
+    // Возьмём максимум 50 символов, чтобы не перегружать
+    const maxChars = 50;
+    const chars = [...text].slice(0, maxChars);
+    const freqs = chars.map(c => {
+      // Unicode code point -> частота (от 200 до 1200 Гц)
+      const code = c.codePointAt(0);
+      return 200 + (code % 1000) * 1.0; // масштабируем для музыкальной частоты
+    });
+    return freqs;
+  }
+
+  // Создаем осцилляторы по массиву частот
+  function createOscillators(freqs) {
+    const oscillators = [];
+    const now = audioCtx.currentTime;
+    freqs.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      oscillators.push(osc);
+    });
+    return oscillators;
+  }
+
+  // Проигрываем ремикс: комбинируем загруженный аудио и осцилляторы из символов
+  function playRemix() {
+    if (!audioBuffer) {
+      alert('Загрузите сначала аудио файл!');
+      return;
+    }
+
+    // Останавливаем старый источник и визуализацию
+    stopRemix();
+
+    sourceNode = audioCtx.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+
+    const effectType = effectSelect.value;
+    effectNode = createEffect(effectType);
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+
+    // Создаем осцилляторы
+    const freqs = generateFrequenciesFromText(unicodeInput.value);
+    const oscillators = createOscillators(freqs);
+
+    // Микшер для осцилляторов
+    const oscGain = audioCtx.createGain();
+    oscGain.gain.value = 0.15;
+
+    // Подключаем осцилляторы
+    oscillators.forEach(osc => {
+      osc.connect(oscGain);
+      osc.start();
+      // остановим осциллятор через 10 секунд, чтобы не висел
+      osc.stop(audioCtx.currentTime + 10);
+    });
+
+    // Соединяем источники: аудио + осцилляторы -> эффект (если есть) -> анализатор -> вывод
+    if (effectNode) {
+      if (effectNode.input && effectNode.output) {
+        sourceNode.connect(effectNode.input);
+        oscGain.connect(effectNode.input);
+        effectNode.output.connect(analyser);
+      } else {
+        sourceNode.connect(effectNode);
+        oscGain.connect(effectNode);
+        effectNode.connect(analyser);
+      }
+    } else {
+      sourceNode.connect(analyser);
+      oscGain.connect(analyser);
+    }
+    analyser.connect(audioCtx.destination);
+
+    sourceNode.start();
+
+    drawVisualizer();
+
+    // Останавливаем осцилляторы и источник через 10 секунд
+    setTimeout(stopRemix, 10000);
+  }
+
+  function stopRemix() {
+    if (sourceNode) {
+      try {
+        sourceNode.stop();
+      } catch {}
+      sourceNode.disconnect();
+      sourceNode = null;
+    }
+    if (effectNode) {
+      try {
+        effectNode.disconnect();
+      } catch {}
+      effectNode = null;
+    }
+    if (analyser) {
+      try {
+        analyser.disconnect();
+      } catch {}
+      analyser = null;
+    }
+    if(animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    clearCanvas();
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Визуализация в стиле литуизма: хаотичные красные иероглифы и геометрия с колебаниями амплитуды
+  function drawVisualizer() {
+    if (!analyser) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+
+    clearCanvas();
+
+    // Фон - хаотичные символы в стиле литуизма
+    const text = unicodeInput.value || '⚡🔥💀☠️🛠️⚙️';
+    const chars = [...text.length ? text : '⚡🔥💀☠️🛠️⚙️'];
+    const fontSize = 18;
+    ctx.font = `${fontSize}px Courier New`;
+    ctx.fillStyle = '#ff3300';
+
+    // Рисуем символы рандомно
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.globalAlpha = 0.1 + 0.4 * Math.random();
+      ctx.fillText(char, x, y);
+    }
+
+    // Рисуем волны частот
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ff2200';
+    ctx.beginPath();
+
+    for(let i=0; i < bufferLength; i++) {
+      const barHeight = dataArray[i];
+      const x = (i / bufferLength) * width;
+      const y = height - barHeight * 1.5;
+      if(i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Дополнительно - случайные геометрические фигуры с пульсацией по амплитуде
+    for(let i=0; i < 15; i++) {
+      const amp = dataArray[i*4] / 255;
+      ctx.globalAlpha = 0.6 * amp;
+      ctx.fillStyle = `rgba(255, 51, 0, ${amp})`;
+      const size = 10 + 30 * amp;
+      const x = (i * 50 + (Date.now() / 50) % 50) % width;
+      const y = height / 2 + 50 * Math.sin(Date.now()/300 + i);
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2*Math.PI);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    animationId = requestAnimationFrame(drawVisualizer);
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    playRemix();
+  });
+
+  stopBtn.addEventListener('click', () => {
+    stopRemix();
+  });
+
+  window.addEventListener('unload', () => {
+    stopRemix();
+    audioCtx.close();
+  });
+})();
+</script>
+
+</body>
+</html>

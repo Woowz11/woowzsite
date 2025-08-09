@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Литуизм Аудио-Визуал Генератор</title>
+<style>
+  body {
+    background: #1a0000;
+    color: #ff3b3b;
+    font-family: 'Consolas', monospace;
+    margin: 0; padding: 20px;
+    user-select: none;
+  }
+  textarea {
+    width: 100%;
+    height: 100px;
+    background: #300000;
+    color: #ff5c5c;
+    border: 1px solid #ff2a2a;
+    font-size: 16px;
+    padding: 10px;
+    resize: none;
+  }
+  label {
+    margin-right: 10px;
+  }
+  #speedControl {
+    width: 100px;
+  }
+  canvas {
+    display: block;
+    margin: 20px auto;
+    background: #300000;
+    border: 2px solid #ff2a2a;
+  }
+  button {
+    background: #a80000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    user-select: none;
+  }
+  button:hover {
+    background: #ff0000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Литуизм Генератор Музыки и Визуала из Текста</h1>
+<textarea id="inputText" placeholder="Введи любой текст с Unicode символами..."></textarea>
+<br/>
+<label for="speedControl">Скорость музыки:</label>
+<input type="range" id="speedControl" min="0.1" max="3" value="1" step="0.1" />
+<span id="speedValue">1.0</span>x
+<br/>
+<button id="generateBtn">Генерировать</button>
+
+<canvas id="canvas" width="600" height="300"></canvas>
+
+<script>
+"use strict";
+
+// Константы и палитра базовых цветов (красные оттенки)
+const baseColorsPalette = [
+  [255, 0, 0],      // ярко-красный
+  [180, 20, 20],    // темный красный
+  [255, 80, 80],    // светло-красный
+  [200, 50, 50],    // красный средней яркости
+  [255, 40, 40],    // насыщенный красный
+  [150, 0, 0],      // очень темный красный
+  [220, 30, 30],    // красный с оранжевым оттенком
+];
+
+// Генератор псевдослучайных чисел с сидом (xorshift32)
+function createSeededRandom(seed) {
+  let x = seed || 123456789;
+  return function() {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    return (x < 0 ? ~x + 1 : x) % 1000 / 1000;
+  };
+}
+
+// Аудиоконтекст и помощники для звука
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, duration, startTime, volume) {
+  let osc = audioCtx.createOscillator();
+  let gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(volume, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+function playNoise(duration, startTime, volume) {
+  let bufferSize = audioCtx.sampleRate * duration;
+  let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  let data = buffer.getChannelData(0);
+  for(let i=0; i<bufferSize; i++) data[i] = (Math.random() * 2 - 1) * volume;
+  let noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  noise.connect(audioCtx.destination);
+  noise.start(startTime);
+  noise.stop(startTime + duration);
+}
+
+// Эффекты шаблонов для Unicode символов
+const unicodeEffectsTemplates = [
+  {
+    name: 'shiftRight',
+    baseColorFunc: (seed) => baseColorsPalette[seed % baseColorsPalette.length],
+    pitchBase: 440,
+    pitchRange: 200,
+    visualEffect: function(pixels, seed, time) {
+      pixels.forEach((p, i) => {
+        p.offsetX = 1 + (seed % 5) * 0.4 + 0.5 * Math.sin(time * 5 + i);
+        p.offsetY = 0;
+      });
+    },
+  },
+  {
+    name: 'invertColors',
+    baseColorFunc: (seed) => baseColorsPalette[seed % baseColorsPalette.length],
+    pitchBase: 330,
+    pitchRange: 150,
+    visualEffect: function(pixels, seed, time) {
+      pixels.forEach(p => {
+        let c = p.baseColor;
+        p.baseColor = [255 - c[0], 255 - c[1], 255 - c[2]];
+      });
+    },
+  },
+  {
+    name: 'boostRed',
+    baseColorFunc: (seed) => {
+      let c = baseColorsPalette[seed % baseColorsPalette.length];
+      return [Math.min(255, c[0] + 80), c[1], c[2]];
+    },
+    pitchBase: 220,
+    pitchRange: 100,
+    visualEffect: function(pixels, seed, time) {
+      pixels.forEach((p, i) => {
+        if(i % 3 === 0) {
+          let c = p.baseColor;
+          p.baseColor = [Math.min(255, c[0] + 100), c[1], c[2]];
+        }
+      });
+    },
+  },
+  {
+    name: 'waveShift',
+    baseColorFunc: (seed) => baseColorsPalette[(seed + 1) % baseColorsPalette.length],
+    pitchBase: 280,
+    pitchRange: 180,
+    visualEffect: function(pixels, seed, time) {
+      pixels.forEach((p, i) => {
+        p.offsetX = 3 * Math.sin(time * 7 + i + seed);
+        p.offsetY = 3 * Math.cos(time * 6 + i + seed * 2);
+      });
+    },
+  },
+  {
+    name: 'pixelBlink',
+    baseColorFunc: (seed) => baseColorsPalette[(seed + 2) % baseColorsPalette.length],
+    pitchBase: 500,
+    pitchRange: 250,
+    visualEffect: function(pixels, seed, time) {
+      pixels.forEach((p, i) => {
+        let blink = Math.sin(time * 20 + i * 3 + seed) > 0 ? 1 : 0.4;
+        p.baseColor = p.baseColor.map(c => c * blink);
+      });
+    },
+  },
+  // Можно добавить 30-50 таких паттернов для расширения
+];
+
+// Получить эффект для символа
+function getEffectForUnicodeChar(charCode) {
+  const templateIndex = charCode % unicodeEffectsTemplates.length;
+  const template = unicodeEffectsTemplates[templateIndex];
+  const seed = charCode;
+
+  const baseColor = template.baseColorFunc(seed);
+
+  const baseFreq = template.pitchBase + (seed % template.pitchRange);
+
+  return {
+    visualEffect: template.visualEffect,
+    baseColor: baseColor,
+    baseFreq: baseFreq,
+    seed: seed,
+  };
+}
+
+// Генерация и воспроизведение мелодии
+function generateMelodyFromUnicodeText(text, speed) {
+  const now = audioCtx.currentTime + 0.1;
+  let timeCursor = now;
+  const baseDuration = 0.3 / speed;
+
+  for(let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    const effect = getEffectForUnicodeChar(code);
+
+    playTone(effect.baseFreq, baseDuration * 0.8, timeCursor, 0.15);
+
+    const freq2 = effect.baseFreq * Math.pow(2, 1/12);
+    const freq3 = effect.baseFreq * Math.pow(2, -1/12);
+    playTone(freq2, baseDuration * 0.3, timeCursor + baseDuration * 0.3, 0.1);
+    playTone(freq3, baseDuration * 0.3, timeCursor + baseDuration * 0.6, 0.1);
+
+    if((effect.seed + i) % 4 === 0) {
+      playNoise(baseDuration * 0.2, timeCursor + baseDuration * 0.5, 0.07);
+    }
+
+    timeCursor += baseDuration * 0.9;
+  }
+}
+
+// Canvas и визуализация
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const pixelSize = 6;
+const pixelsX = Math.floor(canvas.width / pixelSize);
+const pixelsY = Math.floor(canvas.height / pixelSize);
+
+// Массив пикселей с начальными параметрами
+function createPixels() {
+  let arr = [];
+  for(let y=0; y<pixelsY; y++) {
+    for(let x=0; x<pixelsX; x++) {
+      arr.push({
+        x: x * pixelSize,
+        y: y * pixelSize,
+        baseColor: [255, 0, 0],
+        offsetX: 0,
+        offsetY: 0,
+      });
+    }
+  }
+  return arr;
+}
+
+let pixels = createPixels();
+
+function drawPixels() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pixels.forEach(p => {
+    const r = Math.min(255, Math.max(0, Math.floor(p.baseColor[0])));
+    const g = Math.min(255, Math.max(0, Math.floor(p.baseColor[1])));
+    const b = Math.min(255, Math.max(0, Math.floor(p.baseColor[2])));
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(p.x + p.offsetX, p.y + p.offsetY, pixelSize, pixelSize);
+  });
+}
+
+// Анимация по времени и тексту
+let animText = '';
+let animSpeed = 1;
+let animTime = 0;
+
+function animate(time) {
+  animTime = time / 1000 * animSpeed;
+
+  if(animText.length === 0) {
+    drawPixels();
+    requestAnimationFrame(animate);
+    return;
+  }
+
+  // Для каждого символа применяем эффект к части пикселей (разделим на блоки)
+  const blockSize = Math.floor(pixels.length / animText.length);
+
+  for(let i=0; i<animText.length; i++) {
+    const code = animText.charCodeAt(i);
+    const effect = getEffectForUnicodeChar(code);
+
+    // Для блока пикселей
+    const start = i * blockSize;
+    const end = (i+1)*blockSize;
+    let blockPixels = pixels.slice(start, end);
+
+    // Устанавливаем базовый цвет для блока
+    blockPixels.forEach(p => p.baseColor = effect.baseColor.slice());
+
+    // Применяем визуальный эффект
+    effect.visualEffect(blockPixels, effect.seed, animTime);
+  }
+
+  drawPixels();
+  requestAnimationFrame(animate);
+}
+
+// UI и запуск
+const inputText = document.getElementById('inputText');
+const speedControl = document.getElementById('speedControl');
+const speedValue = document.getElementById('speedValue');
+const generateBtn = document.getElementById('generateBtn');
+
+speedControl.addEventListener('input', () => {
+  animSpeed = parseFloat(speedControl.value);
+  speedValue.textContent = animSpeed.toFixed(1);
+});
+
+generateBtn.addEventListener('click', () => {
+  const text = inputText.value.trim();
+  if(text.length === 0) return alert('Введи текст для генерации!');
+
+  animText = text;
+
+  // Обнуляем пиксели, чтобы не накапливались эффекты
+  pixels = createPixels();
+
+  // Запускаем звук
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  generateMelodyFromUnicodeText(text, animSpeed);
+});
+
+// Старт анимации
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>

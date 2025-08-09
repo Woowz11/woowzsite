@@ -1,4 +1,4 @@
-Написано для версии: **41** (более новые могут отлчичаться)
+Написано для версии: **51** (более новые могут отличаться)
 # Установка WoowzEngine
 
 Для начала работы с **WoowzEngine** версии **{WoowzEngineVersion}**, вам понадобится:
@@ -53,7 +53,7 @@ dependencies {
 	...
 	implementation name: 'WoowzEngine' // Укажите название файлов, как вам удобнее, очищай версию из названия, или вписывай сюда с версией, типа 'WoowzEngine-{WoowzEngineVersion}'
 	implementation name: 'WoowzEngine-javadoc'
-	implementation name: 'WoowzEngine-sources'     ??? скажите вувзу что-бы проверил это, а то не дело))))
+	implementation name: 'WoowzEngine-sources'	 ??? скажите вувзу что-бы проверил это, а то не дело))))
 	...
 }
 ```
@@ -72,34 +72,36 @@ dependencies {
 /* Выше должны быть package, import's */
 /* Запускающий скрипт для WoowzEngine v.{WoowzEngineVersion} */
 public class Run { // Укажите своё название скрипта (Заместо Run)
-    public static void main(String[] Args){
-        try {
-            /* Запуск движка */
-            WE.Install.Start(Config.Start()
-                    .SetName  ("") // Укажите название вашего проекта (Допустим "The Game")
-                    .SetID    ("") // Укажите ID вашего проекта (Допустим "the_game" или "TheGame")
-                    .SetAuthor("") // Укажите себя
-            );
+	public static void main(String[] Args){
+		try {
+			WE.Install.Awake(Config.Awake()
+					.SetName  ("") // Укажите название вашего проекта (Допустим "The Game")
+					.SetID	("") // Укажите ID вашего проекта (Допустим "the_game" или "TheGame")
+					.SetAuthor("") // Укажите себя
+			);
+		
+			/* Запуск движка */
+			WE.Install.Start(Config.Start());
 
-            /* Создание окна */
-            WE.Install.CreateWindow(Config.Window());
+			/* Создание окна */
+			WE.Install.CreateWindow(Config.Window());
 
-            /* Цикл */
-            while (WE.Install.DoCycle()){
-                /* Начало цикла (обязательно в начале!) */
-                WE.Install.StartCycle();
+			/* Цикл */
+			while (WE.Install.DoCycle()){
+				/* Начало цикла (обязательно в начале!) */
+				WE.Install.StartCycle();
 
-                /* Конец цикла (обязательно в конце!) */
-                WE.Install.EndCycle();
-            }
+				/* Конец цикла (обязательно в конце!) */
+				WE.Install.EndCycle();
+			}
 
-            /* конец движка */
-            WE.Install.End(true);
-        } catch (Exception e) {
-            /* произошла ошибка */
-            WE.Install.Crashed(e);
-        }
-    }
+			/* конец движка */
+			WE.Install.End(true);
+		} catch (Exception e) {
+			/* произошла ошибка */
+			WE.Install.Crashed(e);
+		}
+	}
 }
 ``` 
 

@@ -11,6 +11,10 @@
 </head>
 
 <style>
+html, body {
+	height: 100%;
+	margin: 0;
+}
 
 .markdown-section{
 	max-width: 95%;
@@ -37,7 +41,10 @@
 	<div id="app"></div>
 
 	<script>
-	window.WoowzEngineVersion = 41;
+	window.WoowzEngineVersion = 51;
+	
+	var LocalHost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+	var WikiPath = LocalHost ? "" : "https://woowz11.github.io/woowzsite/WoowzEngine/";
 	
 	window.$docsify = {
 		name: "WoowzEngine",
@@ -47,6 +54,7 @@
 		auto2top: true,
 		search: true,
 		darkTheme: true,
+		basePath: WikiPath,
 		plugins: [
 			function(hook) {
 				hook.doneEach(() => {
@@ -54,9 +62,11 @@
 						hljs.highlightElement(block);
 					});
 					
+					const Root = document.getElementById("app") || document.body;
+					const Page = document.getElementById("main");
+					
 					function Replace(Key, Value){
 						const pattern = new RegExp(`\\{${Key}\\}`, 'g');
-						const root = document.getElementById('app') || document.body;
 
 						function walk(node) {
 							if (node.nodeType === Node.TEXT_NODE) {
@@ -66,7 +76,7 @@
 							}
 						}
 
-						walk(root);
+						walk(Root);
 					}
 					Replace("WoowzEngineVersion", window.WoowzEngineVersion);
 				});
@@ -78,12 +88,6 @@
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
 	<script src="../highlight/highlight.min.js"></script>
-
-
-	
-	<!--<footer style="text-align:center; padding:10px; background:#222; color:#fff;">
-		&copy; 2025 WoowzEngine. Все права защищены. (WIP)
-	</footer>-->
 </body>
 
 </html>

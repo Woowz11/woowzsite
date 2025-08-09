@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Литуизм: Музыкально-Визуальный Генератор из Текста</title>
+  <style>
+    body {
+      margin: 0; 
+      background: #220000;
+      color: #ff0000;
+      font-family: "Consolas", monospace;
+      overflow: hidden;
+      user-select: none;
+      display: flex; 
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    h1 {
+      margin: 1rem;
+      text-shadow: 0 0 10px #ff0000;
+    }
+    textarea {
+      width: 80vw;
+      height: 80px;
+      background: #330000;
+      border: 2px solid #ff0000;
+      color: #ff4444;
+      font-size: 18px;
+      padding: 10px;
+      resize: none;
+      outline: none;
+      margin-bottom: 10px;
+      box-shadow: 0 0 10px #ff0000 inset;
+    }
+    button {
+      background: #660000;
+      color: #ff4444;
+      border: 1px solid #ff0000;
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0000;
+      transition: 0.3s;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #aa0000;
+      box-shadow: 0 0 30px #ff0000;
+    }
+    canvas {
+      display: block;
+      background: #110000;
+      box-shadow: 0 0 40px #ff0000;
+      border: 3px solid #ff0000;
+      flex-grow: 1;
+      width: 100vw;
+      height: calc(100vh - 220px);
+    }
+    #curse {
+      font-size: 14px;
+      color: #aa0000;
+      font-style: italic;
+      text-shadow: 0 0 3px #550000;
+      user-select: none;
+      margin-top: 5px;
+      pointer-events: none;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ЛИТУИЗМ: МУЗЫКА И ВИЗУАЛ ИЗ ТЕКСТА</h1>
+  <textarea id="inputText" placeholder="Пиши, ссаный питух..."></textarea>
+  <button id="startBtn">Начать ритуал</button>
+  <div id="curse">Проклятие питухам загружено и готово!</div>
+  <canvas id="glitchCanvas"></canvas>
+
+  <script>
+    // ========== Аудио и визуализация ==========
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const canvas = document.getElementById('glitchCanvas');
+    const ctx = canvas.getContext('2d');
+    let isPlaying = false;
+    let frame = 0;
+
+    // Пиксельный сетап
+    const pixelSize = 8; 
+    let gridCols, gridRows;
+    let pixels = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - 220;
+      gridCols = Math.floor(canvas.width / pixelSize);
+      gridRows = Math.floor(canvas.height / pixelSize);
+      pixels = new Array(gridCols * gridRows).fill(0).map(() => ({
+        x: 0, y: 0, baseColor: '', offsetX: 0, offsetY: 0, alpha: 0
+      }));
+      initPixels();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function randomRedShade() {
+      // Разные красные оттенки с баговым эффектом
+      const r = 180 + Math.floor(Math.random() * 75);
+      const g = Math.floor(Math.random() * 20);
+      const b = Math.floor(Math.random() * 20);
+      return `rgba(${r},${g},${b},`;
+    }
+
+    function initPixels() {
+      for(let y = 0; y < gridRows; y++) {
+        for(let x = 0; x < gridCols; x++) {
+          const idx = y * gridCols + x;
+          pixels[idx].x = x * pixelSize;
+          pixels[idx].y = y * pixelSize;
+          pixels[idx].baseColor = randomRedShade();
+          pixels[idx].offsetX = Math.random() * 2 - 1;
+          pixels[idx].offsetY = Math.random() * 2 - 1;
+          pixels[idx].alpha = 0;
+        }
+      }
+    }
+
+    // Звуковые утилиты
+    function playTone(freq, duration, time, volume = 0.2) {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, time);
+      gainNode.gain.setValueAtTime(volume, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start(time);
+      osc.stop(time + duration);
+    }
+
+    function playNoise(duration, time, volume = 0.1) {
+      const bufferSize = audioCtx.sampleRate * duration;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0; i<bufferSize; i++) data[i] = (Math.random()*2-1)*0.2;
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(volume, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration);
+      noise.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      noise.start(time);
+      noise.stop(time + duration);
+    }
+
+    // Конвертация текста в мелодию с арпеджио и случайными акцентами
+    function generateMelody(text) {
+      const now = audioCtx.currentTime;
+      const chars = text.split('');
+      let time = now + 0.1;
+
+      function charFreq(charCode, octaveShift = 0) {
+        // Частота: 150-900 Гц, сдвиг по октаве +/- 12 полутонов
+        const base = 150 + ((charCode - 32) / (126 - 32)) * 750;
+        return base * Math.pow(2, octaveShift / 12);
+      }
+
+      // Массив для визуала басов
+      let bassLevel = 0;
+
+      // Арпеджио (тройки нот)
+      for(let i = 0; i < chars.length; i++) {
+        const c = chars[i];
+        const code = c.charCodeAt(0);
+        const baseFreq = charFreq(code);
+
+        // Тройка нот - основная + две вариации
+        const notes = [
+          baseFreq,
+          charFreq(code, 3),
+          charFreq(code, -4)
+        ];
+
+        // Акценты с вероятностью
+        const durBase = 0.15;
+        notes.forEach((freq, idx) => {
+          const dur = durBase * (idx === 1 ? 1.5 : 1);
+          const volume = idx === 0 ? 0.22 : 0.1;
+          const playTime = time + idx * dur * 0.85;
+          if(Math.random() < 0.85) playTone(freq, dur, playTime, volume);
+          // Добавляем шум для текстуры
+          if(Math.random() < 0.1) playNoise(0.1, playTime, 0.05);
+        });
+
+        // Обновляем бас для визуала (если нота низкая - bassLevel растёт)
+        bassLevel = 0.4 * bassLevel + 0.6 * (baseFreq < 300 ? 1 : 0);
+        time += durBase * 3 * 0.85;
+      }
+      return bassLevel;
+    }
+
+    // Визуальная часть — движение пикселей по тексту
+    function drawVisual(time, bassLevel) {
+      // Тёмный полупрозрачный фон, даёт эффект размытия "следа"
+      ctx.fillStyle = 'rgba(26, 0, 0, 0.12)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Двигаем пиксели с разной амплитудой и скоростью
+      for(let i = 0; i < pixels.length; i++) {
+        const p = pixels[i];
+        // Смещение зависит от синуса, позиции и баса
+        const alphaBase = 0.3 + 0.7 * Math.abs(Math.sin(time * 4 + i));
+        const xMove = p.offsetX * Math.sin(time * 7 + i);
+        const yMove = p.offsetY * Math.cos(time * 6 + i * 1.3);
+
+        // Изменяем прозрачность в такт басу и случайно
+        const alpha = Math.min(1, alphaBase + bassLevel * 0.8);
+
+        // Рисуем пиксель
+        ctx.fillStyle = p.baseColor + alpha + ')';
+        ctx.fillRect(p.x + xMove, p.y + yMove, pixelSize, pixelSize);
+      }
+    }
+
+    // ========== Основная логика ==========
+
+    let bassLevelGlobal = 0;
+    let animationId;
+
+    function animate(timeMs) {
+      const time = timeMs / 1000;
+      drawVisual(time, bassLevelGlobal);
+      animationId = requestAnimationFrame(animate);
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      if (!isPlaying) {
+        const text = document.getElementById('inputText').value || 'ГОЛУ СИЛЬНЕЕ ПИТОВ! СРАНЫЙ СПАНЧ УБЬЕТ!';
+        bassLevelGlobal = generateMelody(text);
+        isPlaying = true;
+        animate(0);
+      }
+    });
+
+  </script>
+
+</body>
+</html>

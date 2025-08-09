@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Литуизм: Эпический Генератор Бита и Глитчей</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    margin: 0; padding: 0;
+    background: #1a0000;
+    color: #ff2222;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    user-select: none;
+    text-shadow: 0 0 10px #ff0000;
+  }
+  h1 {
+    font-size: 3em;
+    letter-spacing: 0.2em;
+    margin: 0 0 20px 0;
+    text-transform: uppercase;
+    color: #ff1111;
+    filter: drop-shadow(0 0 5px #ff3300);
+  }
+  button {
+    background: #330000;
+    border: 3px solid #ff0000;
+    padding: 20px 60px;
+    margin: 10px;
+    font-size: 24px;
+    color: #ff4444;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 20px #ff0000;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+  }
+  button:hover {
+    background: #660000;
+    box-shadow: 0 0 50px #ff5500;
+    color: #ffaaaa;
+  }
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #curse {
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #aa1111;
+    text-shadow: 0 0 5px #ff0000;
+    font-style: italic;
+    user-select: none;
+    z-index: 11;
+  }
+</style>
+</head>
+<body>
+
+<h1>G O L U  -  L I T U I Z M  R I S E S</h1>
+<div>
+  <button id="start">ПУСТИ ЖЕСТЬ</button>
+  <button id="stop">ЗАТКНИСЬ</button>
+</div>
+<canvas id="visualizer"></canvas>
+<div id="curse">Сраный питух соси... GOLU даст жару твоим ушам!</div>
+
+<script>
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const context = new AudioContext();
+
+  let isPlaying = false;
+  let intervalId = null;
+
+  const canvas = document.getElementById('visualizer');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const analyser = context.createAnalyser();
+  analyser.fftSize = 512;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  const masterGain = context.createGain();
+  masterGain.gain.setValueAtTime(0.4, context.currentTime);
+  masterGain.connect(analyser);
+  analyser.connect(context.destination);
+
+  // Реверберация с адским импульсом
+  function createReverb() {
+    const convolver = context.createConvolver();
+    const rate = context.sampleRate;
+    const length = rate * 3;
+    const impulse = context.createBuffer(2, length, rate);
+
+    for (let ch = 0; ch < 2; ch++) {
+      let channelData = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 6);
+      }
+    }
+    convolver.buffer = impulse;
+    return convolver;
+  }
+
+  const reverb = createReverb();
+  masterGain.connect(reverb);
+  reverb.connect(context.destination);
+
+  // Эпичные звуки литуизма с глитчами и искажениями
+  function playKick(time) {
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(180, time);
+    osc.frequency.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.15);
+  }
+
+  function playSnare(time) {
+    const bufferSize = context.sampleRate * 0.15;
+    const noiseBuffer = context.createBuffer(1, bufferSize, context.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * (Math.sin(i * 0.2) > 0 ? 1 : -1);
+    }
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const filter = context.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1500, time);
+
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(time);
+    noise.stop(time + 0.16);
+  }
+
+  function playGlitchSynth(time) {
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+
+    const waves = ['sawtooth', 'triangle', 'square'];
+    osc.type = waves[Math.floor(Math.random() * waves.length)];
+
+    // Искажение частоты и резкое изменение на глитч эффект
+    const baseFreq = 400 + Math.random() * 700;
+    osc.frequency.setValueAtTime(baseFreq, time);
+    osc.frequency.setValueAtTime(baseFreq * (0.8 + Math.random() * 0.4), time + 0.02);
+
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.25, time + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.2);
+  }
+
+  function playDistortedArp(time) {
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+
+    osc.type = 'triangle';
+    const baseFreq = 220 + Math.random() * 180;
+    const notes = [0, 4, 7, 10, 13];
+    let index = 0;
+
+    function arpStep() {
+      if (!isPlaying) {
+        gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.5);
+        osc.stop(context.currentTime + 0.6);
+        return;
+      }
+      const freq = baseFreq * Math.pow(2, notes[index] / 12);
+      osc.frequency.setValueAtTime(freq, context.currentTime);
+      gain.gain.cancelScheduledValues(context.currentTime);
+      gain.gain.setValueAtTime(0.15, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.1);
+      index = (index + 1) % notes.length;
+      setTimeout(arpStep, 100);
+    }
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+    arpStep();
+  }
+
+  function playIndustrialNoise(time) {
+    const bufferSize = 2 * context.sampleRate;
+    const noiseBuffer = context.createBuffer(1, bufferSize, context.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const distortion = context.createWaveShaper();
+    distortion.curve = makeDistortionCurve(400);
+    distortion.oversample = '4x';
+
+    const filter = context.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(800, time);
+
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.2, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 1);
+
+    noise.connect(distortion);
+    distortion.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(time);
+    noise.stop(time + 1.1);
+  }
+
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount : 50;
+    const n_samples = 44100;
+    const curve = new Float32Array(n_samples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; i++) {
+      const x = i * 2 / n_samples - 1;
+      curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  // Расписание паттерна
+  let startTime = 0;
+  let bpm = 140;
+  let interval = (60 / bpm) * 1000;
+  let step = 0;
+
+  function schedulePattern() {
+    if (!isPlaying) return;
+    const now = context.currentTime;
+
+    if (startTime === 0) startTime = now;
+
+    while (startTime < now + 0.2) {
+      // 4/4 бит: 1 - кик, 2 - снейр, 3 - глитч, 4 - снейр с шумом
+      const beatTime = startTime + (step * 0.25 * 60 / bpm);
+
+      if (step % 4 === 0) playKick(beatTime);
+      if (step % 4 === 1) playSnare(beatTime);
+      if (step % 4 === 2) playGlitchSynth(beatTime);
+      if (step % 4 === 3) {
+        playSnare(beatTime);
+        playIndustrialNoise(beatTime);
+      }
+
+      if (step % 16 === 0) playDistortedArp(beatTime);
+
+      startTime += 0.25 * 60 / bpm;
+      step++;
+    }
+    intervalId = setTimeout(schedulePattern, 50);
+  }
+
+  // Визуализация: красные глитчи, баги и вспышки в такт музыке
+  function draw() {
+    requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = 'rgba(26,0,0,0.12)';
+    ctx.fillRect(0, 0, width, height);
+
+    // Глитчевые линии, по басу и высоким
+    for (let i = 0; i < bufferLength; i++) {
+      const x = (width / bufferLength) * i;
+      const heightBar = (dataArray[i] / 255) * height * 0.6;
+      ctx.strokeStyle = `rgba(255, ${Math.floor(dataArray[i] / 2)}, ${Math.floor(dataArray[i] / 5)}, 0.8)`;
+      ctx.lineWidth = 1 + dataArray[i] / 50;
+      ctx.beginPath();
+      ctx.moveTo(x, height);
+      ctx.lineTo(x, height - heightBar);
+      ctx.stroke();
+    }
+
+    // Огромный пульсирующий баговый глаз в центре (круг + глитч)
+    const bass = dataArray[1];
+    const radius = 100 + bass * 0.8 + Math.sin(Date.now() / 150) * 15;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Фон круга с артефактами
+    const glitchCount = 5;
+    for (let i = 0; i < glitchCount; i++) {
+      const glitchX = centerX + Math.random() * 50 - 25;
+      const glitchY = centerY + Math.random() * 50 - 25;
+      const glitchSize = 10 + bass / 10;
+      ctx.fillStyle = `rgba(255, 0, 0, ${0.1 + Math.random() * 0.4})`;
+      ctx.fillRect(glitchX, glitchY, glitchSize, glitchSize);
+    }
+
+    // Основной круг глаза
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.3, centerX, centerY, radius);
+    gradient.addColorStop(0, 'rgba(255, 50, 50, 0.9)');
+    gradient.addColorStop(1, 'rgba(255, 0, 0, 0.3)');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Зрачок — пульсирующий красный круг с багами
+    const pupilRadius = radius / 3 + (bass / 3) + Math.sin(Date.now() / 100) * 5;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, pupilRadius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 0, 0, 0.85)`;
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur = 30;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Квадрат-глитч с вращением по частоте высоких
+    const highFreq = dataArray[20];
+    const size = 50 + highFreq / 2;
+    ctx.save();
+    ctx.translate(width * 0.75, height * 0.25);
+    ctx.rotate(Date.now() / 400 * (highFreq / 128));
+    ctx.fillStyle = `rgba(255, 0, 0, 0.6)`;
+    ctx.fillRect(-size / 2, -size / 2, size, size);
+    ctx.restore();
+
+    // Мерцание "битвы" RGB-глитчей сверху
+    const glitchBarCount = 10;
+    for (let i = 0; i < glitchBarCount; i++) {
+      const barWidth = width / glitchBarCount;
+      const x = i * barWidth;
+      const glitchHeight = Math.random() * 30 + 10;
+      const alpha = 0.2 + Math.random() * 0.5;
+      ctx.fillStyle = `rgba(${255 - i * 20},0,${i * 20},${alpha})`;
+      ctx.fillRect(x, 0, barWidth * 0.8, glitchHeight);
+    }
+  }
+  draw();
+
+  // Управление кнопками
+  document.getElementById('start').addEventListener('click', async () => {
+    if (context.state === 'suspended') await context.resume();
+    if (isPlaying) return;
+    isPlaying = true;
+    startTime = 0;
+    step = 0;
+    schedulePattern();
+  });
+  document.getElementById('stop').addEventListener('click', () => {
+    isPlaying = false;
+    clearTimeout(intervalId);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Литуизм Visual + Audio Ritual</title>
+  <style>
+    body { margin:0; background:#000; color:#f00; user-select:none; overflow:hidden; }
+    #ui{position:absolute;top:10px;left:10px;z-index:10;}
+    input, button{margin:5px; background:#900; color:#fff; border:none; padding:5px; font:bold 14px monospaced;}
+    #canvas{display:block;}
+  </style>
+</head>
+<body>
+<div id="ui">
+  <input id="seedInput" placeholder="Сид..." />
+  <input id="speed" type="range" min="0.2" max="2" step="0.05" value="1"/>
+  <span id="speedV">1.00×</span>
+  <button onclick="start()">Старт</button>
+  <button onclick="download()">Скачать MP4</button>
+</div>
+<canvas id="canvas"></canvas>
+<script>
+const c = document.getElementById('canvas'), ctx = c.getContext('2d');
+c.width = innerWidth; c.height = innerHeight;
+let seedStr='lituisм', speed=1, audioCtx, analyser, gainNode;
+let renderFrameCB;
+
+// hash + random
+function hash(s){let h=0;for(let ch of s)h=(31*h+ch.charCodeAt(0))|0;return h;}
+function rand(seed){let x=Math.sin(seed++)*1e4;return x-Math.floor(x);}
+
+// аудио
+function initAudio(seed){
+  if(audioCtx)audioCtx.close();
+  audioCtx=new (window.AudioContext)();
+  analyser=audioCtx.createAnalyser(); analyser.fftSize=512;
+  gainNode=audioCtx.createGain();
+  gainNode.gain.value=0.3;
+  const osc = audioCtx.createOscillator();
+  osc.type=['sawtooth','square','triangle','sine'][seed%4];
+  osc.frequency.value=220 + (seed%200);
+  // арпеджио + задержка
+  const delay = audioCtx.createDelay(); delay.delayTime.value=0.3;
+  osc.connect(delay).connect(audioCtx.destination);
+  osc.connect(analyser).connect(gainNode).connect(audioCtx.destination);
+  osc.start();
+}
+
+// молния
+class Lightning {
+  constructor(){this.life=1;}
+  draw(){
+    const x0=rand(seed+5)*c.width;
+    const y0=0, x1=rand(seed+7)*c.width, y1=c.height;
+    ctx.strokeStyle='rgba(255,200,50,'+this.life+')';
+    ctx.lineWidth=2+rand(seed+9)*3;
+    ctx.beginPath();
+    ctx.moveTo(x0,y0);
+    ctx.lineTo((x0+x1)/2,rand(seed+13)*c.height);
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+    this.life-=0.02;
+  }
+}
+
+// slideshow
+let patterns=[];
+function genPattern(seed){
+  const g=hash(seed+'pat')%3;
+  const arr = [];
+  for(let i=0;i<20;i++)arr.push({x:rand(seed+i)*c.width, y:rand(seed+i+1)*c.height, r:10+rand(seed+i+2)*50});
+  return {type:g, arr};
+}
+function drawPattern(p, t){
+  p.arr.forEach(o=>{
+    ctx.fillStyle=`hsla(${(hash(seedStr)+o.x+o.y)%360},80%,60%,0.3)`;
+    if(p.type==0) ctx.fillRect(o.x+Math.sin(t+o.x)*20, o.y, o.r, o.r);
+    if(p.type==1) ctx.beginPath(), ctx.arc(o.x, o.y+Math.cos(t+o.y)*20, o.r,0,2*Math.PI),ctx.fill();
+    if(p.type==2){
+      ctx.save();
+      ctx.translate(o.x,o.y); ctx.rotate(t*0.5);
+      ctx.fillRect(0,0,o.r, o.r/2); ctx.restore();
+    }
+  });
+}
+
+// lightning list
+let lightnings=[];
+
+// render
+function render(){
+  ctx.fillStyle='rgba(0,0,0,0.1)'; ctx.fillRect(0,0,c.width,c.height);
+  analyser.getByteFrequencyData(data);
+  // сигналы
+  for(let i=0;i<data.length;i++){
+    if(data[i]>150 && rand(seed+i)<0.1*speed){
+      lightnings.push(new Lightning());
+    }
+  }
+  // draw lightning
+  lightnings = lightnings.filter(l=>l.life>0);
+  lightnings.forEach(l=>l.draw());
+  // slideshow
+  patterns.forEach(p=>drawPattern(p, time*0.3));
+  requestAnimationFrame(render);
+}
+
+// start
+let data, time=0;
+function start(){
+  seedStr = document.getElementById('seedInput').value || seedStr;
+  speed = parseFloat(document.getElementById('speed').value);
+  document.getElementById('speedV').textContent = speed.toFixed(2)+'×';
+  const seed = Math.abs(hash(seedStr));
+  initAudio(seed);
+  analyser.fftSize=256;
+  data=new Uint8Array(analyser.frequencyBinCount);
+  patterns=[];
+  for(let i=0;i<5;i++)patterns.push(genPattern(seed+i));
+  time=0;
+  render();
+}
+
+// скачивание
+function download(){
+  const stream = c.captureStream(30);
+  const rec = new MediaRecorder(stream, {mimeType:'video/webm'});
+  const channel = [];
+  rec.ondataavailable = e=>channel.push(e.data);
+  rec.onstop = ()=> {
+    const blob=new Blob(channel,{type:'video/webm'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='litumus.webm'; a.click();
+  };
+  rec.start();
+  setTimeout(()=>rec.stop(),10000);
+}
+
+// init
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Литуизм: Генератор музыки + ремикс MP3 + визуализация</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; background: black; color: white;
+      font-family: monospace;
+      user-select: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    #canvas {
+      display: block;
+      background: #111;
+      width: 100vw;
+      height: 70vh;
+      border-top: 1px solid #330000;
+      border-bottom: 1px solid #330000;
+      margin-bottom: 10px;
+    }
+    #input-text {
+      width: 90vw;
+      max-width: 600px;
+      font-size: 18px;
+      background: #222;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      outline: none;
+      border-radius: 6px;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    #file-input {
+      color: white;
+      margin-bottom: 10px;
+    }
+    #controls {
+      width: 90vw;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    button {
+      background: #330000;
+      border: none;
+      color: #ff4444;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #ff4444;
+      color: #330000;
+    }
+    #instructions {
+      font-size: 14px;
+      color: #ff4444;
+      font-weight: bold;
+      user-select: none;
+      margin-top: 12px;
+      max-width: 600px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <input id="input-text" placeholder="Пиши сюда любые символы, чтобы генерировать музыку..." autocomplete="off" spellcheck="false" />
+  
+  <div id="controls">
+    <input type="file" id="file-input" accept="audio/mp3,audio/mpeg" />
+    <button id="play-text">Играть текст</button>
+    <button id="play-remix">Играть ремикс MP3</button>
+    <button id="stop">Стоп</button>
+  </div>
+
+  <div id="instructions">
+    Введи текст для генерации музыки. <br/>
+    Или загрузи MP3 — программа сделает ремикс и визуализацию в стиле литуизма.
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight * 0.7;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Цвета литуизма
+    const palette = ['#FF003C', '#FF8C00', '#DAF7A6', '#33FF57', '#00FFFF', '#007BFF', '#AA00FF', '#FF00AA'];
+
+    // Текстовый синтезатор Tone.js
+    const synth = new Tone.Synth({
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 1.0 }
+    }).toDestination();
+
+    // AudioContext для загрузки MP3
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    let audioBuffer = null; // загруженный аудиобуфер
+    let sourceNode = null;
+    let remixGain = null;
+    let delayNode = null;
+    let pitchShift = 0; // сдвиг в полутоне для ремикса
+
+    // Анализатор для визуализации
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Подключение для ремикса
+    function setupRemixNodes() {
+      if(sourceNode) sourceNode.disconnect();
+      if(remixGain) remixGain.disconnect();
+      if(delayNode) delayNode.disconnect();
+
+      remixGain = audioCtx.createGain();
+      delayNode = audioCtx.createDelay();
+      delayNode.delayTime.value = 0.2; // задержка 200ms
+
+      sourceNode = audioCtx.createBufferSource();
+      sourceNode.buffer = audioBuffer;
+      sourceNode.loop = true;
+
+      // Питч-шифт через playbackRate (упрощённо)
+      sourceNode.playbackRate.value = Math.pow(2, pitchShift / 12);
+
+      sourceNode.connect(delayNode);
+      delayNode.connect(remixGain);
+      remixGain.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+
+    // Функция для воспроизведения текста как мелодии
+    let playingText = false;
+    function playTextMelody(text) {
+      if (!text) return;
+      if (Tone.context.state !== 'running') Tone.context.resume();
+
+      let index = 0;
+      playingText = true;
+
+      function playNext() {
+        if (!playingText || index >= text.length) return;
+        const char = text[index];
+        const note = charToNote(char);
+        synth.triggerAttackRelease(note, "8n");
+        index++;
+        setTimeout(playNext, 150);
+      }
+      playNext();
+    }
+
+    function stopAll() {
+  playingText = false;
+  if(sourceNode){
+    try {
+      sourceNode.stop();
+    } catch {}
+    sourceNode.disconnect();
+    sourceNode = null;
+  }
+  Tone.Transport.stop();
+  // synth.releaseAll(); // УДАЛИТЬ, такого метода нет
+  // Для остановки звука синтезатора просто ничего не делать,
+  // или если нужно - можно вызвать synth.triggerRelease(), но у нас нет активной ноты.
+}
+
+    // Преобразование символа в ноту MIDI в диапазоне C3-B5
+    function charToNote(char) {
+      const baseMidi = 48;
+      const code = char.charCodeAt(0);
+      const midi = baseMidi + (code % 36);
+      return Tone.Frequency(midi, "midi").toNote();
+    }
+
+    // Визуализация — спектр с глитчами и кислотными цветами
+    function drawVisualizer() {
+      ctx.clearRect(0, 0, w, h);
+
+      analyser.getByteFrequencyData(dataArray);
+
+      // Фон с кислотным градиентом
+      let gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, '#110000');
+      gradient.addColorStop(1, '#330000');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Глитчи - случайные красные квадраты по частоте
+      for(let i=0; i<bufferLength; i++) {
+        let val = dataArray[i];
+        if(val > 100 && Math.random() > 0.7) {
+          let size = val / 3;
+          ctx.fillStyle = palette[Math.floor(Math.random() * palette.length)];
+          ctx.fillRect(i * (w / bufferLength), h/2 + (Math.random() * 20 - 10), size, size);
+        }
+      }
+
+      // Спектр - полосы
+      const barWidth = w / bufferLength;
+      for(let i=0; i<bufferLength; i++) {
+        const barHeight = dataArray[i];
+        ctx.fillStyle = palette[i % palette.length];
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 10;
+        ctx.fillRect(i * barWidth, h - barHeight, barWidth * 0.8, barHeight);
+      }
+
+      requestAnimationFrame(drawVisualizer);
+    }
+
+    // Обработчик загрузки MP3
+    const fileInput = document.getElementById('file-input');
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const arrayBuffer = await file.arrayBuffer();
+      audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      alert('MP3 загружен. Нажми "Играть ремикс MP3" для запуска.');
+    });
+
+    // Кнопки управления
+    const playTextBtn = document.getElementById('play-text');
+    const playRemixBtn = document.getElementById('play-remix');
+    const stopBtn = document.getElementById('stop');
+    const inputText = document.getElementById('input-text');
+
+    playTextBtn.addEventListener('click', () => {
+      stopAll();
+      playTextMelody(inputText.value);
+    });
+
+    playRemixBtn.addEventListener('click', () => {
+      if (!audioBuffer) {
+        alert('Сначала загрузите MP3!');
+        return;
+      }
+      stopAll();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      pitchShift = Math.floor(Math.random() * 7) - 3; // сдвиг случайный от -3 до +3 полутона
+      setupRemixNodes();
+      sourceNode.start();
+      drawVisualizer();
+    });
+
+    stopBtn.addEventListener('click', () => {
+      stopAll();
+    });
+
+    // Автозапуск визуализации с пустым буфером
+    function drawSilence() {
+      ctx.clearRect(0, 0, w, h);
+      let gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, '#110000');
+      gradient.addColorStop(1, '#330000');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+      requestAnimationFrame(drawSilence);
+    }
+    drawSilence();
+
+    // Запуск Tone.js после пользовательского действия
+    inputText.addEventListener('focus', async () => {
+      await Tone.start();
+    }, { once: true });
+
+  </script>
+</body>
+</html>

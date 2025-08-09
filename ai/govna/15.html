@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lituiзм Remix Generator & Visualizer</title>
+<style>
+  body {
+    background: #1a0000;
+    color: #f44336;
+    font-family: 'Courier New', monospace;
+    margin: 0; padding: 0; overflow: hidden;
+    user-select: none;
+  }
+  #controls {
+    position: fixed;
+    top: 10px; left: 10px; right: 10px;
+    background: #330000cc;
+    padding: 15px;
+    border: 2px solid #f44336;
+    z-index: 10;
+  }
+  #textInput {
+    width: 100%;
+    font-size: 18px;
+    padding: 5px;
+    background: #220000;
+    color: #f44336;
+    border: 1px solid #f44336;
+    outline: none;
+  }
+  #fileInput {
+    margin-top: 10px;
+    color: #f44336;
+  }
+  button {
+    background: #660000;
+    border: 1px solid #f44336;
+    color: #f44336;
+    padding: 8px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #1a0000;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+  <div id="controls">
+    <input type="text" id="textInput" placeholder="Вводи случайные символы для генерации ремикса..." autocomplete="off" />
+    <input type="file" id="fileInput" accept="audio/mp3,audio/mpeg" />
+    <button id="playBtn" disabled>▶️ Play Remix</button>
+    <button id="stopBtn" disabled>⏹ Stop</button>
+  </div>
+  <canvas id="visualizer"></canvas>
+
+<script>
+(async () => {
+  const ctx = new AudioContext();
+  let sourceNode = null;
+  let audioBuffer = null;
+  let isPlaying = false;
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 2048;
+
+  // Эффекты
+  const gainNode = ctx.createGain();
+  const distortion = ctx.createWaveShaper();
+  const delay = ctx.createDelay();
+  const feedbackGain = ctx.createGain();
+  const reverbConvolver = ctx.createConvolver();
+  const biquadFilter = ctx.createBiquadFilter();
+  const bitCrusher = createBitCrusher(ctx, 4); // кастомный биткрашер с глубиной 4 бит
+
+  // Соединяем эффекты в цепочку
+  // sourceNode -> distortion -> biquadFilter -> delay -> feedbackGain -> delay (feedback loop)
+  // delay -> reverb -> bitCrusher -> gain -> analyser -> ctx.destination
+
+  delay.delayTime.value = 0.3;
+  feedbackGain.gain.value = 0.25;
+  distortion.curve = makeDistortionCurve(400);
+  distortion.oversample = '4x';
+  biquadFilter.type = 'lowpass';
+  biquadFilter.frequency.value = 1000;
+
+  gainNode.gain.value = 0.7;
+
+  delay.connect(feedbackGain);
+  feedbackGain.connect(delay);
+  delay.connect(reverbConvolver);
+  reverbConvolver.connect(bitCrusher.input);
+  bitCrusher.output.connect(gainNode);
+  gainNode.connect(analyser);
+  analyser.connect(ctx.destination);
+
+  // Плей
+  const playBtn = document.getElementById('playBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const fileInput = document.getElementById('fileInput');
+  const textInput = document.getElementById('textInput');
+
+  // Загрузка импульсного отклика для реверба (простой реверб)
+  reverbConvolver.buffer = await loadReverbImpulse();
+
+  // Анализатор и визуализация
+  const canvas = document.getElementById('visualizer');
+  const ctx2d = canvas.getContext('2d');
+  resizeCanvas();
+
+  window.addEventListener('resize', resizeCanvas);
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createBitCrusher(audioCtx, bits) {
+    const node = audioCtx.createScriptProcessor(4096, 1, 1);
+    let phaser = 0;
+    let lastSample = 0;
+    const step = Math.pow(0.5, bits);
+
+    node.onaudioprocess = (e) => {
+      const input = e.inputBuffer.getChannelData(0);
+      const output = e.outputBuffer.getChannelData(0);
+
+      for (let i = 0; i < input.length; i++) {
+        phaser += step;
+        if (phaser >= 1.0) {
+          phaser -= 1.0;
+          lastSample = step * Math.floor(input[i] / step + 0.5);
+        }
+        output[i] = lastSample;
+      }
+    };
+
+    node.input = node;
+    node.output = node;
+    return node;
+  }
+
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount : 50,
+      n_samples = 44100,
+      curve = new Float32Array(n_samples),
+      deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; ++i) {
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  async function loadReverbImpulse() {
+    // Простейший импульс отклика для имитации реверба
+    const length = ctx.sampleRate * 3;
+    const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+      let channelData = impulse.getChannelData(channel);
+      for (let i = 0; i < length; i++) {
+        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+      }
+    }
+    return impulse;
+  }
+
+  // Загрузка файла
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const arrayBuffer = await file.arrayBuffer();
+    audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+    playBtn.disabled = false;
+  });
+
+  // Воспроизведение с ремиксом по символам
+  playBtn.addEventListener('click', () => {
+    if (!audioBuffer || isPlaying) return;
+    startPlayback();
+  });
+
+  stopBtn.addEventListener('click', () => {
+    stopPlayback();
+  });
+
+  // Генерация параметров эффектов по символам
+  function mapCharsToEffects(text) {
+    const effects = {
+      distortionAmount: 0,
+      filterFreq: 5000,
+      delayTime: 0.2,
+      feedbackGain: 0.2,
+      reverbMix: 0.5,
+      bitCrusherBits: 8,
+      playbackRate: 1,
+    };
+
+    if (!text) return effects;
+
+    let sumCodes = 0;
+    for (let i = 0; i < text.length; i++) {
+      sumCodes += text.charCodeAt(i);
+    }
+    // Пример маппинга
+    effects.distortionAmount = Math.min(800, (sumCodes % 1000) + 100);
+    effects.filterFreq = 500 + (sumCodes % 5000);
+    effects.delayTime = 0.1 + ((sumCodes % 400) / 1000);
+    effects.feedbackGain = 0.1 + ((sumCodes % 500) / 1000);
+    effects.bitCrusherBits = 2 + (sumCodes % 6);
+    effects.playbackRate = 0.7 + ((sumCodes % 300) / 500);
+
+    return effects;
+  }
+
+  // Визуализация
+  function drawVisualizer() {
+    if (!isPlaying) {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(drawVisualizer);
+      return;
+    }
+    const width = canvas.width;
+    const height = canvas.height;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+
+    ctx2d.fillStyle = '#1a0000';
+    ctx2d.fillRect(0, 0, width, height);
+
+    // Случайные геометрические фигуры — кубы, круги, линии с Lituiзм глитч-эффектом
+    for (let i = 0; i < 30; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const size = Math.random() * 80 + 10;
+      const freqIndex = Math.floor(Math.random() * bufferLength);
+      const alpha = dataArray[freqIndex] / 255;
+      const hue = (dataArray[freqIndex] + i * 10) % 360;
+
+      ctx2d.strokeStyle = `hsla(${hue}, 80%, 50%, ${alpha})`;
+      ctx2d.lineWidth = 2;
+      ctx2d.beginPath();
+
+      const shapeType = i % 3;
+      if (shapeType === 0) {
+        // Круг
+        ctx2d.arc(x, y, size * alpha, 0, 2 * Math.PI);
+      } else if (shapeType === 1) {
+        // Квадрат
+        ctx2d.rect(x, y, size * alpha, size * alpha);
+      } else {
+        // Линии
+        ctx2d.moveTo(x, y);
+        ctx2d.lineTo(x + size * alpha, y + size * alpha);
+      }
+      ctx2d.stroke();
+    }
+
+    // "Глитч" - сдвиг цветов и искажение
+    const imgData = ctx2d.getImageData(0, 0, width, height);
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      imgData.data[i] = imgData.data[i] + Math.sin(i / 1000 + performance.now() / 200) * 30; // R
+      imgData.data[i + 1] = imgData.data[i + 1] + Math.cos(i / 1100 + performance.now() / 150) * 20; // G
+      imgData.data[i + 2] = imgData.data[i + 2] + Math.sin(i / 1200 + performance.now() / 180) * 10; // B
+    }
+    ctx2d.putImageData(imgData, 0, 0);
+
+    requestAnimationFrame(drawVisualizer);
+  }
+
+  function startPlayback() {
+    if (isPlaying) return;
+    sourceNode = ctx.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+
+    // Получаем параметры эффектов из текста
+    const text = textInput.value;
+    const effects = mapCharsToEffects(text);
+
+    // Обновляем эффекты
+    distortion.curve = makeDistortionCurve(effects.distortionAmount);
+    biquadFilter.frequency.setValueAtTime(effects.filterFreq, ctx.currentTime);
+    delay.delayTime.setValueAtTime(effects.delayTime, ctx.currentTime);
+    feedbackGain.gain.setValueAtTime(effects.feedbackGain, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.8, ctx.currentTime);
+    bitCrusher.bits = effects.bitCrusherBits || 4;
+    sourceNode.playbackRate.value = effects.playbackRate;
+
+    // Подключаем цепочку
+    sourceNode.connect(distortion);
+    //distortion.connect(biquadFilter);
+    distortion.connect(biquadFilter);
+    biquadFilter.connect(delay);
+    delay.connect(feedbackGain);
+    feedbackGain.connect(delay);
+    delay.connect(reverbConvolver);
+    reverbConvolver.connect(bitCrusher.input);
+    bitCrusher.output.connect(gainNode);
+
+    gainNode.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    sourceNode.start();
+    isPlaying = true;
+    playBtn.disabled = true;
+    stopBtn.disabled = false;
+    drawVisualizer();
+
+    sourceNode.onended = () => {
+      stopPlayback();
+    };
+  }
+
+  function stopPlayback() {
+    if (!isPlaying) return;
+    if (sourceNode) {
+      try {
+        sourceNode.stop();
+      } catch {}
+      sourceNode.disconnect();
+      sourceNode = null;
+    }
+    isPlaying = false;
+    playBtn.disabled = false;
+    stopBtn.disabled = true;
+  }
+})();
+</script>
+
+</body>
+</html>

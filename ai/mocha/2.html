@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Генератор лица Wyldi в стиле Литуизма</title>
+<style>
+  @font-face {
+    font-family: "Lithium";
+    src: url("https://fonts.gstatic.com/s/uncialantiqua/v15/0QIuK9_6F6T1pY8RZ0h8Gk8N1CGD5fVL1f7t.ttf") format("truetype");
+  }
+  body {
+    margin: 0; background: #0b0000; color: #ff1100;
+    font-family: "Lithium", monospace;
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh;
+    user-select: none;
+  }
+  canvas {
+    border: 2px solid #ff1100;
+    background: #1a0000;
+    image-rendering: pixelated;
+  }
+  h1 {
+    margin: 0.5em 0;
+    text-shadow:
+      0 0 5px #ff1100,
+      0 0 10px #ff0000,
+      0 0 20px #ff3300;
+  }
+  button {
+    background: #330000;
+    border: 1px solid #ff1100;
+    color: #ff1100;
+    font-family: monospace;
+    font-size: 1.2em;
+    padding: 0.5em 1.2em;
+    margin-top: 1em;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  button:hover {
+    background: #ff1100;
+    color: #330000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Генератор лица Wyldi</h1>
+<canvas id="wyldiCanvas" width="320" height="320"></canvas>
+<button id="regenBtn">Перегенерировать</button>
+
+<script>
+// --- Утилиты ---
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+function randChoice(arr) {
+  return arr[randInt(0, arr.length)];
+}
+
+// --- Цвета в стиле Литуизма ---
+const COLORS = {
+  darkRed: '#330000',
+  brightRed: '#ff1100',
+  glitchRed: '#ff3300',
+  shadowRed: '#660000',
+  bloodBlack: '#0b0000'
+};
+
+// --- Элементы лица Wyldi (абстрактные) ---
+function drawEye(ctx, x, y, size, glitchIntensity) {
+  // Белок глаза
+  ctx.fillStyle = COLORS.darkRed;
+  ctx.beginPath();
+  ctx.ellipse(x, y, size * 1.2, size * 0.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Радужка (слегка с глитчем)
+  const irisColors = ['#aa0000', '#cc2200', '#ff4400'];
+  const irisColor = randChoice(irisColors);
+  ctx.fillStyle = irisColor;
+  ctx.beginPath();
+  ctx.ellipse(x + glitchIntensity * 2, y + glitchIntensity * 1.5, size * 0.7, size * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Зрачок — квадратный и glitch
+  ctx.fillStyle = COLORS.brightRed;
+  const pupilSize = size * 0.3;
+  const offsetX = glitchIntensity * (Math.random() - 0.5);
+  const offsetY = glitchIntensity * (Math.random() - 0.5);
+  ctx.fillRect(x - pupilSize/2 + offsetX, y - pupilSize/2 + offsetY, pupilSize, pupilSize);
+}
+
+function drawMouth(ctx, x, y, width, height, glitchIntensity) {
+  ctx.strokeStyle = COLORS.brightRed;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  // Глитч-ломаная линия
+  const step = width / 6;
+  ctx.moveTo(x - width/2, y);
+  for(let i=1; i<=6; i++) {
+    const glitchY = y + (Math.random() - 0.5) * glitchIntensity * 3;
+    const glitchX = x - width/2 + i * step + (Math.random()-0.5) * glitchIntensity;
+    ctx.lineTo(glitchX, glitchY);
+  }
+  ctx.stroke();
+}
+
+function drawFaceOutline(ctx, x, y, radius, glitchIntensity) {
+  ctx.strokeStyle = COLORS.glitchRed;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  for(let angle=0; angle < 2*Math.PI; angle += 0.1) {
+    // Искажение контура лица
+    const r = radius + (Math.sin(angle*20 + glitchIntensity*10) * glitchIntensity * 2);
+    const px = x + r * Math.cos(angle);
+    const py = y + r * Math.sin(angle);
+    if(angle === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.stroke();
+}
+
+function drawGlitchLines(ctx, width, height) {
+  // Случайные горизонтальные линии — глитчи
+  ctx.strokeStyle = COLORS.brightRed;
+  ctx.lineWidth = 1;
+  for(let i=0; i<20; i++) {
+    const y = Math.random() * height;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y + (Math.random() - 0.5) * 10);
+    ctx.stroke();
+  }
+}
+
+// --- Основная функция генерации Wyldi ---
+function generateWyldiFace() {
+  const canvas = document.getElementById('wyldiCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Чистим холст
+  ctx.clearRect(0, 0, w, h);
+
+  // Фон — глубокий blood-black с легким шумом
+  ctx.fillStyle = COLORS.bloodBlack;
+  ctx.fillRect(0, 0, w, h);
+
+  // Легкий шум (глитч-пыль)
+  for(let i=0; i<800; i++) {
+    ctx.fillStyle = `rgba(255,17,17,${Math.random() * 0.04})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, 1,1);
+  }
+
+  // Искажения, глитчи
+  drawGlitchLines(ctx, w, h);
+
+  // Рисуем лицо
+  const centerX = w/2;
+  const centerY = h/2 + 20;
+  const radius = 120;
+
+  // Контур лица с искажениями
+  const glitchIntensity = Math.random() * 4 + 2;
+  drawFaceOutline(ctx, centerX, centerY, radius, glitchIntensity);
+
+  // Глаза — асимметрия и глитчи
+  drawEye(ctx, centerX - 50 + Math.random()*6, centerY - 30 + Math.random()*4, 25, glitchIntensity);
+  drawEye(ctx, centerX + 50 + Math.random()*6, centerY - 25 + Math.random()*4, 28, glitchIntensity);
+
+  // Рот
+  drawMouth(ctx, centerX + (Math.random()*6-3), centerY + 60 + (Math.random()*4-2), 100, 25, glitchIntensity);
+
+  // Надписи в стиле литуизма (глитч-символы)
+  ctx.font = '20px Lithium, monospace';
+  ctx.fillStyle = COLORS.brightRed;
+  const texts = [
+    'W¥LDI',
+    '☠ ⛧ ☣',
+    'GŁITCH Ɏ⚡',
+    'BŁØØD',
+    '⧼░▒▓░⧽',
+    'RX-Ɏ-09'
+  ];
+  for(let i=0; i<texts.length; i++) {
+    const x = centerX + randInt(-120, 100);
+    const y = centerY + randInt(-100, 120);
+    ctx.fillText(texts[i], x, y);
+  }
+}
+
+// Генерируем при загрузке
+generateWyldiFace();
+
+// Перегенерация по кнопке
+document.getElementById('regenBtn').onclick = () => {
+  generateWyldiFace();
+};
+</script>
+
+</body>
+</html>

@@ -126,7 +126,7 @@ const PAGE_EDITOR =
 			<br><br>
 			<button onclick="editor_save();" id="SAVE" disabled>Сохранить</button>
 			<br>
-			<button onclick="fatal('в разработке!!!');">Скомпилировать</button>
+			<button onclick="Compile();">Скомпилировать</button>
 		</center>
 	</panel>
 	<panel id="WORKSPACE">
@@ -1705,6 +1705,91 @@ function RenderLoop(){
 	requestAnimationFrame(RenderLoop);
 }
 requestAnimationFrame(RenderLoop);
+
+//=============================
+
+function Compile(){
+	var loading = document.getElementById("LOADING");
+	loading.innerHTML = 
+	`<text>Компилируется...</text>`;
+	loading.style.display = "flex";
+	try{
+		const zip = await JSZip.loadAsync(file);
+		
+		async function checkfile(f,s){ if(!f){ throw new Error(`Файл "${s}" не найден!`); } var c = await f.async("text"); return c; }
+		function checkkey(tabl,k,notfound = "NotFound"){ if(!tabl[k]){ warn(`Не найден ключ "${k}" в файле!`); return notfound; } return tabl[k]; }
+		
+		const ProjectSettings_File = zip.file("ProjectSettings");
+		const ProjectSettings_Content = await checkfile(ProjectSettings_File, "ProjectSettings");
+		const ProjectSettings = JSON.parse(ProjectSettings_Content);
+		
+		log("Настройки проекта:");
+		log(ProjectSettings);
+		
+		var MRC_Version = checkkey(ProjectSettings,"MRC_Version","-1");
+		if(MRC_Version!==VERSION){ fatal(`Версия проекта отличается от новой версии, возможны ошибки! ${MRC_Version} != ${VERSION}`); }
+		
+		P_NAME    = checkkey(ProjectSettings,"Name");
+		P_AUTHOR  = checkkey(ProjectSettings,"Author");
+		P_LICENSE = checkkey(ProjectSettings,"License");
+		P_CATEGORIES = checkkey(ProjectSettings,"Categories",["NotFound"]);
+		
+		var files_all = checkkey(ProjectSettings,"Files",{});
+		P_FILES = {};
+		var content = zip.folder("Content");
+		async function processFiles() {
+			for (var category in files_all) {
+				if (P_CATEGORIES.includes(category)) {
+					P_FILES[category] = [];
+					var category_folder = content.folder(category);
+					var files = files_all[category];
+
+					var promises = files.map(async (file) => {
+						var file_content = file["ContentType"] === "text" ? await category_folder.file(file["Name"]).async("text") : await category_folder.file(file["Name"]).async("uint8array");
+
+						file["URL"     ] = null;
+						file["Content" ] = file_content;
+						file["Size"    ] = file["ContentType"] === "byte" ? file_content.byteLength : file_content.length;
+						file["Category"] = category;
+
+						if (file["Type"] === "texture") {
+							try {
+								var dimension = await get_png_dimension(file_content);
+								file["Dimension"] = dimension;
+							} catch (e) {
+								console.error(`Не получилось определить размер изображения [${file["Name"]}]! editor_load(${file});`);
+							}
+						} else {
+							file["Dimension"] = null;
+						}
+
+						P_FILES[category].push(file);
+					});
+
+					await Promise.all(promises);
+				} else {
+					console.warn(`Категория [${category}] в файлах не найдена!`);
+				}
+			}
+		}
+		processFiles().then(() => {
+			for (var category in P_FILES) {
+				P_FILES[category].sort((a,b) => a["ID"] - b["ID"]);
+			}
+			log("Проект загружен!");
+			loading.style.display = "none";
+			page("e");
+		})
+		.catch(e => {
+			loading.style.display = "none";
+			error(e);
+			fatal(`Произошла ошибка при загрузке файлов!`);
+		});
+	}catch(e){
+		loading.style.display = "none";
+		fatal(`Не получилось скомпилировать проект, ${e}`);
+	}
+}
 
 //=============================
 page();

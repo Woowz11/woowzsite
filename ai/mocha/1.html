@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Вулди посылают нахуй</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+
+  body {
+    background: #1a0a0a;
+    color: #ff2a2a;
+    font-family: 'Roboto Slab', serif;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+  h1 {
+    margin-top: 40px;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow: 0 0 10px #ff0000;
+  }
+  .curse-container {
+    margin-top: 30px;
+    width: 90%;
+    max-width: 900px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  .curse {
+    background: #300000;
+    border: 2px solid #ff3b3b;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1 1 280px;
+    color: #ffb3b3;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: 0 0 10px #ff3b3b inset;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+  .curse:hover {
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 0 20px #ff0000 inset, 0 0 15px #ff5a5a;
+  }
+
+  /* Анимации посыла */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+  .flicker {
+    animation: flicker 1.5s infinite;
+  }
+  .shake {
+    animation: shake 0.5s infinite;
+  }
+  /* Разноцветные эффекты */
+  .red-glow {
+    text-shadow:
+      0 0 6px #ff0000,
+      0 0 12px #ff4d4d,
+      0 0 20px #ff0000;
+  }
+  .green-glow {
+    text-shadow:
+      0 0 6px #00ff00,
+      0 0 12px #4dff4d,
+      0 0 20px #00ff00;
+  }
+  .blue-glow {
+    text-shadow:
+      0 0 6px #00aaff,
+      0 0 12px #4ddfff,
+      0 0 20px #00aaff;
+  }
+</style>
+</head>
+<body>
+
+<h1>Вулди посылают нахуй ВСЕМИ способами</h1>
+
+<div class="curse-container">
+  <div class="curse flicker red-glow" title="Посылка Вулди нахуй">Иди нахуй, Вулди!</div>
+  <div class="curse shake green-glow" title="Посылка отца Вулди">Пошёл нахуй, твой папа!</div>
+  <div class="curse flicker blue-glow" title="Посылка маме Вулди">Мать твою нахуй посылаю!</div>
+  <div class="curse red-glow" title="Классический посыл">Нахуй иди со своими заморочками!</div>
+  <div class="curse shake red-glow" title="Грубый посыл">Ебись нахуй, Вулди и вся твоя семья!</div>
+  <div class="curse flicker green-glow" title="От души">Да пошли вы нахуй все, включая маму и папу!</div>
+  <div class="curse blue-glow" title="Креатив">Иди-ка ты нахуй, вместе с твоими родителями!</div>
+  <div class="curse shake" title="Безжалостный посыл">На хуй всех вас и ваших мам с папами!</div>
+</div>
+
+<script>
+  // Звуковые эффекты для посылов
+  const curses = document.querySelectorAll('.curse');
+  const curseSounds = [
+    'https://actions.google.com/sounds/v1/cartoon/boing.ogg',
+    'https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg',
+    'https://actions.google.com/sounds/v1/cartoon/pop.ogg'
+  ];
+
+  curses.forEach((el) => {
+    el.addEventListener('click', () => {
+      const audio = new Audio(curseSounds[Math.floor(Math.random() * curseSounds.length)]);
+      audio.volume = 0.4;
+      audio.play();
+      // Дополнительная визуальная реакция при клике
+      el.style.transform = 'scale(1.2) rotate(10deg)';
+      setTimeout(() => {
+        el.style.transform = '';
+      }, 300);
+    });
+  });
+</script>
+
+</body>
+</html>

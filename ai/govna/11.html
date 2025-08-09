@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>⛧ LITU ⛧ UNICODE SYMPHONY</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      color: white;
+      font-family: monospace;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border: 1px solid crimson;
+    }
+    textarea {
+      width: 300px;
+      height: 100px;
+      background: #111;
+      color: crimson;
+      font-family: monospace;
+    }
+    button {
+      background: crimson;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<div id="ui">
+  <textarea id="seed">☠⚠🜏𝔊𝕆𝕃𝕌✞💀💉⚙𝖈𝖗𝖆𝖘𝖍𝖋𝖚𝖈𝖐𝖊𝖗🔧🧠🩸</textarea>
+  <br/>
+  <button onclick="generate()">🔥 ГЕНЕРИРОВАТЬ 🔥</button>
+  <button onclick="saveImage()">💾 PNG</button>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+let audioCtx;
+
+window.onresize = () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+};
+
+function glitchChar(char, x, y, size) {
+  ctx.font = size + 'px monospace';
+  ctx.fillStyle = 'hsl(' + (Math.random() * 360) + ', 100%, 50%)';
+  ctx.fillText(char, x + Math.random() * 5, y + Math.random() * 5);
+}
+
+function generate() {
+  ctx.clearRect(0, 0, width, height);
+  const seed = document.getElementById('seed').value;
+  const chars = seed.split('');
+  for (let i = 0; i < 100; i++) {
+    const char = chars[Math.floor(Math.random() * chars.length)];
+    glitchChar(char, Math.random() * width, Math.random() * height, 20 + Math.random() * 40);
+  }
+  playGlitchMusic(seed);
+}
+
+function saveImage() {
+  const link = document.createElement('a');
+  link.download = 'litu-art.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// === MUSIC === //
+function playGlitchMusic(seedText) {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const seed = seedText.split('').map(c => c.charCodeAt(0));
+  const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < data.length; i++) {
+    const t = i / audioCtx.sampleRate;
+    const baseFreq = 200 + (seed[i % seed.length] % 50) * 20;
+    const mod = (seed[i % seed.length] % 10) * Math.sin(t * 10);
+    data[i] = Math.sin(2 * Math.PI * (baseFreq + mod) * t) * Math.random() * 0.7;
+  }
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(audioCtx.destination);
+  src.start();
+}
+</script>
+</body>
+</html>

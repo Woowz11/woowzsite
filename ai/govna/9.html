@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Литуизм: Эпичный Аудио‑Визуальный Ритуал</title>
+  <style>
+    body {margin:0;background:#000;color:#f00;overflow:hidden;font-family:monospace;}
+    #ui {position:absolute;top:10px;left:10px;z-index:10;}
+    input, button {margin:5px;background:#900;color:#fff;border:none;padding:5px;font:bold 14px;}
+    canvas {display:block;}
+  </style>
+</head>
+<body>
+<div id="ui">
+  <input id="seedInput" placeholder="Введите сид...">
+  <input id="speed" type="range" min="0.2" max="2" step="0.05" value="1">
+  <span id="speedV">1.00×</span>
+  <button onclick="start()">Старт</button>
+  <button onclick="download()">Скачать MP4</button>
+</div>
+<canvas id="canvas"></canvas>
+<script>
+const c = document.getElementById('canvas'), ctx = c.getContext('2d');
+c.width = innerWidth; c.height = innerHeight;
+
+let seedStr = "lituisм", speed = 1, audioCtx, analyser, gainNode, data, time = 0;
+
+function hash(s){
+  let h=0; for(let ch of s) h=(31*h+ch.charCodeAt(0))|0;
+  return Math.abs(h);
+}
+function rand(seed){
+  let x = Math.sin(seed++)*1e4; return x-Math.floor(x);
+}
+
+// Инициализация аудио с арпеджио, реверберацией, фильтрами.
+function initAudio(seed){
+  if(audioCtx) audioCtx.close();
+  audioCtx = new (window.AudioContext)();
+  analyser = audioCtx.createAnalyser(); analyser.fftSize = 512;
+  gainNode = audioCtx.createGain(); gainNode.gain.value = 0.3;
+
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  const reverb = audioCtx.createConvolver();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass'; filter.frequency.value = 800;
+
+  osc1.type = ['sawtooth','square','triangle','sine'][seed%4];
+  osc1.frequency.setValueAtTime(220 + seed%200, audioCtx.currentTime);
+  osc2.type = 'triangle';
+  osc2.frequency.setValueAtTime((220 + seed%200)*1.5, audioCtx.currentTime);
+  gain2.gain.value = 0.15;
+
+  // простой реверб зубчатого сигнала
+  const ir = audioCtx.createBuffer(2, audioCtx.sampleRate*1.5, audioCtx.sampleRate);
+  for(let ch=0;ch<2;ch++){
+    let d = ir.getChannelData(ch);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1 - i/d.length)**3;
+  }
+  reverb.buffer = ir;
+
+  osc1.connect(filter).connect(reverb).connect(gainNode).connect(audioCtx.destination);
+  osc2.connect(gain2).connect(reverb).connect(audioCtx.destination);
+  analyser.connect(audioCtx.destination);
+  osc1.start(); osc2.start();
+}
+
+// Визуальные объекты: волны, круги, диаграммы
+let waveParams = [], circles = [], bars = [], lightning = [], patterns = [];
+function initVisual(seed){
+  waveParams = Array.from({length:5},(_,i)=>({
+    phase: rand(seed+i)*Math.PI*2,
+    speed: rand(seed+i+10)*0.5+0.2,
+    amp: 30+rand(seed+i+20)*50,
+    freq: 0.005+rand(seed+i+30)*0.02
+  }));
+  circles = Array.from({length:30},(_,i)=>({
+    x: rand(seed+i+40)*c.width,
+    y: rand(seed+i+50)*c.height,
+    r: 10+rand(seed+i+60)*100,
+    hue: (seed+i*7)%360
+  }));
+  bars = Array.from({length:10},(_,i)=>({
+    hue:(seed*3+i*20)%360
+  }));
+  Lightning = function(){
+    this.life=1;
+    this.x0 = rand(seed+100)*c.width;
+    this.x1 = rand(seed+110)*c.width;
+  };
+  Lightning.prototype.draw=function(){
+    ctx.strokeStyle=`rgba(255,255,100,${this.life})`;
+    ctx.lineWidth=2+rand(seed+120)*3;
+    ctx.beginPath();
+    ctx.moveTo(this.x0,0);
+    ctx.lineTo((this.x0+this.x1)/2,rand(seed+130)*c.height);
+    ctx.lineTo(this.x1,c.height);
+    ctx.stroke();
+    this.life-=0.02;
+  };
+  lightning = [];
+  patterns = Array.from({length:3},(_,i)=>genPattern(seed+i));
+}
+
+function genPattern(s){
+  return Array.from({length:20},(_,i)=>({
+    x: rand(s+i)*c.width,
+    y: rand(s+i*2)*c.height,
+    r:10+rand(s+i*3)*50
+  }));
+}
+
+function drawPattern(p,t){
+  p.forEach(o=>{
+    ctx.fillStyle=`hsla(${(hash(seedStr)+o.x+o.y)%360},80%,60%,0.3)`;
+    ctx.beginPath();
+    ctx.arc(o.x+Math.sin(t+o.x)*20,o.y+Math.cos(t+o.y)*20,o.r,0,2*Math.PI);
+    ctx.fill();
+  });
+}
+
+function render(){
+  ctx.fillStyle='rgba(0,0,0,0.1)'; ctx.fillRect(0,0,c.width,c.height);
+  analyser.getByteFrequencyData(data);
+
+  // волны
+  waveParams.forEach(w=>{
+    w.phase += w.speed*speed*0.1;
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(200,50,50,0.7)';
+    ctx.lineWidth=2;
+    for(let x=0;x<c.width;x+=10){
+      const y = c.height/2 + Math.sin(x*w.freq + w.phase)*w.amp;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  });
+
+  // круги
+  circles.forEach(o=>{
+    const a = 0.005*time*speed;
+    ctx.beginPath();
+    ctx.arc(o.x+Math.sin(a+o.x)*50,o.y+Math.cos(a+o.y)*50,o.r*Math.sin(a+1),0,Math.PI*2);
+    ctx.strokeStyle = `hsla(${o.hue},90%,60%,0.5)`;
+    ctx.lineWidth=2;
+    ctx.stroke();
+  });
+
+  // диаграмма-бар
+  const barW = c.width/bars.length;
+  bars.forEach((b,i)=>{
+    const h = data[i] / 255 * c.height;
+    ctx.fillStyle = `hsl(${b.hue},100%,50%)`;
+    ctx.fillRect(i*barW,c.height - h, barW*0.8, h);
+  });
+
+  // молнии
+  for(let i=0;i<data.length;i++){
+    if(data[i]>200 && rand(hash(seedStr)+i)<0.1*speed) lightning.push(new Lightning());
+  }
+  lightning = lightning.filter(l=>l.life>0);
+  lightning.forEach(l=>l.draw());
+
+  // слайд-шоу паттернов
+  patterns.forEach(p=>drawPattern(p,time*0.3));
+
+  time += 1;
+  requestAnimationFrame(render);
+}
+
+// запуск
+function start(){
+  seedStr = document.getElementById('seedInput').value || seedStr;
+  speed = parseFloat(document.getElementById('speed').value);
+  document.getElementById('speedV').textContent = speed.toFixed(2)+'×';
+  const seed = hash(seedStr);
+  initAudio(seed);
+  data = new Uint8Array((analyser = audioCtx.createAnalyser(), analyser.fftSize=512, analyser).frequencyBinCount);
+  initVisual(seed);
+  time = 0;
+  render();
+}
+
+// скачать видео
+function download(){
+  const stream = c.captureStream(30);
+  const rec = new MediaRecorder(stream,{mimeType:'video/webm'});
+  const ch = [];
+  rec.ondataavailable = e=>ch.push(e.data);
+  rec.onstop = ()=>{
+    const blob = new Blob(ch,{type:'video/webm'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'litu.mp4';
+    a.click();
+  };
+  rec.start();
+  setTimeout(()=>rec.stop(),10000);
+}
+
+// init
+start();
+</script>
+</body>
+</html>

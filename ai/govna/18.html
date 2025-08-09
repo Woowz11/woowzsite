@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Литуизм 2.1 - Загрузка своей музыки и визуализация</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  body {
+    margin: 0; padding: 0;
+    background: #1a0000;
+    color: #ff3333;
+    font-family: 'Share Tech Mono', monospace;
+    user-select: none;
+  }
+  header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    background: linear-gradient(90deg, #220000, #660000);
+    border-bottom: 2px solid #ff0000;
+  }
+  h1.glitch {
+    position: relative;
+    font-size: 3rem;
+    font-weight: 900;
+    animation: glitch 1.5s infinite;
+  }
+  h1.glitch::before,
+  h1.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    opacity: 0.8;
+    clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+  }
+  h1.glitch::before {
+    animation: glitchTop 1.5s infinite;
+    color: #ff5555;
+    left: 2px;
+    text-shadow: -2px 0 red;
+  }
+  h1.glitch::after {
+    animation: glitchBottom 1.5s infinite;
+    color: #ff0000;
+    left: -2px;
+    text-shadow: 2px 0 red;
+    top: 2px;
+  }
+  @keyframes glitch {
+    0%, 100% { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
+    50% { text-shadow: 2px 2px 5px #ff0000, -2px -2px 10px #ff5555; }
+  }
+  @keyframes glitchTop {
+    0%, 100% { clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); transform: translate(0); }
+    50% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(-3px, -3px); }
+  }
+  @keyframes glitchBottom {
+    0%, 100% { clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%); transform: translate(0); }
+    50% { clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); transform: translate(3px, 3px); }
+  }
+
+  main {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+  .panel {
+    border: 2px solid #ff0000;
+    padding: 20px;
+    margin-top: 30px;
+    background: #220000cc;
+    box-shadow: 0 0 15px #ff0000;
+  }
+
+  button {
+    background: #440000;
+    border: 1px solid #ff0000;
+    color: #ff3333;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 12px 24px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #ff0000;
+    color: #220000;
+  }
+
+  #visualizer {
+    display: block;
+    margin: 40px auto 0;
+    background: black;
+    border: 1px solid #ff0000;
+    width: 800px;
+    height: 200px;
+  }
+
+  label, input, textarea {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: #ff3333;
+  }
+  input[type="file"] {
+    color: #ff3333;
+    margin-top: 10px;
+  }
+  textarea {
+    width: 100%;
+    height: 70px;
+    margin-top: 10px;
+    background: #220000;
+    border: 1px solid #ff0000;
+    color: #ff3333;
+    resize: vertical;
+    padding: 8px;
+  }
+
+  /* Ошибки */
+  #error-msg {
+    color: #ff0000;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="glitch" data-text="ЛИТУИЗМ 2.1">ЛИТУИЗМ 2.1</h1>
+  <p>Загрузи свою музыку, создай ремикс и наслаждайся визуалами!</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Загрузка музыки</h2>
+    <input type="file" id="file-input" accept="audio/*" />
+    <div id="error-msg"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Введи символы для ремикса</h2>
+    <textarea id="char-input" placeholder="Введи любые символы Юникода"></textarea>
+    <button id="start-btn">Старт ремикса</button>
+    <button id="stop-btn" disabled>Стоп ремикса</button>
+  </section>
+
+  <section class="panel">
+    <h2>Визуализация</h2>
+    <canvas id="visualizer"></canvas>
+  </section>
+</main>
+
+<script>
+  // Глобальные переменные
+  let audioCtx, sourceNode, analyser, dataArray, bufferLength;
+  let audioBuffer = null;
+  let isPlaying = false;
+
+  const fileInput = document.getElementById('file-input');
+  const charInput = document.getElementById('char-input');
+  const startBtn = document.getElementById('start-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  const canvas = document.getElementById('visualizer');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 800;
+  canvas.height = 200;
+
+  // Инициализация аудио контекста по клику, чтобы обойти ограничения браузера
+  function initAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  // Загрузка файла и декодирование
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    errorMsg.textContent = '';
+    initAudioContext();
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    audioCtx.decodeAudioData(arrayBuffer).then(buffer => {
+      audioBuffer = buffer;
+      console.log('Аудио загружено и декодировано');
+    }).catch(err => {
+      errorMsg.textContent = 'Ошибка декодирования аудио: ' + err.message;
+      audioBuffer = null;
+    });
+  });
+
+  // Ремиксирование на основе символов
+  function remixFromChars(chars) {
+    if (!audioBuffer) {
+      errorMsg.textContent = 'Сначала загрузите музыку!';
+      return;
+    }
+    errorMsg.textContent = '';
+
+    // Простой пример: разбиваем аудио на куски и играем с задержками,
+    // частотами и панорамой, основанной на кодах символов
+    if (isPlaying) stopAudio();
+
+    initAudioContext();
+
+    sourceNode = audioCtx.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    // Эффекты на основе символов — простой пример
+    const gainNode = audioCtx.createGain();
+    const delayNode = audioCtx.createDelay();
+    const panNode = audioCtx.createStereoPanner();
+
+    // Рассчитываем параметры из символов
+    let sumCharCode = 0;
+    for (let ch of chars) sumCharCode += ch.charCodeAt(0);
+
+    // Gain зависит от суммы кодов символов (усредненно)
+    gainNode.gain.value = 0.3 + (sumCharCode % 100) / 500;
+
+    // Delay время из суммы % 0.5 секунды
+    delayNode.delayTime.value = (sumCharCode % 500) / 1000;
+
+    // Панорама от -1 до 1
+    panNode.pan.value = ((sumCharCode % 200) / 100) - 1;
+
+    sourceNode.connect(gainNode);
+    gainNode.connect(delayNode);
+    delayNode.connect(panNode);
+    panNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    sourceNode.start();
+
+    isPlaying = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    visualize();
+  }
+
+  // Остановка
+  function stopAudio() {
+    if (sourceNode) {
+      sourceNode.stop();
+      sourceNode.disconnect();
+    }
+    if (analyser) analyser.disconnect();
+    if (audioCtx && audioCtx.state !== 'closed') {
+      // Не закрываем контекст, оставим для повторного запуска
+    }
+    isPlaying = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+
+    clearCanvas();
+  }
+
+  startBtn.addEventListener('click', () => {
+    const chars = charInput.value.trim();
+    if (!chars) {
+      errorMsg.textContent = 'Введите символы для ремикса!';
+      return;
+    }
+    remixFromChars(chars);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    stopAudio();
+  });
+
+  // Визуализация частот
+  function visualize() {
+    if (!analyser) return;
+
+    requestAnimationFrame(visualize);
+
+    analyser.getByteFrequencyData(dataArray);
+
+    ctx.fillStyle = '#110000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const barWidth = (canvas.width / bufferLength) * 2.5;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const barHeight = dataArray[i];
+      const r = barHeight + 25 * (i / bufferLength);
+      const g = 50 * (i / bufferLength);
+      const b = 50;
+
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+
+      x += barWidth + 1;
+    }
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#110000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // При загрузке - очистить всё
+  clearCanvas();
+
+</script>
+
+</body>
+</html>

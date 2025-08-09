@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Литуизм Музыкальный Генератор и Визуализация</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: #FF3C00;
+    font-family: "Courier New", Courier, monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  #controls {
+    position: fixed;
+    top: 5px; left: 5px;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 12px;
+    border: 1px solid #FF3C00;
+    border-radius: 8px;
+    z-index: 10;
+    max-width: 320px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input[type="text"], input[type="file"] {
+    width: 100%;
+    background: black;
+    border: 1px solid #FF3C00;
+    color: #FF3C00;
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+  button {
+    margin-top: 15px;
+    padding: 8px 15px;
+    background: #FF3C00;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: black;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <label for="symbolInput">Введите символы (любой Unicode):</label>
+  <input type="text" id="symbolInput" placeholder="Пример: Литуизм🔥⚡">
+
+  <label for="audioFile">Загрузить mp3 для ремикса:</label>
+  <input type="file" id="audioFile" accept="audio/mp3,audio/mpeg">
+
+  <button id="startBtn">▶ Запустить генерацию</button>
+  <button id="stopBtn" disabled>■ Остановить</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+
+  let isPlaying = false;
+  let scheduledNotes = [];
+  let current16thNote = 0;
+  let nextNoteTime = 0;
+  const tempo = 110; // BPM (можно сделать настраиваемым)
+  const lookahead = 25.0; // ms
+  const scheduleAheadTime = 0.1; // sec
+  let timerID;
+
+  // Элементы управления
+  const symbolInput = document.getElementById('symbolInput');
+  const audioFileInput = document.getElementById('audioFile');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+
+  // Эффекты для ремикса
+  const effectsList = [
+    'clean',
+    'delay',
+    'reverb',
+    'bitcrusher',
+    'lowpass',
+    'highpass',
+    'distortion',
+  ];
+  let currentEffect = 'clean';
+
+  // Для анализа загруженного трека
+  let sourceNode = null;
+  let analyserNode = null;
+  let audioBuffer = null;
+  let remixGainNode = null;
+  let remixPlaying = false;
+
+  // Мелодия на основе символов
+  // Символы преобразуются в частоты в октаве 4 (C4=261.6Hz)
+  // Для упрощения — используем диапазон MIDI нот 48-72 (C3-C5)
+  function charToMidiNote(char) {
+    let code = char.codePointAt(0);
+    // Ограничим код в пределах диапазона нот
+    return 48 + (code % 25);
+  }
+  function midiToFreq(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  // Ударные: Kick и Snare генерация с Web Audio
+  function playKick(time) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(time);
+    osc.stop(time + 0.1);
+  }
+
+  function playSnare(time) {
+    const bufferSize = audioCtx.sampleRate * 0.2;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    let data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(1, audioCtx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(audioCtx.destination);
+
+    noise.start(audioCtx.currentTime);
+    noise.stop(audioCtx.currentTime + 0.2);
+  }
+
+  // Мелодия синтезатор (простая синусоида)
+  function playNote(freq, time, duration = 0.25) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, time);
+
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.25, time + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(time);
+    osc.stop(time + duration + 0.02);
+  }
+
+  // Паттерн для ударных на 16 долей
+  function scheduleNote(beatNumber, time) {
+    scheduledNotes.push({ beatNumber, time });
+    // Kick на 1, 9 долях
+    if (beatNumber % 8 === 0) playKick(time);
+    // Snare на 5 доле
+    if (beatNumber % 16 === 4) playSnare(time);
+
+    // Мелодия на символах - берем символ по индексу
+    const symbols = symbolInput.value || 'Литуизм';
+    if (symbols.length > 0) {
+      const charIndex = beatNumber % symbols.length;
+      const midiNote = charToMidiNote(symbols[charIndex]);
+      const freq = midiToFreq(midiNote);
+      playNote(freq, time, 0.2);
+    }
+  }
+
+  function nextNote() {
+    const secondsPerBeat = 60.0 / tempo;
+    nextNoteTime += secondsPerBeat / 4; // 16 долей
+    current16thNote++;
+    if (current16thNote === 16) current16thNote = 0;
+  }
+
+  function scheduler() {
+    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+      scheduleNote(current16thNote, nextNoteTime);
+      nextNote();
+    }
+    timerID = setTimeout(scheduler, lookahead);
+  }
+
+  // Визуализация
+
+  const visualObjects = [];
+
+  class VisualObject {
+    constructor() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.size = 10 + Math.random() * 30;
+      this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      this.speedX = (Math.random() - 0.5) * 1.5;
+      this.speedY = (Math.random() - 0.5) * 1.5;
+      this.opacity = 0.5 + Math.random() * 0.5;
+      this.angle = Math.random() * 2 * Math.PI;
+      this.spinSpeed = (Math.random() - 0.5) * 0.02;
+      this.shapeType = Math.floor(Math.random() * 3); // 0 - circle, 1 - square, 2 - triangle
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.angle += this.spinSpeed;
+
+      if (this.x < 0 || this.x > width) this.speedX = -this.speedX;
+      if (this.y < 0 || this.y > height) this.speedY = -this.speedY;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = this.color;
+
+      switch (this.shapeType) {
+        case 0: // circle
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size, 0, 2 * Math.PI);
+          ctx.fill();
+          break;
+        case 1: // square
+          ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+          break;
+        case 2: // triangle
+          ctx.beginPath();
+          ctx.moveTo(0, -this.size/1.5);
+          ctx.lineTo(this.size/1.5, this.size/1.5);
+          ctx.lineTo(-this.size/1.5, this.size/1.5);
+          ctx.closePath();
+          ctx.fill();
+          break;
+      }
+      ctx.restore();
+    }
+  }
+
+  for(let i=0; i<40; i++) visualObjects.push(new VisualObject());
+
+  // Аудио-анализатор для ремикса и визуала
+  const analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  // Загрузка и воспроизведение файла с ремиксом
+  function loadAudioFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const arrayBuffer = ev.target.result;
+      audioCtx.decodeAudioData(arrayBuffer).then(buffer => {
+        audioBuffer = buffer;
+        if(sourceNode) sourceNode.disconnect();
+        sourceNode = audioCtx.createBufferSource();
+        sourceNode.buffer = audioBuffer;
+
+        // Создаем эффекты и цепочку
+        remixGainNode = audioCtx.createGain();
+        remixGainNode.gain.value = 0.7;
+
+        sourceNode.connect(remixGainNode);
+
+        // Эффекты (пример delay + filter)
+        const delay = audioCtx.createDelay();
+        delay.delayTime.value = 0.2;
+
+        const feedback = audioCtx.createGain();
+        feedback.gain.value = 0.4;
+
+        delay.connect(feedback);
+        feedback.connect(delay);
+
+        remixGainNode.connect(delay);
+        delay.connect(analyser);
+        analyser.connect(audioCtx.destination);
+
+        sourceNode.start();
+
+        remixPlaying = true;
+        stopBtn.disabled = false;
+        startBtn.disabled = true;
+      }).catch(e => alert("Ошибка декодирования аудио: " + e));
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // Ремикс - простая модификация громкости и панорамирования по символам
+  function applyRemixEffects(time) {
+    if(!audioBuffer) return;
+    // Можно расширить по желанию
+  }
+
+  // Визуализация основного canvas
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Получаем данные спектра
+    analyser.getByteFrequencyData(dataArray);
+
+    // Фон с градиентом с эффектом дрожания
+    let grad = ctx.createRadialGradient(width/2, height/2, 100, width/2, height/2, width);
+    grad.addColorStop(0, `rgba(255, 60, 0, 0.6)`);
+    grad.addColorStop(1, `rgba(0, 0, 0, 0.95)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Рисуем фигуры, размер и прозрачность зависят от спектра
+    visualObjects.forEach((obj, i) => {
+      const freqValue = dataArray[i % bufferLength] / 255;
+      obj.size = 10 + freqValue * 40;
+      obj.opacity = 0.3 + freqValue * 0.7;
+      obj.update();
+      obj.draw(ctx);
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  // Обработчики кнопок
+  startBtn.addEventListener('click', async () => {
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    if (isPlaying) return;
+    isPlaying = true;
+    current16thNote = 0;
+    nextNoteTime = audioCtx.currentTime + 0.05;
+    scheduledNotes.length = 0;
+    scheduler();
+    draw();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (!isPlaying) return;
+    clearTimeout(timerID);
+    isPlaying = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+  });
+
+  audioFileInput.addEventListener('change', (e) => {
+    if(e.target.files.length === 0) return;
+    loadAudioFile(e.target.files[0]);
+  });
+
+})();
+</script>
+
+</body>
+</html>

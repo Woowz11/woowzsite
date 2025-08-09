@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>🩸 Литуизм: Unicode-Симфония</title>
+  <style>
+    body {
+      background: #100000;
+      color: #ff4444;
+      font-family: monospace;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #ff5555;
+      text-align: center;
+    }
+    #controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .track {
+      background: #300000;
+      padding: 10px;
+      border: 1px solid #ff2a2a;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .track textarea {
+      width: 100%;
+      height: 60px;
+      background: #1a0000;
+      color: #ff9999;
+      border: 1px solid #ff5555;
+      font-size: 14px;
+      resize: none;
+    }
+    canvas {
+      background: #200000;
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #ff0000;
+    }
+    button {
+      background: #900000;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #ff0000;
+    }
+  </style>
+</head>
+<body>
+  <h1>🩸 Литуизм: Unicode-Симфония</h1>
+  <div id="controls">
+    <button onclick="addTrack()">➕ Трек</button>
+    <button onclick="randomTrack()">🎲 Случайный</button>
+    <button onclick="startPlayback()">▶️ Воспроизвести</button>
+    <button onclick="stopPlayback()">⏹️ Стоп</button>
+  </div>
+  <div id="tracks"></div>
+  <canvas id="canvas" width="800" height="400"></canvas>
+
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const tracks = [];
+    let animationId;
+    let isPlaying = false;
+
+    function addTrack(text = '', speed = 1.0) {
+      const track = { text, speed, seed: Math.random(), offset: 0, notes: [], interval: null };
+      tracks.push(track);
+      renderTracks();
+    }
+
+    function randomUnicodeChar() {
+      const ranges = [
+        [0x0370, 0x03FF],  // Greek
+        [0x0400, 0x04FF],  // Cyrillic
+        [0x2500, 0x257F],  // Box Drawing
+        [0x1F300, 0x1F5FF], // Emojis
+        [0x2E80, 0x2EFF],   // CJK Radicals
+      ];
+      const [start, end] = ranges[Math.floor(Math.random() * ranges.length)];
+      return String.fromCharCode(start + Math.floor(Math.random() * (end - start)));
+    }
+
+    function randomTrack() {
+      let str = '';
+      for (let i = 0; i < 24 + Math.floor(Math.random() * 24); i++) {
+        str += randomUnicodeChar();
+      }
+      addTrack(str);
+    }
+
+    function renderTracks() {
+      const container = document.getElementById('tracks');
+      container.innerHTML = '';
+      tracks.forEach((track, i) => {
+        const div = document.createElement('div');
+        div.className = 'track';
+        div.innerHTML = `
+          <label>Трек ${i + 1} <button onclick="removeTrack(${i})">–</button></label>
+          <textarea oninput="updateTrack(${i}, this.value)">${track.text}</textarea>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateTrack(i, value) {
+      tracks[i].text = value;
+    }
+
+    function removeTrack(index) {
+      tracks.splice(index, 1);
+      renderTracks();
+    }
+
+    function generateMelodyFromText(text, seed = 0) {
+      const notes = [];
+      for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        const freq = 200 + (char % 2000); // Диапазон 200–2200 Гц
+        notes.push(freq);
+      }
+      return notes;
+    }
+
+    function playTrack(track) {
+      track.notes = generateMelodyFromText(track.text, track.seed);
+      let noteIndex = 0;
+
+      track.interval = setInterval(() => {
+        if (!isPlaying) return;
+        if (noteIndex >= track.notes.length) noteIndex = 0;
+
+        const freq = track.notes[noteIndex];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.value = 0.05;
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+
+        noteIndex++;
+        track.offset = noteIndex;
+      }, 200 / track.speed);
+    }
+
+    function startPlayback() {
+      if (isPlaying) return;
+      isPlaying = true;
+      tracks.forEach(track => playTrack(track));
+      animate();
+    }
+
+    function stopPlayback() {
+      isPlaying = false;
+      tracks.forEach(track => clearInterval(track.interval));
+      cancelAnimationFrame(animationId);
+      const ctx = document.getElementById('canvas').getContext('2d');
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    function animate() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const time = Date.now() / 1000;
+
+      tracks.forEach((track, i) => {
+        const y = 50 + i * 60;
+        const chars = track.text.split('');
+        const color = `hsl(${(track.seed * 360 + time * 50) % 360}, 100%, 70%)`;
+
+        chars.forEach((char, j) => {
+          const x = 40 + j * 20;
+          ctx.fillStyle = color;
+          ctx.font = '20px monospace';
+          ctx.fillText(char, x, y + Math.sin(time * 2 + j) * 10);
+        });
+      });
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Инициализация с одним треком
+    addTrack('𝕷𝕴𝕿𝖀𝕴𝕾𝕸 💉 ⛓ 🧬');
+  </script>
+</body>
+</html>
