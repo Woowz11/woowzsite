@@ -5,9 +5,10 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>WoowzEngine загрузка...</title>
-	<link rel="icon" href="icon.ico" type="image/x-icon" />
+	<link rel="icon" href="Icon.ico" type="image/x-icon" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/themes/vue.css" />
-	<link rel="stylesheet" href="../highlight/styles/atom-one-dark.css" />
+	<link rel="stylesheet" href="Style.css" />
+	<link rel="stylesheet" href="Code.css" />
 </head>
 
 <style>
@@ -35,6 +36,15 @@ html, body {
   scrollbar-color: rgba(100,100,100,0.5) transparent;
 }
 
+.docsify-copy-code-button{
+	bottom: 7px;
+	top: initial !important;
+}
+
+*::selection{
+	color:red;
+	background-color: white;
+}
 </style>
 
 <body>
@@ -47,13 +57,17 @@ html, body {
 		el: "#app",
 		name: "WoowzEngine",
 		loadSidebar: "SideBar.md",
-		homepage: "README.md",
+		homepage: "Main.md",
 		subMaxLevel: 2,
 		auto2top: true,
-		search: true,
 		darkTheme: true,
+		coverpage: "Cover.md",
+		search: {
+			placeholder: "Поиск...",
+			noData: "Не найдено!"
+		},
 		plugins: [
-			function(hook) {
+			function(hook){
 				hook.doneEach(() => {
 					document.querySelectorAll('pre code').forEach(block => {
 						hljs.highlightElement(block);
@@ -84,7 +98,9 @@ html, body {
 	
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-	<script src="../highlight/highlight.min.js"></script>
+	<script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
+	<script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+	<script src="../highlight/highlight.js"></script>
 </body>
 
 </html>

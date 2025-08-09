@@ -26,17 +26,17 @@
 
 ## Получение WoowzEngine
 
-см. [Получение WoowzEngine](./Pages/Get.md)
+см. [Получение WoowzEngine](Get.md)
 
 ---
 
 ## Подключение WoowzEngine
 
-Создайте папку внутри проекта, назови её допустим `libs`
+Создайте папку внутри проекта, назовите её допустим `libs`
 
 Поместите полученные файлы WoowzEngine: `WoowzEngine.jar`, `WoowzEngine-sources.jar`, `WoowzEngine-javadoc.jar` в папку которую вы создали
 
-В файл ```build.gradle``` добавьте следующий код для подключения JAR-библиотеки WoowzEngine:
+В файл ```build.gradle``` добавьте следующий код для подключения **JAR-библиотеки WoowzEngine**:
 
 ### ```build.gradle```
 
@@ -64,14 +64,14 @@ dependencies {
 
 Создайте папку внутри папки `java` (С названием вашего проекта например), или используйте готовую
 
-Создайте в созданной папке стартовый скрипт `.java`
+Создайте в созданной папке стартовый скрипт `Run.java`
 
 ### Пример содержимого:
 
 ```java
 /* Выше должны быть package, import's */
 /* Запускающий скрипт для WoowzEngine v.{WoowzEngineVersion} */
-public class Run { // Укажите своё название скрипта (Заместо Run)
+public class Run { // Укажите своё название скрипта (если хотите)
 	public static void main(String[] Args){
 		try {
 			WE.Install.Awake(Config.Awake()
