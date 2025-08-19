@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ToiletMaster — Унитазы премиум-класса</title>
+
+  <!-- Tailwind CSS через CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons через CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Дополнительные стили для Lucide */
+    .lucide {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <i data-lucide="droplet" class="w-6 h-6 text-white"></i>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">ToiletMaster</span>
+        </div>
+        
+        <nav class="hidden md:flex space-x-8">
+          <a href="#home" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Главная</a>
+          <a href="#products" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Продукция</a>
+          <a href="#features" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Особенности</a>
+          <a href="#about" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">О нас</a>
+          <a href="#contact" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Контакты</a>
+        </nav>
+
+        <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          Купить сейчас
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="relative h-96 md:h-screen overflow-hidden">
+    <div class="absolute inset-0" id="hero-slider">
+      <!-- Слайды будут вставлены через JS -->
+    </div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+      <div class="text-white max-w-3xl">
+        <h1 id="hero-title" class="text-4xl md:text-6xl font-bold mb-4 leading-tight"></h1>
+        <p id="hero-subtitle" class="text-xl md:text-2xl mb-8 opacity-90"></p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg">
+            Перейти в каталог
+          </button>
+          <button class="border-2 border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-gray-900 transition-colors font-semibold text-lg">
+            Узнать больше
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Стрелки -->
+    <button id="prev-slide" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all">
+      <i data-lucide="chevron-left" class="w-6 h-6"></i>
+    </button>
+    <button id="next-slide" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all">
+      <i data-lucide="chevron-right" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Индикаторы -->
+    <div id="slide-indicators" class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2"></div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">15000+</div>
+          <div class="text-gray-600 font-medium">довольных клиентов</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">50000+</div>
+          <div class="text-gray-600 font-medium">проданных унитазов</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">15+</div>
+          <div class="text-gray-600 font-medium">лет на рынке</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">99%</div>
+          <div class="text-gray-600 font-medium">удовлетворенность</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Наша продукция</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Широкий выбор унитазов для любого интерьера и бюджета. От классических моделей до умных унитазов премиум-класса.
+        </p>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="flex flex-wrap justify-center gap-4 mb-12">
+        <button data-filter="all" class="filter-btn px-6 py-3 rounded-full font-medium bg-blue-600 text-white">Все категории</button>
+        <button data-filter="premium" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Премиум</button>
+        <button data-filter="eco" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Эко</button>
+        <button data-filter="smart" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Умные</button>
+        <button data-filter="classic" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Классика</button>
+        <button data-filter="compact" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Компакт</button>
+        <button data-filter="luxury" class="filter-btn px-6 py-3 rounded-full font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Роскошь</button>
+      </div>
+
+      <!-- Товары -->
+      <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Почему выбирают нас?</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Мы предлагаем инновационные решения, которые сочетают в себе передовые технологии, высокое качество и максимальный комфорт.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="droplet" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Экономия воды</h3>
+          <p class="text-gray-600">Наши унитазы экономят до 40% воды по сравнению с обычными моделями</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="shield" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Антибактериальное покрытие</h3>
+          <p class="text-gray-600">Специальное покрытие предотвращает размножение бактерий и упрощает уборку</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="trending-up" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Высокая надежность</h3>
+          <p class="text-gray-600">Гарантия 5 лет и срок службы более 15 лет при правильной эксплуатации</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="wrench" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Легкая установка</h3>
+          <p class="text-gray-600">Простая установка своими руками или профессиональный монтаж</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Отзывы наших клиентов</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Узнайте, что говорят о нас люди, которые уже оценили качество нашей продукции
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-50 p-8 rounded-xl">
+          <div class="flex items-center mb-6">
+            <img src="https://placehold.co/60x60/f1f5f9/475569?text=АП" alt="Анна Петрова" class="w-12 h-12 rounded-full mr-4"/>
+            <div>
+              <h4 class="font-bold text-gray-900">Анна Петрова</h4>
+              <p class="text-gray-600 text-sm">Москва</p>
+            </div>
+          </div>
+          <div class="flex mb-4">
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+          </div>
+          <p class="text-gray-700 italic">"Купили унитаз AquaLux Pro полгода назад. Это просто революция в домашнем комфорте! Подогрев сиденья, очистка водой - все работает идеально. Рекомендую всем!"</p>
+        </div>
+
+        <div class="bg-gray-50 p-8 rounded-xl">
+          <div class="flex items-center mb-6">
+            <img src="https://placehold.co/60x60/e2e8f0/64748b?text=СИ" alt="Сергей Иванов" class="w-12 h-12 rounded-full mr-4"/>
+            <div>
+              <h4 class="font-bold text-gray-900">Сергей Иванов</h4>
+              <p class="text-gray-600 text-sm">Санкт-Петербург</p>
+            </div>
+          </div>
+          <div class="flex mb-4">
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+          </div>
+          <p class="text-gray-700 italic">"Установили EcoFlush в новой квартире. Очень доволен экономией воды и тихой работой. Качество сборки на высшем уровне."</p>
+        </div>
+
+        <div class="bg-gray-50 p-8 rounded-xl">
+          <div class="flex items-center mb-6">
+            <img src="https://placehold.co/60x60/f8fafc/334155?text=ОС" alt="Ольга Смирнова" class="w-12 h-12 rounded-full mr-4"/>
+            <div>
+              <h4 class="font-bold text-gray-900">Ольга Смирнова</h4>
+              <p class="text-gray-600 text-sm">Казань</p>
+            </div>
+          </div>
+          <div class="flex mb-4">
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+            <i data-lucide="star" class="w-5 h-5 text-gray-300"></i>
+          </div>
+          <p class="text-gray-700 italic">"SmartClean - это будущее! Голосовое управление и автоматическая очистка поражают воображение. Единственное - цена высокая, но оно того стоит."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="py-20 bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-4xl font-bold mb-6">О компании ToiletMaster</h2>
+          <p class="text-xl text-gray-300 mb-6 leading-relaxed">
+            Мы - ведущий производитель и поставщик унитазов в России с 2008 года. 
+            Наша миссия - сделать повседневную жизнь комфортнее с помощью инновационных 
+            решений для сантехники.
+          </p>
+          <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+            Более 15 лет мы работаем над тем, чтобы каждый унитаз был не просто 
+            функциональным устройством, а источником комфорта и удовольствия. 
+            Наши инженеры постоянно разрабатывают новые технологии, улучшая 
+            качество жизни миллионов людей.
+          </p>
+          
+          <div class="grid grid-cols-2 gap-6">
+            <div class="flex items-center">
+              <i data-lucide="award" class="w-8 h-8 text-blue-400 mr-3"></i>
+              <div>
+                <div class="font-bold text-white">15+ лет</div>
+                <div class="text-gray-400 text-sm">на рынке</div>
+              </div>
+            </div>
+            <div class="flex items-center">
+              <i data-lucide="users" class="w-8 h-8 text-blue-400 mr-3"></i>
+              <div>
+                <div class="font-bold text-white">15000+</div>
+                <div class="text-gray-400 text-sm">клиентов</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-xl overflow-hidden">
+          <img src="https://placehold.co/600x400/1e293b/64748b?text=Our+Factory" alt="Factory" class="w-full h-80 object-cover"/>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Свяжитесь с нами</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Готовы сделать выбор в пользу комфорта? Свяжитесь с нами прямо сейчас!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-8">Контактная информация</h3>
+          
+          <div class="space-y-6">
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <i data-lucide="map-pin" class="w-6 h-6 text-blue-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Адрес</h4>
+                <p class="text-gray-600">123456, Москва, ул. Сантехническая, 42</p>
+              </div>
+            </div>
+
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <i data-lucide="phone" class="w-6 h-6 text-blue-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Телефон</h4>
+                <p class="text-gray-600">+7 (495) 123-45-67</p>
+                <p class="text-gray-600">+7 (800) 555-35-35</p>
+              </div>
+            </div>
+
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <i data-lucide="mail" class="w-6 h-6 text-blue-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Email</h4>
+                <p class="text-gray-600">info@toiletmaster.ru</p>
+                <p class="text-gray-600">sales@toiletmaster.ru</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Мы в социальных сетях</h3>
+            <div class="flex space-x-6">
+              <a href="#" class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
+                <i data-lucide="facebook" class="w-6 h-6 text-white"></i>
+              </a>
+              <a href="#" class="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center hover:bg-blue-500 transition-colors">
+                <i data-lucide="twitter" class="w-6 h-6 text-white"></i>
+              </a>
+              <a href="#" class="w-12 h-12 bg-pink-600 rounded-lg flex items-center justify-center hover:bg-pink-700 transition-colors">
+                <i data-lucide="instagram" class="w-6 h-6 text-white"></i>
+              </a>
+              <a href="#" class="w-12 h-12 bg-blue-800 rounded-lg flex items-center justify-center hover:bg-blue-900 transition-colors">
+                <i data-lucide="linkedin" class="w-6 h-6 text-white"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-8 rounded-xl">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Оставить заявку</h3>
+          <form class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+              <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ваше имя"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+              <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="+7 (___) ___-__-__"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ваш email"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Сообщение</label>
+              <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ваше сообщение"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+              Отправить заявку
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <i data-lucide="droplet" class="w-5 h-5 text-white"></i>
+            </div>
+            <span class="text-xl font-bold">ToiletMaster</span>
+          </div>
+          <p class="text-gray-400">
+            Лидер в производстве унитазов премиум-класса. Комфорт и качество для вашего дома.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-bold text-lg mb-4">Продукция</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors">Премиум унитазы</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Умные унитазы</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Эко-модели</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Компактные решения</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-bold text-lg mb-4">Информация</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors">О компании</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Доставка и оплата</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Гарантия</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Контакты</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-bold text-lg mb-4">Контакты</h4>
+          <div class="space-y-2 text-gray-400">
+            <p>Телефон: +7 (495) 123-45-67</p>
+            <p>Email: info@toiletmaster.ru</p>
+            <p>Адрес: Москва, ул. Сантехническая, 42</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2024 ToiletMaster. Все права защищены.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Инициализация Lucide
+    lucide.createIcons();
+
+    // Данные
+    const heroSlides = [
+      {
+        image: "https://placehold.co/1200x600/e2e8f0/64748b?text=Premium+Toilets",
+        title: "Современные унитазы премиум-класса",
+        subtitle: "Инновационные решения для вашего дома"
+      },
+      {
+        image: "https://placehold.co/1200x600/f1f5f9/475569?text=Smart+Toilets",
+        title: "Умные унитазы нового поколения",
+        subtitle: "Технологии будущего уже сегодня"
+      },
+      {
+        image: "https://placehold.co/1200x600/f8fafc/334155?text=Eco+Toilets",
+        title: "Экологичные решения",
+        subtitle: "Экономия воды и забота о природе"
+      }
+    ];
+
+    const products = [
+      {
+        id: 1,
+        name: "AquaLux Pro",
+        category: "premium",
+        price: 24990,
+        rating: 5,
+        image: "https://placehold.co/400x300/e2e8f0/64748b?text=AquaLux+Pro",
+        features: ["Автоматическое открывание", "Подогрев сиденья", "Сушка воздухом", "Очищение водой"],
+        description: "Премиальный унитаз с полным набором умных функций для максимального комфорта"
+      },
+      {
+        id: 2,
+        name: "EcoFlush",
+        category: "eco",
+        price: 12990,
+        rating: 4,
+        image: "https://placehold.co/400x300/f1f5f9/475569?text=EcoFlush",
+        features: ["Двойной слив", "Экономия воды", "Антибактериальное покрытие", "Тихая работа"],
+        description: "Экологичный унитаз с инновационной системой слива воды"
+      },
+      {
+        id: 3,
+        name: "Classic Comfort",
+        category: "classic",
+        price: 8990,
+        rating: 4,
+        image: "https://placehold.co/400x300/f8fafc/334155?text=Classic+Comfort",
+        features: ["Комфортная форма", "Прочный фарфор", "Легкая установка", "Гарантия 5 лет"],
+        description: "Надежный классический унитаз по доступной цене"
+      },
+      {
+        id: 4,
+        name: "SmartClean",
+        category: "smart",
+        price: 35990,
+        rating: 5,
+        image: "https://placehold.co/400x300/e2e8f0/64748b?text=SmartClean",
+        features: ["Автоматическая очистка", "UV-дезинфекция", "Голосовое управление", "Wi-Fi подключение"],
+        description: "Самый технологичный унитаз на рынке с полной автоматизацией"
+      },
+      {
+        id: 5,
+        name: "Compact Mini",
+        category: "compact",
+        price: 7990,
+        rating: 3,
+        image: "https://placehold.co/400x300/f1f5f9/475569?text=Compact+Mini",
+        features: ["Компактные размеры", "Универсальная установка", "Легкий вес", "Доступная цена"],
+        description: "Идеальное решение для маленьких помещений"
+      },
+      {
+        id: 6,
+        name: "Royal Flush",
+        category: "luxury",
+        price: 59990,
+        rating: 5,
+        image: "https://placehold.co/400x300/f8fafc/334155?text=Royal+Flush",
+        features: ["Золотые элементы", "Массаж сиденья", "Ароматизация", "Музыкальное сопровождение"],
+        description: "Роскошный унитаз для самых требовательных клиентов"
+      }
+    ];
+
+    // Карусель
+    let currentSlide = 0;
+
+    function updateHero() {
+      const slide = heroSlides[currentSlide];
+      document.getElementById("hero-slider").innerHTML = `
+        <div class="absolute inset-0">
+          <img src="${slide.image}" alt="Hero" class="w-full h-full object-cover transition-opacity duration-1000"/>
+          <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+        </div>
+      `;
+      document.getElementById("hero-title").textContent = slide.title;
+      document.getElementById("hero-subtitle").textContent = slide.subtitle;
+
+      // Индикаторы
+      const indicators = document.getElementById("slide-indicators");
+      indicators.innerHTML = heroSlides.map((_, i) =>
+        `<button class="w-3 h-3 rounded-full ${i === currentSlide ? 'bg-white' : 'bg-white bg-opacity-50'}"></button>`
+      ).join('');
+
+      lucide.createIcons(); // Пересоздаём иконки
+    }
+
+    document.getElementById("next-slide").addEventListener("click", () => {
+      currentSlide = (currentSlide + 1) % heroSlides.length;
+      updateHero();
+    });
+
+    document.getElementById("prev-slide").addEventListener("click", () => {
+      currentSlide = (currentSlide - 1 + heroSlides.length) % heroSlides.length;
+      updateHero();
+    });
+
+    // Фильтрация товаров
+    function renderProducts(category = 'all') {
+      const grid = document.getElementById("products-grid");
+      const filtered = category === 'all' 
+        ? products 
+        : products.filter(p => p.category === category);
+
+      grid.innerHTML = filtered.map(p => {
+        const stars = [...Array(5)].map((_, i) => 
+          `<i data-lucide="star" class="w-5 h-5 ${i < p.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>`
+        ).join('');
+
+        return `
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+          <div class="relative">
+            <img src="${p.image}" alt="${p.name}" class="w-full h-64 object-cover"/>
+            <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              ${p.price.toLocaleString()} ₽
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">${p.name}</h3>
+            <p class="text-gray-600 mb-4 text-sm">${p.description}</p>
+            <div class="flex items-center mb-4">${stars}</div>
+            <div class="mb-4">
+              <h4 class="font-semibold text-gray-900 mb-2">Особенности:</h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                ${p.features.slice(0, 2).map(f => 
+                  `<li class="flex items-center"><i data-lucide="chevron-right" class="w-4 h-4 text-blue-600 mr-2"></i>${f}</li>`
+                ).join('')}
+                ${p.features.length > 2 ? `<li class="text-blue-600 font-medium">+${p.features.length - 2} других функций</li>` : ''}
+              </ul>
+            </div>
+            <button class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+              Подробнее
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Фильтры
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => 
+          b.classList.remove("bg-blue-600"), b.classList.add("bg-gray-100")
+        );
+        btn.classList.add("bg-blue-600");
+        btn.classList.remove("bg-gray-100");
+        renderProducts(btn.dataset.filter);
+      });
+    });
+
+    // Инициализация
+    updateHero();
+    renderProducts('all');
+  </script>
+</body>
+</html>

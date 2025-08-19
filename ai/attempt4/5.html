@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌀🚽 ToiletMaster: ULTIMATE TRIP</title>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wfdn=Orbitron&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      color: #0f0;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .neon {
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #f0f, 0 0 40px #f0f;
+      color: #0ff;
+    }
+
+    .glitch {
+      position: relative;
+      animation: glitch 2s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-5px, 5px); text-shadow: 2px -2px #f00; }
+      40% { transform: translate(5px, -5px); text-shadow: -2px 2px #0f0; }
+      60% { transform: translate(-5px, -5px); text-shadow: 2px 2px #ff0; }
+      80% { transform: translate(5px, 5px); text-shadow: -2px -2px #00f; }
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.6; transform: scale(1); }
+      to { opacity: 1; transform: scale(1.05); }
+    }
+
+    .trip {
+      animation: trip 0.2s ease-out;
+    }
+
+    @keyframes trip {
+      0% { transform: scale(1) rotate(0deg); filter: blur(0px); }
+      50% { transform: scale(1.2) rotate(5deg) translate(10px, -10px); filter: blur(2px); }
+      100% { transform: scale(1) rotate(0deg); filter: blur(0px); }
+    }
+
+    .disco {
+      background: linear-gradient(45deg, #f00, #ff0, #0f0, #0ff, #f0f, #f00);
+      background-size: 600% 600%;
+      animation: discoBG 10s linear infinite;
+    }
+
+    @keyframes discoBG {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .cursor {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle, #0ff 0%, transparent 70%);
+      border: 2px solid #0ff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transform: translate(-50%, -50%);
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .toilet-img {
+      filter: hue-rotate(180deg) saturate(200%) contrast(150%) brightness(120%);
+      transition: transform 0.3s, filter 0.5s;
+    }
+
+    .toilet-img:hover {
+      transform: scale(1.1) rotate(5deg);
+      filter: hue-rotate(270deg) saturate(300%) contrast(200%) drop-shadow(0 0 10px #f0f);
+    }
+
+    .mini-game {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #0f0;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 1000;
+    }
+
+    .hangover {
+      filter: blur(4px);
+      animation: hangover 3s ease-out forwards;
+    }
+
+    @keyframes hangover {
+      0% { transform: rotate(2deg) translateX(5px) translateY(5px); filter: blur(4px); }
+      50% { transform: rotate(-2deg) translateX(-5px) translateY(5px); }
+      100% { transform: rotate(0deg) translateX(0) translateY(0); filter: blur(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen hangover">
+
+  <!-- 3D Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Курсор -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- Мини-игра -->
+  <div class="mini-game" id="mini-game">
+    <div>🎯 Выиграй унитаз!</div>
+    <div>Кликни по 🚽, когда появится!</div>
+    <div>Очки: <span id="score">0</span></div>
+  </div>
+
+  <!-- Звуки -->
+  <audio id="flush" src="https://cdn.pixabay.com/audio/2021/10/25/audio_5e1d767a95.mp3" preload="auto"></audio>
+  <audio id="ping" src="https://cdn.pixabay.com/audio/2022/04/26/audio_0c9b9b3b25.mp3" preload="auto"></audio>
+  <audio id="disco" src="https://cdn.pixabay.com/audio/2022/01/25/audio_798375c5ea.mp3" preload="auto"></audio>
+  <audio id="win" src="https://cdn.pixabay.com/audio/2022/02/28/audio_381768c6ea.mp3" preload="auto"></audio>
+
+  <!-- Header -->
+  <header class="relative z-10 p-6 text-center">
+    <h1 class="text-6xl font-black neon glitch mb-2">🚽 TOILETMASTER 🌀</h1>
+    <p class="text-2xl text-purple-400 pulse">Мультиплеер. Трип. Управление. Игра.</p>
+  </header>
+
+  <!-- Hero -->
+  <section class="min-h-screen flex items-center justify-center text-center px-6">
+    <div class="max-w-4xl">
+      <h2 class="text-8xl font-black neon glitch mb-6">СЛИВАЙСЯ</h2>
+      <p class="text-3xl text-pink-400 mb-12">С WASD, с кликами, с друзьями</p>
+      <button id="trip-button" class="bg-transparent border-4 border-fuchsia-500 text-fuchsia-400 px-12 py-6 rounded-full font-bold text-3xl hover:bg-fuchsia-500 hover:text-black transition-all pulse trip">
+        НАЧАТЬ ТРИП
+      </button>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section id="products" class="py-20 px-6">
+    <h2 class="text-6xl font-black text-center neon glitch mb-16">УНИТАЗЫ</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+      <div class="toilet-img-container text-center">
+        <img src="https://images.unsplash.com/photo-1615530539982-2a5b803b6684?w=500&h=400&fit=crop" alt="Matrix Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">🌀 МАТРИЦА-СЛИВ</h3>
+        <p class="text-purple-300">WASD + пробел</p>
+        <button class="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 py-3 px-8 rounded-full font-bold trip-button">УПРАВЛЯТЬ</button>
+      </div>
+      <div class="toilet-img-container text-center">
+        <img src="https://images.unsplash.com/photo-1584681392352-3f38c697c72e?w=500&h=400&fit=crop" alt="Alien Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">👽 ПРИШЕЛЕЦ</h3>
+        <p class="text-purple-300">Игрок 2: стрелки</p>
+      </div>
+      <div class="toilet-img-container text-center">
+        <img src="https://images.unsplash.com/photo-1600047509807-5e42de3c72d1?w=500&h=400&fit=crop" alt="Luxury Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">💎 РОСКОШЬ</h3>
+        <p class="text-purple-300">Игрок 3: RFV</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 text-center disco text-black font-bold text-2xl">
+    © 2025 ToiletMaster. Реальность смыта.
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Курсор
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Звуки
+    const flushSound = document.getElementById('flush');
+    const pingSound = document.getElementById('ping');
+    const discoSound = document.getElementById('disco');
+    const winSound = document.getElementById('win');
+
+    // WebGL
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Мультиплеер: 4 унитаза
+    const toilets = [];
+    const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
+    for (let i = 0; i < 4; i++) {
+      const geo = new THREE.TorusGeometry(3 + i, 1, 8, 20);
+      const mat = new THREE.MeshBasicMaterial({ color: colors[i], wireframe: true });
+      const toilet = new THREE.Mesh(geo, mat);
+      toilet.position.set(
+        Math.sin(i) * 10,
+        Math.cos(i) * 10,
+        -20
+      );
+      scene.add(toilet);
+      toilets.push(toilet);
+    }
+
+    camera.position.z = 30;
+
+    // Управление
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Игрок 1: WASD + пробел
+      if (keys['w']) toilets[0].position.y += 0.2;
+      if (keys['s']) toilets[0].position.y -= 0.2;
+      if (keys['a']) toilets[0].position.x -= 0.2;
+      if (keys['d']) toilets[0].position.x += 0.2;
+      if (keys[' ']) toilets[0].rotation.z += 0.1;
+
+      // Игрок 2: стрелки
+      if (keys['arrowup']) toilets[1].position.y += 0.2;
+      if (keys['arrowdown']) toilets[1].position.y -= 0.2;
+      if (keys['arrowleft']) toilets[1].position.x -= 0.2;
+      if (keys['arrowright']) toilets[1].position.x += 0.2;
+
+      // Игрок 3: RFV
+      if (keys['r']) toilets[2].position.y += 0.2;
+      if (keys['f']) toilets[2].position.y -= 0.2;
+      if (keys['v']) toilets[2].position.x += 0.2;
+
+      // Вращение всех
+      toilets.forEach(t => {
+        t.rotation.x += 0.01;
+        t.rotation.y += 0.01;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Мини-игра "Выиграй унитаз"
+    const game = document.getElementById('mini-game');
+    let score = 0;
+    let target = null;
+
+    function spawnTarget() {
+      if (target) target.remove();
+      target = document.createElement('div');
+      target.innerHTML = '🚽';
+      target.style.position = 'absolute';
+      target.style.left = Math.random() * window.innerWidth + 'px';
+      target.style.top = Math.random() * window.innerHeight + 'px';
+      target.style.fontSize = '40px';
+      target.style.cursor = 'pointer';
+      target.onclick = () => {
+        score++;
+        document.getElementById('score').textContent = score;
+        winSound.currentTime = 0;
+        winSound.play();
+        target.remove();
+        setTimeout(spawnTarget, 1000);
+      };
+      document.body.appendChild(target);
+    }
+
+    setTimeout(spawnTarget, 2000);
+
+    // Трип-эффект
+    function tripEffect() {
+      document.body.classList.add('trip');
+      setTimeout(() => document.body.classList.remove('trip'), 300);
+      document.body.style.color = ['#0f0', '#f0f', '#0ff', '#ff0'][Math.floor(Math.random() * 4)];
+      pingSound.currentTime = 0;
+      pingSound.play();
+      if (!discoSound.playing) {
+        discoSound.volume = 0.2;
+        discoSound.currentTime = 0;
+        discoSound.play();
+        discoSound.playing = true;
+        setTimeout(() => { discoSound.playing = false; }, 5000);
+      }
+    }
+
+    document.getElementById('trip-button').onclick = tripEffect;
+    document.querySelectorAll('.trip-button').forEach(b => b.onclick = tripEffect);
+
+    // Инициализация иконок
+    lucide.createIcons();
+  </script>
+</body>
+</html>

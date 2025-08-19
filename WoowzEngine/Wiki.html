@@ -50,8 +50,25 @@ html, body {
 <body>
 	<div id="app"></div>
 
-	<script>
-	window.WoowzEngineVersion = 51;
+	<script>	
+	window.WoowzEngineVersion = 59;
+	
+	window.ReplaceKey = function(Key, Value){
+		const Root = document.getElementById("app") || document.body;
+		const Page = document.getElementById("main");
+	
+		const pattern = new RegExp(`\\{${Key}\\}`, 'g');
+
+		function walk(node) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				node.textContent = node.textContent.replace(pattern, Value);
+			} else {
+				node.childNodes.forEach(walk);
+			}
+		}
+
+		walk(Root);
+	}
 	
 	window.$docsify = {
 		el: "#app",
@@ -73,23 +90,31 @@ html, body {
 						hljs.highlightElement(block);
 					});
 					
-					const Root = document.getElementById("app") || document.body;
-					const Page = document.getElementById("main");
-					
-					function Replace(Key, Value){
-						const pattern = new RegExp(`\\{${Key}\\}`, 'g');
+					window.ReplaceKey("WoowzEngineVersion", window.WoowzEngineVersion);
+				});
+			},
+			
+			function(hook){
+				hook.doneEach(() => {
+					const Page = document.getElementById("main") || document.getElementById("app") || document.body;
 
-						function walk(node) {
-							if (node.nodeType === Node.TEXT_NODE) {
-								node.textContent = node.textContent.replace(pattern, Value);
-							} else {
-								node.childNodes.forEach(walk);
-							}
+					Array.from(Page.querySelectorAll("script")).forEach(Element => {
+						if(Element.dataset.execDone){ return; }
+
+						const ScriptText = (Element.textContent || "").trim();
+
+						Element.dataset.execDone = true;
+
+						if(!ScriptText && Element.parentNode){ Element.parentNode.removeChild(Element); return; }
+
+						try{
+							new Function("Page", ScriptText)(Page);
+						} catch (e) {
+							console.error("Ошибка при выполнении содержимого <script>:", e, "\nкод:\n", ScriptText);
+						} finally {
+							if(Element.parentNode){ Element.parentNode.removeChild(Element); }
 						}
-
-						walk(Root);
-					}
-					Replace("WoowzEngineVersion", window.WoowzEngineVersion);
+					});
 				});
 			}
 		]

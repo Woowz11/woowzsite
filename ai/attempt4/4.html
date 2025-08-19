@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌀🚽 ToiletMaster — Трип-унитазы из 5D</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js (для 3D-унитаза) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wfdn=Orbitron&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      color: #0f0;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .neon {
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #f0f, 0 0 40px #f0f;
+      color: #0ff;
+      font-weight: 900;
+    }
+
+    .glitch {
+      position: relative;
+      animation: glitch 2s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-5px, 5px); text-shadow: 2px -2px #f00; }
+      40% { transform: translate(5px, -5px); text-shadow: -2px 2px #0f0; }
+      60% { transform: translate(-5px, -5px); text-shadow: 2px 2px #ff0; }
+      80% { transform: translate(5px, 5px); text-shadow: -2px -2px #00f; }
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.6; transform: scale(1); }
+      to { opacity: 1; transform: scale(1.05); }
+    }
+
+    .trip {
+      animation: trip 0.2s ease-out;
+    }
+
+    @keyframes trip {
+      0% { transform: scale(1) rotate(0deg); filter: blur(0px); }
+      50% { transform: scale(1.2) rotate(5deg) translate(10px, -10px); filter: blur(2px); }
+      100% { transform: scale(1) rotate(0deg); filter: blur(0px); }
+    }
+
+    .disco {
+      background: linear-gradient(45deg, #f00, #ff0, #0f0, #0ff, #f0f, #f00);
+      background-size: 600% 600%;
+      animation: discoBG 10s linear infinite;
+    }
+
+    @keyframes discoBG {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .cursor {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle, #0ff 0%, transparent 70%);
+      border: 2px solid #0ff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transform: translate(-50%, -50%);
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .toilet-img {
+      filter: hue-rotate(180deg) saturate(200%) contrast(150%) brightness(120%);
+      transition: transform 0.3s, filter 0.5s;
+    }
+
+    .toilet-img:hover {
+      transform: scale(1.1) rotate(5deg);
+      filter: hue-rotate(270deg) saturate(300%) contrast(200%) drop-shadow(0 0 10px #f0f);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- 3D Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Курсор -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- Звуки -->
+  <audio id="flush" src="https://cdn.pixabay.com/audio/2021/10/25/audio_5e1d767a95.mp3" preload="auto"></audio>
+  <audio id="ping" src="https://cdn.pixabay.com/audio/2022/04/26/audio_0c9b9b3b25.mp3" preload="auto"></audio>
+  <audio id="disco" src="https://cdn.pixabay.com/audio/2022/01/25/audio_798375c5ea.mp3" preload="auto"></audio>
+
+  <!-- Header -->
+  <header class="relative z-10 p-6 text-center">
+    <h1 class="text-6xl font-black neon glitch mb-2">🚽 TOILETMASTER 🌀</h1>
+    <p class="text-2xl text-purple-400 pulse">Унитазы, которые сносят крышу</p>
+  </header>
+
+  <!-- Hero -->
+  <section class="min-h-screen flex items-center justify-center text-center px-6">
+    <div class="max-w-4xl">
+      <h2 class="text-8xl font-black neon glitch mb-6" data-text="СЛИВАЙСЯ">СЛИВАЙСЯ</h2>
+      <p class="text-3xl text-pink-400 mb-12">С комфортом. С музыкой. С трипом.</p>
+      <button id="trip-button" class="bg-transparent border-4 border-fuchsia-500 text-fuchsia-400 px-12 py-6 rounded-full font-bold text-3xl hover:bg-fuchsia-500 hover:text-black transition-all pulse trip">
+        НАЧАТЬ ТРИП
+      </button>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section id="products" class="py-20 px-6">
+    <h2 class="text-6xl font-black text-center neon glitch mb-16">УНИТАЗЫ</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+      <!-- Товар 1 -->
+      <div class="toilet-img-container text-center trip-effect">
+        <img src="https://images.unsplash.com/photo-1615530539982-2a5b803b6684?w=500&h=400&fit=crop" alt="Psycho Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">🌀 МАТРИЦА-СЛИВ</h3>
+        <p class="text-purple-300">Вибрация, глитч-звук, 5D-подсветка</p>
+        <p class="text-2xl font-bold text-pink-400">₽77 777</p>
+        <button class="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 py-3 px-8 rounded-full font-bold trip-button">В СЛИВ</button>
+      </div>
+
+      <!-- Товар 2 -->
+      <div class="toilet-img-container text-center trip-effect">
+        <img src="https://images.unsplash.com/photo-1584681392352-3f38c697c72e?w=500&h=400&fit=crop" alt="Alien Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">👽 УНИТАЗ ПРИШЕЛЬЦА</h3>
+        <p class="text-purple-300">Зелёная вода, телепортация, кислотный запах</p>
+        <p class="text-2xl font-bold text-pink-400">₽99 999</p>
+        <button class="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 py-3 px-8 rounded-full font-bold trip-button">В СЛИВ</button>
+      </div>
+
+      <!-- Товар 3 -->
+      <div class="toilet-img-container text-center trip-effect">
+        <img src="https://images.unsplash.com/photo-1600047509807-5e42de3c72d1?w=500&h=400&fit=crop" alt="Luxury Toilet" class="w-full h-64 object-cover toilet-img rounded-xl">
+        <h3 class="text-3xl font-bold text-cyan-400 mt-4">💎 РОСКОШЬ-ХАОС</h3>
+        <p class="text-purple-300">Золото, диско-шар, лазерное очищение</p>
+        <p class="text-2xl font-bold text-pink-400">₽123 456</p>
+        <button class="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 py-3 px-8 rounded-full font-bold trip-button">В СЛИВ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 text-center disco text-black font-bold text-2xl">
+    © 2025 ToiletMaster. Все права смыты.
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Курсор
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Звуки
+    const flushSound = document.getElementById('flush');
+    const pingSound = document.getElementById('ping');
+    const discoSound = document.getElementById('disco');
+
+    // WebGL 3D Унитаз
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Создаём абстрактный унитаз (куб + тор)
+    const geometry = new THREE.TorusGeometry(5, 2, 16, 100);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
+    const toilet = new THREE.Mesh(geometry, material);
+    scene.add(toilet);
+
+    camera.position.z = 15;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      toilet.rotation.x += 0.01;
+      toilet.rotation.y += 0.02;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Трип-эффекты
+    function tripEffect() {
+      document.body.classList.add('trip');
+      document.body.style.transform = 'rotate(3deg) scale(1.02)';
+      setTimeout(() => {
+        document.body.style.transform = '';
+      }, 200);
+
+      // Меняем цвета
+      const colors = ['#0f0', '#f0f', '#0ff', '#ff0'];
+      document.body.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+      // Включаем диско-звук
+      if (!discoSound.playing) {
+        discoSound.volume = 0.3;
+        discoSound.currentTime = 0;
+        discoSound.play();
+        discoSound.playing = true;
+        setTimeout(() => { discoSound.playing = false; }, 5000);
+      }
+    }
+
+    // Клик по кнопкам
+    document.getElementById('trip-button').addEventListener('click', () => {
+      pingSound.currentTime = 0;
+      pingSound.play();
+      tripEffect();
+    });
+
+    document.querySelectorAll('.trip-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        flushSound.currentTime = 0;
+        flushSound.play();
+        tripEffect();
+      });
+    });
+
+    // При наведении — пинг
+    document.querySelectorAll('.toilet-img-container').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        pingSound.currentTime = 0;
+        pingSound.play();
+      });
+    });
+
+    // Инициализация иконок
+    lucide.createIcons();
+  </script>
+</body>
+</html>

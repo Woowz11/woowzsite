@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>УПОРОТИК 3000</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            color: white;
+        }
+        
+        .container {
+            width: 100%;
+        }
+        
+        .section {
+            width: 100%;
+            min-height: 80vh;
+            padding: 2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .rainbow-text {
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s linear infinite;
+            font-weight: bold;
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .glitch {
+            position: relative;
+            color: #fff;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0;
+            animation: glitch 2s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; }
+            25% { text-shadow: -2px 0 #f00, 2px 0 #00f; }
+            50% { text-shadow: -1px 0 #0f0, 1px 0 #ff0; }
+            75% { text-shadow: -3px 0 #f0f, 3px 0 #0ff; }
+        }
+        
+        .neon {
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #e60073, 0 0 20px #e60073, 0 0 25px #e60073;
+            color: #fff;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes neon {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+        
+        .pixel {
+            image-rendering: pixelated;
+            animation: pixelate 4s infinite alternate;
+        }
+        
+        @keyframes pixelate {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+        
+        .image-container {
+            position: relative;
+            margin: 2rem 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            max-height: 60vh;
+            transition: all 0.5s ease;
+        }
+        
+        .video-container {
+            position: relative;
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        }
+        
+        .video-container video {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 15px;
+        }
+        
+        .button {
+            padding: 1rem 2rem;
+            margin: 1rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            margin: 2rem 0;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            animation: float 3s infinite;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.8);
+        }
+        
+        .emoji {
+            font-size: 3rem;
+            margin: 1rem;
+            animation: spin 4s linear infinite;
+            text-shadow: 0 0 10px #ff0, 0 0 20px #0ff;
+        }
+        
+        .ascii-art {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 0.8rem;
+            line-height: 0.8;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+            margin: 2rem 0;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
+        .rainbow-border {
+            border: 5px solid;
+            border-image: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet) 1;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .glitch-image {
+            position: relative;
+            filter: contrast(1.2) brightness(1.1);
+        }
+        
+        .glitch-image::before, .glitch-image::after {
+            content: attr(data-content);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 255, 0.3);
+            mix-blend-mode: screen;
+            background-size: 100% 100%;
+            clip: rect(0, 900px, 0, 0);
+            opacity: 0;
+        }
+        
+        .glitch-image::before {
+            left: 2px;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch-image::after {
+            left: -2px;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(30px, 9999px, 92px, 0); opacity: 0.5; }
+            5% { clip: rect(10px, 9999px, 84px, 0); opacity: 0.7; }
+            10% { clip: rect(49px, 9999px, 77px, 0); opacity: 0.3; }
+            15% { clip: rect(24px, 9999px, 98px, 0); opacity: 0.8; }
+            20% { clip: rect(13px, 9999px, 81px, 0); opacity: 0.4; }
+            25% { clip: rect(41px, 9999px, 73px, 0); opacity: 0.6; }
+            30% { clip: rect(35px, 9999px, 95px, 0); opacity: 0.2; }
+            35% { clip: rect(28px, 9999px, 88px, 0); opacity: 0.9; }
+            40% { clip: rect(17px, 9999px, 79px, 0); opacity: 0.5; }
+            45% { clip: rect(45px, 9999px, 91px, 0); opacity: 0.7; }
+            50% { clip: rect(12px, 9999px, 83px, 0); opacity: 0.3; }
+            55% { clip: rect(39px, 9999px, 75px, 0); opacity: 0.8; }
+            60% { clip: rect(23px, 9999px, 97px, 0); opacity: 0.4; }
+            65% { clip: rect(16px, 9999px, 80px, 0); opacity: 0.6; }
+            70% { clip: rect(48px, 9999px, 94px, 0); opacity: 0.2; }
+            75% { clip: rect(32px, 9999px, 87px, 0); opacity: 0.9; }
+            80% { clip: rect(27px, 9999px, 78px, 0); opacity: 0.5; }
+            85% { clip: rect(19px, 9999px, 90px, 0); opacity: 0.7; }
+            90% { clip: rect(42px, 9999px, 82px, 0); opacity: 0.3; }
+            95% { clip: rect(14px, 9999px, 74px, 0); opacity: 0.8; }
+            100% { clip: rect(37px, 9999px, 96px, 0); opacity: 0.4; }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(43px, 9999px, 76px, 0); opacity: 0.4; }
+            5% { clip: rect(18px, 9999px, 89px, 0); opacity: 0.6; }
+            10% { clip: rect(31px, 9999px, 72px, 0); opacity: 0.2; }
+            15% { clip: rect(26px, 9999px, 99px, 0); opacity: 0.9; }
+            20% { clip: rect(15px, 9999px, 82px, 0); opacity: 0.5; }
+            25% { clip: rect(47px, 9999px, 74px, 0); opacity: 0.7; }
+            30% { clip: rect(11px, 9999px, 96px, 0); opacity: 0.3; }
+            35% { clip: rect(40px, 9999px, 88px, 0); opacity: 0.8; }
+            40% { clip: rect(29px, 9999px, 81px, 0); opacity: 0.4; }
+            45% { clip: rect(22px, 9999px, 73px, 0); opacity: 0.6; }
+            50% { clip: rect(44px, 9999px, 95px, 0); opacity: 0.2; }
+            55% { clip: rect(17px, 9999px, 87px, 0); opacity: 0.9; }
+            60% { clip: rect(41px, 9999px, 79px, 0); opacity: 0.5; }
+            65% { clip: rect(25px, 9999px, 92px, 0); opacity: 0.7; }
+            70% { clip: rect(13px, 9999px, 84px, 0); opacity: 0.3; }
+            75% { clip: rect(46px, 9999px, 76px, 0); opacity: 0.8; }
+            80% { clip: rect(30px, 9999px, 89px, 0); opacity: 0.4; }
+            85% { clip: rect(24px, 9999px, 82px, 0); opacity: 0.6; }
+            90% { clip: rect(19px, 9999px, 74px, 0); opacity: 0.2; }
+            95% { clip: rect(42px, 9999px, 97px, 0); opacity: 0.9; }
+            100% { clip: rect(28px, 9999px, 80px, 0); opacity: 0.5; }
+        }
+        
+        .floating-element {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        .psychedelic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(45deg, #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-size: 600% 600%;
+            animation: bg-animation 10s ease infinite;
+        }
+        
+        @keyframes bg-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s;
+        }
+        
+        .cursor::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            top: -10px;
+            left: -10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes cursor-pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.5); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .sound-button {
+            background: linear-gradient(45deg, #ff0080, #00ffff);
+            color: white;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .retro-text {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 #000;
+            color: #0f0;
+        }
+        
+        .holographic {
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .holographic::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1), rgba(255, 255, 0, 0.1), rgba(0, 255, 0, 0.1));
+            animation: holographic 5s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes holographic {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pixel-art {
+            image-rendering: pixelated;
+            width: 200px;
+            height: 200px;
+            margin: 1rem;
+            animation: pixelate 2s infinite alternate;
+        }
+        
+        .trippy {
+            animation: trippy 5s infinite alternate;
+        }
+        
+        @keyframes trippy {
+            0% { filter: hue-rotate(0deg) contrast(1) brightness(1); }
+            25% { filter: hue-rotate(90deg) contrast(1.5) brightness(1.2); }
+            50% { filter: hue-rotate(180deg) contrast(1) brightness(0.8); }
+            75% { filter: hue-rotate(270deg) contrast(1.3) brightness(1.1); }
+            100% { filter: hue-rotate(360deg) contrast(1) brightness(1); }
+        }
+        
+        .warp-text {
+            display: inline-block;
+            transform-origin: center;
+            animation: warp 3s infinite alternate;
+        }
+        
+        @keywaves warp {
+            0% { transform: skew(0deg, 0deg) scale(1); }
+            25% { transform: skew(5deg, -5deg) scale(1.1); }
+            50% { transform: skew(-5deg, 5deg) scale(0.9); }
+            75% { transform: skew(3deg, 3deg) scale(1.05); }
+            100% { transform: skew(0deg, 0deg) scale(1); }
+        }
+        
+        .bouncing-ball {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, #000);
+            animation: bounce 1s infinite;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .loading-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff0080, #00ffff);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+        
+        .loading-text {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            animation: rainbow 3s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="psychedelic-bg"></div>
+    <div class="fireworks" id="fireworks"></div>
+    <div class="cursor" id="cursor"></div>
+    
+    <div class="loading" id="loading">
+        <div class="loading-text">LOADING УПОРОТИК 3000...</div>
+        <div class="loading-bar">
+            <div class="loading-fill" id="loading-fill"></div>
+        </div>
+    </div>
+
+    <div class="container" id="container"></div>
+    
+    <div class="sound-button" id="sound-button">🔊</div>
+
+    <script>
+        // Loading animation
+        const loading = document.getElementById('loading');
+        const loadingFill = document.getElementById('loading-fill');
+        let progress = 0;
+        const loadingInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    loading.style.opacity = '0';
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 500);
+                }, 300);
+            }
+            loadingFill.style.width = progress + '%';
+        }, 200);
+
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.width = '15px';
+            cursor.style.height = '15px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.style.width = '20px';
+            cursor.style.height = '20px';
+        });
+
+        // Sound system
+        const soundButton = document.getElementById('sound-button');
+        let isSoundOn = false;
+        const soundEffects = [
+            'https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-2420.mp3',
+            'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3',
+            'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3',
+            'https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3',
+            'https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3'
+        ];
+
+        function playRandomSound() {
+            if (isSoundOn) {
+                const audio = new Audio(soundEffects[Math.floor(Math.random() * soundEffects.length)]);
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log('Audio play failed:', e));
+            }
+        }
+
+        soundButton.addEventListener('click', () => {
+            isSoundOn = !isSoundOn;
+            soundButton.innerHTML = isSoundOn ? '🔊' : '🔇';
+            if (isSoundOn) {
+                playRandomSound();
+            }
+        });
+
+        // Fireworks
+        function createFirework() {
+            const fireworks = document.getElementById('fireworks');
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            
+            // Random position
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            
+            // Random color
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            firework.style.left = x + 'px';
+            firework.style.top = y + 'px';
+            firework.style.background = color;
+            
+            fireworks.appendChild(firework);
+            
+            // Animate
+            let size = 0;
+            let opacity = 1;
+            const interval = setInterval(() => {
+                size += 2;
+                opacity -= 0.02;
+                firework.style.width = size + 'px';
+                firework.style.height = size + 'px';
+                firework.style.opacity = opacity;
+                
+                if (opacity <= 0) {
+                    clearInterval(interval);
+                    firework.remove();
+                }
+            }, 20);
+        }
+
+        // Create fireworks randomly
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                createFirework();
+            }
+        }, 500);
+
+        // Generate random content
+        const container = document.getElementById('container');
+        const sectionTypes = ['text', 'image', 'video', 'grid', 'ascii', 'cards', 'emojis', 'pixel', 'trippy'];
+        const imageKeywords = ['psychedelic', 'neon', 'retro', 'cyberpunk', 'abstract', 'glitch', 'vaporwave', 'synthwave', 'kaleidoscope', 'fractal'];
+        const videoKeywords = ['trippy', 'abstract', 'motion graphics', 'visual effects', 'digital art'];
+        const asciiArt = [
+            `@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@`,
+            `╦ ╦┌─┐┬  ┌─┐┌─┐┌┬┐┌─┐  ╔═╗┌─┐┬─┐┌─┐┌─┐┌─┐┌┬┐┌─┐┬─┐
+╠═╣├┤ │  │  │ ││││├┤   ╠╣ │ │├┬┘├─┤└─┐│ │ ││├┤ ├┬┘
+╩ ╩└─┘┴─┘└─┘└─┘┴ ┴└─┘  ╚  └─┘┴└─┴ ┴└─┘└─┘─┴┘└─┘┴└─`,
+            `  ▄▄▄▄· ▄▄▄ .▄▄▄   ▄· ▄▌▄▄▄ .▄▄▄  
+  ▐█ ▀█▪▀▄.▀·▀▄ █·▐█▪██▌▀▄.▀·▀▄ █·
+  ▐█▀▀█▄▐▀▀▪▄▐▀▀▄ ▐█▌▐█▪▐▀▀▪▄▐▀▀▄ 
+  ██▄▪▐█▐█▄▄▌▐█•█▌ ▐█▀·.▐█▄▄▌▐█•█▌
+  ·▀▀▀▀  ▀▀▀ .▀  ▀  ▀ •  ▀▀▀ .▀  ▀`
+        ];
+        const emojis = ['🌈', ' psychedelic', '🌀', '⚡', '🔥', '💫', '🌟', '✨', '🎇', '🎆', '☄️', '🪄', '🔮', '🎭', '🎪', '🎪', '🎨', '🎭', '🎪', '🎪'];
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff', '#ff8800', '#8800ff', '#00ff88'];
+
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function createSection() {
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.style.backgroundColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.1)`;
+            
+            const sectionType = getRandomElement(sectionTypes);
+            
+            switch (sectionType) {
+                case 'text':
+                    createTextSection(section);
+                    break;
+                case 'image':
+                    createImageSection(section);
+                    break;
+                case 'video':
+                    createVideoSection(section);
+                    break;
+                case 'grid':
+                    createGridSection(section);
+                    break;
+                case 'ascii':
+                    createAsciiSection(section);
+                    break;
+                case 'cards':
+                    createCardsSection(section);
+                    break;
+                case 'emojis':
+                    createEmojisSection(section);
+                    break;
+                case 'pixel':
+                    createPixelSection(section);
+                    break;
+                case 'trippy':
+                    createTrippySection(section);
+                    break;
+            }
+            
+            container.appendChild(section);
+            return section;
+        }
+
+        function createTextSection(section) {
+            const title = document.createElement('h1');
+            title.className = 'glitch';
+            title.textContent = generateRandomTitle();
+            section.appendChild(title);
+            
+            const subtitle = document.createElement('h2');
+            subtitle.className = 'neon';
+            subtitle.textContent = generateRandomSubtitle();
+            section.appendChild(subtitle);
+            
+            const paragraph = document.createElement('p');
+            paragraph.className = 'rainbow-text';
+            paragraph.style.fontSize = `${Math.random() * 2 + 1}rem`;
+            paragraph.textContent = generateRandomText();
+            section.appendChild(paragraph);
+        }
+
+        function createImageSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'warp-text';
+            title.textContent = 'ПСИХОДЕЛИЧЕСКАЯ КАРТИНКА';
+            section.appendChild(title);
+            
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            
+            const img = document.createElement('img');
+            const keyword = getRandomElement(imageKeywords);
+            const width = 600 + Math.floor(Math.random() * 400);
+            const height = 400 + Math.floor(Math.random() * 300);
+            img.src = `https://source.unsplash.com/random/${width}x${height}/?${keyword},psychedelic,abstract,art`;
+            img.alt = 'Random psychedelic image';
+            img.style.borderRadius = Math.random() > 0.5 ? '15px' : '50%';
+            img.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+            
+            // Add glitch effect randomly
+            if (Math.random() > 0.7) {
+                img.className = 'glitch-image';
+                img.setAttribute('data-content', img.alt);
+            }
+            
+            imageContainer.appendChild(img);
+            section.appendChild(imageContainer);
+        }
+
+        function createVideoSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'trippy';
+            title.textContent = 'ТРИППОВОЕ ВИДЕО';
+            section.appendChild(title);
+            
+            const videoContainer = document.createElement('div');
+            videoContainer.className = 'video-container';
+            
+            const video = document.createElement('video');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('loop', '');
+            video.setAttribute('muted', '');
+            video.style.opacity = '0.8';
+            
+            const source = document.createElement('source');
+            const keyword = getRandomElement(videoKeywords);
+            // Using a placeholder video since we can't access real video URLs
+            source.src = `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
+            source.type = 'video/mp4';
+            
+            video.appendChild(source);
+            videoContainer.appendChild(video);
+            section.appendChild(videoContainer);
+        }
+
+        function createGridSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'pixel';
+            title.textContent = 'ПИКСЕЛЬНАЯ СЕТКА';
+            section.appendChild(title);
+            
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            
+            const itemCount = 4 + Math.floor(Math.random() * 5);
+            for (let i = 0; i < itemCount; i++) {
+                const item = document.createElement('div');
+                item.className = 'card';
+                item.style.backgroundColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.2)`;
+                item.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+                
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji';
+                emoji.textContent = getRandomElement(emojis);
+                item.appendChild(emoji);
+                
+                const text = document.createElement('p');
+                text.className = 'rainbow-text';
+                text.textContent = generateRandomShortText();
+                item.appendChild(text);
+                
+                grid.appendChild(item);
+            }
+            
+            section.appendChild(grid);
+        }
+
+        function createAsciiSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'retro-text';
+            title.textContent = 'ASCII АРТ';
+            section.appendChild(title);
+            
+            const ascii = document.createElement('div');
+            ascii.className = 'ascii-art';
+            ascii.textContent = getRandomElement(asciiArt);
+            ascii.style.color = getRandomColor();
+            section.appendChild(ascii);
+        }
+
+        function createCardsSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'neon';
+            title.textContent = 'ИНТЕРЕСНЫЕ КАРТОЧКИ';
+            section.appendChild(title);
+            
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            
+            const cardTypes = ['fact', 'quote', 'tip', 'joke'];
+            const itemCount = 3 + Math.floor(Math.random() * 4);
+            
+            for (let i = 0; i < itemCount; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.backgroundColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.15)`;
+                
+                const type = getRandomElement(cardTypes);
+                let content = '';
+                
+                switch (type) {
+                    case 'fact':
+                        content = `ИНТЕРЕСНЫЙ ФАКТ: ${generateRandomFact()}`;
+                        break;
+                    case 'quote':
+                        content = `"${generateRandomQuote()}"`;
+                        break;
+                    case 'tip':
+                        content = `СОВЕТ: ${generateRandomTip()}`;
+                        break;
+                    case 'joke':
+                        content = `АНЕКДОТ: ${generateRandomJoke()}`;
+                        break;
+                }
+                
+                const text = document.createElement('p');
+                text.innerHTML = content;
+                text.className = 'rainbow-text';
+                card.appendChild(text);
+                
+                grid.appendChild(card);
+            }
+            
+            section.appendChild(grid);
+        }
+
+        function createEmojisSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'glitch';
+            title.textContent = 'ЭМОДЗИ ПАРТИ';
+            section.appendChild(title);
+            
+            const emojiContainer = document.createElement('div');
+            emojiContainer.style.display = 'flex';
+            emojiContainer.style.flexWrap = 'wrap';
+            emojiContainer.style.justifyContent = 'center';
+            emojiContainer.style.gap = '1rem';
+            emojiContainer.style.margin = '2rem 0';
+            
+            const emojiCount = 10 + Math.floor(Math.random() * 15);
+            for (let i = 0; i < emojiCount; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji';
+                emoji.textContent = getRandomElement(emojis);
+                emoji.style.fontSize = `${Math.random() * 3 + 1}rem`;
+                emoji.style.transform = `rotate(${Math.random() * 360}deg)`;
+                emojiContainer.appendChild(emoji);
+            }
+            
+            section.appendChild(emojiContainer);
+        }
+
+        function createPixelSection(section) {
+            const title = document.createElement('h2');
+            title.className = 'pixel';
+            title.textContent = 'ПИКСЕЛЬ АРТ';
+            section.appendChild(title);
+            
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            
+            const img = document.createElement('img');
+            const width = 200 + Math.floor(Math.random() * 200);
+            const height = 200 + Math.floor(Math.random() * 200);
+            img.src = `https://source.unsplash.com/random/${width}x${height}/?pixel,art,8bit,retro`;
+            img.alt = 'Pixel art';
+            img.className = 'pixel-art';
+            img.style.imageRendering = 'pixelated';
+            
+            imageContainer.appendChild(img);
+            section.appendChild(imageContainer);
+        }
+
+        function createTrippySection(section) {
+            const title = document.createElement('h1');
+            title.className = 'trippy';
+            title.textContent = 'ТРИППОВАЯ ЗОНА';
+            section.appendChild(title);
+            
+            const content = document.createElement('div');
+            content.className = 'holographic';
+            content.style.padding = '2rem';
+            content.style.margin = '2rem 0';
+            content.style.borderRadius = '15px';
+            content.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+            
+            const text = document.createElement('p');
+            text.className = 'rainbow-text';
+            text.style.fontSize = '2rem';
+            text.style.textAlign = 'center';
+            text.textContent = generateRandomText();
+            content.appendChild(text);
+            
+            section.appendChild(content);
+            
+            // Add bouncing balls
+            const ballCount = 3 + Math.floor(Math.random() * 5);
+            for (let i = 0; i < ballCount; i++) {
+                const ball = document.createElement('div');
+                ball.className = 'bouncing-ball';
+                ball.style.position = 'absolute';
+                ball.style.left = `${Math.random() * 80 + 10}%`;
+                ball.style.animationDelay = `${Math.random() * 2}s`;
+                section.appendChild(ball);
+            }
+        }
+
+        function generateRandomTitle() {
+            const titles = [
+                'УПОРОТИК 3000',
+                'ПСИХОДЕЛИЧЕСКИЙ МИР',
+                'ТРИППОВАЯ РЕАЛЬНОСТЬ',
+                'НЕОНОВЫЙ АПОКАЛИПСИС',
+                'ЦИФРОВОЙ КАЛЕЙДОСКОП',
+                'ГЛЮКОВАЯ МАТРИЦА',
+                'ВАПОРВЕЙВ КОСМОС',
+                'СИНТВЕЙВ ГАЛАКТИКА',
+                'ФРАКТАЛЬНЫЙ ХАОС',
+                'НЕЙРОННЫЙ ВЗРЫВ'
+            ];
+            return getRandomElement(titles);
+        }
+
+        function generateRandomSubtitle() {
+            const subtitles = [
+                'Готов к упоротому путешествию?',
+                'Трип начинается здесь!',
+                'Твое сознание больше не будет прежним',
+                'Добро пожаловать в безумие',
+                'Реальность - это иллюзия',
+                'Готов к цифровому экстазу?',
+                'Включай звук для полного погружения!',
+                'Ты точно готов к этому?',
+                'Приготовься к визуальному перегрузу!',
+                'Это только начало безумия!'
+            ];
+            return getRandomElement(subtitles);
+        }
+
+        function generateRandomText() {
+            const texts = [
+                'Ты погружаешься в безумный мир упоротых визуальных эффектов и кислотных цветов. Каждый пиксель кричит о своем существовании!',
+                'Сознание расширяется, реальность искажается, границы стираются. Ты становишься частью цифрового космоса.',
+                'Неоновые огни пульсируют в такт твоему сердцу. Каждый вдох наполняет тебя энергией упоротого цифрового мира.',
+                'Глаза не успевают следить за визуальным безумием. Ты видишь то, что невозможно описать словами.',
+                'Ты пересек границу реальности и попал в параллельную вселенную, где правят кислотные цвета и безумные анимации.',
+                'Каждый элемент на этой странице живет своей жизнью, танцуя в безумном ритме упоротого цифрового танца.',
+                'Ты не просто смотришь на экран - ты становишься частью этого безумного цифрового спектакля.',
+                'Твои чувства обостряются, восприятие меняется. Ты начинаешь видеть красоту в хаосе и порядке в безумии.',
+                'Это не просто веб-сайт - это путешествие в глубины упоротого цифрового сознания.',
+                'Ты больше не можешь отличить реальность от цифрового бреда. И это прекрасно!'
+            ];
+            return getRandomElement(texts);
+        }
+
+        function generateRandomShortText() {
+            const texts = [
+                'Безумие - это порядок, видимый через призму упоротости',
+                'Цвета кричат, формы танцуют, реальность исчезает',
+                'Ты не пьяный, это просто реальность шатается',
+                'Каждый пиксель - это капля упоротого сознания',
+                'Глаза видят, мозг отказывается понимать',
+                'Это не баг, это фича упоротого цифрового мира',
+                'Ты не в матрице, ты и есть матрица',
+                'Реальность - это просто настройка в цифровом меню',
+                'Ты не сошел с ума, ты просто стал частью хаоса',
+                'Упоротость - это не состояние, это образ жизни'
+            ];
+            return getRandomElement(texts);
+        }
+
+        function generateRandomFact() {
+            const facts = [
+                'Человеческий мозг не может одновременно видеть все цвета радуги',
+                'Если бы вы могли сложить бумагу 42 раза, она достигла бы Луны',
+                'Кальмары имеют три сердца и синюю кровь',
+                'На Земле больше деревьев, чем звезд в Млечном Пути',
+                'Муравьи никогда не спят, но у них есть короткие периоды покоя',
+                'Каждый человек оставляет отпечатки пальцев, похожие на спирали галактик',
+                'Свет от Солнца достигает Земли за 8 минут и 20 секунд',
+                'В космосе звук не распространяется, но вибрации можно почувствовать',
+                'Человеческий нос может запомнить более 50,000 различных запахов',
+                'Если бы вы могли увидеть радиоволны, ночное небо светилось бы ярче Солнца'
+            ];
+            return getRandomElement(facts);
+        }
+
+        function generateRandomQuote() {
+            const quotes = [
+                'Реальность - это иллюзия, хотя и очень устойчивая - Альберт Эйнштейн',
+                'Безумие - это повторение одного и того же действия и ожидание другого результата - Альберт Эйнштейн',
+                'То, что мы видим, зависит от того, где мы стоим - Карл Маркс',
+                'Границы между реальностью и вымыслом стираются - Филип К. Дик',
+                'Мы - звездная пыль, мечтающая о себе - Карл Саган',
+                'Вселенная - это не место, это состояние сознания - Алан Уоттс',
+                'Ты не входишь в поток, ты становишься потоком - Алан Уоттс',
+                'Все, что мы видим - это иллюзия, хотя и устойчивая - Альберт Эйнштейн',
+                'Сознание - это не то, что происходит в мозге, а то, что мозг делает - Дэниел Деннет',
+                'Реальность - это то, что продолжает существовать, когда вы перестаете в нее верить - Филип К. Дик'
+            ];
+            return getRandomElement(quotes);
+        }
+
+        function generateRandomTip() {
+            const tips = [
+                'Попробуй смотреть на экран одним глазом, потом другим - эффект будет сильнее',
+                'Включи звук и закрой глаза на минуту, потом открой - реальность изменится',
+                'Попробуй читать текст вверх ногами - мозг найдет новые паттерны',
+                'Поставь экран под углом и посмотри косым взглядом - увидишь скрытые изображения',
+                'Попробуй моргать в ритме пульсации элементов - получишь синхронизацию',
+                'Закрой один глаз и посмотри на центр экрана - увидишь 3D-эффект',
+                'Попробуй дышать в ритме анимаций - получишь цифровой транс',
+                'Поставь экран рядом с зеркалом - получишь бесконечный упоротый коридор',
+                'Попробуй смотреть на экран через призму стакана с водой - увидишь радугу',
+                'Закрой глаза на 30 секунд, потом открой - яркость будет сильнее'
+            ];
+            return getRandomElement(tips);
+        }
+
+        function generateRandomJoke() {
+            const jokes = [
+                'Почему программисты не ходят в лес? Потому что боятся массивов!',
+                'Какой самый длинный день в году? Программистский - 31 февраля!',
+                'Почему роза покраснела? Потому что увидела сад-комплекс!',
+                'Какой узел нельзя развязать? Железнодорожный!',
+                'Почему у кальмаров всегда есть деньги? Потому что у них есть щупальца!',
+                'Какой самый быстрый способ передачи данных? Курьером на велосипеде!',
+                'Почему велосипед не может упасть? Потому что он слишком устал!',
+                'Какой самый тяжелый металл? Тяжелорыжий!',
+                'Почему пингвины не летают? Потому что у них нет пропуска в небо!',
+                'Какой самый умный овощ? Зеленый помидор - он знает, когда созреть!'
+            ];
+            return getRandomElement(jokes);
+        }
+
+        // Create initial sections
+        for (let i = 0; i < 10; i++) {
+            createSection();
+        }
+
+        // Infinite scroll
+        let creatingSections = false;
+        window.addEventListener('scroll', () => {
+            if (creatingSections) return;
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Check if user is near bottom
+            if (scrollTop + windowHeight >= documentHeight - 1000) {
+                creatingSections = true;
+                
+                // Create multiple sections at once for smoother experience
+                setTimeout(() => {
+                    for (let i = 0; i < 5; i++) {
+                        createSection();
+                    }
+                    creatingSections = false;
+                    
+                    // Play sound occasionally
+                    if (Math.random() > 0.7 && isSoundOn) {
+                        playRandomSound();
+                    }
+                }, 500);
+            }
+            
+            // Check if section is in viewport for animation
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top < windowHeight * 0.8 && rect.bottom > 0) {
+                    section.classList.add('visible');
+                }
+            });
+        });
+
+        // Initial check for visible sections
+        setTimeout(() => {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.8 && rect.bottom > 0) {
+                    section.classList.add('visible');
+                }
+            });
+        }, 1000);
+
+        // Add floating elements
+        function createFloatingElement() {
+            const element = document.createElement('div');
+            element.className = 'floating-element';
+            
+            const shapes = ['●', '■', '▲', '◆', '⬟', '⬣', '⬢', '⬥'];
+            element.textContent = getRandomElement(shapes);
+            element.style.fontSize = `${Math.random() * 5 + 1}rem`;
+            element.style.color = getRandomColor();
+            element.style.left = `${Math.random() * 100}%`;
+            element.style.top = `${Math.random() * 100}%`;
+            element.style.opacity = Math.random() * 0.5 + 0.1;
+            element.style.animationDuration = `${Math.random() * 10 + 5}s`;
+            element.style.animationDelay = `${Math.random() * 5}s`;
+            
+            document.body.appendChild(element);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                element.remove();
+            }, 20000);
+        }
+
+        // Create floating elements periodically
+        setInterval(() => {
+            if (document.querySelectorAll('.floating-element').length < 20) {
+                createFloatingElement();
+            }
+        }, 1000);
+
+        // Initial floating elements
+        for (let i = 0; i < 15; i++) {
+            createFloatingElement();
+        }
+
+        // Easter egg: Konami code
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    activateKonamiCode();
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        function activateKonamiCode() {
+            document.body.style.animation = 'bg-animation 2s infinite';
+            document.body.style.background = 'repeating-linear-gradient(45deg, #ff0000, #ff0000 10px, #00ff00 10px, #00ff00 20px, #0000ff 20px, #0000ff 30px)';
+            
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.transform = 'rotate(180deg)';
+            });
+            
+            setTimeout(() => {
+                document.body.style.animation = '';
+                document.body.style.background = '';
+                sections.forEach(section => {
+                    section.style.transform = '';
+                });
+            }, 5000);
+            
+            // Play special sound
+            if (isSoundOn) {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3');
+                audio.volume = 0.5;
+                audio.play();
+            }
+        }
+
+        // Make cursor more trippy when moving fast
+        let lastX = 0;
+        let lastY = 0;
+        let speed = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            speed = Math.sqrt(dx * dx + dy * dy);
+            
+            cursor.style.width = `${Math.min(speed + 20, 40)}px`;
+            cursor.style.height = `${Math.min(speed + 20, 40)}px`;
+            
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+    </script>
+</body>
+</html>
