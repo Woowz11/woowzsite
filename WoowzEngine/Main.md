@@ -12,11 +12,23 @@
 
 <script>
 function DateToString(y,M,d,h,m,post){
-	var sy = post ? "году"   : (y == 1 ? "год" : (y > 1 && y < 5 ? "года" : "лет"));
-	var sM = post ? "месяца" : (M == 1 ? "месяц" : (M > 1 && M < 5 ? "месяца" : "месяцев"));
-	var sd = post ? "дня"    : (d == 1 ? "день" : (d > 1 && d < 5 ? "дня" : "дней"));
-	var sh = post ? "часов"  : (h == 1 ? "час" : (h > 1 && h < 5 ? "часа" : "часов"));
-	var sm = post ? "минут"  : (m == 1 ? "минута" : (m > 1 && m < 5 ? "минуты" : "минут"));
+	function Pluralize(n, forms){
+		n = Math.abs(n);
+		if(n % 100 >= 11 && n % 100 <= 14){ return forms[2]; }
+		switch(n % 10){
+			case 1: return forms[0];
+			case 2:
+			case 3:
+			case 4: return forms[1];
+			default: return forms[2];
+		}
+	}
+
+	var sy = post ? "году"   : Pluralize(y, ["год","года","лет"]);
+	var sM = post ? "месяца" : Pluralize(M, ["месяц","месяца","месяцев"]);
+	var sd = post ? "дня"    : Pluralize(d, ["день","дня","дней"]);
+	var sh = post ? "часов"  : Pluralize(h, ["час","часа","часов"]);
+	var sm = post ? "минут"  : Pluralize(m, ["минута","минуты","минут"]);
 	
 	return (post ? "в " : "") + y + " " + sy + ", " + M + " " + sM + ", " + d + " " + sd + ", " + h + " " + sh + ", " + m + " " + sm;
 }

@@ -51,7 +51,7 @@ html, body {
 	<div id="app"></div>
 
 	<script>	
-	window.WoowzEngineVersion = 59;
+	window.WoowzEngineVersion = 70;
 	
 	window.ReplaceKey = function(Key, Value){
 		const Root = document.getElementById("app") || document.body;
@@ -68,6 +68,19 @@ html, body {
 		}
 
 		walk(Root);
+	}
+	
+	window.UniformTypes = {
+		"f" : [0, "Float"    , "float"    , "0f"   ],
+		"i" : [1, "Integer"  , "float"    , "0"    ],
+		"b" : [2, "Boolean"  , "bool"     , "false"],
+		"c" : [3, "Color"    , "vec4"     , "new Color().BLACK()"],
+		"2" : [4, "Vector2f" , "vec2"     , "new Vector2f()"],
+		"3" : [5, "Vector3f" , "vec3"     , "new Vector3f()"],
+		"4" : [6, "Vector4f" , "vec4"     , "new Vector4f()"],
+		"34": [7, "Matrix34f", "mat4x3"   , "new Matrix34()"],
+		"44": [8, "Matrix44f", "mat4"     , "new Matrix44()"],
+		"t" : [9, "Texture"  , "sampler2D", "WE.Resource.GetDefaultTexture().GetTexture()"]
 	}
 	
 	window.$docsify = {

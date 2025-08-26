@@ -1,11 +1,21 @@
 - Основная информация
 	- [Главная](/)
 	- [Лицензия](License.md)
+	- [Разработчики](WIP.md)
 	- [Игры](Games.md)
 	- [Версии](Versions.md)
-	- [Получить](Get.md)
+	- [Новости](WIP.md)
+	- [FAQ](WIP.md)
+	- [Получить (должно переехать в FAQ)](Get.md)
 
-- Строение
+- Архитектура
+	- [Рендер](WIP.md)
+	- [Ввод](WIP.md)
+	- [Физика](WIP.md)
+	- [События](WIP.md)
+	- [Ресурсы](WIP.md)
+	- Отладочная консоль
+		- [Логирование](WIP.md)
 
 - Туториалы
 	- [Установка](Install.md)
@@ -19,16 +29,31 @@
 		- Объекты
 			- Asset
 				- [Shader](WIP.md)
-					- [Uniform's](Uniforms.md)
-					- [Layout's](WIP.md)
+					- [Uniforms](Uniforms.md)
+					- [Include](Include.md)
+					- [Layout](WIP.md)
 				- [Texture](WIP.md)
 				- [Mesh](WIP.md)
 				- [Font](WIP.md)
 				- [Frame](WIP.md)
 				- [Sound](WIP.md)
-			- [Ресурсы](WIP.md)
+			- [Resource & CResource](WIP.md)
 			- [GameObject](WIP.md)
 			- [Scene](WIP.md)
+			- [Script](WIP.md)
+			- Остальное
+				- [Model](WIP.md)
+				- [Material](WIP.md)
+				- [Light](WIP.md)
+		- Скрипты
+			- [Camera](WIP.md)
+			- [Transform](WIP.md)
+			- [Physic](WIP.md)
+			- [RenderModel](WIP.md)
+			- [Light](WIP.md)
 	- Lua
-	
-- Базовые скрипты
+
+- Дополнительно
+	- Сообщество
+	- Профилирование
+	- Рекомендации
