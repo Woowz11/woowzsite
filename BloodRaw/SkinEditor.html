@@ -1,12 +1,12 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>BloodRaw - Редактор скина</title>
-<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
+<link rel="icon" type="image/x-icon" href="Source/iconblock.ico">
 
 <style>
 
 html{
-	background-image: url("source/bloodraw/dirt.png");
+	background-image: url("Source/dirt.png");
 	background-size: 64px 64px;
 	image-rendering: pixelated;
 }
@@ -17,7 +17,7 @@ body{
 
 </style>
 
-<link rel="stylesheet" href="source/bloodraw/css.css">
+<link rel="stylesheet" href="Source/css.css">
 <script src="source/source.js"></script>
 <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 <script type="importmap">
@@ -97,7 +97,7 @@ body{
 
 	const loader = new THREE.TextureLoader();
 	loader.load(
-		'source/bloodraw/cubemap.png',
+		'Source/cubemap.png',
 		function ( texture ) {
 			texture.colorSpace = THREE.SRGBColorSpace;
 			const cube = new THREE.Mesh(
@@ -309,7 +309,7 @@ body{
 		}
 
 		Selector.style.overflow = "hidden";
-		Selector.style.backgroundImage = 'url("source/bloodraw/dirt.png")';
+		Selector.style.backgroundImage = 'url("Source/dirt.png")';
 		Selector.style.backgroundSize = "64px 64px";
 		Selector.style.imageRendering = "pixelated";
 		var Grid = null;

@@ -200,7 +200,7 @@ AddFullnessToTable([
 WoowzsiteSourceBloodraw = AddFullnessToTable([
 	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png","og.png",
 	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png"
-],"source/bloodraw/","");
+],"BloodRaw/Source/","");
 
 WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([
 	"bloodeye_system","bloodeye_system_2_screen","bloodeye_system_3d","bloodeye_system_screen","bloodeye_system2","bloodeye_system2_3d","bloodeye_system3","bloodeye_system3_3d","boxtexture","boxtexture_3d",
@@ -283,55 +283,55 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 
 BloodrawSkinEditorBody = AddFullnessToTable([
 	"Обычное телоlСамое обычное телосложение"
-],"bloodraw/skineditor/body/",".png");
+],"BloodRaw/Source/Skin/body/",".png");
 
 BloodrawSkinEditorBoots = AddFullnessToTable([
 	
-],"bloodraw/skineditor/boots/",".png");
+],"BloodRaw/Source/Skin/boots/",".png");
 
 BloodrawSkinEditorCloths = AddFullnessToTable([
 	
-],"bloodraw/skineditor/cloths/",".png");
+],"BloodRaw/Source/Skin/cloths/",".png");
 
 BloodrawSkinEditorHats = AddFullnessToTable([
 	
-],"bloodraw/skineditor/hats/",".png");
+],"BloodRaw/Source/Skin/hats/",".png");
 
 BloodrawSkinEditorLowerdecor = AddFullnessToTable([
 	
-],"bloodraw/skineditor/lowerdecor/",".png");
+],"BloodRaw/Source/Skin/lowerdecor/",".png");
 
 BloodrawSkinEditorMask = AddFullnessToTable([
 	
-],"bloodraw/skineditor/mask/",".png");
+],"BloodRaw/Source/Skin/mask/",".png");
 
 BloodrawSkinEditorPants = AddFullnessToTable([
 	
-],"bloodraw/skineditor/pants/",".png");
+],"BloodRaw/Source/Skin/pants/",".png");
 
 BloodrawSkinEditorHairs = AddFullnessToTable([
 	
-],"bloodraw/skineditor/hairs/",".png");
+],"BloodRaw/Source/Skin/hairs/",".png");
 
 BloodrawSkinEditorTattoo = AddFullnessToTable([
 	
-],"bloodraw/skineditor/tattoo/",".png");
+],"BloodRaw/Source/Skin/tattoo/",".png");
 
 BloodrawSkinEditorUnderpants = AddFullnessToTable([
 	
-],"bloodraw/skineditor/underpants/",".png");
+],"BloodRaw/Source/Skin/underpants/",".png");
 
 BloodrawSkinEditorUpperdecor = AddFullnessToTable([
 	
-],"bloodraw/skineditor/upperdecor/",".png");
+],"BloodRaw/Source/Skin/upperdecor/",".png");
 
 BloodrawSkinEditorGradientsSkins = AddFullnessToTable([
 	"Светлый"
-],"bloodraw/skineditor/gradients/skins/",".png");
+],"BloodRaw/Source/Skin/gradients/skins/",".png");
 
 BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
 	
-],"bloodraw/skineditor/gradients/skins/",".png");
+],"BloodRaw/Source/Skin/gradients/skins/",".png");
 
 /*__________________________________________________________________________________________________*/
 
