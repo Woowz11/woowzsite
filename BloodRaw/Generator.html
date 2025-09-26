@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <meta charset="utf-8">
 <title>BloodRaw</title>
-<link rel="icon" type="image/x-icon" href="source/bloodraw/iconblock.ico">
+<link rel="icon" type="image/x-icon" href="Source/iconblock.ico">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://woowz11.github.io/woowzsite/BloodRaw/Main">
@@ -12,13 +12,93 @@
 <meta property="og:title" content="Minecraft Texture/Resource pack!">
 <meta property="og:description" content="">
 
+<link rel="stylesheet" href="Source/css.css">
+
 <style>
 html{
 	background-image: url("Source/dirt.png");
 	background-size: 64px 64px;
 	image-rendering: pixelated;
 }
-</style>
-<link rel="stylesheet" href="Source/css.css">
 
-<body id="body"><center>БУДЕТ ПЕРЕДЕЛАНО!</center></body>
+.container {
+	max-width: 800px;
+	margin: 20px auto;
+	padding: 20px;
+}
+
+h1 {
+	font-size: 2em;
+	margin-bottom: 10px;
+	color: #FFFF55;
+	text-align: center;
+}
+
+.block {
+	border-image: url("button.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 32px 32px;
+	padding: 15px;
+	margin: 15px 0;
+}
+
+.console {
+	background: black;
+	color: #00FF00;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 10px;
+	height: 200px;
+	overflow-y: auto;
+	border: 3px solid #2B2B2B;
+}
+
+</style>
+
+<body id="body"><div class="container">
+
+	<h1>Генератор ресурс-пака</h1>
+
+	<div class="block">
+		<p>Текущая версия: <b>v1.3.5</b></p>
+		<a href="#">Changelog</a>
+	</div>
+
+	<div class="block">
+		<p>Выберите версию Minecraft:</p>
+		<select>
+			<option>1.20.1</option>
+			<option>1.19.4</option>
+			<option>1.18.2</option>
+			<option>1.16.5</option>
+		</select>
+	</div>
+
+	<div class="block">
+		<p>Дополнения:</p>
+		<label><input type="checkbox"> Моды</label><br>
+		<label><input type="checkbox"> CTM</label><br>
+		<label><input type="checkbox"> CIT</label><br>
+		<label><input type="checkbox"> Другие</label>
+	</div>
+
+	<div class="block">
+		<p>Приколы:</p>
+		<label><input type="checkbox"> Криперы мяукают</label><br>
+		<label><input type="checkbox"> Мемные блоки</label><br>
+		<label><input type="checkbox"> Текстуры 1x1 пиксель</label><br>
+		<label><input type="checkbox"> Случайный трэш</label>
+	</div>
+
+	<div class="block" style="text-align:center;">
+		<button id="generate">Сгенерировать пак</button>
+	</div>
+
+	<div class="block">
+		<p>Консоль:</p>
+		<div class="console" id="console">
+			[INFO] Готов к генерации...
+		</div>
+	</div>
+
+</div></body>

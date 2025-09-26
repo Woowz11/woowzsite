@@ -1,59 +1,95 @@
-@font-face {
-    font-family: "CFont";
-    src: url("minecraft.ttf") format('opentype');
+@font-face{
+	font-family: "CFont";
+	src: url("minecraft.ttf") format('opentype');
 }
 
-button{
-    border-image: url("button.png") repeat;
-    border-image-slice: 6 fill;
-    border-image-width: 32px 32px;
-    font-family:CFont;
-    color:white;
-	cursor: pointer;
+html, button{
+	font-family : CFont;
+	color	    : white;
+	font-size   : 1.25em;
+	text-shadow : 0.15em 0.15em 0px color-mix(in srgb, currentColor 30%, black);
+	word-spacing: 0.5em;
+	cursor      : default;
 }
 
-button:hover{
-    border-image: url("button_hover.png") repeat;
-    border-image-slice: 6 fill;
-    border-image-width: 32px 32px;
+// Презагрузка
+body::after{
+	content: "";
+    display: none;
+    background: 
+        url("button.png"),
+        url("button_hover.png"),
+		url("button_disabled.png"),
+        url("checkbox.png"),
+		url("checkbox_checked.png"),
+		url("checkbox_hover.png"),
+		url("checkbox_hover_checked.png");
 }
 
-button:disabled{
-    border-image: url("button_disabled.png") repeat;
-    border-image-slice: 6 fill;
-    border-image-width: 32px 32px;
-}
-
-html{
-    font-family:CFont;
-    color:white;
-    font-size: 1.25em;
-    text-shadow: 0.15em 0.15em 0px #2B2B2B;
-}
-
-::selection {
+::selection{
 	opacity: 0;
 }
 
-input[type='checkbox'] {
-	-webkit-appearance: none;
-	width: 30px;
-	height: 30px;
-	vertical-align:middle;
-	background-image: url("checkbox.png");
-	background-size: 100%;
-	background-position: right center;
-	background-repeat: no-repeat;
+button{
+	border-image	  : url("button.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 32px 32px;
+	font-family	      : CFont;
+	cursor			  : pointer;
+	line-height       : 1.35em;
 }
 
-input[type='checkbox']:checked {
+button:hover{
+	border-image	  : url("button_hover.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 32px 32px;
+	color             : #FFFF55;
+}
+
+button:disabled{
+	border-image	  : url("button_disabled.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 32px 32px;
+}
+
+label{
+	cursor: pointer;
+}
+
+input[type='checkbox']{
+	-webkit-appearance : none;
+	width			   : 30px;
+	height			   : 30px;
+	vertical-align	   : middle;
+	background-image   : url("checkbox.png");
+	background-size	   : 100%;
+	background-position: right center;
+	background-repeat  : no-repeat;
+	cursor             : pointer;
+}
+
+input[type='checkbox']:checked{
 	background-image: url("checkbox_checked.png");
 }
 
-input[type='checkbox']:hover {
+input[type='checkbox']:hover{
 	background-image: url("checkbox_hover.png");
 }
 
-input[type='checkbox']:checked:hover {
+input[type='checkbox']:checked:hover{
 	background-image: url("checkbox_hover_checked.png");
+}
+
+a{
+	color          : #FFFF55;
+	text-decoration: none;
+	cursor         : pointer;
+}
+
+a:hover{
+	color: #FFFFFF;
+}
+
+a:active{
+	color: #555555;
 }
