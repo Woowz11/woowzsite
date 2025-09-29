@@ -52,7 +52,7 @@ function __Print(Message, Exception, Type){
 	try{
 		var Result = Message;
 		
-		const Length = 50;
+		const Length = 100;
 		
 		if(Exception){
 			Result += "\n:" + "=".repeat(Length) + ":\n";

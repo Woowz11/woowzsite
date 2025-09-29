@@ -21,28 +21,23 @@ html{
 	image-rendering: pixelated;
 }
 
-.container {
-	max-width: 800px;
+.Container{
+	max-width: 1000px;
 	margin: 20px auto;
 	padding: 20px;
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-h1 {
+h1{
 	font-size: 2em;
 	margin-bottom: 10px;
 	color: #FFFF55;
 	text-align: center;
 }
 
-.block {
-	border-image: url("button.png") repeat;
-	border-image-slice: 6 fill;
-	border-image-width: 32px 32px;
-	padding: 15px;
-	margin: 15px 0;
-}
-
-.console {
+.Console{
 	background: black;
 	color: #00FF00;
 	font-family: monospace;
@@ -50,106 +45,187 @@ h1 {
 	padding: 10px;
 	height: 200px;
 	overflow-y: auto;
-	border: 3px solid #2B2B2B;
+	outline: 3px solid rgba(0,0,0,0.5);
+	text-shadow: none;
 }
 
 </style>
 
-<body id="body"><div class="container">
-	<input type="file" id="PreLoadPack" accept=".zip">
+<link href="../Libs/select2.min.css" rel="stylesheet" />
+<script src="../Libs/jquery.min.js"></script>
+<script src="../Libs/select2.min.js"></script>
+
+<body id="body"><div class="Container">
+	<input type="file" id="PreLoadPack" accept=".zip" style="display: none;">
 
 	<h1>Генератор ресурс-пака</h1>
 
-	<div class="block">
+	<div>
 		<p>Текущая версия: <b>v1.3.5</b></p>
 		<a href="#">Changelog</a>
 	</div>
 
-	<div class="block">
-		<p>Выберите версию Minecraft:</p>
-		<select>
-			<option>1.20.1</option>
-			<option>1.19.4</option>
-			<option>1.18.2</option>
-			<option>1.16.5</option>
-		</select>
+	<div>
+		<p>Версия:</p>
+		<select id="SelectVersion" style="width: 400px;"></select>
+	</div>
+	
+	<hr>
+
+	<div style="text-align:center;">
+		<button id="B_Generate" onclick="Generate();">Сгенерировать пак</button>
 	</div>
 
-	<div class="block">
-		<p>Дополнения:</p>
-		<label><input type="checkbox"> Моды</label><br>
-		<label><input type="checkbox"> CTM</label><br>
-		<label><input type="checkbox"> CIT</label><br>
-		<label><input type="checkbox"> Другие</label>
-	</div>
-
-	<div class="block">
-		<p>Приколы:</p>
-		<label><input type="checkbox"> Криперы мяукают</label><br>
-		<label><input type="checkbox"> Мемные блоки</label><br>
-		<label><input type="checkbox"> Текстуры 1x1 пиксель</label><br>
-		<label><input type="checkbox"> Случайный трэш</label>
-	</div>
-
-	<div class="block" style="text-align:center;">
-		<button id="generate">Сгенерировать пак</button>
-	</div>
-
-	<div class="block">
+	<div>
 		<p>Консоль:</p>
-		<div class="console" id="console">
-			[INFO] Готов к генерации...
-		</div>
+		<div class="Console" id="Console"></div>
 	</div>
 
 </div></body>
 
 <script src="../source/Logger.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="../Libs/jszip.min.js"></script>
 <script>
 
 /* Запущен сайт локально? */ const IsLocal	= window.location.protocol === "file:";
 /* Путь до файла с паком  */ const PackFile = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
 
+/* ======================================================== */
+
+var Console = $("#Console");
+
+Logger.Console = function(Message){
+	Logger.Info(Message);
+	Console.append(`<p>${Message}</p>`);
+}
+
+/* ======================================================== */
+
+/* Информация об паке */
+var Pack;
+
+/* Генерация пака */
+async function Generate(){
+	try{
+		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
+		Console.empty();
+		
+		Logger.Console("Начало генерации пака!");
+		
+		Logger.Console(SelectedVersion);
+		
+		Logger.Console("Конец генерации пака!");
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при генерации пака!", e);
+	}
+}
+
+/* ======================================================== */
+
+/* Файлы пака (Все файлы) */
+const PackFiles = {};
+/* Папки пака (Файлы внутри папок) */
+const PackFolders = {};
+
+/* Доступные версии пака */
+const PackVersions = {}
+
+/* Выбранная версия */
+var SelectedVersion = null;
+
+/* Получает разную информацию из пака */
+function LoadPackInformation(){
+	try{
+		for(const Path of Object.keys(PackFiles)){
+			const LastSlash = Path.lastIndexOf("/");
+			const Folder    = LastSlash === -1 ? ""   : Path.substring(0,  LastSlash);
+			
+			if(!PackFolders[Folder]){ PackFolders[Folder] = []; }
+			PackFolders[Folder].push(PackFiles[Path]);
+		}
+		
+		for(const File of PackFolders["Generators"]){
+			var Version = File.name.split("/").pop();
+			const LastDot = Version.lastIndexOf(".");
+			if(LastDot !== -1){ Version = Version.substring(0, LastDot); }
+			PackVersions[Version] = true;
+		}
+	}catch(e){
+		throw new Error("Произошла ошибка при загрузке информации об паке!", e);
+	}
+}
+
+/* Вызывается после пре-загрузки */
+function PreLoadAfter(){
+	if(!StartPreLoaded){ return; }
+	try{
+		LoadPackInformation();
+	
+		const SelectVersion = $("#SelectVersion");
+		Logger.Info(PackVersions);
+		
+		SelectVersion.html(Object.keys(PackVersions).map(V => `<option value="${V}">${V}</option>`).join(""));
+		SelectVersion.select2({
+			placeholder: "Выберите версию",
+			allowClear: true
+		});
+		
+		SelectedVersion = SelectVersion.val();
+		
+		SelectVersion.on('change', function(){ SelectedVersion = SelectVersion.val(); });
+		
+		PreLoaded = true;
+	}catch(e){
+		throw new Error("Произошла ошибка после пред-загрузки!", e);
+	}
+}
+
+/* Начата пред-загрузка пака? */
+var StartPreLoaded = false;
 /* Пак пред-загружен? */
 var PreLoaded = false;
 /* Пре-загрузка пака (Только один раз!) */
 async function PreLoad(Buf){
-	if(PreLoaded){ return; } PreLoaded = true;
+	if(StartPreLoaded || PreLoaded){ return; } StartPreLoaded = true;
 	try{
-		const zip = await JSZip.loadAsync(arrayBuffer);
+		const ZIP = await JSZip.loadAsync(Buf);
 
-		console.log("=== Файлы в архиве ===");
-		for (const name of Object.keys(zip.files)) {
-			console.log(name);
+		for (const Name of Object.keys(ZIP.files)) {
+			const File = ZIP.files[Name];
+			if(File.dir){ continue; }
+
+			PackFiles[Name] = File;
 		}
+		
+		PreLoadAfter();
 	} catch(e){
-		throw new __Error("Произошла ошибка при пред-загрузке пака!", e);
+		throw new Error("Произошла ошибка при пред-загрузке пака!", e);
 	}
 }
 
+/* Вызывается при запуске сайта */
 function Awake(){
-	const PreLoadPack = document.getElementById("PreLoadPack");
+	const PreLoadPack = $("#PreLoadPack");
 	if (IsLocal){
-		PreLoadPack.addEventListener("change", async (EV) => {
+		PreLoadPack.on("change", async (EV) => {
 			try{
 				const File = EV.target.files[0];
 				if(!File){ return; }
-				const Buf = await file.arrayBuffer();
-				PreLoad(Buf);
+				const Buf = await File.arrayBuffer();
+				await PreLoad(Buf);
 			}catch(e){
 				Logger.Fatal("Произошла ошибка при получении пака с компьютера!", e);
 			}
 		});
 		
+		PreLoadPack.css("display", "unset");
 	}else{
-		PreLoadPack.style.display = "none";
 		(async () => {
 			try{
 				const response = await fetch(PackFile);
 				if (!response.ok){ throw new __Error("Ошибка загрузки: " + response.status); }
 				const Buf = await response.arrayBuffer();
-				PreLoad(Buf);
+				await PreLoad(Buf);
 			}catch(e){
 				Logger.Fatal("Произошла ошибка при получении пака с raw.githubusercontent.com!", e);
 			}
@@ -157,5 +233,16 @@ function Awake(){
 	}
 }
 Awake();
+
+/* Вызывается когда сайт загружен */
+function SiteLoaded(){
+	try{
+	
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при загрузке сайта!", e);
+	}
+}
+
+$(document).ready(function(){ SiteLoaded(); });
 
 </script>
