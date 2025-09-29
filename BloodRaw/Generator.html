@@ -56,6 +56,7 @@ h1 {
 </style>
 
 <body id="body"><div class="container">
+	<input type="file" id="PreLoadPack" accept=".zip">
 
 	<h1>Генератор ресурс-пака</h1>
 
@@ -102,3 +103,59 @@ h1 {
 	</div>
 
 </div></body>
+
+<script src="../source/Logger.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+
+/* Запущен сайт локально? */ const IsLocal	= window.location.protocol === "file:";
+/* Путь до файла с паком  */ const PackFile = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
+
+/* Пак пред-загружен? */
+var PreLoaded = false;
+/* Пре-загрузка пака (Только один раз!) */
+async function PreLoad(Buf){
+	if(PreLoaded){ return; } PreLoaded = true;
+	try{
+		const zip = await JSZip.loadAsync(arrayBuffer);
+
+		console.log("=== Файлы в архиве ===");
+		for (const name of Object.keys(zip.files)) {
+			console.log(name);
+		}
+	} catch(e){
+		throw new __Error("Произошла ошибка при пред-загрузке пака!", e);
+	}
+}
+
+function Awake(){
+	const PreLoadPack = document.getElementById("PreLoadPack");
+	if (IsLocal){
+		PreLoadPack.addEventListener("change", async (EV) => {
+			try{
+				const File = EV.target.files[0];
+				if(!File){ return; }
+				const Buf = await file.arrayBuffer();
+				PreLoad(Buf);
+			}catch(e){
+				Logger.Fatal("Произошла ошибка при получении пака с компьютера!", e);
+			}
+		});
+		
+	}else{
+		PreLoadPack.style.display = "none";
+		(async () => {
+			try{
+				const response = await fetch(PackFile);
+				if (!response.ok){ throw new __Error("Ошибка загрузки: " + response.status); }
+				const Buf = await response.arrayBuffer();
+				PreLoad(Buf);
+			}catch(e){
+				Logger.Fatal("Произошла ошибка при получении пака с raw.githubusercontent.com!", e);
+			}
+		})();
+	}
+}
+Awake();
+
+</script>
