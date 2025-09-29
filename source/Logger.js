@@ -1,26 +1,3 @@
-const __Pad = {
-    Left: function(str, length, char = " ") {
-        str = String(str);
-        if(str.length >= length) return str;
-        return char.repeat(length - str.length) + str;
-    },
-
-    Right: function(str, length, char = " ") {
-        str = String(str);
-        if(str.length >= length) return str;
-        return str + char.repeat(length - str.length);
-    },
-
-    Center: function(str, length, char = " ") {
-        str = String(str);
-        if(str.length >= length) return str;
-        const total = length - str.length;
-        const leftPad = Math.floor(total / 2);
-        const rightPad = total - leftPad;
-        return char.repeat(leftPad) + str + char.repeat(rightPad);
-    }
-};
-
 const __Error = Error;
 
 const __ErrorRegex = /^(.*?)@(.+):(\d+):(\d+)$/;
@@ -61,7 +38,7 @@ function __Print(Message, Exception, Type){
 				const Parent = __E(E.Parent);
 				
 				function PadException(E_, M){
-					return __Pad.Left("[" + __Pad.Right(E_, 20, " ") + "]", Length - 1 - M.length, " ");
+					return ("[" + E_.padEnd(20, " ") + "]").padStart(Length - 1 - M.length, " ");
 				}
 				
 				if(E instanceof Error){

@@ -15,10 +15,9 @@
 <link rel="stylesheet" href="Source/css.css">
 
 <style>
-html{
-	background-image: url("Source/dirt.png");
-	background-size: 64px 64px;
-	image-rendering: pixelated;
+html, button{
+	font-size   : 1.25em;
+	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 }
 
 .Container{
@@ -30,25 +29,29 @@ html{
     gap: 15px;
 }
 
-h1{
-	font-size: 2em;
-	margin-bottom: 10px;
-	color: #FFFF55;
-	text-align: center;
-}
-
 .Console{
-	background: black;
-	color: #00FF00;
-	font-family: monospace;
-	font-size: 0.9em;
-	padding: 10px;
-	height: 200px;
+	background: radial-gradient(
+		circle at center,
+		rgba(0, 10, 0, 0.9 ) 0%  ,
+		rgba(0, 5 , 0, 0.85) 40% ,
+		rgba(0, 0 , 0, 0.75) 100%
+	);
+	color: #00ff55;
+	font-size: 0.8em;
+	line-height: 1.4em;
+
+	padding   : 12px;
+	height    : 275px;
 	overflow-y: auto;
-	outline: 3px solid rgba(0,0,0,0.5);
-	text-shadow: none;
+
+	outline: 3px solid rgba(0, 0, 0, 0.5);
+
+	text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
 }
 
+.Console p{
+	margin: 0;
+}
 </style>
 
 <link href="../Libs/select2.min.css" rel="stylesheet" />
@@ -58,19 +61,17 @@ h1{
 <body id="body"><div class="Container">
 	<input type="file" id="PreLoadPack" accept=".zip" style="display: none;">
 
-	<h1>Генератор ресурс-пака</h1>
+	<h1>Генератор BloodRaw</h1>
 
 	<div>
-		<p>Текущая версия: <b>v1.3.5</b></p>
-		<a href="#">Changelog</a>
+		<p>Информация:</p>
+		<li><p id="PackVersion">?</p></li>
 	</div>
 
 	<div>
 		<p>Версия:</p>
 		<select id="SelectVersion" style="width: 400px;"></select>
 	</div>
-	
-	<hr>
 
 	<div style="text-align:center;">
 		<button id="B_Generate" onclick="Generate();">Сгенерировать пак</button>
@@ -87,36 +88,361 @@ h1{
 <script src="../Libs/jszip.min.js"></script>
 <script>
 
-/* Запущен сайт локально? */ const IsLocal	= window.location.protocol === "file:";
-/* Путь до файла с паком  */ const PackFile = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
+/* Запущен сайт локально?  */ const IsLocal	     = window.location.protocol === "file:";
+/* Путь до файла с паком   */ const PackFile     = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
+/* Ссылка на сайт BloodRaw */ const BloodRawLink = "https://woowz11.github.io/woowzsite/BloodRaw/Main";
+ 
+/* Дефолтная текстура */ const DefaultTexture = "R/T/Default.png"
+/* Текстура ошибка    */ const ErrorTexture   = "R/T/Error.png"
+/* Пустая текстура    */ const EmptyTexture   = "R/T/Empty.png"
 
 /* ======================================================== */
 
 var Console = $("#Console");
 
-Logger.Console = function(Message){
-	Logger.Info(Message);
-	Console.append(`<p>${Message}</p>`);
+Logger.Console = function(Message, ThatError){
+	if(ThatError){ Logger.Error(Message); }else{ Logger.Info(Message); }
+	if(!InGeneration){ return; }
+	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(3, "-") + "]: " + Message;
+	Console.append(`<p${ThatError ? " style=\"color:red;\"" : ""}>${Message}</p>`);
+}
+
+Logger.ConsoleError = function(Message, Exception){
+	Logger.Error(Message, Exception);
+	Logger.Console(Exception.Message  , true);
+	Logger.Console("См. консоль (F12)", true);
+}
+
+/* Более умный JSON.parse */
+function JSONParse(Text){
+	Text = Text.replace(/\/\*[\s\S]*?\*\//g, "");
+	Text = Text.replace(/\/\/.*$/gm        , "");
+	
+	Text = Text.replace(/^\uFEFF/, '');
+    Text = Text.replace(/[\x00-\x1F\x7F]/g, c => c === '\n' || c === '\r' ? c : '');
+	
+	return JSON.parse(Text);
+}
+
+/* Останавливает поток на определённое кол-во миллисекунд */
+function Sleep(MS){
+	return new Promise(R => setTimeout(R, MS));
+}
+
+/* Обновляет строку */
+function UpdateString(String){
+	const Replacements = {
+		Version         : Version,
+        MinecraftVersion: SelectedVersion,
+        Author          : Author,
+        License         : License,
+        Link            : BloodRawLink
+	};
+
+	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => {
+		return Replacements[K] !== undefined ? Replacements[K] : M;
+	});
 }
 
 /* ======================================================== */
 
-/* Информация об паке */
+/* Информация об паке (ZIP файл результат) */
 var Pack;
+
+/* Пак генерируется? */
+var InGeneration = false;
+
+/* Время начала генерации */
+var GenerationStartTime;
 
 /* Генерация пака */
 async function Generate(){
 	try{
 		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
+		if(InGeneration){ throw new Error("Пак уже генерируется!"); }
 		Console.empty();
 		
+		InGeneration = true;
+		GenerationStartTime = Date.now();
 		Logger.Console("Начало генерации пака!");
 		
-		Logger.Console(SelectedVersion);
+		Pack = new JSZip();
+		
+		await ApplyGenerator(PackVersions[SelectedVersion]);
+		
+		Logger.Console("Скачивание...");
+		
+		const Blob = await Pack.generateAsync({ type: "blob" });
+		const A = document.createElement("a");
+		A.href = URL.createObjectURL(Blob);
+		A.download = "Bloodraw " + SelectedVersion + ".zip";
+		document.body.appendChild(A);
+		A.click();
+		document.body.removeChild(A);
+		URL.revokeObjectURL(A.href);
 		
 		Logger.Console("Конец генерации пака!");
+		InGeneration = false;
+		Pack = null;
 	}catch(e){
-		Logger.Fatal("Произошла ошибка при генерации пака!", e);
+		if(InGeneration){ 
+			Logger.ConsoleError("Произошла ошибка при генерации пака!", e);
+		}else{
+			Logger.Fatal("Произошла ошибка при генерации пака!", e);
+		}
+	}
+}
+
+/* Применить генератор */
+async function ApplyGenerator(Generator){
+	try{
+		var Files = Generator["Files"];
+		
+		Logger.Console("Применение генератора. ID: " + Generator["ID"]);
+		
+		for(const Path of Object.keys(Files)){
+			var Content = await GenerateFile(Path, Files[Path]);
+			
+			if(Content instanceof Texture){
+				Content = Content.ToBlob();
+			}
+			
+			Pack.file(Path, Content);
+		}
+	}catch(e){
+		throw new Error("Произошла ошибка с генератором!", e);
+	}
+}
+
+/* Применение модификаторов */
+async function ApplyActions(Content, Actions){
+	try{
+		if(!Actions){ return Content; }
+		
+		return Content;
+	}catch(e){
+		throw new Error("Произошла ошибка при применении модификаторов!", e);
+	}
+}
+
+/* Содержимое сгенерированного файла */
+async function GenerateFile(Path, Info){
+	var MemoryFile = Path && !Info;
+	if(MemoryFile){ Info = Path; Path = null; }
+
+	try{
+		if(MemoryFile){
+			Logger.Console("Генерация файла в памяти...");
+		}else{
+			Logger.Console("Генерация [" + Path + "]...");
+		}
+		
+		const GenerateType = Info[0];
+		var Actions = null;
+		
+		var Result = "Не найден тип генерации [" + GenerateType + "]!";
+		
+		if(GenerateType === "Texture"){
+			var FilePath = Info[1];
+			Actions = Info[2];
+			Result = await GetTexture(FilePath);
+		}else if(GenerateType === "Create"){
+			var Content = Info[1];
+			Actions = Info[2];
+			Result = UpdateString(Content);
+		}else if(GenerateType === "Atlas"){
+			var AtlasInfo = Info[1];
+			Actions = Info[2];
+			Result = await GenerateAtlas(AtlasInfo);
+		}
+		
+		Result = await ApplyActions(Result, Actions);
+		return Result;
+	}catch(e){
+		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
+		return "Произошла ошибка при генерации этого файла...";
+	}
+}
+
+/* ======================================================== */
+
+class Texture{
+	constructor(W, H, Content = null){
+		try{
+			if(W <= 0 || H <= 0){ throw new Error("Размеры текстуры <= 0!"); }
+			
+			this.W = W;
+			this.H = H;
+			
+			this.C = document.createElement("Canvas");
+			this.C.width = W; this.C.height = H;
+			this.CTX = this.C.getContext("2d");
+			
+			this.Content = new Uint8ClampedArray(W * H * 4);
+			
+			this.Fill(Content);
+		}catch(e){
+			throw new Error("Произошла ошибка при создании текстуры! new Texture(" + W + ", " + H + ", ...);", e);
+		}
+	}
+	
+	/* Полностью закрасить текстуру */
+	Fill(Content){
+		try{
+			var Data = Content;
+			if(Content instanceof Texture){ Data = Content.Content; }
+			if(Data instanceof Uint8ClampedArray){
+				if(Content.length !== this.Content.length){ throw new Error("Размер Content не совпадает с требуемым!"); }
+				this.Content.set(Data);
+				this.__UpdateCanvas();
+			}else{
+				this.CTX.fillStyle = Data || "transparent";
+				this.CTX.fillRect(0, 0, this.W, this.H);
+				this.__UpdateContent();
+			}
+		}catch(e){
+			throw new Error("Произошла ошибка при заливке текстуры [" + this + "]!", e);
+		}
+	}
+	
+	/* Клонирует текстуру */
+	Clone(){
+		return new Texture(this.W, this.H, this.Content);
+	}
+	
+	/* ======================================================== */
+	
+	async ToBlob(){
+		return await new Promise(R => this.C.toBlob(R, "image/png"));
+	}
+	
+	__UpdateCanvas(){
+		this.CTX.putImageData(new ImageData(this.Content, this.W, this.H), 0, 0);
+	}
+	
+	__UpdateContent(){
+		this.Content.set(this.CTX.getImageData(0, 0, this.W, this.H));
+	}
+	
+	toString(){
+		return "Texture[" + this.W + "x" + this.H + "]";
+	}
+}
+
+/* ======================================================== */
+
+/* Генерация атласа */
+async function GenerateAtlas(Info){
+	try{
+		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : await GetTexture(EmptyTexture);
+		var Size  = Info["Size" ] || [1,1];
+		var W     = Size[0];
+		var H     = Size[1];
+		
+		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
+		
+		var Atlas = new Texture(W * 16, H * 16);
+		
+		for(var X = 0; X < W; X++){
+			for(var Y = 0; Y < H; Y++){
+				var X_ = Info[X];
+				if(X_){
+					var Y_ = X_[Y];
+					if(Y_){
+						var Tile = await GenerateFile(Y_);
+						
+					}
+				}
+			}
+		}
+		
+		return Atlas;
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации атласа!", e);
+	}
+}
+
+/* ======================================================== */
+
+/* Получить файл */
+async function GetFile(Path, ThatTexture = false){
+	Path = Path.replace(/\\/g, "/").replace(/\/+/g, "/");
+	
+	if(__GetFileCache[Path]){ return __GetFileCache[Path]; }
+	
+	var File = PackFiles[Path];
+	if(!File){ throw new Error("Файл [" + Path + "] не найден!"); }
+	
+	if(ThatTexture){
+		const PNGContent = await FileContentByte(File);
+		
+		const Blob_  = new Blob([PNGContent], { type: "image/png" });
+		
+		const { W, H, Content } = await new Promise((R, E) => {
+			const Image_ = new Image();
+			Image_.onload = () => {
+				const C = document.createElement("canvas");
+				C.width = Image_.width;
+				C.height = Image_.height;
+				const CTX = C.getContext("2d");
+				CTX.drawImage(Image_, 0, 0);
+				const ImageData = CTX.getImageData(0, 0, Image_.width, Image_.height);
+				URL.revokeObjectURL(Image_.src);
+				R({ W: Image_.width, H: Image_.height, Content: ImageData.data });
+			};
+			Image_.onerror = E;
+			Image_.src = URL.createObjectURL(Blob_);
+		});
+		
+		File = new Texture(W, H, new Uint8ClampedArray(Content));
+	}
+	
+	__GetFileCache[Path] = File;
+	return File;
+}
+const __GetFileCache = {};
+
+/* Получить текстуру */
+async function GetTexture(Path){ return await GetFile(Path, true); }
+
+/* Получить содержимое файла в виде JSON */
+async function FileContentJSON(File){
+	try{
+		var Text = await FileContent(File);
+		return JSONParse(Text);
+	}catch(e){
+		throw new Error("Произошла ошибка при чтении файла [" + File.name + "], в формате JSON!", e);
+	}
+}
+
+const __FilesContentString = {};
+const __FilesContentBytes  = {};
+
+/* Получить строковое содержимое файла */
+async function FileContent(File){
+	if(__FilesContentString[File.name]){ return __FilesContentString[File.name]; }
+	
+	try{
+		const Text = await File.async("text");
+		__FilesContentString[File.name] = Text;
+		return Text;
+	}catch(e){
+		throw new Error("Произошла ошибка при чтении файла [" + File.name + "]!", e);
+	}
+}
+
+/* Получить байтовое содержимое файла */
+async function FileContentByte(File){
+	if(File instanceof Texture){ return File.Content; }
+	if(__FilesContentBytes[File.name]){ return __FilesContentBytes[File.name]; }
+	
+	try{
+		const Buf = await File.async("uint8array");
+		const Bytes = new Uint8Array(Buf);
+		__FilesContentBytes[File.name] = Bytes;
+		return Bytes;
+	}catch(e){
+		throw new Error("Произошла ошибка при чтении файла [" + File.name + "], в формате Bytes!", e);
 	}
 }
 
@@ -127,6 +453,18 @@ const PackFiles = {};
 /* Папки пака (Файлы внутри папок) */
 const PackFolders = {};
 
+/* Информация об паке */
+var PackInfo;
+
+/* Автор пака */
+var Author;
+
+/* Лицензия пака */
+var License;
+
+/* Версия пака */
+var Version;
+
 /* Доступные версии пака */
 const PackVersions = {}
 
@@ -134,7 +472,7 @@ const PackVersions = {}
 var SelectedVersion = null;
 
 /* Получает разную информацию из пака */
-function LoadPackInformation(){
+async function LoadPackInformation(){
 	try{
 		for(const Path of Object.keys(PackFiles)){
 			const LastSlash = Path.lastIndexOf("/");
@@ -144,11 +482,32 @@ function LoadPackInformation(){
 			PackFolders[Folder].push(PackFiles[Path]);
 		}
 		
+		PackInfo = await FileContentJSON(await GetFile("Info.json"));
+		Author   = PackInfo["Author" ];
+		License  = PackInfo["License"];
+		
+		try{
+			const Response = await fetch("https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits/main");
+			if(!Response.ok){ throw new Error("Ошибка загрузки: " + Response.status); }
+			
+			const Commit = await Response.json();
+			
+			Version = Commit.commit.message.split("\n")[0];
+		}catch(e){
+			Logger.Error("Произошла ошибка при получении версии репозитория!", e);
+			Version = "Error";
+		}
+		
+		$("#PackVersion").text(Version);
+		
 		for(const File of PackFolders["Generators"]){
 			var Version = File.name.split("/").pop();
 			const LastDot = Version.lastIndexOf(".");
 			if(LastDot !== -1){ Version = Version.substring(0, LastDot); }
-			PackVersions[Version] = true;
+			
+			var VersionInfo = await FileContentJSON(File);
+			
+			PackVersions[Version] = VersionInfo;
 		}
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке информации об паке!", e);
@@ -156,13 +515,12 @@ function LoadPackInformation(){
 }
 
 /* Вызывается после пре-загрузки */
-function PreLoadAfter(){
+async function PreLoadAfter(){
 	if(!StartPreLoaded){ return; }
 	try{
-		LoadPackInformation();
+		await LoadPackInformation();
 	
 		const SelectVersion = $("#SelectVersion");
-		Logger.Info(PackVersions);
 		
 		SelectVersion.html(Object.keys(PackVersions).map(V => `<option value="${V}">${V}</option>`).join(""));
 		SelectVersion.select2({
@@ -194,10 +552,11 @@ async function PreLoad(Buf){
 			const File = ZIP.files[Name];
 			if(File.dir){ continue; }
 
-			PackFiles[Name] = File;
+			File.name = File.name.replace(/\\/g, "/").replace(/\/+/g, "/");
+			PackFiles[Name.replace(/\\/g, "/").replace(/\/+/g, "/")] = File;
 		}
 		
-		PreLoadAfter();
+		await PreLoadAfter();
 	} catch(e){
 		throw new Error("Произошла ошибка при пред-загрузке пака!", e);
 	}
