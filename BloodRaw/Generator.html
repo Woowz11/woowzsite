@@ -100,17 +100,26 @@ html, button{
 
 var Console = $("#Console");
 
-Logger.Console = function(Message, ThatError){
-	if(ThatError){ Logger.Error(Message); }else{ Logger.Info(Message); }
+Logger.Console = function(Message, Type = 0){
+	switch(Type){
+		case 0: Logger.Info (Message, null, "color: lime;"); break;
+		case 1: Logger.Warn (Message                      ); break;
+		case 2: Logger.Error(Message                      ); break;
+	}
 	if(!InGeneration){ return; }
-	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(3, "-") + "]: " + Message;
-	Console.append(`<p${ThatError ? " style=\"color:red;\"" : ""}>${Message}</p>`);
+	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
+	Console.append(`<p${Type !== 0 ? " style=\"color:" + (Type === 1 ? "yellow" : "red") + ";\"" : ""}>${Message}</p>`);
+}
+
+Logger.ConsoleWarn = function(Message, Exception){
+	Logger.Warn(Message, Exception);
+	Logger.Console(Message, 1);
 }
 
 Logger.ConsoleError = function(Message, Exception){
 	Logger.Error(Message, Exception);
-	Logger.Console(Exception.Message  , true);
-	Logger.Console("См. консоль (F12)", true);
+	Logger.Console(Exception.Message  , 2);
+	Logger.Console("См. консоль (F12)", 2);
 }
 
 /* Более умный JSON.parse */
@@ -132,17 +141,17 @@ function Sleep(MS){
 /* Обновляет строку */
 function UpdateString(String){
 	const Replacements = {
-		Version         : Version,
+		Version         : PackVersion,
         MinecraftVersion: SelectedVersion,
         Author          : Author,
         License         : License,
         Link            : BloodRawLink
 	};
 
-	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => {
-		return Replacements[K] !== undefined ? Replacements[K] : M;
-	});
+	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => Replacements[K] ?? "undefined");
 }
+
+function Lerp(A, B, T){ return A + (B - A) * T; }
 
 /* ======================================================== */
 
@@ -214,10 +223,55 @@ async function ApplyGenerator(Generator){
 	}
 }
 
+/* Применяет модификатор */
+async function ApplyAction(Content, Type, Info){
+	try{
+		Logger.Console("Применение модификатора [" + Type + "]...");
+	
+		if(Type === "Background"){
+			Content.Background(Info[0]);
+		}else if(Type === "Put"){
+			var T     = await GenerateFile(Info[0]);
+			var X     = Info[1] || 0;
+			var Y     = Info[2] || 0;
+			var Blend = Info[3] || "alpha";
+			
+			Content.Put(T, X, Y, Blend);
+		}else if(Type === "Frame"){
+			var Index = Info[0] || 0;
+			
+			Content.Frame(Index);
+		}else if(Type === "Resize"){
+			var W = Info[0];
+			var H = Info[1];
+			var Smooth = Info[2] || true;
+			
+			Content.Resize(W, H, Smooth);
+		}else if(Type === "Crop"){
+			var X = Info[0];
+			var Y = Info[1];
+			var W = Info[2];
+			var H = Info[3];
+			
+			Content.Crop(X, Y, W, H);
+		}else{
+			Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
+		}
+		
+		return Content;
+	}catch(e){
+		throw new Error("Произошла ошибка при применении модификатора [" + Type + "]!", e);
+	}
+}
+
 /* Применение модификаторов */
 async function ApplyActions(Content, Actions){
 	try{
-		if(!Actions){ return Content; }
+		if(!Actions || !Actions.length){ return Content; }
+		
+		Content = Content.Clone();
+		
+		for(var Action of Actions){ Content = await ApplyAction(Content, Action[0], Action.slice(1)); }
 		
 		return Content;
 	}catch(e){
@@ -244,16 +298,32 @@ async function GenerateFile(Path, Info){
 		
 		if(GenerateType === "Texture"){
 			var FilePath = Info[1];
-			Actions = Info[2];
+			Actions = Info[2] || null;
 			Result = await GetTexture(FilePath);
 		}else if(GenerateType === "Create"){
-			var Content = Info[1];
-			Actions = Info[2];
-			Result = UpdateString(Content);
+			if(typeof Info[1] === "number" && typeof Info[2] === "number"){
+				var W = Info[1];
+				var H = Info[2];
+				var Color = Info[3] || "transparent";
+				Actions = Info[4] || null;
+				
+				Result = new Texture(W, H, Color);
+			}else{
+				var Content = Info[1];
+				Actions = Info[2] || null;
+				Result = UpdateString(Content);
+			}
 		}else if(GenerateType === "Atlas"){
 			var AtlasInfo = Info[1];
-			Actions = Info[2];
+			Actions = Info[2] || null;
 			Result = await GenerateAtlas(AtlasInfo);
+		}else if(GenerateType === "Painting"){
+			var W = Info[1];
+			var H = Info[2];
+			Actions = Info[3] || null;
+			Result = await GeneratePainting(W, H);
+		}else{
+			Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
 		}
 		
 		Result = await ApplyActions(Result, Actions);
@@ -261,6 +331,65 @@ async function GenerateFile(Path, Info){
 	}catch(e){
 		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
 		return "Произошла ошибка при генерации этого файла...";
+	}
+}
+
+/* ======================================================== */
+
+/* Генерация атласа */
+async function GenerateAtlas(Info){
+	try{
+		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : false;
+		var Size  = Info["Size" ] || [1 , 1 ];
+		var Scale = Info["Scale"] || [16, 16];
+		var W     = Size[0];
+		var H     = Size[1];
+		
+		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
+		
+		var Atlas = new Texture(W * Scale[0], H * Scale[1]);
+		
+		for(var Y = 1; Y < (H + 1); Y++){
+			for(var X = 1; X < (W + 1); X++){
+				try{
+					var Tile = null;
+					var Y_ = Info[Y];
+					if(Y_){
+						var X_ = Y_[X];
+						if(X_ != undefined){
+							if(X_ === false){
+								Tile = false;
+							}else{
+								Tile = await GenerateFile(X_);
+							}
+						}
+					}
+					
+					if(Tile != false){
+						Atlas.Set(Tile ? Tile : Empty, (X - 1) * Scale[0], (Y - 1) * Scale[1]);
+					}
+				}catch(e){
+					Logger.Error("Произошла ошибка генерации тайтла [" + X + ":" + Y + "] у атласа!");
+				}
+			}
+		}
+		
+		return Atlas;
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации атласа!", e);
+	}
+}
+
+/* Генерация картины */
+async function GeneratePainting(W, H){
+	try{
+		if(W === true && !H){ return await GetTexture("Changelog.texture"); }
+	
+		var FrameTexture = "R/T/ART/Frame_" + W + H + ".png";
+	
+		return await GetTexture(FrameTexture);
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации картины " + W + "x" + H + "!", e);
 	}
 }
 
@@ -291,17 +420,215 @@ class Texture{
 		try{
 			var Data = Content;
 			if(Content instanceof Texture){ Data = Content.Content; }
+			
 			if(Data instanceof Uint8ClampedArray){
-				if(Content.length !== this.Content.length){ throw new Error("Размер Content не совпадает с требуемым!"); }
+				if(Data.length !== this.Content.length){ throw new Error("Размер Content не совпадает с требуемым!"); }
 				this.Content.set(Data);
 				this.__UpdateCanvas();
 			}else{
+				this.CTX.clearRect(0, 0, this.W, this.H);
 				this.CTX.fillStyle = Data || "transparent";
 				this.CTX.fillRect(0, 0, this.W, this.H);
 				this.__UpdateContent();
 			}
+			
+			return this;
 		}catch(e){
 			throw new Error("Произошла ошибка при заливке текстуры [" + this + "]!", e);
+		}
+	}
+	
+	/* Добавляет текстуру на текстуру */
+	Put(Content, X = 0, Y = 0, Blend = "alpha"){
+		if(Content === false){ return; }
+	
+		const PrevBlend = this.CTX.globalCompositeOperation;
+		if(Blend !== "alpha"){ this.CTX.globalCompositeOperation = Blend; }
+	
+		try{
+			if(X < 0 || Y < 0){ throw new Error("Позиция < 0!"); }
+			if(X > this.W || Y > this.H){ throw new Error("Позиция > размера текстуры!"); }
+		
+			if(Blend === "alpha"){
+				var Data;
+				if(Content instanceof Texture){
+					Data = Content.Content;
+				}else if(Content instanceof Uint8ClampedArray){
+					Data = Content;
+				}else{
+					throw new Error("Нужен Texture!");
+				}
+				
+				var W = Content.W || this.W;
+				var H = Content.H || this.H;
+				
+				for(var Y_ = 0; Y_ < H; Y_++){
+					for(var X_ = 0; X_ < W; X_++){
+						const CI = ((Y_ + Y) * this.W + (X_ + X)) * 4;
+						const DI = (Y_ * W + X_) * 4;
+						
+						const BaseR = this.Content[CI + 0]      ;
+						const BaseG = this.Content[CI + 1]      ;
+						const BaseB = this.Content[CI + 2]      ;
+						const BaseA = this.Content[CI + 3] / 255;
+
+						const OverR = Data[DI + 0]      ;
+						const OverG = Data[DI + 1]      ;
+						const OverB = Data[DI + 2]      ;
+						const OverA = Data[DI + 3] / 255;
+
+						const OutA = OverA + BaseA * (1 - OverA);
+						if (OutA === 0){ continue; }
+
+						this.Content[CI + 0] = Math.round((OverR * OverA + BaseR * BaseA * (1 - OverA)) / OutA);
+						this.Content[CI + 1] = Math.round((OverG * OverA + BaseG * BaseA * (1 - OverA)) / OutA);
+						this.Content[CI + 2] = Math.round((OverB * OverA + BaseB * BaseA * (1 - OverA)) / OutA);
+						this.Content[CI + 3] = Math.round(OutA * 255);
+					}
+				}
+				
+				this.__UpdateCanvas();
+			}else{
+				if(Content instanceof Texture){
+					this.CTX.drawImage(Content.C, X, Y);
+				}else if(Content instanceof Uint8ClampedArray){
+					this.CTX.putImageData(new ImageData(Content, this.W, this.H), X, Y);
+				}else{
+					throw new Error("Нужен Texture!");
+				}
+				
+				this.__UpdateContent();
+			}
+			
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при добавлении текстуры на текстуру [" + this + "]! Put(..., " + X + ", " + Y + ");", e);
+		}finally{
+			if(Blend !== "alpha"){ this.CTX.globalCompositeOperation = PrevBlend; }
+		}
+	}
+	
+	/* Заменяет текстуру */
+	Set(Content, X = 0, Y = 0){ return this.Put(Content, X, Y, "source-over"); }
+	
+	/* Устанавливает цвет заднего фона */
+	Background(Color = "white"){
+		try{
+			var Current = new Uint8ClampedArray(this.Content);
+			this.Fill(Color        );
+			this.Put (Current, 0, 0);
+			
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при установке цвета заднего фона текстуре [" + this + "]! Background(" + Color + ");", e);
+		}
+	}
+	
+	/* Обрезать текстуру */
+	Crop(X, Y, W, H){
+		try{
+			if(X < 0 || Y < 0 || X + W > this.W || Y + H > this.H){ throw new Error("Параметры выходят за пределы текстуры!"); }
+			
+			const NewContent = new Uint8ClampedArray(W * H * 4);
+
+			for(var Y_ = 0; Y_ < H; Y_++){
+				for(var X_ = 0; X_ < W; X_++){
+					const CI = ((Y_ + Y) * this.W + (X_ + X)) * 4;
+					const DI = (Y_ * W + X_) * 4;
+
+					NewContent[DI + 0] = this.Content[CI + 0];
+					NewContent[DI + 1] = this.Content[CI + 1];
+					NewContent[DI + 2] = this.Content[CI + 2];
+					NewContent[DI + 3] = this.Content[CI + 3];
+				}
+			}
+
+			this.Content = NewContent;
+			this.W = W; this.H = H;
+			
+			this.C.width = W; this.C.height = H;
+			this.CTX.putImageData(new ImageData(this.Content, W, H), 0, 0);
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при обрезке текстуры [" + this + "]! Crop(" + X + ", " + Y + ", " + W + ", " + H + ");", e);
+		}
+	}
+	
+	/* Получает кадр из анимированной текстуры */
+	Frame(Index = 0){
+		try{
+			const TotalFrames = Math.floor(this.H / this.W);
+			
+			if(Index < 0 || Index >= TotalFrames){ throw new Error("Индекс кадра выходит за пределы анимации!"); }
+			
+			return this.Crop(Index * this.W, 0, this.W, this.W);
+		}catch(e){
+			throw new Error("Произошла ошибка при получении кадра из анимации у текстуры [" + this + "]! Frame(" + Index + ");", e);
+		}
+	}
+	
+	/* Изменить размер изображения */
+	Resize(W, H, Smooth = true){
+		const PrevISE = this.CTX.imageSmoothingEnabled;
+		const PrevISQ = this.CTX.imageSmoothingQuality;
+		
+		this.CTX.imageSmoothingEnabled = Smooth;
+		this.CTX.imageSmoothingQuality = Smooth ? "high" : "low";
+	
+		try{
+			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
+			
+			const OW = this.W;
+			const OH = this.H;
+			const NewContent = new Uint8ClampedArray(W * H * 4);
+
+			for(var Y = 0; Y < H; Y++){
+				for(var X = 0; X < W; X++){
+					const NI = (Y * W + X) * 4;
+
+					if(Smooth){
+						const GX = (X + 0.5) * OW / W - 0.5;
+						const GY = (Y + 0.5) * OH / H - 0.5;
+						const GXI = Math.floor(GX);
+						const GYI = Math.floor(GY);
+						const DX = GX - GXI;
+						const DY = GY - GYI;
+
+						for(var P = 0; P < 4; P++){
+							const P00 = this.Content[((Math.min(GYI    , OH - 1) * OW + Math.min(GXI    , OW - 1)) * 4) + P];
+							const P10 = this.Content[((Math.min(GYI    , OH - 1) * OW + Math.min(GXI + 1, OW - 1)) * 4) + P];
+							const P01 = this.Content[((Math.min(GYI + 1, OH - 1) * OW + Math.min(GXI    , OW - 1)) * 4) + P];
+							const P11 = this.Content[((Math.min(GYI + 1, OH - 1) * OW + Math.min(GXI + 1, OW - 1)) * 4) + P];
+
+							const P0 = P00 * (1 - DX) + P10 * DX;
+							const P1 = P01 * (1 - DX) + P11 * DX;
+							NewContent[NI + P] = Math.round(P0 * (1 - DY) + P1 * DY);
+						}
+					} else {
+						const OX = Math.floor(X * OW / W);
+						const OY = Math.floor(Y * OH / H);
+						const OI = (OY * OW + OX) * 4;
+						NewContent[NI + 0] = this.Content[OI + 0];
+						NewContent[NI + 1] = this.Content[OI + 1];
+						NewContent[NI + 2] = this.Content[OI + 2];
+						NewContent[NI + 3] = this.Content[OI + 3];
+					}
+				}
+			}
+
+			this.W = W; this.H = H;
+			this.Content = NewContent;
+
+			this.C.width = W; this.C.height = H;
+			this.CTX.putImageData(new ImageData(this.Content, W, H), 0, 0);
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "]! Resize(" + W + ", " + H + ", " + Smooth + ");", e);
+		}finally{
+			this.CTX.imageSmoothingEnabled = PrevISE;
+			this.CTX.imageSmoothingQuality = PrevISQ;
 		}
 	}
 	
@@ -321,44 +648,11 @@ class Texture{
 	}
 	
 	__UpdateContent(){
-		this.Content.set(this.CTX.getImageData(0, 0, this.W, this.H));
+		this.Content.set(this.CTX.getImageData(0, 0, this.W, this.H).data);
 	}
 	
 	toString(){
 		return "Texture[" + this.W + "x" + this.H + "]";
-	}
-}
-
-/* ======================================================== */
-
-/* Генерация атласа */
-async function GenerateAtlas(Info){
-	try{
-		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : await GetTexture(EmptyTexture);
-		var Size  = Info["Size" ] || [1,1];
-		var W     = Size[0];
-		var H     = Size[1];
-		
-		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
-		
-		var Atlas = new Texture(W * 16, H * 16);
-		
-		for(var X = 0; X < W; X++){
-			for(var Y = 0; Y < H; Y++){
-				var X_ = Info[X];
-				if(X_){
-					var Y_ = X_[Y];
-					if(Y_){
-						var Tile = await GenerateFile(Y_);
-						
-					}
-				}
-			}
-		}
-		
-		return Atlas;
-	}catch(e){
-		throw new Error("Произошла ошибка при генерации атласа!", e);
 	}
 }
 
@@ -374,27 +668,35 @@ async function GetFile(Path, ThatTexture = false){
 	if(!File){ throw new Error("Файл [" + Path + "] не найден!"); }
 	
 	if(ThatTexture){
-		const PNGContent = await FileContentByte(File);
+		const Extension = Path.split(".").pop().toLowerCase();
 		
-		const Blob_  = new Blob([PNGContent], { type: "image/png" });
+		if(Extension === "texture"){
+			const TextureInfo = await FileContentJSON(File);
+			
+			File = await GenerateFile(Path, TextureInfo);
+		}else{
+			const PNGContent = await FileContentByte(File);
 		
-		const { W, H, Content } = await new Promise((R, E) => {
-			const Image_ = new Image();
-			Image_.onload = () => {
-				const C = document.createElement("canvas");
-				C.width = Image_.width;
-				C.height = Image_.height;
-				const CTX = C.getContext("2d");
-				CTX.drawImage(Image_, 0, 0);
-				const ImageData = CTX.getImageData(0, 0, Image_.width, Image_.height);
-				URL.revokeObjectURL(Image_.src);
-				R({ W: Image_.width, H: Image_.height, Content: ImageData.data });
-			};
-			Image_.onerror = E;
-			Image_.src = URL.createObjectURL(Blob_);
-		});
-		
-		File = new Texture(W, H, new Uint8ClampedArray(Content));
+			const Blob_  = new Blob([PNGContent], { type: "image/png" });
+			
+			const { W, H, Content } = await new Promise((R, E) => {
+				const Image_ = new Image();
+				Image_.onload = () => {
+					const C = document.createElement("canvas");
+					C.width = Image_.width;
+					C.height = Image_.height;
+					const CTX = C.getContext("2d");
+					CTX.drawImage(Image_, 0, 0);
+					const ImageData = CTX.getImageData(0, 0, Image_.width, Image_.height);
+					URL.revokeObjectURL(Image_.src);
+					R({ W: Image_.width, H: Image_.height, Content: ImageData.data });
+				};
+				Image_.onerror = E;
+				Image_.src = URL.createObjectURL(Blob_);
+			});
+			
+			File = new Texture(W, H, new Uint8ClampedArray(Content));
+		}
 	}
 	
 	__GetFileCache[Path] = File;
@@ -463,7 +765,7 @@ var Author;
 var License;
 
 /* Версия пака */
-var Version;
+var PackVersion;
 
 /* Доступные версии пака */
 const PackVersions = {}
@@ -492,13 +794,13 @@ async function LoadPackInformation(){
 			
 			const Commit = await Response.json();
 			
-			Version = Commit.commit.message.split("\n")[0];
+			PackVersion = Commit.commit.message.split("\n")[0];
 		}catch(e){
 			Logger.Error("Произошла ошибка при получении версии репозитория!", e);
-			Version = "Error";
+			PackVersion = "Error";
 		}
-		
-		$("#PackVersion").text(Version);
+
+		$("#PackVersion").text(PackVersion);
 		
 		for(const File of PackFolders["Generators"]){
 			var Version = File.name.split("/").pop();
@@ -522,7 +824,7 @@ async function PreLoadAfter(){
 	
 		const SelectVersion = $("#SelectVersion");
 		
-		SelectVersion.html(Object.keys(PackVersions).map(V => `<option value="${V}">${V}</option>`).join(""));
+		SelectVersion.html(Object.keys(PackVersions).map(V => `<option value="${V}">${V} : ${V.ID}</option>`).join(""));
 		SelectVersion.select2({
 			placeholder: "Выберите версию",
 			allowClear: true

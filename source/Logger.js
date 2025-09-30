@@ -25,9 +25,9 @@ Error = class{
 	}
 }
 
-function __Print(Message, Exception, Type){
+function __Print(Message, Exception, Type, Style){
 	try{
-		var Result = Message;
+		var Result = "%c" + Message;
 		
 		const Length = 100;
 		
@@ -61,9 +61,9 @@ function __Print(Message, Exception, Type){
 		}
 		
 		switch(Type){
-			case 0: console.log  (Result); break;
-			case 1: console.warn (Result); break;
-			case 2: console.error(Result); break;
+			case 0: console.log  (Result, Style); break;
+			case 1: console.warn (Result, Style); break;
+			case 2: console.error(Result, Style); break;
 		}
 	}catch(e){
 		console.error("Произошла ошибка при отправке сообщения!\nТип: " + Type + "\nСообщение: " + Message + "\nException: " + Exception, e);
@@ -71,10 +71,10 @@ function __Print(Message, Exception, Type){
 }
 
 const Logger = {};
-Logger.Info  = function(Message, Exception){ __Print(Message, Exception, 0); }
-Logger.Warn  = function(Message, Exception){ __Print(Message, Exception, 1); }
-Logger.Error = function(Message, Exception){ __Print(Message, Exception, 2); }
-Logger.Fatal = function(Message, Exception){
-	Logger.Error(Message, Exception);
+Logger.Info  = function(Message, Exception, Style){ __Print(Message, Exception, 0, Style); }
+Logger.Warn  = function(Message, Exception, Style){ __Print(Message, Exception, 1, Style); }
+Logger.Error = function(Message, Exception, Style){ __Print(Message, Exception, 2, Style); }
+Logger.Fatal = function(Message, Exception, Style){
+	Logger.Error(Message, Exception, Style);
 	alert(Message + "\nСм. консоль (F12)");
 }
