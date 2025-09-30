@@ -171,7 +171,8 @@ function UpdateString(String){
 /* Обновляет цвет */
 function UpdateColor(Color){
 	const Replacements = {
-		Grass: "#8DC456"
+		Grass : "#8DC456",
+		Leaves: "red" // Узнать цвет листвы
 	}
 	
 	return Color in Replacements ? Replacements[Color] : Color;
@@ -310,15 +311,15 @@ async function ApplyAction(Content, Type, Info){
 			Content.Frame(Index);
 		}else if(Type === "Resize"){
 			var W = Info[0];
-			var H = Info[1];
+			var H = Info[1] || W;
 			var Smooth = Info[2] || true;
 			
 			Content.Resize(W, H, Smooth);
 		}else if(Type === "Crop"){
 			var X = Info[0];
-			var Y = Info[1];
+			var Y = Info[1] || X;
 			var W = Info[2];
-			var H = Info[3];
+			var H = Info[3] || W;
 			
 			Content.Crop(X, Y, W, H);
 		}else if(Type === "Gradient"){
@@ -336,6 +337,28 @@ async function ApplyAction(Content, Type, Info){
 			var A = Info[3] || null;
 		
 			Content.Fixed(R, G, B, A);
+		}else if(Type === "NewSize"){
+			var W = Info[0];
+			var H = Info[1];
+			
+			Content.NewSize(W, H);
+		}else if(Type === "Flip"){
+			var X = Info[0] || false;
+			var Y = Info[1] || false;
+			
+			Content.Flip(X, Y);
+		}else if(Type === "Trim"){
+			var R = Info[0] || null;
+			var G = Info[1] || null;
+			var B = Info[2] || null;
+			var A = Info[3] || null;
+			
+			Content.Trim(R, G, B, A);
+		}else if(Type === "Move"){
+			var X = Info[0] || 0;
+			var Y = Info[1] || 0;
+			
+			Content.Move(X, Y);
 		}else{
 			Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
 		}
@@ -428,6 +451,8 @@ async function GenerateAtlas(Info){
 		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : false;
 		var Size  = Info["Size" ] || [1 , 1 ];
 		var Scale = Info["Scale"] || [16, 16];
+		var TrueScale = Scale === true;
+		if(TrueScale){ Scale = [1, 1]; }
 		var W     = Size[0];
 		var H     = Size[1];
 		
@@ -435,8 +460,14 @@ async function GenerateAtlas(Info){
 		
 		var Atlas = new Texture(W * Scale[0], H * Scale[1]);
 		
-		for(var Y = 1; Y < (H + 1); Y++){
-			for(var X = 1; X < (W + 1); X++){
+		if(!TrueScale){
+			W += 1; H += 1;
+		}
+		
+		var OneZero = TrueScale ? 0 : 1;
+		
+		for(var Y = OneZero; Y < H; Y++){
+			for(var X = OneZero; X < W; X++){
 				try{
 					var Tile = null;
 					var Y_ = Info[Y];
@@ -452,7 +483,7 @@ async function GenerateAtlas(Info){
 					}
 					
 					if(Tile != false){
-						Atlas.Set(Tile ? Tile : Empty, (X - 1) * Scale[0], (Y - 1) * Scale[1]);
+						Atlas.Set(Tile ? Tile : Empty, (X - OneZero) * Scale[0], (Y - OneZero) * Scale[1]);
 					}
 				}catch(e){
 					Logger.Error("Произошла ошибка генерации тайтла [" + X + ":" + Y + "] у атласа!");
@@ -571,23 +602,28 @@ class Texture{
 				var W = Content.W || this.W;
 				var H = Content.H || this.H;
 				
-				for(var Y_ = 0; Y_ < H; Y_++){
-					for(var X_ = 0; X_ < W; X_++){
+				const SY = Math.max(0,        - Y);
+				const EY = Math.min(H, this.H - Y);
+				const SX = Math.max(0,        - X);
+				const EX = Math.min(W, this.W - X);
+
+				for(let Y_ = SY; Y_ < EY; Y_++){
+					for(let X_ = SX; X_ < EX; X_++){
 						const CI = ((Y_ + Y) * this.W + (X_ + X)) * 4;
 						const DI = (Y_ * W + X_) * 4;
-						
-						const BaseR = this.Content[CI + 0]      ;
-						const BaseG = this.Content[CI + 1]      ;
-						const BaseB = this.Content[CI + 2]      ;
+
+						const BaseR = this.Content[CI + 0];
+						const BaseG = this.Content[CI + 1];
+						const BaseB = this.Content[CI + 2];
 						const BaseA = this.Content[CI + 3] / 255;
 
-						const OverR = Data[DI + 0]      ;
-						const OverG = Data[DI + 1]      ;
-						const OverB = Data[DI + 2]      ;
+						const OverR = Data[DI + 0];
+						const OverG = Data[DI + 1];
+						const OverB = Data[DI + 2];
 						const OverA = Data[DI + 3] / 255;
 
 						const OutA = OverA + BaseA * (1 - OverA);
-						if (OutA === 0){ continue; }
+						if(OutA === 0){ continue; }
 
 						this.Content[CI + 0] = Math.round((OverR * OverA + BaseR * BaseA * (1 - OverA)) / OutA);
 						this.Content[CI + 1] = Math.round((OverG * OverA + BaseG * BaseA * (1 - OverA)) / OutA);
@@ -677,7 +713,7 @@ class Texture{
 		}
 	}
 	
-	/* Изменить размер изображения */
+	/* Изменяет размер текстуры, так же содержимое */
 	Resize(W, H, Smooth = true){
 		try{
 			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
@@ -728,7 +764,84 @@ class Texture{
 
 			return this;
 		}catch(e){
-			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "]! Resize(" + W + ", " + H + ", " + Smooth + ");", e);
+			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "] и содержимого! Resize(" + W + ", " + H + ", " + Smooth + ");", e);
+		}
+	}
+	
+	/* Изменяет размер текстуры, не трогая содержимое */
+	NewSize(W = null, H = null){
+		try{
+			if(W === null){ W = this.W; }
+			if(H === null){ H = this.H; }
+		
+			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
+			
+			const OW = this.W; const OH = this.H;
+			const OContent = this.Content ? new Uint8ClampedArray(this.Content) : null;
+
+			this.W = W; this.H = H;
+
+			this.Content = new Uint8ClampedArray(W * H * 4);
+
+			this.C.width = W;  this.C.height = H;
+
+			if(OContent){
+				const CW = Math.min(OW, W);
+				const CH = Math.min(OH, H);
+
+				for(var Y = 0; Y < CH; Y++){
+					for(var X = 0; X < CW; X++){
+						const OI = (Y * OW + X) * 4;
+						const NI = (Y *  W + X) * 4;
+						this.Content[NI + 0] = OContent[OI + 0];
+						this.Content[NI + 1] = OContent[OI + 1];
+						this.Content[NI + 2] = OContent[OI + 2];
+						this.Content[NI + 3] = OContent[OI + 3];
+					}
+				}
+			}
+
+			this.__UpdateCanvas();
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "]! NewSize(" + W + ", " + H + ");", e);
+		}
+	}
+	
+	/* Двигает текстуру */
+	Move(X = 0, Y = 0){
+		try{
+			if(X === 0 && Y === 0){ return this; } // нет смещения — ничего не делаем
+
+			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
+
+			// Рассчитываем области копирования
+			const StartX = Math.max(0, X);
+			const StartY = Math.max(0, Y);
+			const EndX   = Math.min(this.W, this.W + X);
+			const EndY   = Math.min(this.H, this.H + Y);
+
+			const SrcStartX = Math.max(0, -X);
+			const SrcStartY = Math.max(0, -Y);
+
+			for(let NY = StartY, SY = SrcStartY; NY < EndY; NY++, SY++){
+				for(let NX = StartX, SX = SrcStartX; NX < EndX; NX++, SX++){
+					const OI = (SY * this.W + SX) * 4;
+					const NI = (NY * this.W + NX) * 4;
+					NewContent[NI + 0] = this.Content[OI + 0];
+					NewContent[NI + 1] = this.Content[OI + 1];
+					NewContent[NI + 2] = this.Content[OI + 2];
+					NewContent[NI + 3] = this.Content[OI + 3];
+				}
+			}
+
+			this.Content = NewContent;
+			this.__UpdateCanvas();
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при движении текстуры [" + this + "]! Move(" + X + ", " + Y + ");", e);
 		}
 	}
 	
@@ -736,7 +849,7 @@ class Texture{
 	Gradient(Gradient_){
 		try{
 			if(!(Gradient_ instanceof Texture)){ throw new Error("Градиент должен быть формата Texture!"); }
-			if(Gradient_.W !== 255 || Gradient_.H !== 1){ throw new Error("Размер градиента должен быть 255x1!"); }
+			if(Gradient_.W !== 256 || Gradient_.H !== 1){ throw new Error("Размер градиента должен быть 256x1!"); }
 			
 			for(var i = 0; i < this.Content.length; i += 4){
 				const Gray = this.Content[i];
@@ -767,6 +880,11 @@ class Texture{
 	/* Устанавливает канал */
 	Fixed(R = null, G = null, B = null, A = null){
 		try{
+			if(R && R > 255 || R < 0){ throw new Error("Красный цвет выходит за пределы 0 и 255!"); }
+			if(G && G > 255 || G < 0){ throw new Error("Зелёный цвет выходит за пределы 0 и 255!"); }
+			if(B && B > 255 || B < 0){ throw new Error("Синий цвет выходит за пределы 0 и 255!"  ); }
+			if(A && A > 255 || A < 0){ throw new Error("Прозрачность выходит за пределы 0 и 255!"); }
+		
 			for (var i = 0; i < this.Content.length; i += 4) {
 				if (R !== null){ this.Content[i + 0] = R; }
 				if (G !== null){ this.Content[i + 1] = G; }
@@ -778,6 +896,69 @@ class Texture{
 			return this;
 		}catch(e){
 			throw new Error("Произошла ошибка при установке каналов текстуре [" + this + "]! Fixed(" + R + ", " + G + ", " + B + ", " + A + ");", e);
+		}
+	}
+	
+	/* Отзеркаливает */
+	Flip(X = false, Y = false){
+		try{
+			if(!X && !Y){ return; }
+			
+			const Old = new Uint8ClampedArray(this.Content);
+			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
+
+			for(let y = 0; y < this.H; y++){
+				for(let x = 0; x < this.W; x++){
+					const srcX = X ? (this.W - 1 - x) : x;
+					const srcY = Y ? (this.H - 1 - y) : y;
+
+					const srcIndex = (srcY * this.W + srcX) * 4;
+					const dstIndex = (y * this.W + x) * 4;
+
+					NewContent[dstIndex + 0] = Old[srcIndex + 0];
+					NewContent[dstIndex + 1] = Old[srcIndex + 1];
+					NewContent[dstIndex + 2] = Old[srcIndex + 2];
+					NewContent[dstIndex + 3] = Old[srcIndex + 3];
+				}
+			}
+
+			this.Content = NewContent;
+			this.__UpdateCanvas();
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при отзеркаливании текстуры [" + this + "]! Flip(" + X + ", " + Y + ");", e);
+		}
+	}
+	
+	/* Обрезка каналов */
+	Trim(R = null, G = null, B = null, A = null){
+		try{
+			const Rules = [R, G, B, A];
+			
+			for(var i = 0; i < this.Content.length; i += 4){
+				for(var c = 0; c < 4; c++){
+					const Rule = Rules[c];
+					if(!Rule){ continue; }
+					
+					const Value = this.Content[i + c];
+					
+					const Left = Rule[0]; const Right = Rule[1];
+					
+					if(Left != null){
+						this.Content[i + c] = (Value <= Left[0] ? Left[1] : Value);
+						continue;
+					}
+					if(Right != null){
+						this.Content[i + c] = (Value => Right[0] ? Right[1] : Value);
+					}
+				}
+			}
+			
+			this.__UpdateCanvas();
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при обрезке текстуры [" + this + "]! Trim(" + R + ", " + G + ", " + B + " ," + A + ");", e);
 		}
 	}
 	
@@ -940,6 +1121,11 @@ async function LoadGenerator(File, FileName, Loaded = new Set()){
 
 				const DataBase    = Base   [Key];
 				const DataOverlay = Overlay[Key];
+				
+				if(DataOverlay === null){
+					delete Result[Key];
+					continue;
+				}
 
 				if (DataBase && typeof DataBase === "object" && DataOverlay && typeof DataOverlay === "object") {
 					if (!Array.isArray(DataBase) && !Array.isArray(DataOverlay)) {
@@ -961,9 +1147,17 @@ async function LoadGenerator(File, FileName, Loaded = new Set()){
 			for(const Key in Overlay){
 				if (!Overlay.hasOwnProperty(Key)){ continue; }
 			
+				const BaseValue    = Base[Key];
+				const OverlayValue = Overlay[Key];
+			
+				if (OverlayValue === null){
+					delete Result[Key];
+					continue;
+				}
+			
 				if(Array.isArray(Base[Key]) && Array.isArray(Overlay[Key]) && Base[Key][0] === "Atlas" && Overlay[Key][0] === "Atlas"){
-					const [TypeBase   , DataBase   ] = Base   [Key];
-					const [TypeOverlay, DataOverlay] = Overlay[Key];
+					const [_ , DataBase   ] = Base   [Key];
+					const [__, DataOverlay] = Overlay[Key];
 					
 					Result[Key] = ["Atlas", MergeObjects(DataBase, DataOverlay)];
 					continue;
@@ -1038,8 +1232,7 @@ async function LoadPackInformation(){
 			if(File.name.includes("Hierarchy")){
 				if(File.name.includes("Version")){ VersionHierarchy = GeneratorInfo; }
 			}else{
-				var Type   = GeneratorInfo["Type"  ] || "Unknown"; GeneratorInfo["Type"  ] = Type  ;
-				var Status = GeneratorInfo["Status"];
+				var Type = GeneratorInfo["Type"  ] || "Unknown"; GeneratorInfo["Type"  ] = Type  ;
 				
 				if(Type === "Version"){
 					PackVersions[GeneratorInfo["Name"]] = await LoadGenerator(File, GeneratorInfo["Name"]);
@@ -1085,9 +1278,9 @@ async function PreLoadAfter(){
 
 		function StyleSelection(D){
 			if (!D.id){ return D.text; }
-			const Status = PackVersions[D.id].Status;
+			const Dev = PackVersions[D.id].Dev;
 			return $("<span>").text(D.text).css("color",
-				Status === "Finish" ? "white" : (Status === "WIP" ? "yellow" : (Status ? "red" : "yellow"))
+				Dev === false ? "white" : (Dev === "Error" ? "red" : (Dev === true ? "yellow" : (Dev ? "black" : "yellow")))
 			);
 		}
 

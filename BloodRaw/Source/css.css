@@ -128,3 +128,7 @@ li::before {
 	left: 0;
 	top: 0;
 }
+
+span li::before{
+	display: none;
+}
