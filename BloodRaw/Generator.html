@@ -22,8 +22,8 @@ html, button{
 
 .Container{
 	max-width: 1000px;
-	margin: 20px auto;
-	padding: 20px;
+	height: 100vh;
+	margin: 0 auto;
 	display: flex;
     flex-direction: column;
     gap: 15px;
@@ -41,7 +41,6 @@ html, button{
 	line-height: 1.4em;
 
 	padding   : 12px;
-	height    : 275px;
 	overflow-y: auto;
 
 	outline: 3px solid rgba(0, 0, 0, 0.5);
@@ -51,6 +50,17 @@ html, button{
 
 .Console p{
 	margin: 0;
+}
+
+.InfoBox {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 15px 20px;
+	background: linear-gradient(135deg, rgba(40,40,40,0.95), rgba(20,20,20,0.95));
+	border: 3px solid rgba(255, 0, 0, 0.5);
+	box-shadow: 0 0 15px rgba(255,0,0,0.3);
+	gap: 20px;
 }
 </style>
 
@@ -63,23 +73,26 @@ html, button{
 
 	<h1>Генератор BloodRaw</h1>
 
-	<div>
-		<p>Информация:</p>
-		<li><p id="PackVersion">?</p></li>
+	<div class="InfoBox">
+		<div>
+			<p><b>Информация:</b></p>
+			<li><p id="PackVersion">?</p></li>
+		</div>
+		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(255,0,0,0.4);" alt="Changelog картинка">
 	</div>
 
-	<div>
+	<center><div>
 		<p>Версия:</p>
 		<select id="SelectVersion" style="width: 400px;"></select>
-	</div>
+	</div></center>
 
-	<div style="text-align:center;">
+	<div style="text-align:center; padding-top: 20px;">
 		<button id="B_Generate" onclick="Generate();">Сгенерировать пак</button>
 	</div>
 
 	<div>
 		<p>Консоль:</p>
-		<div class="Console" id="Console"></div>
+		<div class="Console" style="min-height: 100%;" id="Console"></div>
 	</div>
 
 </div></body>
@@ -92,9 +105,10 @@ html, button{
 /* Путь до файла с паком   */ const PackFile     = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
 /* Ссылка на сайт BloodRaw */ const BloodRawLink = "https://woowz11.github.io/woowzsite/BloodRaw/Main";
  
-/* Дефолтная текстура */ const DefaultTexture = "R/T/Default.png"
-/* Текстура ошибка    */ const ErrorTexture   = "R/T/Error.png"
-/* Пустая текстура    */ const EmptyTexture   = "R/T/Empty.png"
+/* Дефолтная текстура */ const DefaultTexture   = "R/T/Default.png"
+/* Текстура ошибка    */ const ErrorTexture     = "R/T/Error.png"
+/* Пустая текстура    */ const EmptyTexture     = "R/T/Empty.png"
+/* Текстура Changelog */ const ChangelogTexture = "Changelog.texture";
 
 /* ======================================================== */
 
@@ -102,7 +116,7 @@ var Console = $("#Console");
 
 Logger.Console = function(Message, Type = 0){
 	switch(Type){
-		case 0: Logger.Info (Message, null, "color: lime;"); break;
+		case 0: Logger.Info (Message, null, InGeneration ? "color: lime;" : undefined); break;
 		case 1: Logger.Warn (Message                      ); break;
 		case 2: Logger.Error(Message                      ); break;
 	}
@@ -145,13 +159,48 @@ function UpdateString(String){
         MinecraftVersion: SelectedVersion,
         Author          : Author,
         License         : License,
-        Link            : BloodRawLink
+        Link            : BloodRawLink,
+		GitHub          : "https://github.com/Woowz11",
+		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
+		Discord         : "woowz11"
 	};
 
 	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => Replacements[K] ?? "undefined");
 }
 
+/* Обновляет цвет */
+function UpdateColor(Color){
+	const Replacements = {
+		Grass: "#8DC456"
+	}
+	
+	return Color in Replacements ? Replacements[Color] : Color;
+}
+
+/* Конвертация цвета в байты */
+function CalculateColor(Color){
+	try{
+		if(typeof Color !== "string"){ return Color; }
+	
+		if(!CalculateColor.CTX){
+			const C = document.createElement("canvas");
+			C.width = 1; C.height = 1;
+			CalculateColor.CTX = C.getContext("2d");
+		}
+	
+		Color = UpdateColor(Color);
+		
+		CalculateColor.CTX.clearRect(0, 0, 1, 1);
+		CalculateColor.CTX.fillStyle = Color;
+		CalculateColor.CTX.fillRect(0, 0, 1, 1);
+		return CalculateColor.CTX.getImageData(0, 0, 1, 1).data;
+	}catch(e){
+		throw new Error("Произошла ошибка при расчёте цвета");
+	}
+}
+
 function Lerp(A, B, T){ return A + (B - A) * T; }
+function Clamp(N, Min, Max){ return N <= Min ? Min : (N >= Max ? Max : N); }
 
 /* ======================================================== */
 
@@ -207,13 +256,31 @@ async function ApplyGenerator(Generator){
 	try{
 		var Files = Generator["Files"];
 		
-		Logger.Console("Применение генератора. ID: " + Generator["ID"]);
+		Logger.Console("Применение генератора [" + Generator["Name"] + "]");
+		
+		var __Info = Generator["__Info"] || {};
+		
+		var Parent = __Info["Parent"] || null;
+		if(Parent){
+			Logger.Console("Родитель [" + Parent + "]");
+		}
+		
+		var Added = __Info["Added"] || [];
+		for(var Added_ of Added){
+			Logger.Console("Добавлено к генератору [" + Added_ + "]");
+		}
 		
 		for(const Path of Object.keys(Files)){
 			var Content = await GenerateFile(Path, Files[Path]);
 			
+			/* Это текстура? */
 			if(Content instanceof Texture){
-				Content = Content.ToBlob();
+				Content = await Content.ToBlob();
+			}
+			
+			/* Это JSZipFile? */
+			if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
+				Content = await FileContentByte(Content);
 			}
 			
 			Pack.file(Path, Content);
@@ -254,6 +321,21 @@ async function ApplyAction(Content, Type, Info){
 			var H = Info[3];
 			
 			Content.Crop(X, Y, W, H);
+		}else if(Type === "Gradient"){
+			var Gradient = await GenerateFile(Info[0]);
+			
+			Content.Gradient(Gradient);
+		}else if(Type === "Multiply"){
+			var Color = Info[0];
+			
+			Content.Multiply(Color);
+		}else if(Type === "Fixed"){
+			var R = Info[0] || null;
+			var G = Info[1] || null;
+			var B = Info[2] || null;
+			var A = Info[3] || null;
+		
+			Content.Fixed(R, G, B, A);
 		}else{
 			Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
 		}
@@ -296,7 +378,11 @@ async function GenerateFile(Path, Info){
 		
 		var Result = "Не найден тип генерации [" + GenerateType + "]!";
 		
-		if(GenerateType === "Texture"){
+		if(GenerateType === "File"){
+			var FilePath = Info[1];
+			Actions = Info[2] || null;
+			Result = await GetFile(FilePath);
+		}else if(GenerateType === "Texture"){
 			var FilePath = Info[1];
 			Actions = Info[2] || null;
 			Result = await GetTexture(FilePath);
@@ -383,7 +469,7 @@ async function GenerateAtlas(Info){
 /* Генерация картины */
 async function GeneratePainting(W, H){
 	try{
-		if(W === true && !H){ return await GetTexture("Changelog.texture"); }
+		if(W === true && !H){ return await GetTexture(ChangelogTexture); }
 	
 		var FrameTexture = "R/T/ART/Frame_" + W + H + ".png";
 	
@@ -416,21 +502,44 @@ class Texture{
 	}
 	
 	/* Полностью закрасить текстуру */
-	Fill(Content){
+	Fill(Content, Blend = "source-over", IgnoreAlpha = false){
 		try{
+			if(!Content){ return; }
+		
 			var Data = Content;
-			if(Content instanceof Texture){ Data = Content.Content; }
+			if(Content instanceof Texture){ Data = Content.Content; }else if(!(Data instanceof Uint8ClampedArray)){ Data = CalculateColor(Data); }
 			
-			if(Data instanceof Uint8ClampedArray){
-				if(Data.length !== this.Content.length){ throw new Error("Размер Content не совпадает с требуемым!"); }
-				this.Content.set(Data);
-				this.__UpdateCanvas();
+			if(Data.length === 4){
+				for(var i = 0; i < this.Content.length; i += 4){
+					if(Blend === "multiply"){
+						this.Content[i + 0] = Math.floor(this.Content[i + 0] * Data[0] / 255);
+						this.Content[i + 1] = Math.floor(this.Content[i + 1] * Data[1] / 255);
+						this.Content[i + 2] = Math.floor(this.Content[i + 2] * Data[2] / 255);
+						if(IgnoreAlpha){ continue; }
+						this.Content[i + 3] = Math.floor(this.Content[i + 3] * Data[3] / 255);
+					}else{
+						this.Content[i + 0] = Data[0];
+						this.Content[i + 1] = Data[1];
+						this.Content[i + 2] = Data[2];
+						if(IgnoreAlpha){ continue; }
+						this.Content[i + 3] = Data[3];
+					}
+				}
 			}else{
-				this.CTX.clearRect(0, 0, this.W, this.H);
-				this.CTX.fillStyle = Data || "transparent";
-				this.CTX.fillRect(0, 0, this.W, this.H);
-				this.__UpdateContent();
+				if(Blend === "multiply"){
+					for(var i = 0; i < this.Content.length; i += 4){
+						this.Content[i + 0] = Math.floor(this.Content[i + 0] * Data[i + 0] / 255);
+						this.Content[i + 1] = Math.floor(this.Content[i + 1] * Data[i + 1] / 255);
+						this.Content[i + 2] = Math.floor(this.Content[i + 2] * Data[i + 2] / 255);
+						if(IgnoreAlpha){ continue; }
+						this.Content[i + 3] = Math.floor(this.Content[i + 3] * Data[i + 3] / 255);
+					}
+				} else {
+					this.Content.set(Data);
+				}
 			}
+			
+			this.__UpdateCanvas();
 			
 			return this;
 		}catch(e){
@@ -570,12 +679,6 @@ class Texture{
 	
 	/* Изменить размер изображения */
 	Resize(W, H, Smooth = true){
-		const PrevISE = this.CTX.imageSmoothingEnabled;
-		const PrevISQ = this.CTX.imageSmoothingQuality;
-		
-		this.CTX.imageSmoothingEnabled = Smooth;
-		this.CTX.imageSmoothingQuality = Smooth ? "high" : "low";
-	
 		try{
 			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
 			
@@ -626,9 +729,55 @@ class Texture{
 			return this;
 		}catch(e){
 			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "]! Resize(" + W + ", " + H + ", " + Smooth + ");", e);
-		}finally{
-			this.CTX.imageSmoothingEnabled = PrevISE;
-			this.CTX.imageSmoothingQuality = PrevISQ;
+		}
+	}
+	
+	/* Применяет градиент */
+	Gradient(Gradient_){
+		try{
+			if(!(Gradient_ instanceof Texture)){ throw new Error("Градиент должен быть формата Texture!"); }
+			if(Gradient_.W !== 255 || Gradient_.H !== 1){ throw new Error("Размер градиента должен быть 255x1!"); }
+			
+			for(var i = 0; i < this.Content.length; i += 4){
+				const Gray = this.Content[i];
+				
+				const GI = Gray * 4;
+				this.Content[i + 0] = Gradient_.Content[GI + 0];
+				this.Content[i + 1] = Gradient_.Content[GI + 1];
+				this.Content[i + 2] = Gradient_.Content[GI + 2];
+				this.Content[i + 3] = Math.min(this.Content[i + 3], Gradient_.Content[GI + 3]);
+			}
+			
+			this.__UpdateCanvas();
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при применении градиента текстуре [" + this + "]! Gradient(" + Gradient_ + ");", e);
+		}
+	}
+	
+	/* Умножает цвет */
+	Multiply(Color){
+		try{
+			return this.Fill(Color, "multiply", true);
+		}catch(e){
+			throw new Error("Произошла ошибка при умножении на цвет [" + Color + "] у текстуры [" + this + "]! Multiply(" + Color + ");", e);
+		}
+	}
+	
+	/* Устанавливает канал */
+	Fixed(R = null, G = null, B = null, A = null){
+		try{
+			for (var i = 0; i < this.Content.length; i += 4) {
+				if (R !== null){ this.Content[i + 0] = R; }
+				if (G !== null){ this.Content[i + 1] = G; }
+				if (B !== null){ this.Content[i + 2] = B; }
+				if (A !== null){ this.Content[i + 3] = A; }
+			}
+			
+			this.__UpdateCanvas();
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при установке каналов текстуре [" + this + "]! Fixed(" + R + ", " + G + ", " + B + ", " + A + ");", e);
 		}
 	}
 	
@@ -767,11 +916,91 @@ var License;
 /* Версия пака */
 var PackVersion;
 
+/* Название коммита */
+var CommitName;
+
 /* Доступные версии пака */
-const PackVersions = {}
+var PackVersions = {}
 
 /* Выбранная версия */
 var SelectedVersion = null;
+
+/* Загрузка генератора */
+async function LoadGenerator(File, FileName, Loaded = new Set()){
+	try{
+		if(Loaded.has(FileName)){ return null; } Loaded.add(FileName);
+		
+		const Info = await FileContentJSON(File);
+		
+		function MergeObjects(Base, Overlay){
+			const Result = { ...Base };
+
+			for (const Key in Overlay) {
+				if (!Overlay.hasOwnProperty(Key)) continue;
+
+				const DataBase    = Base   [Key];
+				const DataOverlay = Overlay[Key];
+
+				if (DataBase && typeof DataBase === "object" && DataOverlay && typeof DataOverlay === "object") {
+					if (!Array.isArray(DataBase) && !Array.isArray(DataOverlay)) {
+						Result[Key] = MergeObjects(DataBase, DataOverlay);
+					} else {
+						Result[Key] = DataOverlay;
+					}
+				} else {
+					Result[Key] = DataOverlay;
+				}
+			}
+
+			return Result;
+		}
+		
+		function MergeFiles(Base, Overlay){
+			const Result = { ...Base };
+			
+			for(const Key in Overlay){
+				if (!Overlay.hasOwnProperty(Key)){ continue; }
+			
+				if(Array.isArray(Base[Key]) && Array.isArray(Overlay[Key]) && Base[Key][0] === "Atlas" && Overlay[Key][0] === "Atlas"){
+					const [TypeBase   , DataBase   ] = Base   [Key];
+					const [TypeOverlay, DataOverlay] = Overlay[Key];
+					
+					Result[Key] = ["Atlas", MergeObjects(DataBase, DataOverlay)];
+					continue;
+				}
+				
+				Result[Key] = Overlay[Key];
+			}
+			
+			return Result;
+		}
+		
+		if(Info.Parent){
+			const Parent = await GetFile("G/" + Info.Parent);
+			const ParentInfo = await LoadGenerator(Parent, Info.Parent, Loaded);
+			Info.Files = MergeFiles(ParentInfo.Files, Info.Files);
+			Info.__Info = Info.__Info || {};
+			Info.__Info.Parent = ParentInfo["Name"];
+		}
+		
+		if(Array.isArray(Info.Add)){
+			for(const Add of Info.Add){
+				const AddInfo = await LoadGenerator(await GetFile("G/" + Add), Add, Loaded);
+				if(AddInfo){
+					Info.Files = MergeFiles(Info.Files, AddInfo.Files);
+					Info.__Info = Info.__Info || {};
+					Info.__Info.Added = Info.__Info.Added || [];
+					Info.__Info.Added.push(AddInfo["Name"]);
+				}
+			}
+			delete Info.Add;
+		}
+		
+		return Info;
+	}catch(e){
+		throw new Error("Произошла ошибка при загрузке генератора [" + FileName + "]!", e);
+	}
+}
 
 /* Получает разную информацию из пака */
 async function LoadPackInformation(){
@@ -784,9 +1013,10 @@ async function LoadPackInformation(){
 			PackFolders[Folder].push(PackFiles[Path]);
 		}
 		
-		PackInfo = await FileContentJSON(await GetFile("Info.json"));
-		Author   = PackInfo["Author" ];
-		License  = PackInfo["License"];
+		PackInfo    = await FileContentJSON(await GetFile("Info.json"));
+		Author      = PackInfo["Author" ];
+		License     = PackInfo["License"];
+		PackVersion = PackInfo["Version"]; $("#PackVersion").text(PackVersion);
 		
 		try{
 			const Response = await fetch("https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits/main");
@@ -794,23 +1024,48 @@ async function LoadPackInformation(){
 			
 			const Commit = await Response.json();
 			
-			PackVersion = Commit.commit.message.split("\n")[0];
+			CommitName = Commit.commit.message.split("\n")[0];
 		}catch(e){
 			Logger.Error("Произошла ошибка при получении версии репозитория!", e);
-			PackVersion = "Error";
+			CommitName = "Не получилось узнать...";
 		}
-
-		$("#PackVersion").text(PackVersion);
 		
-		for(const File of PackFolders["Generators"]){
-			var Version = File.name.split("/").pop();
-			const LastDot = Version.lastIndexOf(".");
-			if(LastDot !== -1){ Version = Version.substring(0, LastDot); }
+		var VersionHierarchy;
+		
+		for(const File of PackFolders["G"]){
+			var GeneratorInfo = await FileContentJSON(File);
 			
-			var VersionInfo = await FileContentJSON(File);
-			
-			PackVersions[Version] = VersionInfo;
+			if(File.name.includes("Hierarchy")){
+				if(File.name.includes("Version")){ VersionHierarchy = GeneratorInfo; }
+			}else{
+				var Type   = GeneratorInfo["Type"  ] || "Unknown"; GeneratorInfo["Type"  ] = Type  ;
+				var Status = GeneratorInfo["Status"];
+				
+				if(Type === "Version"){
+					PackVersions[GeneratorInfo["Name"]] = await LoadGenerator(File, GeneratorInfo["Name"]);
+				}
+			}
 		}
+		
+		var AllVersions = Object.keys(PackVersions);
+		AllVersions = AllVersions.sort((A, B) => {
+			const iA = VersionHierarchy.indexOf(A);
+			const iB = VersionHierarchy.indexOf(B);
+			
+			if(iA === -1){ throw new Error("Не найдена версия [" + A + "] в иерархии!"); }
+			if(iB === -1){ throw new Error("Не найдена версия [" + B + "] в иерархии!"); }
+
+			return iA - iB;
+		});
+		
+		const SortedPackVersions = {};
+		for(const Version of AllVersions){
+			SortedPackVersions[Version] = PackVersions[Version];
+		}
+		PackVersions = SortedPackVersions;
+		
+		var ChangelogTexture_ = await GetTexture(ChangelogTexture);
+		document.getElementById("ChangelogImage").src = ChangelogTexture_.C.toDataURL("image/png");
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке информации об паке!", e);
 	}
@@ -824,10 +1079,23 @@ async function PreLoadAfter(){
 	
 		const SelectVersion = $("#SelectVersion");
 		
-		SelectVersion.html(Object.keys(PackVersions).map(V => `<option value="${V}">${V} : ${V.ID}</option>`).join(""));
+		SelectVersion.html(
+			Object.keys(PackVersions).map(V => `<option value="${V}">${V}</option>`).join("")
+		);
+
+		function StyleSelection(D){
+			if (!D.id){ return D.text; }
+			const Status = PackVersions[D.id].Status;
+			return $("<span>").text(D.text).css("color",
+				Status === "Finish" ? "white" : (Status === "WIP" ? "yellow" : (Status ? "red" : "yellow"))
+			);
+		}
+
 		SelectVersion.select2({
 			placeholder: "Выберите версию",
-			allowClear: true
+			allowClear: true,
+			templateResult   : StyleSelection,
+			templateSelection: StyleSelection
 		});
 		
 		SelectedVersion = SelectVersion.val();

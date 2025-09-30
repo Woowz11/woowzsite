@@ -412,9 +412,11 @@ function GetAllWoowzsiteIcons(){
 
 /*__________________________________________________________________________________________________*/
 
-WoowzsiteSourceFonts = AddFullnessToTable([
-	"minecraft.ttf","Comfortaa.ttf","inkverse.ttf","topor.otf","concrete.otf","bloodraw/minecraft.ttf","Kantsler Fraktur.ttf"
-],"source/","")
+WoowzsiteSourceFonts = AddTableToTable(AddFullnessToTable([
+	"minecraft.ttf","Comfortaa.ttf","inkverse.ttf","topor.otf","concrete.otf","Kantsler Fraktur.ttf"
+],"source/",""),[
+	"BloodRaw/Source/minecraft.ttf"
+])
 
 WoowzsiteWords = ["растворился","арбуз","пёрни","тротил","шуруп","сообщение","mail","got","idiot","java","python","c#","cpp","lua","фотон","солнце","немцы","сок","жвачка","курица","петух","трамп","байден","обама","вино",
 "бакал","байкал","мазут","копро","гидро-педро-метро","морж","сок","у","тебя","дома","цезий","плутон","нептуний","уран","гачимучи","выигрыш","победа","геолокация","координаты","пердёж","цена","негра","за","много","мало",

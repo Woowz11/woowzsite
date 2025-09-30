@@ -27,7 +27,7 @@ Error = class{
 
 function __Print(Message, Exception, Type, Style){
 	try{
-		var Result = "%c" + Message;
+		var Result = Message;
 		
 		const Length = 100;
 		
@@ -60,13 +60,21 @@ function __Print(Message, Exception, Type, Style){
 			Result += __E(Exception);
 		}
 		
-		switch(Type){
-			case 0: console.log  (Result, Style); break;
-			case 1: console.warn (Result, Style); break;
-			case 2: console.error(Result, Style); break;
+		if(Style){
+			switch(Type){
+				case 0: console.log  ("%c" + Result, Style); break;
+				case 1: console.warn ("%c" + Result, Style); break;
+				case 2: console.error("%c" + Result, Style); break;
+			}
+		}else{
+			switch(Type){
+				case 0: console.log  (Result); break;
+				case 1: console.warn (Result); break;
+				case 2: console.error(Result); break;
+			}
 		}
 	}catch(e){
-		console.error("Произошла ошибка при отправке сообщения!\nТип: " + Type + "\nСообщение: " + Message + "\nException: " + Exception, e);
+		console.error("Произошла ошибка при отправке сообщения!\nТип: " + Type + "\nСообщение: " + Message + "\nException: " + Exception + "\nException сообщения: " + e.message, e);
 	}
 }
 

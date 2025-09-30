@@ -1,5 +1,5 @@
 :root {
-  --mc-yellow: #FFFF55;
+	--mc-yellow: #FFFF55;
 }
 
 @font-face{
@@ -9,24 +9,28 @@
 
 html, button, input{
 	font-family : CFont;
-	color		: white;
+	color: white;
 	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 	word-spacing: 0.5em;
-	cursor	  : default;
+	cursor: default;
+}
+
+body{
+	margin: 0;
 }
 
 html{
 	background-image: url("dirt.png");
-	background-size: 64px 64px;
-	image-rendering: pixelated;
+	background-size : 64px 64px;
+	image-rendering : pixelated;
 }
 
 h1{
-	font-size: 2em;
+	font-size    : 2em;
 	margin-bottom: 10px;
-	color: var(--mc-yellow);
-	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
-	text-align: center;
+	color        : var(--mc-yellow);
+	text-shadow  : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
+	text-align   : center;
 }
 
 /* Пре-загрузка */
@@ -34,14 +38,14 @@ body::after{
 	content: "";
 	display: none;
 	background:
-		url("dirt.png"                  ),
-		url("button.png"                ),
-		url("button_hover.png"          ),
-		url("button_disabled.png"       ),
-		url("checkbox.png"              ),
-		url("checkbox_checked.png"      ),
-		url("checkbox_hover.png"        ),
-		url("checkbox_hover_checked.png");
+	url("dirt.png"),
+	url("button.png"),
+	url("button_hover.png"),
+	url("button_disabled.png"),
+	url("checkbox.png"),
+	url("checkbox_checked.png"),
+	url("checkbox_hover.png"),
+	url("checkbox_hover_checked.png");
 }
 
 ::selection{
@@ -49,25 +53,25 @@ body::after{
 }
 
 button{
-	border-image	  : url("button.png") repeat;
-	border-image-slice: 6 fill;
-	border-image-width: 32px 32px;
-	font-family		  : CFont;
-	cursor			  : pointer;
-	line-height	   : 1.35em;
+	border-image: url("button.png") repeat;
+	border-image-slice  : 6 fill;
+	border-image-width  : 32px 32px;
+	font-family: CFont;
+	cursor: pointer;
+	line-height    : 1.35em;
 }
 
 button:hover{
-	border-image	  : url("button_hover.png") repeat;
-	border-image-slice: 6 fill;
-	border-image-width: 32px 32px;
-	color			 : var(--mc-yellow);
+	border-image: url("button_hover.png") repeat;
+	border-image-slice  : 6 fill;
+	border-image-width  : 32px 32px;
+	color    : var(--mc-yellow);
 }
 
 button:disabled{
-	border-image	  : url("button_disabled.png") repeat;
-	border-image-slice: 6 fill;
-	border-image-width: 32px 32px;
+	border-image: url("button_disabled.png") repeat;
+	border-image-slice  : 6 fill;
+	border-image-width  : 32px 32px;
 }
 
 label{
@@ -76,14 +80,14 @@ label{
 
 input[type='checkbox']{
 	-webkit-appearance : none;
-	width			   : 30px;
-	height			   : 30px;
-	vertical-align	   : middle;
-	background-image   : url("checkbox.png");
-	background-size	   : 100%;
-	background-position: right center;
-	background-repeat  : no-repeat;
-	cursor			 : pointer;
+	width : 30px;
+	height : 30px;
+	vertical-align : middle;
+	background-image : url("checkbox.png");
+	background-size : 100%;
+	background-position : right center;
+	background-repeat : no-repeat;
+	cursor  : pointer;
 }
 
 input[type='checkbox']:checked{
@@ -99,9 +103,9 @@ input[type='checkbox']:checked:hover{
 }
 
 a{
-	color		  : var(--mc-yellow);
-	text-decoration: none;
-	cursor		 : pointer;
+	color: var(--mc-yellow);
+	text-decoration : none;
+	cursor    : pointer;
 }
 
 a:hover{
@@ -112,6 +116,15 @@ a:active{
 	color: #555555;
 }
 
-li::marker {
-	content: "▪ ";
+li {
+	list-style: none;
+	position: relative;
+	padding-left: 1.2em;
+}
+
+li::before {
+	content: "▪";
+	position: absolute;
+	left: 0;
+	top: 0;
 }
