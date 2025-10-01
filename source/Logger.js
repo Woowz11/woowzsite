@@ -46,7 +46,7 @@ function __Print(Message, Exception, Type, Style){
 				}else{
 					if(E instanceof __Error){
 						var S = E.stack.split("\n")[1];
-						const M = S.match(__ErrorRegex) || [];
+						const M = (S ? S.match(__ErrorRegex) : null) || [];
 						S = M[2] || "Anonymous";
 						S = S.replace(__FunctionRegex, "");
 						S += ":" + (M[3] || "-1");

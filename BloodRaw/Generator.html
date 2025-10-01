@@ -144,8 +144,14 @@ function JSONParse(Text){
 	Text = Text.replace(/^\uFEFF/, '');
     Text = Text.replace(/[\x00-\x1F\x7F]/g, c => c === '\n' || c === '\r' ? c : '');
 	
-	return JSON.parse(Text);
+	if(__JSONParse[Text]){ return DeepClone(__JSONParse[Text]); }
+	
+	var Result = JSON.parse(Text);
+	__JSONParse[Text] = Result;
+	
+	return Result;
 }
+var __JSONParse = {};
 
 /* Останавливает поток на определённое кол-во миллисекунд */
 function Sleep(MS){
@@ -162,7 +168,9 @@ function UpdateString(String){
         Link            : BloodRawLink,
 		GitHub          : "https://github.com/Woowz11",
 		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
-		Discord         : "woowz11"
+		Discord         : "woowz11",
+		G_TotalFiles    : (BuildFile ? TotalFiles + 1 : TotalFiles),
+		G_Time          : GenerationTime
 	};
 
 	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => Replacements[K] ?? "undefined");
@@ -171,8 +179,8 @@ function UpdateString(String){
 /* Обновляет цвет */
 function UpdateColor(Color){
 	const Replacements = {
-		Grass : "#8DC456",
-		Leaves: "red" // Узнать цвет листвы
+		Grass : "#4E6925",
+		Leaves: "#1D3F19"
 	}
 	
 	return Color in Replacements ? Replacements[Color] : Color;
@@ -200,6 +208,22 @@ function CalculateColor(Color){
 	}
 }
 
+/* Глубокое копирование объекта */
+function DeepClone(Obj){
+	if(Obj === null || typeof Obj !== "object"){ return Obj; }
+	
+	if(Array.isArray(Obj)){ return Obj.map(DeepClone); }
+	if(ArrayBuffer.isView(Obj)){ return new Obj.constructor(Obj); }
+	
+	const Clone = {};
+	for(const Key in Obj){
+		if(Object.prototype.hasOwnProperty.call(Obj, Key)){
+			Clone[Key] = DeepClone(Obj[Key]);
+		}
+	}
+	return Clone;
+}
+
 function Lerp(A, B, T){ return A + (B - A) * T; }
 function Clamp(N, Min, Max){ return N <= Min ? Min : (N >= Max ? Max : N); }
 
@@ -214,6 +238,12 @@ var InGeneration = false;
 /* Время начала генерации */
 var GenerationStartTime;
 
+/* Всего файлов */
+var TotalFiles;
+
+/* Сколько времени заняла генерация */
+var GenerationTime;
+
 /* Генерация пака */
 async function Generate(){
 	try{
@@ -223,11 +253,25 @@ async function Generate(){
 		
 		InGeneration = true;
 		GenerationStartTime = Date.now();
+		Logger.Info(":" + "=".repeat(50) + ":");
 		Logger.Console("Начало генерации пака!");
 		
 		Pack = new JSZip();
 		
-		await ApplyGenerator(PackVersions[SelectedVersion]);
+		TotalFiles = 0;
+		
+		__AllPaintings = AllPaintings;
+		
+		var VersionGenerator = PackVersions[SelectedVersion];
+		await ApplyGenerator(await LoadGenerator(VersionGenerator[0], VersionGenerator[1]));
+		
+		GenerationTime = Date.now() - GenerationStartTime;
+		
+		if(BuildFile){
+			Logger.Console("Применение BuildFile...");
+			var BuildFile_ = await GenerateFile(BuildFile[0], BuildFile[1], true);
+			await AddFileToPack(BuildFile[0], BuildFile_);
+		}
 		
 		Logger.Console("Скачивание...");
 		
@@ -242,6 +286,7 @@ async function Generate(){
 		
 		Logger.Console("Конец генерации пака!");
 		InGeneration = false;
+		BuildFile = null;
 		Pack = null;
 	}catch(e){
 		if(InGeneration){ 
@@ -249,6 +294,27 @@ async function Generate(){
 		}else{
 			Logger.Fatal("Произошла ошибка при генерации пака!", e);
 		}
+	}
+}
+
+/* Добавляет файл паку */
+async function AddFileToPack(Path, Content){
+	try{
+		if(Content === null){ return; }
+		
+		/* Это текстура? */
+		if(Content instanceof Texture){
+			Content = await Content.ToBlob();
+		}
+		
+		/* Это JSZipFile? */
+		if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
+			Content = await FileContentByte(Content);
+		}
+		
+		Pack.file(Path, Content); TotalFiles++;
+	}catch(e){
+		throw new Error("Произошла ошибка при добавлении файла [" + Path + "] паку!", e);
 	}
 }
 
@@ -273,18 +339,7 @@ async function ApplyGenerator(Generator){
 		
 		for(const Path of Object.keys(Files)){
 			var Content = await GenerateFile(Path, Files[Path]);
-			
-			/* Это текстура? */
-			if(Content instanceof Texture){
-				Content = await Content.ToBlob();
-			}
-			
-			/* Это JSZipFile? */
-			if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
-				Content = await FileContentByte(Content);
-			}
-			
-			Pack.file(Path, Content);
+			await AddFileToPack(Path, Content);
 		}
 	}catch(e){
 		throw new Error("Произошла ошибка с генератором!", e);
@@ -359,6 +414,18 @@ async function ApplyAction(Content, Type, Info){
 			var Y = Info[1] || 0;
 			
 			Content.Move(X, Y);
+		}else if(Type === "Invert"){
+			var R = Info[0] || true;
+			var G = Info[1] || true;
+			var B = Info[2] || true;
+			var A = Info[3] || false;
+			
+			Content.Invert(R, G, B, A);
+		}else if(Type === "Tile"){
+			var X = Info[0] || 1;
+			var Y = Info[1] || 1;
+			
+			Content.Tile(X, Y);
 		}else{
 			Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
 		}
@@ -384,19 +451,36 @@ async function ApplyActions(Content, Actions){
 	}
 }
 
-/* Содержимое сгенерированного файла */
-async function GenerateFile(Path, Info){
+/* Файл с выводом информации */
+var BuildFile;
+
+/* Содержимое сгенерированного файла [Если указать только 1 аргумент, будет считаться как в памяти] */
+async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	var MemoryFile = Path && !Info;
 	if(MemoryFile){ Info = Path; Path = null; }
 
-	try{
+	try{		
+		/* Как генерировать файл */
+		var GenerateType = Info[0];
+		/* Дополнительная информация и теги */
+		var Tag = null;
+		
+		if(Array.isArray(GenerateType)){
+			Tag = GenerateType[1];
+			GenerateType = GenerateType[0];
+		}
+		
+		if(!IgnoreTags && Tag && Tag[0] === "BuildFile"){
+			BuildFile = [Path, Info];
+			return null;
+		}
+		
 		if(MemoryFile){
 			Logger.Console("Генерация файла в памяти...");
 		}else{
 			Logger.Console("Генерация [" + Path + "]...");
 		}
 		
-		const GenerateType = Info[0];
 		var Actions = null;
 		
 		var Result = "Не найден тип генерации [" + GenerateType + "]!";
@@ -417,6 +501,11 @@ async function GenerateFile(Path, Info){
 				Actions = Info[4] || null;
 				
 				Result = new Texture(W, H, Color);
+			}else if(Array.isArray(Info[1])){
+				var File = await GenerateFile(Info[1]);
+				var Content = await FileContent(File);
+				
+				Result = UpdateString(Content);
 			}else{
 				var Content = Info[1];
 				Actions = Info[2] || null;
@@ -497,18 +586,31 @@ async function GenerateAtlas(Info){
 	}
 }
 
+/* Все картины */
+var AllPaintings;
+
 /* Генерация картины */
 async function GeneratePainting(W, H){
 	try{
 		if(W === true && !H){ return await GetTexture(ChangelogTexture); }
 	
-		var FrameTexture = "R/T/ART/Frame_" + W + H + ".png";
+		var PaintingSize = W + "x" + H;
 	
-		return await GetTexture(FrameTexture);
+		var FrameTexture = "R/T/ART/Frame_" + PaintingSize + ".png";
+	
+		var PaintingFamily = __AllPaintings[PaintingSize];
+		if(!PaintingFamily || PaintingFamily.length === 0){
+			Logger.ConsoleWarn("Закончились картины типа [" + PaintingSize + "]!");
+			return await GenerateFile(["Texture", "R/T/ART/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
+		}
+	
+		var Painting = PaintingFamily.splice(Math.floor(Math.random() * PaintingFamily.length), 1)[0];
+		return await GenerateFile(["Texture", Painting, [["Put", ["Texture", FrameTexture]]]]);
 	}catch(e){
 		throw new Error("Произошла ошибка при генерации картины " + W + "x" + H + "!", e);
 	}
 }
+var __AllPaintings;
 
 /* ======================================================== */
 
@@ -962,12 +1064,68 @@ class Texture{
 		}
 	}
 	
+	/* Инвертирует канал */
+	Invert(R = true, G = true, B = true, A = false){
+		try{
+			for(let i = 0; i < this.Content.length; i += 4){
+				if(R){ this.Content[i + 0] = 255 - this.Content[i + 0]; }
+				if(G){ this.Content[i + 1] = 255 - this.Content[i + 1]; }
+				if(B){ this.Content[i + 2] = 255 - this.Content[i + 2]; }
+				if(A){ this.Content[i + 3] = 255 - this.Content[i + 3]; }
+			}
+
+			this.__UpdateCanvas();
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при инвертировании каналов у текстуры [" + this + "]! Invert(" + R + ", " + G + ", " + B + " ," + A + ");", e);
+		}
+	}
+	
+	/* Повторяет текстуру */
+	Tile(X = 1, Y = 1){
+		try{
+			if(X <= 0 || Y <= 0){ throw new Error("Кол-во Tile <= 0!"); }
+			
+			const NewW = this.W * X;
+			const NewH = this.H * Y;
+			const NewContent = new Uint8ClampedArray(NewW * NewH * 4);
+
+			for(let ty = 0; ty < Y; ty++){
+				for(let tx = 0; tx < X; tx++){
+					for(let y = 0; y < this.H; y++){
+						for(let x = 0; x < this.W; x++){
+							const SrcIndex = (y * this.W + x) * 4;
+							const DestIndex = ((ty * this.H + y) * NewW + (tx * this.W + x)) * 4;
+
+							NewContent[DestIndex + 0] = this.Content[SrcIndex + 0];
+							NewContent[DestIndex + 1] = this.Content[SrcIndex + 1];
+							NewContent[DestIndex + 2] = this.Content[SrcIndex + 2];
+							NewContent[DestIndex + 3] = this.Content[SrcIndex + 3];
+						}
+					}
+				}
+			}
+
+			this.W = NewW;
+			this.H = NewH;
+			this.Content = NewContent;
+
+			this.C.width = NewW;
+			this.C.height = NewH;
+			this.__UpdateCanvas();
+
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при повторении текстуры [" + this + "]! Tile(" + X + ", " + Y + ");", e);
+		}
+	}
+	
+	/* ======================================================== */
+	
 	/* Клонирует текстуру */
 	Clone(){
 		return new Texture(this.W, this.H, this.Content);
 	}
-	
-	/* ======================================================== */
 	
 	async ToBlob(){
 		return await new Promise(R => this.C.toBlob(R, "image/png"));
@@ -1082,7 +1240,7 @@ async function FileContentByte(File){
 
 /* Файлы пака (Все файлы) */
 const PackFiles = {};
-/* Папки пака (Файлы внутри папок) */
+/* Папки пака (Файлы внутри папок) [Файлы без пути к папке] */
 const PackFolders = {};
 
 /* Информация об паке */
@@ -1109,7 +1267,9 @@ var SelectedVersion = null;
 /* Загрузка генератора */
 async function LoadGenerator(File, FileName, Loaded = new Set()){
 	try{
-		if(Loaded.has(FileName)){ return null; } Loaded.add(FileName);
+		if(Loaded.has(FileName)){ return null; }
+		var FirstGenerator = Loaded.size === 0;
+		Loaded.add(FileName);
 		
 		const Info = await FileContentJSON(File);
 		
@@ -1171,15 +1331,15 @@ async function LoadGenerator(File, FileName, Loaded = new Set()){
 		
 		if(Info.Parent){
 			const Parent = await GetFile("G/" + Info.Parent);
-			const ParentInfo = await LoadGenerator(Parent, Info.Parent, Loaded);
+			var ParentInfo = await LoadGenerator(Parent, Info.Parent, Loaded);
 			Info.Files = MergeFiles(ParentInfo.Files, Info.Files);
 			Info.__Info = Info.__Info || {};
 			Info.__Info.Parent = ParentInfo["Name"];
 		}
 		
-		if(Array.isArray(Info.Add)){
+		if(FirstGenerator && Array.isArray(Info.Add)){
 			for(const Add of Info.Add){
-				const AddInfo = await LoadGenerator(await GetFile("G/" + Add), Add, Loaded);
+				var AddInfo = await LoadGenerator(await GetFile("G/" + Add), Add, Loaded);
 				if(AddInfo){
 					Info.Files = MergeFiles(Info.Files, AddInfo.Files);
 					Info.__Info = Info.__Info || {};
@@ -1235,7 +1395,7 @@ async function LoadPackInformation(){
 				var Type = GeneratorInfo["Type"  ] || "Unknown"; GeneratorInfo["Type"  ] = Type  ;
 				
 				if(Type === "Version"){
-					PackVersions[GeneratorInfo["Name"]] = await LoadGenerator(File, GeneratorInfo["Name"]);
+					PackVersions[GeneratorInfo["Name"]] = [File, GeneratorInfo["Name"], GeneratorInfo];
 				}
 			}
 		}
@@ -1278,7 +1438,7 @@ async function PreLoadAfter(){
 
 		function StyleSelection(D){
 			if (!D.id){ return D.text; }
-			const Dev = PackVersions[D.id].Dev;
+			const Dev = PackVersions[D.id][2].Dev;
 			return $("<span>").text(D.text).css("color",
 				Dev === false ? "white" : (Dev === "Error" ? "red" : (Dev === true ? "yellow" : (Dev ? "black" : "yellow")))
 			);
@@ -1294,6 +1454,19 @@ async function PreLoadAfter(){
 		SelectedVersion = SelectVersion.val();
 		
 		SelectVersion.on('change', function(){ SelectedVersion = SelectVersion.val(); });
+		
+		AllPaintings = {};
+		for(var File of PackFolders["R/T/ART"]){
+			var Path = File.name.split("/").pop();
+			var Match = Path.match(/^(\d+x\d+)_(\d+)\.png$/i);
+			if (!Match){ continue; }
+			
+			var PaintingSize = Match[1];
+
+			if(!AllPaintings[PaintingSize]){ AllPaintings[PaintingSize] = []; }
+			
+			AllPaintings[PaintingSize].push("R/T/ART/" + Path);
+		}
 		
 		PreLoaded = true;
 	}catch(e){
