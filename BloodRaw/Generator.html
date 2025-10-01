@@ -178,13 +178,9 @@ function UpdateString(String){
 
 /* Обновляет цвет */
 function UpdateColor(Color){
-	const Replacements = {
-		Grass : "#4E6925",
-		Leaves: "#1D3F19"
-	}
-	
-	return Color in Replacements ? Replacements[Color] : Color;
+	return Color in __Colors ? __Colors[Color] : Color;
 }
+var __Colors = {};
 
 /* Конвертация цвета в байты */
 function CalculateColor(Color){
@@ -555,18 +551,18 @@ async function GenerateAtlas(Info){
 		
 		var OneZero = TrueScale ? 0 : 1;
 		
-		for(var Y = OneZero; Y < H; Y++){
-			for(var X = OneZero; X < W; X++){
+		for(var X = OneZero; X < W; X++){
+			for(var Y = OneZero; Y < H; Y++){
 				try{
 					var Tile = null;
-					var Y_ = Info[Y];
-					if(Y_){
-						var X_ = Y_[X];
-						if(X_ != undefined){
-							if(X_ === false){
+					var X_ = Info[X];
+					if(X_){
+						var Y_ = X_[Y];
+						if(Y_ != undefined){
+							if(Y_ === false){
 								Tile = false;
 							}else{
-								Tile = await GenerateFile(X_);
+								Tile = await GenerateFile(Y_);
 							}
 						}
 					}
@@ -1122,6 +1118,24 @@ class Texture{
 	
 	/* ======================================================== */
 	
+	/* Получает цвет из пикселя */
+	GetColor(X, Y){
+		try{
+			if(X < 0 || Y < 0 || X >= this.W || Y >= this.H){ throw new Error("Пиксель выходит за пределы текстуры!"); }
+			
+			const i = (Y * this.W + X) * 4;
+			
+			return [
+				this.Content[i + 0],
+				this.Content[i + 1],
+				this.Content[i + 2],
+				this.Content[i + 3]
+			];
+		}catch(e){
+			throw new Error("Произошла ошибка при получении цвета пикселя у текстуры [" + this + "]! GetColor(" + X + ", " + Y + ");", e);
+		}
+	}
+	
 	/* Клонирует текстуру */
 	Clone(){
 		return new Texture(this.W, this.H, this.Content);
@@ -1424,6 +1438,42 @@ async function LoadPackInformation(){
 	}
 }
 
+/* Загружает картины */
+function LoadPaintings(){
+	try{
+		AllPaintings = {};
+		for(var File of PackFolders["R/T/ART"]){
+			var Path = File.name.split("/").pop();
+			var Match = Path.match(/^(\d+x\d+)_(\d+)\.png$/i);
+			if (!Match){ continue; }
+			
+			var PaintingSize = Match[1];
+
+			if(!AllPaintings[PaintingSize]){ AllPaintings[PaintingSize] = []; }
+			
+			AllPaintings[PaintingSize].push("R/T/ART/" + Path);
+		}
+	}catch(e){
+		throw new Error("Произошла ошибка при загрузке картин!", e);
+	}
+}
+
+/* Загружает цвета */
+async function LoadColors(){
+	try{
+		var GrassColormap  = await GetTexture("R/T/O/Colormap_Grass.png" );
+		var LeavesColormap = await GetTexture("R/T/O/Colormap_Leaves.png");
+		
+		var GrassColor  = GrassColormap .GetColor(127, 127);
+		var LeavesColor = LeavesColormap.GetColor(127, 127);
+		
+		__Colors["Grass" ] = `rgb(${GrassColor[0]},${GrassColor[1]},${GrassColor[2]})`;
+		__Colors["Leaves"] = `rgb(${LeavesColor[0]},${LeavesColor[1]},${LeavesColor[2]})`;
+	}catch(e){
+		throw new Error("Произошла ошибка при загрузке цветов!", e);
+	}
+}
+
 /* Вызывается после пре-загрузки */
 async function PreLoadAfter(){
 	if(!StartPreLoaded){ return; }
@@ -1455,18 +1505,9 @@ async function PreLoadAfter(){
 		
 		SelectVersion.on('change', function(){ SelectedVersion = SelectVersion.val(); });
 		
-		AllPaintings = {};
-		for(var File of PackFolders["R/T/ART"]){
-			var Path = File.name.split("/").pop();
-			var Match = Path.match(/^(\d+x\d+)_(\d+)\.png$/i);
-			if (!Match){ continue; }
-			
-			var PaintingSize = Match[1];
-
-			if(!AllPaintings[PaintingSize]){ AllPaintings[PaintingSize] = []; }
-			
-			AllPaintings[PaintingSize].push("R/T/ART/" + Path);
-		}
+		await LoadColors();
+		
+		LoadPaintings();
 		
 		PreLoaded = true;
 	}catch(e){

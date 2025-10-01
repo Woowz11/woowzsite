@@ -52,6 +52,11 @@ body::after{
 	opacity: 0;
 }
 
+textarea::selection {
+	background-color: rgba(255, 0, 0, 0.3);
+	color: white;
+}
+
 button{
 	border-image: url("button.png") repeat;
 	border-image-slice  : 6 fill;
@@ -131,4 +136,30 @@ li::before {
 
 span li::before{
 	display: none;
+}
+
+textarea {
+	font-family: CFont;
+	color: white;
+	text-shadow: 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
+	background-color: #2d2d2d;
+	border: none;
+	border-image: url("area.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 16px 16px;
+	padding: 10px;
+	line-height: 1.35em;
+	resize: none;
+	outline: none;
+	width: 100%;
+	height: 300px;
+	background-size: 100% 100%;
+	overflow: auto;
+	box-sizing: border-box;
+}
+
+textarea:focus {
+	border-image: url("area_hover.png") repeat;
+	border-image-slice: 6 fill;
+	border-image-width: 16px 16px;
 }
