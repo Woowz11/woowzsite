@@ -26,11 +26,12 @@ html, button{
 
 .Container{
 	max-width: 1000px;
-	height: 100vh;
+	height: 100%;
 	margin: 0 auto;
 	display: flex;
     flex-direction: column;
     gap: 15px;
+	padding-bottom: 50px;
 }
 
 .Console{
@@ -52,10 +53,6 @@ html, button{
 	text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
 }
 
-.Console p{
-	margin: 0;
-}
-
 .InfoBox {
 	display: flex;
 	align-items: center;
@@ -68,9 +65,7 @@ html, button{
 }
 </style>
 
-<link href="../Libs/select2.min.css" rel="stylesheet" />
 <script src="../Libs/jquery.min.js"></script>
-<script src="../Libs/select2.min.js"></script>
 
 <body id="body"><div class="Container">
 	<input type="file" id="PreLoadPack" accept=".zip" style="display: none;">
@@ -85,9 +80,9 @@ html, button{
 		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
-	<center><div>
-		<p>Версия:</p>
-		<select id="SelectVersion" style="width: 400px;"></select>
+	<center><div class="Bumb" style="display: flex; height: 60vh; padding: 0;">
+		<div class="Bumb" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px; direction: ltr;" id="SelectVersion"></div></div>
+		<div style="flex: 1;"></div>
 	</div></center>
 
 	<div style="text-align:center; padding-top: 20px;">

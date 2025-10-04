@@ -132,533 +132,6 @@ function DeepClone(Obj){
 function Lerp(A, B, T){ return A + (B - A) * T; }
 function Clamp(N, Min, Max){ return N <= Min ? Min : (N >= Max ? Max : N); }
 
-/* ======================================================== */
-
-/* Информация об паке (ZIP файл результат) */
-var Pack;
-
-/* Пак генерируется? */
-var InGeneration = false;
-
-/* Время начала генерации */
-var GenerationStartTime;
-
-/* Всего файлов */
-var TotalFiles;
-
-/* Сколько времени заняла генерация */
-var GenerationTime;
-
-/* Текущий файл (Путь) */
-var CurrentFile;
-
-/* Произошла ошибка во время генерации? */
-var HasError = false;
-
-/* Генерация пака */
-async function Generate(){
-	try{
-		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
-		if(InGeneration){ throw new Error("Пак уже генерируется!"); }
-		Console.empty();
-		
-		HasError = false;
-		document.documentElement.style.setProperty("--infobox", "255, 255, 0");
-		
-		InGeneration = true;
-		GenerationStartTime = Date.now();
-		Logger.Info(":" + "=".repeat(50) + ":");
-		Logger.Console("Начало генерации пака!");
-		
-		Pack = new JSZip();
-		
-		TotalFiles = 0;
-		
-		LoadPaintings();
-		__AllPaintings = AllPaintings;
-		
-		var VersionGenerator = PackVersions[SelectedVersion];
-		await ApplyGenerator(await LoadGenerator(VersionGenerator[0], VersionGenerator[1]));
-		
-		GenerationTime = Date.now() - GenerationStartTime;
-		
-		if(BuildFile){
-			Logger.Console("Применение BuildFile...");
-			var BuildFile_ = await GenerateFile(BuildFile[0], BuildFile[1], true);
-			await AddFileToPack(BuildFile[0], BuildFile_);
-		}
-		
-		Logger.Console("Скачивание...");
-		
-		const Blob = await Pack.generateAsync({ type: "blob" });
-		const A = document.createElement("a");
-		A.href = URL.createObjectURL(Blob);
-		A.download = "Bloodraw " + SelectedVersion + ".zip";
-		document.body.appendChild(A);
-		A.click();
-		document.body.removeChild(A);
-		URL.revokeObjectURL(A.href);
-		
-		document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
-		
-		Logger.Console("Конец генерации пака!");
-		InGeneration = false;
-		BuildFile = null;
-		Pack = null;
-	}catch(e){
-		if(InGeneration){ 
-			Logger.ConsoleError("Произошла ошибка при генерации пака!", e);
-		}else{
-			Logger.Fatal("Произошла ошибка при генерации пака!", e);
-		}
-	}
-}
-
-/* Добавляет файл паку */
-async function AddFileToPack(Path, Content){
-	try{
-		if(Content === null){ return; }
-		
-		/* Это текстура? */
-		if(Content instanceof Texture){
-			Content = await Content.ToBlob();
-		}
-		
-		/* Это JSZipFile? */
-		if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
-			Content = await FileContentByte(Content);
-		}
-		
-		Pack.file(Path, Content); TotalFiles++;
-	}catch(e){
-		throw new Error("Произошла ошибка при добавлении файла [" + Path + "] паку!", e);
-	}
-}
-
-/* Применить генератор */
-async function ApplyGenerator(Generator){
-	try{
-		Logger.Console("Применение генератора [" + Generator["Name"] + "]");
-		
-		var Files = Generator["Files"];
-		
-		var __Info = Generator["__Info"] || {};
-		
-		var Parent = __Info["Parent"] || null;
-		if(Parent){
-			Logger.Console("Родитель [" + Parent + "]");
-		}
-		
-		var Added = __Info["Added"] || [];
-		for(var Added_ of Added){
-			Logger.Console("Добавлено к генератору [" + Added_ + "]");
-		}
-		
-		for(const Path of Object.keys(Files)){
-			var Content = await GenerateFile(Path, Files[Path]);
-			await AddFileToPack(Path, Content);
-		}
-	}catch(e){
-		throw new Error("Произошла ошибка с генератором!", e);
-	}
-}
-
-/* Применяет модификатор */
-async function ApplyAction(Content, Type, Info){
-	try{
-		Logger.Console("Применение модификатора [" + Type + "]...");
-	
-		switch(Type){
-			case "Background": {
-				Content.Background(Info[0]);
-				break;
-			}
-			
-			case "Put": {
-				var T     = await GenerateFile(Info[0]);
-				var X     = Info[1] || 0;
-				var Y     = Info[2] || 0;
-				var Blend = Info[3] || "alpha";
-				
-				Content.Put(T, X, Y, Blend);
-				break;
-			}
-			
-			case "Frame": {
-				var Index = Info[0] || 0;
-				Content.Frame(Index);
-				break;
-			}
-			
-			case "Resize": {
-				var W = Info[0];
-				var H = Info[1] || W;
-				var Smooth = Info[2] ?? true;
-				Content.Resize(W, H, Smooth);
-				break;
-			}
-			
-			case "Crop": {
-				var X = Info[0];
-				var Y = Info[1];
-				var W = Info[2];
-				var H = Info[3];
-				
-				Content.Crop(X, Y, W, H);
-				break;
-			}
-			
-			case "Gradient": {
-				var Gradient = await GenerateFile(Info[0]);
-				Content.Gradient(Gradient);
-				break;
-			}
-			
-			case "Multiply": {
-				var C = Info[0];
-				if(Array.isArray(C)){ C = await GenerateFile(C); } 
-				Content.Multiply(C);
-				break;
-			}
-			
-			case "Fixed": {
-				var R = Info[0] || null;
-				var G = Info[1] || null;
-				var B = Info[2] || null;
-				var A = Info[3] || null;
-				
-				Content.Fixed(R, G, B, A);
-				break;
-			}
-			
-			case "NewSize": {
-				var W = Info[0];
-				var H = Info[1];
-				Content.NewSize(W, H);
-				break;
-			}
-			
-			case "Flip": {
-				var X = Info[0] || false;
-				var Y = Info[1] || false;
-				Content.Flip(X, Y);
-				break;
-			}
-			
-			case "Trim": {
-				var R = Info[0] || null;
-				var G = Info[1] || null;
-				var B = Info[2] || null;
-				var A = Info[3] || null;
-				
-				Content.Trim(R, G, B, A);
-				break;
-			}
-			
-			case "Move": {
-				var X = Info[0] || 0;
-				var Y = Info[1] || 0;
-				Content.Move(X, Y);
-				break;
-			}
-			
-			case "Invert": {
-				var R = Info[0] ?? true;
-				var G = Info[1] ?? true;
-				var B = Info[2] ?? true;
-				var A = Info[3] ?? false;
-				
-				Content.Invert(R, G, B, A);
-				break;
-			}
-			
-			case "Tile": {
-				var X = Info[0] || 1;
-				var Y = Info[1] || 1;
-				Content.Tile(X, Y);
-				break;
-			}
-			
-			case "Fill": {
-				var X0 = Info[0] || 0;
-				var Y0 = Info[1] || 0;
-				var X1 = Info[2] || null;
-				var X2 = Info[3] || null;
-				var Color = Info[4] || "transparent";
-				
-				Content.Fill(X0, Y0, X1, X2, Color);
-				break;
-			}
-			
-			case "Mask": {
-				Content.Mask();
-				break;
-			}
-			
-			default: {
-				Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
-				break;
-			}
-		}
-		
-		return Content;
-	}catch(e){
-		throw new Error("Произошла ошибка при применении модификатора [" + Type + "]!", e);
-	}
-}
-
-/* Применение модификаторов */
-async function ApplyActions(Content, Actions){
-	try{
-		if(!Actions || !Actions.length){ return Content; }
-		
-		Content = Content.Clone();
-		
-		for(var Action of Actions){ Content = await ApplyAction(Content, Action[0], Action.slice(1)); }
-		
-		return Content;
-	}catch(e){
-		throw new Error("Произошла ошибка при применении модификаторов!", e);
-	}
-}
-
-/* Файл с выводом информации */
-var BuildFile;
-
-/* Содержимое сгенерированного файла [Если указать только 1 аргумент, будет считаться как в памяти] */
-async function GenerateFile(Path, Info = null, IgnoreTags = false){
-	var MemoryFile = Path && !Info;
-	if(MemoryFile){ Info = Path; Path = null; }
-
-	try{
-		/* Как генерировать файл */
-		var GenerateType = Info[0];
-		
-		var ID = MemoryFile ? JSON.stringify(Info) : Path;
-		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting"){
-			var __Result = __GenerateFile[ID];
-			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
-			return __Result;
-		}
-		
-		Info.shift();
-		
-		/* Дополнительная информация и теги */
-		var Tag = null;
-		
-		if(Array.isArray(GenerateType)){
-			Tag = GenerateType[1];
-			GenerateType = GenerateType[0];
-		}
-		
-		if(!IgnoreTags && Tag){
-			if(Tag[0] === "BuildFile"){
-				BuildFile = [Path, [GenerateType, ...Info]];
-				return null;
-			}
-		}
-		
-		CurrentFile = MemoryFile ? "[CurrentFile : null]" : Path;
-		
-		Logger.Console(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...");
-		
-		var Actions = null;
-		
-		var Result;
-		
-		switch(GenerateType){
-			case "File": {
-				var FilePath = Info[0];
-				Actions = Info[1] || null;
-				Result = await GetFile(FilePath);
-				break;
-			}
-			
-			case "Texture": {
-				var FilePath = Info[0];
-				Actions = Info[1] || null;
-				Result = await GetTexture(FilePath);
-				break;
-			}
-			
-			case "Create": {
-				if (typeof Info[0] === "number" && typeof Info[1] === "number") {
-					var W = Info[0];
-					var H = Info[1];
-					var Color = Info[2] || "transparent";
-					Actions   = Info[3] || null;
-
-					Result = new Texture(W, H, Color);
-				} else if (Array.isArray(Info[0])) {
-					var File = await GenerateFile(Info[0]);
-					var Content = await FileContent(File);
-
-					Result = UpdateString(Content);
-				} else {
-					var Content = Info[0];
-					Actions = Info[1] || null;
-					Result = UpdateString(Content);
-				}
-				break;
-			}
-			
-			case "Atlas": {
-				var AtlasInfo = Info[0];
-				Actions = Info[1] || null;
-				Result = await GenerateAtlas(AtlasInfo);
-				break;
-			}
-			
-			case "Painting": {
-				var W = Info[0];
-				var H = Info[1];
-				Actions = Info[2] || null;
-				Result = await GeneratePainting(W, H);
-				break;
-			}
-			
-			case "Splashes": {
-				var SplashesVersion = Info[0];
-				Actions = Info[1] || null;
-				Result = await GenerateSplashes(SplashesVersion);
-				break;
-			}
-			
-			default: {
-				Result = "Не найден тип генерации [" + GenerateType + "]!";
-				Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
-				break;
-			}
-		}
-		
-		Result = await ApplyActions(Result, Actions);
-		__GenerateFile[ID] = Result;
-		return Result;
-	}catch(e){
-		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
-		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
-	}
-}
-var __GenerateFile = {};
-
-/* ======================================================== */
-
-/* Генерация атласа */
-async function GenerateAtlas(Info){
-	try{
-		Info = DeepClone(Info);
-		
-		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : false;
-		var Size  = Info["Size" ] || [2, 2];
-		var Scale = Info["Scale"] || [1, 1];
-		var W     = Size[0];
-		var H     = Size[1];
-		
-		if(Info["Empty"]){ delete Info["Empty"]; }
-		if(Info["Size" ]){ delete Info["Size" ]; }
-		if(Info["Scale"]){ delete Info["Scale"]; }
-		
-		if(Size[0] <= 1 || Size[1] <= 1){ throw new Error("Кол-во клеток <= 1!\nSize[0]: " + Size[0] + " | Size[1]: " + Size[1]); }
-		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
-		
-		var Atlas = new Texture(W * Scale[0], H * Scale[1]);
-		
-		for(var X = 0; X < W; X++){
-			for(var Y = 0; Y < H; Y++){
-				try{
-					var Tile = null;
-					var X_ = Info[X];
-					if(X_){
-						var Y_ = X_[Y];
-						if(Y_ != undefined){
-							if(Y_ === false){
-								Tile = false;
-							}else{
-								Tile = await GenerateFile(Y_);
-							}
-							
-							delete Info[X][Y];
-							if(Object.keys(Info[X]).length <= 0){ delete Info[X]; }
-						}
-					}
-					
-					if(Tile != false){
-						Atlas.Set(Tile ? Tile : Empty, X * Scale[0], Y * Scale[1]);
-					}
-				}catch(e){
-					Logger.Error("Произошла ошибка генерации тайтла [" + X + ":" + Y + "] у атласа!");
-				}
-			}
-		}
-		
-		const LeftOver = Object.keys(Info);
-		if(LeftOver.length > 0){
-			for(var Key of LeftOver){
-				Logger.ConsoleWarn("У атласа найден лишний ключ [" + Key + "]!");
-			}
-			throw new Error("В атласе найдены лишние ключи!");
-		}
-		
-		return Atlas;
-	}catch(e){
-		throw new Error("Произошла ошибка при генерации атласа!", e);
-	}
-}
-
-/* Все картины */
-var AllPaintings;
-
-/* Генерация картины */
-async function GeneratePainting(W, H){
-	try{
-		if(W === true && !H){ return await GetTexture(ChangelogTexture); }
-	
-		var PaintingSize = W + "x" + H;
-	
-		var FrameTexture = "R/T/ART/Frame_" + PaintingSize + ".png";
-	
-		var PaintingFamily = __AllPaintings[PaintingSize];
-		if(!PaintingFamily || PaintingFamily.length === 0){
-			Logger.ConsoleWarn("Закончились картины типа [" + PaintingSize + "]!");
-			return await GenerateFile(["Texture", "R/T/ART/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
-		}
-	
-		var Painting = PaintingFamily.splice(Math.floor(Math.random() * PaintingFamily.length), 1)[0];
-		return await GenerateFile(["Texture", Painting, [["Put", ["Texture", FrameTexture]]]]);
-	}catch(e){
-		throw new Error("Произошла ошибка при генерации картины " + W + "x" + H + "!", e);
-	}
-}
-var __AllPaintings;
-
-/* Генерация сплешей */
-async function GenerateSplashes(SplashesVersion){
-	try{
-		if(SplashesVersion < 0){ throw new Error("Версия не может быть < 0!"); }
-		
-		var Result = "";
-		
-		var Splashes = await FileContentJSON(await GetFile("R/O/Splashes.json"));
-		for(var SplashInfo of Splashes){
-			var Splash = SplashInfo;
-			var Tags   = [];
-			if(Array.isArray(SplashInfo)){
-				Splash = SplashInfo[0];
-				Tags   = SplashInfo[1];
-			}
-			
-			if(Result.length > 0){ Result += "\n"; }
-			Result += UpdateString(Splash);
-		}
-		
-		return Result;
-	}catch(e){
-		throw new Error("Произошла ошибка при генерации сплешей!\nВерсия: " + SplashesVersion, e);
-	}
-}
-
-/* ======================================================== */
-
 /* Получить файл */
 async function GetFile(Path, ThatTexture = false){
 	Path = Path.replace(/\\/g, "/").replace(/\/+/g, "/");
@@ -748,6 +221,36 @@ async function FileContentByte(File){
 		throw new Error("Произошла ошибка при чтении файла [" + File.name + "], в формате Bytes!", e);
 	}
 }
+
+/* ======================================================== */
+
+/* Показывает информацию о генераторе */
+function ShowInfo(Info){
+	try{
+		
+	}catch(e){
+		throw new Error("Произошла ошибка при показе информации об генераторе!", e);
+	}
+}
+
+/* Версия выбрана */
+function SelectVersion(Version){
+	try{
+		Logger.Info("Выбрана версия: " + Version);
+		
+		if(SelectedVersion == Version){ return; }
+		SelectedVersion = Version;
+		
+		if(__OldSelectVersionButton != null){ __OldSelectVersionButton.classList.remove("Selected"); }
+		
+		const Button = document.getElementById("SV-" + Version);
+		Button.classList.add("Selected");
+		__OldSelectVersionButton = Button;
+	}catch(e){
+		throw new Error("Произошла ошибка при выборе версии [" + Version + "]!", e);
+	}
+}
+var __OldSelectVersionButton = null;
 
 /* ======================================================== */
 
@@ -985,30 +488,23 @@ async function PreLoadAfter(){
 	try{
 		await LoadPackInformation();
 	
-		const SelectVersion = $("#SelectVersion");
+		const SelectVersion_ = $("#SelectVersion");
 		
-		SelectVersion.html(
-			Object.keys(PackVersions).map(V => `<option value="${V}">${V}</option>`).join("")
+		const Versions = Object.keys(PackVersions);
+		
+		SelectVersion_.html(
+			Versions.map(V => {
+				var Version = PackVersions[V][2];
+				var Dev = Version.Dev;
+				
+				const MinL = 6 ; const MaxL = 10;
+				const MinS = 24; const MaxS = 14;
+				var T = Clamp((V.length - MinL) / (MaxL - MinL), 0, 1);
+				return `<button onclick="SelectVersion('${V}');" id="SV-${V}" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
+			}).join("")
 		);
-
-		function StyleSelection(D){
-			if (!D.id){ return D.text; }
-			const Dev = PackVersions[D.id][2].Dev;
-			return $("<span>").text(D.text).css("color",
-				Dev === false ? "white" : (Dev === "Error" ? "red" : (Dev === true ? "yellow" : (Dev ? "black" : "yellow")))
-			);
-		}
-
-		SelectVersion.select2({
-			placeholder: "Выберите версию",
-			allowClear: true,
-			templateResult   : StyleSelection,
-			templateSelection: StyleSelection
-		});
 		
-		SelectedVersion = SelectVersion.val();
-		
-		SelectVersion.on('change', function(){ SelectedVersion = SelectVersion.val(); });
+		SelectVersion(Versions[0]);
 		
 		await LoadColors();
 		
@@ -1075,3 +571,537 @@ function Awake(){
 	}
 }
 Awake();
+
+/* ======================================================== */
+
+/* Информация об паке (ZIP файл результат) */
+var Pack;
+
+/* Пак генерируется? */
+var InGeneration = false;
+
+/* Время начала генерации */
+var GenerationStartTime;
+
+/* Всего файлов */
+var TotalFiles;
+
+/* Сколько времени заняла генерация */
+var GenerationTime;
+
+/* Текущий файл (Путь) */
+var CurrentFile;
+
+/* Произошла ошибка во время генерации? */
+var HasError = false;
+
+/* Генерация пака */
+async function Generate(){
+	try{
+		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
+		if(InGeneration){ throw new Error("Пак уже генерируется!"); }
+		Console.empty();
+		
+		HasError = false;
+		document.documentElement.style.setProperty("--infobox", "255, 255, 0");
+		
+		InGeneration = true;
+		GenerationStartTime = Date.now();
+		Logger.Info(":" + "=".repeat(50) + ":");
+		Logger.Console("Начало генерации пака!");
+		
+		Pack = new JSZip();
+		
+		TotalFiles = 0;
+		
+		LoadPaintings();
+		__AllPaintings = AllPaintings;
+		
+		var VersionGenerator = PackVersions[SelectedVersion];
+		await ApplyGenerator(await LoadGenerator(VersionGenerator[0], VersionGenerator[1]));
+		
+		GenerationTime = Date.now() - GenerationStartTime;
+		
+		if(BuildFile){
+			Logger.Console("Применение BuildFile...");
+			var BuildFile_ = await GenerateFile(BuildFile[0], BuildFile[1], true);
+			await AddFileToPack(BuildFile[0], BuildFile_);
+		}
+		
+		Logger.Console("Скачивание...");
+		
+		const Blob = await Pack.generateAsync({ type: "blob" });
+		const A = document.createElement("a");
+		A.href = URL.createObjectURL(Blob);
+		A.download = "Bloodraw " + SelectedVersion + ".zip";
+		document.body.appendChild(A);
+		A.click();
+		document.body.removeChild(A);
+		URL.revokeObjectURL(A.href);
+		
+		document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
+		
+		Logger.Console("Конец генерации пака!");
+		InGeneration = false;
+		BuildFile = null;
+		Pack = null;
+		
+		Logger.Info(":" + "=".repeat(50) + ":");
+	}catch(e){
+		if(InGeneration){ 
+			Logger.ConsoleError("Произошла ошибка при генерации пака!", e);
+		}else{
+			Logger.Fatal("Произошла ошибка при генерации пака!", e);
+		}
+	}
+}
+
+/* Добавляет файл паку */
+async function AddFileToPack(Path, Content){
+	try{
+		if(Content === null){ return; }
+		
+		/* Это текстура? */
+		if(Content instanceof Texture){
+			Content = await Content.ToBlob();
+		}
+		
+		/* Это JSZipFile? */
+		if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
+			Content = await FileContentByte(Content);
+		}
+		
+		Pack.file(Path, Content); TotalFiles++;
+	}catch(e){
+		throw new Error("Произошла ошибка при добавлении файла [" + Path + "] паку!", e);
+	}
+}
+
+/* Применить генератор */
+async function ApplyGenerator(Generator){
+	try{
+		Logger.Console("Применение генератора [" + Generator["Name"] + "]");
+		
+		var Files = Generator["Files"];
+		
+		var __Info = Generator["__Info"] || {};
+		
+		var Parent = __Info["Parent"] || null;
+		if(Parent){
+			Logger.Console("Родитель [" + Parent + "]");
+		}
+		
+		var Added = __Info["Added"] || [];
+		for(var Added_ of Added){
+			Logger.Console("Добавлено к генератору [" + Added_ + "]");
+		}
+		
+		for(const Path of Object.keys(Files)){
+			var Content = await GenerateFile(Path, Files[Path]);
+			await AddFileToPack(Path, Content);
+		}
+	}catch(e){
+		throw new Error("Произошла ошибка с генератором!", e);
+	}
+}
+
+/* Применяет модификатор */
+async function ApplyAction(Content, Type, Info){
+	try{
+		Logger.Console("Применение модификатора [" + Type + "]...");
+	
+		switch(Type){
+			case "Background": {
+				Content.Background(Info[0]);
+				break;
+			}
+			
+			case "Put": {
+				var T     = await GenerateFile(Info[0]);
+				var X     = Info[1] || 0;
+				var Y     = Info[2] || 0;
+				var Blend = Info[3] || "alpha";
+				
+				Content.Put(T, X, Y, Blend);
+				break;
+			}
+			
+			case "Frame": {
+				var Index = Info[0] || 0;
+				Content.Frame(Index);
+				break;
+			}
+			
+			case "Resize": {
+				var W = Info[0];
+				var H = Info[1] || W;
+				var Smooth = Info[2] ?? false;
+				Content.Resize(W, H, Smooth);
+				break;
+			}
+			
+			case "Crop": {
+				var X = Info[0];
+				var Y = Info[1];
+				var W = Info[2] || null;
+				var H = Info[3] || null;
+				
+				if(W == null && H == null){
+					W = X; H = Y; X = Y = 0;
+				}
+				
+				Content.Crop(X, Y, W, H);
+				break;
+			}
+			
+			case "Gradient": {
+				var Gradient = await GenerateFile(Info[0]);
+				Content.Gradient(Gradient);
+				break;
+			}
+			
+			case "Multiply": {
+				var C = Info[0];
+				if(Array.isArray(C)){ C = await GenerateFile(C); } 
+				Content.Multiply(C);
+				break;
+			}
+			
+			case "Fixed": {
+				var R = Info[0] || null;
+				var G = Info[1] || null;
+				var B = Info[2] || null;
+				var A = Info[3] || null;
+				
+				Content.Fixed(R, G, B, A);
+				break;
+			}
+			
+			case "NewSize": {
+				var W = Info[0];
+				var H = Info[1];
+				Content.NewSize(W, H);
+				break;
+			}
+			
+			case "Flip": {
+				var X = Info[0] || false;
+				var Y = Info[1] || false;
+				Content.Flip(X, Y);
+				break;
+			}
+			
+			case "Trim": {
+				var R = Info[0] || null;
+				var G = Info[1] || null;
+				var B = Info[2] || null;
+				var A = Info[3] || null;
+				
+				Content.Trim(R, G, B, A);
+				break;
+			}
+			
+			case "Move": {
+				var X = Info[0] || 0;
+				var Y = Info[1] || 0;
+				Content.Move(X, Y);
+				break;
+			}
+			
+			case "Invert": {
+				var R = Info[0] ?? true;
+				var G = Info[1] ?? true;
+				var B = Info[2] ?? true;
+				var A = Info[3] ?? false;
+				
+				Content.Invert(R, G, B, A);
+				break;
+			}
+			
+			case "Tile": {
+				var X = Info[0] || 1;
+				var Y = Info[1] || 1;
+				Content.Tile(X, Y);
+				break;
+			}
+			
+			case "Fill": {
+				var X0 = Info[0] || 0;
+				var Y0 = Info[1] || 0;
+				var X1 = Info[2] || null;
+				var X2 = Info[3] || null;
+				var Color = Info[4] || "transparent";
+				
+				Content.Fill(X0, Y0, X1, X2, Color);
+				break;
+			}
+			
+			case "Mask": {
+				Content.Mask();
+				break;
+			}
+			
+			default: {
+				Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
+				break;
+			}
+		}
+		
+		return Content;
+	}catch(e){
+		throw new Error("Произошла ошибка при применении модификатора [" + Type + "]!", e);
+	}
+}
+
+/* Применение модификаторов */
+async function ApplyActions(Content, Actions){
+	try{
+		if(!Actions || !Actions.length){ return Content; }
+		
+		Content = Content.Clone();
+		
+		for(var Action of Actions){ Content = await ApplyAction(Content, Action[0], Action.slice(1)); }
+		
+		return Content;
+	}catch(e){
+		throw new Error("Произошла ошибка при применении модификаторов!", e);
+	}
+}
+
+/* Файл с выводом информации */
+var BuildFile;
+
+/* Содержимое сгенерированного файла [Если указать только 1 аргумент, будет считаться как в памяти] */
+async function GenerateFile(Path, Info = null, IgnoreTags = false){
+	var MemoryFile = Path && !Info;
+	if(MemoryFile){ Info = Path; Path = null; }
+
+	try{
+		/* Как генерировать файл */
+		var GenerateType = Info[0];
+		
+		var ID = MemoryFile ? JSON.stringify(Info) : Path;
+		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting"){
+			var __Result = __GenerateFile[ID];
+			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
+			
+			Logger.Console(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...");
+			
+			return __Result;
+		}
+		
+		Info.shift();
+		
+		/* Дополнительная информация и теги */
+		var Tag = null;
+		
+		if(Array.isArray(GenerateType)){
+			Tag = GenerateType[1];
+			GenerateType = GenerateType[0];
+		}
+		
+		if(!IgnoreTags && Tag){
+			if(Tag[0] === "BuildFile"){
+				BuildFile = [Path, [GenerateType, ...Info]];
+				return null;
+			}
+		}
+		
+		CurrentFile = MemoryFile ? "[CurrentFile : null]" : Path;
+		
+		Logger.Console(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...");
+		
+		var Actions = null;
+		
+		var Result;
+		
+		switch(GenerateType){
+			case "File": {
+				var FilePath = Info[0];
+				Actions = Info[1] || null;
+				Result = await GetFile(FilePath);
+				break;
+			}
+			
+			case "Texture": {
+				var FilePath = Info[0];
+				Actions = Info[1] || null;
+				Result = await GetTexture(FilePath);
+				break;
+			}
+			
+			case "Create": {
+				if (typeof Info[0] === "number" && typeof Info[1] === "number") {
+					var W = Info[0];
+					var H = Info[1];
+					var Color = Info[2] || "transparent";
+					Actions   = Info[3] || null;
+
+					Result = new Texture(W, H, Color);
+				} else if (Array.isArray(Info[0])) {
+					var File = await GenerateFile(Info[0]);
+					var Content = await FileContent(File);
+
+					Result = UpdateString(Content);
+				} else {
+					var Content = Info[0];
+					Actions = Info[1] || null;
+					Result = UpdateString(Content);
+				}
+				break;
+			}
+			
+			case "Atlas": {
+				var AtlasInfo = Info[0];
+				Actions = Info[1] || null;
+				Result = await GenerateAtlas(AtlasInfo);
+				break;
+			}
+			
+			case "Painting": {
+				var W = Info[0];
+				var H = Info[1];
+				Actions = Info[2] || null;
+				Result = await GeneratePainting(W, H);
+				break;
+			}
+			
+			case "Splashes": {
+				var SplashesVersion = Info[0];
+				Actions = Info[1] || null;
+				Result = await GenerateSplashes(SplashesVersion);
+				break;
+			}
+			
+			default: {
+				Result = "Не найден тип генерации [" + GenerateType + "]!";
+				Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
+				break;
+			}
+		}
+		
+		Result = await ApplyActions(Result, Actions);
+		__GenerateFile[ID] = Result;
+		return Result;
+	}catch(e){
+		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
+		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
+	}
+}
+var __GenerateFile = {};
+
+/* ======================================================== */
+
+/* Генерация атласа */
+async function GenerateAtlas(Info){
+	try{
+		Info = DeepClone(Info);
+		
+		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : false;
+		var Size  = Info["Size" ] || [2, 2];
+		var Scale = Info["Scale"] || [1, 1];
+		var W     = Size[0];
+		var H     = Size[1];
+		
+		if(Info["Empty"]){ delete Info["Empty"]; }
+		if(Info["Size" ]){ delete Info["Size" ]; }
+		if(Info["Scale"]){ delete Info["Scale"]; }
+		
+		if(Size[0] <= 1 || Size[1] <= 1){ throw new Error("Кол-во клеток <= 1!\nSize[0]: " + Size[0] + " | Size[1]: " + Size[1]); }
+		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
+		
+		var Atlas = new Texture(W * Scale[0], H * Scale[1]);
+		
+		for(var X = 0; X < W; X++){
+			for(var Y = 0; Y < H; Y++){
+				try{
+					var Tile = null;
+					var X_ = Info[X];
+					if(X_){
+						var Y_ = X_[Y];
+						if(Y_ != undefined){
+							if(Y_ === false){
+								Tile = false;
+							}else{
+								Tile = await GenerateFile(Y_);
+							}
+							
+							delete Info[X][Y];
+							if(Object.keys(Info[X]).length <= 0){ delete Info[X]; }
+						}
+					}
+					
+					if(Tile != false){
+						Atlas.Set(Tile ? Tile : Empty, X * Scale[0], Y * Scale[1]);
+					}
+				}catch(e){
+					Logger.Error("Произошла ошибка генерации тайтла [" + X + ":" + Y + "] у атласа!");
+				}
+			}
+		}
+		
+		const LeftOver = Object.keys(Info);
+		if(LeftOver.length > 0){
+			for(var Key of LeftOver){
+				Logger.ConsoleWarn("У атласа найден лишний ключ [" + Key + "]!");
+			}
+			throw new Error("В атласе найдены лишние ключи!");
+		}
+		
+		return Atlas;
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации атласа!", e);
+	}
+}
+
+/* Все картины */
+var AllPaintings;
+
+/* Генерация картины */
+async function GeneratePainting(W, H){
+	try{
+		if(W === true && !H){ return await GetTexture(ChangelogTexture); }
+	
+		var PaintingSize = W + "x" + H;
+	
+		var FrameTexture = "R/T/ART/Frame_" + PaintingSize + ".png";
+	
+		var PaintingFamily = __AllPaintings[PaintingSize];
+		if(!PaintingFamily || PaintingFamily.length === 0){
+			Logger.ConsoleWarn("Закончились картины типа [" + PaintingSize + "]!");
+			return await GenerateFile(["Texture", "R/T/ART/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
+		}
+	
+		var Painting = PaintingFamily.splice(Math.floor(Math.random() * PaintingFamily.length), 1)[0];
+		return await GenerateFile(["Texture", Painting, [["Put", ["Texture", FrameTexture]]]]);
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации картины " + W + "x" + H + "!", e);
+	}
+}
+var __AllPaintings;
+
+/* Генерация сплешей */
+async function GenerateSplashes(SplashesVersion){
+	try{
+		if(SplashesVersion < 0){ throw new Error("Версия не может быть < 0!"); }
+		
+		var Result = "";
+		
+		var Splashes = await FileContentJSON(await GetFile("R/O/Splashes.json"));
+		for(var SplashInfo of Splashes){
+			var Splash = SplashInfo;
+			var Tags   = [];
+			if(Array.isArray(SplashInfo)){
+				Splash = SplashInfo[0];
+				Tags   = SplashInfo[1];
+			}
+			
+			if(Result.length > 0){ Result += "\n"; }
+			Result += UpdateString(Splash);
+		}
+		
+		return Result;
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации сплешей!\nВерсия: " + SplashesVersion, e);
+	}
+}

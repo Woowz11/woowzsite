@@ -200,11 +200,6 @@ AddFullnessToTable([
 	"channel_banner.jpg","kot4vostanovlenniy.jpg","c97196394a4d48595ccd4521266fa03477f165bc_full.jpg","2d2595b7dac4cc61.jpg","20250318164446_2.jpg","part2.webp"
 ],"art/",""));
 
-WoowzsiteSourceBloodraw = AddFullnessToTable([
-	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png","og.png",
-	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png","area.png","area_hover.png"
-],"BloodRaw/Source/","");
-
 WoowzsiteSourceBloodeyeSystems = AddFullnessToTable([
 	"bloodeye_system","bloodeye_system_2_screen","bloodeye_system_3d","bloodeye_system_screen","bloodeye_system2","bloodeye_system2_3d","bloodeye_system3","bloodeye_system3_3d","boxtexture","boxtexture_3d",
 ],"source/bloodeyesystems/",".png");
@@ -283,6 +278,11 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 ],"core-wiki/source/",".gif"),AddFullnessToTable([
 	"vaporwave","catbackground","accept_christ"
 ],"core-wiki/source/",".jpg")));
+
+WoowzsiteSourceBloodraw = AddFullnessToTable([
+	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png","og.png",
+	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png","area.png","area_hover.png", "button_selected.png"
+],"BloodRaw/Source/","");
 
 BloodrawSkinEditorBody = AddFullnessToTable([
 	"Обычное телоlСамое обычное телосложение"
