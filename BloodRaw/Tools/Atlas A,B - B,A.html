@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>Конвертер Atlas (Y,X → X,Y) с любыми значениями</title>
 
+<link rel="stylesheet" href="../Source/css.css">
+
 <style>
 html, button{
 	font-size   : 1.25em;
@@ -11,17 +13,15 @@ html, button{
 }
 
 body { padding: 0 20px; }
-textarea { width: calc(100% - 20px); height: 275px; background: #2d2d2d; color: #eee; border: 1px solid #555; padding: 10px; font-family: monospace; }
+textarea { width: 100%; height: 310px; }
 </style>
-
-<link rel="stylesheet" href="../Source/css.css">
 
 </head>
 <body>
 <h2>Конвертер Atlas (A, B → B, A)</h2>
 
-<p><b>Atlas (A, B):</b></p>
-<textarea id="input" autocomplete="off" placeholder='				"2" : {
+<p>Atlas (A, B):</p>
+<textarea id="input" autocomplete="off" spellcheck="false" placeholder='				"2" : {
 					"2"  : ["Texture", "R/T/P/Splash_1.texture"]
 				},
 				"3" : {
@@ -34,7 +34,7 @@ textarea { width: calc(100% - 20px); height: 275px; background: #2d2d2d; color: 
 <br>
 <button onclick="convert()">Конвертировать</button>
 
-<p><b>Atlas (B, A):</b></p>
+<p>Atlas (B, A):</p>
 <button onclick="copyOutput()">Скопировать результат</button>
 <textarea id="output" readonly placeholder='				"1" : {
 					"3" : ["Texture", "R/T/P/Bubble.png"],
@@ -50,14 +50,13 @@ function convert() {
     const input = document.getElementById("input").value;
     const lines = input.split('\n');
 
-    const data = {}; // Y → X → {value, tabX, tabY}
+    const data = {};
     let currentY = null;
     let currentTabY = "";
 
     lines.forEach(line => {
         if (!line.trim() || line.trim() === '},' || line.trim() === '}') return;
 
-        // Ищем Y
         let matchY = line.match(/^(\s*)"(\d+)"\s*:/);
         if (matchY && line.trim().endsWith('{')) {
             currentY = matchY[2];
@@ -66,7 +65,6 @@ function convert() {
             return;
         }
 
-        // Ищем X и значение после :
         let matchX = line.match(/^(\s*)"(\d+)"\s*:\s*(.+?),?\s*$/);
         if (matchX && currentY) {
             let tabX = matchX[1];
@@ -76,9 +74,8 @@ function convert() {
         }
     });
 
-    // Конвертируем Y,X → X,Y с сохранением табуляций
     const result = {};
-    const tabXRef = {}; // первая табуляция блока X
+    const tabXRef = {};
     Object.keys(data).forEach(y => {
         const row = data[y];
         Object.keys(row.values).forEach(x => {
@@ -88,7 +85,6 @@ function convert() {
         });
     });
 
-    // Форматируем вывод без лишнего \n в конце
     let outputLines = [];
     const xKeys = Object.keys(result).sort((a,b)=>Number(a)-Number(b));
     xKeys.forEach(x => {
@@ -106,11 +102,10 @@ function convert() {
     document.getElementById("output").value = outputLines.join(',\n');
 }
 
-// Кнопка копирования
 function copyOutput() {
     const outputField = document.getElementById("output");
     outputField.select();
-    outputField.setSelectionRange(0, 99999); // Для мобильных
+    outputField.setSelectionRange(0, 99999);
     document.execCommand("copy");
 }
 </script>

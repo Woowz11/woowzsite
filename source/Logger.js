@@ -25,40 +25,47 @@ Error = class{
 	}
 }
 
+const ExceptionLength = 100;
+
+function ExceptionInfo(Exception){
+	if(!Exception){ return; }
+	const Parent = ExceptionInfo(Exception.Parent);
+	
+	function PadException(E_, M){
+		return ("[" + E_.padEnd(20, " ") + "]").padStart(ExceptionLength - 1 - M.length, " ");
+	}
+	
+	if(Exception instanceof Error){
+		return " " + Exception.Message + " " + PadException(Exception.Exception(), Exception.Message) + (Parent ? "\n" + Parent : "");
+	}else{
+		if(Exception instanceof __Error){
+			var S = Exception.stack.split("\n")[1];
+			const M = (S ? S.match(__ErrorRegex) : null) || [];
+			S = M[2] || "Anonymous";
+			S = S.replace(__FunctionRegex, "");
+			S += ":" + (M[3] || "-1");
+			
+			return " " + Exception.message + " " + PadException(S, Exception.message) + (Exception.stack ? "\n" + Exception.stack : "");
+		}else{
+			return " " + Exception;
+		}
+	}
+}
+
+function PrintMessageText(Message, Exception){
+	var Result = Message;
+	
+	if(Exception){
+		Result += "\n:" + "=".repeat(ExceptionLength) + ":\n";
+		Result += ExceptionInfo(Exception);
+	}
+	
+	return Result;
+}
+
 function __Print(Message, Exception, Type, Style){
 	try{
-		var Result = Message;
-		
-		const Length = 100;
-		
-		if(Exception){
-			Result += "\n:" + "=".repeat(Length) + ":\n";
-			function __E(E){
-				if(!E){ return; }
-				const Parent = __E(E.Parent);
-				
-				function PadException(E_, M){
-					return ("[" + E_.padEnd(20, " ") + "]").padStart(Length - 1 - M.length, " ");
-				}
-				
-				if(E instanceof Error){
-					return " " + E.Message + " " + PadException(E.Exception(), E.Message) + (Parent ? "\n" + Parent : "");
-				}else{
-					if(E instanceof __Error){
-						var S = E.stack.split("\n")[1];
-						const M = (S ? S.match(__ErrorRegex) : null) || [];
-						S = M[2] || "Anonymous";
-						S = S.replace(__FunctionRegex, "");
-						S += ":" + (M[3] || "-1");
-						
-						return " " + E.message + " " + PadException(S, E.message) + (E.stack ? "\n" + E.stack : "");
-					}else{
-						return " " + E;
-					}
-				}
-			}
-			Result += __E(Exception);
-		}
+		var Result = PrintMessageText(Message, Exception);
 		
 		if(Style){
 			switch(Type){

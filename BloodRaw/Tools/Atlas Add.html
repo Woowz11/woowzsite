@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Конвертер Atlas (+N к ключам)</title>
+
+<link rel="stylesheet" href="../Source/css.css">
+
+<style>
+html, button, input{
+	font-size   : 1.25em;
+	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
+}
+
+body { padding: 0 20px; }
+textarea { width: 100%; height: 275px; }
+</style>
+
+</head>
+<body>
+<h2>Конвертер Atlas (+N к ключам)</h2>
+
+<p>Введите Atlas:</p>
+<textarea id="input" autocomplete="off" spellcheck="false" placeholder='				"2" : {
+					"2"  : ["Texture", "R/T/P/Splash_1.texture"]
+				},
+				"3" : {
+					"1"  : ["Texture", "R/T/P/Bubble.png"]
+				},
+				"4" : {
+					"1"  : ["Texture", "R/T/P/Fire.texture"],
+					"2"  : ["Texture", "R/T/P/Lava.png"]
+				}'></textarea>
+<br>
+
+<p>Смещение ключей: <input id="offset" type="number" value="-1"></p>
+<button onclick="convert()">Конвертировать</button>
+
+<p><b>Результат:</b></p>
+<button onclick="copyOutput()">Скопировать результат</button>
+<textarea id="output" readonly placeholder='				"1" : {
+					"1" : ["Texture", "R/T/P/Splash_1.texture"]
+				},
+				"2" : {
+					"0" : ["Texture", "R/T/P/Bubble.png"]
+				},
+				"3" : {
+					"0" : ["Texture", "R/T/P/Fire.texture"],
+					"1" : ["Texture", "R/T/P/Lava.png"]
+				}'></textarea>
+
+<script>
+function convert() {
+    const input = document.getElementById("input").value;
+    const offset = parseInt(document.getElementById("offset").value, 10) || 0;
+    const lines = input.split('\n');
+
+    const data = {};
+    let currentY = null;
+    let currentTabY = "";
+
+    lines.forEach(line => {
+        if (!line.trim() || line.trim() === '},' || line.trim() === '}') return;
+
+        let matchY = line.match(/^(\s*)"(\d+)"\s*:/);
+        if (matchY && line.trim().endsWith('{')) {
+            currentY = String(Number(matchY[2]) + offset);
+            currentTabY = matchY[1];
+            data[currentY] = {tabY: currentTabY, values: {}};
+            return;
+        }
+
+        let matchX = line.match(/^(\s*)"(\d+)"\s*:\s*(.+?),?\s*$/);
+        if (matchX && currentY) {
+            let tabX = matchX[1];
+            let x = String(Number(matchX[2]) + offset);
+            let value = matchX[3].trim();
+            data[currentY].values[x] = {value: value, tabX: tabX};
+        }
+    });
+
+    let outputLines = [];
+    const yKeys = Object.keys(data).sort((a,b)=>Number(a)-Number(b));
+    yKeys.forEach(y => {
+        let blockLines = [];
+        blockLines.push(`${data[y].tabY}"${y}" : {`);
+        const xKeys = Object.keys(data[y].values).sort((a,b)=>Number(a)-Number(b));
+        xKeys.forEach((x, xi) => {
+            const item = data[y].values[x];
+            blockLines.push(`${item.tabX}"${x}" : ${item.value}${xi < xKeys.length - 1 ? ',' : ''}`);
+        });
+        blockLines.push(`${data[y].tabY}}`);
+        outputLines.push(blockLines.join('\n'));
+    });
+
+    document.getElementById("output").value = outputLines.join(',\n');
+}
+
+function copyOutput() {
+    const outputField = document.getElementById("output");
+    outputField.select();
+    outputField.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+}
+</script>
+</body>
+</html>

@@ -15,6 +15,10 @@
 <link rel="stylesheet" href="Source/css.css">
 
 <style>
+:root {
+	--infobox: 128, 128, 128;
+}
+
 html, button{
 	font-size   : 1.25em;
 	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
@@ -58,8 +62,8 @@ html, button{
 	justify-content: space-between;
 	padding: 15px 20px;
 	background: linear-gradient(135deg, rgba(40,40,40,0.95), rgba(20,20,20,0.95));
-	border: 3px solid rgba(255, 0, 0, 0.5);
-	box-shadow: 0 0 15px rgba(255,0,0,0.3);
+	border: 3px solid rgba(var(--infobox), 0.5);
+	box-shadow: 0 0 15px rgba(var(--infobox), 0.3);
 	gap: 20px;
 }
 </style>
@@ -71,14 +75,14 @@ html, button{
 <body id="body"><div class="Container">
 	<input type="file" id="PreLoadPack" accept=".zip" style="display: none;">
 
-	<h1>Генератор BloodRaw</h1>
+	<h1>Генератор <a href="https://woowz11.github.io/woowzsite/BloodRaw/Main">BloodRaw</a></h1>
 
 	<div class="InfoBox">
 		<div>
 			<p><b>Информация:</b></p>
 			<li><p id="PackVersion">?</p></li>
 		</div>
-		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(255,0,0,0.4);" alt="Changelog картинка">
+		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
 	<center><div>
@@ -99,4 +103,5 @@ html, button{
 
 <script src="../source/Logger.js" ></script>
 <script src="../Libs/jszip.min.js"></script>
+<script src="../source/Texture.js" ></script>
 <script src="Source/Generator.js" ></script>

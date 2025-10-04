@@ -4,12 +4,13 @@
 /* Путь до файла с паком   */ const PackFile     = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
 /* Ссылка на сайт BloodRaw */ const BloodRawLink = "https://woowz11.github.io/woowzsite/BloodRaw/Main";
  
-/* Дефолтная текстура */ const DefaultTexture   = "R/T/Default.png"
-/* Текстура ошибка    */ const ErrorTexture     = "R/T/Error.png"
-/* Пустая текстура    */ const EmptyTexture     = "R/T/Empty.png"
+/* Дефолтная текстура */ const DefaultTexture   = "R/T/Default.png";
+/* Текстура ошибка    */ const ErrorTexture     = "R/T/Error.png";
 /* Текстура Changelog */ const ChangelogTexture = "Changelog.texture";
 
 /* ======================================================== */
+
+Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz11");
 
 var Console = $("#Console");
 
@@ -30,6 +31,8 @@ Logger.ConsoleWarn = function(Message, Exception){
 }
 
 Logger.ConsoleError = function(Message, Exception){
+	HasError = true;
+	
 	Logger.Error(Message, Exception);
 	Logger.Console(Exception.Message  , 2);
 	Logger.Console("См. консоль (F12)", 2);
@@ -68,6 +71,8 @@ function UpdateString(String){
 		GitHub          : "https://github.com/Woowz11",
 		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
 		Discord         : "woowz11",
+		Data            : "ТЕКУЩАЯ ДАТА ФОРМАТА 04.10.2025", //------------------------------------GWEWGWEGWEGWEGWEG
+		CurrentFile     : CurrentFile,
 		G_TotalFiles    : (BuildFile ? TotalFiles + 1 : TotalFiles),
 		G_Time          : GenerationTime
 	};
@@ -103,7 +108,7 @@ function CalculateColor(Color){
 		__CalculateColor[Color] = Result;
 		return Result;
 	}catch(e){
-		throw new Error("Произошла ошибка при расчёте цвета");
+		throw new Error("Произошла ошибка при расчёте цвета", e);
 	}
 }
 __CalculateColor = {};
@@ -144,12 +149,21 @@ var TotalFiles;
 /* Сколько времени заняла генерация */
 var GenerationTime;
 
+/* Текущий файл (Путь) */
+var CurrentFile;
+
+/* Произошла ошибка во время генерации? */
+var HasError = false;
+
 /* Генерация пака */
 async function Generate(){
 	try{
 		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
 		if(InGeneration){ throw new Error("Пак уже генерируется!"); }
 		Console.empty();
+		
+		HasError = false;
+		document.documentElement.style.setProperty("--infobox", "255, 255, 0");
 		
 		InGeneration = true;
 		GenerationStartTime = Date.now();
@@ -160,6 +174,7 @@ async function Generate(){
 		
 		TotalFiles = 0;
 		
+		LoadPaintings();
 		__AllPaintings = AllPaintings;
 		
 		var VersionGenerator = PackVersions[SelectedVersion];
@@ -183,6 +198,8 @@ async function Generate(){
 		A.click();
 		document.body.removeChild(A);
 		URL.revokeObjectURL(A.href);
+		
+		document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
 		
 		Logger.Console("Конец генерации пака!");
 		InGeneration = false;
@@ -221,9 +238,9 @@ async function AddFileToPack(Path, Content){
 /* Применить генератор */
 async function ApplyGenerator(Generator){
 	try{
-		var Files = Generator["Files"];
-		
 		Logger.Console("Применение генератора [" + Generator["Name"] + "]");
+		
+		var Files = Generator["Files"];
 		
 		var __Info = Generator["__Info"] || {};
 		
@@ -251,91 +268,137 @@ async function ApplyAction(Content, Type, Info){
 	try{
 		Logger.Console("Применение модификатора [" + Type + "]...");
 	
-		if(Type === "Background"){
-			Content.Background(Info[0]);
-		}else if(Type === "Put"){
-			var T     = await GenerateFile(Info[0]);
-			var X     = Info[1] || 0;
-			var Y     = Info[2] || 0;
-			var Blend = Info[3] || "alpha";
+		switch(Type){
+			case "Background": {
+				Content.Background(Info[0]);
+				break;
+			}
 			
-			Content.Put(T, X, Y, Blend);
-		}else if(Type === "Frame"){
-			var Index = Info[0] || 0;
+			case "Put": {
+				var T     = await GenerateFile(Info[0]);
+				var X     = Info[1] || 0;
+				var Y     = Info[2] || 0;
+				var Blend = Info[3] || "alpha";
+				
+				Content.Put(T, X, Y, Blend);
+				break;
+			}
 			
-			Content.Frame(Index);
-		}else if(Type === "Resize"){
-			var W = Info[0];
-			var H = Info[1] || W;
-			var Smooth = Info[2] || true;
+			case "Frame": {
+				var Index = Info[0] || 0;
+				Content.Frame(Index);
+				break;
+			}
 			
-			Content.Resize(W, H, Smooth);
-		}else if(Type === "Crop"){
-			var X = Info[0];
-			var Y = Info[1];
-			var W = Info[2];
-			var H = Info[3];
+			case "Resize": {
+				var W = Info[0];
+				var H = Info[1] || W;
+				var Smooth = Info[2] ?? true;
+				Content.Resize(W, H, Smooth);
+				break;
+			}
 			
-			Content.Crop(X, Y, W, H);
-		}else if(Type === "Gradient"){
-			var Gradient = await GenerateFile(Info[0]);
+			case "Crop": {
+				var X = Info[0];
+				var Y = Info[1];
+				var W = Info[2];
+				var H = Info[3];
+				
+				Content.Crop(X, Y, W, H);
+				break;
+			}
 			
-			Content.Gradient(Gradient);
-		}else if(Type === "Multiply"){
-			var Color = Info[0];
+			case "Gradient": {
+				var Gradient = await GenerateFile(Info[0]);
+				Content.Gradient(Gradient);
+				break;
+			}
 			
-			Content.Multiply(Color);
-		}else if(Type === "Fixed"){
-			var R = Info[0] || null;
-			var G = Info[1] || null;
-			var B = Info[2] || null;
-			var A = Info[3] || null;
-		
-			Content.Fixed(R, G, B, A);
-		}else if(Type === "NewSize"){
-			var W = Info[0];
-			var H = Info[1];
+			case "Multiply": {
+				var C = Info[0];
+				if(Array.isArray(C)){ C = await GenerateFile(C); } 
+				Content.Multiply(C);
+				break;
+			}
 			
-			Content.NewSize(W, H);
-		}else if(Type === "Flip"){
-			var X = Info[0] || false;
-			var Y = Info[1] || false;
+			case "Fixed": {
+				var R = Info[0] || null;
+				var G = Info[1] || null;
+				var B = Info[2] || null;
+				var A = Info[3] || null;
+				
+				Content.Fixed(R, G, B, A);
+				break;
+			}
 			
-			Content.Flip(X, Y);
-		}else if(Type === "Trim"){
-			var R = Info[0] || null;
-			var G = Info[1] || null;
-			var B = Info[2] || null;
-			var A = Info[3] || null;
+			case "NewSize": {
+				var W = Info[0];
+				var H = Info[1];
+				Content.NewSize(W, H);
+				break;
+			}
 			
-			Content.Trim(R, G, B, A);
-		}else if(Type === "Move"){
-			var X = Info[0] || 0;
-			var Y = Info[1] || 0;
+			case "Flip": {
+				var X = Info[0] || false;
+				var Y = Info[1] || false;
+				Content.Flip(X, Y);
+				break;
+			}
 			
-			Content.Move(X, Y);
-		}else if(Type === "Invert"){
-			var R = Info[0] || true;
-			var G = Info[1] || true;
-			var B = Info[2] || true;
-			var A = Info[3] || false;
+			case "Trim": {
+				var R = Info[0] || null;
+				var G = Info[1] || null;
+				var B = Info[2] || null;
+				var A = Info[3] || null;
+				
+				Content.Trim(R, G, B, A);
+				break;
+			}
 			
-			Content.Invert(R, G, B, A);
-		}else if(Type === "Tile"){
-			var X = Info[0] || 1;
-			var Y = Info[1] || 1;
+			case "Move": {
+				var X = Info[0] || 0;
+				var Y = Info[1] || 0;
+				Content.Move(X, Y);
+				break;
+			}
 			
-			Content.Tile(X, Y);
-		}else if(Type === "Fill"){
-			var X0 = Info[0] || 0;
-			var Y0 = Info[1] || 0;
-			var X1 = Info[2] || null;
-			var X2 = Info[3] || null;
-			var Color = Info[4] || "transparent";
+			case "Invert": {
+				var R = Info[0] ?? true;
+				var G = Info[1] ?? true;
+				var B = Info[2] ?? true;
+				var A = Info[3] ?? false;
+				
+				Content.Invert(R, G, B, A);
+				break;
+			}
 			
-			Content.Fill(X0, Y0, X1, X2, Color);
-		}else{
-			Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
+			case "Tile": {
+				var X = Info[0] || 1;
+				var Y = Info[1] || 1;
+				Content.Tile(X, Y);
+				break;
+			}
+			
+			case "Fill": {
+				var X0 = Info[0] || 0;
+				var Y0 = Info[1] || 0;
+				var X1 = Info[2] || null;
+				var X2 = Info[3] || null;
+				var Color = Info[4] || "transparent";
+				
+				Content.Fill(X0, Y0, X1, X2, Color);
+				break;
+			}
+			
+			case "Mask": {
+				Content.Mask();
+				break;
+			}
+			
+			default: {
+				Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
+				break;
+			}
 		}
 		
 		return Content;
@@ -367,9 +430,19 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	var MemoryFile = Path && !Info;
 	if(MemoryFile){ Info = Path; Path = null; }
 
-	try{		
+	try{
 		/* Как генерировать файл */
 		var GenerateType = Info[0];
+		
+		var ID = MemoryFile ? JSON.stringify(Info) : Path;
+		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting"){
+			var __Result = __GenerateFile[ID];
+			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
+			return __Result;
+		}
+		
+		Info.shift();
+		
 		/* Дополнительная информация и теги */
 		var Tag = null;
 		
@@ -378,94 +451,120 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			GenerateType = GenerateType[0];
 		}
 		
-		if(!IgnoreTags && Tag && Tag[0] === "BuildFile"){
-			BuildFile = [Path, Info];
-			return null;
+		if(!IgnoreTags && Tag){
+			if(Tag[0] === "BuildFile"){
+				BuildFile = [Path, [GenerateType, ...Info]];
+				return null;
+			}
 		}
 		
-		if(MemoryFile){
-			Logger.Console("Генерация файла в памяти...");
-		}else{
-			Logger.Console("Генерация [" + Path + "]...");
-		}
+		CurrentFile = MemoryFile ? "[CurrentFile : null]" : Path;
+		
+		Logger.Console(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...");
 		
 		var Actions = null;
 		
 		var Result;
 		
-		if(GenerateType === "File"){
-			var FilePath = Info[1];
-			Actions = Info[2] || null;
-			Result = await GetFile(FilePath);
-		}else if(GenerateType === "Texture"){
-			var FilePath = Info[1];
-			Actions = Info[2] || null;
-			Result = await GetTexture(FilePath);
-		}else if(GenerateType === "Create"){
-			if(typeof Info[1] === "number" && typeof Info[2] === "number"){
-				var W = Info[1];
-				var H = Info[2];
-				var Color = Info[3] || "transparent";
-				Actions = Info[4] || null;
-				
-				Result = new Texture(W, H, Color);
-			}else if(Array.isArray(Info[1])){
-				var File = await GenerateFile(Info[1]);
-				var Content = await FileContent(File);
-				
-				Result = UpdateString(Content);
-			}else{
-				var Content = Info[1];
-				Actions = Info[2] || null;
-				Result = UpdateString(Content);
+		switch(GenerateType){
+			case "File": {
+				var FilePath = Info[0];
+				Actions = Info[1] || null;
+				Result = await GetFile(FilePath);
+				break;
 			}
-		}else if(GenerateType === "Atlas"){
-			var AtlasInfo = Info[1];
-			Actions = Info[2] || null;
-			Result = await GenerateAtlas(AtlasInfo);
-		}else if(GenerateType === "Painting"){
-			var W = Info[1];
-			var H = Info[2];
-			Actions = Info[3] || null;
-			Result = await GeneratePainting(W, H);
-		}else{
-			Result = "Не найден тип генерации [" + GenerateType + "]!";
-			Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
+			
+			case "Texture": {
+				var FilePath = Info[0];
+				Actions = Info[1] || null;
+				Result = await GetTexture(FilePath);
+				break;
+			}
+			
+			case "Create": {
+				if (typeof Info[0] === "number" && typeof Info[1] === "number") {
+					var W = Info[0];
+					var H = Info[1];
+					var Color = Info[2] || "transparent";
+					Actions   = Info[3] || null;
+
+					Result = new Texture(W, H, Color);
+				} else if (Array.isArray(Info[0])) {
+					var File = await GenerateFile(Info[0]);
+					var Content = await FileContent(File);
+
+					Result = UpdateString(Content);
+				} else {
+					var Content = Info[0];
+					Actions = Info[1] || null;
+					Result = UpdateString(Content);
+				}
+				break;
+			}
+			
+			case "Atlas": {
+				var AtlasInfo = Info[0];
+				Actions = Info[1] || null;
+				Result = await GenerateAtlas(AtlasInfo);
+				break;
+			}
+			
+			case "Painting": {
+				var W = Info[0];
+				var H = Info[1];
+				Actions = Info[2] || null;
+				Result = await GeneratePainting(W, H);
+				break;
+			}
+			
+			case "Splashes": {
+				var SplashesVersion = Info[0];
+				Actions = Info[1] || null;
+				Result = await GenerateSplashes(SplashesVersion);
+				break;
+			}
+			
+			default: {
+				Result = "Не найден тип генерации [" + GenerateType + "]!";
+				Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
+				break;
+			}
 		}
 		
 		Result = await ApplyActions(Result, Actions);
+		__GenerateFile[ID] = Result;
 		return Result;
 	}catch(e){
 		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
-		return "Произошла ошибка при генерации этого файла...";
+		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
 	}
 }
+var __GenerateFile = {};
 
 /* ======================================================== */
 
 /* Генерация атласа */
 async function GenerateAtlas(Info){
 	try{
+		Info = DeepClone(Info);
+		
 		var Empty = Info["Empty"] ? await GenerateFile(Info["Empty"]) : false;
-		var Size  = Info["Size" ] || [1 , 1 ];
-		var Scale = Info["Scale"] || [16, 16];
-		var TrueScale = Scale === true;
-		if(TrueScale){ Scale = [1, 1]; }
+		var Size  = Info["Size" ] || [2, 2];
+		var Scale = Info["Scale"] || [1, 1];
 		var W     = Size[0];
 		var H     = Size[1];
 		
+		if(Info["Empty"]){ delete Info["Empty"]; }
+		if(Info["Size" ]){ delete Info["Size" ]; }
+		if(Info["Scale"]){ delete Info["Scale"]; }
+		
+		if(Size[0] <= 1 || Size[1] <= 1){ throw new Error("Кол-во клеток <= 1!\nSize[0]: " + Size[0] + " | Size[1]: " + Size[1]); }
 		if(W <= 0 || H <= 0){ throw new Error("Размер атласа <= 0!\nW: " + W + " | H: " + H); }
 		
 		var Atlas = new Texture(W * Scale[0], H * Scale[1]);
 		
-		if(!TrueScale){
-			W += 1; H += 1;
-		}
-		
-		var OneZero = TrueScale ? 0 : 1;
-		
-		for(var X = OneZero; X < W; X++){
-			for(var Y = OneZero; Y < H; Y++){
+		for(var X = 0; X < W; X++){
+			for(var Y = 0; Y < H; Y++){
 				try{
 					var Tile = null;
 					var X_ = Info[X];
@@ -477,16 +576,27 @@ async function GenerateAtlas(Info){
 							}else{
 								Tile = await GenerateFile(Y_);
 							}
+							
+							delete Info[X][Y];
+							if(Object.keys(Info[X]).length <= 0){ delete Info[X]; }
 						}
 					}
 					
 					if(Tile != false){
-						Atlas.Set(Tile ? Tile : Empty, (X - OneZero) * Scale[0], (Y - OneZero) * Scale[1]);
+						Atlas.Set(Tile ? Tile : Empty, X * Scale[0], Y * Scale[1]);
 					}
 				}catch(e){
 					Logger.Error("Произошла ошибка генерации тайтла [" + X + ":" + Y + "] у атласа!");
 				}
 			}
+		}
+		
+		const LeftOver = Object.keys(Info);
+		if(LeftOver.length > 0){
+			for(var Key of LeftOver){
+				Logger.ConsoleWarn("У атласа найден лишний ключ [" + Key + "]!");
+			}
+			throw new Error("В атласе найдены лишние ключи!");
 		}
 		
 		return Atlas;
@@ -521,577 +631,29 @@ async function GeneratePainting(W, H){
 }
 var __AllPaintings;
 
-/* ======================================================== */
-
-class Texture{
-	constructor(W, H, Content = null){
-		try{
-			if(W <= 0 || H <= 0){ throw new Error("Размеры текстуры <= 0!"); }
-			
-			this.W = W;
-			this.H = H;
-			
-			this.C = document.createElement("Canvas");
-			this.C.width = W; this.C.height = H;
-			this.CTX = this.C.getContext("2d");
-			
-			this.Content = new Uint8ClampedArray(W * H * 4);
-			
-			this.Fill(Content);
-		}catch(e){
-			throw new Error("Произошла ошибка при создании текстуры! new Texture(" + W + ", " + H + ", ...);", e);
-		}
-	}
-	
-	/* Закрасить текстуру */
-	Fill(Arg1, Arg2 = "source-over", Arg3 = false, Arg4 = null, Arg5 = null, Arg6 = "source-over", Arg7 = false){
-		try{
-			var Fill2 = !(typeof Arg2 === "string");
-			
-			var Content     = Fill2 ? null : Arg1;
-			var Blend       = Fill2 ? Arg6 : Arg2;
-			var IgnoreAlpha = Fill2 ? Arg7 : Arg3;
+/* Генерация сплешей */
+async function GenerateSplashes(SplashesVersion){
+	try{
+		if(SplashesVersion < 0){ throw new Error("Версия не может быть < 0!"); }
 		
-			var X0    = Fill2 ? (Arg1 || 0) : null;
-			var Y0    = Fill2 ? (Arg2 || 0) : null;
-			var X1    = Fill2 ? (Arg3 || this.W) : null;
-			var Y1    = Fill2 ? (Arg4 || this.H) : null;
-			var Color = Fill2 ? (Arg5 || "transparent") : null;
+		var Result = "";
 		
-			const CalculatePixel = (i, r, g, b, a) => {
-				if (Blend === "multiply") {
-					this.Content[i + 0] = Math.floor(this.Content[i + 0] * r / 255);
-					this.Content[i + 1] = Math.floor(this.Content[i + 1] * g / 255);
-					this.Content[i + 2] = Math.floor(this.Content[i + 2] * b / 255);
-					if (!IgnoreAlpha) {
-						this.Content[i + 3] = Math.floor(this.Content[i + 3] * a / 255);
-					}
-				} else {
-					this.Content[i + 0] = r;
-					this.Content[i + 1] = g;
-					this.Content[i + 2] = b;
-					if (!IgnoreAlpha) {
-						this.Content[i + 3] = a;
-					}
-				}
-			};
+		var Splashes = await FileContentJSON(await GetFile("R/O/Splashes.json"));
+		for(var SplashInfo of Splashes){
+			var Splash = SplashInfo;
+			var Tags   = [];
+			if(Array.isArray(SplashInfo)){
+				Splash = SplashInfo[0];
+				Tags   = SplashInfo[1];
+			}
+			
+			if(Result.length > 0){ Result += "\n"; }
+			Result += UpdateString(Splash);
+		}
 		
-			if(Fill2){
-				if(X0 < 0 || Y0 < 0 || X1 > this.W || Y1 > this.H){ throw new Error("Координаты выходят за пределы текстуры!"); }
-				if(X0 >= X1 || Y0 >= Y1){ throw new Error("Координаты совпадают или первые больше вторых!"); }
-			
-				Color = CalculateColor(Color);
-				for (let y = Y0; y < Y1; y++) {
-					for (let x = X0; x < X1; x++) {
-						const i = (y * this.W + x) * 4;
-						CalculatePixel(i, Color[0], Color[1], Color[2], Color[3]);
-					}
-				}
-				
-			}else{
-				if(!Content){ return; }
-		
-				var Data = Content;
-				if(Content instanceof Texture){ Data = Content.Content; }else if(!(Data instanceof Uint8ClampedArray)){ Data = CalculateColor(Data); }
-				
-				if(Data.length === 4){
-					for(var i = 0; i < this.Content.length; i += 4) {
-						CalculatePixel(i, Data[0], Data[1], Data[2], Data[3]);
-					}
-				}else{
-					for (var i = 0; i < this.Content.length; i += 4) {
-						CalculatePixel(i, Data[i + 0], Data[i + 1], Data[i + 2], Data[i + 3]);
-					}
-				}
-			}
-			
-			this.__UpdateCanvas();
-			
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при заливке текстуры [" + this + "]! Fill(" + Arg1 + ", " + Arg2 + ", " + Arg3 + ", " + Arg4 + ", " + Arg5 + ", " + Arg6 + ", " + Arg7 + ");", e);
-		}
-	}
-	
-	/* Добавляет текстуру на текстуру */
-	Put(Content, X = 0, Y = 0, Blend = "alpha"){
-		if(Content === false){ return; }
-	
-		const PrevBlend = this.CTX.globalCompositeOperation;
-		if(Blend !== "alpha"){ this.CTX.globalCompositeOperation = Blend; }
-	
-		try{
-			if(X < -this.W || Y < -this.H){ throw new Error("Позиция < -(размера текстуры)!"); }
-			if(X > this.W || Y > this.H){ throw new Error("Позиция > размера текстуры!"); }
-		
-			if(Blend === "alpha"){
-				var Data;
-				if(Content instanceof Texture){
-					Data = Content.Content;
-				}else if(Content instanceof Uint8ClampedArray){
-					Data = Content;
-				}else{
-					throw new Error("Нужен Texture!");
-				}
-				
-				var W = Content.W || this.W;
-				var H = Content.H || this.H;
-				
-				const SY = Math.max(0,        - Y);
-				const EY = Math.min(H, this.H - Y);
-				const SX = Math.max(0,        - X);
-				const EX = Math.min(W, this.W - X);
-
-				for(let Y_ = SY; Y_ < EY; Y_++){
-					for(let X_ = SX; X_ < EX; X_++){
-						const CI = ((Y_ + Y) * this.W + (X_ + X)) * 4;
-						const DI = (Y_ * W + X_) * 4;
-
-						const BaseR = this.Content[CI + 0];
-						const BaseG = this.Content[CI + 1];
-						const BaseB = this.Content[CI + 2];
-						const BaseA = this.Content[CI + 3] / 255;
-
-						const OverR = Data[DI + 0];
-						const OverG = Data[DI + 1];
-						const OverB = Data[DI + 2];
-						const OverA = Data[DI + 3] / 255;
-
-						const OutA = OverA + BaseA * (1 - OverA);
-						if(OutA === 0){ continue; }
-
-						this.Content[CI + 0] = Math.round((OverR * OverA + BaseR * BaseA * (1 - OverA)) / OutA);
-						this.Content[CI + 1] = Math.round((OverG * OverA + BaseG * BaseA * (1 - OverA)) / OutA);
-						this.Content[CI + 2] = Math.round((OverB * OverA + BaseB * BaseA * (1 - OverA)) / OutA);
-						this.Content[CI + 3] = Math.round(OutA * 255);
-					}
-				}
-				
-				this.__UpdateCanvas();
-			}else{
-				if(Content instanceof Texture){
-					this.CTX.drawImage(Content.C, X, Y);
-				}else if(Content instanceof Uint8ClampedArray){
-					this.CTX.putImageData(new ImageData(Content, this.W, this.H), X, Y);
-				}else{
-					throw new Error("Нужен Texture!");
-				}
-				
-				this.__UpdateContent();
-			}
-			
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при добавлении текстуры на текстуру [" + this + "]! Put(..., " + X + ", " + Y + ");", e);
-		}finally{
-			if(Blend !== "alpha"){ this.CTX.globalCompositeOperation = PrevBlend; }
-		}
-	}
-	
-	/* Заменяет текстуру */
-	Set(Content, X = 0, Y = 0){ return this.Put(Content, X, Y, "source-over"); }
-	
-	/* Устанавливает цвет заднего фона */
-	Background(Color = "white"){
-		try{
-			var Current = new Uint8ClampedArray(this.Content);
-			this.Fill(Color        );
-			this.Put (Current, 0, 0);
-			
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при установке цвета заднего фона текстуре [" + this + "]! Background(" + Color + ");", e);
-		}
-	}
-	
-	/* Обрезать текстуру */
-	Crop(X, Y, W, H){
-		try{
-			if(X < 0 || Y < 0 || X + W > this.W || Y + H > this.H){ throw new Error("Параметры выходят за пределы текстуры!"); }
-			
-			const NewContent = new Uint8ClampedArray(W * H * 4);
-
-			for(var Y_ = 0; Y_ < H; Y_++){
-				for(var X_ = 0; X_ < W; X_++){
-					const CI = ((Y_ + Y) * this.W + (X_ + X)) * 4;
-					const DI = (Y_ * W + X_) * 4;
-
-					NewContent[DI + 0] = this.Content[CI + 0];
-					NewContent[DI + 1] = this.Content[CI + 1];
-					NewContent[DI + 2] = this.Content[CI + 2];
-					NewContent[DI + 3] = this.Content[CI + 3];
-				}
-			}
-
-			this.Content = NewContent;
-			this.W = W; this.H = H;
-			
-			this.C.width = W; this.C.height = H;
-			this.CTX.putImageData(new ImageData(this.Content, W, H), 0, 0);
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при обрезке текстуры [" + this + "]! Crop(" + X + ", " + Y + ", " + W + ", " + H + ");", e);
-		}
-	}
-	
-	/* Получает кадр из анимированной текстуры */
-	Frame(Index = 0){
-		try{
-			const TotalFrames = Math.floor(this.H / this.W);
-			
-			if(Index < 0 || Index >= TotalFrames){ throw new Error("Индекс кадра выходит за пределы анимации!"); }
-			
-			return this.Crop(Index * this.W, 0, this.W, this.W);
-		}catch(e){
-			throw new Error("Произошла ошибка при получении кадра из анимации у текстуры [" + this + "]! Frame(" + Index + ");", e);
-		}
-	}
-	
-	/* Изменяет размер текстуры, так же содержимое */
-	Resize(W, H, Smooth = true){
-		try{
-			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
-			
-			const OW = this.W;
-			const OH = this.H;
-			const NewContent = new Uint8ClampedArray(W * H * 4);
-
-			for(var Y = 0; Y < H; Y++){
-				for(var X = 0; X < W; X++){
-					const NI = (Y * W + X) * 4;
-
-					if(Smooth){
-						const GX = (X + 0.5) * OW / W - 0.5;
-						const GY = (Y + 0.5) * OH / H - 0.5;
-						const GXI = Math.floor(GX);
-						const GYI = Math.floor(GY);
-						const DX = GX - GXI;
-						const DY = GY - GYI;
-
-						for(var P = 0; P < 4; P++){
-							const P00 = this.Content[((Math.min(GYI    , OH - 1) * OW + Math.min(GXI    , OW - 1)) * 4) + P];
-							const P10 = this.Content[((Math.min(GYI    , OH - 1) * OW + Math.min(GXI + 1, OW - 1)) * 4) + P];
-							const P01 = this.Content[((Math.min(GYI + 1, OH - 1) * OW + Math.min(GXI    , OW - 1)) * 4) + P];
-							const P11 = this.Content[((Math.min(GYI + 1, OH - 1) * OW + Math.min(GXI + 1, OW - 1)) * 4) + P];
-
-							const P0 = P00 * (1 - DX) + P10 * DX;
-							const P1 = P01 * (1 - DX) + P11 * DX;
-							NewContent[NI + P] = Math.round(P0 * (1 - DY) + P1 * DY);
-						}
-					} else {
-						const OX = Math.floor(X * OW / W);
-						const OY = Math.floor(Y * OH / H);
-						const OI = (OY * OW + OX) * 4;
-						NewContent[NI + 0] = this.Content[OI + 0];
-						NewContent[NI + 1] = this.Content[OI + 1];
-						NewContent[NI + 2] = this.Content[OI + 2];
-						NewContent[NI + 3] = this.Content[OI + 3];
-					}
-				}
-			}
-
-			this.W = W; this.H = H;
-			this.Content = NewContent;
-
-			this.C.width = W; this.C.height = H;
-			this.CTX.putImageData(new ImageData(this.Content, W, H), 0, 0);
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "] и содержимого! Resize(" + W + ", " + H + ", " + Smooth + ");", e);
-		}
-	}
-	
-	/* Изменяет размер текстуры, не трогая содержимое */
-	NewSize(W = null, H = null){
-		try{
-			if(W === null){ W = this.W; }
-			if(H === null){ H = this.H; }
-		
-			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
-			
-			const OW = this.W; const OH = this.H;
-			const OContent = this.Content ? new Uint8ClampedArray(this.Content) : null;
-
-			this.W = W; this.H = H;
-
-			this.Content = new Uint8ClampedArray(W * H * 4);
-
-			this.C.width = W;  this.C.height = H;
-
-			if(OContent){
-				const CW = Math.min(OW, W);
-				const CH = Math.min(OH, H);
-
-				for(var Y = 0; Y < CH; Y++){
-					for(var X = 0; X < CW; X++){
-						const OI = (Y * OW + X) * 4;
-						const NI = (Y *  W + X) * 4;
-						this.Content[NI + 0] = OContent[OI + 0];
-						this.Content[NI + 1] = OContent[OI + 1];
-						this.Content[NI + 2] = OContent[OI + 2];
-						this.Content[NI + 3] = OContent[OI + 3];
-					}
-				}
-			}
-
-			this.__UpdateCanvas();
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при изменении размера у текстуры [" + this + "]! NewSize(" + W + ", " + H + ");", e);
-		}
-	}
-	
-	/* Двигает текстуру */
-	Move(X = 0, Y = 0){
-		try{
-			if(X === 0 && Y === 0){ return this; } // нет смещения — ничего не делаем
-
-			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
-
-			// Рассчитываем области копирования
-			const StartX = Math.max(0, X);
-			const StartY = Math.max(0, Y);
-			const EndX   = Math.min(this.W, this.W + X);
-			const EndY   = Math.min(this.H, this.H + Y);
-
-			const SrcStartX = Math.max(0, -X);
-			const SrcStartY = Math.max(0, -Y);
-
-			for(let NY = StartY, SY = SrcStartY; NY < EndY; NY++, SY++){
-				for(let NX = StartX, SX = SrcStartX; NX < EndX; NX++, SX++){
-					const OI = (SY * this.W + SX) * 4;
-					const NI = (NY * this.W + NX) * 4;
-					NewContent[NI + 0] = this.Content[OI + 0];
-					NewContent[NI + 1] = this.Content[OI + 1];
-					NewContent[NI + 2] = this.Content[OI + 2];
-					NewContent[NI + 3] = this.Content[OI + 3];
-				}
-			}
-
-			this.Content = NewContent;
-			this.__UpdateCanvas();
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при движении текстуры [" + this + "]! Move(" + X + ", " + Y + ");", e);
-		}
-	}
-	
-	/* Применяет градиент */
-	Gradient(Gradient_){
-		try{
-			if(!(Gradient_ instanceof Texture)){ throw new Error("Градиент должен быть формата Texture!"); }
-			if(Gradient_.W !== 256 || Gradient_.H !== 1){ throw new Error("Размер градиента должен быть 256x1!"); }
-			
-			for(var i = 0; i < this.Content.length; i += 4){
-				const Gray = this.Content[i];
-				
-				const GI = Gray * 4;
-				this.Content[i + 0] = Gradient_.Content[GI + 0];
-				this.Content[i + 1] = Gradient_.Content[GI + 1];
-				this.Content[i + 2] = Gradient_.Content[GI + 2];
-				this.Content[i + 3] = Math.min(this.Content[i + 3], Gradient_.Content[GI + 3]);
-			}
-			
-			this.__UpdateCanvas();
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при применении градиента текстуре [" + this + "]! Gradient(" + Gradient_ + ");", e);
-		}
-	}
-	
-	/* Умножает цвет */
-	Multiply(Color){
-		try{
-			return this.Fill(Color, "multiply", true);
-		}catch(e){
-			throw new Error("Произошла ошибка при умножении на цвет [" + Color + "] у текстуры [" + this + "]! Multiply(" + Color + ");", e);
-		}
-	}
-	
-	/* Устанавливает канал */
-	Fixed(R = null, G = null, B = null, A = null){
-		try{
-			if(R && R > 255 || R < 0){ throw new Error("Красный цвет выходит за пределы 0 и 255!"); }
-			if(G && G > 255 || G < 0){ throw new Error("Зелёный цвет выходит за пределы 0 и 255!"); }
-			if(B && B > 255 || B < 0){ throw new Error("Синий цвет выходит за пределы 0 и 255!"  ); }
-			if(A && A > 255 || A < 0){ throw new Error("Прозрачность выходит за пределы 0 и 255!"); }
-		
-			for (var i = 0; i < this.Content.length; i += 4) {
-				if (R !== null){ this.Content[i + 0] = R; }
-				if (G !== null){ this.Content[i + 1] = G; }
-				if (B !== null){ this.Content[i + 2] = B; }
-				if (A !== null){ this.Content[i + 3] = A; }
-			}
-			
-			this.__UpdateCanvas();
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при установке каналов текстуре [" + this + "]! Fixed(" + R + ", " + G + ", " + B + ", " + A + ");", e);
-		}
-	}
-	
-	/* Отзеркаливает */
-	Flip(X = false, Y = false){
-		try{
-			if(!X && !Y){ return; }
-			
-			const Old = new Uint8ClampedArray(this.Content);
-			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
-
-			for(let y = 0; y < this.H; y++){
-				for(let x = 0; x < this.W; x++){
-					const srcX = X ? (this.W - 1 - x) : x;
-					const srcY = Y ? (this.H - 1 - y) : y;
-
-					const srcIndex = (srcY * this.W + srcX) * 4;
-					const dstIndex = (y * this.W + x) * 4;
-
-					NewContent[dstIndex + 0] = Old[srcIndex + 0];
-					NewContent[dstIndex + 1] = Old[srcIndex + 1];
-					NewContent[dstIndex + 2] = Old[srcIndex + 2];
-					NewContent[dstIndex + 3] = Old[srcIndex + 3];
-				}
-			}
-
-			this.Content = NewContent;
-			this.__UpdateCanvas();
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при отзеркаливании текстуры [" + this + "]! Flip(" + X + ", " + Y + ");", e);
-		}
-	}
-	
-	/* Обрезка каналов */
-	Trim(R = null, G = null, B = null, A = null){
-		try{
-			const Rules = [R, G, B, A];
-			
-			for(var i = 0; i < this.Content.length; i += 4){
-				for(var c = 0; c < 4; c++){
-					const Rule = Rules[c];
-					if(!Rule){ continue; }
-					
-					const Value = this.Content[i + c];
-					
-					const Left = Rule[0]; const Right = Rule[1];
-					
-					if(Left != null){
-						this.Content[i + c] = (Value <= Left[0] ? Left[1] : Value);
-						continue;
-					}
-					if(Right != null){
-						this.Content[i + c] = (Value => Right[0] ? Right[1] : Value);
-					}
-				}
-			}
-			
-			this.__UpdateCanvas();
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при обрезке текстуры [" + this + "]! Trim(" + R + ", " + G + ", " + B + " ," + A + ");", e);
-		}
-	}
-	
-	/* Инвертирует канал */
-	Invert(R = true, G = true, B = true, A = false){
-		try{
-			for(let i = 0; i < this.Content.length; i += 4){
-				if(R){ this.Content[i + 0] = 255 - this.Content[i + 0]; }
-				if(G){ this.Content[i + 1] = 255 - this.Content[i + 1]; }
-				if(B){ this.Content[i + 2] = 255 - this.Content[i + 2]; }
-				if(A){ this.Content[i + 3] = 255 - this.Content[i + 3]; }
-			}
-
-			this.__UpdateCanvas();
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при инвертировании каналов у текстуры [" + this + "]! Invert(" + R + ", " + G + ", " + B + " ," + A + ");", e);
-		}
-	}
-	
-	/* Повторяет текстуру */
-	Tile(X = 1, Y = 1){
-		try{
-			if(X <= 0 || Y <= 0){ throw new Error("Кол-во Tile <= 0!"); }
-			
-			const NewW = this.W * X;
-			const NewH = this.H * Y;
-			const NewContent = new Uint8ClampedArray(NewW * NewH * 4);
-
-			for(let ty = 0; ty < Y; ty++){
-				for(let tx = 0; tx < X; tx++){
-					for(let y = 0; y < this.H; y++){
-						for(let x = 0; x < this.W; x++){
-							const SrcIndex = (y * this.W + x) * 4;
-							const DestIndex = ((ty * this.H + y) * NewW + (tx * this.W + x)) * 4;
-
-							NewContent[DestIndex + 0] = this.Content[SrcIndex + 0];
-							NewContent[DestIndex + 1] = this.Content[SrcIndex + 1];
-							NewContent[DestIndex + 2] = this.Content[SrcIndex + 2];
-							NewContent[DestIndex + 3] = this.Content[SrcIndex + 3];
-						}
-					}
-				}
-			}
-
-			this.W = NewW;
-			this.H = NewH;
-			this.Content = NewContent;
-
-			this.C.width = NewW;
-			this.C.height = NewH;
-			this.__UpdateCanvas();
-
-			return this;
-		}catch(e){
-			throw new Error("Произошла ошибка при повторении текстуры [" + this + "]! Tile(" + X + ", " + Y + ");", e);
-		}
-	}
-	
-	/* ======================================================== */
-	
-	/* Получает цвет из пикселя */
-	GetColor(X, Y){
-		try{
-			if(X < 0 || Y < 0 || X >= this.W || Y >= this.H){ throw new Error("Пиксель выходит за пределы текстуры!"); }
-			
-			const i = (Y * this.W + X) * 4;
-			
-			return [
-				this.Content[i + 0],
-				this.Content[i + 1],
-				this.Content[i + 2],
-				this.Content[i + 3]
-			];
-		}catch(e){
-			throw new Error("Произошла ошибка при получении цвета пикселя у текстуры [" + this + "]! GetColor(" + X + ", " + Y + ");", e);
-		}
-	}
-	
-	/* Клонирует текстуру */
-	Clone(){
-		return new Texture(this.W, this.H, this.Content);
-	}
-	
-	async ToBlob(){
-		return await new Promise(R => this.C.toBlob(R, "image/png"));
-	}
-	
-	__UpdateCanvas(){
-		this.CTX.putImageData(new ImageData(this.Content, this.W, this.H), 0, 0);
-	}
-	
-	__UpdateContent(){
-		this.Content.set(this.CTX.getImageData(0, 0, this.W, this.H).data);
-	}
-	
-	toString(){
-		return "Texture[" + this.W + "x" + this.H + "]";
+		return Result;
+	}catch(e){
+		throw new Error("Произошла ошибка при генерации сплешей!\nВерсия: " + SplashesVersion, e);
 	}
 }
 
@@ -1450,9 +1012,8 @@ async function PreLoadAfter(){
 		
 		await LoadColors();
 		
-		LoadPaintings();
-		
 		PreLoaded = true;
+		document.documentElement.style.setProperty("--infobox", "0, 255, 0");
 	}catch(e){
 		throw new Error("Произошла ошибка после пред-загрузки!", e);
 	}
@@ -1493,6 +1054,7 @@ function Awake(){
 				const Buf = await File.arrayBuffer();
 				await PreLoad(Buf);
 			}catch(e){
+				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
 				Logger.Fatal("Произошла ошибка при получении пака с компьютера!", e);
 			}
 		});
@@ -1506,20 +1068,10 @@ function Awake(){
 				const Buf = await response.arrayBuffer();
 				await PreLoad(Buf);
 			}catch(e){
+				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
 				Logger.Fatal("Произошла ошибка при получении пака с raw.githubusercontent.com!", e);
 			}
 		})();
 	}
 }
 Awake();
-
-/* Вызывается когда сайт загружен */
-function SiteLoaded(){
-	try{
-	
-	}catch(e){
-		Logger.Fatal("Произошла ошибка при загрузке сайта!", e);
-	}
-}
-
-$(document).ready(function(){ SiteLoaded(); });
