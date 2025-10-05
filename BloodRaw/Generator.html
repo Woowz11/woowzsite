@@ -74,15 +74,23 @@ html, button{
 
 	<div class="InfoBox">
 		<div>
-			<p><b>Информация:</b></p>
-			<li><p id="PackVersion">?</p></li>
+			<p>Информация:</p>
+			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
+				<li><p id="PackVersion">?</p></li>
+				<li><a id="CommitName" href="#">?</a></li>
+			</ul>
 		</div>
 		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
 	<center><div class="Bumb" style="display: flex; height: 60vh; padding: 0;">
-		<div class="Bumb" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px; direction: ltr;" id="SelectVersion"></div></div>
-		<div style="flex: 1;"></div>
+		<div class="Bumb" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
+		<div style="flex: 1; padding-top: 20px;">
+			<img class="Bumb" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
+			<p id="VersionName">FULLNAME</p>
+			<p>==========</p>
+			<p id="VersionType" style="cursor: help;">TYPE</p>
+		</div>
 	</div></center>
 
 	<div style="text-align:center; padding-top: 20px;">
@@ -90,7 +98,6 @@ html, button{
 	</div>
 
 	<div>
-		<p>Консоль:</p>
 		<div class="Console" style="min-height: 100%;" id="Console"></div>
 	</div>
 

@@ -574,6 +574,12 @@ class Texture{
 		return await new Promise(R => this.C.toBlob(R, "image/png"));
 	}
 	
+	ToImage(){
+		if(this.__DataURL){ return this.__DataURL; }
+		this.__DataURL = this.C.toDataURL("image/png");
+		return this.__DataURL;
+	}
+	
 	__UpdateCanvas(){
 		this.CTX.putImageData(new ImageData(this.Content, this.W, this.H), 0, 0);
 	}

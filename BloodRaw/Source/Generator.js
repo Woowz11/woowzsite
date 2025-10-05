@@ -14,7 +14,7 @@ Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz1
 
 var Console = $("#Console");
 
-Logger.Console = function(Message, Type = 0){
+Logger.Console = function(Message, Type = 0, Title){
 	switch(Type){
 		case 0: Logger.Info (Message, null, InGeneration ? "color: lime;" : undefined); break;
 		case 1: Logger.Warn (Message                      ); break;
@@ -22,7 +22,11 @@ Logger.Console = function(Message, Type = 0){
 	}
 	if(!InGeneration){ return; }
 	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
-	Console.append(`<p${Type !== 0 ? " style=\"color:" + (Type === 1 ? "yellow" : "red") + ";\"" : ""}>${Message}</p>`);
+	Console.append(`<p${Title ? ` title="${RemoveHTML(Title)}"` : ""}${Type !== 0 ? " style=\"color:" + (Type === 1 ? "yellow" : "red") + ";\"" : ""}>${Message}</p>`);
+}
+
+Logger.ConsoleWithTitle = function(Message, Title){
+	Logger.Console(Message, 0, Title);
 }
 
 Logger.ConsoleWarn = function(Message, Exception){
@@ -132,6 +136,11 @@ function DeepClone(Obj){
 function Lerp(A, B, T){ return A + (B - A) * T; }
 function Clamp(N, Min, Max){ return N <= Min ? Min : (N >= Max ? Max : N); }
 
+/* Проверяет, есть ли файл */
+function HasFile(Path){
+	return PackFiles[Path] !== null && PackFiles[Path] !== undefined;
+}
+
 /* Получить файл */
 async function GetFile(Path, ThatTexture = false){
 	Path = Path.replace(/\\/g, "/").replace(/\/+/g, "/");
@@ -139,7 +148,7 @@ async function GetFile(Path, ThatTexture = false){
 	if(__GetFileCache[Path]){ return __GetFileCache[Path]; }
 	
 	var File = PackFiles[Path];
-	if(!File){ throw new Error("Файл [" + Path + "] не найден!"); }
+	if(!HasFile(Path)){ throw new Error("Файл [" + Path + "] не найден!"); }
 	
 	if(ThatTexture){
 		const Extension = Path.split(".").pop().toLowerCase();
@@ -222,12 +231,37 @@ async function FileContentByte(File){
 	}
 }
 
+/* Уберает спец символы HTML из текста */
+function RemoveHTML(HTML){
+	return HTML	.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('/', '&#47;');
+}
+
 /* ======================================================== */
 
 /* Показывает информацию о генераторе */
-function ShowInfo(Info){
+function ShowInfo(Button){
 	try{
+		const ShowVersion = Button ? Button.innerText : SelectedVersion;
 		
+		document.getElementById("VersionName").innerText = ShowVersion.replace(/^a/, "Alpha ").replace(/^b/, "Beta ").replace(/^c/, "Classic ").replace(/^rd/, "RubyDung ");
+		
+		const Version = PackVersions[ShowVersion][2];
+		const VersionImage  = HasFile("R/V/" + ShowVersion + ".png") ? ShowVersion : "Unknown";
+		
+		document.getElementById("VersionImage").src = __VersionImages[VersionImage].ToImage();
+		
+		var Add = Version["Add"] || [];
+		
+		const VersionTypeInfo = {
+			"?": ["Неизвестный пак","Если вам попался этот пак, сообщите автору! Потому-что это ошибка!"],
+			"i": ["Заменяемый пак", "Нужно заменить файлы внутри .jar версии"],
+			"t": ["Текстур пак","Нужно кинуть в папку texturepacks"],
+			"r": ["Ресурс пак","Нужно кинуть в папку resourcepacks"],
+		}
+		
+		var VersionType = Add.includes("ReplacePack.json") ? "i" : (Add.includes("TexturePack.json") ? "t" : "?");
+		document.getElementById("VersionType").innerText = VersionTypeInfo[VersionType][0];
+		document.getElementById("VersionType").title     = VersionTypeInfo[VersionType][1];
 	}catch(e){
 		throw new Error("Произошла ошибка при показе информации об генераторе!", e);
 	}
@@ -246,6 +280,8 @@ function SelectVersion(Version){
 		const Button = document.getElementById("SV-" + Version);
 		Button.classList.add("Selected");
 		__OldSelectVersionButton = Button;
+		
+		ShowInfo(Button);
 	}catch(e){
 		throw new Error("Произошла ошибка при выборе версии [" + Version + "]!", e);
 	}
@@ -372,6 +408,23 @@ async function LoadGenerator(File, FileName, Loaded = new Set()){
 			delete Info.Add;
 		}
 		
+		function FlattenFiles(Files, Prefix = ""){
+			const Result = {};
+			
+			for(const Path in Files){
+				const Info_ = Files[Path];
+				const FullPath = Prefix + Path;
+				if(typeof Info_ === "object" && !Array.isArray(Info_) && Info_ !== null){
+					Object.assign(Result, FlattenFiles(Info_, FullPath));
+				}else{
+					Result[FullPath] = Info_;
+				}
+			}
+			
+			return Result;
+		}
+		
+		Info.Files = FlattenFiles(Info.Files);
 		return Info;
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке генератора [" + FileName + "]!", e);
@@ -401,6 +454,9 @@ async function LoadPackInformation(){
 			const Commit = await Response.json();
 			
 			CommitName = Commit.commit.message.split("\n")[0];
+			document.getElementById("CommitName").innerText = CommitName;
+			document.getElementById("CommitName").href      = Commit.html_url;
+			document.getElementById("CommitName").title     = "+" + Commit.stats.additions + " | -" + Commit.stats.deletions;
 		}catch(e){
 			Logger.Error("Произошла ошибка при получении версии репозитория!", e);
 			CommitName = "Не получилось узнать...";
@@ -440,7 +496,7 @@ async function LoadPackInformation(){
 		PackVersions = SortedPackVersions;
 		
 		var ChangelogTexture_ = await GetTexture(ChangelogTexture);
-		document.getElementById("ChangelogImage").src = ChangelogTexture_.C.toDataURL("image/png");
+		document.getElementById("ChangelogImage").src = ChangelogTexture_.ToImage();
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке информации об паке!", e);
 	}
@@ -450,7 +506,7 @@ async function LoadPackInformation(){
 function LoadPaintings(){
 	try{
 		AllPaintings = {};
-		for(var File of PackFolders["R/T/ART"]){
+		for(var File of PackFolders["R/T/A"]){
 			var Path = File.name.split("/").pop();
 			var Match = Path.match(/^(\d+x\d+)_(\d+)\.png$/i);
 			if (!Match){ continue; }
@@ -459,7 +515,7 @@ function LoadPaintings(){
 
 			if(!AllPaintings[PaintingSize]){ AllPaintings[PaintingSize] = []; }
 			
-			AllPaintings[PaintingSize].push("R/T/ART/" + Path);
+			AllPaintings[PaintingSize].push("R/T/A/" + Path);
 		}
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке картин!", e);
@@ -482,6 +538,23 @@ async function LoadColors(){
 	}
 }
 
+/* Загрузка картинок версий */
+async function LoadVersionImages(){
+	try{
+		const VersionImages = PackFolders["R/V"];
+		
+		__VersionImages["Unknown"] = await GetTexture("R/T/U/Unknown.png");
+		
+		for(const VersionImage of VersionImages){
+			const Version = VersionImage.name.split("/").pop().replace(".png", "");
+			__VersionImages[Version] = await GetTexture(VersionImage.name);
+		}
+	}catch(e){
+		throw new Error("Произошла ошибка при загрузке изображений версий!", e);
+	}
+}
+const __VersionImages = {};
+
 /* Вызывается после пре-загрузки */
 async function PreLoadAfter(){
 	if(!StartPreLoaded){ return; }
@@ -500,9 +573,11 @@ async function PreLoadAfter(){
 				const MinL = 6 ; const MaxL = 10;
 				const MinS = 24; const MaxS = 14;
 				var T = Clamp((V.length - MinL) / (MaxL - MinL), 0, 1);
-				return `<button onclick="SelectVersion('${V}');" id="SV-${V}" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
+				return `<button onclick="SelectVersion('${V}');" id="SV-${V}" onmouseenter="ShowInfo(this);" onmouseleave="ShowInfo();" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
 			}).join("")
 		);
+		
+		await LoadVersionImages();
 		
 		SelectVersion(Versions[0]);
 		
@@ -880,12 +955,12 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		/* Как генерировать файл */
 		var GenerateType = Info[0];
 		
-		var ID = MemoryFile ? JSON.stringify(Info) : Path;
+		var ID = JSON.stringify(Info);
 		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting"){
 			var __Result = __GenerateFile[ID];
 			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
 			
-			Logger.Console(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...");
+			Logger.ConsoleWithTitle(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...", ID);
 			
 			return __Result;
 		}
@@ -909,7 +984,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		
 		CurrentFile = MemoryFile ? "[CurrentFile : null]" : Path;
 		
-		Logger.Console(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...");
+		Logger.ConsoleWithTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
 		
 		var Actions = null;
 		
@@ -1064,12 +1139,12 @@ async function GeneratePainting(W, H){
 	
 		var PaintingSize = W + "x" + H;
 	
-		var FrameTexture = "R/T/ART/Frame_" + PaintingSize + ".png";
+		var FrameTexture = "R/T/A/Frame_" + PaintingSize + ".png";
 	
 		var PaintingFamily = __AllPaintings[PaintingSize];
 		if(!PaintingFamily || PaintingFamily.length === 0){
 			Logger.ConsoleWarn("Закончились картины типа [" + PaintingSize + "]!");
-			return await GenerateFile(["Texture", "R/T/ART/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
+			return await GenerateFile(["Texture", "R/T/A/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
 		}
 	
 		var Painting = PaintingFamily.splice(Math.floor(Math.random() * PaintingFamily.length), 1)[0];
