@@ -353,9 +353,11 @@ function ShowInfo(Button){
 		const ShowVersion = Button ? Button.innerText : SelectedVersion;
 		if(!ShowVersion){ return; }
 		
-		document.getElementById("VersionName").innerText = ShowVersion.replace(/^a/, "Alpha ").replace(/^b/, "Beta ").replace(/^c/, "Classic ").replace(/^rd/, "RubyDung ");
-		
 		const Version = PackVersions[ShowVersion][2];
+		
+		var VersionName = ShowVersion.replace(/^a/, "Alpha ").replace(/^b/, "Beta ").replace(/^c/, "Classic ").replace(/^rd/, "RubyDung ").replace(/^inf/, "Infdev ");
+		if(Version.Joke){ VersionName = "Joke \"" + VersionName + "\""; }
+		document.getElementById("VersionName").innerText = VersionName;
 		
 		var Add = Version["Add"] || [];
 		
@@ -443,41 +445,54 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		/* Информация генератора */
 		const Info = await FileContentJSON(File);
 		
-		/* Начальная обработка файлов */
-		if(Info.Files){
-			function F_Start(Files, Prefix = ""){
-				const Result = {};
-				
-				for(const Key in Files){
-					const Value = Files[Key];
-					const Path  = Prefix + Key;
-
-					/* Для данных типа: "folder/": { ... } */
-					if(Path.endsWith("/")){
-						if(Value && typeof Value === "object" && !Array.isArray(Value)){
-							Object.assign(Result, F_Start(Value, Path));
-						}else{
-							Result[Path] = Value;
-						}
-					}else{
-						Result[Path] = Value;
-					}
-				}
-				
-				return Result;
-			}
-			Info.Files = F_Start(Info.Files);
-		}
-		
 		/* Действия */
 		var Actions = [];
 		
 		/* Начальные действия */
 		if(Info.Files){
-			for(const Key of Object.keys(Info.Files)){
-				const Value = Info.Files[Key];
-				Actions.push([Key, Value]);
+			function Process(Files, Prefix = ""){
+				function PostProcess(Path, Value){
+					/* Если: "folder/": ... */
+					if(Path.endsWith("/")){
+						/* Если: "folder/": { ... } */
+						if(Value && typeof Value === "object" && !Array.isArray(Value)){
+							Process(Value, Path);
+						/* Если: "folder/": null (или другое) */
+						}else{
+							Actions.push([Path, Value]);
+						}
+					/* Если "file.txt": ["Replace", "file2.txt"] */
+					}else if(Value && Array.isArray(Value) && Value[0] === "Replace"){
+						const OldFile = Value[1];
+						Actions.push([Path, OldFile]);
+						Actions.push([OldFile, null]);
+					/* Если "file.txt": ["Rename", "file2.txt"] */
+					}else if(Value && Array.isArray(Value) && Value[0] === "Rename"){
+						const OldFile = Prefix + Value[1];
+						Actions.push([Path, OldFile]);
+						Actions.push([OldFile, null]);
+					/* Если: "file.txt": ... */
+					}else{
+						Actions.push([Path, Value]);
+					}
+				}
+				
+				for(const Key of Object.keys(Files)){
+					const Value = Files[Key];
+					const Path  = Prefix + Key;
+					
+					/* Если несколько действий: "file...": ["Actions", "Action1", "Action2"] */
+					if(Array.isArray(Value) && Value[0] === "Actions"){
+						for(const Action of DeepClone(Value.slice(1))){
+							PostProcess(Path, Action);
+						}
+						continue;
+					}
+					
+					PostProcess(Path, Value);
+				}
 			}
+			Process(Info.Files);
 		}
 		
 		/* Установка родительских действий */
@@ -518,17 +533,28 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		
 		/* Финальная обработка файлов */
 		for(const [Key, Value] of Actions){
-			/* Если ссылка на другой файл, типа: "file.txt": "file2.txt" */
 			if(typeof Value === "string"){
 				const RefKey = Value;
-				if(RefKey in Files){
-					const RefValue = DeepClone(Files[RefKey]);
-					if(RefValue){
-						Files[Key] = RefValue;
+				/* Перенос папки в другую папку: "A/": "B/" */
+				if(Key.endsWith("/") && RefKey.endsWith("/")){
+					for(const Key_ in Files){
+						if(Key_.startsWith(RefKey)){
+							const NewKey = Key + Key_.slice(RefKey.length);
+							Files[NewKey] = DeepClone(Files[Key_]);
+						}
 					}
+					
+				/* Если ссылка на другой файл, типа: "file.txt": "file2.txt" */
 				}else{
-					Logger.ConsoleError("Файл [" + Key + "] ссылается на несуществующий другой файл [" + RefKey + "]!");
-					Files[Key] = null;
+					if(RefKey in Files){
+						const RefValue = DeepClone(Files[RefKey]);
+						if(RefValue){
+							Files[Key] = RefValue;
+						}
+					}else{
+						Logger.ConsoleError("Файл [" + Key + "] ссылается на несуществующий другой файл [" + RefKey + "]!");
+						Files[Key] = null;
+					}
 				}
 			}else if(Value === null){
 				/* Удаление папки: "folder/": null */
@@ -1212,6 +1238,13 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				var SplashesVersion = Info[0];
 				Actions = Info[1] || null;
 				Result = await GenerateSplashes(SplashesVersion);
+				break;
+			}
+			
+			case "Json": {
+				var Json = Info[0];
+				Actions = Info[1] || null;
+				Result = UpdateString(JSON.stringify(Json, null, '\t'));
 				break;
 			}
 			
