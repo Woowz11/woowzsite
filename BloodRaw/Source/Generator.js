@@ -37,24 +37,127 @@ Logger.ConsoleWarn = function(Message, Exception){
 Logger.ConsoleError = function(Message, Exception){
 	HasError = true;
 	
-	Logger.Error(Message, Exception);
-	Logger.Console(Exception.Message  , 2);
+	if(Exception){
+		Logger.Error(Message, Exception);
+		Logger.Console(Exception.Message, 2);
+	}else{
+		Logger.Console(Message, 2);
+	}
+	
 	Logger.Console("См. консоль (F12)", 2);
 }
 
 /* Более умный JSON.parse */
 function JSONParse(Text){
 	Text = Text.replace(/\/\*[\s\S]*?\*\//g, "");
-	Text = Text.replace(/\/\/.*$/gm        , "");
-	
-	Text = Text.replace(/^\uFEFF/, '');
-    Text = Text.replace(/[\x00-\x1F\x7F]/g, c => c === '\n' || c === '\r' ? c : '');
-	
+	Text = Text.replace(/\/\/.*$/gm		, "");
+	Text = Text.replace(/^\uFEFF/		  , "");
+	Text = Text.replace(/[\x00-\x1F\x7F]/g , c => c === '\n' || c === '\r' ? c : '');
+
 	if(__JSONParse[Text]){ return DeepClone(__JSONParse[Text]); }
-	
-	var Result = JSON.parse(Text);
+
+	var Pos = 0;
+
+	function SkipWhitespace(){ while(/\s/.test(Text[Pos])){ Pos++; } }
+
+	function ParseValue(){
+		SkipWhitespace();
+		
+		const Char = Text[Pos];
+		if(Char === '{'){ return ParseObject(); }
+		if(Char === '['){ return ParseArray (); }
+		if(Char === '"'){ return ParseString(); }
+		if(/[-0-9]/.test(Char)){ return ParseNumber(); }
+		if(Text.startsWith('true' , Pos)){ Pos += 4; return true ; }
+		if(Text.startsWith('false', Pos)){ Pos += 5; return false; }
+		if(Text.startsWith('null' , Pos)){ Pos += 4; return null ; }
+		throw new Error("Неожиданный символ в позиции [" + Pos + "]");
+	}
+
+	function ParseObject(){
+		const Obj = {};
+		const Keys = new Set();
+		
+		Pos++;
+		
+		SkipWhitespace();
+		if(Text[Pos] === '}'){ Pos++; return Obj; }
+
+		while(true){
+			SkipWhitespace();
+			const Key = ParseString();
+			if(Keys.has(Key)){ Logger.Warn("Повторяющийся ключ [" + Key + "] в позиции [" + Pos + "]"); }
+			Keys.add(Key);
+			SkipWhitespace();
+			if (Text[Pos] !== ':') throw new Error("Ожидался символ ':' после ключа в позиции [" + Pos + "]");
+			Pos++;
+			const Value = ParseValue();
+			Obj[Key] = Value;
+			SkipWhitespace();
+			if (Text[Pos] === '}'){ Pos++; break; }
+			if (Text[Pos] !== ','){ throw new Error("Ожидалась запятая после пары ключ-значение в позиции [" + Pos + "]"); }
+			Pos++;
+			SkipWhitespace();
+			if (Text[Pos] === '}'){ Pos++; break; } 
+		}
+		return Obj;
+	}
+
+	function ParseArray(){
+		const Arr = [];
+		Pos++;
+		SkipWhitespace();
+		if(Text[Pos] === ']'){ Pos++; return Arr; }
+
+		while(true){
+			const Value = ParseValue();
+			Arr.push(Value);
+			SkipWhitespace();
+			if (Text[Pos] === ']'){ Pos++; break; }
+			if (Text[Pos] !== ','){ throw new Error("Ожидалась запятая в массиве в позиции [" + Pos + "]"); }
+			Pos++;
+			SkipWhitespace();
+			if(Text[Pos] === ']'){ Pos++; break; }
+		}
+		return Arr;
+	}
+
+	function ParseString(){
+		Pos++;
+		var Result = "";
+		while(true){
+			if(Pos >= Text.length){ throw new Error("Не закрыта строка"); }
+			const Char = Text[Pos];
+			if (Char === '"') { Pos++; break; }
+			if (Char === '\\'){
+				Pos++;
+				const Escape = Text[Pos];
+				const Map = { '"':'"', '\\':'\\', '/':'/', b:'\b', f:'\f', n:'\n', r:'\r', t:'\t' };
+				if (Map[Escape] !== undefined) Result += Map[Escape];
+				else if (Escape === 'u'){
+					const Hex = Text.substr(Pos + 1,4);
+					if (!/^[0-9a-fA-F]{4}$/.test(Hex)){ throw new Error("Неверная escape-последовательность Unicode"); }
+					Result += String.fromCharCode(parseInt(Hex, 16));
+					Pos += 4;
+				} else throw new Error("Неверная escape-последовательность \\" + Escape);
+			} else Result += Char;
+			Pos++;
+		}
+		return Result;
+	}
+
+	function ParseNumber(){
+		const NumMatch = /^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(Text.slice(Pos));
+		if(!NumMatch){ throw new Error("Неверное число в позиции [" + Pos + "]"); }
+		Pos += NumMatch[0].length;
+		return Number(NumMatch[0]);
+	}
+
+	const Result = ParseValue();
+	SkipWhitespace();
+	if(Pos !== Text.length){ throw new Error("Неожиданный символ в позиции [" + Pos + "]"); }
+
 	__JSONParse[Text] = Result;
-	
 	return Result;
 }
 var __JSONParse = {};
@@ -75,8 +178,9 @@ function UpdateString(String){
 		GitHub          : "https://github.com/Woowz11",
 		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
 		Discord         : "woowz11",
-		Data            : "ТЕКУЩАЯ ДАТА ФОРМАТА 04.10.2025", //------------------------------------GWEWGWEGWEGWEGWEG
+		Data            : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
 		CurrentFile     : CurrentFile,
+		PackFormat      : PackFormat,
 		G_TotalFiles    : (BuildFile ? TotalFiles + 1 : TotalFiles),
 		G_Time          : GenerationTime
 	};
@@ -120,16 +224,21 @@ __CalculateColor = {};
 /* Глубокое копирование объекта */
 function DeepClone(Obj){
 	if(Obj === null || typeof Obj !== "object"){ return Obj; }
-	
-	if(Array.isArray(Obj)){ return Obj.map(DeepClone); }
-	if(ArrayBuffer.isView(Obj)){ return new Obj.constructor(Obj); }
-	
-	const Clone = {};
-	for(const Key in Obj){
-		if(Object.prototype.hasOwnProperty.call(Obj, Key)){
-			Clone[Key] = DeepClone(Obj[Key]);
-		}
+
+	if(Array.isArray(Obj)){
+		return Obj.map(DeepClone);
 	}
+
+	if(ArrayBuffer.isView(Obj)){
+		return new Obj.constructor(Obj);
+	}
+
+	const Clone = Object.create(Object.getPrototypeOf(Obj));
+
+	for(const Key of Object.keys(Obj)){
+		Clone[Key] = DeepClone(Obj[Key]);
+	}
+
 	return Clone;
 }
 
@@ -242,13 +351,11 @@ function RemoveHTML(HTML){
 function ShowInfo(Button){
 	try{
 		const ShowVersion = Button ? Button.innerText : SelectedVersion;
+		if(!ShowVersion){ return; }
 		
 		document.getElementById("VersionName").innerText = ShowVersion.replace(/^a/, "Alpha ").replace(/^b/, "Beta ").replace(/^c/, "Classic ").replace(/^rd/, "RubyDung ");
 		
 		const Version = PackVersions[ShowVersion][2];
-		const VersionImage  = HasFile("R/V/" + ShowVersion + ".png") ? ShowVersion : "Unknown";
-		
-		document.getElementById("VersionImage").src = __VersionImages[VersionImage].ToImage();
 		
 		var Add = Version["Add"] || [];
 		
@@ -259,11 +366,15 @@ function ShowInfo(Button){
 			"r": ["Ресурс пак","Нужно кинуть в папку resourcepacks"],
 		}
 		
-		var VersionType = Add.includes("ReplacePack.json") ? "i" : (Add.includes("TexturePack.json") ? "t" : "?");
+		var VersionType = Add.includes("ReplacePack.json") ? "i" : (Add.includes("TexturePack.json") ? "t" : (Add.includes("ResourcePack.json") ? "r" : "?"));
 		document.getElementById("VersionType").innerText = VersionTypeInfo[VersionType][0];
 		document.getElementById("VersionType").title     = VersionTypeInfo[VersionType][1];
+		
+		const VersionImage  = HasFile("R/V/" + ShowVersion + ".png") ? ShowVersion : "Unknown";
+		if(!__VersionImages[VersionImage]){ return; }
+		document.getElementById("VersionImage").src = __VersionImages[VersionImage].ToImage();
 	}catch(e){
-		throw new Error("Произошла ошибка при показе информации об генераторе!", e);
+		Logger.Error("Произошла ошибка при показе информации об генераторе!", e);
 	}
 }
 
@@ -317,119 +428,159 @@ var PackVersions = {}
 var SelectedVersion = null;
 
 /* Загрузка генератора */
-async function LoadGenerator(File, FileName, Loaded = new Set()){
+async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = false){
 	try{
-		if(Loaded.has(FileName)){ return null; }
-		var FirstGenerator = Loaded.size === 0;
-		Loaded.add(FileName);
+		if(Loaded.size === 0 && !GetActions){
+			if(__LoadGenerator[FileName]){
+				Logger.Console("Генератор уже был сгенерирован!");
+				return __LoadGenerator[FileName];
+			}
+		}
 		
+		/* Защита от рекурсии */
+		if(Loaded.has(FileName)){ return null; } var First = Loaded.size === 0; Loaded.add(FileName);
+		
+		/* Информация генератора */
 		const Info = await FileContentJSON(File);
 		
-		function MergeObjects(Base, Overlay){
-			const Result = { ...Base };
-
-			for (const Key in Overlay) {
-				if (!Overlay.hasOwnProperty(Key)) continue;
-
-				const DataBase    = Base   [Key];
-				const DataOverlay = Overlay[Key];
+		/* Начальная обработка файлов */
+		if(Info.Files){
+			function F_Start(Files, Prefix = ""){
+				const Result = {};
 				
-				if(DataOverlay === null){
-					delete Result[Key];
-					continue;
-				}
+				for(const Key in Files){
+					const Value = Files[Key];
+					const Path  = Prefix + Key;
 
-				if (DataBase && typeof DataBase === "object" && DataOverlay && typeof DataOverlay === "object") {
-					if (!Array.isArray(DataBase) && !Array.isArray(DataOverlay)) {
-						Result[Key] = MergeObjects(DataBase, DataOverlay);
-					} else {
-						Result[Key] = DataOverlay;
+					/* Для данных типа: "folder/": { ... } */
+					if(Path.endsWith("/")){
+						if(Value && typeof Value === "object" && !Array.isArray(Value)){
+							Object.assign(Result, F_Start(Value, Path));
+						}else{
+							Result[Path] = Value;
+						}
+					}else{
+						Result[Path] = Value;
 					}
-				} else {
-					Result[Key] = DataOverlay;
-				}
-			}
-
-			return Result;
-		}
-		
-		function MergeFiles(Base, Overlay){
-			const Result = { ...Base };
-			
-			for(const Key in Overlay){
-				if (!Overlay.hasOwnProperty(Key)){ continue; }
-			
-				var BaseValue    = Base   [Key];
-				var OverlayValue = Overlay[Key];
-			
-				if(typeof OverlayValue === "string"){
-					var RecursiveName = OverlayValue;
-					Overlay[Key] = Base[RecursiveName];
-					if(Overlay[Key] === undefined){ throw new Error("Файл [" + RecursiveName + "] не найден!"); }
-				}
-			
-				if (OverlayValue === null){
-					delete Result[Key];
-					continue;
-				}
-			
-				if(Array.isArray(Base[Key]) && Array.isArray(Overlay[Key]) && Base[Key][0] === "Atlas" && Overlay[Key][0] === "Atlas"){
-					const [_ , DataBase   ] = Base   [Key];
-					const [__, DataOverlay] = Overlay[Key];
-					
-					Result[Key] = ["Atlas", MergeObjects(DataBase, DataOverlay)];
-					continue;
 				}
 				
-				Result[Key] = Overlay[Key];
+				return Result;
 			}
-			
-			return Result;
+			Info.Files = F_Start(Info.Files);
 		}
 		
+		/* Действия */
+		var Actions = [];
+		
+		/* Начальные действия */
+		if(Info.Files){
+			for(const Key of Object.keys(Info.Files)){
+				const Value = Info.Files[Key];
+				Actions.push([Key, Value]);
+			}
+		}
+		
+		/* Установка родительских действий */
 		if(Info.Parent){
-			const Parent = await GetFile("G/" + Info.Parent);
-			var ParentInfo = await LoadGenerator(Parent, Info.Parent, Loaded);
-			Info.Files = MergeFiles(ParentInfo.Files, Info.Files);
-			Info.__Info = Info.__Info || {};
-			Info.__Info.Parent = ParentInfo["Name"];
-		}
-		
-		if(FirstGenerator && Array.isArray(Info.Add)){
-			for(const Add of Info.Add){
-				var AddInfo = await LoadGenerator(await GetFile("G/" + Add), Add, Loaded);
-				if(AddInfo){
-					Info.Files = MergeFiles(Info.Files, AddInfo.Files);
-					Info.__Info = Info.__Info || {};
-					Info.__Info.Added = Info.__Info.Added || [];
-					Info.__Info.Added.push(AddInfo["Name"]);
-				}
+			const ParentRaw     = await GetFile("G/" + Info.Parent);
+			const ParentInfo    = await LoadGenerator(ParentRaw, Info.Parent, Loaded, true);
+			const ParentActions = ParentInfo["Actions"];
+			if(ParentActions !== null){
+				Actions = [...ParentActions, ...Actions];
+				
+				Info.__Info = Info.__Info || {};
+				Info.__Info.Parent = ParentInfo.Name;
 			}
-			delete Info.Add;
+			
+			if(!Info.PackFormat && !ParentInfo.PackFormat){ Info.PackFormat = ParentInfo.PackFormat; }
 		}
 		
-		function FlattenFiles(Files, Prefix = ""){
-			const Result = {};
-			
-			for(const Path in Files){
-				const Info_ = Files[Path];
-				const FullPath = Prefix + Path;
-				if(typeof Info_ === "object" && !Array.isArray(Info_) && Info_ !== null){
-					Object.assign(Result, FlattenFiles(Info_, FullPath));
+		/* Добавление Add */
+		if(Info.Add && Array.isArray(Info.Add) && First){
+			for(const AddFile of Info.Add){
+				const AddRaw     = await GetFile("G/" + AddFile);
+				const AddInfo    = await LoadGenerator(AddRaw, AddFile, Loaded, true);
+				const AddActions = AddInfo["Actions"];
+				if(AddActions === null){ continue; }
+				
+				Actions = [...Actions, ...AddActions];
+				
+				Info.__Info = Info.__Info || {};
+				Info.__Info.Added = Info.__Info.Added || [];
+				Info.__Info.Added.push(AddInfo.Name);
+			}
+		}
+		
+		if(GetActions){ Info.Actions = Actions; return Info; }
+		
+		/* Результат файлов */
+		const Files = {};
+		
+		/* Финальная обработка файлов */
+		for(const [Key, Value] of Actions){
+			/* Если ссылка на другой файл, типа: "file.txt": "file2.txt" */
+			if(typeof Value === "string"){
+				const RefKey = Value;
+				if(RefKey in Files){
+					const RefValue = DeepClone(Files[RefKey]);
+					if(RefValue){
+						Files[Key] = RefValue;
+					}
 				}else{
-					Result[FullPath] = Info_;
+					Logger.ConsoleError("Файл [" + Key + "] ссылается на несуществующий другой файл [" + RefKey + "]!");
+					Files[Key] = null;
 				}
+			}else if(Value === null){
+				/* Удаление папки: "folder/": null */
+				if(Key.endsWith("/")){
+					for(const Key_ in Files){
+						if(Key_.startsWith(Key)){ delete Files[Key_]; }
+					}
+				/* Если файл удаляется: "file.txt": null */
+				}else{
+					delete Files[Key];
+				}
+			/* Если атлас: "file.png": ["Atlas", { ... }] */
+			}else if(Value[0] === "Atlas" && (!Files[Key] || Files[Key][0] === "Atlas")){
+				function Merge(A, B){
+					if(!A){ return B; }
+					
+					const R = { ...A };
+					
+					for(const Key in B){
+						/* Смешение массивов: "?": { ... } */
+						if(Key in R && typeof R[Key] === "object" && typeof B[Key] === "object" && !Array.isArray(R[Key])){
+							R[Key] = Merge(R[Key], B[Key]);
+						/* Удаление текстуры: "?": null */
+						}else if(R[Key] && B[Key] === null){
+							delete R[Key];
+						/* Простая текстура: "?": ["Texture", ...] */
+						}else{
+							R[Key] = B[Key];
+						}
+					}
+					
+					return R;
+				}
+				Files[Key] = ["Atlas", Merge(Files[Key] ? Files[Key][1] : null, Value[1])];
+			/* Если просто файл: "file.txt": ["Create", "Example"] */
+			}else{
+				Files[Key] = Value;
 			}
-			
-			return Result;
 		}
 		
-		Info.Files = FlattenFiles(Info.Files);
+		Info.Files = Files;
+		
+		if(First){
+			__LoadGenerator[FileName] = Info;
+		}
+		
 		return Info;
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке генератора [" + FileName + "]!", e);
 	}
 }
+const __LoadGenerator = {};
 
 /* Получает разную информацию из пака */
 async function LoadPackInformation(){
@@ -470,7 +621,7 @@ async function LoadPackInformation(){
 			if(File.name.includes("Hierarchy")){
 				if(File.name.includes("Version")){ VersionHierarchy = GeneratorInfo; }
 			}else{
-				var Type = GeneratorInfo["Type"  ] || "Unknown"; GeneratorInfo["Type"  ] = Type  ;
+				var Type = GeneratorInfo["Type"] || "Unknown"; GeneratorInfo["Type"] = Type  ;
 				
 				if(Type === "Version"){
 					PackVersions[GeneratorInfo["Name"]] = [File, GeneratorInfo["Name"], GeneratorInfo];
@@ -614,6 +765,13 @@ async function PreLoad(Buf){
 	}
 }
 
+/* Уберает оверлей загрузки */
+function RemoveLoadingOverlay(){
+	document.getElementById("Loading").style.opacity       = 0;
+	document.getElementById("Loading").style.pointerEvents = "none";
+}
+if(IsLocal){ RemoveLoadingOverlay(); }
+
 /* Вызывается при запуске сайта */
 function Awake(){
 	const PreLoadPack = $("#PreLoadPack");
@@ -638,6 +796,7 @@ function Awake(){
 				if (!response.ok){ throw new __Error("Ошибка загрузки: " + response.status); }
 				const Buf = await response.arrayBuffer();
 				await PreLoad(Buf);
+				RemoveLoadingOverlay();
 			}catch(e){
 				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
 				Logger.Fatal("Произошла ошибка при получении пака с raw.githubusercontent.com!", e);
@@ -670,11 +829,14 @@ var CurrentFile;
 /* Произошла ошибка во время генерации? */
 var HasError = false;
 
+/* Формат пака */
+var PackFormat = -1;
+
 /* Генерация пака */
 async function Generate(){
 	try{
-		if(!PreLoaded){ throw new Error("Пак ещё не был пред-загружен!"); }
-		if(InGeneration){ throw new Error("Пак уже генерируется!"); }
+		if(!PreLoaded  ){ throw new Error("Пак ещё не был пред-загружен!"); }
+		if(InGeneration){ throw new Error("Пак уже генерируется!"        ); }
 		Console.empty();
 		
 		HasError = false;
@@ -692,8 +854,10 @@ async function Generate(){
 		LoadPaintings();
 		__AllPaintings = AllPaintings;
 		
-		var VersionGenerator = PackVersions[SelectedVersion];
-		await ApplyGenerator(await LoadGenerator(VersionGenerator[0], VersionGenerator[1]));
+		const VersionGenerator = PackVersions[SelectedVersion];
+		const Generator = await LoadGenerator(VersionGenerator[0], VersionGenerator[1]);
+		PackFormat = Generator.PackFormat || -1;
+		await ApplyGenerator(Generator);
 		
 		GenerationTime = Date.now() - GenerationStartTime;
 		
@@ -952,6 +1116,9 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	if(MemoryFile){ Info = Path; Path = null; }
 
 	try{
+		/* Что-бы Info.shift(), не редактировал генераторы */
+		Info = DeepClone(Info);
+		
 		/* Как генерировать файл */
 		var GenerateType = Info[0];
 		
@@ -964,6 +1131,8 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			
 			return __Result;
 		}
+		
+		Logger.ConsoleWithTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
 		
 		Info.shift();
 		
@@ -983,8 +1152,6 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		}
 		
 		CurrentFile = MemoryFile ? "[CurrentFile : null]" : Path;
-		
-		Logger.ConsoleWithTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
 		
 		var Actions = null;
 		

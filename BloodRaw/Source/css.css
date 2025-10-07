@@ -13,7 +13,7 @@
 	scrollbar-color: #898A8A #212121;
 }
 
-html, button, input{
+html, button, input, textarea{
 	font-family : CFont;
 	color: white;
 	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
@@ -217,9 +217,19 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* ======================================================== */
 
-.Bumb{
+.In{
 	border: 3px solid rgba(0, 0, 0, 0.25);
 	box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5), inset 0px 0px 30px rgba(0,0,0,0.25);
+	padding: 15px;
+	
+	background-image: url('dirt.png');
+	background-size: 1024px 1024px;
+	image-rendering: pixelated;
+}
+
+.Out{
+	border: 3px solid rgba(0, 0, 0, 0.25);
+	box-shadow: 0px 0px 10px rgba(0,0,0,0.5), 0px 0px 30px rgba(0,0,0,0.25);
 	padding: 15px;
 	
 	background-image: url('dirt.png');

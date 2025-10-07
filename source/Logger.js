@@ -53,7 +53,13 @@ function ExceptionInfo(Exception){
 }
 
 function PrintMessageText(Message, Exception){
-	var Result = Message;
+	var Result;
+	
+	if(typeof Message === "string"){
+		Result = Message;
+	}else{
+		Result = JSON.stringify(Message, null, 2);
+	}
 	
 	if(Exception){
 		Result += "\n:" + "=".repeat(ExceptionLength) + ":\n";

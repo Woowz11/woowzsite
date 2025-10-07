@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Конвертер Atlas: Value - [Key, Value]</title>
+
+<link rel="stylesheet" href="../Source/css.css">
+
+<style>
+html, button, input{
+	font-size   : 1.25em;
+	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
+}
+
+body { padding: 0 20px; }
+textarea { width: 100%; height: 275px; }
+</style>
+
+</head>
+<body>
+<h2>Конвертер Atlas Value → [Key, Value]</h2>
+
+<p>Atlas ("Key": Value, ...)</p>
+<textarea id="input" autocomplete="off" spellcheck="false" placeholder='		"License.txt" : ["Create", ["File", "License.txt"]],
+		"Readme.md"   : [["Create", ["BuildFile"]], ["File", "Readme.md"]],
+		"Site.url"    : ["File", "Link.url"]'></textarea>
+<br>
+
+<button onclick="convert()">Конвертировать</button>
+
+<p style="margin-top: 30px;">Atlas (["Key", Value], ...)</p>
+<button onclick="copyOutput()">Скопировать результат</button>
+<textarea id="output" readonly placeholder='		["License.txt", ["Create",["File","License.txt"]]],
+		["Readme.md", [["Create",["BuildFile"]],["File","Readme.md"]]],
+		["Site.url", ["File","Link.url"]]'></textarea>
+
+<script>
+function convert() {
+    const input = document.getElementById("input").value;
+    const lines = input.split('\n');
+
+    const result = [];
+    let currentKey = null;
+    let currentLeading = '';
+    let currentValueLines = [];
+    let bracketCount = 0; // отслеживаем вложенные скобки
+
+    function pushCurrent() {
+        if(currentKey !== null){
+            const valueText = currentValueLines.join('\n');
+            result.push({leading: currentLeading, key: currentKey, valueText});
+            currentKey = null;
+            currentValueLines = [];
+            bracketCount = 0;
+        }
+    }
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if(!trimmed) return;
+
+        const match = line.match(/^(\s*)"(.+?)"\s*:\s*(.+)?$/);
+        if(match && bracketCount === 0){
+            pushCurrent();
+            currentLeading = match[1];
+            currentKey = match[2];
+            let rest = match[3] || '';
+            if(rest.endsWith(',')) rest = rest.slice(0, -1);
+            
+            currentValueLines.push(rest);
+            bracketCount += (rest.match(/{/g)||[]).length + (rest.match(/\[/g)||[]).length;
+            bracketCount -= (rest.match(/}/g)||[]).length + (rest.match(/\]/g)||[]).length;
+        } else if(currentKey !== null){
+            currentValueLines.push(line);
+            bracketCount += (line.match(/{/g)||[]).length + (line.match(/\[/g)||[]).length;
+            bracketCount -= (line.match(/}/g)||[]).length + (line.match(/\]/g)||[]).length;
+        }
+
+        if(currentKey !== null && bracketCount === 0){
+            pushCurrent();
+        }
+    });
+    pushCurrent();
+
+	const output = result.map(({leading, key, valueText}) => {
+		let val = valueText.trim();
+		// Убираем запятую в конце, если есть
+		if(val.endsWith(',')) val = val.slice(0, -1);
+		return `${leading}[${JSON.stringify(key)}, ${val}]`;
+	}).join(',\n');
+
+    document.getElementById("output").value = output;
+}
+
+function copyOutput() {
+    const outputField = document.getElementById("output");
+    outputField.select();
+    outputField.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+}
+</script>
+</body>
+</html>

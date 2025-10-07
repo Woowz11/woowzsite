@@ -20,7 +20,7 @@ textarea { width: 100%; height: 275px; }
 <body>
 <h2>Конвертер Atlas (+N к ключам)</h2>
 
-<p>Введите Atlas:</p>
+<p>Atlas</p>
 <textarea id="input" autocomplete="off" spellcheck="false" placeholder='				"2" : {
 					"2"  : ["Texture", "R/T/P/Splash_1.texture"]
 				},
@@ -33,10 +33,10 @@ textarea { width: 100%; height: 275px; }
 				}'></textarea>
 <br>
 
-<p>Смещение ключей: <input id="offset" type="number" value="-1"></p>
+<p>Смещение ключей <input id="offset" type="number" value="-1"></p>
 <button onclick="convert()">Конвертировать</button>
 
-<p><b>Результат:</b></p>
+<p style="margin-top: 30px;">Результат</p>
 <button onclick="copyOutput()">Скопировать результат</button>
 <textarea id="output" readonly placeholder='				"1" : {
 					"1" : ["Texture", "R/T/P/Splash_1.texture"]

@@ -67,7 +67,24 @@ html, button{
 
 <script src="../Libs/jquery.min.js"></script>
 
-<body id="body"><div class="Container">
+<body id="body"><div id="Loading" style="
+	position: fixed;
+	top: 0; left: 0;
+	width: 100vw; height: 100vh;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2em;
+	text-shadow: 0 0 10px red;
+	z-index: 9999;
+	transition: opacity 0.3s ease;
+">
+	<span id="OverlayText">Загрузка...</span>
+</div>
+
+<div class="Container">
 	<input type="file" id="PreLoadPack" accept=".zip" style="display: none;">
 
 	<h1>Генератор <a href="https://woowz11.github.io/woowzsite/BloodRaw/Main">BloodRaw</a></h1>
@@ -83,13 +100,21 @@ html, button{
 		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
-	<center><div class="Bumb" style="display: flex; height: 60vh; padding: 0;">
-		<div class="Bumb" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
+	<center><div class="In" style="display: flex; height: 60vh; padding: 0;">
+		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
 		<div style="flex: 1; padding-top: 20px;">
-			<img class="Bumb" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
+			<img class="Out" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
 			<p id="VersionName">FULLNAME</p>
 			<p>==========</p>
 			<p id="VersionType" style="cursor: help;">TYPE</p>
+		</div>
+	</div></center>
+	
+	<center id="ModificationPanel" style="display: none;"><div class="In" style="display: flex; height: 60vh; padding: 0;">
+		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;"></div></div>
+		<div style="flex: 1; padding-top: 20px;">
+			<img class="Out" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
+			<p>FULLNAME</p>
 		</div>
 	</div></center>
 
