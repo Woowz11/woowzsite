@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Конвертер Atlas: Value - [Key, Value]</title>
+<title>"Key": Value → [Key, Value]</title>
 
 <link rel="stylesheet" href="../Source/css.css">
 
@@ -18,9 +18,9 @@ textarea { width: 100%; height: 275px; }
 
 </head>
 <body>
-<h2>Конвертер Atlas Value → [Key, Value]</h2>
+<h2>"Key": Value → [Key, Value]</h2>
 
-<p>Atlas ("Key": Value, ...)</p>
+<p>"Key": Value, ...</p>
 <textarea id="input" autocomplete="off" spellcheck="false" placeholder='		"License.txt" : ["Create", ["File", "License.txt"]],
 		"Readme.md"   : [["Create", ["BuildFile"]], ["File", "Readme.md"]],
 		"Site.url"    : ["File", "Link.url"]'></textarea>
@@ -28,7 +28,7 @@ textarea { width: 100%; height: 275px; }
 
 <button onclick="convert()">Конвертировать</button>
 
-<p style="margin-top: 30px;">Atlas (["Key", Value], ...)</p>
+<p style="margin-top: 30px;">["Key", Value], ...</p>
 <button onclick="copyOutput()">Скопировать результат</button>
 <textarea id="output" readonly placeholder='		["License.txt", ["Create",["File","License.txt"]]],
 		["Readme.md", [["Create",["BuildFile"]],["File","Readme.md"]]],

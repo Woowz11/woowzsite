@@ -58,7 +58,7 @@ function PrintMessageText(Message, Exception){
 	if(typeof Message === "string"){
 		Result = Message;
 	}else{
-		Result = JSON.stringify(Message, null, 2);
+		Result = JSON.stringify(Message, null, '\t');
 	}
 	
 	if(Exception){

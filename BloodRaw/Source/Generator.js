@@ -22,7 +22,8 @@ Logger.Console = function(Message, Type = 0, Title){
 	}
 	if(!InGeneration){ return; }
 	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
-	Console.append(`<p${Title ? ` title="${RemoveHTML(Title)}"` : ""}${Type !== 0 ? " style=\"color:" + (Type === 1 ? "yellow" : "red") + ";\"" : ""}>${Message}</p>`);
+	const Style = (Type !== 0 ? "color:" + (Type === 1 ? "yellow" : "red") + ";" : "") + (Title ? "cursor: help;" : "");
+	Console.append(`<p${Title ? ` title="${RemoveHTML(Title)}"` : ""} style="${Style}">${Message}</p>`);
 }
 
 Logger.ConsoleWithTitle = function(Message, Title){
@@ -49,8 +50,28 @@ Logger.ConsoleError = function(Message, Exception){
 
 /* Более умный JSON.parse */
 function JSONParse(Text){
-	Text = Text.replace(/\/\*[\s\S]*?\*\//g, "");
-	Text = Text.replace(/\/\/.*$/gm		, "");
+	function StripComments(Text_){
+		var R = "", inStr = false, strChar = "", inCom = "", i = 0;
+		while(i < Text_.length){
+			const c = Text_[i], n = Text_[i+1];
+
+			if(!inCom){
+				if(!inStr && (c === '"' || c === "'")) inStr = true, strChar = c;
+				else if(inStr && c === strChar && Text_[i-1] !== '\\') inStr = false;
+				
+				if(!inStr && c === '/' && n === '/'){ inCom = 'line'; i++; }
+				else if(!inStr && c === '/' && n === '*'){ inCom = 'block'; i++; }
+				else R += c;
+			} else {
+				if(inCom === 'line' && (c === '\n' || c === '\r')){ inCom = ''; R += c; }
+				if(inCom === 'block' && c === '*' && n === '/'){ inCom = ''; i++; }
+			}
+			i++;
+		}
+		return R;
+	}
+	
+	Text = StripComments(Text);
 	Text = Text.replace(/^\uFEFF/		  , "");
 	Text = Text.replace(/[\x00-\x1F\x7F]/g , c => c === '\n' || c === '\r' ? c : '');
 
@@ -93,10 +114,14 @@ function JSONParse(Text){
 			Pos++;
 			const Value = ParseValue();
 			Obj[Key] = Value;
+			
 			SkipWhitespace();
 			if (Text[Pos] === '}'){ Pos++; break; }
+			
+			SkipWhitespace();
 			if (Text[Pos] !== ','){ throw new Error("Ожидалась запятая после пары ключ-значение в позиции [" + Pos + "]"); }
 			Pos++;
+			
 			SkipWhitespace();
 			if (Text[Pos] === '}'){ Pos++; break; } 
 		}
@@ -128,7 +153,7 @@ function JSONParse(Text){
 		while(true){
 			if(Pos >= Text.length){ throw new Error("Не закрыта строка"); }
 			const Char = Text[Pos];
-			if (Char === '"') { Pos++; break; }
+			if (Char === '"'){ Pos++; break; }
 			if (Char === '\\'){
 				Pos++;
 				const Escape = Text[Pos];
@@ -160,7 +185,7 @@ function JSONParse(Text){
 	__JSONParse[Text] = Result;
 	return Result;
 }
-var __JSONParse = {};
+const __JSONParse = {};
 
 /* Останавливает поток на определённое кол-во миллисекунд */
 function Sleep(MS){
@@ -169,37 +194,46 @@ function Sleep(MS){
 
 /* Обновляет строку */
 function UpdateString(String){
-	const Replacements = {
+	const Replacements = {...__ReplaceString, ...{
 		Version         : PackVersion,
         MinecraftVersion: SelectedVersion,
-        Author          : Author,
-        License         : License,
         Link            : BloodRawLink,
-		GitHub          : "https://github.com/Woowz11",
 		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
-		Discord         : "woowz11",
-		Data            : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
+		Date            : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
 		CurrentFile     : CurrentFile,
 		PackFormat      : PackFormat,
 		G_TotalFiles    : (BuildFile ? TotalFiles + 1 : TotalFiles),
 		G_Time          : GenerationTime
-	};
+	}};
 
 	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => Replacements[K] ?? "undefined");
 }
+const __ReplaceString = {};
+
+/* Обновляет анимацию */
+function UpdateAnimation(Animation){
+	if(typeof Animation !== "string"){ return Animation; }
+	
+	if(Animation in __ReplaceAnimation){
+		return __ReplaceAnimation[Animation];
+	}else{
+		throw new Error("Анимация [" + Animation + "] не найдена!");
+	}
+}
+const __ReplaceAnimation = {};
 
 /* Обновляет цвет */
 function UpdateColor(Color){
-	return Color in __Colors ? __Colors[Color] : Color;
+	return Color in __ReplaceColor ? __ReplaceColor[Color] : Color;
 }
-var __Colors = {};
+const __ReplaceColor = {};
 
 /* Конвертация цвета в байты */
 function CalculateColor(Color){
 	try{
 		if(typeof Color !== "string"){ return Color; }
 	
-		if(__CalculateColor[Color]){ return __CalculateColor[Color]; }
+		if(__Colors[Color]){ return __Colors[Color]; }
 	
 		if(!CalculateColor.CTX){
 			const C = document.createElement("canvas");
@@ -213,13 +247,13 @@ function CalculateColor(Color){
 		CalculateColor.CTX.fillStyle = Color;
 		CalculateColor.CTX.fillRect(0, 0, 1, 1);
 		var Result = CalculateColor.CTX.getImageData(0, 0, 1, 1).data;
-		__CalculateColor[Color] = Result;
+		__Colors[Color] = Result;
 		return Result;
 	}catch(e){
 		throw new Error("Произошла ошибка при расчёте цвета", e);
 	}
 }
-__CalculateColor = {};
+__Colors = {};
 
 /* Глубокое копирование объекта */
 function DeepClone(Obj){
@@ -372,9 +406,9 @@ function ShowInfo(Button){
 		document.getElementById("VersionType").innerText = VersionTypeInfo[VersionType][0];
 		document.getElementById("VersionType").title     = VersionTypeInfo[VersionType][1];
 		
-		const VersionImage  = HasFile("R/V/" + ShowVersion + ".png") ? ShowVersion : "Unknown";
-		if(!__VersionImages[VersionImage]){ return; }
-		document.getElementById("VersionImage").src = __VersionImages[VersionImage].ToImage();
+		const VersionImage  = __VersionImages[ShowVersion];
+		if(!VersionImage){ return; }
+		document.getElementById("VersionImage").src = VersionImage.ToImage();
 	}catch(e){
 		Logger.Error("Произошла ошибка при показе информации об генераторе!", e);
 	}
@@ -411,12 +445,6 @@ const PackFolders = {};
 /* Информация об паке */
 var PackInfo;
 
-/* Автор пака */
-var Author;
-
-/* Лицензия пака */
-var License;
-
 /* Версия пака */
 var PackVersion;
 
@@ -440,10 +468,21 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		}
 		
 		/* Защита от рекурсии */
-		if(Loaded.has(FileName)){ return null; } var First = Loaded.size === 0; Loaded.add(FileName);
+		if(Loaded.has(FileName)){ return null; } const First = Loaded.size === 0; Loaded.add(FileName);
 		
 		/* Информация генератора */
 		const Info = await FileContentJSON(File);
+		
+		/* Родительская информация */
+		var ParentInfo;
+		
+		/* Получение родительской информации */
+		if(Info.Parent){
+			const ParentRaw  = await GetFile("G/" + Info.Parent);
+			      ParentInfo = await LoadGenerator(ParentRaw, Info.Parent, Loaded, true);
+			
+			if(!Info.PackFormat && ParentInfo.PackFormat){ Info.PackFormat = ParentInfo.PackFormat; }
+		}
 		
 		/* Действия */
 		var Actions = [];
@@ -497,8 +536,6 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		
 		/* Установка родительских действий */
 		if(Info.Parent){
-			const ParentRaw     = await GetFile("G/" + Info.Parent);
-			const ParentInfo    = await LoadGenerator(ParentRaw, Info.Parent, Loaded, true);
 			const ParentActions = ParentInfo["Actions"];
 			if(ParentActions !== null){
 				Actions = [...ParentActions, ...Actions];
@@ -506,8 +543,6 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 				Info.__Info = Info.__Info || {};
 				Info.__Info.Parent = ParentInfo.Name;
 			}
-			
-			if(!Info.PackFormat && !ParentInfo.PackFormat){ Info.PackFormat = ParentInfo.PackFormat; }
 		}
 		
 		/* Добавление Add */
@@ -620,8 +655,9 @@ async function LoadPackInformation(){
 		}
 		
 		PackInfo    = await FileContentJSON(await GetFile("Info.json"));
-		Author      = PackInfo["Author" ];
-		License     = PackInfo["License"];
+		Object.assign(__ReplaceString   , PackInfo["Texts"     ]);
+		Object.assign(__ReplaceColor    , PackInfo["Colors"    ]);
+		Object.assign(__ReplaceAnimation, PackInfo["Animations"]);
 		PackVersion = PackInfo["Version"]; $("#PackVersion").text(PackVersion);
 		
 		try{
@@ -718,13 +754,13 @@ async function LoadColors(){
 /* Загрузка картинок версий */
 async function LoadVersionImages(){
 	try{
-		const VersionImages = PackFolders["R/V"];
-		
-		__VersionImages["Unknown"] = await GetTexture("R/T/U/Unknown.png");
-		
-		for(const VersionImage of VersionImages){
-			const Version = VersionImage.name.split("/").pop().replace(".png", "");
-			__VersionImages[Version] = await GetTexture(VersionImage.name);
+		for(const VersionID of Object.keys(PackVersions)){
+			const Version = PackVersions[VersionID][2];
+			
+			const VersionImageInfo = Version.Icon || ["Texture", "R/T/U/Unknown.png"];
+			const VersionImageID = JSON.stringify(VersionImageInfo);
+			
+			__VersionImages[VersionID] = await GenerateFile(VersionImageInfo);
 		}
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке изображений версий!", e);
@@ -993,6 +1029,7 @@ async function ApplyAction(Content, Type, Info){
 			
 			case "Frame": {
 				var Index = Info[0] || 0;
+				if(Content.W === Content.H){ Logger.ConsoleWarn("Невозможно применение Frame, потому-что размеры текстуры одинаковые!"); }
 				Content.Frame(Index);
 				break;
 			}
@@ -1149,7 +1186,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		var GenerateType = Info[0];
 		
 		var ID = JSON.stringify(Info);
-		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting"){
+		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting" && GenerateType != "Animation"){
 			var __Result = __GenerateFile[ID];
 			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
 			
@@ -1185,14 +1222,14 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		
 		switch(GenerateType){
 			case "File": {
-				var FilePath = Info[0];
+				const FilePath = Info[0];
 				Actions = Info[1] || null;
 				Result = await GetFile(FilePath);
 				break;
 			}
 			
 			case "Texture": {
-				var FilePath = Info[0];
+				const FilePath = Info[0];
 				Actions = Info[1] || null;
 				Result = await GetTexture(FilePath);
 				break;
@@ -1200,19 +1237,19 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			
 			case "Create": {
 				if (typeof Info[0] === "number" && typeof Info[1] === "number") {
-					var W = Info[0];
-					var H = Info[1];
-					var Color = Info[2] || "transparent";
+					const W = Info[0];
+					const H = Info[1];
+					const Color = Info[2] || "transparent";
 					Actions   = Info[3] || null;
 
 					Result = new Texture(W, H, Color);
 				} else if (Array.isArray(Info[0])) {
-					var File = await GenerateFile(Info[0]);
-					var Content = await FileContent(File);
+					const File = await GenerateFile(Info[0]);
+					const Content = await FileContent(File);
 
 					Result = UpdateString(Content);
 				} else {
-					var Content = Info[0];
+					const Content = Info[0];
 					Actions = Info[1] || null;
 					Result = UpdateString(Content);
 				}
@@ -1220,31 +1257,84 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			}
 			
 			case "Atlas": {
-				var AtlasInfo = Info[0];
+				const AtlasInfo = Info[0];
 				Actions = Info[1] || null;
 				Result = await GenerateAtlas(AtlasInfo);
 				break;
 			}
 			
 			case "Painting": {
-				var W = Info[0];
-				var H = Info[1];
+				const W = Info[0];
+				const H = Info[1];
 				Actions = Info[2] || null;
 				Result = await GeneratePainting(W, H);
 				break;
 			}
 			
 			case "Splashes": {
-				var SplashesVersion = Info[0];
 				Actions = Info[1] || null;
-				Result = await GenerateSplashes(SplashesVersion);
+				Result = await GenerateSplashes();
 				break;
 			}
 			
 			case "Json": {
-				var Json = Info[0];
+				const Json = Info[0];
 				Actions = Info[1] || null;
 				Result = UpdateString(JSON.stringify(Json, null, '\t'));
+				break;
+			}
+			
+			case "Animation": {
+				const T = Info[0];
+				const AnimationInfo = UpdateAnimation(Info[1]);
+				Actions = Info[2] || [];
+				Result = await GenerateFile(T);
+				
+				const Frames = Result.H / Result.W;
+				if(!Number.isInteger(Frames)){ throw new Error("У анимации неверно задана высота! Число кадров дробное!\nКадров: " + Frames); }
+				if(Frames === 1){ throw new Error("Не является анимацией!"); }
+				
+				if(AnimationInfo === false){
+					Actions = [...Actions, ["Frame"]];
+				}else{
+					const Speed = AnimationInfo["Speed"] || 1;
+					if(Speed <= 0){ throw new Error("Скорость анимации не может быть <= 0!"); }
+					if(!Number.isInteger(Speed)){ throw new Error("Скорость анимации не может быть дробной!"); }
+					
+					if(PackFormat > 0){
+						const Animation = {};
+						
+						if(AnimationInfo["Smooth"] === true){
+							Animation.interpolate = true;
+						}
+						
+						Animation.frametime = Speed;
+						
+						if(AnimationInfo["Frames"]){
+							Animation.frames = AnimationInfo["Frames"];
+						}
+						
+						await AddFileToPack(Path + ".mcmeta", await GenerateFile(["Json", {"animation":Animation}]));
+					}else{
+						var Animation = "";
+						
+						const Frames_ = AnimationInfo["Frames"];
+						
+						if(Frames_){
+							for(const i of Frames_){
+								if(Animation.length > 0){ Animation += "\n"; }
+								Animation += i + "*" + Speed;
+							}
+						}else{
+							for(var i = 0; i < Frames; i++){
+								if(Animation.length > 0){ Animation += "\n"; }
+								Animation += i + "*" + Speed;
+							}
+						}
+						
+						await AddFileToPack(Path.split(".")[0] + ".txt", await GenerateFile(["Create", Animation]));
+					}
+				}
 				break;
 			}
 			
@@ -1356,10 +1446,8 @@ async function GeneratePainting(W, H){
 var __AllPaintings;
 
 /* Генерация сплешей */
-async function GenerateSplashes(SplashesVersion){
+async function GenerateSplashes(){
 	try{
-		if(SplashesVersion < 0){ throw new Error("Версия не может быть < 0!"); }
-		
 		var Result = "";
 		
 		var Splashes = await FileContentJSON(await GetFile("R/O/Splashes.json"));
@@ -1372,11 +1460,11 @@ async function GenerateSplashes(SplashesVersion){
 			}
 			
 			if(Result.length > 0){ Result += "\n"; }
-			Result += UpdateString(Splash);
+			Result += "§f" + UpdateString(Splash);
 		}
 		
 		return Result;
 	}catch(e){
-		throw new Error("Произошла ошибка при генерации сплешей!\nВерсия: " + SplashesVersion, e);
+		throw new Error("Произошла ошибка при генерации сплешей!", e);
 	}
 }
