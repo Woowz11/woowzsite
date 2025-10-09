@@ -1,29 +1,35 @@
 /* Генератор для BloodRaw */
 
-/* Запущен сайт локально?  */ const IsLocal	     = window.location.protocol === "file:";
-/* Путь до файла с паком   */ const PackFile     = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
-/* Ссылка на сайт BloodRaw */ const BloodRawLink = "https://woowz11.github.io/woowzsite/BloodRaw/Main";
+/* Запущен сайт локально?  */ const IsLocal	 = window.location.protocol === "file:";
+/* Путь до файла с паком   */ const PackFile = "https://raw.githubusercontent.com/Woowz11/BloodRaw-Minecraft/refs/heads/main/BloodRaw-Pack.zip";
  
 /* Дефолтная текстура */ const DefaultTexture   = "R/T/Default.png";
 /* Текстура ошибка    */ const ErrorTexture     = "R/T/Error.png";
-/* Текстура Changelog */ const ChangelogTexture = "Changelog.texture";
+/* Текстура Changelog */ const ChangelogTexture = "R/O/Changelog.file";
 
 /* ======================================================== */
 
 Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz11");
 
-var Console = $("#Console");
+var Console = document.getElementById("Console");
 
 Logger.Console = function(Message, Type = 0, Title){
 	switch(Type){
 		case 0: Logger.Info (Message, null, InGeneration ? "color: lime;" : undefined); break;
-		case 1: Logger.Warn (Message                      ); break;
-		case 2: Logger.Error(Message                      ); break;
+		case 1: Logger.Warn (Message                                                 ); break;
+		case 2: Logger.Error(Message                                                 ); break;
 	}
 	if(!InGeneration){ return; }
-	Message = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
-	const Style = (Type !== 0 ? "color:" + (Type === 1 ? "yellow" : "red") + ";" : "") + (Title ? "cursor: help;" : "");
-	Console.append(`<p${Title ? ` title="${RemoveHTML(Title)}"` : ""} style="${Style}">${Message}</p>`);
+
+	const M = document.createElement("p");
+	
+	if(Title){ M.title = Title; M.style.cursor = "help"; }
+	
+	if(Type > 0){ M.style.color = Type === 1 ? "yellow" : "red"; }
+	
+	M.textContent = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
+	
+	Console.appendChild(M);
 }
 
 Logger.ConsoleWithTitle = function(Message, Title){
@@ -193,22 +199,23 @@ function Sleep(MS){
 }
 
 /* Обновляет строку */
-function UpdateString(String){
-	const Replacements = {...__ReplaceString, ...{
-		Version         : PackVersion,
-        MinecraftVersion: SelectedVersion,
-        Link            : BloodRawLink,
-		Generator       : "https://woowz11.github.io/woowzsite/BloodRaw/Generator",
-		Date            : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
-		CurrentFile     : CurrentFile,
-		PackFormat      : PackFormat,
-		G_TotalFiles    : (BuildFile ? TotalFiles + 1 : TotalFiles),
-		G_Time          : GenerationTime
+function UpdateText(Text){
+	const R = {...__ReplaceText, ...{
+        D_Version    : SelectedVersion,
+		D_Date       : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
+		D_CurrentFile: CurrentFile,
+		D_PackFormat : PackFormat,
+		D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
+		D_Time       : GenerationTime
 	}};
 
-	return String.replace(/<([A-Za-z0-9_]+)>/g, (M, K) => Replacements[K] ?? "undefined");
+	return Text.replace(/<([A-Za-z0-9_]+)>/g, (M, K, O) => {
+		if(K in R){ return R[K]; }
+		Logger.ConsoleError(`Не найден текстовой код <${K}>!\nТекст: ${Text}`);
+		return "undefined";
+	});
 }
-const __ReplaceString = {};
+const __ReplaceText = {};
 
 /* Обновляет анимацию */
 function UpdateAnimation(Animation){
@@ -243,9 +250,13 @@ function CalculateColor(Color){
 	
 		Color = UpdateColor(Color);
 		
-		CalculateColor.CTX.clearRect(0, 0, 1, 1);
+		const Old = CalculateColor.CTX.fillStyle;
 		CalculateColor.CTX.fillStyle = Color;
-		CalculateColor.CTX.fillRect(0, 0, 1, 1);
+		
+		if(CalculateColor.CTX.fillStyle === Old){ Logger.ConsoleError("Не получилось определить цвет [" + Color + "]!"); CalculateColor.CTX.fillStyle = "rgb(255,0,255)"; }
+		
+		CalculateColor.CTX.clearRect(0, 0, 1, 1);
+		CalculateColor.CTX.fillRect (0, 0, 1, 1);
 		var Result = CalculateColor.CTX.getImageData(0, 0, 1, 1).data;
 		__Colors[Color] = Result;
 		return Result;
@@ -293,14 +304,13 @@ async function GetFile(Path, ThatTexture = false){
 	var File = PackFiles[Path];
 	if(!HasFile(Path)){ throw new Error("Файл [" + Path + "] не найден!"); }
 	
-	if(ThatTexture){
-		const Extension = Path.split(".").pop().toLowerCase();
-		
-		if(Extension === "texture"){
-			const TextureInfo = await FileContentJSON(File);
-			
-			File = await GenerateFile(Path, TextureInfo);
-		}else{
+	const Extension = Path.split(".").pop().toLowerCase();
+	
+	if(Extension === "file"){
+		const FileInfo = await FileContentJSON(File);
+		File = await GenerateFile(Path, FileInfo);
+	}else{
+		if(ThatTexture){
 			const PNGContent = await FileContentByte(File);
 		
 			const Blob_  = new Blob([PNGContent], { type: "image/png" });
@@ -437,16 +447,15 @@ var __OldSelectVersionButton = null;
 
 /* ======================================================== */
 
-/* Файлы пака (Все файлы) */
+/* Файлы пака (Все файлы) {PackFiles["R/T/A/Backface.png"] = File} */
 const PackFiles = {};
-/* Папки пака (Файлы внутри папок) [Файлы без пути к папке] */
+/* Папки пака (Файлы внутри папок) [Файлы без пути к папке] {PackFilesFolders["R/T/A/"] = File[]} */
+const PackFilesFolders = {};
+/* Чисто папки пака (Какие папки внутри папки) {PackFolders["R"]["T"]["A"] = Folders[]} */
 const PackFolders = {};
 
 /* Информация об паке */
 var PackInfo;
-
-/* Версия пака */
-var PackVersion;
 
 /* Название коммита */
 var CommitName;
@@ -456,6 +465,12 @@ var PackVersions = {}
 
 /* Выбранная версия */
 var SelectedVersion = null;
+
+/* Название файла результата */
+var OutName;
+
+/* Генераторы */
+var Generators = {};
 
 /* Загрузка генератора */
 async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = false){
@@ -648,17 +663,28 @@ async function LoadPackInformation(){
 	try{
 		for(const Path of Object.keys(PackFiles)){
 			const LastSlash = Path.lastIndexOf("/");
-			const Folder    = LastSlash === -1 ? ""   : Path.substring(0,  LastSlash);
+			const Folder    = LastSlash === -1 ? "" : Path.substring(0,  LastSlash);
 			
-			if(!PackFolders[Folder]){ PackFolders[Folder] = []; }
-			PackFolders[Folder].push(PackFiles[Path]);
+			if(!PackFilesFolders[Folder]){ PackFilesFolders[Folder] = []; }
+			PackFilesFolders[Folder].push(PackFiles[Path]);
+			
+			const Parts = Path.split("/"); Parts.pop();
+			var Current = PackFolders;
+			for(const Part of Parts){
+				if(!Current[Part]){ Current[Part] = {}; }
+				Current = Current[Part];
+			}
 		}
 		
-		PackInfo    = await FileContentJSON(await GetFile("Info.json"));
-		Object.assign(__ReplaceString   , PackInfo["Texts"     ]);
-		Object.assign(__ReplaceColor    , PackInfo["Colors"    ]);
-		Object.assign(__ReplaceAnimation, PackInfo["Animations"]);
-		PackVersion = PackInfo["Version"]; $("#PackVersion").text(PackVersion);
+		PackInfo = await FileContentJSON(await GetFile("Info.json"));
+		
+		OutName = PackInfo["Out"];
+		
+		Object.assign(__ReplaceText     , PackInfo["Text"     ]);
+		Object.assign(__ReplaceColor    , PackInfo["Color"    ]);
+		Object.assign(__ReplaceAnimation, PackInfo["Animation"]);
+		
+		document.getElementById("PackVersion").innerText = __ReplaceText["Version"];
 		
 		try{
 			const Response = await fetch("https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits/main");
@@ -677,7 +703,7 @@ async function LoadPackInformation(){
 		
 		var VersionHierarchy;
 		
-		for(const File of PackFolders["G"]){
+		for(const File of PackFilesFolders["G"]){
 			var GeneratorInfo = await FileContentJSON(File);
 			
 			if(File.name.includes("Hierarchy")){
@@ -719,16 +745,13 @@ async function LoadPackInformation(){
 function LoadPaintings(){
 	try{
 		AllPaintings = {};
-		for(var File of PackFolders["R/T/A"]){
-			var Path = File.name.split("/").pop();
-			var Match = Path.match(/^(\d+x\d+)_(\d+)\.png$/i);
-			if (!Match){ continue; }
-			
-			var PaintingSize = Match[1];
-
+		
+		for(var PaintingSize of Object.keys(PackFolders["R"]["T"]["A"])){
+			if(PaintingSize === "Frame"){ continue; }
 			if(!AllPaintings[PaintingSize]){ AllPaintings[PaintingSize] = []; }
-			
-			AllPaintings[PaintingSize].push("R/T/A/" + Path);
+			for(var Painting of PackFilesFolders["R/T/A/" + PaintingSize]){
+				AllPaintings[PaintingSize].push(Painting.name);
+			}
 		}
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке картин!", e);
@@ -738,14 +761,14 @@ function LoadPaintings(){
 /* Загружает цвета */
 async function LoadColors(){
 	try{
-		var GrassColormap  = await GetTexture("R/T/O/Colormap_Grass.png" );
-		var LeavesColormap = await GetTexture("R/T/O/Colormap_Leaves.png");
+		var GrassColormap  = await GetTexture("R/T/O/Colormap/Grass.png" );
+		var LeavesColormap = await GetTexture("R/T/O/Colormap/Leaves.png");
 		
 		var GrassColor  = GrassColormap .GetColor(127, 127);
 		var LeavesColor = LeavesColormap.GetColor(127, 127);
 		
-		__Colors["Grass" ] = `rgb(${GrassColor[0]},${GrassColor[1]},${GrassColor[2]})`;
-		__Colors["Leaves"] = `rgb(${LeavesColor[0]},${LeavesColor[1]},${LeavesColor[2]})`;
+		__ReplaceColor["D_Grass" ] = `rgb(${GrassColor[0]},${GrassColor[1]},${GrassColor[2]})`;
+		__ReplaceColor["D_Leaves"] = `rgb(${LeavesColor[0]},${LeavesColor[1]},${LeavesColor[2]})`;
 	}catch(e){
 		throw new Error("Произошла ошибка при загрузке цветов!", e);
 	}
@@ -815,9 +838,10 @@ async function PreLoad(Buf){
 
 		for (const Name of Object.keys(ZIP.files)) {
 			const File = ZIP.files[Name];
-			if(File.dir){ continue; }
 
 			File.name = File.name.replace(/\\/g, "/").replace(/\/+/g, "/");
+			
+			if(File.name.split("/").pop() === ""){ continue; }
 			PackFiles[Name.replace(/\\/g, "/").replace(/\/+/g, "/")] = File;
 		}
 		
@@ -827,30 +851,34 @@ async function PreLoad(Buf){
 	}
 }
 
-/* Уберает оверлей загрузки */
-function RemoveLoadingOverlay(){
-	document.getElementById("Loading").style.opacity       = 0;
-	document.getElementById("Loading").style.pointerEvents = "none";
+/* Показывает или уберает оверлей загрузки */
+function LoadingOverlay(Show){
+	document.getElementById("Loading").style.opacity       = Show ? 1 : 0;
+	document.getElementById("Loading").style.pointerEvents = Show ? "unset" : "none";
 }
-if(IsLocal){ RemoveLoadingOverlay(); }
+if(IsLocal){ LoadingOverlay(false); }
 
 /* Вызывается при запуске сайта */
 function Awake(){
-	const PreLoadPack = $("#PreLoadPack");
+	const PreLoadPack = document.getElementById("PreLoadPack");
 	if (IsLocal){
-		PreLoadPack.on("change", async (EV) => {
+		PreLoadPack.addEventListener("change", async (EV) => {
 			try{
+				LoadingOverlay(true);
+				
 				const File = EV.target.files[0];
 				if(!File){ return; }
 				const Buf = await File.arrayBuffer();
 				await PreLoad(Buf);
+				
+				LoadingOverlay(false);
 			}catch(e){
 				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
 				Logger.Fatal("Произошла ошибка при получении пака с компьютера!", e);
 			}
 		});
 		
-		PreLoadPack.css("display", "unset");
+		PreLoadPack.style.display = "unset";
 	}else{
 		(async () => {
 			try{
@@ -858,7 +886,7 @@ function Awake(){
 				if (!response.ok){ throw new __Error("Ошибка загрузки: " + response.status); }
 				const Buf = await response.arrayBuffer();
 				await PreLoad(Buf);
-				RemoveLoadingOverlay();
+				LoadingOverlay(false);
 			}catch(e){
 				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
 				Logger.Fatal("Произошла ошибка при получении пака с raw.githubusercontent.com!", e);
@@ -899,7 +927,7 @@ async function Generate(){
 	try{
 		if(!PreLoaded  ){ throw new Error("Пак ещё не был пред-загружен!"); }
 		if(InGeneration){ throw new Error("Пак уже генерируется!"        ); }
-		Console.empty();
+		Console.innerHTML = "";
 		
 		HasError = false;
 		document.documentElement.style.setProperty("--infobox", "255, 255, 0");
@@ -934,7 +962,7 @@ async function Generate(){
 		const Blob = await Pack.generateAsync({ type: "blob" });
 		const A = document.createElement("a");
 		A.href = URL.createObjectURL(Blob);
-		A.download = "Bloodraw " + SelectedVersion + ".zip";
+		A.download = UpdateText(OutName);
 		document.body.appendChild(A);
 		A.click();
 		document.body.removeChild(A);
@@ -1247,11 +1275,11 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					const File = await GenerateFile(Info[0]);
 					const Content = await FileContent(File);
 
-					Result = UpdateString(Content);
+					Result = UpdateText(Content);
 				} else {
 					const Content = Info[0];
 					Actions = Info[1] || null;
-					Result = UpdateString(Content);
+					Result = UpdateText(Content);
 				}
 				break;
 			}
@@ -1280,7 +1308,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			case "Json": {
 				const Json = Info[0];
 				Actions = Info[1] || null;
-				Result = UpdateString(JSON.stringify(Json, null, '\t'));
+				Result = UpdateText(JSON.stringify(Json, null, '\t'));
 				break;
 			}
 			
@@ -1429,7 +1457,7 @@ async function GeneratePainting(W, H){
 	
 		var PaintingSize = W + "x" + H;
 	
-		var FrameTexture = "R/T/A/Frame_" + PaintingSize + ".png";
+		var FrameTexture = "R/T/A/Frame/" + PaintingSize + ".png";
 	
 		var PaintingFamily = __AllPaintings[PaintingSize];
 		if(!PaintingFamily || PaintingFamily.length === 0){
@@ -1460,7 +1488,7 @@ async function GenerateSplashes(){
 			}
 			
 			if(Result.length > 0){ Result += "\n"; }
-			Result += "§f" + UpdateString(Splash);
+			Result += "§f" + UpdateText(Splash);
 		}
 		
 		return Result;
