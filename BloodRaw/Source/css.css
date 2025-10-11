@@ -69,7 +69,9 @@ textarea::selection {
 }
 
 button{
-	border-image: url("button.png") repeat;
+	background-color   : #212121;
+	border             : none; 
+	border-image       : url("button.png") repeat;
 	border-image-slice : 6 fill;
 	border-image-width : 32px 32px;
 	font-family        : CFont;

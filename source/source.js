@@ -281,7 +281,8 @@ WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 
 WoowzsiteSourceBloodraw = AddFullnessToTable([
 	"dirt.png","iconblock.ico","logo.png","cubemap.png","test-skin.png","test-skin-2.png","button.png","button_hover.png","button_disabled.png","font.png","updatepainting.png","og.png",
-	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png","area.png","area_hover.png", "button_selected.png"
+	"checkbox.png","checkbox_checked.png","checkbox_hover.png","checkbox_hover_checked.png","ico_forge.png","ico_optifine.png","area.png","area_hover.png", "button_selected.png",
+	"dead.png"
 ],"BloodRaw/Source/","");
 
 BloodrawSkinEditorBody = AddFullnessToTable([

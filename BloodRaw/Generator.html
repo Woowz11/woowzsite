@@ -63,11 +63,23 @@ html, button{
 	box-shadow: 0 0 15px rgba(var(--infobox), 0.3);
 	gap: 20px;
 }
+
+.ActionBox {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: flex-start;
+	padding: 15px 20px;
+	background: linear-gradient(135deg, rgba(40,40,40,0.95), rgba(20,20,20,0.95));
+	border: 3px solid rgba(var(--infobox), 0.5);
+	box-shadow: 0 0 15px rgba(var(--infobox), 0.3);
+	gap: 10px;
+}
 </style>
 
-<script src="../Libs/jquery.min.js"></script>
+<body id="body">
 
-<body id="body"><div id="Loading" style="
+<div id="Loading" style="
 	position: fixed;
 	top: 0; left: 0;
 	width: 100vw; height: 100vh;
@@ -94,55 +106,105 @@ html, button{
 			<p>Информация:</p>
 			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
 				<li><p id="PackVersion">?</p></li>
-				<li><a id="CommitName" href="#">?</a></li>
+				<li><a id="CommitName">?</a></li>
 			</ul>
 		</div>
-		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
+		<img id="ChangelogImage" src="Source/updatepainting.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
-	<center><div class="In" style="display: flex; height: 70vh; padding: 0;">
-		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
-		<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
-			<img class="Out" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="90%" height="auto">
-			<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
-				<p id="VersionName">FULLNAME</p>
-				<p>=================</p>
-				<p id="VersionType" style="cursor: help;">TYPE</p>
-				<div style="display: flex; justify-content: center; gap: 8px;">
-					<p id="VersionMods" style="cursor: help;"    >M</p>|
-					<p id="VersionOptifine" style="cursor: help;">O</p>|
-					<p id="VersionDLS"      style="cursor: help;">D</p>
+	<center>
+		<div class="ActionBox">
+			<div style="flex: 1; display: flex; width: 100%; box-shadow: 0 0 15px rgba(var(--infobox), 0.3);">
+				<button style="flex: 1;" onclick="SelectGenerateType(0);" id="GenerateType0">Полный</button>
+				<button style="flex: 1;" onclick="SelectGenerateType(1);" id="GenerateType1">Часть</button>
+				<button style="flex: 1;" onclick="SelectGenerateType(2);" id="GenerateType2">Файл</button>
+			</div>
+			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
+				<li><input type="checkbox" autocomplete="off" onchange="EnablePrikols(this.checked);" title="Позволяет сломать разными способами генерацию">Приколы</input></li>
+			</ul>
+		</div>
+		
+		<p id="GenerateDesc" style="padding-top: 20px;">DESC</p>
+		
+		<div id="VersionPanel" style="display: none;">
+			<div class="In" style="display: flex; height: 65vh; padding: 0; margin-top: 20px;">
+				<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
+				<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
+					<img class="Out" id="VersionImage" src="Source/dead.png" width="90%" height="auto">
+					<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+						<p id="VersionName">FULLNAME</p>
+						<p>=================</p>
+						<p id="VersionType" style="cursor: help;">TYPE</p>
+						<div style="display: flex; justify-content: center; gap: 8px;">
+							<p id="VersionMods"      style="cursor: help;">M</p>|
+							<p id="VersionOptifine"  style="cursor: help;">O</p>|
+							<p id="VersionExtension" style="cursor: help;">E</p>
+						</div>
+						<p>=================</p>
+						<p id="VersionDesc">DESC</p>
+					</div>
 				</div>
-				<p>=================</p>
-				<p id="VersionDesc">DESC</p>
 			</div>
 		</div>
-	</div></center>
+		
+		<div id="AddonPanel" style="display: none;">
+			<div id="AddonPanel_Has" style="display: none;">
+				<div class="In" style="display: flex; height: 100vh; padding: 0; margin-top: 20px;">
+					<div class="In" style="flex: 2; padding: 0; display: flex; flex-direction: column;">
+						<div class="Out" style="padding: 0; display: flex; width: 100%; direction:ltr;">
+							<button style="flex: 1;" id="CategoryExtension" onclick="SelectAddons('Extension');">Extension</button>
+							<button style="flex: 1;" id="CategoryOptifine"  onclick="SelectAddons('Optifine' );">Optifine </button>
+							<button style="flex: 1;" id="CategoryForge"     onclick="SelectAddons('Forge'    );">Forge    </button>
+							<button style="flex: 1;" id="CategoryFabric"    onclick="SelectAddons('Fabric'   );">Fabric   </button>
+						</div>
+						
+						<div id="AddonSelected" class="In" style="
+							flex: 1;
+							display: flex; 
+							flex-direction: column;
+							align-items: stretch;
+							justify-content: flex-start;
+							overflow-y: scroll;
+							padding: 0;
+						"></div>
+						<div class="Out" style="padding:10px;"></div>
+						<div id="AddonUnselected" class="In" style="
+							flex: 1;
+							display: flex; 
+							flex-direction: column;
+							align-items: stretch;
+							justify-content: flex-start;
+							overflow-y: scroll;
+							padding: 0;
+						"></div>
+						
+					</div>
+					<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
+						<img class="Out" id="AddonImage" src="Source/dead.png" width="90%" height="auto">
+						<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+							<p id="AddonName">FULLNAME</p>
+							<p>=================</p>
+							<a>LINK</a>
+							<p>=================</p>
+							<p>DESC</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="FilePanel" style="display: none;">Тут ещё пока-что ничего нет...</div>
+		
+		<div id="PrikolPanel" style="display: none;">
+			<div class="Out" style="margin-top: 20px; border-image: linear-gradient(135deg, red, orange, yellow, green, cyan, blue, violet) 1;">
+				Тут будут рофлы
+			</div>
+		</div>
 	
-	<center id="ModsPanel" style="display: none;"><div class="In" style="display: flex; height: 60vh; padding: 0;">
-		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; padding: 0;">
-			<div class="Out" style="padding: 0; display: flex; width: 100%; direction:ltr;">
-				<button style="flex: 1;" id="CategoryDLS"      onclick="SelectMods('DLS');"     >DLS</button>
-				<button style="flex: 1;" id="CategoryOptifine" onclick="SelectMods('Optifine');">Optifine</button>
-				<button style="flex: 1;" id="CategoryForge"    onclick="SelectMods('Forge');"   >Forge</button>
-				<button style="flex: 1;" id="CategoryFabric"   onclick="SelectMods('Fabric');"  >Fabric</button>
-			</div>
-			<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr; padding: 15px;"></div>
-		</div>
-		<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
-			<img class="Out" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="90%" height="auto">
-			<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
-				<p>FULLNAME</p>
-				<p>=================</p>
-				<p style="cursor: help;">TYPE</p>
-				<p>=================</p>
-				<p>DESC</p>
-			</div>
-		</div>
-	</div></center>
+	</center>
 
 	<div style="text-align:center; padding-top: 20px;">
-		<button id="B_Generate" onclick="Generate();">Сгенерировать пак</button>
+		<button id="B_Generate" onclick="Generate();">?</button>
 	</div>
 
 	<div>

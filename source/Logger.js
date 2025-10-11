@@ -6,7 +6,7 @@ Error = class{
 	constructor(Message, Parent){
 		this.Message  = Message;
 		this.Parent   = Parent || null;
-		this.Line     = new __Error().stack.split("\n")[1];
+		this.Line     = new __Error().stack.split("\n")[0];
 		const Match   = this.Line.match(__ErrorRegex) || [];
 		this.Function = Match[1] || "?";
 		this.Script   = Match[2] || "Anonymous";
@@ -25,10 +25,11 @@ Error = class{
 	}
 }
 
-const ExceptionLength = 100;
+const ExceptionLength = 125;
 
 function ExceptionInfo(Exception){
 	if(!Exception){ return; }
+	
 	const Parent = ExceptionInfo(Exception.Parent);
 	
 	function PadException(E_, M){
@@ -39,13 +40,13 @@ function ExceptionInfo(Exception){
 		return " " + Exception.Message + " " + PadException(Exception.Exception(), Exception.Message) + (Parent ? "\n" + Parent : "");
 	}else{
 		if(Exception instanceof __Error){
-			var S = Exception.stack.split("\n")[1];
+			var S = Exception.stack.split("\n")[0];
 			const M = (S ? S.match(__ErrorRegex) : null) || [];
 			S = M[2] || "Anonymous";
 			S = S.replace(__FunctionRegex, "");
 			S += ":" + (M[3] || "-1");
 			
-			return " " + Exception.message + " " + PadException(S, Exception.message) + (Exception.stack ? "\n" + Exception.stack : "");
+			return " " + Exception.message + " " + PadException(S, Exception.message) + (Exception.stack ? "\n[ --- Дефолтный стек --- ]\n" + Exception.stack : "");
 		}else{
 			return " " + Exception;
 		}

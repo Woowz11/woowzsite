@@ -403,7 +403,9 @@ function ShowInfo(Button){
 		
 		document.getElementById("VersionDesc").innerText = UpdateText(Version["Desc"]);
 		
-		const Mods = Version["Mods"];
+		const Addon = Version["Addon"] || [];
+		
+		const Mods  = Addon["Mods"];
 		const Mods_ = document.getElementById("VersionMods");
 		if(Mods){
 			var ModsTitle = "";
@@ -417,7 +419,7 @@ function ShowInfo(Button){
 			Mods_.title = "Эта версия не содержит каких либо модификаций!"; Mods_.style.color = "gray";
 		}
 		
-		const Optifine = Version["Optifine"];
+		const Optifine  = Addon["Optifine"];
 		const Optifine_ = document.getElementById("VersionOptifine");
 		if(Optifine){
 			Optifine_.title = "sex"; Optifine_.style.color = "white";
@@ -425,12 +427,12 @@ function ShowInfo(Button){
 			Optifine_.title = "что-то там оптифайн, доделай"; Optifine_.style.color = "gray";
 		}
 		
-		const DLS = Version["DLS"];
-		const DLS_ = document.getElementById("VersionDLS");
-		if(DLS){
-			DLS_.title = "sex"; DLS_.style.color = "white";
+		const Extension  = Addon["Extension"];
+		const Extension_ = document.getElementById("VersionExtension");
+		if(Extension){
+			Extension_.title = "sex"; Extension_.style.color = "white";
 		}else{
-			DLS_.title = "что-то там оптифайн, доделай"; DLS_.style.color = "gray";
+			Extension_.title = "что-то там оптифайн, доделай"; Extension_.style.color = "gray";
 		}
 		
 		var Add = Version["Add"] || [];
@@ -454,7 +456,26 @@ function ShowInfo(Button){
 	}
 }
 
-/* Версия выбрана */
+/* Показывает информацию об адоне */
+function ShowInfoAddon(AddonPanel){
+	try{
+		const ShowAddon = AddonPanel ? AddonPanel.AddonID : SelectedAddon;
+		
+		const AddonInfo = Generators[ShowAddon];
+		
+		document.getElementById("AddonName").innerText = AddonInfo["Name"];
+		
+		const AddonImage = __AddonImages[ShowAddon];
+		if(!AddonImage){ return; }
+		document.getElementById("AddonImage").src = AddonImage.ToImage();
+	}catch(e){
+		Logger.Error("Произошла ошибка при показе информации об дополнении!", e);
+	}
+}
+
+/* ======================================================== */
+
+/* Выбор версии */
 function SelectVersion(Version){
 	try{
 		Logger.Info("Выбрана версия: " + Version);
@@ -472,49 +493,268 @@ function SelectVersion(Version){
 		
 		const VersionInfo = PackVersions[SelectedVersion][2];
 		
-		const Mods     = VersionInfo["Mods"    ];
-		const Optifine = VersionInfo["Optifine"];
-		const DLS      = VersionInfo["DLS"     ];
+		const Addon = VersionInfo["Addon"] || []; 
 		
-		document.getElementById("CategoryForge" ).disabled = !Mods;
-		document.getElementById("CategoryFabric").disabled = !Mods;
-		document.getElementById("CategoryOptifine").disabled = !Optifine;
-		document.getElementById("CategoryDLS").disabled = !DLS;
-		document.getElementById("ModsPanel").style.display = (Mods || Optifine || DLS) ? "unset" : "none";
+		const Mods      = Addon["Mods"     ] || [];
+		const Optifine  = Addon["Optifine" ] || [];
+		const Extension = Addon["Extension"] || [];
 		
-		if(DLS){
-			SelectMods("DLS");
-		}else if(Optifine){
-			SelectMods("Optifine");
-		}else if(/*Forge*/Mods){
-			SelectMods("Forge");
-		}else if(/*Fabric*/false){
-			SelectMods("Fabric");
+		var HasForge = false; var HasFabric = false;
+		for(const Mod of Mods){
+			const ModInfo = Generators[Mod];
+			if(!ModInfo["Core"]){ Logger.ConsoleError("Мод [" + Mod + "] не имеет ядра!"); continue; }
+			HasForge  = HasForge  || ModInfo["Core"].includes("Forge" );
+			HasFabric = HasFabric || ModInfo["Core"].includes("Fabric");
+		}
+		
+		var HasOptifine = Optifine.length > 0;
+		
+		var HasExtension = Extension.length > 0;
+		
+		document.getElementById("AddonPanel_Has").style.display = (HasForge || HasFabric || HasOptifine || HasExtension) ? "unset" : "none";
+		
+		document.getElementById("CategoryForge"    ).disabled = !HasForge ;
+		document.getElementById("CategoryFabric"   ).disabled = !HasFabric;
+		document.getElementById("CategoryOptifine" ).disabled = !HasOptifine;
+		document.getElementById("CategoryExtension").disabled = !HasExtension;
+		
+		if(HasExtension){
+			SelectAddons("Extension", true);
+		}else if(HasOptifine){
+			SelectAddons("Optifine" , true);
+		}else if(HasForge){
+			SelectAddons("Forge"    , true);
+		}else if(HasFabric){
+			SelectAddons("Fabric"   , true);
 		}
 	}catch(e){
-		throw new Error("Произошла ошибка при выборе версии [" + Version + "]!", e);
+		Logger.Fatal("Произошла ошибка при выборе версии [" + Version + "]!", e);
 	}
 }
 var __OldSelectVersionButton = null;
 
-/* Выбор модификаций */
-function SelectMods(Type){
+/* Выбор дополнения */
+function SelectAddon(Addon){
 	try{
-		if(__OldSelectMods === Type){ return; } __OldSelectMods = Type;
+		SelectedAddon = Addon;
+		
+		ShowInfoAddon(document.getElementById("Addon_" + Addon));
+		
+		const Button = document.getElementById("Addon_" + Addon + "_Button");
+		
+		if(__OldSelectAddonButton){ __OldSelectAddonButton.classList.remove("Selected"); }
+		Button.classList.add("Selected");
+		__OldSelectAddonButton = Button;
+	}catch(e){
+		throw new Error("Произошла ошибка при выборе дополнения!", e);
+	}
+}
+var __OldSelectAddonButton = null;
+
+function SA_CreateButton(Addon, Table){
+	try{
+		const A = Table[SelectedVersion][Addon];
+		
+		const Panel = A === false ? SA_Unselected : SA_Selected;
+		
+		const AddonInfo = Generators[Addon];
+		
+		const R = document.createElement("div");
+		R.AddonID  = Addon;
+		R.Selected = A !== false;
+		R.id = "Addon_" + Addon;
+		R.style.display = "flex";
+		
+		const Up = document.createElement("button");
+		Up.textContent = "↑";
+		Up.style.flex = 1;
+		
+		const Down = document.createElement("button");
+		Down.textContent = "↓";
+		Down.style.flex = 1;
+		
+		R.appendChild(Up); R.appendChild(Down);
+		
+		const B = document.createElement("button");
+		B.textContent = AddonInfo["Name"];
+		B.style.flex = 10;
+		B.id = "Addon_" + Addon + "_Button";
+		
+		B.onclick = () => SelectAddon(Addon);
+		
+		R.onmouseenter = () => ShowInfoAddon(R);
+		R.onmouseleave = () => ShowInfoAddon( );
+		
+		R.appendChild(B);
+		
+		const B2 = document.createElement("button");
+		
+		if(A === false){
+			Up.disabled   = true;
+			Down.disabled = true;
+			
+			B2.textContent = "+";
+			B2.onclick   = () => SA_Action(Addon, "add"   , Table);
+		}else{
+			B2.textContent = "-";
+			B2.onclick   = () => SA_Action(Addon, "remove", Table);
+			
+			Up  .onclick = () => SA_Action(Addon, "up"    , Table);
+			Down.onclick = () => SA_Action(Addon, "down"  , Table);
+		}
+		
+		B2.style.flex = 1;
+		R.appendChild(B2);
+		
+		Panel.appendChild(R);
+		
+		if(SelectedAddon === null){ SelectAddon(Addon); }
+	}catch(e){
+		throw new Error("Произошла ошибка при добавлении кнопки об дополнении [" + Addon + "]!", e);
+	}
+}
+
+/* Пересоздание кнопок дополнений */
+function __SA_RebuildAddons(Table){
+	const C = document.getElementById("")
+}
+
+/* Действие аддоновой кнопки */
+function SA_Action(Addon, Action, Table){
+	try{
+		const AddonPanel = document.getElementById("Addon_" + Addon);
+		const Addons = Table[SelectedVersion];
+		
+		switch(Action){
+			case "add": {
+				AddonPanel.remove();
+				Table[SelectedVersion][Addon] = true;
+				SA_CreateButton(Addon, Table);
+				SelectAddon(Addon);
+				break;
+			}
+			case "remove": {
+				AddonPanel.remove();
+				Table[SelectedVersion][Addon] = false;
+				SA_CreateButton(Addon, Table);
+				SelectAddon(Addon);
+				break;
+			}
+			case "up": {
+				break;
+			}
+			case "down": {
+				break;
+			}
+		}
+		
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при действии [" + Action + "] кнопки [" + Addon + "]!", e);
+	}
+}
+
+/* Выбор дополнений */
+function SelectAddons(Type, UpdateAnyway = false){
+	try{
+		if(__OldSelectAddons === Type && !UpdateAnyway){ return; } __OldSelectAddons = Type;
 		
 		const Version = PackVersions[SelectedVersion][2];
 		
-		if(__OldSelectModsButton != null){ __OldSelectModsButton.classList.remove("Selected"); }
+		if(__OldSelectAddonsButton != null){ __OldSelectAddonsButton.classList.remove("Selected"); }
 		
 		const Button = document.getElementById("Category" + Type);
 		Button.classList.add("Selected");
-		__OldSelectModsButton = Button;
+		__OldSelectAddonsButton = Button;
+		
+		SelectedAddon = null;
+		
+		SA_Selected.replaceChildren(); SA_Unselected.replaceChildren();
+		
+		switch(Type){
+			case "Forge": {
+				if(!__SA_Forge[SelectedVersion]){
+					__SA_Forge[SelectedVersion] = {};
+					
+					for(const Mod of Version["Addon"]["Mods"]){
+						const ModInfo = Generators[Mod];
+						if(ModInfo["Core"].includes("Forge")){ __SA_Forge[SelectedVersion][Mod] = false; }
+					}
+				}
+				
+				for(const Mod of Object.keys(__SA_Forge[SelectedVersion])){ SA_CreateButton(Mod, __SA_Forge); }
+				
+				break;
+			}
+			case "Fabric": {
+				break;
+			}
+			case "Optifine": {
+				break;
+			}
+			case "Extension": {
+				break;
+			}
+			default: { throw new Error("Не найден тип [" + Type + "]!"); }
+		}
 	}catch(e){
-		throw new Error("Произошла ошибка при выборе модификаций!", e);
+		Logger.Fatal("Произошла ошибка при выборе дополнений!\nТип: " + Type, e);
 	}
 }
-var __OldSelectMods       = null;
-var __OldSelectModsButton = null;
+var __OldSelectAddons       = null;
+var __OldSelectAddonsButton = null;
+
+var SelectedAddon = null;
+
+const SA_Selected   = document.getElementById("AddonSelected"  );
+const SA_Unselected = document.getElementById("AddonUnselected");
+
+var __SA_Forge     = {}
+var __SA_Fabric    = {}
+var __SA_Optifine  = {}
+var __SA_Extension = {}
+
+/* Выбор типа генерации */
+/*
+	0 - Полный
+	1 - Часть
+	2 - Файл
+*/
+function SelectGenerateType(Type){
+	try{
+		if(SelectedGenerateType === Type || !PreLoaded){ return; } SelectedGenerateType = Type;
+		Logger.Info("Выбран тип генерации [" + Type + "]!");
+		
+		if(__OldSelectGenerationTypeButton != null){ __OldSelectGenerationTypeButton.classList.remove("Selected"); }
+		
+		const Button = document.getElementById("GenerateType" + Type);
+		Button.classList.add("Selected");
+		__OldSelectGenerationTypeButton = Button;
+		
+		document.getElementById("VersionPanel"  ).style.display = Type  <  2 ? "unset" : "none";
+		document.getElementById("AddonPanel"    ).style.display = Type  <  2 ? "unset" : "none";
+		document.getElementById("FilePanel"     ).style.display = Type === 2 ? "unset" : "none";
+		
+		document.getElementById("B_Generate").innerText = Type === 0 ? "Сгенерировать пак" : (Type === 1 ? "Сгенерировать часть" : "Сгенерировать файл/файлы");
+		
+		document.getElementById("GenerateDesc").innerText = [
+			"Обычная генерация пака, с версией, и по желанию с дополнениями",
+			"Генерация пака только с дополнениями, без версии",
+			"Генерация определённых файлов из выбранных генераторов"
+		][Type];
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при выборе типа генерации!\nТип: " + Type, e);
+	}
+}
+var __OldSelectGenerationTypeButton = null;
+
+/* Включены приколы? */
+function EnablePrikols(Enabled){
+	try{
+		document.getElementById("PrikolPanel").style.display = Enabled ? "unset" : "none";
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при в" + (Enabled === false ? "ы" : "") + "ключении приколов!", e);
+	}
+}
 
 /* ======================================================== */
 
@@ -534,8 +774,14 @@ var CommitName;
 /* Доступные версии пака */
 var PackVersions = {}
 
+/* Доступные дополнения пака */
+var PackAddons = {};
+
 /* Выбранная версия */
 var SelectedVersion = null;
+
+/* Выбранный тип генерации */
+var SelectedGenerateType = null;
 
 /* Название файла результата */
 var OutName;
@@ -799,6 +1045,11 @@ async function LoadPackInformation(){
 				if(Type === "Version"){
 					PackVersions[GeneratorInfo["ID"]] = [File, GeneratorInfo["ID"], GeneratorInfo];
 				}
+				
+				switch(Type){
+					case "Version": PackVersions[GeneratorInfo["ID"]] = [File, GeneratorInfo["ID"], GeneratorInfo];
+					case "Addon"  : PackAddons  [GeneratorInfo["ID"]] = [File, GeneratorInfo["ID"], GeneratorInfo];
+				}
 			}
 		}
 		
@@ -859,22 +1110,30 @@ async function LoadColors(){
 	}
 }
 
-/* Загрузка картинок версий */
-async function LoadVersionImages(){
+/* Загрузка иконок */
+async function LoadIcons(){
 	try{
 		for(const VersionID of Object.keys(PackVersions)){
 			const Version = PackVersions[VersionID][2];
 			
 			const VersionImageInfo = Version.Icon || ["Texture", "R/T/U/Unknown.png"];
-			const VersionImageID = JSON.stringify(VersionImageInfo);
 			
 			__VersionImages[VersionID] = await GenerateFile(VersionImageInfo);
 		}
+		
+		for(const AddonID of Object.keys(PackAddons)){
+			const Addon = PackAddons[AddonID][2];
+			
+			const AddonImageInfo = Addon.Icon || ["Texture", "R/T/U/Unknown.png"];
+			
+			__AddonImages[AddonID] = await GenerateFile(AddonImageInfo);
+		}
 	}catch(e){
-		throw new Error("Произошла ошибка при загрузке изображений версий!", e);
+		throw new Error("Произошла ошибка при загрузке иконок!", e);
 	}
 }
 const __VersionImages = {};
+const __AddonImages   = {};
 
 /* Вызывается после пре-загрузки */
 async function PreLoadAfter(){
@@ -882,25 +1141,21 @@ async function PreLoadAfter(){
 	try{
 		await LoadPackInformation();
 	
-		const SelectVersion_ = $("#SelectVersion");
+		const SelectVersion_ = document.getElementById("SelectVersion");
 		
 		const Versions = Object.keys(PackVersions);
 		
-		SelectVersion_.html(
-			Versions.map(V => {
-				var Version = PackVersions[V][2];
-				var Dev = Version.Dev;
-				
-				const MinL = 6 ; const MaxL = 10;
-				const MinS = 24; const MaxS = 14;
-				var T = Clamp((V.length - MinL) / (MaxL - MinL), 0, 1);
-				return `<button onclick="SelectVersion('${V}');" id="SV-${V}" onmouseenter="ShowInfo(this);" onmouseleave="ShowInfo();" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
-			}).join("")
-		);
+		SelectVersion_.innerHTML = Versions.map(V => {
+			var Version = PackVersions[V][2];
+			var Dev = Version.Dev;
+			
+			const MinL = 6 ; const MaxL = 10;
+			const MinS = 24; const MaxS = 14;
+			var T = Clamp((V.length - MinL) / (MaxL - MinL), 0, 1);
+			return `<button onclick="SelectVersion('${V}');" id="SV-${V}" onmouseenter="ShowInfo(this);" onmouseleave="ShowInfo();" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
+		}).join("");
 		
-		await LoadVersionImages();
-		
-		SelectVersion(Versions[0]);
+		await LoadIcons();
 		
 		await LoadColors();
 		
@@ -932,6 +1187,9 @@ async function PreLoad(Buf){
 		
 		await PreLoadAfter();
 		
+		SelectGenerateType(0);
+		SelectVersion(Object.keys(PackVersions)[0]);
+		
 		Logger.Info("Zip-файл пака был загружен!");
 		Logger.Info(":" + "=".repeat(50) + ":");
 	} catch(e){
@@ -959,6 +1217,7 @@ function Awake(){
 				const Buf = await File.arrayBuffer();
 				await PreLoad(Buf);
 				
+				PreLoadPack.style.display = "none";
 				LoadingOverlay(false);
 			}catch(e){
 				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
@@ -1025,6 +1284,8 @@ async function Generate(){
 		Logger.Info(":" + "=".repeat(50) + ":");
 		Logger.Console("Начало генерации пака!");
 		
+		if(SelectedGenerateType !== 0){ throw new Error("Ещё не создана генерация для типа [" + SelectedGenerateType + "]!"); }
+		
 		Pack = new JSZip();
 		
 		TotalFiles = 0;
@@ -1069,6 +1330,11 @@ async function Generate(){
 		}else{
 			Logger.Fatal("Произошла ошибка при генерации пака!", e);
 		}
+		
+		document.documentElement.style.setProperty("--infobox", "255, 0, 0");
+		InGeneration = false;
+		BuildFile = null;
+		Pack = null;
 	}
 }
 
