@@ -386,7 +386,7 @@ async function FileContentByte(File){
 
 /* Уберает спец символы HTML из текста */
 function RemoveHTML(HTML){
-	return HTML	.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('/', '&#47;');
+	return HTML.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('/', '&#47;');
 }
 
 /* ======================================================== */
@@ -399,9 +399,39 @@ function ShowInfo(Button){
 		
 		const Version = PackVersions[ShowVersion][2];
 		
-		var VersionName = ShowVersion.replace(/^a/, "Alpha ").replace(/^b/, "Beta ").replace(/^c/, "Classic ").replace(/^rd/, "RubyDung ").replace(/^inf/, "Infdev ");
-		if(Version.Joke){ VersionName = "Joke \"" + VersionName + "\""; }
-		document.getElementById("VersionName").innerText = VersionName;
+		document.getElementById("VersionName").innerText = Version["Name"];
+		
+		document.getElementById("VersionDesc").innerText = UpdateText(Version["Desc"]);
+		
+		const Mods = Version["Mods"];
+		const Mods_ = document.getElementById("VersionMods");
+		if(Mods){
+			var ModsTitle = "";
+			for(const ModID of Mods){
+				if(ModsTitle.length !== 0){ ModsTitle += ", "; }
+				const Mod = Generators[ModID]["Name"];
+				ModsTitle += Mod;
+			}
+			Mods_.title = ModsTitle; Mods_.style.color = "white";
+		}else{
+			Mods_.title = "Эта версия не содержит каких либо модификаций!"; Mods_.style.color = "gray";
+		}
+		
+		const Optifine = Version["Optifine"];
+		const Optifine_ = document.getElementById("VersionOptifine");
+		if(Optifine){
+			Optifine_.title = "sex"; Optifine_.style.color = "white";
+		}else{
+			Optifine_.title = "что-то там оптифайн, доделай"; Optifine_.style.color = "gray";
+		}
+		
+		const DLS = Version["DLS"];
+		const DLS_ = document.getElementById("VersionDLS");
+		if(DLS){
+			DLS_.title = "sex"; DLS_.style.color = "white";
+		}else{
+			DLS_.title = "что-то там оптифайн, доделай"; DLS_.style.color = "gray";
+		}
 		
 		var Add = Version["Add"] || [];
 		
@@ -412,7 +442,7 @@ function ShowInfo(Button){
 			"r": ["Ресурс пак","Нужно кинуть в папку resourcepacks"],
 		}
 		
-		var VersionType = Add.includes("ReplacePack.json") ? "i" : (Add.includes("TexturePack.json") ? "t" : (Add.includes("ResourcePack.json") ? "r" : "?"));
+		var VersionType = Add.includes("ReplacePack") ? "i" : (Add.includes("TexturePack") ? "t" : (Add.includes("ResourcePack") ? "r" : "?"));
 		document.getElementById("VersionType").innerText = VersionTypeInfo[VersionType][0];
 		document.getElementById("VersionType").title     = VersionTypeInfo[VersionType][1];
 		
@@ -439,11 +469,52 @@ function SelectVersion(Version){
 		__OldSelectVersionButton = Button;
 		
 		ShowInfo(Button);
+		
+		const VersionInfo = PackVersions[SelectedVersion][2];
+		
+		const Mods     = VersionInfo["Mods"    ];
+		const Optifine = VersionInfo["Optifine"];
+		const DLS      = VersionInfo["DLS"     ];
+		
+		document.getElementById("CategoryForge" ).disabled = !Mods;
+		document.getElementById("CategoryFabric").disabled = !Mods;
+		document.getElementById("CategoryOptifine").disabled = !Optifine;
+		document.getElementById("CategoryDLS").disabled = !DLS;
+		document.getElementById("ModsPanel").style.display = (Mods || Optifine || DLS) ? "unset" : "none";
+		
+		if(DLS){
+			SelectMods("DLS");
+		}else if(Optifine){
+			SelectMods("Optifine");
+		}else if(/*Forge*/Mods){
+			SelectMods("Forge");
+		}else if(/*Fabric*/false){
+			SelectMods("Fabric");
+		}
 	}catch(e){
 		throw new Error("Произошла ошибка при выборе версии [" + Version + "]!", e);
 	}
 }
 var __OldSelectVersionButton = null;
+
+/* Выбор модификаций */
+function SelectMods(Type){
+	try{
+		if(__OldSelectMods === Type){ return; } __OldSelectMods = Type;
+		
+		const Version = PackVersions[SelectedVersion][2];
+		
+		if(__OldSelectModsButton != null){ __OldSelectModsButton.classList.remove("Selected"); }
+		
+		const Button = document.getElementById("Category" + Type);
+		Button.classList.add("Selected");
+		__OldSelectModsButton = Button;
+	}catch(e){
+		throw new Error("Произошла ошибка при выборе модификаций!", e);
+	}
+}
+var __OldSelectMods       = null;
+var __OldSelectModsButton = null;
 
 /* ======================================================== */
 
@@ -473,28 +544,30 @@ var OutName;
 var Generators = {};
 
 /* Загрузка генератора */
-async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = false){
+async function LoadGenerator(Name, Loaded = new Set(), GetActions = false){
 	try{
+		Logger.Console("Начало загрузки генератора [" + Name + "]...");
 		if(Loaded.size === 0 && !GetActions){
-			if(__LoadGenerator[FileName]){
+			if(__LoadGenerator[Name]){
 				Logger.Console("Генератор уже был сгенерирован!");
-				return __LoadGenerator[FileName];
+				return __LoadGenerator[Name];
 			}
 		}
 		
 		/* Защита от рекурсии */
-		if(Loaded.has(FileName)){ return null; } const First = Loaded.size === 0; Loaded.add(FileName);
+		if(Loaded.has(Name)){ return null; } const First = Loaded.size === 0; Loaded.add(Name);
 		
 		/* Информация генератора */
-		const Info = await FileContentJSON(File);
+		const Info = Generators[Name];
+		
+		if(!Info){ throw new Error("Генератор не был найден!"); }
 		
 		/* Родительская информация */
 		var ParentInfo;
 		
 		/* Получение родительской информации */
 		if(Info.Parent){
-			const ParentRaw  = await GetFile("G/" + Info.Parent);
-			      ParentInfo = await LoadGenerator(ParentRaw, Info.Parent, Loaded, true);
+			ParentInfo = await LoadGenerator(Info.Parent, Loaded, true);
 			
 			if(!Info.PackFormat && ParentInfo.PackFormat){ Info.PackFormat = ParentInfo.PackFormat; }
 		}
@@ -563,8 +636,7 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		/* Добавление Add */
 		if(Info.Add && Array.isArray(Info.Add) && First){
 			for(const AddFile of Info.Add){
-				const AddRaw     = await GetFile("G/" + AddFile);
-				const AddInfo    = await LoadGenerator(AddRaw, AddFile, Loaded, true);
+				const AddInfo    = await LoadGenerator(AddFile, Loaded, true);
 				const AddActions = AddInfo["Actions"];
 				if(AddActions === null){ continue; }
 				
@@ -647,13 +719,11 @@ async function LoadGenerator(File, FileName, Loaded = new Set(), GetActions = fa
 		
 		Info.Files = Files;
 		
-		if(First){
-			__LoadGenerator[FileName] = Info;
-		}
+		if(First){ __LoadGenerator[Name] = Info; }
 		
 		return Info;
 	}catch(e){
-		throw new Error("Произошла ошибка при загрузке генератора [" + FileName + "]!", e);
+		throw new Error("Произошла ошибка при загрузке генератора [" + Name + "]!", e);
 	}
 }
 const __LoadGenerator = {};
@@ -703,16 +773,31 @@ async function LoadPackInformation(){
 		
 		var VersionHierarchy;
 		
-		for(const File of PackFilesFolders["G"]){
+		const Generators_ = [];
+		
+		for(const Generator of PackFilesFolders["G"]){
+			Generators_.push(Generator);
+		}
+		for(const Folder of Object.keys(PackFolders["G"])){
+			for(const Generator of PackFilesFolders["G/" + Folder]){
+				Generators_.push(Generator);
+			}
+		}
+		
+		for(const File of Generators_){
 			var GeneratorInfo = await FileContentJSON(File);
+			
+			Generators[GeneratorInfo["ID"]] = GeneratorInfo;
 			
 			if(File.name.includes("Hierarchy")){
 				if(File.name.includes("Version")){ VersionHierarchy = GeneratorInfo; }
 			}else{
-				var Type = GeneratorInfo["Type"] || "Unknown"; GeneratorInfo["Type"] = Type  ;
+				const Type = GeneratorInfo["Type"] || "Unknown"; GeneratorInfo["Type"] = Type;
+				const Name = GeneratorInfo["Name"] || GeneratorInfo["ID"]; GeneratorInfo["Name"] = Name; 
+				const Desc = GeneratorInfo["Desc"] || ""; GeneratorInfo["Desc"] = Desc; 
 				
 				if(Type === "Version"){
-					PackVersions[GeneratorInfo["Name"]] = [File, GeneratorInfo["Name"], GeneratorInfo];
+					PackVersions[GeneratorInfo["ID"]] = [File, GeneratorInfo["ID"], GeneratorInfo];
 				}
 			}
 		}
@@ -846,6 +931,9 @@ async function PreLoad(Buf){
 		}
 		
 		await PreLoadAfter();
+		
+		Logger.Info("Zip-файл пака был загружен!");
+		Logger.Info(":" + "=".repeat(50) + ":");
 	} catch(e){
 		throw new Error("Произошла ошибка при пред-загрузке пака!", e);
 	}
@@ -944,8 +1032,7 @@ async function Generate(){
 		LoadPaintings();
 		__AllPaintings = AllPaintings;
 		
-		const VersionGenerator = PackVersions[SelectedVersion];
-		const Generator = await LoadGenerator(VersionGenerator[0], VersionGenerator[1]);
+		const Generator = await LoadGenerator(SelectedVersion);
 		PackFormat = Generator.PackFormat || -1;
 		await ApplyGenerator(Generator);
 		
@@ -1009,7 +1096,7 @@ async function AddFileToPack(Path, Content){
 /* Применить генератор */
 async function ApplyGenerator(Generator){
 	try{
-		Logger.Console("Применение генератора [" + Generator["Name"] + "]");
+		Logger.Console("Применение генератора [" + Generator["ID"] + "]");
 		
 		var Files = Generator["Files"];
 		

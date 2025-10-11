@@ -100,21 +100,44 @@ html, button{
 		<img id="ChangelogImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="120px" height="120px" style="box-shadow: 0 0 10px rgba(var(--infobox),0.4);" alt="Changelog картинка">
 	</div>
 
-	<center><div class="In" style="display: flex; height: 60vh; padding: 0;">
-		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
-		<div style="flex: 1; padding-top: 20px;">
-			<img class="Out" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
-			<p id="VersionName">FULLNAME</p>
-			<p>==========</p>
-			<p id="VersionType" style="cursor: help;">TYPE</p>
+	<center><div class="In" style="display: flex; height: 70vh; padding: 0;">
+		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;" id="SelectVersion"></div></div>
+		<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
+			<img class="Out" id="VersionImage" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="90%" height="auto">
+			<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+				<p id="VersionName">FULLNAME</p>
+				<p>=================</p>
+				<p id="VersionType" style="cursor: help;">TYPE</p>
+				<div style="display: flex; justify-content: center; gap: 8px;">
+					<p id="VersionMods" style="cursor: help;"    >M</p>|
+					<p id="VersionOptifine" style="cursor: help;">O</p>|
+					<p id="VersionDLS"      style="cursor: help;">D</p>
+				</div>
+				<p>=================</p>
+				<p id="VersionDesc">DESC</p>
+			</div>
 		</div>
 	</div></center>
 	
-	<center id="ModificationPanel" style="display: none;"><div class="In" style="display: flex; height: 60vh; padding: 0;">
-		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; background-attachment: local;"><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr;"></div></div>
-		<div style="flex: 1; padding-top: 20px;">
-			<img class="Out" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="80%" height="auto">
-			<p>FULLNAME</p>
+	<center id="ModsPanel" style="display: none;"><div class="In" style="display: flex; height: 60vh; padding: 0;">
+		<div class="In" style="flex: 2; overflow-y: scroll; direction: rtl; padding: 0;">
+			<div class="Out" style="padding: 0; display: flex; width: 100%; direction:ltr;">
+				<button style="flex: 1;" id="CategoryDLS"      onclick="SelectMods('DLS');"     >DLS</button>
+				<button style="flex: 1;" id="CategoryOptifine" onclick="SelectMods('Optifine');">Optifine</button>
+				<button style="flex: 1;" id="CategoryForge"    onclick="SelectMods('Forge');"   >Forge</button>
+				<button style="flex: 1;" id="CategoryFabric"   onclick="SelectMods('Fabric');"  >Fabric</button>
+			</div>
+			<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); direction: ltr; padding: 15px;"></div>
+		</div>
+		<div style="flex: 1; padding-top: 20px; display: flex; flex-direction: column; align-items: center;">
+			<img class="Out" src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/cowfly.png" width="90%" height="auto">
+			<div class="In" style="width: 90%; margin: 20px 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+				<p>FULLNAME</p>
+				<p>=================</p>
+				<p style="cursor: help;">TYPE</p>
+				<p>=================</p>
+				<p>DESC</p>
+			</div>
 		</div>
 	</div></center>
 
