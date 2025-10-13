@@ -56,118 +56,117 @@ Logger.ConsoleError = function(Message, Exception){
 
 /* Более умный JSON.parse */
 function JSONParse(Text){
-	function StripComments(Text_){
-		var R = "", inStr = false, strChar = "", inCom = "", i = 0;
-		while(i < Text_.length){
-			const c = Text_[i], n = Text_[i+1];
+	const __JSONParse = {};
+	if(__JSONParse[Text]) return DeepClone(__JSONParse[Text]);
 
-			if(!inCom){
-				if(!inStr && (c === '"' || c === "'")) inStr = true, strChar = c;
-				else if(inStr && c === strChar && Text_[i-1] !== '\\') inStr = false;
-				
-				if(!inStr && c === '/' && n === '/'){ inCom = 'line'; i++; }
-				else if(!inStr && c === '/' && n === '*'){ inCom = 'block'; i++; }
-				else R += c;
-			} else {
-				if(inCom === 'line' && (c === '\n' || c === '\r')){ inCom = ''; R += c; }
-				if(inCom === 'block' && c === '*' && n === '/'){ inCom = ''; i++; }
+	let Pos = 0;
+
+	function SkipWhitespace(){
+		while(Pos < Text.length){
+			const c = Text[Pos];
+			const n = Text[Pos+1];
+			
+			// Пробелы и переносы строк
+			if(/\s/.test(c)){ Pos++; continue; }
+
+			// // комментарий
+			if(c === '/' && n === '/'){
+				Pos += 2;
+				while(Pos < Text.length && Text[Pos] !== '\n' && Text[Pos] !== '\r') Pos++;
+				continue;
 			}
-			i++;
+
+			// /* комментарий */
+			if(c === '/' && n === '*'){
+				Pos += 2;
+				while(Pos < Text.length && !(Text[Pos] === '*' && Text[Pos+1] === '/')) Pos++;
+				Pos += 2;
+				continue;
+			}
+
+			break;
 		}
-		return R;
 	}
-	
-	Text = StripComments(Text);
-	Text = Text.replace(/^\uFEFF/		  , "");
-	Text = Text.replace(/[\x00-\x1F\x7F]/g , c => c === '\n' || c === '\r' ? c : '');
-
-	if(__JSONParse[Text]){ return DeepClone(__JSONParse[Text]); }
-
-	var Pos = 0;
-
-	function SkipWhitespace(){ while(/\s/.test(Text[Pos])){ Pos++; } }
 
 	function ParseValue(){
 		SkipWhitespace();
-		
 		const Char = Text[Pos];
-		if(Char === '{'){ return ParseObject(); }
-		if(Char === '['){ return ParseArray (); }
-		if(Char === '"'){ return ParseString(); }
-		if(/[-0-9]/.test(Char)){ return ParseNumber(); }
-		if(Text.startsWith('true' , Pos)){ Pos += 4; return true ; }
+		if(Char === '{') return ParseObject();
+		if(Char === '[') return ParseArray();
+		if(Char === '"') return ParseString();
+		if(/[-0-9]/.test(Char)) return ParseNumber();
+		if(Text.startsWith('true', Pos)){ Pos += 4; return true; }
 		if(Text.startsWith('false', Pos)){ Pos += 5; return false; }
-		if(Text.startsWith('null' , Pos)){ Pos += 4; return null ; }
+		if(Text.startsWith('null', Pos)){ Pos += 4; return null; }
 		throw new Error("Неожиданный символ в позиции [" + Pos + "]");
 	}
 
-	function ParseObject(){
+	function ParseObject() {
 		const Obj = {};
 		const Keys = new Set();
-		
 		Pos++;
-		
 		SkipWhitespace();
 		if(Text[Pos] === '}'){ Pos++; return Obj; }
 
 		while(true){
 			SkipWhitespace();
+			if(Text[Pos] === '}'){ Pos++; break; } // конец объекта
+
 			const Key = ParseString();
-			if(Keys.has(Key)){ Logger.Warn("Повторяющийся ключ [" + Key + "] в позиции [" + Pos + "]"); }
+			if(Keys.has(Key)) console.warn("Повторяющийся ключ [" + Key + "] в позиции [" + Pos + "]");
 			Keys.add(Key);
+
 			SkipWhitespace();
-			if (Text[Pos] !== ':') throw new Error("Ожидался символ ':' после ключа в позиции [" + Pos + "]");
+			if(Text[Pos] !== ':') throw new Error("Ожидался ':' после ключа [" + Key + "] в позиции [" + Pos + "]");
 			Pos++;
+
 			const Value = ParseValue();
 			Obj[Key] = Value;
-			
+
 			SkipWhitespace();
-			if (Text[Pos] === '}'){ Pos++; break; }
-			
-			SkipWhitespace();
-			if (Text[Pos] !== ','){ throw new Error("Ожидалась запятая после пары ключ-значение в позиции [" + Pos + "]"); }
-			Pos++;
-			
-			SkipWhitespace();
-			if (Text[Pos] === '}'){ Pos++; break; } 
+			if(Text[Pos] === '}'){ Pos++; break; } // конец объекта
+			if(Text[Pos] === ','){ Pos++; continue; } // следующая пара
+			throw new Error("Ожидалась запятая после пары ключ-значение в позиции [" + Pos + "]");
 		}
 		return Obj;
 	}
 
-	function ParseArray(){
+	function ParseArray() {
 		const Arr = [];
 		Pos++;
 		SkipWhitespace();
 		if(Text[Pos] === ']'){ Pos++; return Arr; }
 
 		while(true){
-			const Value = ParseValue();
-			Arr.push(Value);
-			SkipWhitespace();
-			if (Text[Pos] === ']'){ Pos++; break; }
-			if (Text[Pos] !== ','){ throw new Error("Ожидалась запятая в массиве в позиции [" + Pos + "]"); }
-			Pos++;
 			SkipWhitespace();
 			if(Text[Pos] === ']'){ Pos++; break; }
+
+			const Value = ParseValue();
+			Arr.push(Value);
+
+			SkipWhitespace();
+			if(Text[Pos] === ']'){ Pos++; break; }
+			if(Text[Pos] === ','){ Pos++; continue; }
+			throw new Error("Ожидалась запятая в массиве в позиции [" + Pos + "]");
 		}
 		return Arr;
 	}
 
 	function ParseString(){
 		Pos++;
-		var Result = "";
+		let Result = "";
 		while(true){
-			if(Pos >= Text.length){ throw new Error("Не закрыта строка"); }
+			if(Pos >= Text.length) throw new Error("Не закрыта строка");
 			const Char = Text[Pos];
-			if (Char === '"'){ Pos++; break; }
-			if (Char === '\\'){
+			if(Char === '"'){ Pos++; break; }
+			if(Char === '\\'){
 				Pos++;
 				const Escape = Text[Pos];
 				const Map = { '"':'"', '\\':'\\', '/':'/', b:'\b', f:'\f', n:'\n', r:'\r', t:'\t' };
-				if (Map[Escape] !== undefined) Result += Map[Escape];
-				else if (Escape === 'u'){
-					const Hex = Text.substr(Pos + 1,4);
-					if (!/^[0-9a-fA-F]{4}$/.test(Hex)){ throw new Error("Неверная escape-последовательность Unicode"); }
+				if(Map[Escape] !== undefined) Result += Map[Escape];
+				else if(Escape === 'u'){
+					const Hex = Text.substr(Pos+1,4);
+					if(!/^[0-9a-fA-F]{4}$/.test(Hex)) throw new Error("Неверная escape-последовательность Unicode");
 					Result += String.fromCharCode(parseInt(Hex, 16));
 					Pos += 4;
 				} else throw new Error("Неверная escape-последовательность \\" + Escape);
@@ -179,14 +178,14 @@ function JSONParse(Text){
 
 	function ParseNumber(){
 		const NumMatch = /^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(Text.slice(Pos));
-		if(!NumMatch){ throw new Error("Неверное число в позиции [" + Pos + "]"); }
+		if(!NumMatch) throw new Error("Неверное число в позиции [" + Pos + "]");
 		Pos += NumMatch[0].length;
 		return Number(NumMatch[0]);
 	}
 
 	const Result = ParseValue();
 	SkipWhitespace();
-	if(Pos !== Text.length){ throw new Error("Неожиданный символ в позиции [" + Pos + "]"); }
+	if(Pos !== Text.length) throw new Error("Неожиданный символ в позиции [" + Pos + "]");
 
 	__JSONParse[Text] = Result;
 	return Result;
@@ -387,6 +386,11 @@ async function FileContentByte(File){
 /* Уберает спец символы HTML из текста */
 function RemoveHTML(HTML){
 	return HTML.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('/', '&#47;');
+}
+
+/* Это JSZipFile? */
+function ThatJSZipFile(Obj){
+	return Obj instanceof Object && Obj.name != null && Obj.dir != null && Obj.date != null;
 }
 
 /* ======================================================== */
@@ -1408,7 +1412,7 @@ async function AddFileToPack(Path, Content){
 		}
 		
 		/* Это JSZipFile? */
-		if(Content instanceof Object && Content.name != null && Content.dir != null && Content.date != null){
+		if(ThatJSZipFile(Content)){
 			Content = await FileContentByte(Content);
 		}
 		
@@ -1807,6 +1811,34 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				break;
 			}
 			
+			case "Variable": {
+				const F         = Info[0];
+				const Variables = Info[1];
+				Actions         = Info[2] || [];
+				
+				Result = await GenerateFile(F);
+				
+				if(ThatJSZipFile(Result)){ Result = await FileContent(Result); }
+				
+				if(typeof Result === "string"){
+					const Matches = [...Result.matchAll(/<Var(\d+)>/g)];
+					
+					const RequiredVars = Matches.map(m => parseInt(m[1]));
+					const MaxVar = Math.max(0, ...RequiredVars);
+					
+					if(Variables.length !== MaxVar){
+						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДоступно: " + Variables.length + "\nНужно: " + MaxVar);
+					}
+					
+					Result = Result.replace(/<Var(\d+)>/g, (m, i) => {
+						const i_ = parseInt(i) - 1;
+						return Variables[i_] !== undefined ? Variables[i_] : m;
+					});
+				}
+				
+				break;
+			}
+			
 			default: {
 				Result = "Не найден тип генерации [" + GenerateType + "]!";
 				Logger.ConsoleWarn("Тип файла [" + GenerateType + "], не найден!");
@@ -1818,7 +1850,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		__GenerateFile[ID] = Result;
 		return Result;
 	}catch(e){
-		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!", e);
+		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!\nИнформация: " + JSON.stringify(Info), e);
 		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
 	}
 }

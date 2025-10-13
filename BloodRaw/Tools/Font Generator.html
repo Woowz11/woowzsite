@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Генератор Minecraft JSON шрифта</title>
+
+<link rel="stylesheet" href="../Source/css.css">
+
+<style>
+html, button, input{
+	font-size   : 1.25em;
+	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
+}
+
+body { padding: 0 20px; }
+textarea { width: 100%; height: 275px; }
+</style>
+
+</head>
+<body>
+<h2>Генератор Minecraft JSON шрифта</h2>
+
+<p>Диапазон Unicode (например, 0400-04FF или U+0400-U+04FF):</p>
+<input id="range" type="text" value="0400-04FF" style="width:100%;">
+
+<p>Путь к файлу текстуры:</p>
+<input id="fontfile" type="text" value="minecraft:font/test.png" style="width:100%;">
+
+<p>Высота символов (ascent):</p>
+<input id="ascent" type="number" value="7">
+
+<br>
+<button onclick="generateFont()">Сгенерировать JSON</button>
+
+<p style="margin-top: 30px;">Результат</p>
+<button onclick="copyOutput()">Скопировать результат</button>
+<textarea id="output" readonly placeholder="Результат Minecraft JSON появится здесь..."></textarea>
+
+<script>
+// --- Разбор диапазона Unicode ---
+function parseUnicodeRange(input) {
+	input = input.trim().toUpperCase();
+
+	// Поддержка обоих форматов: U+XXXX-U+XXXX и XXXX-XXXX
+	let match = input.match(/^(?:U\+)?([0-9A-F]{4,6})\s*-\s*(?:U\+)?([0-9A-F]{4,6})$/);
+	if (!match) return null;
+
+	const start = parseInt(match[1], 16);
+	const end   = parseInt(match[2], 16);
+	return [start, end];
+}
+
+// --- Генерация JSON ---
+function generateFont() {
+	const rangeInput = document.getElementById('range').value;
+	const file = document.getElementById('fontfile').value.trim();
+	const ascent = parseInt(document.getElementById('ascent').value, 10);
+
+	const range = parseUnicodeRange(rangeInput);
+	if (!range) {
+		alert('Неверный формат диапазона. Используй формат: 0400-04FF или U+0400-U+04FF');
+		return;
+	}
+
+	const [start, end] = range;
+	const chars = [];
+	let line = '';
+
+	for (let code = start; code <= end; code++) {
+		line += `\\\\u${code.toString(16).padStart(4, '0').toUpperCase()}`;
+		if ((code - start + 1) % 16 === 0) {
+			chars.push(line);
+			line = '';
+		}
+	}
+	if (line.length > 0) chars.push(line);
+
+	const json = {
+		type: "bitmap",
+		file: file,
+		ascent: ascent,
+		chars: chars
+	};
+
+	let text = JSON.stringify(json, null, '\t');
+	text = text.replace(/\\\\\\\\u/g, "\\u"); // превращает "\\\\u" → "\u"
+
+	document.getElementById('output').value = text;
+}
+
+// --- Копирование результата ---
+function copyOutput() {
+	const outputField = document.getElementById("output");
+	outputField.select();
+	outputField.setSelectionRange(0, 99999);
+	document.execCommand("copy");
+}
+</script>
+</body>
+</html>

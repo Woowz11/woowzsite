@@ -63,9 +63,9 @@ h2{
 	opacity: 0;
 }
 
-textarea::selection {
-	background-color: rgba(255, 0, 0, 0.3);
-	color: white;
+textarea::selection, input[type='number']::selection, input[type='text']::selection {
+	background-color: color-mix(in srgb, var(--mc-yellow) 30%, transparent);
+	color: var(--mc-yellow);
 }
 
 button{
@@ -169,19 +169,24 @@ textarea {
 	border-image-width: 16px 16px;
 	padding: 10px;
 	line-height: 1.35em;
-	outline: none;
 	background-size: 100% 100%;
 	overflow: auto;
 	box-sizing: border-box;
+	
+	outline: 3px solid #212121;
+	
+	cursor: text;
 }
 
 textarea:focus {
 	border-image: url("area_hover.png") repeat;
 	border-image-slice: 6 fill;
 	border-image-width: 16px 16px;
+	
+	outline: 3px solid #E2E2E2;
 }
 
-input[type="number"] {
+input[type="number"], input[type="text"] {
 	-webkit-appearance: none;
 	-moz-appearance: textfield;
 	appearance: textfield;
@@ -202,20 +207,17 @@ input[type="number"] {
 	width: 120px;
 	box-sizing: border-box;
 	
+	outline: 3px solid #212121;
+	
 	cursor: text;
 }
 
-input[type="number"]:focus {
+input[type="number"]:focus, input[type="text"]:focus {
 	border-image: url("area_hover.png") repeat;
 	border-image-slice: 6 fill;
 	border-image-width: 16px 16px;
-	color: var(--mc-yellow);
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
+	
+	outline: 3px solid #E2E2E2;
 }
 
 /* ======================================================== */
