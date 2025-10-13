@@ -32,7 +32,7 @@ Logger.Console = function(Message, Type = 0, Title){
 	Console.appendChild(M);
 }
 
-Logger.ConsoleWithTitle = function(Message, Title){
+Logger.ConsoleTitle = function(Message, Title){
 	Logger.Console(Message, 0, Title);
 }
 
@@ -248,10 +248,10 @@ function CalculateColor(Color){
 			CalculateColor.CTX = C.getContext("2d");
 		}
 	
-		Color = UpdateColor(Color);
+		const TrueColor = UpdateColor(Color);
 		
 		const Old = CalculateColor.CTX.fillStyle;
-		CalculateColor.CTX.fillStyle = Color;
+		CalculateColor.CTX.fillStyle = TrueColor;
 		
 		if(CalculateColor.CTX.fillStyle === Old){ Logger.ConsoleError("Не получилось определить цвет [" + Color + "]!"); CalculateColor.CTX.fillStyle = "rgb(255,0,255)"; }
 		
@@ -400,7 +400,6 @@ function ShowInfo(Button){
 		const Version = PackVersions[ShowVersion][2];
 		
 		document.getElementById("VersionName").innerText = Version["Name"];
-		
 		document.getElementById("VersionDesc").innerText = UpdateText(Version["Desc"]);
 		
 		const Addon = Version["Addon"] || [];
@@ -461,9 +460,10 @@ function ShowInfoAddon(AddonPanel){
 	try{
 		const ShowAddon = AddonPanel ? AddonPanel.AddonID : SelectedAddon;
 		
-		const AddonInfo = Generators[ShowAddon];
+		const Addon = Generators[ShowAddon];
 		
-		document.getElementById("AddonName").innerText = AddonInfo["Name"];
+		document.getElementById("AddonName").innerText = Addon["Name"];
+		document.getElementById("AddonDesc").innerText = UpdateText(Addon["Desc"]);
 		
 		const AddonImage = __AddonImages[ShowAddon];
 		if(!AddonImage){ return; }
@@ -551,17 +551,16 @@ function SelectAddon(Addon){
 }
 var __OldSelectAddonButton = null;
 
-function SA_CreateButton(Addon, Table){
+function SA_CreateButton(Addon, Table, Selected){
 	try{
-		const A = Table[SelectedVersion][Addon];
-		
-		const Panel = A === false ? SA_Unselected : SA_Selected;
+		const Panel = Selected ? SA_Selected : SA_Unselected;
 		
 		const AddonInfo = Generators[Addon];
+		const Dev = AddonInfo["Dev"];
 		
 		const R = document.createElement("div");
 		R.AddonID  = Addon;
-		R.Selected = A !== false;
+		R.Selected = Selected;
 		R.id = "Addon_" + Addon;
 		R.style.display = "flex";
 		
@@ -579,6 +578,7 @@ function SA_CreateButton(Addon, Table){
 		B.textContent = AddonInfo["Name"];
 		B.style.flex = 10;
 		B.id = "Addon_" + Addon + "_Button";
+		B.style.color = Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")));
 		
 		B.onclick = () => SelectAddon(Addon);
 		
@@ -589,18 +589,18 @@ function SA_CreateButton(Addon, Table){
 		
 		const B2 = document.createElement("button");
 		
-		if(A === false){
-			Up.disabled   = true;
-			Down.disabled = true;
-			
-			B2.textContent = "+";
-			B2.onclick   = () => SA_Action(Addon, "add"   , Table);
-		}else{
+		if(Selected){
 			B2.textContent = "-";
 			B2.onclick   = () => SA_Action(Addon, "remove", Table);
 			
 			Up  .onclick = () => SA_Action(Addon, "up"    , Table);
 			Down.onclick = () => SA_Action(Addon, "down"  , Table);
+		}else{
+			Up.disabled   = true;
+			Down.disabled = true;
+			
+			B2.textContent = "+";
+			B2.onclick   = () => SA_Action(Addon, "add"   , Table);
 		}
 		
 		B2.style.flex = 1;
@@ -616,38 +616,74 @@ function SA_CreateButton(Addon, Table){
 
 /* Пересоздание кнопок дополнений */
 function __SA_RebuildAddons(Table){
-	const C = document.getElementById("")
+	try{
+		const Addons = Table[SelectedVersion];
+		
+		SA_Selected.replaceChildren(); SA_Unselected.replaceChildren();
+		
+		const  SA = Object.entries(Addons).filter(([_, v]) => v !== false).sort((a, b) => a[1] - b[1]);
+		const USA = Object.entries(Addons).filter(([_, v]) => v  == false).sort((a, b) => a[0].localeCompare(b[0]));
+		
+		for(const [A, I] of  SA){ SA_CreateButton(A, Table, true ); }
+		for(const [A, I] of USA){ SA_CreateButton(A, Table, false); }
+	}catch(e){
+		throw new Error("Произошла ошибка при пересоздании дополнений!", e);
+	}
+}
+
+function __SA_ReindexAddons(Addons){
+	var i = 1;
+	for(const addon of Object.keys(Addons).sort()){
+		if(Addons[addon] !== false){
+			Addons[addon] = i++;
+		}
+	}
+}
+
+function __SA_SwapPosition(Addons, Addon, dir){
+	if(Addons[Addon] === false) return;
+	const current = Addons[Addon];
+	const target = current + dir;
+	if(target < 1) return;
+
+	const other = Object.entries(Addons)
+		.find(([_, v]) => v === target);
+
+	if(!other) return;
+
+	const otherAddon = other[0];
+	Addons[Addon] = target;
+	Addons[otherAddon] = current;
 }
 
 /* Действие аддоновой кнопки */
 function SA_Action(Addon, Action, Table){
 	try{
-		const AddonPanel = document.getElementById("Addon_" + Addon);
 		const Addons = Table[SelectedVersion];
 		
 		switch(Action){
 			case "add": {
-				AddonPanel.remove();
-				Table[SelectedVersion][Addon] = true;
-				SA_CreateButton(Addon, Table);
-				SelectAddon(Addon);
+				const SC = Object.values(Addons).filter(v => v !== false).length;
+				Addons[Addon] = SC + 1;
 				break;
 			}
 			case "remove": {
-				AddonPanel.remove();
-				Table[SelectedVersion][Addon] = false;
-				SA_CreateButton(Addon, Table);
-				SelectAddon(Addon);
+				Addons[Addon] = false;
+				__SA_ReindexAddons(Addons);
 				break;
 			}
 			case "up": {
+				__SA_SwapPosition(Addons, Addon, -1);
 				break;
 			}
 			case "down": {
+				__SA_SwapPosition(Addons, Addon, 1);
 				break;
 			}
 		}
 		
+		__SA_RebuildAddons(Table);
+		SelectAddon(Addon);
 	}catch(e){
 		Logger.Fatal("Произошла ошибка при действии [" + Action + "] кнопки [" + Addon + "]!", e);
 	}
@@ -681,7 +717,7 @@ function SelectAddons(Type, UpdateAnyway = false){
 					}
 				}
 				
-				for(const Mod of Object.keys(__SA_Forge[SelectedVersion])){ SA_CreateButton(Mod, __SA_Forge); }
+				__SA_RebuildAddons(__SA_Forge);
 				
 				break;
 			}
@@ -785,6 +821,9 @@ var SelectedGenerateType = null;
 
 /* Название файла результата */
 var OutName;
+
+/* Название файла результата (Дополнения) */
+var OutAddonName;
 
 /* Генераторы */
 var Generators = {};
@@ -994,11 +1033,13 @@ async function LoadPackInformation(){
 		
 		PackInfo = await FileContentJSON(await GetFile("Info.json"));
 		
-		OutName = PackInfo["Out"];
+		OutName      = PackInfo["Out"]["Default"];
+		OutAddonName = PackInfo["Out"]["Addon"  ];
 		
 		Object.assign(__ReplaceText     , PackInfo["Text"     ]);
 		Object.assign(__ReplaceColor    , PackInfo["Color"    ]);
 		Object.assign(__ReplaceAnimation, PackInfo["Animation"]);
+		Object.assign(__SavedAction     , PackInfo["Action"   ]);
 		
 		document.getElementById("PackVersion").innerText = __ReplaceText["Version"];
 		
@@ -1152,7 +1193,7 @@ async function PreLoadAfter(){
 			const MinL = 6 ; const MaxL = 10;
 			const MinS = 24; const MaxS = 14;
 			var T = Clamp((V.length - MinL) / (MaxL - MinL), 0, 1);
-			return `<button onclick="SelectVersion('${V}');" id="SV-${V}" onmouseenter="ShowInfo(this);" onmouseleave="ShowInfo();" style="font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
+			return `<button onclick="SelectVersion('${V}');" id="SV-${V}" onmouseenter="ShowInfo(this);" onmouseleave="ShowInfo();" style="white-space: nowrap; font-size: clamp(12px, 2vw, ${Lerp(MinS, MaxS, T)}px); color: ${Dev === false ? "white" : (Dev === "Error" ? "var(--mc-red)" : (Dev === true ? "var(--mc-yellow)" : (Dev ? "black" : "var(--mc-yellow)")))};">${V}</button>`;
 		}).join("");
 		
 		await LoadIcons();
@@ -1284,7 +1325,9 @@ async function Generate(){
 		Logger.Info(":" + "=".repeat(50) + ":");
 		Logger.Console("Начало генерации пака!");
 		
-		if(SelectedGenerateType !== 0){ throw new Error("Ещё не создана генерация для типа [" + SelectedGenerateType + "]!"); }
+		if(SelectedGenerateType > 1){ throw new Error("Ещё не создана генерация для типа [" + SelectedGenerateType + "]!"); }
+		
+		var OnlyAddon = SelectedGenerateType === 1;
 		
 		Pack = new JSZip();
 		
@@ -1293,9 +1336,25 @@ async function Generate(){
 		LoadPaintings();
 		__AllPaintings = AllPaintings;
 		
-		const Generator = await LoadGenerator(SelectedVersion);
-		PackFormat = Generator.PackFormat || -1;
-		await ApplyGenerator(Generator);
+		const VersionGenerator = await LoadGenerator(SelectedVersion);
+		PackFormat = VersionGenerator.PackFormat || -1;
+		await ApplyGenerator(OnlyAddon ? await LoadGenerator("AddonPack") : VersionGenerator);
+		
+		const Addons_Forge = __SA_Forge[SelectedVersion] || {};
+		const Addons_Forge_Result = [];
+		for(const [A, I] of Object.entries(Addons_Forge)){
+			if(I !== false){ Addons_Forge_Result.push([A, I]); }
+		}
+		
+		if(Addons_Forge_Result.length > 0){
+			Addons_Forge_Result.sort((a, b) => a[1] - b[1]);
+			Logger.Console("Применение дополнений [Forge]...");
+			for(const A_ of Addons_Forge_Result){
+				const A = A_[0];
+				
+				await ApplyGenerator(await LoadGenerator(A));
+			}
+		}
 		
 		GenerationTime = Date.now() - GenerationStartTime;
 		
@@ -1310,7 +1369,7 @@ async function Generate(){
 		const Blob = await Pack.generateAsync({ type: "blob" });
 		const A = document.createElement("a");
 		A.href = URL.createObjectURL(Blob);
-		A.download = UpdateText(OutName);
+		A.download = UpdateText(OnlyAddon ? OutAddonName : OutName);
 		document.body.appendChild(A);
 		A.click();
 		document.body.removeChild(A);
@@ -1390,11 +1449,19 @@ async function ApplyGenerator(Generator){
 /* Применяет модификатор */
 async function ApplyAction(Content, Type, Info){
 	try{
-		Logger.Console("Применение модификатора [" + Type + "]...");
+		Logger.ConsoleTitle("Применение модификатора [" + Type + "]...", JSON.stringify(Info));
 	
 		switch(Type){
 			case "Background": {
-				Content.Background(Info[0]);
+				if(Array.isArray(Info[0])){
+					var T = await GenerateFile(Info[0]);
+					var X = Info[1] || 0;
+					var Y = Info[2] || 0;
+					
+					Content.Background(T, X, Y);
+				}else{
+					Content.Background(Info[0]);
+				}
 				break;
 			}
 			
@@ -1524,6 +1591,22 @@ async function ApplyAction(Content, Type, Info){
 				break;
 			}
 			
+			case "Rotate": {
+				var Deg = Info[0] || 0;
+				
+				Content.Rotate(Deg);
+				break;
+			}
+			
+			case "Action": {
+				var Action = __SavedAction[Info[0]];
+				
+				if(Action === undefined){ throw new Error("Модификатор [" + Info[0] + "] в пресетах не найден!"); }
+				
+				return await ApplyActions(Content, Action);
+				break;
+			}
+			
 			default: {
 				Logger.ConsoleWarn("Тип модификатора [" + Type + "], не найден!");
 				break;
@@ -1535,6 +1618,7 @@ async function ApplyAction(Content, Type, Info){
 		throw new Error("Произошла ошибка при применении модификатора [" + Type + "]!", e);
 	}
 }
+const __SavedAction = {};
 
 /* Применение модификаторов */
 async function ApplyActions(Content, Actions){
@@ -1560,6 +1644,8 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	if(MemoryFile){ Info = Path; Path = null; }
 
 	try{
+		if(Info.length === 0){ Info = ["Texture", "R/T/Default.png"]; }
+		
 		/* Что-бы Info.shift(), не редактировал генераторы */
 		Info = DeepClone(Info);
 		
@@ -1571,12 +1657,12 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			var __Result = __GenerateFile[ID];
 			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
 			
-			Logger.ConsoleWithTitle(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...", ID);
+			Logger.ConsoleTitle(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...", ID);
 			
 			return __Result;
 		}
 		
-		Logger.ConsoleWithTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
+		Logger.ConsoleTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
 		
 		Info.shift();
 		
@@ -1605,6 +1691,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			case "File": {
 				const FilePath = Info[0];
 				Actions = Info[1] || null;
+				if(Actions && !Array.isArray(Actions) || Info[2]){ throw new Error("Файл содержит лишние данные!"); }
 				Result = await GetFile(FilePath);
 				break;
 			}
@@ -1612,6 +1699,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			case "Texture": {
 				const FilePath = Info[0];
 				Actions = Info[1] || null;
+				if(Actions && !Array.isArray(Actions) || Info[2]){ throw new Error("Текстура содержит лишние данные!"); }
 				Result = await GetTexture(FilePath);
 				break;
 			}

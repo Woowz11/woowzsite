@@ -96,6 +96,8 @@ class Texture{
 		if(Blend !== "alpha"){ this.CTX.globalCompositeOperation = Blend; }
 	
 		try{
+			if(typeof X !== "number" || typeof Y !== "number" || typeof Blend !== "string"){ throw new Error("Переменные неверного типа!"); }
+			
 			if(X < -this.W || Y < -this.H){ throw new Error("Позиция < -(размера текстуры)!"); }
 			if(X > this.W || Y > this.H){ throw new Error("Позиция > размера текстуры!"); }
 		
@@ -167,15 +169,21 @@ class Texture{
 	Set(Content, X = 0, Y = 0){ return this.Put(Content, X, Y, "source-over"); }
 	
 	/* Устанавливает цвет заднего фона */
-	Background(Color = "white"){
+	Background(Content = "white", X = 0, Y = 0){
 		try{
 			var Current = new Uint8ClampedArray(this.Content);
-			this.Fill(Color        );
-			this.Put (Current, 0, 0);
+			
+			if(typeof Content === "string"){
+				this.Fill(Content);
+			}else{
+				this.Put(Content, X, Y);
+			}
+			
+			this.Put(Current, 0, 0);
 			
 			return this;
 		}catch(e){
-			throw new Error("Произошла ошибка при установке цвета заднего фона текстуре [" + this + "]! Background(" + Color + ");", e);
+			throw new Error("Произошла ошибка при установке цвета заднего фона текстуре [" + this + "]! Background(" + Content + ", " + X + ", " + Y + ");", e);
 		}
 	}
 	
@@ -542,6 +550,51 @@ class Texture{
 			return this;
 		}catch(e){
 			throw new Error("Произошла ошибка при применении маски у текстуры [" + this + "]! Mask();", e);
+		}
+	}
+	
+	/* Повернуть текстуру */
+	Rotate(Deg = 0){
+		try{
+			if(Deg % 360 === 0){ return; }
+			
+			const Rad = Deg * Math.PI / 180;
+			
+			const C = Math.cos(Rad); const S = Math.sin(Rad);
+			
+			const CX = this.W / 2; const CY = this.H / 2;
+			
+			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
+			
+			for(var Y = 0; Y < this.H; Y++){
+				for(var X = 0; X < this.W; X++){
+					const SX =  (X - CX) * C + (Y - CY) * S + CX;
+					const SY = -(X - CX) * S + (Y - CY) * C + CY;
+					
+					const D = (Y * this.W + X) * 4;
+					
+					if(SX >= 0 && SY >= 0 && SX < this.W && SY < this.H){
+						const I = (Math.floor(SY) * this.W + Math.floor(SX)) * 4;
+						
+						NewContent[D + 0] = this.Content[I + 0];
+						NewContent[D + 1] = this.Content[I + 1];
+						NewContent[D + 2] = this.Content[I + 2];
+						NewContent[D + 3] = this.Content[I + 3];
+					}else{
+						NewContent[D + 0] = 0;
+						NewContent[D + 1] = 0;
+						NewContent[D + 2] = 0;
+						NewContent[D + 3] = 0;
+					}
+				}
+			}
+			
+			this.Content = NewContent;
+			this.__UpdateCanvas();
+			
+			return this;
+		}catch(e){
+			throw new Error("Произошла ошибка при повороте текстуры [" + this + "]! Rotate(" + Deg + ");", e);
 		}
 	}
 	

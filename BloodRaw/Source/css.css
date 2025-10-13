@@ -76,7 +76,7 @@ button{
 	border-image-width : 32px 32px;
 	font-family        : CFont;
 	cursor             : pointer;
-	line-height        : 1.35em;
+	line-height        : 1.4em;
 }
 
 button:not(:disabled):hover{
