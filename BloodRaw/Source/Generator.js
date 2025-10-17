@@ -66,17 +66,14 @@ function JSONParse(Text){
 			const c = Text[Pos];
 			const n = Text[Pos+1];
 			
-			// Пробелы и переносы строк
 			if(/\s/.test(c)){ Pos++; continue; }
 
-			// // комментарий
 			if(c === '/' && n === '/'){
 				Pos += 2;
 				while(Pos < Text.length && Text[Pos] !== '\n' && Text[Pos] !== '\r') Pos++;
 				continue;
 			}
 
-			// /* комментарий */
 			if(c === '/' && n === '*'){
 				Pos += 2;
 				while(Pos < Text.length && !(Text[Pos] === '*' && Text[Pos+1] === '/')) Pos++;
@@ -95,9 +92,9 @@ function JSONParse(Text){
 		if(Char === '[') return ParseArray();
 		if(Char === '"') return ParseString();
 		if(/[-0-9]/.test(Char)) return ParseNumber();
-		if(Text.startsWith('true', Pos)){ Pos += 4; return true; }
+		if(Text.startsWith('true' , Pos)){ Pos += 4; return true ; }
 		if(Text.startsWith('false', Pos)){ Pos += 5; return false; }
-		if(Text.startsWith('null', Pos)){ Pos += 4; return null; }
+		if(Text.startsWith('null' , Pos)){ Pos += 4; return null ; }
 		throw new Error("Неожиданный символ в позиции [" + Pos + "]");
 	}
 
@@ -110,7 +107,7 @@ function JSONParse(Text){
 
 		while(true){
 			SkipWhitespace();
-			if(Text[Pos] === '}'){ Pos++; break; } // конец объекта
+			if(Text[Pos] === '}'){ Pos++; break; }
 
 			const Key = ParseString();
 			if(Keys.has(Key)) console.warn("Повторяющийся ключ [" + Key + "] в позиции [" + Pos + "]");
@@ -124,8 +121,8 @@ function JSONParse(Text){
 			Obj[Key] = Value;
 
 			SkipWhitespace();
-			if(Text[Pos] === '}'){ Pos++; break; } // конец объекта
-			if(Text[Pos] === ','){ Pos++; continue; } // следующая пара
+			if(Text[Pos] === '}'){ Pos++; break; }
+			if(Text[Pos] === ','){ Pos++; continue; }
 			throw new Error("Ожидалась запятая после пары ключ-значение в позиции [" + Pos + "]");
 		}
 		return Obj;
@@ -201,6 +198,7 @@ function Sleep(MS){
 function UpdateText(Text){
 	const R = {...__ReplaceText, ...{
         D_Version    : SelectedVersion,
+		D_RealVersion: 0,
 		D_Date       : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
 		D_CurrentFile: CurrentFile,
 		D_PackFormat : PackFormat,
@@ -208,10 +206,27 @@ function UpdateText(Text){
 		D_Time       : GenerationTime
 	}};
 
-	return Text.replace(/<([A-Za-z0-9_]+)>/g, (M, K, O) => {
-		if(K in R){ return R[K]; }
-		Logger.ConsoleError(`Не найден текстовой код <${K}>!\nТекст: ${Text}`);
-		return "undefined";
+	return Text.replace(/<\[\s*([\s\S]*?)\s*\]>/g, (M, E) => {
+		E = E.trim();
+		
+		if(/^Var\d*$/.test(E)){ return M; }
+		
+		try{
+			if(E.startsWith("Custom ")){
+				const Code = E.slice(7).trim();
+				const Func = new Function(...Object.keys(R), `return (${Code});`);
+			
+				const Result = Func(...Object.values(R));
+				
+				return Result;
+			}
+			
+			if(E in R){ return R[E]; }
+			throw new Error(`Не найден текстовой код <${E}>!\nТекст: ${Text}`);
+		}catch(e){
+			Logger.ConsoleError("Произошла ошибка в UpdateText!\nТекст: " + Text, e);
+			return "undefined";
+		}
 	});
 }
 const __ReplaceText = {};
@@ -345,6 +360,8 @@ async function GetTexture(Path){ return await GetFile(Path, true); }
 /* Получить содержимое файла в виде JSON */
 async function FileContentJSON(File){
 	try{
+		if(!ThatJSZipFile(File)){ return File; }
+		
 		var Text = await FileContent(File);
 		return JSONParse(Text);
 	}catch(e){
@@ -357,6 +374,8 @@ const __FilesContentBytes  = {};
 
 /* Получить строковое содержимое файла */
 async function FileContent(File){
+	if(!ThatJSZipFile(File)){ return File; }
+	
 	if(__FilesContentString[File.name]){ return __FilesContentString[File.name]; }
 	
 	try{
@@ -364,12 +383,14 @@ async function FileContent(File){
 		__FilesContentString[File.name] = Text;
 		return Text;
 	}catch(e){
-		throw new Error("Произошла ошибка при чтении файла [" + File.name + "]!", e);
+		throw new Error("Произошла ошибка при чтении файла [" + File.name + "]!\nФайл: " + File, e);
 	}
 }
 
 /* Получить байтовое содержимое файла */
 async function FileContentByte(File){
+	if(!ThatJSZipFile(File)){ return File; }
+	
 	if(File instanceof Texture){ return File.Content; }
 	if(__FilesContentBytes[File.name]){ return __FilesContentBytes[File.name]; }
 	
@@ -392,6 +413,54 @@ function RemoveHTML(HTML){
 function ThatJSZipFile(Obj){
 	return Obj instanceof Object && Obj.name != null && Obj.dir != null && Obj.date != null;
 }
+
+/* Отлючить работу мыши? */
+function DisableMouse(Disable){
+	if(__DisableMouse === Disable){ return; } __DisableMouse = Disable;
+	if(Disable){
+		document.addEventListener("click", __DisableMouseH, true);
+	}else{
+		document.removeEventListener("click", __DisableMouseH, true);
+	}
+}
+var __DisableMouse = false;
+__DisableMouseH = function(e){ e.stopImmediatePropagation(); e.preventDefault(); }
+
+/* Парсит версию на массив */
+function ParseVersion(Version){
+	Version = Version.replace(/^[^\d]*/, '');
+	
+	if(Version.includes('.')){ return Version.split('.').map(n => parseInt(n, 10)); }
+	
+	var n = parseInt(Version, 10);
+	return isNan(n) ? [-1] : [n];
+}
+
+/* Сравнивает версии, и скидывает число разницу, т.е если '1.8' & '1.8' = 0, '1.5' & '1.8' = -3, '1.10' & '1.8' = 2 */
+function CompareVersion(VersionA, VersionB){
+	const A = ParseVersion(VersionA);
+	const B = ParseVersion(VersionB);
+	const L = Math.max(A.length, B.length);
+	
+	var Diff = 0;
+	for(var i = 0; i < L; i++){
+		const NA = A[i] || 0;
+		const NB = B[i] || 0;
+		Diff += (NA - NB) * Math.pow(100, L - i - 1);
+	}
+	
+	return Diff;
+}
+
+/* Этот файл бинарный? */
+function ThatBinaryFile(File){
+	if(ThatJSZipFile(File)){
+		return __BinaryExtensions.some(e => File.name.toLowerCase().endsWith(e));
+	}
+	
+	return false;
+}
+const __BinaryExtensions = [".png", ".bin"];
 
 /* ======================================================== */
 
@@ -1047,20 +1116,18 @@ async function LoadPackInformation(){
 		
 		document.getElementById("PackVersion").innerText = __ReplaceText["Version"];
 		
-		try{
-			const Response = await fetch("https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits/main");
+		fetch("https://api.github.com/repos/Woowz11/BloodRaw-Minecraft/commits/main").then(Response => {
 			if(!Response.ok){ throw new Error("Ошибка загрузки: " + Response.status); }
-			
-			const Commit = await Response.json();
-			
+			return Response.json();
+		}).then(Commit => {
 			CommitName = Commit.commit.message.split("\n")[0];
 			document.getElementById("CommitName").innerText = CommitName;
 			document.getElementById("CommitName").href      = Commit.html_url;
 			document.getElementById("CommitName").title     = "+" + Commit.stats.additions + " | -" + Commit.stats.deletions;
-		}catch(e){
+		}).catch(e => {
 			Logger.Error("Произошла ошибка при получении версии репозитория!", e);
-			CommitName = "Не получилось узнать...";
-		}
+			CommitName = "Не получилось загрузить...";
+		});
 		
 		var VersionHierarchy;
 		
@@ -1142,8 +1209,8 @@ function LoadPaintings(){
 /* Загружает цвета */
 async function LoadColors(){
 	try{
-		var GrassColormap  = await GetTexture("R/T/O/Colormap/Grass.png" );
-		var LeavesColormap = await GetTexture("R/T/O/Colormap/Leaves.png");
+		var GrassColormap  = await GetTexture("R/T/G/Colormap/Grass.png" );
+		var LeavesColormap = await GetTexture("R/T/G/Colormap/Leaves.png");
 		
 		var GrassColor  = GrassColormap .GetColor(127, 127);
 		var LeavesColor = LeavesColormap.GetColor(127, 127);
@@ -1325,6 +1392,9 @@ async function Generate(){
 		document.documentElement.style.setProperty("--infobox", "255, 255, 0");
 		
 		InGeneration = true;
+		
+		DisableMouse(true);
+		
 		GenerationStartTime = Date.now();
 		Logger.Info(":" + "=".repeat(50) + ":");
 		Logger.Console("Начало генерации пака!");
@@ -1370,6 +1440,8 @@ async function Generate(){
 		
 		Logger.Console("Скачивание...");
 		
+		DisableMouse(false);
+		
 		const Blob = await Pack.generateAsync({ type: "blob" });
 		const A = document.createElement("a");
 		A.href = URL.createObjectURL(Blob);
@@ -1382,6 +1454,7 @@ async function Generate(){
 		document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
 		
 		Logger.Console("Конец генерации пака!");
+		
 		InGeneration = false;
 		BuildFile = null;
 		Pack = null;
@@ -1395,6 +1468,7 @@ async function Generate(){
 		}
 		
 		document.documentElement.style.setProperty("--infobox", "255, 0, 0");
+		DisableMouse(false);
 		InGeneration = false;
 		BuildFile = null;
 		Pack = null;
@@ -1657,14 +1731,6 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		var GenerateType = Info[0];
 		
 		var ID = JSON.stringify(Info);
-		if(__GenerateFile[ID] != null && !IgnoreTags && GenerateType != "Painting" && GenerateType != "Animation"){
-			var __Result = __GenerateFile[ID];
-			if(__Result instanceof Texture){ __Result = __Result.Clone(); }
-			
-			Logger.ConsoleTitle(MemoryFile ? "Получение файла из памяти..." : "Получение [" + Path + "]...", ID);
-			
-			return __Result;
-		}
 		
 		Logger.ConsoleTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
 		
@@ -1695,8 +1761,16 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			case "File": {
 				const FilePath = Info[0];
 				Actions = Info[1] || null;
-				if(Actions && !Array.isArray(Actions) || Info[2]){ throw new Error("Файл содержит лишние данные!"); }
-				Result = await GetFile(FilePath);
+				if((Actions && !Array.isArray(Actions)) || Info[2]){ throw new Error("Файл содержит лишние данные!"); }
+				
+				const File = await GetFile(FilePath);
+				
+				if(ThatJSZipFile(File) && !ThatBinaryFile(File)){
+					Result = UpdateText(await FileContent(File));
+				}else{
+					Result = File;
+				}
+				
 				break;
 			}
 			
@@ -1821,7 +1895,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				if(ThatJSZipFile(Result)){ Result = await FileContent(Result); }
 				
 				if(typeof Result === "string"){
-					const Matches = [...Result.matchAll(/<Var(\d+)>/g)];
+					const Matches = [...Result.matchAll(/<\[\s*Var(\d+)\s*\]>/g)];
 					
 					const RequiredVars = Matches.map(m => parseInt(m[1]));
 					const MaxVar = Math.max(0, ...RequiredVars);
@@ -1830,7 +1904,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДоступно: " + Variables.length + "\nНужно: " + MaxVar);
 					}
 					
-					Result = Result.replace(/<Var(\d+)>/g, (m, i) => {
+					Result = Result.replace(/<\[\s*Var(\d+)\s*\]>/g, (m, i) => {
 						const i_ = parseInt(i) - 1;
 						return Variables[i_] !== undefined ? Variables[i_] : m;
 					});
@@ -1847,14 +1921,12 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		}
 		
 		Result = await ApplyActions(Result, Actions);
-		__GenerateFile[ID] = Result;
 		return Result;
 	}catch(e){
 		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!\nИнформация: " + JSON.stringify(Info), e);
 		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
 	}
 }
-var __GenerateFile = {};
 
 /* ======================================================== */
 
@@ -1951,17 +2023,14 @@ async function GenerateSplashes(){
 	try{
 		var Result = "";
 		
-		var Splashes = await FileContentJSON(await GetFile("R/O/Splashes.json"));
-		for(var SplashInfo of Splashes){
-			var Splash = SplashInfo;
-			var Tags   = [];
-			if(Array.isArray(SplashInfo)){
-				Splash = SplashInfo[0];
-				Tags   = SplashInfo[1];
-			}
-			
+		const SplashesInfo = await FileContentJSON(await GetFile("R/O/Splashes.json"));
+		
+		const Start = SplashesInfo["Start"];
+		
+		for(const Splash of SplashesInfo["Content"]){
 			if(Result.length > 0){ Result += "\n"; }
-			Result += "§f" + UpdateText(Splash);
+			
+			Result += Start + UpdateText(Splash);
 		}
 		
 		return Result;

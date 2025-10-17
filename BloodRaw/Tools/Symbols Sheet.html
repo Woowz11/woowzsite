@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Генератор символов по диапазону</title>
+
+<link rel="stylesheet" href="../Source/css.css">
+
+<style>
+html, button, input {
+	font-size: 1.25em;
+}
+
+body { padding: 20px; }
+textarea { width: 100%; height: 300px; margin-top: 10px; }
+</style>
+
+</head>
+<body>
+<h2>Генератор символов по диапазону</h2>
+
+<p>Начальный код (hex, например 0020):</p>
+<input id="startCode" type="text" value="0020" style="width:100%;">
+
+<p>Конечный код (hex, например 007F):</p>
+<input id="endCode" type="text" value="007F" style="width:100%;">
+
+<p>Через сколько символов делать перенос (0 = без переносов):</p>
+<input id="lineBreak" type="number" value="16" style="width:100%;">
+
+<br>
+<button onclick="generateChars()">Сгенерировать символы</button>
+<button onclick="copyOutput()">Скопировать результат</button>
+
+<textarea id="output" readonly placeholder="Символы появятся здесь..."></textarea>
+
+<script>
+function generateChars() {
+	const startHex = document.getElementById('startCode').value.trim();
+	const endHex   = document.getElementById('endCode').value.trim();
+	const lineBreak = parseInt(document.getElementById('lineBreak').value, 10);
+
+	const start = parseInt(startHex, 16);
+	const end   = parseInt(endHex, 16);
+
+	if (isNaN(start) || isNaN(end) || start > end || isNaN(lineBreak) || lineBreak < 0) {
+		alert('Неверный диапазон или некорректный перенос!');
+		return;
+	}
+
+	let result = '';
+	let count = 0;
+
+	for (let code = start; code <= end; code++) {
+		result += String.fromCharCode(code);
+		count++;
+
+		if (lineBreak > 0 && count % lineBreak === 0) {
+			result += '\n';
+		}
+	}
+
+	document.getElementById('output').value = result;
+}
+
+function copyOutput() {
+	const outputField = document.getElementById("output");
+	outputField.select();
+	outputField.setSelectionRange(0, 99999);
+	document.execCommand("copy");
+}
+</script>
+</body>
+</html>

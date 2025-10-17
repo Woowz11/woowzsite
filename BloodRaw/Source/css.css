@@ -4,17 +4,26 @@
 }
 
 @font-face{
-	font-family: "CFont";
-	src: url("minecraft.ttf") format('opentype');
+	font-family: "BloodRaw";
+	src: url("minecraft.ttf") format("opentype");
+}
+
+@font-face{
+	font-family: "BloodRaw-Color";
+	src: url("minecraft-color.ttf") format("opentype");
 }
 
 * {
 	scrollbar-width: thin;
 	scrollbar-color: #898A8A #212121;
+	
+	font-family: BloodRaw;
+	font-smooth: never;
+	-webkit-font-smoothing: none;
+	-moz-osx-font-smoothing: auto;
 }
 
 html, button, input, textarea{
-	font-family : CFont;
 	color: white;
 	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 	word-spacing: 0.5em;
@@ -74,7 +83,6 @@ button{
 	border-image       : url("button.png") repeat;
 	border-image-slice : 6 fill;
 	border-image-width : 32px 32px;
-	font-family        : CFont;
 	cursor             : pointer;
 	line-height        : 1.4em;
 }
@@ -128,9 +136,9 @@ input[type='checkbox']:checked:hover{
 }
 
 a{
-	color: var(--mc-yellow);
-	text-decoration : none;
-	cursor    : pointer;
+	color          : var(--mc-yellow);
+	text-decoration: none;
+	cursor         : pointer;
 }
 
 a:hover{
@@ -159,7 +167,7 @@ span li::before{
 }
 
 textarea {
-	font-family: CFont;
+	font-family: BloodRaw;
 	color: white;
 	text-shadow: 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 	background-color: #2d2d2d;
@@ -191,7 +199,7 @@ input[type="number"], input[type="text"] {
 	-moz-appearance: textfield;
 	appearance: textfield;
 
-	font-family : CFont;
+	font-family : BloodRaw;
 	color       : white;
 	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 	background-color: #2d2d2d;

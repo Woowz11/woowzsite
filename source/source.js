@@ -416,7 +416,7 @@ function GetAllWoowzsiteIcons(){
 WoowzsiteSourceFonts = AddTableToTable(AddFullnessToTable([
 	"minecraft.ttf","Comfortaa.ttf","inkverse.ttf","topor.otf","concrete.otf","Kantsler Fraktur.ttf"
 ],"source/",""),[
-	"BloodRaw/Source/minecraft.ttf"
+	"BloodRaw/Source/minecraft.ttf", "BloodRaw/Source/minecraft-color.ttf"
 ])
 
 WoowzsiteWords = ["растворился","арбуз","пёрни","тротил","шуруп","сообщение","mail","got","idiot","java","python","c#","cpp","lua","фотон","солнце","немцы","сок","жвачка","курица","петух","трамп","байден","обама","вино",

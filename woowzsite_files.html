@@ -565,12 +565,16 @@ div{
 		document.getElementById("prikol").innerHTML = "(с приколом!)";
 	}
 	
-	GenerateTableCustom("Шрифты",WoowzsiteSourceFonts,
+	GenerateTableCustom("Шрифты", WoowzsiteSourceFonts,
 	`<div style="font-size:2em; padding:5px; text-align: justify;">`,
 	`<div style="width:99.5%; display:inline-block; background-color:rgb(250,250,250); border-radius: 20px; padding:5px; margin-bottom:5px; cursor:default;"><center style="margin-bottom:10px;"><font>{s2}</font><br><button onclick="ChangeFont('{s}');">Установить шрифт</button></center><font style="font-family:{s}; padding:5px; word-wrap: break-word;">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ<br>аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ<br>0123456789+-=_(){}[]<>!?~@#№$.,:;%^&*"\`/|\\'<br>·•°™©®§±µ«»€█§¿¢£…</font></div> `,
-	`</div>`,function(src){ var stl = document.createElement("style"); stl.innerHTML = "@font-face{ font-family:\""+src.split("/")[1].split(".")[0]+"\"; src: url(\""+src+"\")format('opentype'); }"; document.head.appendChild(stl); },function(src){ return src.split("/")[1].split(".")[0]; });
+	`</div>`,function(src){
+		var stl = document.createElement("style");
+		stl.innerHTML = "@font-face{ font-family:\""+src.replace(/\//g, "_").split(".")[0]+"\"; src: url(\""+src+"\")format('opentype'); }";
+		document.head.appendChild(stl);
+	},function(src){ return src.replace(/\//g, "_").split(".")[0]; });
 	
 	GenerateTableSites();
 	
-	GenerateTableCustom("Слова",WoowzsiteWords,`<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);
+	GenerateTableCustom("Слова", WoowzsiteWords, `<div style="background-color:rgba(0,0,0,0.2); font-size:2em; overflow-wrap: break-word; padding:5px; text-align: justify;">`,`<div style="display:inline-block; padding:5px;"><font class="src" onclick="CopyToClipboard('{s}');" style="cursor:pointer; background-color:rgb(250,250,250); border-radius: 20px; padding:5px;">{s}</font></div> `,`</div>`);
 </script>
