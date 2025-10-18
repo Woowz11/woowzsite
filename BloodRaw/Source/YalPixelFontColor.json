@@ -52,7 +52,7 @@
 		"⇰⇱⇲⇳⇴⇵⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿",
 		""
 	],
-	"glyph-color": "color",
+	"glyph-color": "white",
 	"glyph-width": 8,
 	"glyph-height": 8,
 	"glyph-ofs-x": 0,
@@ -89,18 +89,19 @@
 	"font-width-class": "5",
 	"font-creation-date": "2025-10-16",
 	"font-creation-time": "19:44",
-	"font-modification-date": "2025-10-16",
-	"font-modification-time": "20:20",
+	"font-modification-date": "2025-10-17",
+	"font-modification-time": "11:36",
 	"font-modification-auto": true,
 	"overrides": [
 		"default_char �",
-		"hide \\s"
+		"hide \\s",
+		"right \\s -4"
 	],
 	"font-preview-text": [
 		"у",
 		"п�����ч стрелка→омг",
 		"",
-		"появилась поддержка кириллицы???",
+		"\\tпоявилась поддержка кириллицы???",
 		"ОМАГАД))))) вот ты же бомж((((",
 		"",
 		"Englis panish spanish))))",

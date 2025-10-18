@@ -225,7 +225,7 @@ class Texture{
 			
 			if(Index < 0 || Index >= TotalFrames){ throw new Error("Индекс кадра выходит за пределы анимации!"); }
 			
-			return this.Crop(Index * this.W, 0, this.W, this.W);
+			return this.Crop(0, Index * this.W, this.W, this.W);
 		}catch(e){
 			throw new Error("Произошла ошибка при получении кадра из анимации у текстуры [" + this + "]! Frame(" + Index + ");", e);
 		}

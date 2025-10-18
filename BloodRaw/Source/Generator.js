@@ -310,7 +310,7 @@ function HasFile(Path){
 }
 
 /* Получить файл */
-async function GetFile(Path, ThatTexture = false){
+async function GetFile(Path, TruePath = null, ThatTexture = false){
 	Path = Path.replace(/\\/g, "/").replace(/\/+/g, "/");
 	
 	if(__GetFileCache[Path]){ return __GetFileCache[Path]; }
@@ -322,7 +322,7 @@ async function GetFile(Path, ThatTexture = false){
 	
 	if(Extension === "file"){
 		const FileInfo = await FileContentJSON(File);
-		File = await GenerateFile(Path, FileInfo);
+		File = await GenerateFile(TruePath ? TruePath : Path, FileInfo);
 	}else{
 		if(ThatTexture){
 			const PNGContent = await FileContentByte(File);
@@ -355,7 +355,7 @@ async function GetFile(Path, ThatTexture = false){
 const __GetFileCache = {};
 
 /* Получить текстуру */
-async function GetTexture(Path){ return await GetFile(Path, true); }
+async function GetTexture(Path, TruePath){ return await GetFile(Path, TruePath, true); }
 
 /* Получить содержимое файла в виде JSON */
 async function FileContentJSON(File){
@@ -461,6 +461,15 @@ function ThatBinaryFile(File){
 	return false;
 }
 const __BinaryExtensions = [".png", ".bin"];
+
+/* Получает родительскую папку */
+function ParentFolder(Path){
+	if(!Path){ return ""; }
+	Path = Path.replace(/\\/g, "/");
+	if(Path.endsWith("/")){ Path = Path.slice(0, -1); }
+	const  i = Path.lastIndexOf("/");
+	return i === -1 ? "" : Path.slice(0, i + 1);
+}
 
 /* ======================================================== */
 
@@ -1701,7 +1710,7 @@ const __SavedAction = {};
 /* Применение модификаторов */
 async function ApplyActions(Content, Actions){
 	try{
-		if(!Actions || !Actions.length){ return Content; }
+		if(!Content || !Actions || !Actions.length){ return Content; }
 		
 		Content = Content.Clone();
 		
@@ -1755,7 +1764,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		
 		var Actions = null;
 		
-		var Result;
+		var Result = null;
 		
 		switch(GenerateType){
 			case "File": {
@@ -1763,7 +1772,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				Actions = Info[1] || null;
 				if((Actions && !Array.isArray(Actions)) || Info[2]){ throw new Error("Файл содержит лишние данные!"); }
 				
-				const File = await GetFile(FilePath);
+				const File = await GetFile(FilePath, Path);
 				
 				if(ThatJSZipFile(File) && !ThatBinaryFile(File)){
 					Result = UpdateText(await FileContent(File));
@@ -1778,7 +1787,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				const FilePath = Info[0];
 				Actions = Info[1] || null;
 				if(Actions && !Array.isArray(Actions) || Info[2]){ throw new Error("Текстура содержит лишние данные!"); }
-				Result = await GetTexture(FilePath);
+				Result = await GetTexture(FilePath, Path);
 				break;
 			}
 			
@@ -1908,6 +1917,37 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 						const i_ = parseInt(i) - 1;
 						return Variables[i_] !== undefined ? Variables[i_] : m;
 					});
+				}
+				
+				break;
+			}
+			
+			case "Table": {
+				const Code = Info[0];
+				Actions    = Info[1] || [];
+				
+				var Table;
+				try{
+					const FileName = Path ? Path.split("/").pop().split(".")[0] : undefined;
+					
+					Table = (new Function("FileName", Code))(FileName);
+					
+					if(typeof Table !== "object" || Array.isArray(Table)){
+						throw new Error("Custom функция должна возвращать таблицу!");
+					}
+				}catch(e){
+					throw new Error("Произошла ошибка при выполнении Custom кода!\nКод: " + Code, e);
+				}
+				
+				for(const [FileName, Info_] of Object.entries(Table)){
+					try{
+						const SubPath = Path ? ParentFolder(Path) + FileName : "";
+						const FileResult = await GenerateFile(SubPath, Info_);
+						
+						await AddFileToPack(SubPath, FileResult);
+					}catch(e){
+						throw new Error("Произошла ошибка генерации файла [" + FileName + "] в Custom!\nИнформация: " + Info_, e);
+					}
 				}
 				
 				break;

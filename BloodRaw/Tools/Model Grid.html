@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Генератор сетки элементов и групп</title>
+
+<link rel="stylesheet" href="../Source/css.css">
+
+<style>
+html, button, input {
+	font-size: 1.2em;
+}
+body {
+	padding: 20px;
+	font-family: sans-serif;
+}
+textarea {
+	width: 100%;
+	height: 500px;
+	margin-top: 10px;
+	font-family: monospace;
+}
+</style>
+</head>
+<body>
+<h2>Генератор сетки элементов и групп</h2>
+
+<p>Ширина текстуры (в пикселях):</p>
+<input id="width" type="number" value="16" style="width:100%;">
+
+<p>Высота текстуры (в пикселях):</p>
+<input id="height" type="number" value="16" style="width:100%;">
+
+<p>Размер пикселя в модели (1 = 1 блок / 16):</p>
+<input id="pixelSize" type="number" value="1" style="width:100%;">
+
+<p>Имя текстуры (например, #texture или #top):</p>
+<input id="textureName" type="text" value="#texture" style="width:100%;">
+
+<br>
+<button onclick="generateGrid()">Сгенерировать JSON</button>
+<button onclick="copyOutput()">Скопировать результат</button>
+
+<textarea id="output" readonly placeholder="JSON появится здесь..."></textarea>
+
+<script>
+function generateGrid() {
+	const w = parseInt(document.getElementById('width').value, 10);
+	const h = parseInt(document.getElementById('height').value, 10);
+	const pixelSize = parseFloat(document.getElementById('pixelSize').value);
+	const textureName = document.getElementById('textureName').value.trim() || "#texture";
+
+	if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+		alert('Введите корректные размеры!');
+		return;
+	}
+
+	const elements = [];
+	const groups = [];
+
+	for (let y = 0; y < h; y++) {
+		for (let x = 0; x < w; x++) {
+			const fromX = w - x * pixelSize;
+			const fromY = w - y * pixelSize;
+			const toX   = fromX - pixelSize;
+			const toY   = fromY - pixelSize;
+
+			const element = {
+				name: x + 1,
+				from: [fromX, fromY, 0],
+				to  : [toX, toY, pixelSize],
+				faces: {
+					up:    { uv: [x, y, x + 1, y + 1], texture: textureName },
+					down:  { uv: [x, y, x + 1, y + 1], texture: textureName },
+					north: { uv: [x, y, x + 1, y + 1], texture: textureName },
+					south: { uv: [x, y, x + 1, y + 1], texture: textureName },
+					west:  { uv: [x, y, x + 1, y + 1], texture: textureName },
+					east:  { uv: [x, y, x + 1, y + 1], texture: textureName }
+				}
+			};
+			elements.push(element);
+		}
+	}
+
+	for (let gy = 0; gy < h; gy++) {
+		const startIndex = gy * w;
+		const endIndex = startIndex + w;
+
+		const children = [];
+		for (let i = startIndex; i < endIndex; i++) {
+			children.push(i);
+		}
+
+		const group = {
+			name: (gy + 1).toString(),
+			origin: [0, 0, 0],
+			color: 0,
+			children: children
+		};
+		groups.push(group);
+	}
+
+	const json = JSON.stringify({ elements, groups });
+	document.getElementById('output').value = json;
+}
+
+function copyOutput() {
+    const outputField = document.getElementById("output");
+    outputField.select();
+    outputField.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+}
+</script>
+</body>
+</html>
