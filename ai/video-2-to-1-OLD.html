@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Merge 2 MP4 → single WebM (offline)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:sans-serif;background:#0b0f14;color:#e8eef2;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+.container{width:720px;background:#0f1720;padding:20px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+input{display:block;margin:10px 0}
+button{padding:10px 14px;border-radius:8px;border:none;background:#1f8fff;color:#fff;cursor:pointer}
+button:disabled{opacity:.5}
+#progressWrap{height:12px;background:#122031;border-radius:8px;overflow:hidden;margin-top:12px}
+#bar{height:100%;width:0;background:#2eaefc;transition:width .1s}
+#status{margin-top:10px;color:#bcd4f0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Склей MP4 → WebM (офлайн)</h2>
+  <label>Видео #1 (MP4) <input id="f1" type="file" accept="video/mp4"></label>
+  <label>Видео #2 (MP4) <input id="f2" type="file" accept="video/mp4"></label>
+  <button id="go" disabled>Склеить в один WebM</button>
+  <div id="progressWrap"><div id="bar"></div></div>
+  <div id="status">Выбери два MP4.</div>
+  <a id="dl" style="display:none;margin-top:10px;color:#9fe0ff;font-weight:600">Скачать</a>
+</div>
+
+<!-- Скрытый элемент для проигрывания -->
+<video id="player" playsinline style="display:none" muted></video>
+
+<script>
+const f1 = document.getElementById('f1');
+const f2 = document.getElementById('f2');
+const go = document.getElementById('go');
+const player = document.getElementById('player');
+const bar = document.getElementById('bar');
+const status = document.getElementById('status');
+const dl = document.getElementById('dl');
+
+let fileA=null,fileB=null;
+f1.onchange = ()=>{ fileA = f1.files[0]; check(); };
+f2.onchange = ()=>{ fileB = f2.files[0]; check(); };
+function check(){ go.disabled = !(fileA && fileB); }
+
+function setProg(p){ bar.style.width = Math.max(0,Math.min(100,p)) + '%'; }
+
+go.onclick = async () => {
+  go.disabled = true;
+  dl.style.display = 'none';
+  status.textContent = 'Подготовка...';
+  setProg(0);
+
+  // Создаём objectURL'ы
+  const url1 = URL.createObjectURL(fileA);
+  const url2 = URL.createObjectURL(fileB);
+
+  // Настраиваем захват через MediaRecorder
+  // Выбираем mime, поддерживаемый браузером
+  const candidateMimes = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm'
+  ];
+  let mime = candidateMimes.find(m => MediaRecorder.isTypeSupported(m)) || '';
+  if(!mime) {
+    status.textContent = 'Твой браузер не поддерживает MediaRecorder для webm.';
+    go.disabled = false;
+    return;
+  }
+
+  // Устанавливаем размеры — необязательно
+  player.muted = true;
+  const stream = player.captureStream ? player.captureStream() : null;
+  if(!stream) {
+    status.textContent = 'captureStream() не поддерживается в этом окружении. Используй другой браузер.';
+    go.disabled = false;
+    return;
+  }
+
+  const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  const parts = [];
+  recorder.ondataavailable = e => { if(e.data && e.data.size) parts.push(e.data); };
+  recorder.onerror = e => console.error(e);
+
+  recorder.start(200);
+  status.textContent = 'Запись — объединяю видео...';
+  setProg(5);
+
+  // Воспроизвести и ждать конец
+  async function playOne(url, progressOffset, totalDur) {
+    return new Promise((res, rej) => {
+      player.src = url;
+      player.play().catch(err => { console.warn('play error', err); /* продолжим */ });
+      // По интервалу обновляем прогресс, если duration доступна
+      const interval = setInterval(()=>{
+        const cur = player.currentTime || 0;
+        const dur = player.duration || 0;
+        if(dur>0 && totalDur>0) {
+          const ratio = (progressOffset + cur) / totalDur;
+          setProg(5 + Math.round(ratio * 90));
+          status.textContent = 'Склейка: ' + Math.round(ratio*100) + '%';
+        }
+      }, 150);
+      player.onended = () => { clearInterval(interval); res(); };
+      player.onerror = (e) => { clearInterval(interval); console.error(e); res(); };
+    });
+  }
+
+  // Узнаём длительности (если возможно)
+  const tmp1 = document.createElement('video'); tmp1.src = url1;
+  const tmp2 = document.createElement('video'); tmp2.src = url2;
+  await Promise.all([tmp1.play().then(()=>tmp1.pause()).catch(()=>{}), tmp2.play().then(()=>tmp2.pause()).catch(()=>{})]).catch(()=>{});
+  const d1 = isFinite(tmp1.duration) ? tmp1.duration : 0;
+  const d2 = isFinite(tmp2.duration) ? tmp2.duration : 0;
+  const total = (d1||0) + (d2||0);
+
+  try {
+    await playOne(url1, 0, total);
+    await playOne(url2, d1, total);
+  } catch(e) { console.warn(e); }
+
+  recorder.stop();
+  status.textContent = 'Формирование файла...';
+  setProg(98);
+
+  // Ждём завершения onstop
+  await new Promise(res => { recorder.onstop = res; });
+
+  const blob = new Blob(parts, { type: mime || 'video/webm' });
+  const outUrl = URL.createObjectURL(blob);
+  dl.href = outUrl;
+  dl.download = 'result.webm';
+  dl.textContent = 'Скачать result.webm';
+  dl.style.display = 'inline';
+  status.textContent = 'Готово — result.webm готов.';
+  setProg(100);
+  go.disabled = false;
+
+  // Освобождение URL
+  URL.revokeObjectURL(url1);
+  URL.revokeObjectURL(url2);
+};
+</script>
+</body>
+</html>
+
+ИИ ЧМО ХУЙНЮ ПИШЕТ ПОШЁЛ ОН НАХУЙ ЧМО

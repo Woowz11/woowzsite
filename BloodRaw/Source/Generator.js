@@ -1910,13 +1910,18 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					const MaxVar = Math.max(0, ...RequiredVars);
 					
 					if(Variables.length !== MaxVar){
-						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДоступно: " + Variables.length + "\nНужно: " + MaxVar);
+						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variables.length + "\nНайдено: " + MaxVar);
 					}
 					
 					Result = Result.replace(/<\[\s*Var(\d+)\s*\]>/g, (m, i) => {
 						const i_ = parseInt(i) - 1;
 						return Variables[i_] !== undefined ? Variables[i_] : m;
 					});
+					
+					try{
+						const JSON_Result = JSONParse(Result);
+						if(Array.isArray(JSON_Result)){ Result = await GenerateFile(JSON_Result); }
+					}catch(e){}
 				}
 				
 				break;

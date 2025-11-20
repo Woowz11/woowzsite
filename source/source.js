@@ -159,7 +159,7 @@ WoowzsiteSourceDiscordAvatars = AddTableToTable(AddFullnessToTable([
 	"justgamingyt5949","kasqw","kastikepussukka","kersher","kirk1448","klaverr","kotyara228","kseleron","lisstons","lomakinnn","mannytko","meeee66","metallcore999","monsterfish._","ne1grox","morphandriy","morzz1c",
 	"myleskingston","nekitplay155","neoprod","no","pacocareal","pavkalakar","pussyfapper","redsham","rodrigesgames","ruslanconnection","sadsalat","santinnel","shiir0k","styledun","sv1t.","taykeu","the0ceanman",
 	"thewindowskerpka","treepii24","troll_bebra","turbobtv","uzelezz","wantedrobot","wldoui","woowz11.","woowz11","xyzswagga","your_local_russian","youwillseelowskill","zebratv","zinderant","zooi","zvski",
-	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx","darkus2","rnswt_offical","4ro9ito","kek_kek_kek_"
+	"brigadir_","mrgun_","primorskiy_","ruddi","sleepingman","odex64","xx_beamcrash_xx","darkus2","rnswt_offical","4ro9ito","kek_kek_kek_","bombom228","ilya_nextbot"
 ],"source/discordavatars/",".png"),AddFullnessToTable([
 	"nberbaaaaaaa","brinq_","haveaniceday.","uranus52"
 ],"source/discordavatars/",".gif"))

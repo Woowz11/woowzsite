@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Склейка MP4 — Без SharedArrayBuffer</title>
+<style>
+body{font-family:Segoe UI,Roboto,Arial,sans-serif;background:#0b0b0f;color:#ddd;margin:0;padding:20px}
+.wrap{max-width:900px;margin:auto;background:#0f1115;padding:20px;border-radius:12px;box-shadow:0 0 25px rgba(0,0,0,.5)}
+h1{margin:0 0 10px;color:#fff}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+button{background:#1f6feb;color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+button.secondary{background:#2d3138}
+#fileList{background:#0b0d10;padding:10px;border-radius:8px;min-height:80px}
+.item{display:flex;align-items:center;gap:8px;margin-bottom:6px;background:#15171c;padding:6px;border-radius:6px}
+.item .title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log{font-family:monospace;background:#000;padding:8px;margin-top:10px;border-radius:6px;max-height:200px;overflow:auto;font-size:12px}
+a.download{display:inline-block;margin-top:12px;padding:8px 12px;background:#10b981;color:#042;text-decoration:none;border-radius:6px;font-weight:600}
+#progress{height:8px;background:#222;border-radius:6px;overflow:hidden;margin-top:8px}
+#fill{height:100%;width:0;background:#1f6feb}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Склейка MP4 (ffmpeg.wasm без SharedArrayBuffer)</h1>
+  <div class="controls">
+    <input id="fileInput" type="file" accept="video/mp4" multiple>
+    <button id="btnMerge" disabled>Склеить и скачать</button>
+    <button id="btnClear" class="secondary">Очистить</button>
+  </div>
+  <div id="fileList"></div>
+  <div id="progress"><div id="fill"></div></div>
+  <div id="status">Статус: ожидание</div>
+  <div id="log" class="log"></div>
+  <div id="download"></div>
+</div>
+
+<!-- ffmpeg.wasm без указания corePath -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
+<script>
+(async()=>{
+  const { createFFmpeg, fetchFile } = FFmpeg;
+  const ffmpeg = createFFmpeg({ log: true, corePath: undefined }); // corePath отключен
+  let files = [];
+
+  const fileInput = document.getElementById('fileInput');
+  const fileList = document.getElementById('fileList');
+  const btnMerge = document.getElementById('btnMerge');
+  const btnClear = document.getElementById('btnClear');
+  const logEl = document.getElementById('log');
+  const statusEl = document.getElementById('status');
+  const fill = document.getElementById('fill');
+  const downloadEl = document.getElementById('download');
+
+  function log(msg){ logEl.textContent += msg + "\n"; logEl.scrollTop = logEl.scrollHeight; }
+
+  function renderList(){
+    fileList.innerHTML='';
+    files.forEach((f,i)=>{
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML=`<div class="title">${f.name}</div>
+        <button ${i===0?'disabled':''} data-up="${i}">▲</button>
+        <button ${i===files.length-1?'disabled':''} data-down="${i}">▼</button>
+        <button data-del="${i}">✖</button>`;
+      fileList.appendChild(d);
+    });
+    btnMerge.disabled = files.length<2;
+  }
+
+  fileInput.onchange = e=>{
+    files.push(...Array.from(e.target.files));
+    renderList();
+  };
+
+  fileList.onclick = e=>{
+    const u=e.target.dataset.up, d=e.target.dataset.down, del=e.target.dataset.del;
+    if(u){const i=+u;[files[i-1],files[i]]=[files[i],files[i-1]];}
+    if(d){const i=+d;[files[i+1],files[i]]=[files[i],files[i+1]];}
+    if(del){files.splice(+del,1);}
+    renderList();
+  };
+
+  btnClear.onclick = ()=>{files=[];renderList();downloadEl.innerHTML='';};
+
+  btnMerge.onclick = async ()=>{
+    statusEl.textContent='Загрузка FFmpeg...';
+    if(!ffmpeg.isLoaded()){ 
+      await ffmpeg.load();
+      log('FFmpeg загружен');
+    }
+
+    for(let i=0;i<files.length;i++){
+      ffmpeg.FS('writeFile',`part${i}.mp4`,await fetchFile(files[i]));
+    }
+    const listTxt = files.map((_,i)=>`file 'part${i}.mp4'`).join('\n');
+    ffmpeg.FS('writeFile','list.txt',new TextEncoder().encode(listTxt));
+
+    fill.style.width='0%';
+    ffmpeg.setProgress(({ratio})=>{
+      fill.style.width=Math.round(ratio*100)+'%';
+    });
+
+    try{
+      await ffmpeg.run('-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4');
+    }catch{
+      log('Ошибка copy — выполняется перекодирование.');
+      await ffmpeg.run('-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','ultrafast','-c:a','aac','-b:a','128k','out.mp4');
+    }
+
+    const data = ffmpeg.FS('readFile','out.mp4');
+    const blob = new Blob([data.buffer],{type:'video/mp4'});
+    const url = URL.createObjectURL(blob);
+    downloadEl.innerHTML=`<a class="download" href="${url}" download="merged.mp4">Скачать merged.mp4</a>`;
+    statusEl.textContent='Готово!';
+    log('Склейка завершена.');
+  };
+})();
+</script>
+</body>
+</html>
