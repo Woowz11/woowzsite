@@ -1,4 +1,4 @@
-:root {
+:root{
 	--mc-yellow: #FFFF55;
 	--mc-red   : #FF5555;
 }
@@ -13,7 +13,7 @@
 	src: url("minecraft-color.ttf") format("opentype");
 }
 
-* {
+*{
 	scrollbar-width: thin;
 	scrollbar-color: #898A8A #212121;
 	
@@ -72,7 +72,7 @@ h2{
 	opacity: 0;
 }
 
-textarea::selection, input[type='number']::selection, input[type='text']::selection {
+textarea::selection, input[type='number']::selection, input[type='text']::selection{
 	background-color: color-mix(in srgb, var(--mc-yellow) 30%, transparent);
 	color: var(--mc-yellow);
 }
@@ -149,13 +149,13 @@ a:active{
 	color: #555555;
 }
 
-li {
+li{
 	list-style: none;
 	position: relative;
 	padding-left: 1.2em;
 }
 
-li::before {
+li::before{
 	content: "▪";
 	position: absolute;
 	left: 0;
@@ -166,7 +166,7 @@ span li::before{
 	display: none;
 }
 
-textarea {
+textarea{
 	font-family: BloodRaw;
 	color: white;
 	text-shadow: 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
@@ -186,7 +186,7 @@ textarea {
 	cursor: text;
 }
 
-textarea:focus {
+textarea:focus{
 	border-image: url("area_hover.png") repeat;
 	border-image-slice: 6 fill;
 	border-image-width: 16px 16px;
@@ -194,7 +194,7 @@ textarea:focus {
 	outline: 3px solid #E2E2E2;
 }
 
-input[type="number"], input[type="text"] {
+input[type="number"], input[type="text"]{
 	-webkit-appearance: none;
 	-moz-appearance: textfield;
 	appearance: textfield;
@@ -220,7 +220,7 @@ input[type="number"], input[type="text"] {
 	cursor: text;
 }
 
-input[type="number"]:focus, input[type="text"]:focus {
+input[type="number"]:focus, input[type="text"]:focus{
 	border-image: url("area_hover.png") repeat;
 	border-image-slice: 6 fill;
 	border-image-width: 16px 16px;

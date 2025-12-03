@@ -18,7 +18,9 @@
 * [Сами вы клон тиктока](https://woowz11.github.io/woowzsite/w.html) 
 
 # Лицензия
-Можно использовать ресурсы, модифицировать, выдавать проект за свой нельзя, получать выгоду с него тоже нельзя
+Можно использовать ресурсы, модифицировать.
+
+Выдавать проект за свой нельзя, получать выгоду с него тоже нельзя.
 
 # Некоторая информация
 * Создатель проекта Woowz11
@@ -29,6 +31,6 @@
 |                                           Аватарка                                       |                    Никнейм                    |       Сколько внесли вклад в проект       |
 |:----------------------------------------------------------------------------------------:|:---------------------------------------------:|:-----------------------------------------:|
 |<img src="https://avatars.githubusercontent.com/u/52042904?v=4"  width="100" height="100">|[Woowz11](https://github.com/Woowz11)          | Очень большой, **99%** всего сделано им   |
-|<img src="https://avatars.githubusercontent.com/u/115502577?v=4" width="100" height="100">|[Wldoui (ЗАБАНЕН)](https://github.com/wldoui)  | Главный помощник создателя, сделал **1%** |
+|<img src="https://avatars.githubusercontent.com/u/115502577?v=4" width="100" height="100">|[Wldoui](https://github.com/wldoui)            | Главный помощник создателя, сделал **1%** |
 |<img src="https://avatars.githubusercontent.com/u/154255275?v=4" width="100" height="100">|[Warmap1](https://github.com/warmap1)          | Ну чёто там сделал, Wldoui попросил       |
-|<img src="https://avatars.githubusercontent.com/u/61869286?v=4"  width="100" height="100">|[Ded-Brigadir](https://github.com/Ded-Brigadir)| Ха-Ха Бригадир делает бррррр....          |
+|<img src="https://avatars.githubusercontent.com/u/61869286?v=4"  width="100" height="100">|[Ded-Brigadir](https://github.com/Ded-Brigadir)| Ха-Ха                                     |

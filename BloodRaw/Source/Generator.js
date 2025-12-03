@@ -414,6 +414,11 @@ function ThatJSZipFile(Obj){
 	return Obj instanceof Object && Obj.name != null && Obj.dir != null && Obj.date != null;
 }
 
+/* Это текстура? */
+function ThatTexture(Obj){
+	return Obj instanceof Texture && Obj.W != null && Obj.H != null;
+}
+
 /* Отлючить работу мыши? */
 function DisableMouse(Disable){
 	if(__DisableMouse === Disable){ return; } __DisableMouse = Disable;
@@ -1327,8 +1332,13 @@ if(IsLocal){ LoadingOverlay(false); }
 
 /* Вызывается при запуске сайта */
 function Awake(){
-	const PreLoadPack = document.getElementById("PreLoadPack");
+	const PreLoadPackButton = document.getElementById("PreLoadPackButton");
+	const PreLoadPackDiv    = document.getElementById("PreLoadPackDiv");
+	const PreLoadPack       = document.getElementById("PreLoadPack");
 	if (IsLocal){
+		PreLoadPackButton.addEventListener("click", () => PreLoadPack.click());
+		
+		PreLoadPack.value = "";
 		PreLoadPack.addEventListener("change", async (EV) => {
 			try{
 				LoadingOverlay(true);
@@ -1338,7 +1348,7 @@ function Awake(){
 				const Buf = await File.arrayBuffer();
 				await PreLoad(Buf);
 				
-				PreLoadPack.style.display = "none";
+				PreLoadPackDiv.style.display = "none";
 				LoadingOverlay(false);
 			}catch(e){
 				document.documentElement.style.setProperty("--infobox", "255, 0, 0");
@@ -1346,7 +1356,7 @@ function Awake(){
 			}
 		});
 		
-		PreLoadPack.style.display = "unset";
+		PreLoadPackDiv.style.display = "unset";
 	}else{
 		(async () => {
 			try{
@@ -1845,6 +1855,8 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				const AnimationInfo = UpdateAnimation(Info[1]);
 				Actions = Info[2] || [];
 				Result = await GenerateFile(T);
+				
+				if(!ThatTexture(Result)){ throw new Error("Невозможно сделать анимацию, поскольку получил не изображение!"); }
 				
 				const Frames = Result.H / Result.W;
 				if(!Number.isInteger(Frames)){ throw new Error("У анимации неверно задана высота! Число кадров дробное!\nКадров: " + Frames); }
