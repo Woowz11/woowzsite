@@ -234,6 +234,9 @@ class Texture{
 	/* Изменяет размер текстуры, так же содержимое */
 	Resize(W, H, Smooth = true){
 		try{
+			W = Math.max(1, Math.floor(W));
+			H = Math.max(1, Math.floor(H));
+			
 			if(W <= 0 || H <= 0){ throw new Error("Новый размер <= 0!"); }
 			
 			const OW = this.W;
@@ -367,16 +370,22 @@ class Texture{
 	Gradient(Gradient_){
 		try{
 			if(!(Gradient_ instanceof Texture)){ throw new Error("Градиент должен быть формата Texture!"); }
-			if(Gradient_.W !== 256 || Gradient_.H !== 1){ throw new Error("Размер градиента должен быть 256x1!"); }
+			
+			const GW = Gradient_.W;
+			const GContent = Gradient_.Content;
+			
+			const Scale = (GW - 1) / 255;
 			
 			for(var i = 0; i < this.Content.length; i += 4){
 				const Gray = this.Content[i];
 				
-				const GI = Gray * 4;
-				this.Content[i + 0] = Gradient_.Content[GI + 0];
-				this.Content[i + 1] = Gradient_.Content[GI + 1];
-				this.Content[i + 2] = Gradient_.Content[GI + 2];
-				this.Content[i + 3] = Math.min(this.Content[i + 3], Gradient_.Content[GI + 3]);
+				const GX = Math.floor(Gray * Scale);
+				const GI = GX * 4;
+				
+				this.Content[i + 0] = GContent[GI + 0];
+				this.Content[i + 1] = GContent[GI + 1];
+				this.Content[i + 2] = GContent[GI + 2];
+				this.Content[i + 3] = Math.min(this.Content[i + 3], GContent[GI + 3]);
 			}
 			
 			this.__UpdateCanvas();

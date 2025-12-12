@@ -50,7 +50,11 @@ html, button{
 
 	outline: 3px solid rgba(0, 0, 0, 0.5);
 
-	text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+	text-shadow: 0 0 5px currentColor, 0 0 30px currentColor;
+}
+
+.Console p[style*="cursor: help"]:hover{
+	color: #9effbe;
 }
 
 .InfoBox{
@@ -124,7 +128,6 @@ html, button{
 			</div>
 			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
 				<li><input type="checkbox" autocomplete="off" onchange="EnablePrikols(this.checked);" title="Позволяет сломать разными способами генерацию">Приколы</input></li>
-				<li><input type="checkbox" autocomplete="off" onchange="" checked="true" title="Включает поддержку Optifine">Optifine</input></li>
 			</ul>
 		</div>
 		
@@ -201,7 +204,9 @@ html, button{
 		
 		<div id="PrikolPanel" style="display: none;">
 			<div class="Out" style="margin-top: 20px; border-image: linear-gradient(135deg, red, orange, yellow, green, cyan, blue, violet) 1;">
-				Тут будут рофлы
+				<input type="checkbox" autocomplete="off" onchange="Prikol_Specialforrandomsite = this.checked;" title="Делает текстуры все с рандом сайта (woowzsite random site)">Случайные картинки</input>
+				<input type="number" autocomplete="off" value="1" onchange="Prikol_MulSize = Math.max(0.001, this.value);" title="Во сколько раз увеличивать размеры текстур?">Увеличить размер текстур</input>
+				<input type="text" autocomplete="off" value="WIP">Кастомные Actions
 			</div>
 		</div>
 	
@@ -212,12 +217,13 @@ html, button{
 	</div>
 
 	<div>
-		<div class="Console" style="min-height: 100%;" id="Console">Тут будут выводиться сообщения...</div>
+		<div class="Console" style="min-height: 100%;" id="Console"><p>Тут будут выводиться сообщения...</p></div>
 	</div>
 
 </div></body>
 
 <script src="../source/Logger.js" ></script>
 <script src="../Libs/jszip.min.js"></script>
-<script src="../source/Texture.js" ></script>
+<script src="../source/Texture.js"></script>
 <script src="Source/Generator.js" ></script>
+<script src="../source/source.js" ></script>

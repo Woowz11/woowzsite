@@ -9,6 +9,14 @@
 
 /* ======================================================== */
 
+Prikol = false;
+
+Prikol_Specialforrandomsite = false;
+
+Prikol_MulSize = 1;
+
+/* ======================================================== */
+
 Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz11");
 
 var Console = document.getElementById("Console");
@@ -203,7 +211,8 @@ function UpdateText(Text){
 		D_CurrentFile: CurrentFile,
 		D_PackFormat : PackFormat,
 		D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
-		D_Time       : GenerationTime
+		D_Time       : GenerationTime,
+		S            : CompareVersion(SelectedVersion, "1.13") > 0 ? "s" : ""
 	}};
 
 	return Text.replace(/<\[\s*([\s\S]*?)\s*\]>/g, (M, E) => {
@@ -249,10 +258,17 @@ function UpdateColor(Color){
 }
 const __ReplaceColor = {};
 
+/* Случайный цвет */
+function RandomColor(){
+	return HSLToRGB(Math.floor(Math.random() * 360), 100, 50);
+}
+
 /* Конвертация цвета в байты */
 function CalculateColor(Color){
 	try{
 		if(typeof Color !== "string"){ return Color; }
+	
+		if(Color === "Random"){ return RandomColor(); }
 	
 		if(__Colors[Color]){ return __Colors[Color]; }
 	
@@ -279,6 +295,32 @@ function CalculateColor(Color){
 	}
 }
 __Colors = {};
+
+/* HSL -> RGB */
+function HSLToRGB(H, S, L){
+	S /= 100;
+	L /= 100;
+
+	const C = (1 - Math.abs(2 * L - 1)) * S;
+	const X = C * (1 - Math.abs((H / 60) % 2 - 1));
+	const M = L - C / 2;
+
+	var R1, G1, B1;
+
+	if(H < 60)      { R1 = C; G1 = X; B1 = 0; }
+	else if(H < 120){ R1 = X; G1 = C; B1 = 0; }
+	else if(H < 180){ R1 = 0; G1 = C; B1 = X; }
+	else if(H < 240){ R1 = 0; G1 = X; B1 = C; }
+	else if(H < 300){ R1 = X; G1 = 0; B1 = C; }
+	else            { R1 = C; G1 = 0; B1 = X; }
+
+	return new Uint8ClampedArray([
+		Math.round((R1 + M) * 255),
+		Math.round((G1 + M) * 255),
+		Math.round((B1 + M) * 255),
+		255
+	]);
+}
 
 /* Глубокое копирование объекта */
 function DeepClone(Obj){
@@ -329,7 +371,7 @@ async function GetFile(Path, TruePath = null, ThatTexture = false){
 		
 			const Blob_  = new Blob([PNGContent], { type: "image/png" });
 			
-			const { W, H, Content } = await new Promise((R, E) => {
+			var { W, H, Content } = await new Promise((R, E) => {
 				const Image_ = new Image();
 				Image_.onload = () => {
 					const C = document.createElement("canvas");
@@ -345,7 +387,92 @@ async function GetFile(Path, TruePath = null, ThatTexture = false){
 				Image_.src = URL.createObjectURL(Blob_);
 			});
 			
-			File = new Texture(W, H, new Uint8ClampedArray(Content));
+			var LoadDefault = true;
+			
+			if(Prikol && Prikol_Specialforrandomsite){
+				LoadDefault = false;
+				
+				if(__AllWoowzsiteImages == null){ __AllWoowzsiteImages = GetAllWoowzsiteImages(); }
+				
+				const RandomImage = __AllWoowzsiteImages[Math.floor(Math.random() * __AllWoowzsiteImages.length)];
+				
+				var TextureRI = null;
+				if(__AllWoowzsiteImagesCache[RandomImage]){
+					TextureRI = __AllWoowzsiteImagesCache[RandomImage];
+				}else{
+					const FullPath = "https://woowz11.github.io/woowzsite/" + RandomImage;
+					
+					const Mime = (() => {
+						const L = RandomImage.toLowerCase();
+						if(L.endsWith(".png")) return "image/png";
+						if(L.endsWith(".jpg") || L.endsWith(".jpeg")) return "image/jpeg";
+						if(L.endsWith(".gif")) return "image/gif";
+						if(L.endsWith(".webp")) return "image/webp";
+						return false
+					})();
+					
+					async function Load(){
+						if(Mime === false){ return true; }
+						
+						const Response = await fetch(FullPath);
+						if(!Response.ok){ Logger.Error("PRIKOL: Не получилось загрузить картинку с рандом сайта [" + FullPath + "]!"); return true; }
+						
+						const ArrayBuf = await Response.arrayBuffer();
+						const Blob_ = new Blob([ArrayBuf], { type: Mime });
+						
+						const TextureLoaded = await new Promise((Resolve, Reject) => {
+							const Img = new Image();
+							Img.crossOrigin = "anonymous";
+							Img.onload = () => {
+								const C = document.createElement("canvas");
+								C.width = Img.width;
+								C.height = Img.height;
+
+								const CTX = C.getContext("2d");
+								CTX.drawImage(Img, 0, 0);
+
+								const ImageData = CTX.getImageData(0, 0, Img.width, Img.height);
+
+								URL.revokeObjectURL(Img.src);
+
+								Resolve({
+									W: Img.width,
+									H: Img.height,
+									Data: new Uint8ClampedArray(ImageData.data)
+								});
+							};
+							Img.onerror = Reject;
+
+							Img.src = URL.createObjectURL(Blob_);
+						});
+						
+						TextureRI = new Texture(TextureLoaded.W, TextureLoaded.H, TextureLoaded.Data);
+						__AllWoowzsiteImagesCache[RandomImage] = TextureRI;
+						
+						return false;
+					}
+					LoadDefault = await Load();
+				}
+				
+				if(!LoadDefault){
+					Logger.Console("Загрузка рандомной картинки [" + RandomImage + "]");
+					
+					if(Prikol){
+						W *= Prikol_MulSize; H *= Prikol_MulSize;
+					}
+					
+					File = TextureRI.Clone().Resize(W, H);
+				}
+			}
+			
+			if(LoadDefault){
+				File = new Texture(W, H, new Uint8ClampedArray(Content));
+				
+				if(Prikol){
+					W *= Prikol_MulSize; H *= Prikol_MulSize;
+					File.Resize(W, H);
+				}
+			}
 		}
 	}
 	
@@ -353,6 +480,9 @@ async function GetFile(Path, TruePath = null, ThatTexture = false){
 	return File;
 }
 const __GetFileCache = {};
+
+var __AllWoowzsiteImages = null;
+const __AllWoowzsiteImagesCache = {};
 
 /* Получить текстуру */
 async function GetTexture(Path, TruePath){ return await GetFile(Path, TruePath, true); }
@@ -508,9 +638,9 @@ function ShowInfo(Button){
 		const Optifine  = Addon["Optifine"];
 		const Optifine_ = document.getElementById("VersionOptifine");
 		if(Optifine){
-			Optifine_.title = "sex"; Optifine_.style.color = "white";
+			Optifine_.title = "Поддерживает Optifine!"; Optifine_.style.color = "white";
 		}else{
-			Optifine_.title = "что-то там оптифайн, доделай"; Optifine_.style.color = "gray";
+			Optifine_.title = "Эта версия не содержит Optifine!"; Optifine_.style.color = "gray";
 		}
 		
 		const Extension  = Addon["Extension"];
@@ -812,6 +942,17 @@ function SelectAddons(Type, UpdateAnyway = false){
 				break;
 			}
 			case "Optifine": {
+				if(!__SA_Optifine[SelectedVersion]){
+					__SA_Optifine[SelectedVersion] = {};
+					
+					for(const Optifine of Version["Addon"]["Optifine"]){
+						const OptifineInfo = Generators[Optifine];
+						__SA_Optifine[SelectedVersion][Optifine] = false;
+					}
+				}
+				
+				__SA_RebuildAddons(__SA_Optifine);
+				
 				break;
 			}
 			case "Extension": {
@@ -873,6 +1014,7 @@ var __OldSelectGenerationTypeButton = null;
 /* Включены приколы? */
 function EnablePrikols(Enabled){
 	try{
+		Prikol = Enabled;
 		document.getElementById("PrikolPanel").style.display = Enabled ? "unset" : "none";
 	}catch(e){
 		Logger.Fatal("Произошла ошибка при в" + (Enabled === false ? "ы" : "") + "ключении приколов!", e);
@@ -1449,6 +1591,22 @@ async function Generate(){
 			}
 		}
 		
+		const Addons_Optifine = __SA_Optifine[SelectedVersion] || {};
+		const Addons_Optifine_Result = [];
+		for(const [A, I] of Object.entries(Addons_Optifine)){
+			if(I !== false){ Addons_Optifine_Result.push([A, I]); }
+		}
+		
+		if(Addons_Optifine_Result.length > 0){
+			Addons_Optifine_Result.sort((a, b) => a[1] - b[1]);
+			Logger.Console("Применение дополнений [Optifine]...");
+			for(const A_ of Addons_Optifine_Result){
+				const A = A_[0];
+				
+				await ApplyGenerator(await LoadGenerator(A));
+			}
+		}
+		
 		GenerationTime = Date.now() - GenerationStartTime;
 		
 		if(BuildFile){
@@ -1568,6 +1726,11 @@ async function ApplyAction(Content, Type, Info){
 				var Y     = Info[2] || 0;
 				var Blend = Info[3] || "alpha";
 				
+				if(Prikol){
+					X *= Prikol_MulSize;
+					Y *= Prikol_MulSize;
+				}
+				
 				Content.Put(T, X, Y, Blend);
 				break;
 			}
@@ -1583,6 +1746,12 @@ async function ApplyAction(Content, Type, Info){
 				var W = Info[0];
 				var H = Info[1] || W;
 				var Smooth = Info[2] ?? false;
+				
+				if(Prikol){
+					W *= Prikol_MulSize;
+					H *= Prikol_MulSize;
+				}
+				
 				Content.Resize(W, H, Smooth);
 				break;
 			}
@@ -1595,6 +1764,13 @@ async function ApplyAction(Content, Type, Info){
 				
 				if(W == null && H == null){
 					W = X; H = Y; X = Y = 0;
+				}
+				
+				if(Prikol){
+					X *= Prikol_MulSize;
+					Y *= Prikol_MulSize;
+					W *= Prikol_MulSize;
+					H *= Prikol_MulSize;
 				}
 				
 				Content.Crop(X, Y, W, H);
@@ -1627,6 +1803,12 @@ async function ApplyAction(Content, Type, Info){
 			case "NewSize": {
 				var W = Info[0];
 				var H = Info[1];
+				
+				if(Prikol){
+					W *= Prikol_MulSize;
+					H *= Prikol_MulSize;
+				}
+				
 				Content.NewSize(W, H);
 				break;
 			}
@@ -1651,6 +1833,12 @@ async function ApplyAction(Content, Type, Info){
 			case "Move": {
 				var X = Info[0] || 0;
 				var Y = Info[1] || 0;
+				
+				if(Prikol){
+					X *= Prikol_MulSize;
+					Y *= Prikol_MulSize;
+				}
+				
 				Content.Move(X, Y);
 				break;
 			}
@@ -1741,7 +1929,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	if(MemoryFile){ Info = Path; Path = null; }
 
 	try{
-		if(Info.length === 0){ Info = ["Texture", "R/T/Default.png"]; }
+		if(Info.length === 0){ Info = ["Texture", "R/T/Default.png", [["Multiply", "Random"]]]; }
 		
 		/* Что-бы Info.shift(), не редактировал генераторы */
 		Info = DeepClone(Info);
@@ -1997,6 +2185,11 @@ async function GenerateAtlas(Info){
 		var Scale = Info["Scale"] || [1, 1];
 		var W     = Size[0];
 		var H     = Size[1];
+		
+		if(Prikol){
+			Scale[0] *= Prikol_MulSize;
+			Scale[1] *= Prikol_MulSize;
+		}
 		
 		if(Info["Empty"]){ delete Info["Empty"]; }
 		if(Info["Size" ]){ delete Info["Size" ]; }
