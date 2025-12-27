@@ -203,7 +203,7 @@ function Sleep(MS){
 }
 
 /* Обновляет строку */
-function UpdateText(Text){
+async function UpdateText(Text){
 	const R = {...__ReplaceText, ...{
         D_Version    : SelectedVersion,
 		D_RealVersion: 0,
@@ -215,29 +215,49 @@ function UpdateText(Text){
 		S            : CompareVersion(SelectedVersion, "1.13") > 0 ? "s" : ""
 	}};
 
-	return Text.replace(/<\[\s*([\s\S]*?)\s*\]>/g, (M, E) => {
-		E = E.trim();
+	const Matches = [...Text.matchAll(/<\[\s*([\s\S]*?)\s*\]>/g)];
+	if(Matches.length === 0){ return Text; }
+	
+	var Result = "";
+	var LastIndex = 0;
+	
+	for(const Match of Matches){
+		const [Full, Expr] = Match;
+		const Start = Match.index;
+		const End = Start + Full.length;
 		
-		if(/^Var\d*$/.test(E)){ return M; }
+		Result += Text.slice(LastIndex, Start);
+		LastIndex = End;
+		
+		const E = Expr.trim();
+		
+		if(/^Var\d*$/.test(E)){ Result += Full; continue; }
 		
 		try{
-			if(E.startsWith("Custom ")){
-				const Code = E.slice(7).trim();
-				const Func = new Function(...Object.keys(R), `return (${Code});`);
-			
-				const Result = Func(...Object.values(R));
-				
-				return Result;
+			if(E.startsWith("Custom ") || E.startsWith("CustomF ")){
+				const FullFunc = E.startsWith("CustomF ");
+				const Code = E.slice(FullFunc ? 8 : 7).trim();
+
+				const Func = new AsyncFunction(...Object.keys(R), FullFunc ? Code : `return (${Code});`);
+
+				const Value = await Func(...Object.values(R));
+				Result += String(Value);
+				continue;
 			}
 			
-			if(E in R){ return R[E]; }
-			throw new Error(`Не найден текстовой код <${E}>!\nТекст: ${Text}`);
-		}catch(e){
-			Logger.ConsoleError("Произошла ошибка в UpdateText!\nТекст: " + Text, e);
-			return "undefined";
+			if(E in R){ Result += String(R[E]); continue; }
+			
+			throw new Error(`Не найден текстовой код <${E}>!`);
+		}catch(Error){
+			Logger.ConsoleError("Произошла ошибка в UpdateText!\nТекст: " + Text, Error);
+			Result += "undefined";
 		}
-	});
+	}
+	
+	Result += Text.slice(LastIndex);
+	return Result;
 }
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 const __ReplaceText = {};
 
 /* Обновляет анимацию */
@@ -320,6 +340,11 @@ function HSLToRGB(H, S, L){
 		Math.round((B1 + M) * 255),
 		255
 	]);
+}
+
+/* RGB -> HEX */
+function RGBToHEX(R, G, B){
+	return [R, G, B].map(v => v.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
 /* Глубокое копирование объекта */
@@ -617,7 +642,9 @@ function ShowInfo(Button){
 		const Version = PackVersions[ShowVersion][2];
 		
 		document.getElementById("VersionName").innerText = Version["Name"];
-		document.getElementById("VersionDesc").innerText = UpdateText(Version["Desc"]);
+		UpdateText(Version["Desc"]).then(R => {
+			document.getElementById("VersionDesc").innerText = R;
+		});
 		
 		const Addon = Version["Addon"] || [];
 		
@@ -680,7 +707,9 @@ function ShowInfoAddon(AddonPanel){
 		const Addon = Generators[ShowAddon];
 		
 		document.getElementById("AddonName").innerText = Addon["Name"];
-		document.getElementById("AddonDesc").innerText = UpdateText(Addon["Desc"]);
+		UpdateText(Addon["Desc"]).then(R => {
+			document.getElementById("AddonDesc").innerText = R;
+		});
 		
 		const AddonImage = __AddonImages[ShowAddon];
 		if(!AddonImage){ return; }
@@ -1622,21 +1651,23 @@ async function Generate(){
 		const Blob = await Pack.generateAsync({ type: "blob" });
 		const A = document.createElement("a");
 		A.href = URL.createObjectURL(Blob);
-		A.download = UpdateText(OnlyAddon ? OutAddonName : OutName);
-		document.body.appendChild(A);
-		A.click();
-		document.body.removeChild(A);
-		URL.revokeObjectURL(A.href);
-		
-		document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
-		
-		Logger.Console("Конец генерации пака!");
-		
-		InGeneration = false;
-		BuildFile = null;
-		Pack = null;
-		
-		Logger.Info(":" + "=".repeat(50) + ":");
+		UpdateText(OnlyAddon ? OutAddonName : OutName).then(R => {
+			A.download = R;
+			document.body.appendChild(A);
+			A.click();
+			document.body.removeChild(A);
+			URL.revokeObjectURL(A.href);
+			
+			document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
+			
+			Logger.Console("Конец генерации пака!");
+			
+			InGeneration = false;
+			BuildFile = null;
+			Pack = null;
+			
+			Logger.Info(":" + "=".repeat(50) + ":");
+		});
 	}catch(e){
 		if(InGeneration){ 
 			Logger.ConsoleError("Произошла ошибка при генерации пака!", e);
@@ -1973,7 +2004,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				const File = await GetFile(FilePath, Path);
 				
 				if(ThatJSZipFile(File) && !ThatBinaryFile(File)){
-					Result = UpdateText(await FileContent(File));
+					Result = await UpdateText(await FileContent(File));
 				}else{
 					Result = File;
 				}
@@ -2001,11 +2032,11 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					const File = await GenerateFile(Info[0]);
 					const Content = await FileContent(File);
 
-					Result = UpdateText(Content);
+					Result = await UpdateText(Content);
 				} else {
 					const Content = Info[0];
 					Actions = Info[1] || null;
-					Result = UpdateText(Content);
+					Result = await UpdateText(Content);
 				}
 				break;
 			}
@@ -2034,7 +2065,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 			case "Json": {
 				const Json = Info[0];
 				Actions = Info[1] || null;
-				Result = UpdateText(JSON.stringify(Json, null, '\t'));
+				Result = await UpdateText(JSON.stringify(Json, null, '\t'));
 				break;
 			}
 			
@@ -2280,7 +2311,7 @@ async function GenerateSplashes(){
 		for(const Splash of SplashesInfo["Content"]){
 			if(Result.length > 0){ Result += "\n"; }
 			
-			Result += Start + UpdateText(Splash);
+			Result += Start + await UpdateText(Splash);
 		}
 		
 		return Result;
