@@ -393,5 +393,15 @@ var all_sites = [
       "tags": [
         "alchemy"
       ]
+    },
+	{
+      "href": "MyVideos",
+      "name": "Мои видео",
+      "catalog": "tools",
+      "hide": false,
+      "icon": "myvideo",
+      "tags": [
+        "video"
+      ]
     }
   ]

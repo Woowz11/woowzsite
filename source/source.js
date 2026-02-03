@@ -22,7 +22,8 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"locate","lupa","metal","microsoft_fly_simulator_epicepdiditonpps","newfolder","no-cat","nointernet","noway!!!","obsidian_bowl","open","openprojecttitle","options","p","paper","par","paste","pixel","plus",
 	"plushover","position_end","position_end1","p_back","quare","rename","search","selectall","selectdinverse","selectdone","sky","smolarrow_bottom","smolarrow_right","smol_galka","sup","systems","teh","test",
 	"title","title2","title3","title4","title_smol","vis","wcom","windowpluginfolders","windowpluginfolders_left","windowpluginfolders_right","woowz11","woowzengine","zakrep","transparent","transparent-dark",
-	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2"
+	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2","gradient",
+	"GarrysMod", "emoji", "Backrooms", "Babina", "Glitch", "Coding", "YOUTUBE", "HalfSword", "History", "Music"
 ],"source/",".png")
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
@@ -69,7 +70,7 @@ WoowzsiteSourceImagesGIF = AddFullnessToTable([
 
 WoowzsiteSourceIcons = AddFullnessToTable([
 	"woowz11","click","text","woowzengine","q","cat","cube","ai-galery","none","dead","wcom","gear","a","terminal","cssjs","blank","folder","idk","search3","test","bloodeye_old",
-	"ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull","wsc","ww","wm_category","chrome","al","lu","whitesponge"
+	"ops","allblack","all","eye","dex","bloodeye","xxx","null","griffer","search2","search","skull","wsc","ww","wm_category","chrome","al","lu","whitesponge","myvideo"
 ],"source/",".ico")
 
 WoowzsiteSourceCursors = AddFullnessToTable([
@@ -231,6 +232,10 @@ WoowzsiteSourceAlchemy = AddTableToTable(AddFullnessToTable([
 ],"alchemy/",".png"),AddFullnessToTable([
 	"большой_взрыв","атом","мол","бож","взрыв","эл","таунейт","о","взрыв_ядерный","магма","лава","пла","ветер","аеро","движение","вулкан","пыль","пожар","песчанная_буря"
 ],"alchemy/",".gif"));
+
+WoowzsiteSourceLituism = AddFullnessToTable([
+	"purple","yellow","level","dark_purple","dark"
+],"source/lituism/",".png");
 
 WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"ants","bath_oil_pearls","beer","bg","button","dice","husky","spider_crab","teeth","chess","poison","trash_can","nokia","error","dark","rainbow_tiles","color-tunel","web","melted-dvd","w","face","cheese_mouse","eye",
@@ -513,4 +518,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
  ░░▓▓██▓░░░░░▓██▓▓░░
    ░░▓▓████████▓▓░░
       ░░░░░░░░░░
-   G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида"]
+   G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида","Hi, welcome there!", "Hi, welcome here!", "G0LU", "G01U",
+   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо"]

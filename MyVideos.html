@@ -1,0 +1,347 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>MyVideos</title>
+<link rel="icon" type="image/x-icon" href="source/myVideo.ico">
+
+<style>
+*{
+	font-family: "Arial", sans-serif;
+	box-sizing: border-box;
+	cursor: default;
+}
+
+html{
+	background-image: url("source/background_.png");
+	overflow-x: hidden;
+	scrollbar-width: thin;
+}
+
+body{
+	margin: 0;
+}
+
+.FullscreenGradient{
+	width: 100vw;
+	height: 100vh;
+	min-width: 1200px;
+	position: fixed;
+	left: 50%;
+	transform: translateX(-50%);
+	background-image: url('source/gradient.png');
+	background-size: contain;
+	background-position: center;
+	pointer-events: none;
+	opacity: 0.3;
+}
+
+.Header{
+	width: 100vw;
+	height: 25px;
+	background-color: rgb(240, 240, 240);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), 0 0 20px rgba(0, 0, 0, 0.15);
+	border-block: 2px solid rgba(255, 255, 255, 1);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.Header input{
+	width: 512px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: 1px solid rgba(0,0,0,0.2);
+	outline: none;
+}
+
+.Header button{
+	min-width: 128px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: 1px solid rgba(0,0,0,0.2);
+	cursor: pointer;
+	background-color: rgba(255,255,255,0.8);
+}
+
+.Header button:hover{
+	background-color: rgba(255,255,255,0.95);
+}
+
+.ContentWrapper{
+	width: 100vw;
+	display: flex;
+	justify-content: center;
+}
+
+#Content{
+	width: 900px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-block: 10px;
+}
+
+.VideoPanel{
+	width: 100%;
+	background-color: rgba(255, 255, 255, 0.12);
+	backdrop-filter: blur(6px);
+	border: 2px solid rgba(255, 255, 255, 1);
+	border-radius: 8px;
+	padding: 10px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+	color: black;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.VideoPanel a:not(.URL) {
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	background-color: rgba(0, 123, 255, 0.8);
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	cursor: pointer;
+}
+
+.VideoPanel a:not(.URL):hover {
+	background-color: rgba(0, 123, 255, 1);
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
+}
+
+.SmallPanel{
+	display: inline-block;
+	padding: 2px 6px;
+	background-color: rgba(0, 0, 0, 0.15);
+	color: white;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: 4px;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	white-space: nowrap;
+}
+
+#Tooltip{
+	position: fixed;
+	background-color: rgba(0,0,0,0.5);
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	pointer-events: none;
+	white-space: pre-line;
+	z-index: 9999;
+	display: none;
+	border: 1px solid rgba(255, 255, 255, 1);
+	backdrop-filter: blur(6px);
+}
+
+[tooltip]{
+	cursor: help;
+}
+
+.URL {
+	color: #4DA6FF;
+	text-decoration: none;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.URL:hover {
+	color: #1A8CFF;
+	text-decoration: underline;
+}
+
+.URL:active {
+	color: #0066CC;
+}
+</style>
+
+<body>
+
+<div class="FullscreenGradient"></div>
+<div class="Header">
+	<input type="text">
+	<button>Обновить список</button>
+</div>
+<div class="ContentWrapper"><div id="Content"></div></div>
+
+</div>
+
+</body>
+
+<script>
+
+var T_Woowz11   = 0
+var T_Wyldi     = 1
+var T_GarrysMod = 2
+var T_Lithuism  = 3
+var T_Funny     = 4
+var T_Backrooms = 5
+var T_Content   = 6
+var T_Glitch    = 7
+var T_Coding    = 8
+var T_Video     = 9
+var T_Forgot    = 10
+var T_HalfSword = 11
+var T_History   = 12
+var T_Music     = 13
+
+var TAGS = {
+	/* Название, Иконка, Описание */
+	[T_Woowz11  ]: ["Woowz11", "source/discordavatars/woowz11.png", "В этом видео есть Woowz11"],
+	[T_Wyldi    ]: ["Wyldi", "source/discordavatars/wldoui.png", "В этом видео есть Wyldi"],
+	[T_GarrysMod]: ["Garry's Mod", "source/GarrysMod.png", "В этом видео играли в Garry's Mod"],
+	[T_Lithuism ]: ["Литуизм", "alchemy/религия.png", "В этом видео есть литуизм"],
+	[T_Funny    ]: ["Весёлое", "source/emoji.png", "В видео весело"],
+	[T_Backrooms]: ["Backrooms", "source/Backrooms.png", "В видео есть Backrooms"],
+	[T_Content  ]: ["Футаж", "source/Babina.png", "Видео использовалось для другого видео"],
+	[T_Glitch   ]: ["Глитч", "source/Glitch.png", "В видео есть глитчи"],
+	[T_Coding   ]: ["Кодинг", "source/Coding.png", "В видео есть кодинг"],
+	[T_Video    ]: ["Другие видео", "source/YOUTUBE.png", "В видео смотрели другие видео"],
+	[T_Forgot   ]: ["Забыл что снимаю", "source/loading.gif", "Чаще всего в конце видео я снял лишнего, потому-что забыл что снимаю"],
+	[T_HalfSword]: ["HalfSword", "source/HalfSword.png", "В этом видео играли в HalfSword"],
+	[T_History  ]: ["Палю что-то", "source/History.png", "В этом видео я что-то спалил, что можно будет в будущем посмотреть"],
+	[T_Music    ]: ["Слушал музыку", "source/Music.png", "В этом видео слушали музыку"]
+}
+
+var P_Hide   = 0
+var P_Link   = 1
+var P_Public = 2
+
+var VIDEOS = [
+	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
+	[0, "Записывали контент для шортса", "2026.01.22 01:15:35", "gSTQ9gZJvl8", "2026.01.24", "3:08:18", P_Hide, [T_Woowz11, T_Wyldi, T_GarrysMod, T_Lithuism, T_Funny, T_Backrooms, T_Content, T_Glitch], "В видео играли в гаррис мод с модами, в стиле литуизма, бекурмс, использовался для шортса https://youtube.com/shorts/Clk0vZdfCbY, так же глючили звук"],
+	[1, "Показывал работу задержки звука", "2026.01.21 23:51:45", "tOgsQlu3T28", "2026.01.24", "45:26", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_Coding, T_Video, T_Forgot], "В видео я УЖЕ ПРОСНУВШЕМУСЯ (см. [3]) вулди показывал свой exe который глючит звук, делает задержки и т.д, + тестили на видео на ютубе, там был американский папаша..."],
+	[2, "Палю чучуть вебкамеру и халф сворд", "2025.04.09 21:02:07", "TNBDVDv8ZOw", "2026.01.24", "11:14", P_Hide, [T_Woowz11, T_Wyldi, T_HalfSword, T_History], "Там чё-то в начале чучуть палю вебкамеру, а так просто геймплей халф сворда (в конце дискорд сервер мой)"],
+	[3, "Пытался показать работу задержки звука", "2026.01.21 02:48:51", "nJ6U1L5050I", "2026.01.22", "2:05:23", P_Hide, [T_Woowz11, T_Wyldi, T_Coding, T_Glitch, T_Lithuism, T_Video, T_Music, T_Funny], "Делал глитч звука при вулди пока тот блять засыпал, в итоге нормально показал только в [1], смешное видео про литуимз в 1:06:34"]
+];
+
+var Content = document.getElementById("Content")
+
+function UpdateContent(VideosList){
+	Content.innerHTML = ""
+	
+	for(var i = 0; i < VideosList.length; i++){
+		var Video = VideosList[i]
+
+		var ID           = Video[0]
+		var Name         = Video[1]
+		var CreationDate = Video[2]
+		var YoutubeID    = Video[3]
+		var PublishDate  = Video[4]
+		var Duration     = Video[5]
+		var Visibility   = Video[6]
+		var Tags         = Video[7]
+		var Description  = Video[8]
+
+		var WatchURL = "https://youtu.be/" + YoutubeID
+
+		var TagsHTML = ""
+		for(var j = 0; j < Tags.length; j++){
+			var Tag = TAGS[Tags[j]]
+			var TagName        = Tag[0]
+			var TagIcon        = Tag[1]
+			var TagDescription = Tag[2]
+			TagsHTML += `<img style="width:21px; height:21px; border-radius: 5px; aspect-ratio: 1 / 1;" tooltip="<b>${TagName}</b><br>${TagDescription}" src="${Tag[1]}" alt="${Tag[0]}">`;
+		}
+		
+		var VisibilityText = (Visibility == P_Hide ? "Скрыто" : (Visibility == P_Link ? "Ссылка" : "Публичное"))
+
+		function FormatDateTime(Input){
+			const Parts    = Input.split(" ")
+			const DatePart = Parts[0]
+			const TimePart = Parts[1]
+
+			const [Y, M, D] = DatePart.split(".")
+
+			if(TimePart){
+				var [H, m, S] = TimePart.split(":")
+				H = parseInt(H, 10)
+				m = parseInt(m, 10)
+				return `${H}:${m} | ${D}.${M}.${Y}`
+			}else{
+				return `${D}.${M}.${Y}`
+			}
+		}
+
+		var CreationDateText = FormatDateTime(CreationDate)
+		var PublishDateText  = FormatDateTime(PublishDate )
+		
+		var DurationText = Duration
+		
+		function FormatDescription(Input){
+			function FormatURL(Input){
+				const Pattern = /(https?:\/\/[^\s,]+)/g;
+				return Input.replace(Pattern, (URL) => {
+					return `<a class="URL" href="${URL}"">${URL}</a>`;
+				});
+			}
+			
+			function FormatTimeCode(Input){
+				const Pattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
+
+				return Input.replace(Pattern, (TimeCode) => {
+					const Parts = TimeCode.split(":").map(Number);
+					var Seconds = 0;
+
+					if(Parts.length === 2){
+						Seconds = Parts[0] * 60 + Parts[1]
+					}else if(Parts.length === 3){
+						Seconds = Parts[0] * 3600 + Parts[1] * 60 + Parts[2]
+					}
+				
+					return `<a class="URL" href="${WatchURL}&t=${Seconds}">${TimeCode}</a>`;
+				});
+			}
+			
+			return FormatTimeCode(FormatURL(Input))
+		}
+		
+		var DescriptionText = FormatDescription(Description)
+
+		var VideoContent = `<div style="display: flex; gap: 5px;"><div class="SmallPanel">${ID}</div><div style="flex-grow: 1;">${Name}</div><div style="display: flex; flex; gap: 2px;">${TagsHTML}</div><div class="SmallPanel" tooltip="Длительность видео: ${Duration}">${DurationText}</div><div class="SmallPanel" tooltip="Дата создания: ${CreationDate}">${CreationDateText}</div><div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}">${PublishDateText}</div><div class="SmallPanel">${VisibilityText}</div><a tooltip="Посмотреть видео на YouTube" href="${WatchURL}">👁️</a><a tooltip="Редактировать видео в YouTube Studio" href="https://studio.youtube.com/video/${YoutubeID}/edit">✏️</a></div>
+<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`
+		
+		var Panel = document.createElement("div")
+		Panel.className = "VideoPanel"
+		Panel.innerHTML = VideoContent
+
+		Content.appendChild(Panel)
+	}
+}
+UpdateContent(VIDEOS)
+
+var tooltip = document.createElement("div");
+tooltip.id = "Tooltip";
+document.body.appendChild(tooltip);
+
+document.addEventListener("mouseover", function(e) {
+    var target = e.target.closest("[tooltip]");
+    if(target){
+        tooltip.innerHTML = target.getAttribute("tooltip");
+        tooltip.style.display = "block";
+    }
+});
+
+document.addEventListener("mousemove", function(e){
+    if(tooltip.style.display === "block"){
+        tooltip.style.left = (e.clientX + 25) + "px";
+        tooltip.style.top = (e.clientY) + "px";
+    }
+});
+
+document.addEventListener("mouseout", function(e){
+    var target = e.target.closest("[tooltip]");
+    if(target){
+        tooltip.style.display = "none";
+    }
+});
+
+</script>
