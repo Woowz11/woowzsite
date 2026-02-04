@@ -37,6 +37,7 @@ body{
 .Header{
 	width: 100vw;
 	height: 25px;
+	box-sizing: content-box;
 	background-color: rgb(240, 240, 240);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), 0 0 20px rgba(0, 0, 0, 0.15);
 	border-block: 2px solid rgba(255, 255, 255, 1);
@@ -81,7 +82,11 @@ body{
 	gap: 2px;
 }
 
-.VideoPanel a:not(.URL) {
+.ImageURL, .ImageURL *{
+	cursor: pointer;
+}
+
+.VideoPanel a:not(.URL):not(.ImageURL){
 	display: inline-block;
 	text-decoration: none;
 	color: #fff;
@@ -94,7 +99,7 @@ body{
 	cursor: pointer;
 }
 
-.VideoPanel a:not(.URL):hover {
+.VideoPanel a:not(.URL):not(.ImageURL):hover{
 	background-color: rgba(0, 123, 255, 1);
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
@@ -127,11 +132,11 @@ body{
 	backdrop-filter: blur(6px);
 }
 
-[tooltip]{
+[tooltip]:not(.ImageURL){
 	cursor: help;
 }
 
-.URL {
+.URL{
 	color: #4DA6FF;
 	text-decoration: none;
 	font-weight: 500;
@@ -139,12 +144,12 @@ body{
 	cursor: pointer;
 }
 
-.URL:hover {
+.URL:hover{
 	color: #1A8CFF;
 	text-decoration: underline;
 }
 
-.URL:active {
+.URL:active{
 	color: #0066CC;
 }
 </style>
@@ -188,7 +193,9 @@ sort:name - Сортировка по имени<br>
 sort:creation - Сортировка по времени создания<br>
 sort:publish - Сортировка по времени публикации<br>
 sort:duration - Сортировка по времени видео<br>
-*:reverse - Реверсирует результат<br>
+sort:random:0 - Случайная сортировка, с учётом сида (если сид не указывать, каждый раз будет случайное)<br>
+sort:tags - Сортировка по кол-ву тегов<br>
+*:reverse - Реверсирует результат
 '>
 	<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
 </div>
@@ -198,117 +205,8 @@ sort:duration - Сортировка по времени видео<br>
 
 </body>
 
+<script src="source/Videos.js"></script>
 <script>
-
-var T_Woowz11       = 0
-var T_Wyldi         = 1
-var T_GarrysMod     = 2
-var T_Lithuism      = 3
-var T_Funny         = 4
-var T_Backrooms     = 5
-var T_Content       = 6
-var T_Glitch        = 7
-var T_Coding        = 8
-var T_Video         = 9
-var T_Forgot        = 10
-var T_HalfSword     = 11
-var T_History       = 12
-var T_Music         = 13
-var T_Blocked       = 14
-var T_HaveANiceDay  = 15
-var T_Skrepka       = 16
-var T_Roblox        = 17
-var T_SFD           = 18
-var T_Pavel         = 19
-var T_HappyWheels   = 20
-var T_Minecraft     = 21
-var T_Communication = 22
-var T_WorldBox      = 23
-var T_Single        = 24
-var T_Teardown      = 25
-var T_Star          = 26
-var T_Troll         = 27
-var T_Nazar         = 28
-var T_Woowzcore     = 29
-
-var TAGS = {
-	/* Название, Иконка, Описание */
-	[T_Woowz11      ]: ["Woowz11", "source/discordavatars/woowz11.png", "В этом видео есть Woowz11 (Вувз)"],
-	[T_Wyldi        ]: ["Wyldi", "source/discordavatars/wldoui.png", "В этом видео есть Wyldi (Вулди)"],
-	[T_GarrysMod    ]: ["Garry's Mod", "source/GarrysMod.png", "В этом видео играли в Garry's Mod"],
-	[T_Lithuism     ]: ["Литуизм", "alchemy/религия.png", "В этом видео есть литуизм"],
-	[T_Funny        ]: ["Весёлое", "source/emoji.png", "В видео весело"],
-	[T_Backrooms    ]: ["Backrooms", "source/Backrooms.png", "В видео есть Backrooms"],
-	[T_Content      ]: ["Футаж", "source/Babina.png", "Видео использовалось для другого видео"],
-	[T_Glitch       ]: ["Глитч", "source/Glitch.png", "В видео есть глитчи"],
-	[T_Coding       ]: ["Кодинг", "source/Coding.png", "В видео есть кодинг"],
-	[T_Video        ]: ["Другие видео", "source/YOUTUBE.png", "В видео смотрели другие видео"],
-	[T_Forgot       ]: ["Забыл что снимаю", "source/loading.gif", "Чаще всего в конце видео я снял лишнего, потому-что забыл что снимаю"],
-	[T_HalfSword    ]: ["HalfSword", "source/HalfSword.png", "В этом видео играли в HalfSword"],
-	[T_History      ]: ["Палю что-то", "source/History.png", "В этом видео я что-то спалил, что можно будет в будущем посмотреть"],
-	[T_Music        ]: ["Слушали музыку", "source/Music.png", "В этом видео слушали музыку"],
-	[T_Blocked      ]: ["Видео заблокировано!", "source/Blocked.png", "Это видео было заблокировано, возможно из-за авторских прав"],
-	[T_HaveANiceDay ]: ["Have a nice day.", "source/discordavatars/haveaniceday..gif", "В этом видео есть Have a nice day. (Дей)"],
-	[T_Skrepka      ]: ["The Window Skrepka", "source/discordavatars/thewindowskerpka.png", "В этом видео есть The Window Skrepka (Скрепка)"],
-	[T_Roblox       ]: ["Roblox", "source/Roblox.png", "В этом видео играли в Roblox"],
-	[T_SFD          ]: ["SuperFighters Deluxe", "source/SFD.png", "В этом видео играли в SuperFighters Deluxe"],
-	[T_Pavel        ]: ["PavkaLakar", "source/discordavatars/pavkalakar.png", "В этом видео есть PavkaLakar (Павел)"],
-	[T_HappyWheels  ]: ["Happy Wheels", "source/HappyWheels.png", "В этом видео играли в Happy Wheels"],
-	[T_Minecraft    ]: ["Minecraft", "source/Minecraft.png", "В этом видео играли в Minecraft"],
-	[T_Communication]: ["Много общения", "source/Communication.png", "В этом видео много обсуждали, разговаривали, возможно философствовали"],
-	[T_WorldBox     ]: ["WorldBox", "source/WorldBox.png", "В этом видео играли в WorldBox"],
-	[T_Single       ]: ["Был один", "source/Single.png", "В этом видео я был одил"],
-	[T_Teardown     ]: ["Teardown", "source/Teardown.png", "В этом видео играли в Teardown"],
-	[T_Star         ]: ["Легендарное видео", "source/Star.png", "Это видео очень хорошее и легендарное"],
-	[T_Troll        ]: ["Troll_Bebra", "source/discordavatars/troll_bebra.png", "В этом виде есть Troll_Bebra (Троль)"],
-	[T_Nazar        ]: ["Nazar", "source/discordavatars/nberbaaaaaaa.gif", "В этом виде есть Nazar (Назар)"],
-	[T_Woowzcore    ]: ["WoowzCore", "source/WoowzCore.png", "В этом видео играли в WoowzCore"]
-}
-
-var P_Hide   = 0
-var P_Link   = 1
-var P_Public = 2
-
-var VIDEOS = [
-	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
-	[0  , "Записывали контент для шортса", "2026.01.22 01:15:35", "gSTQ9gZJvl8", "2026.01.24", "3:08:18", P_Hide, [T_Woowz11, T_Wyldi, T_GarrysMod, T_Lithuism, T_Funny, T_Backrooms, T_Content, T_Glitch, T_Star], "В видео играли в гаррис мод с модами, в стиле литуизма, бекурмс, использовался для шортса https://youtube.com/shorts/Clk0vZdfCbY, так же глючили звук"],
-	[1  , "Показывал работу задержки звука", "2026.01.21 23:51:45", "tOgsQlu3T28", "2026.01.24", "45:26", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_Coding, T_Video, T_Forgot, T_Blocked], "В видео я УЖЕ ПРОСНУВШЕМУСЯ (см. [3]) вулди показывал свой exe (https://github.com/Woowz11/rofl-games/tree/main/WoowzVST) который глючит звук, делает задержки и т.д, + тестили на видео на ютубе, там был американский папаша..."],
-	[2  , "Палю чучуть вебкамеру и халф сворд", "2025.04.09 21:02:07", "TNBDVDv8ZOw", "2026.01.24", "11:14", P_Hide, [T_Woowz11, T_Wyldi, T_HalfSword, T_History], "Там чё-то в начале чучуть палю вебкамеру, а так просто геймплей халф сворда (в конце дискорд сервер мой)"],
-	[3  , "Пытался показать работу задержки звука", "2026.01.21 02:48:51", "nJ6U1L5050I", "2026.01.22", "2:05:23", P_Hide, [T_Woowz11, T_Wyldi, T_Coding, T_Glitch, T_Lithuism, T_Video, T_Music, T_Funny], "Делал глитч звука при вулди пока тот блять засыпал, в итоге нормально показал только в [1], смешное видео про литуизм в 1:06:34, предыдущая часть [16]"],
-	[4  , "Геймплей халф сворда с деем на фоне", "2025.04.09 21:52:22", "8tzdqaGPe8s", "2026.01.24", "1:16:00", P_Hide, [T_Woowz11, T_Wyldi, T_HaveANiceDay, T_HalfSword, T_History], "Вулди с деем обсуждают роблокс на фоне, Дей что-то палит на демку про роблокс"],
-	[5  , "Геймплей халф сворда с деем на фоне x2", "2025.04.09 23:09:06", "iAjgHGxwKIQ", "2026.01.24", "16:39", P_Hide, [T_Woowz11, T_Wyldi, T_HaveANiceDay, T_HalfSword, T_History], "Странный момент в 9:15, там я спалил чат гпт кстати старый и дискорд"],
-	[6  , "Геймплей халф сворда", "2025.04.10 17:06:46", "AgbvZg-eX7s", "2026.01.24", "44:40", P_Hide, [T_Woowz11, T_HalfSword, T_Single], "Простой скучный молчаливый геймплей в халф сворд, палю вувзкор файлы в 42:12"],
-	[7  , "Показывал скрепке свой упоротый плейс", "2025.04.12 19:55:36", "VwHREk_jwe8", "2026.01.24", "39:42", P_Hide, [T_Woowz11, T_Skrepka, T_Roblox, T_Funny, T_Coding], "Показывал скрепке тот самый плейс с тайконом упоротый, так же играл в плейс скрепки 15:10 про обби дексона"],
-	[8  , "Геймплей халф сворда с читами", "2025.04.13 15:20:23", "9EgqM8XYiSU", "2026.01.24", "1:13:01", P_Hide, [T_Woowz11, T_Wyldi, T_HalfSword, T_Forgot, T_Video], "В начале крокус обсуждали))) в 1:00:36 пробовал изучить как делать читы на анрил энджин, да а потом в конце крокус смотрели"],
-	[9  , "Играли в хеппи вилс", "2025.04.13 16:53:26", "4w9WyKJJRTc", "2026.01.24", "1:51:43", P_Hide, [T_Woowz11, T_Wyldi, T_Pavel, T_SFD, T_HappyWheels, T_History], "Играли в сфд, потом искали во что (мастерская гмода, роблокс), потом в хеппи вилс, ну ещё я уровень там создавал <b>(ТОЛЬКО ИЗ-ЗА ТОГО ЧТО СНИМАЛ ВО ВЕСЬ ЭКРАН, ВИДЕО ГЛЮЧНОЕ, ПОКАДРОВОЕ ТАК СКАЗАТЬ...)</b>"],
-	[10 , "Вулди показывал свои видео", "2025.04.13 23:17:22", "CBj7hrvfEsk", "2026.01.24", "2:36:47", P_Hide, [T_Woowz11, T_Wyldi, T_Video, T_History, T_Communication], "Палил разные свои видео, геймплеи, Bloodsky.avi... (28:56), потом сидели в дискорде что-то обсуждали, смотрели bloodeye плейс (1:17:45), просто всё что у меня в дискорде есть, + мои карты старые из майнкрафта тоже есть в виде скринов (2:15:04) + (2:20:06), и paint the town red... (2:28:03)"],
-	[11 , "Один играл в халф сворд под музыку", "2025.04.17 01:07:28", "MFGQl0hrWeY", "2026.01.24", "1:02:47", P_Hide, [T_Woowz11, T_HalfSword, T_Music, T_Single], "В начале что-то вувзкор показал"],
-	[12 , "Один играл в майнкрафт с модами", "2025.04.17 20:17:26", "5D5yFzMCpC8", "2026.01.24", "2:09:52", P_Hide, [T_Woowz11, T_Minecraft, T_Music, T_Single], "То самое, где я сделал nocubes, высокие горы, физик мод и у меня лагал майнкрафт"],
-	[13 , "Один играл в ворлд бокс", "2025.04.18 13:19:35", "IoRJHz4VVvU", "2026.01.24", "1:55:14", P_Hide, [T_Woowz11, T_WorldBox, T_Music, T_Single], "Играл один под музыку смотрел обнову ворлд бокса, про рассы и т.д, в конце на афк поставил мир с расами, ну и рабочий стол в конце спалил"],
-	[14 , "Один играл в ворлд бокс x2", "2025.04.18 19:47:18", "THxW0zGSz5I", "2026.01.24", "1:08:55", P_Hide, [T_Woowz11, T_WorldBox, T_Music, T_Single], "Просто играл в ворлд бокс опять один, это где я насоздавал куча мощных существ, а потом пытался их убить"],
-	[15 , "Один играл в халф сворд", "2025.04.18 23:56:40", "T45_UQQZWk8", "2026.01.24", "32:41", P_Hide, [T_Woowz11, T_HalfSword, T_Music, T_Single], "нечего сказать"],
-	[16 , "Просто проверял работает ли ломание звука", "2026.01.21 02:44:17", "TWOUjJjuQ2s", "2026.01.22", "0:52", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_Coding], "Следующая часть [3], предыдущая [17]"],
-	[17 , "Просто проверял работает ли ломание звука x2", "2026.01.21 02:42:53", "qEU0U0zup58", "2026.01.22", "0:24", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_Coding], "Следующая часть [16], предыдущая [18] (ВУЛДИ В КОНЦЕ ГОВОРИТ, <b>ДА УМРИ!</b>)"],
-	[18 , "Пытался сделать VST, сделал своё", "2026.01.20 22:18:23", "beSnWH1arX0", "2026.01.22", "3:01:51", P_Hide, [T_Woowz11, T_Roblox, T_Single, T_Glitch, T_Music, T_Coding], "Играл в роблокс один на говно плейсах, потом очень долго был афк смотрел вк шортсы, потом решил ломать себе звук в реальном времени, Следующая часть [17]"],
-	[19 , "Ломали звук в реальном времени", "2026.01.19 04:09:21", "Wmo45UEmv84", "2026.01.22", "1:54:01", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_SFD, T_Music], "Играли в сфд со сломанным звуков и вулди орал сломанным звуков (23:41), предыдущая часть [20]"],
-	[20 , "Проверяли ломания звука", "2026.01.19 04:08:29", "3ZA4zND9eFs", "2026.01.22", "0:18", P_Hide, [T_Woowz11, T_Wyldi, T_Glitch, T_Music], "Следующая часть [19]"],
-	[21 , "Играли в Isle", "2026.01.18 20:27:43", "DYPQSsZges0", "2026.01.22", "2:49:49", P_Hide, [T_Woowz11, T_Wyldi, T_Roblox, T_Music, T_Single], "Вулди что-то снилось нехорошее про исле..., проходили концовки в Isle, в конце посрались, и я ушёл играть в какую-то хуйню плейс, пред [22]"],
-	[22 , "Играл в плейс про фобии, но больше Isle", "2026.01.18 02:52:31", "5l2kv45YxKw", "2026.01.22", "2:48:15", P_Hide, [T_Woowz11, T_Wyldi, T_Roblox], "Играли в плейс про фобии, потом зоопарт тот самый (23:48), потом хоррор где мне на уши блевали (про яму) (39:37), потом играли в исле isle (53:53), на концовки, след [21]"],
-	[23 , "Играли в сфд", "2026.01.17 17:51:34", "7MmXtQR_FRw", "2026.01.22", "55:19", P_Hide, [T_Woowz11, T_Wyldi, T_SFD], "Играли в сфд где в конце 2 я раза бомбанул"],
-	[24 , "Гигахрущёвка в тирдауне мультиплеер", "2026.01.15 17:25:55", "fAgfRNrsLkc", "2026.01.22", "3:13:03", P_Hide, [T_Woowz11, T_Wyldi, T_Coding, T_Teardown], "Обсуждали что долго не общались, в начале что-то про самодельную музыку сказали, потом пошли в тирдаун, тг спалил, то самое, где в каком-то подвале/бункере скелеты жили (1:03:21), потом бутылки собирали в мегаструктурах (2:04:41)"],
-	[25 , "Монтаж видео про башни близнецы", "2025.04.08 22:30:49", "R8xHXnoC-cg", "2026.01.15", "2:44:20", P_Hide, [T_Woowz11, T_Wyldi, T_Lithuism, T_Video, T_HaveANiceDay, T_History], "Заснял как вулди монтажил видео https://www.youtube.com/watch?v=WGMXGzyzGng, посреди видео смотрел другие видео на фоне, реакция вулди на нейролица павла (1:49:12), потом там что-то в конце дей пришёл, и видео смотрел реакцию"],
-	[26 , "Подготовка карты про башни близнецы + игра в тирдаун", "2025.03.17 13:33:08", "CVcLim87RvY", "2026.01.15", "5:16:17", P_Hide, [T_Woowz11, T_Wyldi, T_Teardown, T_Minecraft, T_Lithuism, T_History], "ТА САМАЯ ФРАЗА В НАЧАЛЕ ОТ ВУЛДИ 'Часть пользователей скрыта!', потом играли в тирдаун (где я роблоксянина за переулком в самаре расчленил), то самое, где я разносил телевизионный центр, + заснял как посщу видео (3:30:13), потом подготовка карты для видео https://www.youtube.com/watch?v=WGMXGzyzGng, в конце видно чуть ли не первую версию видео монтажа"],
-	[27 , "Простая игра в сфд", "2025.03.27 19:56:54", "2RBw3J1Nzdo", "2026.01.15", "1:16:30", P_Hide, [T_Woowz11, T_Wyldi, T_SFD], "😀"],
-	[28 , "Генерация постеров про павла писечника тв павлом", "2025.03.30 14:50:07", "z4_mLVTmgtE", "2026.01.15", "2:31:05", P_Hide, [T_Woowz11, T_Pavel, T_HalfSword, T_History], "Спалил в начале AI, Павел генерирует лицо павла писечника тв про башни близнецы, + палю дискорд (он почему-то чёрный), павел тг палит, павел в течении видео себя ведёт как даун"],
-	[29 , "Как активировать JetBrains продукты | 2025 | Marmok feet.org", "2025.11.03 21:50:58", "UAvbPFVVd5o", "2025.11.04", "42:03", P_Public, [T_Woowz11, T_Content, T_Lithuism], ""],
-	[30 , "Стрелялка в гаррис моде + рп бекрумс в гмоде", "2025.01.01 20:43:18", "4Ogdd3XslJ0", "2025.02.27", "2:31:05", P_Hide, [T_Woowz11, T_Troll, T_Nazar, T_GarrysMod, T_Backrooms, T_Star], "Бегаем по верт порталу и стреляемся, потом пришёл назар, потом рп в бекрумсе (выживание) (2:49:29), потом я делал им сюжет (где-то в видео троль палит лицо)"],
-	[31 , "Первое архивное видео", "2024.07.16 20:58:53", "7MyBb60U0is", "2024.11.11", "21:04", P_Link, [T_Woowz11, T_HaveANiceDay, T_GarrysMod, T_Star], "Первое опубликованное видео, в формате архива, тут я бегаю с деем на верт портале и дерусь"],
-	[32 , "обзор мода CraftGuide на 1.7.10", "2016.07.22 13:38:20", "Qzh9aaqlCnE", "2016.07.22", "1:05", P_Public, [T_Woowz11, T_Minecraft, T_Content], "Первое публичное видео на канале (не считая удалённых)"],
-	[33 , "minecraft 2013 11 03 - часть 4", "2013.11.03", "GRCoYE5iFSI", "2021.09.08", "8:57", P_Public, [T_Woowz11, T_Minecraft, T_Content], "Очень старое видео, котрое я ещё снимал на папином компьютере, взято с моего старого заброшеного канала"],
-	[34 , "Назар озвучивал видео про башни близнецы", "2025.03.31 02:32:09", "S9-zZMAK8Ao", "2026.01.15", "2:14:06", P_Hide, [T_Woowz11, T_Wyldi, T_Nazar, T_HalfSword, T_History], "Очень долго озвучивал и плакал..., в конце играли в халф сворд"],
-	[35 , "Играл в майнкрафт ту самую апрельскую версию", "2025.04.02 18:56:35", "tyvlN2t2C60", "2026.01.15", "1:54:09", P_Hide, [T_Woowz11, T_Single, T_Minecraft], "Апрельская версия про редактирование миров"],
-	[36 , "Дей играет в вувзкор", "2025.04.02 23:46:19", "VXPeJWGeI7U", "2026.01.15", "31:10", P_Hide, [T_Woowz11, T_HaveANiceDay, T_Woowzcore], "ИЗВИНИ МЕНЯ ПОЖАЛУЙСТА(((((((("]
-];
 
 var Content = document.getElementById("Content")
 
@@ -336,16 +234,16 @@ window.onunhandledrejection = function(event){
 var CurrentURL = window.location.href.split("#")[0]
 
 function RandomColor(Seed, Whiteness){
-	var Hash = 2166136261;
+	var Hash = 2166136261
 
 	for(var i = 0; i < Seed.length; i++){
 		Hash ^= Seed.charCodeAt(i)
 		Hash += (Hash << 1) + (Hash << 4) + (Hash << 7) + (Hash << 8) + (Hash << 24)
 	}
 
-	var R = (Hash >> 16) & 0xFF;
-	var G = (Hash >> 8)  & 0xFF;
-	var B =  Hash        & 0xFF;
+	var R = (Hash >> 16) & 0xFF
+	var G = (Hash >> 8)  & 0xFF
+	var B =  Hash        & 0xFF
 
 	if(Whiteness == null){ Whiteness = 0 }
 
@@ -359,6 +257,8 @@ function RandomColor(Seed, Whiteness){
 }
 
 function UpdateContent(VideosList){
+	const AddedIDs = new Set()
+
 	Content.innerHTML = ""
 	
 	for(var i = 0; i < VideosList.length; i++){
@@ -374,9 +274,23 @@ function UpdateContent(VideosList){
 		var Tags         = Video[7]
 		var Description  = Video[8]
 
+		try{
+			if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ) }
+			if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!") }
+			if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ) }
+			if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !") }
+			if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ) }
+			if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!") }
+		}catch(e){
+			console.error(e)
+			throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!")
+		}
+
+		AddedIDs.add(ID)
+
 		var WatchURL = "https://youtu.be/" + YoutubeID
 
-		const Height = "21px";
+		const Height = "21px"
 
 		var TagsHTML = ""
 		for(var j = 0; j < Tags.length; j++){
@@ -385,7 +299,20 @@ function UpdateContent(VideosList){
 			var TagName        = Tag[0]
 			var TagIcon        = Tag[1]
 			var TagDescription = Tag[2]
-			TagsHTML += `<img style="width:${Height}; height:${Height}; border-radius: 5px; aspect-ratio: 1 / 1;" tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}" src="${Tag[1]}" alt="${Tag[0]}">`;
+			TagsHTML += `<a
+				class="ImageURL"
+				href="${CurrentURL}#tag%3A${TagID}"
+				tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}"
+			><img 
+				style="
+					width:${Height};
+					height:${Height};
+					border-radius: 5px;
+					aspect-ratio: 1 / 1;
+				"
+				src="${Tag[1]}"
+				alt="${Tag[0]}"
+			></a>`;
 		}
 		
 		var VisibilityText = (Visibility == P_Hide ? "Скрыто" : (Visibility == P_Link ? "Ссылка" : "Публичное"))
@@ -397,7 +324,7 @@ function UpdateContent(VideosList){
 
 			const [Y, M, D] = DatePart.split(".")
 
-			function Pad2(N){ return String(N).padStart(2, "0"); }
+			function Pad2(N){ return String(N).padStart(2, "0") }
 
 			if(TimePart){
 				var [H, m, S] = TimePart.split(":")
@@ -418,17 +345,17 @@ function UpdateContent(VideosList){
 			function FormatURL(Input){
 				const Pattern = /(https?:\/\/[^\s]+)/g
 				return Input.replace(Pattern, (URL) => {
-					var EndChar = "";
+					var EndChar = ""
 					if(/[)\]\},.?]/.test(URL.slice(-1))){
-						EndChar = URL.slice(-1);
-						URL = URL.slice(0, -1);
+						EndChar = URL.slice(-1)
+						URL = URL.slice(0, -1)
 					}
 					return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`
-				});
+				})
 			}
 			
 			function FormatTimeCode(Input){
-				const Pattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
+				const Pattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g
 
 				return Input.replace(Pattern, (TimeCode) => {
 					const Parts = TimeCode.split(":").map(Number)
@@ -441,17 +368,17 @@ function UpdateContent(VideosList){
 					}
 				
 					return `<a class="URL" href="${WatchURL}&t=${Seconds}">${TimeCode}</a>`
-				});
+				})
 			}
 			
 			function FormatIDLink(Input){
 				return Input.replace(/\[(\d+)\]/g, (M, ID) => {
-					const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10));
+					const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10))
 					if(Video){
 						return `<a class="URL" href="${CurrentURL}#id%3A${ID}">${M}</a>`
 					}
-					return M;
-				});
+					return M
+				})
 			}
 			
 			return FormatIDLink(FormatTimeCode(FormatURL(Input)))
@@ -481,31 +408,54 @@ function UpdateContent(VideosList){
 	}
 }
 
-var Tooltip = document.createElement("div");
-Tooltip.id = "Tooltip";
-document.body.appendChild(Tooltip);
+var Tooltip = document.createElement("div")
+Tooltip.id = "Tooltip"
+document.body.appendChild(Tooltip)
 
 document.addEventListener("mouseover", function(e) {
-	var Target = e.target.closest("[tooltip]");
+	var Target = e.target.closest("[tooltip]")
 	if(Target){
-		Tooltip.innerHTML = Target.getAttribute("tooltip");
-		Tooltip.style.display = "block";
+		Tooltip.innerHTML = Target.getAttribute("tooltip")
+		Tooltip.style.display = "block"
 	}
-});
+})
 
 document.addEventListener("mousemove", function(e){
 	if(Tooltip.style.display === "block"){
-		Tooltip.style.left = (e.clientX + 25) + "px";
-		Tooltip.style.top = (e.clientY) + "px";
+		Tooltip.style.left = (e.clientX + 25) + "px"
+		Tooltip.style.top = (e.clientY) + "px"
 	}
-});
+})
 
 document.addEventListener("mouseout", function(e){
-	var Target = e.target.closest("[tooltip]");
+	var Target = e.target.closest("[tooltip]")
 	if(Target){
-		Tooltip.style.display = "none";
+		Tooltip.style.display = "none"
 	}
-});
+})
+
+function RandomWithSeedGenerator(Seed){
+	var V = (Seed + 61266) >>> 0
+	
+	return function(){
+		V ^= V << 13
+		V ^= V >> 17
+		V ^= V << 5
+		return (V >>> 0) / 4294967296
+	}
+}
+
+function ShuffleArrayWithSeed(Array, Seed){
+	const Random = RandomWithSeedGenerator(Seed)
+	for(var i = Array.length - 1; i > 0; i--){
+		const j = Math.floor(Random() * (i + 1))
+		
+		const Temp = Array[i]
+		Array[i] = Array[j]
+		Array[j] = Temp
+	}
+	return Array
+}
 
 var SearchInput = document.getElementById("Search")
 
@@ -524,6 +474,7 @@ function Search(){
 	var SearchConditions = []
 	var SortMethod       = null
 	var SortReverse      = false
+	var SortSeed         = 0
 	
 	for(const Part of Parts){
 		var Lower = Part.toLowerCase()
@@ -531,9 +482,17 @@ function Search(){
 			const SortParts = Lower.split(":")
 			
 			var Method = SortParts[1]
-			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id"){ SortMethod = Method }
+			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags"){ SortMethod = Method }
 			
-			if(SortParts[2] === "reverse"){ SortReverse = true }
+			if(Method === "random"){
+				if(SortParts[2] && /^\d+$/.test(SortParts[2])){
+					SortSeed = parseInt(SortParts[2], 10)
+				}else{
+					SortSeed = Date.now()
+				}
+			}
+			
+			if(SortParts[2] === "reverse" || SortParts[3] === "reverse"){ SortReverse = true }
 			continue
 		}
 		
@@ -582,16 +541,16 @@ function Search(){
 			}else if(Condution.Field == "id"){
 				M = ID === parseInt(Condution.Value, 10)
 			}else if(Condution.Field === "tag"){
-				const TagValue = Condution.Value.toLowerCase();
+				const TagValue = Condution.Value.toLowerCase()
 				if(/^\d+$/.test(TagValue)){
-					const TagID = parseInt(TagValue, 10);
-					M = Tags.includes(TagID);
+					const TagID = parseInt(TagValue, 10)
+					M = Tags.includes(TagID)
 				}
 				else {
 					M = Tags.some(TagID => {
-						const TagName = TAGS[TagID][0].toLowerCase();
-						return TagName.includes(TagValue);
-					});
+						const TagName = TAGS[TagID][0].toLowerCase()
+						return TagName.includes(TagValue)
+					})
 				}
 			}else if(Condution.Field == "visible"){
 				M = Visibility === parseInt(Condution.Value, 10)
@@ -611,27 +570,33 @@ function Search(){
 	}))
 	
 	if(SortMethod){
-		FilteredVideos.sort((A, B) => {
-			if(SortMethod === "name"){
-				return A[1].localeCompare(B[1])
-			}else if(SortMethod === "creation"){
-				return new Date(A[2]) - new Date(B[2])
-			}else if(SortMethod === "publish"){
-				return new Date(A[4]) - new Date(B[4])
-			}else if(SortMethod === "duration"){
-				const ToSeconds = T => {
-					const P = T.split(":").map(Number)
-					if(P.length === 2){ return P[0] * 60 + P[1] }
-					return P[0] * 3600 + P[1] * 60 + P[2]
+		if(SortMethod == "random"){
+			ShuffleArrayWithSeed(FilteredVideos, SortSeed || 0)
+		}else{
+			FilteredVideos.sort((A, B) => {
+				if(SortMethod === "name"){
+					return A[1].localeCompare(B[1])
+				}else if(SortMethod === "creation"){
+					return new Date(A[2]) - new Date(B[2])
+				}else if(SortMethod === "publish"){
+					return new Date(A[4]) - new Date(B[4])
+				}else if(SortMethod === "duration"){
+					const ToSeconds = T => {
+						const P = T.split(":").map(Number)
+						if(P.length === 2){ return P[0] * 60 + P[1] }
+						return P[0] * 3600 + P[1] * 60 + P[2]
+					}
+					return ToSeconds(A[5]) - ToSeconds(B[5])
+				}else if(SortMethod === "id"){
+					return A[0] - B[0]
+				}else if(SortMethod === "tags"){
+					return A[7].length - B[7].length
 				}
-				return ToSeconds(A[5]) - ToSeconds(B[5])
-			}else if(SortMethod === "id"){
-				return A[0] - B[0];
-			}
-			return 0
-		})
+				return 0
+			})
+		}
 
-		if(SortReverse) FilteredVideos.reverse();
+		if(SortReverse) FilteredVideos.reverse()
 	}
 	
 	document.title = "MyVideos (" + FilteredVideos.length + ")"
@@ -646,14 +611,14 @@ window.addEventListener("load", () => {
 	}else{
 		Search()
 	}
-});
+})
 
 window.addEventListener("hashchange", () => {
-	const RawText = decodeURIComponent(window.location.hash.substring(1));
+	const RawText = decodeURIComponent(window.location.hash.substring(1))
 	if(RawText !== SearchInput.value){
-		SearchInput.value = RawText;
-		Search();
+		SearchInput.value = RawText
+		Search()
 	}
-});
+})
 
 </script>
