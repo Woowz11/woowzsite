@@ -34,7 +34,7 @@ body{
 	opacity: 0.3;
 }
 
-.Header{
+.Header, .Footer{
 	width: 100vw;
 	height: 25px;
 	box-sizing: content-box;
@@ -56,10 +56,36 @@ body{
 	cursor: text;
 }
 
+.Footer{
+	height: 100px;
+}
+
+
+.FooterPanel{
+	background-color: rgb(170, 170, 170);
+	border: 2px solid rgba(255, 255, 255, 1);
+	border-radius: 8px;
+	padding: 10px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+	color: black;
+
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.PageWrapper{
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
 .ContentWrapper{
 	width: 100vw;
 	display: flex;
 	justify-content: center;
+	
+	flex-grow: 1;
 }
 
 #Content{
@@ -156,6 +182,8 @@ body{
 
 <body>
 
+<div class="PageWrapper">
+
 <div id="ErrorNotification" style="
 	position: fixed;
 	bottom: 20px;
@@ -186,7 +214,7 @@ description:"" - Поиск по описанию<br>
 id:0 - Поиск по ID<br>
 tag:"" - Поиск по названию тега<br>
 tag:0 - Поиск по ID тега<br>
-visible:0 - Поиск по публичности видео (0 - Скрыто, 1 - Ссылка, 2 - Публичное)
+visible:0 - Поиск по публичности видео (0 - Скрыто, 1 - Ссылка, 2 - Публичное, 3 - Заблокированное)
 <hr>
 sort:id - Сортировка по ID<br>
 sort:name - Сортировка по имени<br>
@@ -200,6 +228,13 @@ sort:tags - Сортировка по кол-ву тегов<br>
 	<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
 </div>
 <div class="ContentWrapper"><div id="Content"></div></div>
+
+<div class="Footer">
+	<div class="FooterPanel">
+		<div class="SmallPanel" id="Info_TotalVideo"></div>
+		<div class="SmallPanel" id="Info_TotalDuration"></div>
+	</div>
+</div>
 
 </div>
 
@@ -261,6 +296,18 @@ function UpdateContent(VideosList){
 
 	Content.innerHTML = ""
 	
+	var TotalDuration = 0
+	
+	function DurationToSeconds(D){
+		const Parts = D.split(":").map(Number)
+
+		if(Parts.length === 2){
+			return Parts[0] * 60 + Parts[1]
+		}else if(Parts.length === 3){
+			return Parts[0] * 3600 + Parts[1] * 60 + Parts[2]
+		}
+	}
+	
 	for(var i = 0; i < VideosList.length; i++){
 		var Video = VideosList[i]
 
@@ -287,6 +334,7 @@ function UpdateContent(VideosList){
 		}
 
 		AddedIDs.add(ID)
+		TotalDuration += DurationToSeconds(Duration)
 
 		var WatchURL = "https://youtu.be/" + YoutubeID
 
@@ -315,9 +363,11 @@ function UpdateContent(VideosList){
 			></a>`;
 		}
 		
-		var VisibilityText = (Visibility == P_Hide ? "Скрыто" : (Visibility == P_Link ? "Ссылка" : "Публичное"))
+		var VisibilityText = (Visibility == P_Hide ? "Скрыто" : (Visibility == P_Link ? "Ссылка" : (Visibility == P_Blocked ? "Заблокировано" : "Публичное")))
 
 		function FormatDateTime(Input){
+			if(Input === UNKNOWN_Date){ return "??.??.????" }
+		
 			const Parts    = Input.split(" ")
 			const DatePart = Parts[0]
 			const TimePart = Parts[1]
@@ -358,16 +408,7 @@ function UpdateContent(VideosList){
 				const Pattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g
 
 				return Input.replace(Pattern, (TimeCode) => {
-					const Parts = TimeCode.split(":").map(Number)
-					var Seconds = 0
-
-					if(Parts.length === 2){
-						Seconds = Parts[0] * 60 + Parts[1]
-					}else if(Parts.length === 3){
-						Seconds = Parts[0] * 3600 + Parts[1] * 60 + Parts[2]
-					}
-				
-					return `<a class="URL" href="${WatchURL}&t=${Seconds}">${TimeCode}</a>`
+					return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`
 				})
 			}
 			
@@ -391,7 +432,7 @@ function UpdateContent(VideosList){
 			<div style="flex-grow: 1;">${Name}</div>
 			<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
 			<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
-			<div class="SmallPanel" tooltip="Дата создания: ${CreationDate}" style="height:${Height};">${CreationDateText}</div>
+			<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 			<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
 			<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
 			<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">👁️</a>
@@ -406,6 +447,31 @@ function UpdateContent(VideosList){
 
 		Content.appendChild(Panel)
 	}
+	
+	function UpdateInfo(){
+		document.getElementById("Info_TotalVideo"   ).innerHTML = "Видео: " + VideosList.length
+		
+		function SecondsToDuration(S){
+			const D   = Math.floor( S / 86400        )
+			const H   = Math.floor((S % 86400) / 3600)
+			const M   = Math.floor((S % 3600 ) / 60  )
+			const Sec = S % 60
+
+			const Pad2 = N => String(N).padStart(2, "0")
+
+			var Result = ""
+
+			if(         D > 0){ Result += D + ":" }
+			if(H > 0 || D > 0){ Result += Pad2(H) + ":" }
+
+			Result += Pad2(M) + ":" + Pad2(Sec)
+
+			return Result
+		}
+		
+		document.getElementById("Info_TotalDuration").innerHTML = "Время: " + SecondsToDuration(TotalDuration)
+	}
+	UpdateInfo()
 }
 
 var Tooltip = document.createElement("div")
@@ -598,8 +664,6 @@ function Search(){
 
 		if(SortReverse) FilteredVideos.reverse()
 	}
-	
-	document.title = "MyVideos (" + FilteredVideos.length + ")"
 	
 	UpdateContent(FilteredVideos)
 }
