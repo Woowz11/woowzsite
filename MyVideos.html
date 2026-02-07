@@ -233,6 +233,7 @@ sort:tags - Сортировка по кол-ву тегов<br>
 	<div class="FooterPanel">
 		<div class="SmallPanel" id="Info_TotalVideo"></div>
 		<div class="SmallPanel" id="Info_TotalDuration"></div>
+		<div class="SmallPanel" id="Info_Visible"></div>
 	</div>
 </div>
 
@@ -297,6 +298,7 @@ function UpdateContent(VideosList){
 	Content.innerHTML = ""
 	
 	var TotalDuration = 0
+	var TotalVisible  = 0
 	
 	function DurationToSeconds(D){
 		const Parts = D.split(":").map(Number)
@@ -335,6 +337,8 @@ function UpdateContent(VideosList){
 
 		AddedIDs.add(ID)
 		TotalDuration += DurationToSeconds(Duration)
+		
+		if(Visibility == P_Link || Visibility == P_Public){ TotalVisible += 1 }
 
 		var WatchURL = "https://youtu.be/" + YoutubeID
 
@@ -363,7 +367,7 @@ function UpdateContent(VideosList){
 			></a>`;
 		}
 		
-		var VisibilityText = (Visibility == P_Hide ? "Скрыто" : (Visibility == P_Link ? "Ссылка" : (Visibility == P_Blocked ? "Заблокировано" : "Публичное")))
+		var VisibilityText = (Visibility == P_Hide ? "🔒 Скрыто" : (Visibility == P_Link ? "🔗 Ссылка" : (Visibility == P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")))
 
 		function FormatDateTime(Input){
 			if(Input === UNKNOWN_Date){ return "??.??.????" }
@@ -426,10 +430,11 @@ function UpdateContent(VideosList){
 		}
 		
 		var DescriptionText = FormatDescription(Description)
+		var NameText        = FormatDescription(Name)
 
 		var VideoContent = `<div style="display: flex; gap: 5px;">
 			<div class="SmallPanel" style="height:${Height};">${ID}</div>
-			<div style="flex-grow: 1;">${Name}</div>
+			<div style="flex-grow: 1;">${NameText}</div>
 			<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
 			<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
 			<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
@@ -449,7 +454,8 @@ function UpdateContent(VideosList){
 	}
 	
 	function UpdateInfo(){
-		document.getElementById("Info_TotalVideo"   ).innerHTML = "Видео: " + VideosList.length
+		document.getElementById("Info_TotalVideo").innerHTML = "Видео: "     + VideosList.length
+		document.getElementById("Info_Visible"   ).innerHTML = "Публичных: " + TotalVisible
 		
 		function SecondsToDuration(S){
 			const D   = Math.floor( S / 86400        )
