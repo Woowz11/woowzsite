@@ -57,7 +57,8 @@ body{
 }
 
 .Footer{
-	height: 100px;
+	height: auto;
+	padding-block: 15px;
 }
 
 
@@ -68,10 +69,11 @@ body{
 	padding: 10px;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 	color: black;
-
 	display: flex;
 	gap: 6px;
 	align-items: center;
+	flex-wrap: wrap;
+	width: 90vw;
 }
 
 .PageWrapper{
@@ -178,6 +180,17 @@ body{
 .URL:active{
 	color: #0066CC;
 }
+
+.Error{
+	color: #FF4D4D;
+	text-decoration: none;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.Error:hover{
+	color: #E60000;
+}
 </style>
 
 <body>
@@ -234,6 +247,11 @@ sort:tags - Сортировка по кол-ву тегов<br>
 		<div class="SmallPanel" id="Info_TotalVideo"></div>
 		<div class="SmallPanel" id="Info_TotalDuration"></div>
 		<div class="SmallPanel" id="Info_Visible"></div>
+		<div class="SmallPanel" style="width: 100%; background-color: white; height: 400px;">
+			<div style="width: 100%; height: 48%; display: block;"><canvas id="Info_Chart_Duration"></canvas></div>
+			<hr>
+			<div style="width: 100%; height: 48%; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
+		</div>
 	</div>
 </div>
 
@@ -242,453 +260,674 @@ sort:tags - Сортировка по кол-ву тегов<br>
 </body>
 
 <script src="source/Videos.js"></script>
+<script src="Libs/chart.js"></script>
 <script>
 
-var Content = document.getElementById("Content")
+var Content = document.getElementById("Content");
 
 function ShowErrorNotification(Message){
-	const Div = document.getElementById("ErrorNotification")
-	Div.textContent = Message
-	Div.style.display = "block"
+	const Div = document.getElementById("ErrorNotification");
+
+	var Text;
+
+	if(Message instanceof Error){
+		console.error(Message);
+		Text = Message.name + ": " + Message.message + (Message.stack ? "\n" + Message.stack : "");
+	}else{
+		Text = String(Message);
+	}
+
+	Div.textContent = Text;
+	Div.style.display = "block";
+
 	clearTimeout(Div.timeout)
-	Div.timeout = setTimeout(() => { Div.style.display = "none" }, 6000)
+	Div.timeout = setTimeout(() => {
+		Div.style.display = "none";
+	}, 6000);
 }
 
 window.onerror = function(message, source, lineno, colno, error){
-	var Message = `${message} (${source}:${lineno}:${colno})`
-	console.error(Message)
-	ShowErrorNotification(Message)
-	return false
+	ShowErrorNotification(error);
+	return false;
 }
 
 window.onunhandledrejection = function(event){
-	var Message = `Unhandled Promise Rejection: ${event.reason}`
-	console.error(Message)
-	ShowErrorNotification(Message)
+	var Message = `Unhandled Promise Rejection: ${event.reason}`;
+	console.error(Message);
+	ShowErrorNotification(Message);
 }
 
-var CurrentURL = window.location.href.split("#")[0]
+var CurrentURL = window.location.href.split("#")[0];
 
 function RandomColor(Seed, Whiteness){
-	var Hash = 2166136261
+	var Hash = 2166136261;
 
 	for(var i = 0; i < Seed.length; i++){
-		Hash ^= Seed.charCodeAt(i)
-		Hash += (Hash << 1) + (Hash << 4) + (Hash << 7) + (Hash << 8) + (Hash << 24)
+		Hash ^= Seed.charCodeAt(i);
+		Hash += (Hash << 1) + (Hash << 4) + (Hash << 7) + (Hash << 8) + (Hash << 24);
 	}
 
-	var R = (Hash >> 16) & 0xFF
-	var G = (Hash >> 8)  & 0xFF
-	var B =  Hash        & 0xFF
+	var R = (Hash >> 16) & 0xFF;
+	var G = (Hash >> 8)  & 0xFF;
+	var B =  Hash        & 0xFF;
 
-	if(Whiteness == null){ Whiteness = 0 }
+	if(Whiteness == null){ Whiteness = 0; }
 
-	R = Math.round(R + (255 - R) * Whiteness)
-	G = Math.round(G + (255 - G) * Whiteness)
-	B = Math.round(B + (255 - B) * Whiteness)
+	R = Math.round(R + (255 - R) * Whiteness);
+	G = Math.round(G + (255 - G) * Whiteness);
+	B = Math.round(B + (255 - B) * Whiteness);
 
-	function ToHex(Byte){ return Byte.toString(16).padStart(2, "0") }
+	function ToHex(Byte){ return Byte.toString(16).padStart(2, "0"); }
 
-	return "#" + ToHex(R) + ToHex(G) + ToHex(B)
+	return "#" + ToHex(R) + ToHex(G) + ToHex(B);
 }
 
 function UpdateContent(VideosList){
-	const AddedIDs = new Set()
+	const AddedIDs = new Set();
 
-	Content.innerHTML = ""
+	Content.innerHTML = "";
 	
-	var TotalDuration = 0
-	var TotalVisible  = 0
+	var TotalDuration    = 0;
+	var TotalVisible     = 0;
+	var TotalDurationAll = [];
 	
 	function DurationToSeconds(D){
-		const Parts = D.split(":").map(Number)
+		const Parts = D.split(":").map(Number);
 
 		if(Parts.length === 2){
-			return Parts[0] * 60 + Parts[1]
+			return Parts[0] * 60 + Parts[1];
 		}else if(Parts.length === 3){
-			return Parts[0] * 3600 + Parts[1] * 60 + Parts[2]
+			return Parts[0] * 3600 + Parts[1] * 60 + Parts[2];
 		}
 	}
 	
 	for(var i = 0; i < VideosList.length; i++){
-		var Video = VideosList[i]
-
-		var ID           = Video[0]
-		var Name         = Video[1]
-		var CreationDate = Video[2]
-		var YoutubeID    = Video[3]
-		var PublishDate  = Video[4]
-		var Duration     = Video[5]
-		var Visibility   = Video[6]
-		var Tags         = Video[7]
-		var Description  = Video[8]
-
 		try{
-			if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ) }
-			if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!") }
-			if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ) }
-			if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !") }
-			if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ) }
-			if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!") }
+			var Video = VideosList[i];
+
+			var ID           = Video[0];
+			var Name         = Video[1];
+			var CreationDate = Video[2];
+			var YoutubeID    = Video[3];
+			var PublishDate  = Video[4];
+			var Duration     = Video[5];
+			var Visibility   = Video[6];
+			var Tags         = Video[7];
+			var Description  = Video[8];
+
+			try{
+				if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
+				if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!"); }
+				if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
+				if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
+				if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
+				if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
+			}catch(e){
+				throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!");
+			}
+
+			AddedIDs.add(ID);
+			var Seconds = DurationToSeconds(Duration);
+			TotalDuration += Seconds;
+			TotalDurationAll.push(Seconds);
+			
+			if(Visibility == P_Link || Visibility == P_Public){ TotalVisible += 1; }
+
+			var WatchURL = "https://youtu.be/" + YoutubeID;
+			var EditURL  = "https://studio.youtube.com/video/" + YoutubeID + "/edit";
+
+			const Height = "21px";
+
+			var TagsHTML = "";
+			for(var j = 0; j < Tags.length; j++){
+				var TagID          = Tags[j];
+				var Tag            = TAGS[TagID];
+				var TagName        = Tag[0];
+				var TagIcon        = Tag[1];
+				var TagDescription = Tag[2];
+				TagsHTML += `<a
+					class="ImageURL"
+					href="${CurrentURL}#tag%3A${TagID}"
+					tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}"
+				><img 
+					style="
+						width:${Height};
+						height:${Height};
+						border-radius: 5px;
+						aspect-ratio: 1 / 1;
+					"
+					src="${Tag[1]}"
+					alt="${Tag[0]}"
+				></a>`;
+			}
+			
+			var VisibilityText = (Visibility == P_Hide ? "🔒 Скрыто" : (Visibility == P_Link ? "🔗 Ссылка" : (Visibility == P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")));
+
+			function FormatDateTime(Input){
+				if(Input === UNKNOWN_Date){ return "??.??.????"; }
+			
+				const Parts    = Input.split(" ");
+				const DatePart = Parts[0];
+				const TimePart = Parts[1];
+
+				const [Y, M, D] = DatePart.split(".");
+
+				function Pad2(N){ return String(N).padStart(2, "0"); }
+
+				if(TimePart){
+					var [H, m, S] = TimePart.split(":");
+					H = parseInt(H, 10);
+					m = parseInt(m, 10);
+					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`;
+				}else{
+					return `${Pad2(D)}.${Pad2(M)}.${Y}`;
+				}
+			}
+
+			var CreationDateText = FormatDateTime(CreationDate);
+			var PublishDateText  = FormatDateTime(PublishDate );
+			
+			var DurationText = Duration;
+			
+			function FormatDescription(Input){
+				function FormatURL(Input){
+					const Pattern = /(https?:\/\/[^\s]+)/g;
+					return Input.replace(Pattern, (URL) => {
+						var EndChar = "";
+						if(/[)\]\},.?]/.test(URL.slice(-1))){
+							EndChar = URL.slice(-1);
+							URL = URL.slice(0, -1);
+						}
+						return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`;
+					})
+				}
+				
+				function FormatTimeCode(Input){
+					    const TimeCodePattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
+						const QuestionPattern = /\[\?\]/g;
+
+						var Result = Input.replace(QuestionPattern, () => {
+							return `<span class="Error" tooltip="Не указано видео! Возможно в будущем будет указано">[?]</span>`;
+						});
+
+						Result = Result.replace(TimeCodePattern, (TimeCode) => {
+							return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`;
+						});
+
+						return Result;
+				}
+				
+				function FormatIDLink(Input){
+					return Input.replace(/\[(\d+)\]/g, (M, ID) => {
+						const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10));
+						if(Video){
+							return `<a class="URL" href="${CurrentURL}#id%3A${ID}">${M}</a>`;
+						}
+						return M;
+					})
+				}
+				
+				return FormatIDLink(FormatTimeCode(FormatURL(Input)));
+			}
+			
+			var DescriptionText = FormatDescription(Description);
+			var NameText        = FormatDescription(Name);
+
+			var VideoContent = `<div style="display: flex; gap: 5px;">
+				<div class="SmallPanel" style="height:${Height};">${ID}</div>
+				<div style="flex-grow: 1;">${NameText}</div>
+				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
+				<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
+				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
+				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
+				<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
+				<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">👁️</a>
+				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">✏️</a>
+			</div>
+	<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`;
+			
+			var Panel = document.createElement("div");
+			Panel.className = "VideoPanel";
+			Panel.innerHTML = VideoContent;
+			Panel.style.backgroundColor = RandomColor(PublishDateText, 0.7);
+
+			Content.appendChild(Panel);
 		}catch(e){
-			console.error(e)
-			throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!")
+			ShowErrorNotification(e);
 		}
-
-		AddedIDs.add(ID)
-		TotalDuration += DurationToSeconds(Duration)
-		
-		if(Visibility == P_Link || Visibility == P_Public){ TotalVisible += 1 }
-
-		var WatchURL = "https://youtu.be/" + YoutubeID
-
-		const Height = "21px"
-
-		var TagsHTML = ""
-		for(var j = 0; j < Tags.length; j++){
-			var TagID = Tags[j]
-			var Tag = TAGS[TagID]
-			var TagName        = Tag[0]
-			var TagIcon        = Tag[1]
-			var TagDescription = Tag[2]
-			TagsHTML += `<a
-				class="ImageURL"
-				href="${CurrentURL}#tag%3A${TagID}"
-				tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}"
-			><img 
-				style="
-					width:${Height};
-					height:${Height};
-					border-radius: 5px;
-					aspect-ratio: 1 / 1;
-				"
-				src="${Tag[1]}"
-				alt="${Tag[0]}"
-			></a>`;
-		}
-		
-		var VisibilityText = (Visibility == P_Hide ? "🔒 Скрыто" : (Visibility == P_Link ? "🔗 Ссылка" : (Visibility == P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")))
-
-		function FormatDateTime(Input){
-			if(Input === UNKNOWN_Date){ return "??.??.????" }
-		
-			const Parts    = Input.split(" ")
-			const DatePart = Parts[0]
-			const TimePart = Parts[1]
-
-			const [Y, M, D] = DatePart.split(".")
-
-			function Pad2(N){ return String(N).padStart(2, "0") }
-
-			if(TimePart){
-				var [H, m, S] = TimePart.split(":")
-				H = parseInt(H, 10)
-				m = parseInt(m, 10)
-				return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`
-			}else{
-				return `${Pad2(D)}.${Pad2(M)}.${Y}`
-			}
-		}
-
-		var CreationDateText = FormatDateTime(CreationDate)
-		var PublishDateText  = FormatDateTime(PublishDate )
-		
-		var DurationText = Duration
-		
-		function FormatDescription(Input){
-			function FormatURL(Input){
-				const Pattern = /(https?:\/\/[^\s]+)/g
-				return Input.replace(Pattern, (URL) => {
-					var EndChar = ""
-					if(/[)\]\},.?]/.test(URL.slice(-1))){
-						EndChar = URL.slice(-1)
-						URL = URL.slice(0, -1)
-					}
-					return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`
-				})
-			}
-			
-			function FormatTimeCode(Input){
-				const Pattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g
-
-				return Input.replace(Pattern, (TimeCode) => {
-					return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`
-				})
-			}
-			
-			function FormatIDLink(Input){
-				return Input.replace(/\[(\d+)\]/g, (M, ID) => {
-					const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10))
-					if(Video){
-						return `<a class="URL" href="${CurrentURL}#id%3A${ID}">${M}</a>`
-					}
-					return M
-				})
-			}
-			
-			return FormatIDLink(FormatTimeCode(FormatURL(Input)))
-		}
-		
-		var DescriptionText = FormatDescription(Description)
-		var NameText        = FormatDescription(Name)
-
-		var VideoContent = `<div style="display: flex; gap: 5px;">
-			<div class="SmallPanel" style="height:${Height};">${ID}</div>
-			<div style="flex-grow: 1;">${NameText}</div>
-			<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
-			<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
-			<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
-			<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
-			<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
-			<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">👁️</a>
-			<a tooltip="Редактировать видео в YouTube Studio" href="https://studio.youtube.com/video/${YoutubeID}/edit" style="height:${Height};">✏️</a>
-		</div>
-<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`
-		
-		var Panel = document.createElement("div")
-		Panel.className = "VideoPanel"
-		Panel.innerHTML = VideoContent
-		Panel.style.backgroundColor = RandomColor(PublishDateText, 0.7)
-
-		Content.appendChild(Panel)
 	}
 	
 	function UpdateInfo(){
-		document.getElementById("Info_TotalVideo").innerHTML = "Видео: "     + VideosList.length
-		document.getElementById("Info_Visible"   ).innerHTML = "Публичных: " + TotalVisible
+		document.getElementById("Info_TotalVideo").innerHTML = "Видео: "     + VideosList.length;
+		document.getElementById("Info_Visible"   ).innerHTML = "Публичных: " + TotalVisible;
 		
 		function SecondsToDuration(S){
-			const D   = Math.floor( S / 86400        )
-			const H   = Math.floor((S % 86400) / 3600)
-			const M   = Math.floor((S % 3600 ) / 60  )
+			const D   = Math.floor( S / 86400        );
+			const H   = Math.floor((S % 86400) / 3600);
+			const M   = Math.floor((S % 3600 ) / 60  );
 			const Sec = S % 60
 
-			const Pad2 = N => String(N).padStart(2, "0")
+			const Pad2 = N => String(N).padStart(2, "0");
 
-			var Result = ""
+			var Result = "";
 
-			if(         D > 0){ Result += D + ":" }
-			if(H > 0 || D > 0){ Result += Pad2(H) + ":" }
+			if(         D > 0){ Result += D + ":"; }
+			if(H > 0 || D > 0){ Result += Pad2(H) + ":"; }
 
-			Result += Pad2(M) + ":" + Pad2(Sec)
+			Result += Pad2(M) + ":" + Pad2(Sec);
 
-			return Result
+			return Result;
 		}
 		
-		document.getElementById("Info_TotalDuration").innerHTML = "Время: " + SecondsToDuration(TotalDuration)
+		function MedianDuration(){
+			if(TotalDurationAll.length === 0){ return 0; }
+			
+			const Sorted = TotalDurationAll.slice().sort((A, B) => A - B);
+			const Median = Math.floor(Sorted.length / 2);
+			
+			if(Sorted.length % 2 === 1){
+				return Sorted[Median];
+			}else{
+				return (Sorted[Median - 1] + Sorted[Median]) / 2;
+			}
+		}
+		
+		document.getElementById("Info_TotalDuration").innerHTML = "Время: " + SecondsToDuration(TotalDuration) + " (В среднем: " + SecondsToDuration(Math.floor(MedianDuration())) + ")";
+	
+		const Chart_Duration = document.getElementById("Info_Chart_Duration").getContext("2d");
+
+		if(Chart_Duration.chart){ Chart_Duration.chart.destroy(); }
+
+		Chart_Duration.chart = new Chart(Chart_Duration, {
+			type: "line",
+			data: {
+				datasets: [
+					{
+						label: "Все видео",
+						borderColor: "#FF4D4D",
+						borderWidth: 1,
+						radius: 8,
+						hoverRadius: 10,
+						data: TotalDurationAll.map((sec, i) => ({ sec, video: VideosList[i] })).sort((a, b) => a.sec - b.sec).map((item, i) => ({
+							x    : i + 1,
+							y    : item.sec,
+							video: item.video,
+							id   : item.video[0],
+							label: item.video[1]
+						})),
+						tension: 0.3,
+						fill: false,
+						parsing: { xAxisKey: "x", yAxisKey: "y" }
+					}
+				]
+			},
+			options: {
+				animation: false,
+				interaction: { intersect: false, mode: "point" },
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: true },
+					title: {
+						display: true,
+						text: "Сортировка по длительности"
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								const Raw = context.raw;
+								return `[${Raw.id}] ${Raw.label}: ${SecondsToDuration(Raw.y)}`;
+							}
+						}
+					}
+				},
+				onHover: (event, activeElements, chart) => {
+					event.native.target.style.cursor = activeElements.length ? "pointer" : "default";
+				},
+				onClick: (event, activeElements, chart) => {
+					if(activeElements.length === 0){ return; }
+					var Raw = activeElements[0].element["$context"].raw;
+					const Href = `${CurrentURL}#id%3A${Raw.id}`
+					
+					window.open(Href, "_blank", "noopener,noreferrer")
+				},
+				scales: {
+					x: {
+						type: "linear",
+						title: { display: false },
+						ticks: { stepSize: 1 }
+					},
+					y: {
+						title: { display: true, text: "Длительность (сек)" },
+						beginAtZero: true
+					}
+				}
+			}
+		});
+		
+		const Chart_Creation = document.getElementById("Info_Chart_Creation").getContext("2d");
+
+		if(Chart_Creation.chart){ Chart_Creation.chart.destroy(); }
+
+		const __GroupedByMounth = {};
+		VideosList.filter(video => video[2] && video[2] !== UNKNOWN_Date && video[5]).forEach(video => {
+			const [datePart] = video[2].split(" ");
+			const [Y, M] = datePart.split(".").map(n => parseInt(n, 10));
+			const monthKey = `${Y}.${String(M).padStart(2,"0")}`;
+			if (!__GroupedByMounth[monthKey]) __GroupedByMounth[monthKey] = [];
+			__GroupedByMounth[monthKey].push(video);
+		});
+
+		const datasets = Object.keys(__GroupedByMounth).sort((a,b) => {
+			const [y1,m1] = a.split(".").map(n=>parseInt(n,10));
+			const [y2,m2] = b.split(".").map(n=>parseInt(n,10));
+			return Date.UTC(y1,m1-1) - Date.UTC(y2,m2-1);
+		}).map(monthKey => {
+			const [Y, M] = monthKey.split(".").map(n=>parseInt(n,10));
+			const monthTimestamp = Date.UTC(Y, M-1,1);
+
+			const dataPoints = __GroupedByMounth[monthKey].map(video => {
+				const CreationDate = video[2];
+				const [datePart, timePart] = CreationDate.split(" ");
+				const [y, m, d] = datePart.split(".").map(n=>parseInt(n,10));
+				let H=0, min=0, s=0;
+				if(timePart){ [H,min,s] = timePart.split(":").map(n=>parseInt(n,10)); }
+				const xTimestamp = Date.UTC(y, m-1, d, H, min, s);
+
+				return {
+					x: xTimestamp,
+					y: monthTimestamp,
+					label: video[1],
+					id: video[0]
+				};
+			}).sort((a,b)=>a.x - b.x);
+
+			return {
+				label: `Видео ${monthKey}`,
+				data: dataPoints,
+				borderColor: RandomColor(Y + ":" + M),
+				borderWidth: 2,
+				radius: 3,
+				hoverRadius: 5,
+				tension: 0.3,
+				fill: true,
+				parsing: false
+			};
+		});
+
+		Chart_Creation.chart = new Chart(Chart_Creation, {
+			type: "line",
+			data: { datasets },
+			options: {
+				animation: false,
+				maintainAspectRatio: false,
+				interaction: { intersect: false, mode: "point" },
+				scales: {
+					x: {
+						type: "linear",
+						title: { display: false },
+						min: datasets[0]?.data[0]?.x,
+						max: Date.now(),
+						ticks: {
+							callback: val => {
+								const d = new Date(val);
+								return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+							}
+						}
+					},
+					y: {
+						type: "linear",
+						title: { display: true, text: "Месяц" },
+						ticks: {
+							callback: val => {
+								const d = new Date(val);
+								return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}`;
+							}
+						}
+					}
+				},
+				plugins: {
+					title: {
+						display: true,
+						text: "Дата создания"
+					},
+					tooltip: {
+						callbacks: {
+							label: ctx => {
+								const dp = ctx.raw;
+								const xDate = new Date(dp.x);
+								const yDate = new Date(dp.y);
+								const dateStr = `${xDate.getFullYear()}.${String(xDate.getMonth()+1).padStart(2,"0")}.${String(xDate.getDate()).padStart(2,"0")}`;
+								return `[${dp.id}] ${dp.label}: ${dateStr}`;
+							}
+						}
+					}
+				},
+				onHover: (event, activeElements) => {
+					event.native.target.style.cursor = activeElements.length ? "pointer" : "default";
+				},
+				onClick: (event, activeElements, chart) => {
+					if(activeElements.length === 0){ return; }
+					var Raw = activeElements[0].element["$context"].raw;
+					const Href = `${CurrentURL}#id%3A${Raw.id}`
+					
+					window.open(Href, "_blank", "noopener,noreferrer")
+				}
+			}
+		});
+
 	}
-	UpdateInfo()
+	UpdateInfo();
 }
 
-var Tooltip = document.createElement("div")
-Tooltip.id = "Tooltip"
-document.body.appendChild(Tooltip)
+var Tooltip = document.createElement("div");
+Tooltip.id = "Tooltip";
+document.body.appendChild(Tooltip);
 
 document.addEventListener("mouseover", function(e) {
-	var Target = e.target.closest("[tooltip]")
+	var Target = e.target.closest("[tooltip]");
 	if(Target){
-		Tooltip.innerHTML = Target.getAttribute("tooltip")
-		Tooltip.style.display = "block"
+		Tooltip.innerHTML = Target.getAttribute("tooltip");
+		Tooltip.style.display = "block";
 	}
-})
+});
 
 document.addEventListener("mousemove", function(e){
 	if(Tooltip.style.display === "block"){
-		Tooltip.style.left = (e.clientX + 25) + "px"
-		Tooltip.style.top = (e.clientY) + "px"
+		Tooltip.style.left = (e.clientX + 25) + "px";
+		Tooltip.style.top = (e.clientY) + "px";
 	}
-})
+});
 
 document.addEventListener("mouseout", function(e){
-	var Target = e.target.closest("[tooltip]")
+	var Target = e.target.closest("[tooltip]");
 	if(Target){
-		Tooltip.style.display = "none"
+		Tooltip.style.display = "none";
 	}
-})
+});
 
 function RandomWithSeedGenerator(Seed){
-	var V = (Seed + 61266) >>> 0
+	var V = (Seed + 61266) >>> 0;
 	
 	return function(){
-		V ^= V << 13
-		V ^= V >> 17
-		V ^= V << 5
-		return (V >>> 0) / 4294967296
+		V ^= V << 13;
+		V ^= V >> 17;
+		V ^= V << 5;
+		return (V >>> 0) / 4294967296;
 	}
 }
 
 function ShuffleArrayWithSeed(Array, Seed){
-	const Random = RandomWithSeedGenerator(Seed)
+	const Random = RandomWithSeedGenerator(Seed);
 	for(var i = Array.length - 1; i > 0; i--){
-		const j = Math.floor(Random() * (i + 1))
+		const j = Math.floor(Random() * (i + 1));
 		
-		const Temp = Array[i]
-		Array[i] = Array[j]
-		Array[j] = Temp
+		const Temp = Array[i];
+		Array[i] = Array[j];
+		Array[j] = Temp;
 	}
-	return Array
+	return Array;
 }
 
-var SearchInput = document.getElementById("Search")
+var SearchInput = document.getElementById("Search");
 
-var CurrentRawText = "~~~"
+var CurrentRawText = "~~~";
 function Search(){
-	var RawText = SearchInput.value.trim()
-	if(CurrentRawText == RawText){ return } CurrentRawText = RawText
+	var RawText = SearchInput.value.trim();
+	if(CurrentRawText == RawText){ return } CurrentRawText = RawText;
 	
 	if(RawText){
-		window.location.hash = encodeURIComponent(RawText)
+		window.location.hash = encodeURIComponent(RawText);
 	} else {
-		history.replaceState(null, null, " ")
+		history.replaceState(null, null, " ");
 	}
 	
-	const Parts = RawText.match(/-?(\w+:"[^"]+"|\S+)/g) || []
-	var SearchConditions = []
-	var SortMethod       = null
-	var SortReverse      = false
-	var SortSeed         = 0
+	const Parts = RawText.match(/-?(\w+:"[^"]+"|\S+)/g) || [];
+	var SearchConditions = [];
+	var SortMethod       = null;
+	var SortReverse      = false;
+	var SortSeed         = 0;
 	
 	for(const Part of Parts){
-		var Lower = Part.toLowerCase()
+		var Lower = Part.toLowerCase();
 		if(Lower.startsWith("sort:")){
-			const SortParts = Lower.split(":")
+			const SortParts = Lower.split(":");
 			
-			var Method = SortParts[1]
-			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags"){ SortMethod = Method }
+			var Method = SortParts[1];
+			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags"){ SortMethod = Method; }
 			
 			if(Method === "random"){
 				if(SortParts[2] && /^\d+$/.test(SortParts[2])){
-					SortSeed = parseInt(SortParts[2], 10)
+					SortSeed = parseInt(SortParts[2], 10);
 				}else{
-					SortSeed = Date.now()
+					SortSeed = Date.now();
 				}
 			}
 			
-			if(SortParts[2] === "reverse" || SortParts[3] === "reverse"){ SortReverse = true }
+			if(SortParts[2] === "reverse" || SortParts[3] === "reverse"){ SortReverse = true; }
 			continue
 		}
 		
-		var Exclude = false
-		var OR      = false
-		var Field   = "any"
-		var Value   = Part
+		var Exclude = false;
+		var OR      = false;
+		var Field   = "any";
+		var Value   = Part;
 		
 		if(Part.startsWith("-")){
-			Exclude = true
-			Value   = Part.slice(1)
+			Exclude = true;
+			Value   = Part.slice(1);
 		}
 		
 		if(Part.startsWith("+")){
-			OR    = true
-			Value = Part.slice(1)
+			OR    = true;
+			Value = Part.slice(1);
 		}
 		
 		const FieldMatch = Value.match(/^(\w+):"([^"]+)"$/)
         if(FieldMatch){
-            Field = FieldMatch[1].toLowerCase()
-            Value = FieldMatch[2]
+            Field = FieldMatch[1].toLowerCase();
+            Value = FieldMatch[2];
         }else if(Value.startsWith("id:")){
-			Field = "id"
-			Value = Value.slice(3)
+			Field = "id";
+			Value = Value.slice(3);
 		}else if(Value.startsWith("tag:")){
-			Field = "tag"
-			Value = Value.slice(4)
+			Field = "tag";
+			Value = Value.slice(4);
 		}else if(Value.startsWith("visible:")){
-			Field = "visible"
-			Value = Value.slice(8)
+			Field = "visible";
+			Value = Value.slice(8);
 		}
 		
-		SearchConditions.push({Field: Field, Value: Value.toLowerCase(), Exclude: Exclude, OR: OR})
+		SearchConditions.push({Field: Field, Value: Value.toLowerCase(), Exclude: Exclude, OR: OR});
 	}
 	
 	var FilteredVideos = (SearchConditions.length == 0 ? [...VIDEOS] : VIDEOS.filter(Video => {
-		const [ID, Name, CreationDate, YoutubeID, PublishDate, Duration, Visibility, Tags, Description] = Video
+		const [ID, Name, CreationDate, YoutubeID, PublishDate, Duration, Visibility, Tags, Description] = Video;
 		
 		function Filter(Condution){
-			var M = false
+			var M = false;
 			if(Condution.Field == "name"){
-				M = Name.toLowerCase().includes(Condution.Value)
+				M = Name.toLowerCase().includes(Condution.Value);
 			}else if(Condution.Field == "description"){
-				M = Description.toLowerCase().includes(Condution.Value)
+				M = Description.toLowerCase().includes(Condution.Value);
 			}else if(Condution.Field == "id"){
-				M = ID === parseInt(Condution.Value, 10)
+				M = ID === parseInt(Condution.Value, 10);
 			}else if(Condution.Field === "tag"){
-				const TagValue = Condution.Value.toLowerCase()
+				const TagValue = Condution.Value.toLowerCase();
 				if(/^\d+$/.test(TagValue)){
-					const TagID = parseInt(TagValue, 10)
-					M = Tags.includes(TagID)
+					const TagID = parseInt(TagValue, 10);
+					M = Tags.includes(TagID);
 				}
 				else {
 					M = Tags.some(TagID => {
-						const TagName = TAGS[TagID][0].toLowerCase()
-						return TagName.includes(TagValue)
-					})
+						const TagName = TAGS[TagID][0].toLowerCase();
+						return TagName.includes(TagValue);
+					});
 				}
 			}else if(Condution.Field == "visible"){
-				M = Visibility === parseInt(Condution.Value, 10)
+				M = Visibility === parseInt(Condution.Value, 10);
 			}
 			
-			if(Condution.Exclude){ M = !M }
-			return M
+			if(Condution.Exclude){ M = !M; }
+			return M;
 		}
 		
-		var ORGroup  = SearchConditions.filter(C =>  C.OR)
-		var AndGroup = SearchConditions.filter(C => !C.OR)
+		var ORGroup  = SearchConditions.filter(C =>  C.OR);
+		var AndGroup = SearchConditions.filter(C => !C.OR);
 		
-		if(!AndGroup.every(C => Filter(C))){ return false }
-		if(ORGroup.length > 0 && !ORGroup.some(C => Filter(C))){ return false }
+		if(!AndGroup.every(C => Filter(C))){ return false; }
+		if(ORGroup.length > 0 && !ORGroup.some(C => Filter(C))){ return false; }
 		
-		return true
+		return true;
 	}))
 	
 	if(SortMethod){
 		if(SortMethod == "random"){
-			ShuffleArrayWithSeed(FilteredVideos, SortSeed || 0)
+			ShuffleArrayWithSeed(FilteredVideos, SortSeed || 0);
 		}else{
 			FilteredVideos.sort((A, B) => {
 				if(SortMethod === "name"){
-					return A[1].localeCompare(B[1])
+					return A[1].localeCompare(B[1]);
 				}else if(SortMethod === "creation"){
-					return new Date(A[2]) - new Date(B[2])
+					return new Date(A[2]) - new Date(B[2]);
 				}else if(SortMethod === "publish"){
-					return new Date(A[4]) - new Date(B[4])
+					return new Date(A[4]) - new Date(B[4]);
 				}else if(SortMethod === "duration"){
 					const ToSeconds = T => {
-						const P = T.split(":").map(Number)
-						if(P.length === 2){ return P[0] * 60 + P[1] }
-						return P[0] * 3600 + P[1] * 60 + P[2]
+						const P = T.split(":").map(Number);
+						if(P.length === 2){ return P[0] * 60 + P[1]; }
+						return P[0] * 3600 + P[1] * 60 + P[2];
 					}
-					return ToSeconds(A[5]) - ToSeconds(B[5])
+					return ToSeconds(A[5]) - ToSeconds(B[5]);
 				}else if(SortMethod === "id"){
-					return A[0] - B[0]
+					return A[0] - B[0];
 				}else if(SortMethod === "tags"){
-					return A[7].length - B[7].length
+					return A[7].length - B[7].length;
 				}
-				return 0
+				return 0;
 			})
 		}
 
-		if(SortReverse) FilteredVideos.reverse()
+		if(SortReverse){ FilteredVideos.reverse(); }
 	}
 	
-	UpdateContent(FilteredVideos)
+	UpdateContent(FilteredVideos);
 }
 
 window.addEventListener("load", () => {
 	if(window.location.hash){
-		SearchInput.value = decodeURIComponent(window.location.hash.substring(1))
-		Search()
+		SearchInput.value = decodeURIComponent(window.location.hash.substring(1));
+		Search();
 	}else{
-		Search()
+		Search();
 	}
-})
+});
 
 window.addEventListener("hashchange", () => {
-	const RawText = decodeURIComponent(window.location.hash.substring(1))
+	const RawText = decodeURIComponent(window.location.hash.substring(1));
 	if(RawText !== SearchInput.value){
-		SearchInput.value = RawText
-		Search()
+		SearchInput.value = RawText;
+		Search();
 	}
-})
+});
 
 </script>
