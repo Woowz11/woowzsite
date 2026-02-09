@@ -110,11 +110,11 @@ body{
 	gap: 2px;
 }
 
-.ImageURL, .ImageURL *{
+.ContentURL, .ContentURL *{
 	cursor: pointer;
 }
 
-.VideoPanel a:not(.URL):not(.ImageURL){
+.VideoPanel a:not(.URL):not(.ContentURL){
 	display: inline-block;
 	text-decoration: none;
 	color: #fff;
@@ -125,9 +125,10 @@ body{
 	transition: all 0.2s ease;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 	cursor: pointer;
+	border: 1px solid rgba(255, 255, 255, 1);
 }
 
-.VideoPanel a:not(.URL):not(.ImageURL):hover{
+.VideoPanel a:not(.URL):not(.ContentURL):hover{
 	background-color: rgba(0, 123, 255, 1);
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
@@ -160,7 +161,7 @@ body{
 	backdrop-filter: blur(6px);
 }
 
-[tooltip]:not(.ImageURL){
+[tooltip]:not(.ContentURL){
 	cursor: help;
 }
 
@@ -247,10 +248,9 @@ sort:tags - Сортировка по кол-ву тегов<br>
 		<div class="SmallPanel" id="Info_TotalVideo"></div>
 		<div class="SmallPanel" id="Info_TotalDuration"></div>
 		<div class="SmallPanel" id="Info_Visible"></div>
-		<div class="SmallPanel" style="width: 100%; background-color: white; height: 400px;">
-			<div style="width: 100%; height: 48%; display: block;"><canvas id="Info_Chart_Duration"></canvas></div>
-			<hr>
-			<div style="width: 100%; height: 48%; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
+		<div style="width: 100%;">
+			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
+			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
 		</div>
 	</div>
 </div>
@@ -386,7 +386,7 @@ function UpdateContent(VideosList){
 				var TagIcon        = Tag[1];
 				var TagDescription = Tag[2];
 				TagsHTML += `<a
-					class="ImageURL"
+					class="ContentURL"
 					href="${CurrentURL}#tag%3A${TagID}"
 					tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}"
 				><img 
@@ -474,7 +474,7 @@ function UpdateContent(VideosList){
 			var NameText        = FormatDescription(Name);
 
 			var VideoContent = `<div style="display: flex; gap: 5px;">
-				<div class="SmallPanel" style="height:${Height};">${ID}</div>
+				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
 				<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
@@ -597,7 +597,7 @@ function UpdateContent(VideosList){
 						ticks: { stepSize: 1 }
 					},
 					y: {
-						title: { display: true, text: "Длительность (сек)" },
+						title: { display: true, text: "Длительность (сек.)" },
 						beginAtZero: true
 					}
 				}
@@ -642,7 +642,7 @@ function UpdateContent(VideosList){
 			}).sort((a,b)=>a.x - b.x);
 
 			return {
-				label: `Видео ${monthKey}`,
+				label: monthKey,
 				data: dataPoints,
 				borderColor: RandomColor(Y + ":" + M),
 				borderWidth: 2,
