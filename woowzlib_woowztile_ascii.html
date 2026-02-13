@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ASCII Generator</title>
+<style>
+body { background:#111; color:#eee; font-family:monospace; }
+textarea { width:600px; height:180px; background:#222; color:#0f0; font-family:monospace; }
+button { padding:6px 12px; font-family:monospace; margin-right:6px; }
+#output, #asciiCanvas { font-size:1.5em; margin-top:20px; white-space:pre; }
+#asciiCanvas { display:block; border:1px solid #555; }
+</style>
+</head>
+<body>
+
+<h2>ASCII Generator</h2>
+
+<label>Mapping (C# format):</label><br>
+<textarea id="mappingInput"></textarea><br><br>
+
+<label>Palette (C# KeyValuePair format):</label><br>
+<textarea id="paletteInput"></textarea><br><br>
+
+<label>Scale:</label>
+<input type="number" id="scaleInput" value="1" step="0.05"><br><br>
+
+<input type="file" id="imageInput" accept="image/*"><br><br>
+<button id="pasteImageButton">Load Image from Clipboard</button>
+
+<button id="generateButton">Generate ASCII</button>
+<button id="copyButton">Copy ASCII</button><br><br>
+
+<pre id="output"></pre>
+
+<label>ASCII Input:</label><br>
+<textarea id="asciiInput"></textarea><br>
+<button id="generateImageButton">Generate Image from ASCII</button>
+<button id="copyImageButton">Copy Image</button><br><br>
+
+<canvas id="canvas" style="display:none;"></canvas>
+<canvas id="asciiCanvas"></canvas>
+
+<script>
+let LoadedImage = null;
+
+const NamedColors = {
+	LightRed: [255,63,63,255], Red:[255,0,0,255], DarkRed:[128,0,0,255],
+	LightOrange:[255,191,63,255], Orange:[255,128,0,255], DarkOrange:[128,63,0,255],
+	Brown:[128,63,0,255], LightYellow:[255,255,63,255], Yellow:[255,255,0,255],
+	DarkYellow:[128,128,0,255], LightGreen:[63,255,63,255], Green:[0,255,0,255],
+	DarkGreen:[0,128,0,255], LightAqua:[63,255,255,255], Aqua:[0,255,255,255],
+	DarkAqua:[0,128,128,255], LightBlue:[63,63,255,255], Blue:[0,0,255,255],
+	DarkBlue:[0,0,128,255], LightPurple:[191,63,255,255], Purple:[128,0,255,255],
+	DarkPurple:[63,0,128,255], LightMagenta:[255,63,255,255], Magenta:[255,0,255,255],
+	DarkMagenta:[128,0,128,255], LightPink:[255,191,255,255], Pink:[255,128,255,255],
+	DarkPink:[128,63,128,255], White:[255,255,255,255], LightGray:[191,191,191,255],
+	Gray:[128,128,128,255], DarkGray:[63,63,63,255], Black:[0,0,0,255],
+	Transparent:[255,255,255,0], One:[255,255,255,255], Half:[128,128,128,128], Zero:[0,0,0,0]
+};
+
+document.getElementById("pasteImageButton").addEventListener("click", async ()=>{
+	try{
+		const items = await navigator.clipboard.read();
+		for(const item of items){
+			for(const type of item.types){
+				if(type.startsWith("image/")){
+					const blob = await item.getType(type);
+					const img = new Image();
+					img.onload = ()=>{
+						LoadedImage = img;
+						autoGenerateIfReady();
+					};
+					img.src = URL.createObjectURL(blob);
+					img.src = URL.createObjectURL(blob);
+					return; // успех — без alert
+				}
+			}
+		}
+		alert("No image found in clipboard");
+	}catch(e){
+		alert("Failed to read clipboard: " + e);
+	}
+});
+
+function autoGenerateIfReady(){
+	if(!LoadedImage) return;
+
+	const mapping = parseMapping();
+	const palette = parsePalette();
+
+	if(!mapping || !palette){
+		return; // если нет mapping или palette — просто не генерируем
+	}
+
+	generateAscii();
+}
+
+document.getElementById("imageInput").addEventListener("change", e=>{
+	const file = e.target.files[0];
+	if(!file) return;
+	const img = new Image();
+	img.onload = ()=>{
+		LoadedImage = img;
+		autoGenerateIfReady();
+	};
+	img.src = URL.createObjectURL(file);
+});
+
+document.getElementById("generateButton").addEventListener("click", ()=>{
+	if(!LoadedImage){ alert("Load image first"); return; }
+	generateAscii();
+});
+document.getElementById("copyButton").addEventListener("click", ()=>{
+	const output = document.getElementById("output").textContent;
+	navigator.clipboard.writeText(output)
+		.catch(e => alert("Failed to copy ASCII: " + e));
+});
+
+
+document.getElementById("copyImageButton").addEventListener("click", async ()=>{
+	const canvas = document.getElementById("asciiCanvas");
+	if(!canvas.width || !canvas.height){
+		alert("No image to copy");
+		return;
+	}
+
+	canvas.toBlob(async blob=>{
+		try{
+			await navigator.clipboard.write([
+				new ClipboardItem({'image/png': blob})
+			]);
+		}catch(e){
+			alert("Failed to copy image: " + e);
+		}
+	});
+});
+
+document.getElementById("generateImageButton").addEventListener("click", ()=>{
+	const ascii = document.getElementById("asciiInput").value;
+	const mapping = parseMapping();
+	const palette = parsePalette();
+
+	if(!ascii || !mapping || !palette){
+		alert("ASCII, mapping or palette missing");
+		return;
+	}
+
+	generateImageFromAscii(ascii, mapping, palette);
+});
+
+
+// -------------------- ASCII GENERATION --------------------
+function generateAscii(){
+	const mapping = parseMapping();
+	const palette = parsePalette();
+	if(!mapping || !palette) return;
+
+	const reverseMapping = Object.fromEntries(Object.entries(mapping).map(([k,v])=>[v.toString(),k]));
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+	const scale = parseFloat(document.getElementById("scaleInput").value) || 0.2;
+	canvas.width = LoadedImage.width * scale;
+	canvas.height = LoadedImage.height * scale;
+	ctx.drawImage(LoadedImage,0,0,canvas.width,canvas.height);
+	const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+
+	const lines = [];
+	for(let y=0; y<canvas.height; y++){
+		let line = '';
+		for(let x=0; x<canvas.width; x++){
+			const i = (y*canvas.width+x)*4;
+			const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+			let charToAdd = '.';
+			if(a>=10){
+				const closest = getClosestPalette(r,g,b,a,palette);
+				charToAdd = reverseMapping[closest.toString()] ?? '.';
+			}else{
+				charToAdd = reverseMapping['0'] ?? '.';
+			}
+			line += charToAdd;
+		}
+		lines.push(line);
+	}
+	document.getElementById("output").textContent = lines.join("\n");
+}
+
+// -------------------- ASCII → IMAGE --------------------
+function generateImageFromAscii(ascii, mapping, palette){
+	const lines = ascii.split("\n");
+	const canvas = document.getElementById("asciiCanvas");
+	const ctx = canvas.getContext("2d");
+
+	const scale = parseFloat(document.getElementById("scaleInput").value) || 1;
+	const width = lines[0]?.length || 0;
+	const height = lines.length;
+
+	canvas.width = width*scale;
+	canvas.height = height*scale;
+
+	const byteMapping = Object.fromEntries(Object.entries(mapping).map(([k,v])=>[k,v]));
+
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+
+	for(let y=0; y<height; y++){
+		for(let x=0; x<width; x++){
+			const char = lines[y][x];
+			if(char === '.'){ continue; } // точка = прозрачный
+			const byte = byteMapping[char];
+			const color = palette[byte] || [0,0,0,255];
+			ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${color[3]/255})`;
+			ctx.fillRect(x*scale, y*scale, scale, scale);
+		}
+	}
+}
+
+// -------------------- PARSERS --------------------
+function parseMapping(){
+	const text = document.getElementById("mappingInput").value;
+	const regex = /\['(.?)'\]\s*=\s*(\d+)/g;
+	const mapping = {};
+	let match;
+	while((match=regex.exec(text))!==null) mapping[match[1]]=parseInt(match[2]);
+	return Object.keys(mapping).length ? mapping : null;
+}
+
+function parsePalette(){
+	const text = document.getElementById("paletteInput").value;
+	const regex=/KeyValuePair<byte,\s*ColorB>\((\d+)\s*,\s*ColorB\.([A-Za-z]+)(?:\.SetA\((\d+)\))?\)/g;
+	const palette={};
+	let match;
+	while((match=regex.exec(text))!==null){
+		const byte=parseInt(match[1]);
+		if(byte===0){ palette[0]=[0,0,0,0]; continue; }
+		const colorName=match[2];
+		const setAlpha=match[3]!==undefined?parseInt(match[3]):undefined;
+		if(NamedColors[colorName]){
+			const [r,g,b,defaultA]=NamedColors[colorName];
+			const alpha=setAlpha!==undefined?setAlpha:defaultA??255;
+			palette[byte]=[r,g,b,alpha];
+		}
+	}
+	return palette;
+}
+
+function getClosestPalette(r,g,b,a,palette){
+	if(a<10) return 0;
+	let minDist=Infinity, best=0;
+	for(const key in palette){
+		const color=palette[key];
+		if(!color) continue;
+		const [pr,pg,pb,pa]=color;
+		const dr=r-pr, dg=g-pg, db=b-pb, da=a-pa;
+		const dist=0.299*dr*dr+0.587*dg*dg+0.114*db*db+0.5*da*da;
+		if(dist<minDist){ minDist=dist; best=key; }
+	}
+	return best;
+}
+</script>
+
+</body>
+</html>
