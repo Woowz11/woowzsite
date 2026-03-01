@@ -322,6 +322,10 @@ function RandomColor(Seed, Whiteness){
 	return "#" + ToHex(R) + ToHex(G) + ToHex(B);
 }
 
+function RainbowColor(T, Alpha){
+	return `hsl(${T * 360}, 100%, 50%, ${Alpha})`;
+}
+
 function UpdateContent(VideosList){
 	const AddedIDs = new Set();
 
@@ -477,7 +481,7 @@ function UpdateContent(VideosList){
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
-				<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height};">${DurationText}</div>
+				<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height}; background-color:${RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
 				<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
@@ -544,9 +548,10 @@ function UpdateContent(VideosList){
 				datasets: [
 					{
 						label: "Все видео",
-						borderColor: "#FF4D4D",
+						borderColor: "transparent",
+						pointBorderColor: ctx => RainbowColor(ctx.parsed.y / 36000, 1),
 						borderWidth: 1,
-						radius: 8,
+						radius: 6,
 						hoverRadius: 10,
 						data: TotalDurationAll.map((sec, i) => ({ sec, video: VideosList[i] })).sort((a, b) => a.sec - b.sec).map((item, i) => ({
 							x    : i + 1,
