@@ -520,4 +520,4 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
    ░░▓▓████████▓▓░░
       ░░░░░░░░░░
    G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида","Hi, welcome there!", "Hi, welcome here!", "G0LU", "G01U",
-   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо"]
+   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ"]
