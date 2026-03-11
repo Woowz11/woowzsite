@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reverse Blocks</title>
+
+<style>
+body{
+    font-family: monospace;
+    background:#111;
+    color:#eee;
+    padding:20px;
+}
+
+textarea{
+    width:100%;
+    height:300px;
+    background:#000;
+    color:#0f0;
+    border:1px solid #333;
+    padding:10px;
+}
+
+button{
+    margin-top:10px;
+    padding:10px 20px;
+}
+</style>
+</head>
+
+<body>
+
+<textarea id="Input"></textarea>
+
+<br>
+
+<button onclick="Reverse()">Reverse</button>
+
+<textarea id="Output"></textarea>
+
+<script>
+
+function ReverseBlocks(Text)
+{
+    const Blocks = []
+
+    let Depth = 0
+    let Start = -1
+
+    for(let i = 0; i < Text.length; i++)
+    {
+        const Char = Text[i]
+
+        if(Char === '[')
+        {
+            if(Depth === 0)
+            {
+                // ищем начало строки чтобы сохранить табы
+                let LineStart = Text.lastIndexOf('\n', i)
+                if(LineStart === -1) LineStart = 0
+                else LineStart += 1
+
+                Start = LineStart
+            }
+
+            Depth++
+        }
+
+        if(Char === ']')
+        {
+            Depth--
+
+            if(Depth === 0 && Start !== -1)
+            {
+                Blocks.push(Text.slice(Start, i + 1))
+                Start = -1
+            }
+        }
+    }
+
+    Blocks.reverse()
+
+    return Blocks.join(",\n\n")
+}
+
+function Reverse()
+{
+    const Input = document.getElementById("Input").value
+    const Result = ReverseBlocks(Input)
+
+    document.getElementById("Output").value = Result
+}
+
+</script>
+
+</body>
+</html>

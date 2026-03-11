@@ -549,7 +549,7 @@ function UpdateContent(VideosList){
 					{
 						label: "Все видео",
 						borderColor: "transparent",
-						pointBorderColor: ctx => RainbowColor(ctx.parsed.y / 36000, 1),
+						pointBorderColor: ctx => RainbowColor((ctx.raw?.y || 0) / 36000, 1),
 						borderWidth: 1,
 						radius: 6,
 						hoverRadius: 10,
@@ -722,6 +722,8 @@ function UpdateContent(VideosList){
 
 	}
 	UpdateInfo();
+	
+	Tooltip.style.display = "none";
 }
 
 var Tooltip = document.createElement("div");
