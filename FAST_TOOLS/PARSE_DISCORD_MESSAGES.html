@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>JSON → HTML Generator</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#111;
+    color:#eee;
+    padding:30px;
+}
+
+progress{
+    width:100%;
+    height:28px;
+}
+
+</style>
+
+</head>
+<body>
+
+<h2>JSON → HTML генератор</h2>
+
+<input type="file" id="FileInput">
+
+<br><br>
+
+<progress id="Progress" value="0" max="100"></progress>
+
+<div id="Status"></div>
+
+<script>
+
+window.onerror = function(Message,Source,Line,Column,Error){
+
+    alert(
+        "Произошла ошибка\n\n" +
+        Message + "\n" +
+        "Файл: " + Source + "\n" +
+        "Строка: " + Line
+    );
+
+    console.error(Error);
+
+};
+
+const FileInput = document.getElementById("FileInput");
+const Progress = document.getElementById("Progress");
+const Status = document.getElementById("Status");
+
+FileInput.addEventListener("change", async function() {
+    try {
+        const File = this.files[0];
+        Status.textContent = "Чтение файла...";
+        const Text = await File.text();
+
+        let Data;
+        try {
+            Data = JSON.parse(Text);
+        } catch(Error) {
+            alert("Ошибка чтения JSON файла");
+            console.error(Error);
+            return;
+        }
+
+        const Total = Data.length;
+        let MessagesHTML = "";
+        let PhotosHTML = "";
+        let AllLinks = ""; // сюда собираем все ссылки
+
+        Progress.value = 0;
+
+        for (let i = Total - 1; i >= 0; i--) {
+            const Msg = Data[i];
+            const ID = Msg.ID || "";
+            const Time = Msg.Timestamp || "";
+
+            let Html = `<div class="m" title="ID: ${ID} | Time: ${Time}">`;
+            Html += `<div class="t">${Time}</div>`;
+
+            if (Msg.Contents) {
+                const SafeText = EscapeHTML(Msg.Contents);
+                const WithLinks = Linkify(SafeText, ID, Time);
+                Html += `<div class="c">${WithLinks}</div>`;
+
+                // собираем ссылки из текста
+                const TextLinks = ExtractLinks(Msg.Contents, ID, Time);
+                AllLinks += TextLinks;
+            }
+
+            if (Msg.Attachments) {
+                const UrlList = Msg.Attachments.trim().split(/\s+/);
+                for (const Url of UrlList) {
+                    if (!Url.startsWith("http")) continue;
+
+                    if (IsImage(Url)) {
+                        Html += `<img loading="lazy" src="${Url}" title="Message ID: ${ID} | ${Time}">`;
+                        PhotosHTML += `
+<div class="img">
+<a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">
+<img src="${Url}" loading="lazy">
+</a>
+</div>`;
+                    } else {
+                        Html += `<a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">${Url}</a>`;
+                        AllLinks += `<div><a href="${Url}" title="Message ID: ${ID} | ${Time}" target="_blank">${Url}</a></div>`;
+                    }
+                }
+            }
+
+            Html += `</div>`;
+            MessagesHTML += Html + "\n";
+
+            const ProgressIndex = Total - i;
+            if (ProgressIndex % 200 === 0) {
+                Progress.value = (ProgressIndex / Total) * 100;
+                Status.textContent = `Обработано ${ProgressIndex} / ${Total}`;
+                await YieldThread();
+            }
+        }
+
+        Progress.value = 100;
+        Status.textContent = "Генерация HTML...";
+
+        DownloadFile(BuildMessagesHTML(MessagesHTML), "messages.html");
+        DownloadFile(BuildPhotosHTML(PhotosHTML), "photos.html");
+        DownloadFile(BuildLinksHTML(AllLinks), "links.html"); // передаем все ссылки
+
+        Status.textContent = "Готово. Скачано 3 HTML файла.";
+
+    } catch(Error) {
+        alert("Ошибка обработки архива");
+        console.error(Error);
+    }
+});
+
+
+function Linkify(text,ID,Time){
+
+    return text.replace(
+        /(https?:\/\/[^\s]+)/g,
+        `<a href="$1" target="_blank" title="Message ID: ${ID} | ${Time}">$1</a>`
+    );
+
+}
+
+function ExtractLinks(text,ID,Time){
+
+    const Matches = text.match(/https?:\/\/[^\s]+/g);
+
+    if(!Matches) return "";
+
+    let Result = "";
+
+    for(const Url of Matches){
+
+        if(IsImage(Url)) continue; // пропускаем картинки
+
+        Result += `<div><a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">${Url}</a></div>`;
+
+    }
+
+    return Result;
+
+}
+
+function BuildMessagesHTML(Content){
+
+return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Messages</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#111;
+    color:#eee;
+    padding:10px;
+}
+
+.m{
+    border-bottom:1px solid #222;
+    padding:4px;
+    font-size:13px;
+}
+
+.t{
+    color:#777;
+    font-size:11px;
+}
+
+.c{
+    margin-top:2px;
+    white-space:pre-wrap;
+}
+
+img{
+    max-width:240px;
+    margin-top:4px;
+}
+
+a{
+    color:#6aa9ff;
+    word-break:break-all;
+}
+
+</style>
+
+</head>
+<body>
+
+${Content}
+
+</body>
+</html>`;
+
+}
+
+function BuildPhotosHTML(Content){
+return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Photos</title>
+<style>
+body{
+    background:#111;
+    color:#eee;
+    font-family:Arial;
+    padding:20px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+    gap:8px;
+}
+
+.img{
+    position:relative;
+    background:#222;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    min-height:80px; /* минимальная высота для placeholder */
+}
+
+.img img{
+    max-width:100%;
+    max-height:100%;
+    height:auto;
+    width:auto;
+    display:block;
+}
+
+.img span{
+    position:absolute;
+    color:#666;
+    font-size:12px;
+    pointer-events:none;
+}
+
+</style>
+</head>
+<body>
+
+<h2>Photos</h2>
+
+<div class="grid">
+
+${Content}
+
+</div>
+
+<script>
+// Добавляем индикатор загрузки для каждого изображения
+document.querySelectorAll('.img img').forEach(img=>{
+    const Span = document.createElement('span');
+    Span.textContent = 'loading...';
+    img.parentNode.appendChild(Span);
+
+    img.onload = () => {
+        Span.remove(); // убираем надпись после загрузки
+    };
+    img.onerror = () => {
+        Span.textContent = 'failed';
+    };
+});
+</${"script"}>
+
+</body>
+</html>`;
+}
+
+function BuildLinksHTML(Content) {
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Links</title>
+<style>
+body{background:#0f0f0f;color:#eee;font-family:Segoe UI,Arial;padding:20px;}
+h2{margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{background:#1b1b1b;cursor:pointer;}
+th{text-align:left;padding:8px;border-bottom:2px solid #333;}
+td{padding:6px;border-bottom:1px solid #222;}
+tr:hover{background:#1a1a1a;}
+a{color:#6aa9ff;text-decoration:none;}
+a:hover{text-decoration:underline;}
+.type{font-weight:bold;color:#aaa;}
+.domain{color:#888;font-size:12px;}
+.short{font-family:monospace;}
+.time{color:#ccc;font-size:12px;}
+</style>
+</head>
+<body>
+
+<h2>Links</h2>
+
+<table id="LinksTable">
+<thead>
+<tr>
+<th onclick="sortTable(0)">Extension</th>
+<th onclick="sortTable(1)">Domain</th>
+<th onclick="sortTable(2)">Short URL</th>
+<th onclick="sortTable(3)">Time</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+const Parser = new DOMParser();
+const Doc = Parser.parseFromString(${JSON.stringify(Content)}, "text/html");
+const Links = [...Doc.querySelectorAll("a")];
+const TableBody = document.querySelector("#LinksTable tbody");
+
+for (const A of Links) {
+    const Url = A.href;
+    let Domain = "";
+    let Ext = "~";
+    let Short = "";
+    let Time = A.getAttribute("title") || "";
+
+    try {
+        const U = new URL(Url);
+        Domain = U.hostname;
+
+        // короткий URL — только последний сегмент пути
+        const PathParts = U.pathname.split("/").filter(p => p.length > 0);
+        Short = PathParts.length > 0 ? PathParts[PathParts.length - 1] : "/";
+
+        const match = U.pathname.match(/\\.([a-z0-9]+)$/i);
+        if (match) Ext = match[1].toLowerCase();
+    } catch {}
+
+    const Row = document.createElement("tr");
+    Row.innerHTML = \`
+<td class="type">\${Ext}</td>
+<td class="domain">\${Domain}</td>
+<td class="short" title="\${Url}">\${Short}</td>
+<td class="time">\${Time}</td>
+<td><a href="\${Url}" target="_blank" title="\${Url}">open</a></td>
+\`;
+    TableBody.appendChild(Row);
+}
+
+// Быстрая сортировка через массив строк
+function sortTable(colIndex) {
+    const tbody = document.querySelector("#LinksTable tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    let asc = tbody.getAttribute("data-sort-dir") !== "asc";
+    tbody.setAttribute("data-sort-dir", asc ? "asc" : "desc");
+
+    rows.sort((a,b)=>{
+        let x=a.cells[colIndex].textContent.trim();
+        let y=b.cells[colIndex].textContent.trim();
+
+        if(colIndex===3){
+            const dx=new Date(x), dy=new Date(y);
+            if(!isNaN(dx) && !isNaN(dy)) return asc ? dx-dy : dy-dx;
+        }
+
+        x=x.toLowerCase(); y=y.toLowerCase();
+        if(x<y) return asc?-1:1;
+        if(x>y) return asc?1:-1;
+        return 0;
+    });
+
+    tbody.innerHTML="";
+    rows.forEach(r=>tbody.appendChild(r));
+}
+</${"script"}>
+
+</body>
+</html>`;
+}
+
+function DownloadFile(content,name){
+
+    const BlobFile = new Blob([content], {type:"text/html"});
+
+    const url = URL.createObjectURL(BlobFile);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+
+}
+
+function IsImage(url){
+
+    return /\.(png|jpg|jpeg|gif|webp)/i.test(url);
+
+}
+
+function EscapeHTML(text){
+
+    const Div = document.createElement("div");
+    Div.innerText = text;
+    return Div.innerHTML;
+
+}
+
+function YieldThread(){
+
+    return new Promise(resolve => setTimeout(resolve));
+
+}
+
+</script>
+
+</body>
+</html>
