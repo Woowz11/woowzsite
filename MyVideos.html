@@ -263,6 +263,8 @@ sort:tags - Сортировка по кол-ву тегов<br>
 <script src="Libs/chart.js"></script>
 <script>
 
+if(Ignore_Errors){ document.title += " (IGNORE ERRORS)" }
+
 var Content = document.getElementById("Content");
 
 function ShowErrorNotification(Message){
@@ -323,7 +325,7 @@ function RandomColor(Seed, Whiteness){
 }
 
 function RainbowColor(T, Alpha){
-	return `hsl(${T * 360}, 100%, 50%, ${Alpha})`;
+	return `hsl(${T * 300}, 100%, 50%, ${Alpha})`;
 }
 
 function UpdateContent(VideosList){
@@ -359,15 +361,17 @@ function UpdateContent(VideosList){
 			var Tags         = Video[7];
 			var Description  = Video[8];
 
-			try{
-				if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
-				if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!"); }
-				if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
-				if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
-				if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
-				if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
-			}catch(e){
-				throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!");
+			if(!Ignore_Errors){
+				try{
+					if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
+					if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!"); }
+					if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
+					if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
+					if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
+					if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
+				}catch(e){
+					throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!");
+				}
 			}
 
 			AddedIDs.add(ID);
@@ -485,15 +489,15 @@ function UpdateContent(VideosList){
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
 				<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
-				<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">👁️</a>
-				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">✏️</a>
+				<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
+				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "✏️"}</a>
 			</div>
 	<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`;
 			
 			var Panel = document.createElement("div");
 			Panel.className = "VideoPanel";
 			Panel.innerHTML = VideoContent;
-			Panel.style.backgroundColor = RandomColor(PublishDateText, 0.7);
+			Panel.style.backgroundColor = PublishDate == DEFAULT_Publish ? "rgb(25, 25, 25)" : RandomColor(PublishDateText, 0.7);
 
 			Content.appendChild(Panel);
 		}catch(e){
