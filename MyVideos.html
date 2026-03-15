@@ -488,7 +488,7 @@ function UpdateContent(VideosList){
 				<div class="SmallPanel" tooltip="Длительность видео: ${Duration}" style="height:${Height}; background-color:${RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
-				<div class="SmallPanel" style="height:${Height};">${VisibilityText}</div>
+				<a class="ContentURL" tooltip="Установить в поиск только видео подобного типа" href="${CurrentURL}#visible%3A${Visibility}"><div class="SmallPanel" style="height:${Height};">${VisibilityText}</div></a>
 				<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
 				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "✏️"}</a>
 			</div>
