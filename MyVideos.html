@@ -263,7 +263,7 @@ sort:tags - Сортировка по кол-ву тегов<br>
 <script src="Libs/chart.js"></script>
 <script>
 
-if(Ignore_Errors){ document.title += " (IGNORE ERRORS)" }
+if(Ignore_Errors){ document.title += " (IGNORE)" }
 
 var Content = document.getElementById("Content");
 
@@ -497,7 +497,9 @@ function UpdateContent(VideosList){
 			var Panel = document.createElement("div");
 			Panel.className = "VideoPanel";
 			Panel.innerHTML = VideoContent;
-			Panel.style.backgroundColor = PublishDate == DEFAULT_Publish ? "rgb(25, 25, 25)" : RandomColor(PublishDateText, 0.7);
+			Panel.style.background = PublishDate == DEFAULT_Publish
+    ? "linear-gradient(90deg, rgb(30, 30, 30), rgb(60, 20, 20), rgb(30, 30, 30))"
+    : `linear-gradient(90deg, ${RandomColor(PublishDateText, 0.5)}, ${RandomColor(PublishDateText + "_2", 0.5)}, ${RandomColor(PublishDateText + "_3", 0.5)})`;
 
 			Content.appendChild(Panel);
 		}catch(e){
