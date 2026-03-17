@@ -203,62 +203,71 @@ function Sleep(MS){
 }
 
 /* Обновляет строку */
-async function UpdateText(Text){
-	const R = {...__ReplaceText, ...{
-        D_Version    : SelectedVersion,
-		D_RealVersion: 0,
-		D_Date       : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
-		D_CurrentFile: CurrentFile,
-		D_PackFormat : PackFormat,
-		D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
-		D_Time       : GenerationTime,
-		S            : CompareVersion(SelectedVersion, "1.13") > 0 ? "s" : ""
-	}};
-
-	const Matches = [...Text.matchAll(/<\[\s*([\s\S]*?)\s*\]>/g)];
-	if(Matches.length === 0){ return Text; }
-	
-	var Result = "";
-	var LastIndex = 0;
-	
-	for(const Match of Matches){
-		const [Full, Expr] = Match;
-		const Start = Match.index;
-		const End = Start + Full.length;
-		
-		Result += Text.slice(LastIndex, Start);
-		LastIndex = End;
-		
-		const E = Expr.trim();
-		
-		if(/^Var\d*$/.test(E)){ Result += Full; continue; }
-		
-		try{
-			if(E.startsWith("Custom ") || E.startsWith("CustomF ")){
-				const FullFunc = E.startsWith("CustomF ");
-				const Code = E.slice(FullFunc ? 8 : 7).trim();
-
-				const Func = new AsyncFunction(...Object.keys(R), FullFunc ? Code : `return (${Code});`);
-
-				const Value = await Func(...Object.values(R));
-				Result += String(Value);
-				continue;
-			}
-			
-			if(E in R){ Result += String(R[E]); continue; }
-			
-			throw new Error(`Не найден текстовой код <${E}>!`);
-		}catch(Error){
-			Logger.ConsoleError("Произошла ошибка в UpdateText!\nТекст: " + Text, Error);
-			Result += "undefined";
-		}
-	}
-	
-	Result += Text.slice(LastIndex);
-	return Result;
-}
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 const __ReplaceText = {};
+async function UpdateText(Text){
+	const MaxInterations = 50; // Макс итеракций
+	var CurrentText = Text;
+	
+	for(var Iteration = 0; Iteration < MaxInterations; Iteration++){
+		const R = {...__ReplaceText, ...{
+			D_Version    : SelectedVersion,
+			D_RealVersion: 0,
+			D_Date       : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
+			D_CurrentFile: CurrentFile,
+			D_PackFormat : PackFormat,
+			D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
+			D_Time       : GenerationTime
+		}};
+
+		const Matches = [...CurrentText.matchAll(/<\[\s*([\s\S]*?)\s*\]>/g)];
+		if(Matches.length === 0){ return CurrentText; }
+		
+		var Result = "";
+		var LastIndex = 0;
+		
+		for(const Match of Matches){
+			const [Full, Expr] = Match;
+			const Start = Match.index;
+			const End = Start + Full.length;
+			
+			Result += CurrentText.slice(LastIndex, Start);
+			LastIndex = End;
+			
+			const E = Expr.trim();
+			
+			if(/^Var\d*$/.test(E)){ Result += Full; continue; }
+			
+			try{
+				if(E.startsWith("Custom ") || E.startsWith("CustomF ")){
+					const FullFunc = E.startsWith("CustomF ");
+					const Code = E.slice(FullFunc ? 8 : 7).trim();
+
+					const Func = new AsyncFunction(...Object.keys(R), FullFunc ? Code : `return (${Code});`);
+
+					const Value = await Func(...Object.values(R));
+					Result += String(Value);
+					continue;
+				}
+				
+				if(E in R){ Result += String(R[E]); continue; }
+				
+				throw new Error(`Не найден текстовой код <${E}>!`);
+			}catch(Error){
+				Logger.ConsoleError("Произошла ошибка в UpdateText!\nТекст: " + CurrentText, Error);
+				Result += "undefined";
+			}
+		}
+		
+		Result += CurrentText.slice(LastIndex);
+		if(Result === CurrentText){ return Result; }
+		
+		CurrentText = Result;
+	}
+	
+	Logger.ConsoleError("UpdateText достиг лимита итераций! Текст: " + Text);
+	return CurrentText;
+}
 
 /* Обновляет анимацию */
 function UpdateAnimation(Animation){
@@ -1571,6 +1580,9 @@ var HasError = false;
 /* Формат пака */
 var PackFormat = -1;
 
+/* Версия >= 1.13 */
+var More113 = false;
+
 /* Генерация пака */
 async function Generate(){
 	try{
@@ -1599,6 +1611,8 @@ async function Generate(){
 		
 		LoadPaintings();
 		__AllPaintings = AllPaintings;
+		
+		More113 = CompareVersion(SelectedVersion, '1.13') >= 0
 		
 		const VersionGenerator = await LoadGenerator(SelectedVersion);
 		PackFormat = VersionGenerator.PackFormat || -1;
@@ -2135,19 +2149,38 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				if(ThatJSZipFile(Result)){ Result = await FileContent(Result); }
 				
 				if(typeof Result === "string"){
-					const Matches = [...Result.matchAll(/<\[\s*Var(\d+)\s*\]>/g)];
+					const Regex = /<\[\s*Var(\d+)\s*\]>/g;
+					const Matches = [...Result.matchAll(Regex)]
 					
-					const RequiredVars = Matches.map(m => parseInt(m[1]));
-					const MaxVar = Math.max(0, ...RequiredVars);
+					const RequiredVars = Matches.map(m => parseInt(m[1]))
+					const MaxVar = Math.max(0, ...RequiredVars)
 					
 					if(Variables.length !== MaxVar){
-						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variables.length + "\nНайдено: " + MaxVar);
+						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variable.length + "\nНайдено: " + MaxVar)
 					}
 					
-					Result = Result.replace(/<\[\s*Var(\d+)\s*\]>/g, (m, i) => {
-						const i_ = parseInt(i) - 1;
-						return Variables[i_] !== undefined ? Variables[i_] : m;
-					});
+					var FinalString = "";
+					var LastIndex = 0;
+					
+					for(const Match of Matches){
+						const FullMatch = Match[0];
+						const Index = Match.index;
+						const VarIndex = parseInt(Match[1]) - 1;
+						
+						FinalString += Result.slice(LastIndex, Index);
+						
+						if(Variables[VarIndex] != undefined){
+							const Updated = await UpdateText(Variables[VarIndex])
+							FinalString += Updated;
+						}else{
+							FinalString += FullMatch;
+						}
+						
+						LastIndex = Index + FullMatch.length;
+					}
+					
+					FinalString += Result.slice(LastIndex)
+					Result = FinalString
 					
 					try{
 						const JSON_Result = JSONParse(Result);

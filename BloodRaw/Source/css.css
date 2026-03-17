@@ -37,14 +37,14 @@ body, p{
 /* Пре-загрузка */
 html{
 	background:
-	url("dirt.png"),
-	url("button.png"),
-	url("button_hover.png"),
-	url("button_disabled.png"),
-	url("button_selected.png"),
-	url("checkbox.png"),
-	url("checkbox_checked.png"),
-	url("checkbox_hover.png"),
+	url("dirt.png"                  ),
+	url("button.png"                ),
+	url("button_hover.png"          ),
+	url("button_disabled.png"       ),
+	url("button_selected.png"       ),
+	url("checkbox.png"              ),
+	url("checkbox_checked.png"      ),
+	url("checkbox_hover.png"        ),
 	url("checkbox_hover_checked.png");
 }
 
@@ -231,15 +231,15 @@ input[type="number"]:focus, input[type="text"]:focus{
 /* ======================================================== */
 
 .In{
-	border: 3px solid rgba(0, 0, 0, 0.25);
+	border    : 3px solid rgba(0, 0, 0, 0.25);
 	box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5), inset 0px 0px 30px rgba(0,0,0,0.25);
-	padding: 15px;
+	padding   : 15px;
 	box-sizing: border-box;
 }
 
 .Out{
-	border: 3px solid rgba(0, 0, 0, 0.25);
+	border    : 3px solid rgba(0, 0, 0, 0.25);
 	box-shadow: 0px 0px 10px rgba(0,0,0,0.5), 0px 0px 30px rgba(0,0,0,0.25);
-	padding: 15px;
+	padding   : 15px;
 	box-sizing: border-box;
 }
