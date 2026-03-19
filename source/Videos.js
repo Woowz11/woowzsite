@@ -37,6 +37,7 @@ T_PtTR          = 35
 T_INotAuthor    = 36
 T_WIP           = 37
 T_Stream        = 38
+T_Shorts        = 39
 
 TAGS = {
 	/* Название, Иконка, Описание */
@@ -78,7 +79,8 @@ TAGS = {
 	[T_PtTR         ]: ["Paint the Town Red", "source/PtTR.png", "В этом видео играли в Paint the Town Red"],
 	[T_INotAuthor   ]: ["Не я снимал", "source/noi.png", "Это видео снимал не я, а кто-то другой"],
 	[T_WIP          ]: ["В процессе добавления...", "source/wip.png", "Видео не до конца добавлено в архив!"],
-	[T_Stream       ]: ["Стрим", "source/stream.png", "Это не видео, это стрим!"]
+	[T_Stream       ]: ["Стрим", "source/stream.png", "Это не видео, это стрим!"],
+	[T_Shorts       ]: ["Short", "source/short.png", "Это не видео, это short!"]
 }
 
 P_Hide    = 0
@@ -102,7 +104,11 @@ Ignore_Errors = false
 
 VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
-
+	
+	[577, "~", "2026.03.14 18:16:00", "HBEWZMWLOxQ", "2026.03.14", "02:09", P_Public,
+	[T_Woowz11, T_WIP, T_Shorts],
+	""],
+	
 	[576, "~", "2025.06.15", "Okef8pjfmbA", "2025.06.15", "1:46:37", P_Link,
 	[T_Woowz11, T_WIP, T_Stream],
 	""],
