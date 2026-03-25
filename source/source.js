@@ -104,11 +104,12 @@ WoowzsiteSourceAudios = AddTableToTable(AddTableToTable(AddTableToTable(AddFulln
 	"TROLL_HIT_4","cringe-music","В лесу под ёлкой сидит белячья тварь,","моя песня стоит денег","дей злая обезьяна, он делает карты в ham","Привет снова",
 	"Мир, Ти Лито, ты хороший актер. Продолжа","Вувз-реактор - редкий вид Вувза, делающе","WoowzMegaHit","Ебись, Сраный Спанч, из мяса и боли,","Куплет 1",
 	"Сраный Спанч дал мне молоток — не грусти","Я думал, что это прикол,","Шёл Сраный Спанч по земле грешной,", "f5a28bef9f2a712", "pern"
-],"source/specialforrandomsite/",".mp3"),AddFullnessToTable([
-	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist","open"
+],"source/specialforrandomsite/",".mp3"), AddFullnessToTable([
+	"doom","Schoolhouse_Trouble_Metal_Version","Pixelizer","sun","babah","The Daniel Pemberton TV Orchestra - The Orb Of Dreamers","forest","button","bass","dentist","open",
+	"Error", "Ring1", "Ring2", "Ring3", "Ring4", "Ring5", "Ring6", "Ring7"
 ],"source/",".mp3")),[
 	"source/woowzbackrooms/sounds/breath.mp3","source/woowzbackrooms/sounds/level0.mp3","source/woowzbackrooms/sounds/walk.mp3"
-]),AddFullnessToTable([
+]), AddFullnessToTable([
 	"ᓚᘏᗢ_ЖИ_ОШз!!!999___","Я ХОЧУ СТАТЬ ИГРОЙ","Я — текстура","Я — твоя замена","Я — Woowz11, я пришёл с костылём, ","СПАНЧ В ДУБАЙСКЕ","СОСИ ЗА МНОЙ СЛОВО ПОСЛЕДНЕЕ УРОД","Помнишь, Woowz_",
 	"Моя песня стоит денег 2","ИИ ПОД ПЯТКОЙ GOLU","Запускаю .java, без GUI, без HUD, ","Желудь Ethernet Печенье","Дей — злая обезьяна 2 (Танцуй, маппер!)","Верните меня в движок",
 	"В начале был БАГ. Не код. Не свет. ","Анимация без конца","WZZK.Zzq-жжж₽₽₽()__!","v1d3C@ll.z0v.k0RR","QX7_Gl!t¢h°Dyn4mix","+Silent Hallways+","ПИИИИИИП—КРРР—ПИИИ—ВУЛДИ... ВОЙНА НАЧАЛ",
