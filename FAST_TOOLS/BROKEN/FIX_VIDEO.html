@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MP4 → H.264 Extractor</title>
+<style>
+body { font-family: Arial; background:#1e1e1e; color:#f5f5f5; display:flex; flex-direction:column; align-items:center; padding:50px; }
+h2 { color:#ff4c4c; }
+input, button { margin:10px 0; padding:10px; font-size:16px; border-radius:5px; border:none; }
+input { width:300px; }
+button { background:#ff4c4c; color:#fff; cursor:pointer; }
+button:hover { background:#e03b3b; }
+#progressContainer { width:300px; height:20px; background:#333; border-radius:10px; overflow:hidden; margin-top:20px; position: relative; }
+#progressBar { height:100%; width:0%; background:#ff4c4c; transition:width 0.1s; }
+#progressText { position:absolute; width:100%; text-align:center; top:0; left:0; color:#fff; font-size:12px; }
+a { margin-top:20px; color:#fff; text-decoration:none; background:#ff4c4c; padding:10px 20px; border-radius:5px; }
+a:hover { background:#e03b3b; }
+</style>
+</head>
+<body>
+<h2>MP4 → H.264 Extractor</h2>
+<input type="file" id="fileInput" accept=".mp4">
+<button id="processBtn">Extract H.264</button>
+<div id="progressContainer">
+    <div id="progressBar"></div>
+    <div id="progressText">0%</div>
+</div>
+<a id="downloadLink" style="display:none;">Download H.264</a>
+
+<script>
+document.getElementById('processBtn').onclick = async () => {
+    const fileInput = document.getElementById('fileInput');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const downloadLink = document.getElementById('downloadLink');
+
+    if (!fileInput.files.length) { alert('Choose a file first'); return; }
+
+    const file = fileInput.files[0];
+    const CHUNK_SIZE = 1024 * 1024; // 1 MB
+    const blobChunks = []; // массив чанков
+
+    let offset = 0;
+
+    while(offset < file.size){
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
+        const arrayBuffer = await slice.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        const chunkOutput = [];
+
+        let i = 0;
+        while(i < bytes.length){
+            if (bytes[i] === 0xFF) {
+                let ffCount = 1;
+                while(i+ffCount < bytes.length && bytes[i+ffCount] === 0xFF) ffCount++;
+                if(ffCount > 1024){ i += ffCount; continue; }
+            }
+            if(i+3 < bytes.length && bytes[i]===0x00 && bytes[i+1]===0x00 && bytes[i+2]===0x00 && bytes[i+3]===0x01){
+                chunkOutput.push(0x00,0x00,0x00,0x01);
+                i+=4;
+                while(i+3 < bytes.length && !(bytes[i]===0x00 && bytes[i+1]===0x00 && bytes[i+2]===0x00 && bytes[i+3]===0x01)){
+                    chunkOutput.push(bytes[i]);
+                    i++;
+                }
+                continue;
+            }
+            i++;
+        }
+
+        // добавляем обработанный чанк в массив Blob
+        if(chunkOutput.length > 0){
+            blobChunks.push(new Uint8Array(chunkOutput));
+        }
+
+        offset += CHUNK_SIZE;
+        const percent = Math.floor((offset/file.size)*100);
+        progressBar.style.width = percent + '%';
+        progressText.textContent = percent + '%';
+
+        await new Promise(r=>setTimeout(r,1)); // даём UI обновиться
+    }
+
+    // создаём Blob из чанков
+    const blob = new Blob(blobChunks, {type:'application/octet-stream'});
+    const url = URL.createObjectURL(blob);
+
+    downloadLink.href = url;
+    downloadLink.download = file.name.replace(/\.[^/.]+$/, "") + ".h264";
+    downloadLink.style.display = "block";
+    downloadLink.textContent = "Download extracted H.264";
+
+    progressBar.style.width = '100%';
+    progressText.textContent = '100%';
+};
+</script>
+</body>
+</html>

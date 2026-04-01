@@ -118,7 +118,7 @@ body{
 	display: inline-block;
 	text-decoration: none;
 	color: #fff;
-	background-color: rgba(0, 123, 255, 0.8);
+	background-color: rgba(0, 123, 255, 1);
 	border-radius: 6px;
 	font-size: 14px;
 	font-weight: 500;
@@ -129,9 +129,14 @@ body{
 }
 
 .VideoPanel a:not(.URL):not(.ContentURL):hover{
-	background-color: rgba(0, 123, 255, 1);
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
+}
+
+.VideoPanel a:not(.URL):not(.ContentURL):active {
+	background-color: rgba(0, 90, 200, 1);
+	transform: scale(0.98);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .SmallPanel{
@@ -191,6 +196,33 @@ body{
 
 .Error:hover{
 	color: #E60000;
+}
+
+.Button {
+	display: inline-block;
+	padding: 8px 16px;
+	background-color: rgba(0, 123, 255, 1);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	text-align: center;
+	border: 1px solid rgba(255, 255, 255, 1);
+	border-radius: 6px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	user-select: none;
+}
+
+.Button:hover {
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
+}
+
+.Button:active {
+	background-color: rgba(0, 90, 200, 1);
+	transform: scale(0.98);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 </style>
 
@@ -252,6 +284,7 @@ sort:tags - Сортировка по кол-ву тегов<br>
 			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
 			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
 		</div>
+		<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
 	</div>
 </div>
 
@@ -927,6 +960,68 @@ function Search(){
 	}
 	
 	UpdateContent(FilteredVideos);
+}
+
+function CheckForDuplicates(){
+	const Check = new Map();
+	const CheckDateDuration = new Map();
+	
+	const Duplicates = [];
+	
+	for(const Video of VIDEOS){
+		const Date     = Video[2];
+		const URL      = Video[3];
+		const Duration = Video[5];
+		
+		const KeyFull = Date + "|" + URL + "|" + Duration;
+		
+		if(Check.has(KeyFull)){
+			Duplicates.push([
+				Check.get(KeyFull),
+				Video,
+				"Полный дубликат"
+			]);
+		}else{
+			Check.set(KeyFull, Video);
+		}
+		
+		const KeyDateDuration = Date + "|" + Duration;
+		
+		if(CheckDateDuration.has(KeyDateDuration)){
+			Duplicates.push([
+				CheckDateDuration.get(KeyDateDuration),
+				Video,
+				"По дате и длительности"
+			]);
+		}else{
+			CheckDateDuration.set(KeyDateDuration, Video);
+		}
+	}
+	
+	if(Duplicates.length > 0){
+		var Filter = "";
+		function AddToFilter(ID){
+			if(Filter){ Filter += " "; }
+			
+			Filter += "%2Bid%3A" + ID;
+		}
+	
+		for(const Pair of Duplicates){
+			const Original = Pair[0];
+			const Duplicat = Pair[1];
+			
+			console.log("Дубликат: " + Original[0] + " == " + Duplicat[0] + " | " + Pair[2])
+			
+			AddToFilter(Original[0]);
+			AddToFilter(Duplicat[0]);
+		}
+		
+		window.location.href = CurrentURL + "#" + Filter + " sort%3Acreation";
+		
+		throw new Error("Дубликаты найдены!");
+	}else{
+		console.log("Дубликаты не найдены!");
+	}
 }
 
 window.addEventListener("load", () => {
