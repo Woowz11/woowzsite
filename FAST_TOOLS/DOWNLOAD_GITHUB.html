@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Downloader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #0f1117;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .Card {
+            background: #161b22;
+            padding: 25px;
+            border-radius: 10px;
+            width: 450px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        input {
+            background: #0d1117;
+            color: white;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #444;
+        }
+
+        .Log {
+            margin-top: 10px;
+            background: #0d1117;
+            padding: 10px;
+            height: 120px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="Card">
+    <h3>GitHub URL Downloader</h3>
+
+    <input id="Url" placeholder="Вставь ссылку GitHub (tree / blob)">
+    <input id="Token" type="password" placeholder="GitHub Token (опционально)">
+
+    <button id="Btn" onclick="Download()">Скачать</button>
+
+    <div id="Log" class="Log"></div>
+</div>
+
+<script>
+const MAX_CONCURRENCY = 5;
+const LogEl = document.getElementById("Log");
+
+function Log(text) {
+    LogEl.innerHTML += text + "<br>";
+    LogEl.scrollTop = LogEl.scrollHeight;
+}
+
+function NormalizePath(path) {
+    return path.replace(/^\/+/, "").replace(/\/+$/, "");
+}
+
+function ParseGitHubUrl(url) {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean);
+    return {
+        owner: parts[0],
+        repo: parts[1],
+        branch: parts[3] || "main",
+        path: decodeURIComponent(parts.slice(4).join("/"))
+    };
+}
+
+async function GetTree(owner, repo, branch) {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
+    if (!res.ok) throw new Error("Tree error: " + res.status);
+    return (await res.json()).tree;
+}
+
+async function DownloadFileRaw(owner, repo, branch, filePath) {
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Raw download failed: " + filePath);
+    const data = await res.arrayBuffer();
+    return new Uint8Array(data);
+}
+
+async function DownloadFiles(tree, owner, repo, branch, basePath, zip) {
+    basePath = NormalizePath(basePath);
+    const files = tree.filter(f => f.type === "blob" && (basePath === "" || f.path.startsWith(basePath + "/") || f.path === basePath));
+    Log("Файлов: " + files.length);
+    let index = 0;
+
+    async function Worker() {
+        while (true) {
+            const i = index++;
+            if (i >= files.length) break;
+            const file = files[i];
+            try {
+                const bytes = await DownloadFileRaw(owner, repo, branch, file.path);
+                let relative = file.path;
+                if (basePath) relative = relative.substring(basePath.length).replace(/^\/+/, "");
+                zip.file(relative, bytes);
+                Log("⬇ " + file.path);
+            } catch (e) {
+                Log("❌ fail: " + file.path);
+            }
+        }
+    }
+
+    await Promise.all(Array.from({ length: MAX_CONCURRENCY }, Worker));
+}
+
+async function Download() {
+    const Btn = document.getElementById("Btn");
+    Btn.disabled = true;
+    LogEl.innerHTML = "";
+    try {
+        const url = document.getElementById("Url").value.trim();
+        const { owner, repo, branch, path } = ParseGitHubUrl(url);
+        Log(`Repo: ${owner}/${repo}`);
+        Log(`Branch: ${branch}`);
+        Log(`Path: ${path}`);
+
+        const zip = new JSZip();
+        const tree = await GetTree(owner, repo, branch);
+
+        await DownloadFiles(tree, owner, repo, branch, path, zip);
+
+        Log("📦 Архивация...");
+        const content = await zip.generateAsync({ type: "blob" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = (repo + (path ? "_" + path : "") + ".zip").replace(/[\\/:*?"<>|]/g,"_");
+        link.click();
+        Log("✅ Готово");
+    } catch (e) {
+        Log("❌ " + e.message);
+    }
+    Btn.disabled = false;
+}
+</script>
+
+</body>
+</html>
