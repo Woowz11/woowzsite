@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>JSON → HTML Generator</title>
+<meta name="referrer" content="no-referrer"> <!-- Важно для Discord CDN -->
+<title>JSON → HTML Generator (Video/Audio Fix)</title>
 
 <style>
 
@@ -23,7 +24,7 @@ progress{
 </head>
 <body>
 
-<h2>JSON → HTML генератор</h2>
+<h2>JSON → HTML генератор (v2.1 - Discord CDN Fix)</h2>
 
 <input type="file" id="FileInput">
 
@@ -70,7 +71,9 @@ FileInput.addEventListener("change", async function() {
         const Total = Data.length;
         let MessagesHTML = "";
         let PhotosHTML = "";
-        let AllLinks = ""; // сюда собираем все ссылки
+        let AllLinks = "";
+        let VideosHTML = "";
+        let AudiosHTML = "";
 
         Progress.value = 0;
 
@@ -87,7 +90,6 @@ FileInput.addEventListener("change", async function() {
                 const WithLinks = Linkify(SafeText, ID, Time);
                 Html += `<div class="c">${WithLinks}</div>`;
 
-                // собираем ссылки из текста
                 const TextLinks = ExtractLinks(Msg.Contents, ID, Time);
                 AllLinks += TextLinks;
             }
@@ -97,17 +99,74 @@ FileInput.addEventListener("change", async function() {
                 for (const Url of UrlList) {
                     if (!Url.startsWith("http")) continue;
 
-                    if (IsImage(Url)) {
-                        Html += `<img loading="lazy" src="${Url}" title="Message ID: ${ID} | ${Time}">`;
+                    // Очищаем URL от лишних пробелов
+                    const CleanUrl = Url.trim();
+
+                    if (IsImage(CleanUrl)) {
+                        Html += `<img loading="lazy" src="${CleanUrl}" title="Message ID: ${ID} | ${Time}" crossorigin="anonymous">`;
                         PhotosHTML += `
 <div class="img">
-<a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">
-<img src="${Url}" loading="lazy">
+<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time}">
+<img src="${CleanUrl}" loading="lazy" crossorigin="anonymous">
 </a>
 </div>`;
+                    } else if (IsVideo(CleanUrl)) {
+                        Html += `
+                        <div class="media-attachment">
+                            <video controls preload="metadata" crossorigin="anonymous" style="max-width:100%; max-height:300px; margin-top:5px;" title="Message ID: ${ID} | ${Time}">
+                                <source src="${CleanUrl}" type="video/mp4">
+                                <p>Ваш браузер не поддерживает видео. <a href="${CleanUrl}" target="_blank">Скачать видео</a></p>
+                            </video>
+                            <div style="font-size:11px; margin-top:3px;">
+                                <a href="${CleanUrl}" target="_blank" download>💾 Скачать если не грузится</a>
+                            </div>
+                        </div>`;
+                        
+                        VideosHTML += `
+                        <div class="media-item">
+                            <video controls preload="metadata" crossorigin="anonymous" style="width:100%; max-height:300px;">
+                                <source src="${CleanUrl}" type="video/mp4">
+                                <p>Видео не загружается. <a href="${CleanUrl}" target="_blank">Открыть напрямую</a></p>
+                            </video>
+                            <div class="media-info">
+                                <div>ID: ${ID}</div>
+                                <div>${Time}</div>
+                                <div>
+                                    <a href="${CleanUrl}" target="_blank">🔗 Открыть</a>
+                                    <a href="${CleanUrl}" download style="margin-left:8px;">⬇️ Скачать</a>
+                                </div>
+                            </div>
+                        </div>`;
+                    } else if (IsAudio(CleanUrl)) {
+                        Html += `
+                        <div class="media-attachment">
+                            <audio controls preload="metadata" crossorigin="anonymous" style="margin-top:5px; width:100%;" title="Message ID: ${ID} | ${Time}">
+                                <source src="${CleanUrl}">
+                                <p>Аудио не загружается. <a href="${CleanUrl}" target="_blank">Скачать аудио</a></p>
+                            </audio>
+                            <div style="font-size:11px; margin-top:3px;">
+                                <a href="${CleanUrl}" target="_blank" download>💾 Скачать если не грузится</a>
+                            </div>
+                        </div>`;
+                        
+                        AudiosHTML += `
+                        <div class="media-item">
+                            <audio controls preload="metadata" crossorigin="anonymous" style="width:100%;">
+                                <source src="${CleanUrl}">
+                                <p>Аудио не загружается. <a href="${CleanUrl}" target="_blank">Открыть напрямую</a></p>
+                            </audio>
+                            <div class="media-info">
+                                <div>ID: ${ID}</div>
+                                <div>${Time}</div>
+                                <div>
+                                    <a href="${CleanUrl}" target="_blank">🔗 Открыть</a>
+                                    <a href="${CleanUrl}" download style="margin-left:8px;">⬇️ Скачать</a>
+                                </div>
+                            </div>
+                        </div>`;
                     } else {
-                        Html += `<a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">${Url}</a>`;
-                        AllLinks += `<div><a href="${Url}" title="Message ID: ${ID} | ${Time}" target="_blank">${Url}</a></div>`;
+                        Html += `<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time}">${CleanUrl}</a>`;
+                        AllLinks += `<div><a href="${CleanUrl}" title="Message ID: ${ID} | ${Time}" target="_blank">${CleanUrl}</a></div>`;
                     }
                 }
             }
@@ -128,9 +187,10 @@ FileInput.addEventListener("change", async function() {
 
         DownloadFile(BuildMessagesHTML(MessagesHTML), "messages.html");
         DownloadFile(BuildPhotosHTML(PhotosHTML), "photos.html");
-        DownloadFile(BuildLinksHTML(AllLinks), "links.html"); // передаем все ссылки
+        DownloadFile(BuildLinksHTML(AllLinks), "links.html");
+        DownloadFile(BuildMediaHTML(VideosHTML, AudiosHTML), "media.html");
 
-        Status.textContent = "Готово. Скачано 3 HTML файла.";
+        Status.textContent = "Готово. Скачано 4 HTML файла.";
 
     } catch(Error) {
         alert("Ошибка обработки архива");
@@ -140,87 +200,45 @@ FileInput.addEventListener("change", async function() {
 
 
 function Linkify(text,ID,Time){
-
     return text.replace(
         /(https?:\/\/[^\s]+)/g,
         `<a href="$1" target="_blank" title="Message ID: ${ID} | ${Time}">$1</a>`
     );
-
 }
 
 function ExtractLinks(text,ID,Time){
-
     const Matches = text.match(/https?:\/\/[^\s]+/g);
-
     if(!Matches) return "";
-
     let Result = "";
-
     for(const Url of Matches){
-
-        if(IsImage(Url)) continue; // пропускаем картинки
-
+        if(IsImage(Url) || IsVideo(Url) || IsAudio(Url)) continue;
         Result += `<div><a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">${Url}</a></div>`;
-
     }
-
     return Result;
-
 }
 
 function BuildMessagesHTML(Content){
-
 return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <title>Messages</title>
-
 <style>
-
-body{
-    font-family:Arial;
-    background:#111;
-    color:#eee;
-    padding:10px;
-}
-
-.m{
-    border-bottom:1px solid #222;
-    padding:4px;
-    font-size:13px;
-}
-
-.t{
-    color:#777;
-    font-size:11px;
-}
-
-.c{
-    margin-top:2px;
-    white-space:pre-wrap;
-}
-
-img{
-    max-width:240px;
-    margin-top:4px;
-}
-
-a{
-    color:#6aa9ff;
-    word-break:break-all;
-}
-
+body{font-family:Arial;background:#111;color:#eee;padding:10px;}
+.m{border-bottom:1px solid #222;padding:4px;font-size:13px;}
+.t{color:#777;font-size:11px;}
+.c{margin-top:2px;white-space:pre-wrap;}
+img{max-width:240px;margin-top:4px;}
+a{color:#6aa9ff;word-break:break-all;}
+.media-attachment{margin-top:5px;}
+video, audio{background:#000;border-radius:6px;}
 </style>
-
 </head>
 <body>
-
 ${Content}
-
 </body>
 </html>`;
-
 }
 
 function BuildPhotosHTML(Content){
@@ -228,72 +246,176 @@ return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <title>Photos</title>
 <style>
-body{
-    background:#111;
-    color:#eee;
-    font-family:Arial;
-    padding:20px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
-    gap:8px;
-}
-
-.img{
-    position:relative;
-    background:#222;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    min-height:80px; /* минимальная высота для placeholder */
-}
-
-.img img{
-    max-width:100%;
-    max-height:100%;
-    height:auto;
-    width:auto;
-    display:block;
-}
-
-.img span{
-    position:absolute;
-    color:#666;
-    font-size:12px;
-    pointer-events:none;
-}
-
+body{background:#111;color:#eee;font-family:Arial;padding:20px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:8px;}
+.img{position:relative;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:80px;}
+.img img{max-width:100%;max-height:100%;height:auto;width:auto;display:block;}
+.img span{position:absolute;color:#666;font-size:12px;pointer-events:none;}
 </style>
 </head>
 <body>
-
 <h2>Photos</h2>
-
 <div class="grid">
-
 ${Content}
-
 </div>
-
 <script>
-// Добавляем индикатор загрузки для каждого изображения
 document.querySelectorAll('.img img').forEach(img=>{
     const Span = document.createElement('span');
     Span.textContent = 'loading...';
     img.parentNode.appendChild(Span);
-
-    img.onload = () => {
-        Span.remove(); // убираем надпись после загрузки
-    };
-    img.onerror = () => {
-        Span.textContent = 'failed';
-    };
+    img.onload = () => Span.remove();
+    img.onerror = () => { Span.textContent = 'failed'; };
 });
+</${"script"}>
+</body>
+</html>`;
+}
+
+function BuildMediaHTML(VideosContent, AudiosContent) {
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<title>Media Player (Video & Audio)</title>
+<style>
+    body {
+        background: #0a0a0a;
+        color: #eee;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        padding: 20px;
+        margin: 0;
+    }
+    h2 {
+        border-bottom: 1px solid #333;
+        padding-bottom: 10px;
+        color: #fff;
+    }
+    .section {
+        margin-bottom: 40px;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+    .media-item {
+        background: #151515;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 15px;
+        border: 1px solid #2a2a2a;
+        transition: transform 0.1s ease;
+    }
+    .media-item:hover {
+        border-color: #444;
+        background: #1a1a1a;
+    }
+    video {
+        width: 100%;
+        height: auto;
+        background: #000;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        max-height: 260px;
+        object-fit: contain;
+    }
+    audio {
+        width: 100%;
+        margin-bottom: 12px;
+        background: #000;
+        border-radius: 30px;
+        height: 45px;
+    }
+    .media-info {
+        font-size: 12px;
+        color: #aaa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .media-info a {
+        color: #6aa9ff;
+        text-decoration: none;
+        border: 1px solid #333;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        background: #1e1e1e;
+        transition: all 0.2s;
+    }
+    .media-info a:hover {
+        background: #2a3a5a;
+        border-color: #6aa9ff;
+    }
+    .empty-message {
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+    }
+    .warning-note {
+        background: #2a2a00;
+        color: #ffd700;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+</style>
+</head>
+<body>
+
+<div class="warning-note">
+    ⚠️ Если видео/аудио не загружается (показывает 0:00) - используйте кнопку "Скачать". 
+    Discord ограничивает прямое воспроизведение с CDN в сторонних HTML файлах.
+</div>
+
+<div class="section">
+    <h2>📹 Videos (${VideosContent ? VideosContent.split('media-item').length - 1 : 0})</h2>
+    <div class="grid">
+        ${VideosContent || '<div class="empty-message">Видео не найдено в архиве</div>'}
+    </div>
+</div>
+
+<div class="section">
+    <h2>🎵 Audio (${AudiosContent ? AudiosContent.split('media-item').length - 1 : 0})</h2>
+    <div class="grid">
+        ${AudiosContent || '<div class="empty-message">Аудио не найдено в архиве</div>'}
+    </div>
+</div>
+
+<script>
+    // Обработка ошибок загрузки медиа
+    document.querySelectorAll('video, audio').forEach(media => {
+        media.addEventListener('error', (e) => {
+            console.log('Media load error:', media.src);
+            const parent = media.closest('.media-item');
+            if(parent) {
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'color:#f66;padding:10px;font-size:12px;background:#2a0000;border-radius:4px;margin-top:8px;';
+                errorMsg.innerHTML = '❌ Ошибка загрузки. Используйте кнопку "Скачать" ниже.';
+                parent.insertBefore(errorMsg, media.nextSibling);
+            }
+        });
+        
+        // Пытаемся перезагрузить если не грузится
+        media.addEventListener('loadedmetadata', () => {
+            console.log('Loaded:', media.src);
+        });
+    });
+    
+    // Добавляем обработку для source элементов
+    document.querySelectorAll('source').forEach(source => {
+        source.addEventListener('error', (e) => {
+            console.log('Source error:', source.src);
+        });
+    });
 </${"script"}>
 
 </body>
@@ -305,6 +427,7 @@ function BuildLinksHTML(Content) {
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <title>Links</title>
 <style>
 body{background:#0f0f0f;color:#eee;font-family:Segoe UI,Arial;padding:20px;}
@@ -323,9 +446,7 @@ a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
-
 <h2>Links</h2>
-
 <table id="LinksTable">
 <thead>
 <tr>
@@ -338,32 +459,25 @@ a:hover{text-decoration:underline;}
 </thead>
 <tbody></tbody>
 </table>
-
 <script>
 const Parser = new DOMParser();
 const Doc = Parser.parseFromString(${JSON.stringify(Content)}, "text/html");
 const Links = [...Doc.querySelectorAll("a")];
 const TableBody = document.querySelector("#LinksTable tbody");
-
 for (const A of Links) {
     const Url = A.href;
     let Domain = "";
     let Ext = "~";
     let Short = "";
     let Time = A.getAttribute("title") || "";
-
     try {
         const U = new URL(Url);
         Domain = U.hostname;
-
-        // короткий URL — только последний сегмент пути
         const PathParts = U.pathname.split("/").filter(p => p.length > 0);
         Short = PathParts.length > 0 ? PathParts[PathParts.length - 1] : "/";
-
         const match = U.pathname.match(/\\.([a-z0-9]+)$/i);
         if (match) Ext = match[1].toLowerCase();
     } catch {}
-
     const Row = document.createElement("tr");
     Row.innerHTML = \`
 <td class="type">\${Ext}</td>
@@ -374,69 +488,53 @@ for (const A of Links) {
 \`;
     TableBody.appendChild(Row);
 }
-
-// Быстрая сортировка через массив строк
 function sortTable(colIndex) {
     const tbody = document.querySelector("#LinksTable tbody");
     const rows = Array.from(tbody.querySelectorAll("tr"));
     let asc = tbody.getAttribute("data-sort-dir") !== "asc";
     tbody.setAttribute("data-sort-dir", asc ? "asc" : "desc");
-
     rows.sort((a,b)=>{
         let x=a.cells[colIndex].textContent.trim();
         let y=b.cells[colIndex].textContent.trim();
-
         if(colIndex===3){
             const dx=new Date(x), dy=new Date(y);
             if(!isNaN(dx) && !isNaN(dy)) return asc ? dx-dy : dy-dx;
         }
-
         x=x.toLowerCase(); y=y.toLowerCase();
         if(x<y) return asc?-1:1;
         if(x>y) return asc?1:-1;
         return 0;
     });
-
     tbody.innerHTML="";
     rows.forEach(r=>tbody.appendChild(r));
 }
 </${"script"}>
-
 </body>
 </html>`;
 }
 
-function DownloadFile(content,name){
-
+function DownloadFile(content, name){
     const BlobFile = new Blob([content], {type:"text/html"});
-
     const url = URL.createObjectURL(BlobFile);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = name;
     a.click();
-
+    setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-function IsImage(url){
-
-    return /\.(png|jpg|jpeg|gif|webp)/i.test(url);
-
-}
+function IsImage(url){ return /\.(png|jpg|jpeg|gif|webp|bmp|svg)/i.test(url); }
+function IsVideo(url){ return /\.(mp4|webm|mov|avi|mkv|flv|m4v|ogv|3gp)/i.test(url); }
+function IsAudio(url){ return /\.(mp3|wav|ogg|m4a|flac|aac|opus|weba)/i.test(url); }
 
 function EscapeHTML(text){
-
     const Div = document.createElement("div");
     Div.innerText = text;
     return Div.innerHTML;
-
 }
 
 function YieldThread(){
-
     return new Promise(resolve => setTimeout(resolve));
-
 }
 
 </script>
