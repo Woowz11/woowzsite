@@ -262,6 +262,11 @@ tag:"" - Поиск по названию тега<br>
 tag:0 - Поиск по ID тега<br>
 visible:0 - Поиск по публичности видео (0 - Скрыто, 1 - Ссылка, 2 - Публичное, 3 - Заблокированное)
 <hr>
+before:дата - Создано до (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
+after:дата - Создано после (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
+publish_before:дата - Опубликовано до (DD.MM.YYYY || YYYY.MM.DD)<br>
+publish_after:дата - Опубликовано после (DD.MM.YYYY || YYYY.MM.DD)<br>
+<hr>
 sort:id - Сортировка по ID<br>
 sort:name - Сортировка по имени<br>
 sort:creation - Сортировка по времени создания<br>
@@ -285,6 +290,7 @@ sort:tags - Сортировка по кол-ву тегов<br>
 			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
 		</div>
 		<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
+		<button class="Button" onclick="CheckForMissingID();">Проверить пропуски ID</button>
 	</div>
 </div>
 
@@ -361,6 +367,29 @@ function RainbowColor(T, Alpha){
 	return `hsl(${T * 300}, 100%, 50%, ${Alpha})`;
 }
 
+function ParseDate(Input){
+	if(!Input || Input === UNKNOWN_Date){ return null; }
+
+	const Parts = Input.split(" ");
+	const DatePart = Parts[0];
+
+	let Y, M, D;
+
+	if(DatePart.includes(".")){
+		const nums = DatePart.split(".");
+		
+		if(nums[0].length === 4){
+			// YYYY.MM.DD
+			[Y, M, D] = nums.map(n => parseInt(n, 10));
+		}else{
+			// DD.MM.YYYY
+			[D, M, Y] = nums.map(n => parseInt(n, 10));
+		}
+	}
+
+	return new Date(Y, M - 1, D).getTime();
+}
+
 function UpdateContent(VideosList){
 	const AddedIDs = new Set();
 
@@ -403,7 +432,7 @@ function UpdateContent(VideosList){
 					if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
 					if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
 				}catch(e){
-					throw new Error("Произошла ошибка при загрузке видео [" + Video + "]!");
+					throw new Error("Произошла ошибка при загрузке видео [" + Video + "]! " + e);
 				}
 			}
 
@@ -521,7 +550,7 @@ function UpdateContent(VideosList){
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
-				<div class="SmallPanel" tooltip="Длительность видео: ${Seconds} секунд" style="height:${Height}; background-color:${OriginalDuration == DEFAULT_Duration ? 'black' : RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
+				<div class="SmallPanel" tooltip="Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)" style="height:${Height}; background-color:${OriginalDuration == DEFAULT_Duration ? 'black' : RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
 				<a class="ContentURL" tooltip="Установить в поиск только видео подобного типа" href="${CurrentURL}#visible%3A${Visibility}"><div class="SmallPanel" style="height:${Height};">${VisibilityText}</div></a>
@@ -884,6 +913,18 @@ function Search(){
 		}else if(Value.startsWith("visible:")){
 			Field = "visible";
 			Value = Value.slice(8);
+		}else if(Value.startsWith("before:")){
+			Field = "before";
+			Value = Value.slice(7);
+		}else if(Value.startsWith("after:")){
+			Field = "after";
+			Value = Value.slice(6);
+		}else if(Value.startsWith("publish_before:")){
+			Field = "publish_before";
+			Value = Value.slice(15);
+		}else if(Value.startsWith("publish_after:")){
+			Field = "publish_after";
+			Value = Value.slice(14);
 		}
 		
 		SearchConditions.push({Field: Field, Value: Value.toLowerCase(), Exclude: Exclude, OR: OR});
@@ -914,6 +955,22 @@ function Search(){
 				}
 			}else if(Condution.Field == "visible"){
 				M = Visibility === parseInt(Condution.Value, 10);
+			}else if(Condution.Field === "before"){
+				const VideoTime = ParseDate(CreationDate);
+				const Target    = ParseDate(Condution.Value);
+				M = VideoTime && Target && VideoTime <= Target;
+			}else if(Condution.Field === "after"){
+				const VideoTime = ParseDate(CreationDate);
+				const Target    = ParseDate(Condution.Value);
+				M = VideoTime && Target && VideoTime >= Target;
+			}else if(Condution.Field === "publish_before"){
+				const VideoTime = ParseDate(PublishDate);
+				const Target    = ParseDate(Condution.Value);
+				M = VideoTime && Target && VideoTime <= Target;
+			}else if(Condution.Field === "publish_after"){
+				const VideoTime = ParseDate(PublishDate);
+				const Target    = ParseDate(Condution.Value);
+				M = VideoTime && Target && VideoTime >= Target;
 			}
 			
 			if(Condution.Exclude){ M = !M; }
@@ -1021,6 +1078,45 @@ function CheckForDuplicates(){
 		throw new Error("Дубликаты найдены!");
 	}else{
 		console.log("Дубликаты не найдены!");
+	}
+}
+
+function CheckForMissingID(){
+	const IDs = VIDEOS.map(v => v[0]).sort((a, b) => a - b);
+
+	if(IDs.length === 0){
+		console.log("Нет видео для проверки");
+		return;
+	}
+
+	const Min = IDs[0];
+	const Max = IDs[IDs.length - 1];
+
+	const Missing = [];
+
+	const IDSet = new Set(IDs);
+
+	for(var i = Min; i <= Max; i++){
+		if(!IDSet.has(i)){
+			Missing.push(i);
+		}
+	}
+
+	if(Missing.length > 0){
+		console.warn("Пропущенные ID:", Missing);
+
+		var Filter = "";
+		for(const id of Missing){
+			if(Filter) Filter += " ";
+			Filter += "%2Bid%3A" + id;
+		}
+
+		ShowErrorNotification("Найдены пропуски ID: " + Missing.join(", "));
+		
+		window.location.href = CurrentURL + "#" + Filter + " sort%3Aid";
+	}else{
+		console.log("Пропусков нет");
+		ShowErrorNotification("Пропусков ID не найдено");
 	}
 }
 
