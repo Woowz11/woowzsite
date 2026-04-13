@@ -240,6 +240,10 @@ WoowzsiteSourceLituism = AddFullnessToTable([
 	"purple","yellow","level","dark_purple","dark"
 ],"source/lituism/",".png");
 
+GOLUPREVIEW = AddFullnessToTable([
+	"1","2","3","4","5","6","7"
+], "source/GOLUPREVIEW/", ".png");
+
 WoowzsiteSourceCore = AddTableToTable(AddFullnessToTable([
 	"ants","bath_oil_pearls","beer","bg","button","dice","husky","spider_crab","teeth","chess","poison","trash_can","nokia","error","dark","rainbow_tiles","color-tunel","web","melted-dvd","w","face","cheese_mouse","eye",
 	"ie","biohazard","emo_scene_rave_rainbow_smiley","molted","balls","weird","ballons","0_0","rabbit",
