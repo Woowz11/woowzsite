@@ -1,14 +1,23 @@
-function AddFullnessToTable(tabl, left = "", right = ""){
-	if (left == null){left = ""}
-	if (right   == null){right   = ""}
+function AddFullnessToTable(tabl, left, right){
+	if(left  == null){left  = ""}
+	if(right == null){right = ""}
 	var result = []
-	for (let str of tabl){
+	for(var str of tabl){
 		result.push(left + str + right)
 	}
 	return result
 }
+
 function AddTableToTable(A,B){
 	return A.concat(B);
+}
+
+function AddTables(...tables){
+	var result = [];
+	for (let t of tables){
+		result = result.concat(t);
+	}
+	return result;
 }
 
 /*__________________________________________________________________________________________________*/
@@ -354,27 +363,30 @@ BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
-	return AddTableToTable(WoowzsiteSourceImagesPNG,
-	AddTableToTable(WoowzsiteSourceImagesJPG,
-	AddTableToTable(WoowzsiteSourceImagesGIF,
-	AddTableToTable(WoowzsiteSourceDiscordAvatars,
-	AddTableToTable(WoowzsiteSourceWoowzengine,
-	AddTableToTable(WoowzsiteSourceWldouiBackrooms,
-	AddTableToTable(WoowzsiteSourceCats,
-	AddTableToTable(WoowzsiteSourceBloodraw,
-	AddTableToTable(WoowzsiteSourceRandomSite,
-	AddTableToTable(WoowzsiteSourceBloodeyeSystems,
-	AddTableToTable(WoowzsiteSourceCore,
-	AddTableToTable(WoowzsiteSourceIcons,
-	AddTableToTable(WoowzsiteSourceCorruptedMinecraft,
-	AddTableToTable(WoowzsiteSourceAlchemy,
-	AddTableToTable(GetAllBloodrawSkinEditor(),
-	AddTableToTable(GitExplorerSource,
-	AddTableToTable(WoowzsiteLituism,
-	AddTableToTable(WoowzsiteSourceWoowzcore,
-	AddTableToTable(WoowzEngineWiki,
-					LithiumArts
-	)))))))))))))))))));
+	return AddTables(
+		WoowzsiteSourceImagesPNG,
+		WoowzsiteSourceImagesJPG,
+		WoowzsiteSourceImagesGIF,
+		WoowzsiteSourceDiscordAvatars,
+		WoowzsiteSourceWoowzengine,
+		WoowzsiteSourceWldouiBackrooms,
+		WoowzsiteSourceCats,
+		WoowzsiteSourceBloodraw,
+		WoowzsiteSourceRandomSite,
+		WoowzsiteSourceBloodeyeSystems,
+		WoowzsiteSourceCore,
+		WoowzsiteSourceIcons,
+		WoowzsiteSourceCorruptedMinecraft,
+		WoowzsiteSourceAlchemy,
+		GetAllBloodrawSkinEditor(),
+		GitExplorerSource,
+		WoowzsiteLituism,
+		WoowzsiteSourceWoowzcore,
+		WoowzEngineWiki,
+		LithiumArts,
+		GOLUPREVIEW,
+		WoowzsiteSourceLituism
+	);
 }
 
 function GetAllWoowzsiteAudios(){
@@ -385,20 +397,21 @@ function GetAllWoowzsiteAudios(){
 }
 
 function GetAllBloodrawSkinEditor(){
-	return AddTableToTable(BloodrawSkinEditorBody,
-	AddTableToTable(BloodrawSkinEditorBoots,
-	AddTableToTable(BloodrawSkinEditorCloths,
-	AddTableToTable(BloodrawSkinEditorHats,
-	AddTableToTable(BloodrawSkinEditorLowerdecor,
-	AddTableToTable(BloodrawSkinEditorMask,
-	AddTableToTable(BloodrawSkinEditorPants,
-	AddTableToTable(BloodrawSkinEditorHairs,
-	AddTableToTable(BloodrawSkinEditorTattoo,
-	AddTableToTable(BloodrawSkinEditorUnderpants,
-	AddTableToTable(BloodrawSkinEditorGradientsHairs,
-	AddTableToTable(BloodrawSkinEditorGradientsSkins,
-					BloodrawSkinEditorUpperdecor
-	))))))))))));
+	return AddTables(
+		BloodrawSkinEditorBody,
+		BloodrawSkinEditorBoots,
+		BloodrawSkinEditorCloths,
+		BloodrawSkinEditorHats,
+		BloodrawSkinEditorLowerdecor,
+		BloodrawSkinEditorMask,
+		BloodrawSkinEditorPants,
+		BloodrawSkinEditorHairs,
+		BloodrawSkinEditorTattoo,
+		BloodrawSkinEditorUnderpants,
+		BloodrawSkinEditorGradientsHairs,
+		BloodrawSkinEditorGradientsSkins,
+		BloodrawSkinEditorUpperdecor
+	);
 }
 
 function GetAllWoowzsiteImages(){
@@ -526,4 +539,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
    ░░▓▓████████▓▓░░
       ░░░░░░░░░░
    G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида","Hi, welcome there!", "Hi, welcome here!", "G0LU", "G01U",
-   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ"]
+   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ",
+   "электробус", "свастика", "самса", "ваня", "кот", "чучело", "кот чучело", "тистикулы", "канибализм"]
