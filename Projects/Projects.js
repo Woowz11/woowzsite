@@ -345,7 +345,7 @@ Add({
 	Links: ["https://woowz11.github.io/woowzsite/Portfolio"],
 	Description: "Сайт который содержит в себе портфолио Woowz11, описания его проектов",
 	Type: Type_Website,
-	Status: Status_Active,
+	Status: Status_Frozen,
 	CreationDate: "2026.03.30"
 });
 
