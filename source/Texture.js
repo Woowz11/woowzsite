@@ -565,42 +565,109 @@ class Texture{
 	/* Повернуть текстуру */
 	Rotate(Deg = 0){
 		try{
-			if(Deg % 360 === 0){ return; }
-			
-			const Rad = Deg * Math.PI / 180;
-			
-			const C = Math.cos(Rad); const S = Math.sin(Rad);
-			
-			const CX = this.W / 2; const CY = this.H / 2;
-			
-			const NewContent = new Uint8ClampedArray(this.W * this.H * 4);
-			
-			for(var Y = 0; Y < this.H; Y++){
-				for(var X = 0; X < this.W; X++){
-					const SX =  (X - CX) * C + (Y - CY) * S + CX;
-					const SY = -(X - CX) * S + (Y - CY) * C + CY;
-					
-					const D = (Y * this.W + X) * 4;
-					
-					if(SX >= 0 && SY >= 0 && SX < this.W && SY < this.H){
-						const I = (Math.floor(SY) * this.W + Math.floor(SX)) * 4;
-						
+			Deg = ((Deg % 360) + 360) % 360;
+
+			if(Deg % 90 === 0){
+				var RW = this.W;
+				var RH = this.H;
+
+				if(Deg === 90 || Deg === 270){
+					RW = this.H;
+					RH = this.W;
+				}
+
+				const NewContent = new Uint8ClampedArray(RW * RH * 4);
+
+				for(var Y = 0; Y < RH; Y++){
+					for(var X = 0; X < RW; X++){
+
+						var SX, SY;
+
+						if(Deg === 0){
+							SX = X; SY = Y;
+						}else if(Deg === 90){
+							SX = Y;
+							SY = this.H - 1 - X;
+						}else if(Deg === 180){
+							SX = this.W - 1 - X;
+							SY = this.H - 1 - Y;
+						}else if(Deg === 270){
+							SX = this.W - 1 - Y;
+							SY = X;
+						}
+
+						const D = ( Y * RW     +  X) * 4;
+						const I = (SY * this.W + SX) * 4;
+
 						NewContent[D + 0] = this.Content[I + 0];
 						NewContent[D + 1] = this.Content[I + 1];
 						NewContent[D + 2] = this.Content[I + 2];
 						NewContent[D + 3] = this.Content[I + 3];
-					}else{
-						NewContent[D + 0] = 0;
-						NewContent[D + 1] = 0;
-						NewContent[D + 2] = 0;
-						NewContent[D + 3] = 0;
+					}
+				}
+
+				this.W = RW;
+				this.H = RH;
+				this.Content = NewContent;
+
+				this.C.width  = RW;
+				this.C.height = RH;
+
+				this.__UpdateCanvas();
+				return this;
+			}
+
+			const Rad = -Deg * Math.PI / 180;
+			const C   = Math.cos(Rad);
+			const S   = Math.sin(Rad);
+
+			const OW = this.W;
+			const OH = this.H;
+
+			const NewW = Math.ceil(Math.abs(OW * C) + Math.abs(OH * S));
+			const NewH = Math.ceil(Math.abs(OW * S) + Math.abs(OH * C));
+
+			const CX = OW / 2;
+			const CY = OH / 2;
+
+			const NCX = NewW / 2;
+			const NCY = NewH / 2;
+
+			const NewContent = new Uint8ClampedArray(NewW * NewH * 4);
+
+			for(let Y = 0; Y < NewH; Y++){
+				for(let X = 0; X < NewW; X++){
+
+					var DX = X - NCX;
+					var DY = Y - NCY;
+
+					var SX =  DX * C + DY * S + CX;
+					var SY = -DX * S + DY * C + CY;
+
+					SX = SX | 0;
+					SY = SY | 0;
+
+					if(SX >= 0 && SY >= 0 && SX < OW && SY < OH){
+						const D = ( Y * NewW +  X) * 4;
+						const I = (SY * OW   + SX) * 4;
+
+						NewContent[D + 0] = this.Content[I + 0];
+						NewContent[D + 1] = this.Content[I + 1];
+						NewContent[D + 2] = this.Content[I + 2];
+						NewContent[D + 3] = this.Content[I + 3];
 					}
 				}
 			}
-			
+
+			this.W = NewW;
+			this.H = NewH;
 			this.Content = NewContent;
+
+			this.C.width = NewW;
+			this.C.height = NewH;
+
 			this.__UpdateCanvas();
-			
+
 			return this;
 		}catch(e){
 			throw new Error("Произошла ошибка при повороте текстуры [" + this + "]! Rotate(" + Deg + ");", e);

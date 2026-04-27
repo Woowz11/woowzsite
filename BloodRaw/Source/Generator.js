@@ -21,6 +21,7 @@ Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz1
 
 var Console = document.getElementById("Console");
 
+var __TotalConsoleMessages = 0;
 Logger.Console = function(Message, Type = 0, Title){
 	switch(Type){
 		case 0: Logger.Info (Message, null, InGeneration ? "color: lime;" : undefined); break;
@@ -35,7 +36,9 @@ Logger.Console = function(Message, Type = 0, Title){
 	
 	if(Type > 0){ M.style.color = Type === 1 ? "yellow" : "red"; }
 	
-	M.textContent = "[" + String((Date.now() - GenerationStartTime)).padEnd(4, "-") + "]: " + Message;
+	__TotalConsoleMessages++;
+	
+	M.textContent = "(" + String(__TotalConsoleMessages).padStart(4, "0") + ") [" + String((Date.now() - GenerationStartTime)).padStart(4, "0") + "]: " + Message;
 	
 	Console.appendChild(M);
 }
@@ -209,15 +212,26 @@ async function UpdateText(Text){
 	const MaxInterations = 50; // Макс итеракций
 	var CurrentText = Text;
 	
+	const Now = new Date();
+	
+	const Now_Seconds = String(Now.getSeconds()).padStart(2, '0');
+	const Now_Minutes = String(Now.getMinutes()).padStart(2, '0');
+	const Now_Hours   = String(Now.getHours  ()).padStart(2, '0');
+	
+	const Now_Day   = String(Now.getDate    ()    ).padStart(2, '0');
+	const Now_Month = String(Now.getMonth   () + 1).padStart(2, '0');
+	const Now_Year  =        Now.getFullYear();
+	
 	for(var Iteration = 0; Iteration < MaxInterations; Iteration++){
 		const R = {...__ReplaceText, ...{
 			D_Version    : SelectedVersion,
 			D_RealVersion: 0,
-			D_Date       : new Date().toLocaleDateString("ru-RU").replace(/\//g, '.'),
+			D_Date       : `${Now_Year}.${Now_Month}.${Now_Day}`,
+			D_Time       : `${Now_Hours}:${Now_Minutes}:${Now_Seconds}`,
 			D_CurrentFile: CurrentFile,
 			D_PackFormat : PackFormat,
 			D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
-			D_Time       : GenerationTime
+			D_Build      : GenerationTime
 		}};
 
 		const Matches = [...CurrentText.matchAll(/<\[\s*([\s\S]*?)\s*\]>/g)];
@@ -602,7 +616,7 @@ function ParseVersion(Version){
 	if(Version.includes('.')){ return Version.split('.').map(n => parseInt(n, 10)); }
 	
 	var n = parseInt(Version, 10);
-	return isNan(n) ? [-1] : [n];
+	return isNaN(n) ? [-1] : [n];
 }
 
 /* Сравнивает версии, и скидывает число разницу, т.е если '1.8' & '1.8' = 0, '1.5' & '1.8' = -3, '1.10' & '1.8' = 2 */
@@ -811,6 +825,7 @@ function SA_CreateButton(Addon, Table, Selected){
 		const Panel = Selected ? SA_Selected : SA_Unselected;
 		
 		const AddonInfo = Generators[Addon];
+		
 		const Dev = AddonInfo["Dev"];
 		
 		const R = document.createElement("div");
@@ -1098,7 +1113,7 @@ var Generators = {};
 /* Загрузка генератора */
 async function LoadGenerator(Name, Loaded = new Set(), GetActions = false){
 	try{
-		Logger.Console("Начало загрузки генератора [" + Name + "]...");
+		Logger.Console("Начало загрузки генератора [" + Name + "]");
 		if(Loaded.size === 0 && !GetActions){
 			if(__LoadGenerator[Name]){
 				Logger.Console("Генератор уже был сгенерирован!");
@@ -1494,7 +1509,10 @@ async function PreLoad(Buf){
 		await PreLoadAfter();
 		
 		SelectGenerateType(0);
-		SelectVersion(Object.keys(PackVersions)[0]);
+		SelectVersion(Object.keys(PackVersions).find(Key => {
+			const VersionInfo = PackVersions[Key][2];
+			return VersionInfo && VersionInfo.Dev !== "Error"; // Выбирает версию не "Error"
+		}) || Object.keys(PackVersions)[0]);
 		
 		Logger.Info("Zip-файл пака был загружен!");
 		Logger.Info(":" + "=".repeat(50) + ":");
@@ -1626,7 +1644,7 @@ async function Generate(){
 		
 		if(Addons_Forge_Result.length > 0){
 			Addons_Forge_Result.sort((a, b) => a[1] - b[1]);
-			Logger.Console("Применение дополнений [Forge]...");
+			Logger.Console("Применение дополнений [Forge]");
 			for(const A_ of Addons_Forge_Result){
 				const A = A_[0];
 				
@@ -1642,7 +1660,7 @@ async function Generate(){
 		
 		if(Addons_Optifine_Result.length > 0){
 			Addons_Optifine_Result.sort((a, b) => a[1] - b[1]);
-			Logger.Console("Применение дополнений [Optifine]...");
+			Logger.Console("Применение дополнений [Optifine]");
 			for(const A_ of Addons_Optifine_Result){
 				const A = A_[0];
 				
@@ -1653,7 +1671,7 @@ async function Generate(){
 		GenerationTime = Date.now() - GenerationStartTime;
 		
 		if(BuildFile){
-			Logger.Console("Применение BuildFile...");
+			Logger.Console("Применение BuildFile");
 			var BuildFile_ = await GenerateFile(BuildFile[0], BuildFile[1], true);
 			await AddFileToPack(BuildFile[0], BuildFile_);
 		}
@@ -1746,10 +1764,68 @@ async function ApplyGenerator(Generator){
 	}
 }
 
+/*
+ * Модификаторы:
+ *
+ * Background - Устанавливает фоновое изображение
+ *     [Цвет ([R, G, B, A]), или путь к файлу]
+ *     [Цвет ([R, G, B, A]), или путь к файлу], [Смещение по X], [Смещение по Y]
+ *
+ * Put - Накладывает одно изображение на другое
+ *     [Изображение], [X, по умолчанию 0], [Y, по умолчанию 0], [Режим смешивания, по умолчанию "alpha"]
+ *
+ * Frame - Извлекает кадр из анимации
+ *     [Индекс кадра, по умолчанию 0]
+ *
+ * Resize - Изменяет размер изображения
+ *     [Новая ширина], [Новая высота], [Сглаживание? по умолчанию false]
+ *
+ * Crop - Обрезает изображение
+ *     [X], [Y], [W], [H]
+ *     [W], [H] <Обрезает от 0, 0>
+ *
+ * Gradient - Применяет градиент
+ *     [Путь к файлу градиента]
+ *
+ * Multiply - Режим наложения "Умножение"
+ *     [Цвет ([R, G, B, A]), или путь к файлу]
+ *
+ * Fixed - Заменяет указанные цветовые каналы на константы
+ *     [R, по умолчанию null], [G, по умолчанию null], [B, по умолчанию null], [A, по умолчанию null]
+ *
+ * NewSize - Устанавливает новый размер изображения
+ *     [Новая ширина], [Новая высота]
+ *
+ * Flip - Отзеркаливает изображение
+ *     [По горизонтали, по умолчанию false], [По вертикали, по умолчанию false]
+ *
+ * Trim - ?
+ *
+ * Move - Двигает изображение
+ *     [X], [Y]
+ *
+ * Invert - Инвертирует указанные цветовые каналы
+ *     [Инвертировать R, по умолчанию true], [Инвертировать G, по умолчанию true], [Инвертировать B, по умолчанию true], [Инвертировать A, по умолчанию true]
+ *
+ * Tile - Повторяет текстуру в виде плитки
+ *     [Кол-во по горизонтали, по умолчанию 1], [Кол-во по вертикали, по умолчанию 1]
+ *
+ * Fill - Заливает область цветом
+ *     [X], [Y], [W, по умолчанию null], [H, по умолчанию null], [Цвет, по умолчанию "transparent"] <Если W == 0 && H == 0, то заполнит всё цветом>
+ *
+ * Mask - ?
+ *
+ * Rotate - Поворачивает изображение
+ *     [Угол в градусах]
+ *
+ * Action - ?
+ *
+ */
+
 /* Применяет модификатор */
 async function ApplyAction(Content, Type, Info){
 	try{
-		Logger.ConsoleTitle("Применение модификатора [" + Type + "]...", JSON.stringify(Info));
+		Logger.ConsoleTitle("Применение модификатора [" + Type + "]", JSON.stringify(Info));
 	
 		switch(Type){
 			case "Background": {
@@ -1906,13 +1982,16 @@ async function ApplyAction(Content, Type, Info){
 			}
 			
 			case "Fill": {
-				var X0 = Info[0] || 0;
-				var Y0 = Info[1] || 0;
-				var X1 = Info[2] || null;
-				var X2 = Info[3] || null;
+				var X = Info[0] || 0;
+				var Y = Info[1] || 0;
+				var W = Info[2] || null;
+				var H = Info[3] || null;
 				var Color = Info[4] || "transparent";
 				
-				Content.Fill(X0, Y0, X1, X2, Color);
+				if(W){ W = X + W; }
+				if(H){ H = Y + H; }
+				
+				Content.Fill(X, Y, W, H, Color);
 				break;
 			}
 			
@@ -1984,7 +2063,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		
 		var ID = JSON.stringify(Info);
 		
-		Logger.ConsoleTitle(MemoryFile ? "Генерация файла в памяти..." : "Генерация [" + Path + "]...", ID);
+		Logger.ConsoleTitle(MemoryFile ? "Генерация файла в памяти" : "Генерация [" + Path + "]", ID);
 		
 		Info.shift();
 		
@@ -2039,7 +2118,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					const W = Info[0];
 					const H = Info[1];
 					const Color = Info[2] || "transparent";
-					Actions   = Info[3] || null;
+					Actions = Info[3] || null;
 
 					Result = new Texture(W, H, Color);
 				} else if (Array.isArray(Info[0])) {
@@ -2156,7 +2235,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					const MaxVar = Math.max(0, ...RequiredVars)
 					
 					if(Variables.length !== MaxVar){
-						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variable.length + "\nНайдено: " + MaxVar)
+						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variables.length + "\nНайдено: " + MaxVar);
 					}
 					
 					var FinalString = "";
@@ -2233,7 +2312,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 		return Result;
 	}catch(e){
 		Logger.ConsoleError("Произошла ошибка при генерации файла " + (MemoryFile ? "в памяти" : "[" + Path + "]") + "!\nИнформация: " + JSON.stringify(Info), e);
-		return PrintMessageText("Произошла ошибка при генерации этого файла...", e);
+		return PrintMessageText("Произошла ошибка при генерации этого файла", e);
 	}
 }
 

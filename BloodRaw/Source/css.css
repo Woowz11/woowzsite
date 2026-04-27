@@ -99,6 +99,9 @@ button:disabled{
 	border-image-slice : 6 fill;
 	border-image-width : 32px 32px;
 	cursor             : default;
+	
+	color: gray;
+	text-shadow : 0.135em 0.125em 0px color-mix(in srgb, currentColor 30%, black);
 }
 
 button.Selected{
