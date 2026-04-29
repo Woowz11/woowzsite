@@ -41,6 +41,8 @@ T_Shorts        = 39
 T_GOLUWorld     = 40
 T_Mewgenics     = 41
 T_RealLife      = 42
+T_Brigadir      = 43
+T_Spectra       = 44
 
 TAGS = {
 	/* Название, Иконка, Описание */
@@ -86,7 +88,9 @@ TAGS = {
 	[T_Shorts       ]: ["Short", "source/short.png", "Это не видео, это short!"],
 	[T_GOLUWorld    ]: ["GOLUWorld", "source/goluworld.png", "В этом видео играли в GOLUWorld"],
 	[T_Mewgenics    ]: ["Mewgenics", "source/mew.png", "В этом видео играли в Mewgenics"],
-	[T_RealLife     ]: ["Реальная жизнь", "source/real.png", "В этом видео видно кадры из реальной жизни"]
+	[T_RealLife     ]: ["Реальная жизнь", "source/real.png", "В этом видео видно кадры из реальной жизни"],
+	[T_Brigadir     ]: ["Brigadir", "source/discordavatars/brigadir_.png", "В этом виде есть Brigadir (Бригадир)"],
+	[T_Spectra      ]: ["Spectra", "source/discordavatars/idk/spectra.png", "В этом виде есть Spectra (Спектра)"]
 }
 
 P_Hide    = 0
@@ -2111,20 +2115,20 @@ VIDEOS = [
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[144, "~", "2025.09.05 23:49:48", "ATrup1oEKhc", "2025.10.22", "59:24", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[144, "Спектра что ты наделал", "2025.09.05 23:49:48", "ATrup1oEKhc", "2025.10.22", "59:24", P_Hide,
+	[T_Woowz11, T_Wyldi, T_Spectra, T_History],
+	"Спектра показывал последствия срача своего, спектра просить задеанонить чела у вулди"],
 	
-	[143, "~", "2025.09.07 23:05:21", "LYj4qh9boT0", "2025.10.22", "52:53", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[143, "Что-то по поводу ст обсуждали и спектры", "2025.09.07 23:05:21", "LYj4qh9boT0", "2025.10.22", "52:53", P_Hide,
+	[T_Woowz11, T_Wyldi, T_Brigadir, T_Communication, T_Spectra, T_History],
+	"Я хз обсуждали что-то много чего-то"],
 	
-	[142, "~", "2025.10.19 20:29:21", "g8H2-pOPysA", "2025.10.22", "49:58", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[142, "Ломаю майнкрафт с вулди", "2025.10.19 20:29:21", "g8H2-pOPysA", "2025.10.22", "49:58", P_Hide,
+	[T_Woowz11, T_Wyldi, T_Coding, T_Minecraft],
+	"Смешно ломал анимации, генерацию текстур и т.д"],
 	
 	[141, "Спектра срался со своей командой", "2025.09.06 18:23:20", "XBHfcvp6IAQ", "2025.10.22", "49:54", P_Hide,
-	[T_Woowz11, T_Communication],
+	[T_Woowz11, T_Communication, T_Spectra, T_History],
 	"Я там ещё показываю что у меня места нету на компьютере))), там этот чел хомяк делает на фоне хуйню какую-то, очень сруться"],
 
 	[140, "PROJECT: GOLU WORLD", "2026.03.04 06:11:43", "mf9pJJV3-MI", "2026.03.04", "11:56", P_Public,
@@ -2244,7 +2248,7 @@ VIDEOS = [
 	"Вулди читает комментарии украинца, катался под картой в тд, потом бомбил бункер"],
 
 	[111, "Спектра вербует", "2025.09.18 22:30:18", "kqkRuLSDWPU", "2025.10.29", "29:13", P_Hide,
-	[T_Woowz11, T_Wyldi, T_History],
+	[T_Woowz11, T_Wyldi, T_History, T_Spectra],
 	"Ёпт твою мать, тут спектра..., спектра пытался завербовать в свой какой-то клан"],
 
 	[110, "Нашёл плейс 10000 уровней обби", "2025.09.28 03:34:28", "2633KMt7TLo", "2025.10.29", "29:08", P_Hide,

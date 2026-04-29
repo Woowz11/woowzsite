@@ -532,6 +532,9 @@ const __GetFileCache = {};
 var __AllWoowzsiteImages = null;
 const __AllWoowzsiteImagesCache = {};
 
+/* Получить цвет пикселя у текстуры */
+async function GetPixel(Path, X = 0, Y = 0){ return (await GetTexture(Path)).GetColor(X, Y); }
+
 /* Получить текстуру */
 async function GetTexture(Path, TruePath){ return await GetFile(Path, TruePath, true); }
 
