@@ -17,9 +17,15 @@ Prikol_MulSize = 1;
 
 /* ======================================================== */
 
+Seed = "";
+
+/* ======================================================== */
+
 Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz11");
 
 var Console = document.getElementById("Console");
+
+var SeedInput = document.getElementById("SeedInput");
 
 var __TotalConsoleMessages = 0;
 Logger.Console = function(Message, Type = 0, Title){
@@ -231,7 +237,8 @@ async function UpdateText(Text){
 			D_CurrentFile: CurrentFile,
 			D_PackFormat : PackFormat,
 			D_TotalFiles : (BuildFile ? TotalFiles + 1 : TotalFiles),
-			D_Build      : GenerationTime
+			D_Build      : GenerationTime,
+			D_Seed       : Seed
 		}};
 
 		const Matches = [...CurrentText.matchAll(/<\[\s*([\s\S]*?)\s*\]>/g)];
@@ -1054,7 +1061,9 @@ function SelectGenerateType(Type){
 		document.getElementById("AddonPanel"    ).style.display = Type  <  2 ? "unset" : "none";
 		document.getElementById("FilePanel"     ).style.display = Type === 2 ? "unset" : "none";
 		
-		document.getElementById("B_Generate").innerText = Type === 0 ? "Сгенерировать пак" : (Type === 1 ? "Сгенерировать часть" : "Сгенерировать файл/файлы");
+		const Button_Generate = document.getElementById("B_Generate");
+		Button_Generate.innerText = Type === 0 ? "Сгенерировать пак" : (Type === 1 ? "Сгенерировать часть" : "Сгенерировать файл/файлы");
+		Button_Generate.disabled = false;
 		
 		document.getElementById("GenerateDesc").innerText = [
 			"Обычная генерация пака, с версией, и по желанию с дополнениями",
@@ -1074,6 +1083,16 @@ function EnablePrikols(Enabled){
 		document.getElementById("PrikolPanel").style.display = Enabled ? "unset" : "none";
 	}catch(e){
 		Logger.Fatal("Произошла ошибка при в" + (Enabled === false ? "ы" : "") + "ключении приколов!", e);
+	}
+}
+
+/* Обновление сида */
+function UpdateSeed(NewSeed){
+	try{
+		Logger.Info("Установлен сид: " + NewSeed);
+		Seed = NewSeed;
+	}catch(e){
+		Logger.Fatal("Произошла ошибка при изменении сида! Новый сид: " + NewSeed, e);
 	}
 }
 
@@ -1534,9 +1553,27 @@ if(IsLocal){ LoadingOverlay(false); }
 /* Вызывается при запуске сайта */
 function Awake(){
 	const PreLoadPackButton = document.getElementById("PreLoadPackButton");
-	const PreLoadPackDiv    = document.getElementById("PreLoadPackDiv");
-	const PreLoadPack       = document.getElementById("PreLoadPack");
-	if (IsLocal){
+	const PreLoadPackDiv    = document.getElementById("PreLoadPackDiv"   );
+	const PreLoadPack       = document.getElementById("PreLoadPack"      );
+	
+	function RandomSeed(){
+		var __Seed = "";
+		
+		if(Math.random() > 0.95){
+			__Seed = WoowzsiteWords[Math.floor(Math.random() * WoowzsiteWords.length)];
+		}else{		
+			const Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			for(var i = 0; i < 16; i++){
+				__Seed += Chars.charAt(Math.floor(Math.random() * Chars.length));
+			}
+		}
+		
+		SeedInput.value = __Seed;
+		UpdateSeed(__Seed);
+	}
+	RandomSeed();
+	
+	if(IsLocal){
 		PreLoadPackButton.addEventListener("click", () => PreLoadPack.click());
 		
 		PreLoadPack.value = "";
@@ -1780,7 +1817,7 @@ async function ApplyGenerator(Generator){
  * Frame - Извлекает кадр из анимации
  *     [Индекс кадра, по умолчанию 0]
  *
- * Resize - Изменяет размер изображения
+ * Resize - Растягивает изображение под указанный размер
  *     [Новая ширина], [Новая высота], [Сглаживание? по умолчанию false]
  *
  * Crop - Обрезает изображение
@@ -2058,6 +2095,8 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 	try{
 		if(Info.length === 0){ Info = ["Texture", "R/T/Default.png", [["Multiply", "Random"]]]; }
 		
+		if(!Array.isArray(Info)){ throw new Error("Генерируемый файл не содержит информации об генерации! (не является массивом)\nСодержимое: " + Info); }
+		
 		/* Что-бы Info.shift(), не редактировал генераторы */
 		Info = DeepClone(Info);
 		
@@ -2231,7 +2270,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 				if(ThatJSZipFile(Result)){ Result = await FileContent(Result); }
 				
 				if(typeof Result === "string"){
-					const Regex = /<\[\s*Var(\d+)\s*\]>/g;
+					const Regex = /<\[Var(\d+)\]>/g;
 					const Matches = [...Result.matchAll(Regex)]
 					
 					const RequiredVars = Matches.map(m => parseInt(m[1]))
@@ -2239,6 +2278,7 @@ async function GenerateFile(Path, Info = null, IgnoreTags = false){
 					
 					if(Variables.length !== MaxVar){
 						Logger.ConsoleError("Неверное кол-во переменных в Variable!\nДано: " + Variables.length + "\nНайдено: " + MaxVar);
+						Logger.Error("Содержимое: " + Result);
 					}
 					
 					var FinalString = "";

@@ -43,6 +43,7 @@ T_Mewgenics     = 41
 T_RealLife      = 42
 T_Brigadir      = 43
 T_Spectra       = 44
+/* LOSTMEDIA    = 45 */
 
 TAGS = {
 	/* Название, Иконка, Описание */
@@ -90,7 +91,8 @@ TAGS = {
 	[T_Mewgenics    ]: ["Mewgenics", "source/mew.png", "В этом видео играли в Mewgenics"],
 	[T_RealLife     ]: ["Реальная жизнь", "source/real.png", "В этом видео видно кадры из реальной жизни"],
 	[T_Brigadir     ]: ["Brigadir", "source/discordavatars/brigadir_.png", "В этом виде есть Brigadir (Бригадир)"],
-	[T_Spectra      ]: ["Spectra", "source/discordavatars/idk/spectra.png", "В этом виде есть Spectra (Спектра)"]
+	[T_Spectra      ]: ["Spectra", "source/discordavatars/idk/spectra.png", "В этом виде есть Spectra (Спектра)"],
+	[45             ]: ["Потерянное", "source/lost.png", "Видео было потеряно, или удалено, или известно о его существовании, но оно не найдено"]
 }
 
 P_Hide    = 0
@@ -98,8 +100,14 @@ P_Link    = 1
 P_Public  = 2
 P_Blocked = 3
 
-UNKNOWN_Date      = "1000.00.00"
 REALZERO_Duration = "0"
+
+UNKNOWN_Date      = "1000.00.00"
+UNKNOWN_Duration  = "unknown";
+UNKNOWN_Link      = "unknown";
+
+// Видео было потеряно...
+LOSTMEDIA = "lost"
 
 // Игнорировать ошибки загрузки видео
 Ignore_Errors = false
@@ -114,6 +122,10 @@ Ignore_Errors = false
 
 VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
+	
+	[645, "~", "2026.04.04 13:46:02", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
 	
 	[644, "~", "2025.06.29", "x_wvJEF-KFU", "2025.06.29", "02:59", P_Public,
 	[T_Woowz11, T_WIP, T_Shorts],
@@ -2701,3 +2713,15 @@ DEFAULT_Creation  = "0000.00.00 00:00:00"
 DEFAULT_YoutubeID = ""
 DEFAULT_Publish   = "0000.00.00"
 DEFAULT_Duration  = "00:00"
+
+function PreUpdateVideos(){
+	for(var i = 0; i < VIDEOS.length; i++){
+		var Video = VIDEOS[i];
+		
+		if(Video[4] === LOSTMEDIA){
+			Video[7].push(45);
+		}
+		
+		VIDEOS[i] = Video;
+	}
+}

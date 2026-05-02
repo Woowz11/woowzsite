@@ -171,7 +171,7 @@ body{
 }
 
 .URL{
-	color: #C1E0FF;
+	color: #1A8CFF;
 	text-decoration: none;
 	font-weight: 500;
 	transition: all 0.2s ease;
@@ -180,7 +180,7 @@ body{
 }
 
 .URL:hover{
-	color: #1A8CFF;
+	color: #C1E0FF;
 	text-decoration: underline;
 }
 
@@ -307,7 +307,7 @@ if(Ignore_Errors){ document.title += " (IGNORE)" }
 
 var Content = document.getElementById("Content");
 
-function ShowErrorNotification(Message){
+function ShowErrorNotification(Message, Color = "red"){
 	const Div = document.getElementById("ErrorNotification");
 
 	var Text;
@@ -321,6 +321,7 @@ function ShowErrorNotification(Message){
 
 	Div.textContent = Text;
 	Div.style.display = "block";
+	Div.style.backgroundColor = Color;
 
 	clearTimeout(Div.timeout)
 	Div.timeout = setTimeout(() => {
@@ -424,6 +425,8 @@ function UpdateContent(VideosList){
 			var Tags         = Video[7];
 			var Description  = Video[8];
 
+			var LostMedia = PublishDate === LOSTMEDIA;
+
 			if(!Ignore_Errors){
 				try{
 					if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
@@ -431,14 +434,18 @@ function UpdateContent(VideosList){
 					if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
 					if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
 					if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
+					
 					if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
 				}catch(e){
 					throw new Error("Произошла ошибка при загрузке видео [" + Video + "]! " + e);
 				}
 			}
+			
+			var UnknownDuration = Duration  === UNKNOWN_Duration;
+			var UnknownLink     = YoutubeID === UNKNOWN_Link;
 
 			var OriginalDuration = Duration
-			if(Duration == REALZERO_Duration){ Duration = "00:00" }
+			if(Duration === REALZERO_Duration){ Duration = "00:00" }
 
 			AddedIDs.add(ID);
 			var Seconds = DurationToSeconds(Duration);
@@ -499,9 +506,10 @@ function UpdateContent(VideosList){
 			}
 
 			var CreationDateText = FormatDateTime(CreationDate);
-			var PublishDateText  = FormatDateTime(PublishDate );
+			var PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate);
 			
-			var DurationText = Duration;
+			var DurationText    = UnknownDuration ? "??:??" : Duration;
+			var DurationTooltip = UnknownDuration ? "Неизвестная длительность видео" : `Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)`;
 			
 			function FormatDescription(Input){
 				function FormatURL(Input){
@@ -547,16 +555,18 @@ function UpdateContent(VideosList){
 			var DescriptionText = FormatDescription(Description);
 			var NameText        = FormatDescription(Name);
 
+			var YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
+				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "✏️"}</a>`;
+
 			var VideoContent = `<div style="display: flex; gap: 5px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
-				<div class="SmallPanel" tooltip="Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)" style="height:${Height}; background-color:${OriginalDuration == DEFAULT_Duration ? 'black' : RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
+				<div class="SmallPanel" tooltip="${DurationTooltip}" style="height:${Height}; background-color:${OriginalDuration === DEFAULT_Duration || UnknownDuration ? 'black' : RainbowColor((Seconds / (10 * 3600)), 0.7)};">${DurationText}</div>
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
-				<div class="SmallPanel" tooltip="Дата публикации: ${PublishDate}" style="height:${Height};">${PublishDateText}</div>
+				<div class="SmallPanel" tooltip="${LostMedia ? 'Видео было потеряно, или удалено, или известно о его существовании, но оно не найдено' : 'Дата публикации: ' + PublishDate}" style="height:${Height};">${PublishDateText}</div>
 				<a class="ContentURL" tooltip="Установить в поиск только видео подобного типа" href="${CurrentURL}#visible%3A${Visibility}"><div class="SmallPanel" style="height:${Height};">${VisibilityText}</div></a>
-				<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
-				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "✏️"}</a>
+				${UnknownLink ? '' : YoutubeButtons}
 			</div>
 	<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`;
 			
@@ -1079,6 +1089,7 @@ function CheckForDuplicates(){
 		throw new Error("Дубликаты найдены!");
 	}else{
 		console.log("Дубликаты не найдены!");
+		ShowErrorNotification("Дубликаты не найдены!", "green");
 	}
 }
 
@@ -1117,11 +1128,13 @@ function CheckForMissingID(){
 		window.location.href = CurrentURL + "#" + Filter + " sort%3Aid";
 	}else{
 		console.log("Пропусков нет");
-		ShowErrorNotification("Пропусков ID не найдено");
+		ShowErrorNotification("Пропусков ID не найдено", "green");
 	}
 }
 
 window.addEventListener("load", () => {
+	PreUpdateVideos();
+
 	if(window.location.hash){
 		SearchInput.value = decodeURIComponent(window.location.hash.substring(1));
 		Search();

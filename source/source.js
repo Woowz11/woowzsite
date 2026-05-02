@@ -34,7 +34,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2","gradient",
 	"GarrysMod", "emoji", "Backrooms", "Babina", "Glitch", "Coding", "YOUTUBE", "HalfSword", "History", "Music", "Blocked", "Roblox", "SFD", "HappyWheels", "Communication", "Minecraft",
 	"WorldBox", "Single", "Teardown", "Star", "WoowzCore", "AI", "TBOI", "Deanon", "BrickRigs", "BeamNGDrive", "PtTR", "noi", "wip", "stream", "short", "Calendar", "Alarm", "goluworld",
-	"mew", "real"
+	"mew", "real", "lost"
 ],"source/",".png")
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
@@ -539,5 +539,5 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
    ░░▓▓████████▓▓░░
       ░░░░░░░░░░
    G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида","Hi, welcome there!", "Hi, welcome here!", "G0LU", "G01U",
-   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ",
-   "электробус", "свастика", "самса", "ваня", "кот", "чучело", "кот чучело", "тистикулы", "канибализм"]
+   "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ", "Я не могу это устроить",
+   "электробус", "свастика", "самса", "ваня", "кот", "чучело", "кот чучело", "тистикулы", "канибализм", "HBM", "NTM"]

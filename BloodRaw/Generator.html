@@ -14,6 +14,11 @@
 
 <link rel="stylesheet" href="Source/css.css">
 
+<script src="../source/Logger.js" ></script>
+<script src="../Libs/jszip.min.js"></script>
+<script src="../source/Texture.js"></script>
+<script src="../source/source.js" ></script>
+
 <style>
 :root{
 	--infobox: 128, 128, 128;
@@ -130,10 +135,11 @@ html, button{
 			</div>
 			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
 				<li><input type="checkbox" autocomplete="off" onchange="EnablePrikols(this.checked);" title="Позволяет сломать разными способами генерацию">Приколы</input></li>
+				<li><input type="text" id="SeedInput" placeholder="SEED" autocomplete="off" onchange="UpdateSeed(this.value);" style="width: 250px;" title="SEED генерируемого пака"></li>
 			</ul>
 		</div>
 		
-		<p id="GenerateDesc" style="padding-top: 20px;">DESC</p>
+		<p id="GenerateDesc" style="padding-top: 20px;"></p>
 		
 		<div id="VersionPanel" style="display: none;">
 			<div class="In" style="display: flex; height: 65vh; padding: 0; margin-top: 20px;">
@@ -215,7 +221,7 @@ html, button{
 	</center>
 
 	<div style="text-align:center; padding-top: 20px;">
-		<button id="B_Generate" onclick="Generate();">?</button>
+		<button id="B_Generate" onclick="Generate();" disabled>Сгенерировать ...</button>
 	</div>
 
 	<div>
@@ -224,8 +230,4 @@ html, button{
 
 </div></body>
 
-<script src="../source/Logger.js" ></script>
-<script src="../Libs/jszip.min.js"></script>
-<script src="../source/Texture.js"></script>
 <script src="Source/Generator.js" ></script>
-<script src="../source/source.js" ></script>
