@@ -5,7 +5,7 @@
  
 /* Дефолтная текстура */ const DefaultTexture   = "R/T/Default.png";
 /* Текстура ошибка    */ const ErrorTexture     = "R/T/Error.png";
-/* Текстура Changelog */ const ChangelogTexture = "R/O/Changelog.file";
+/* Текстура Changelog */ const ChangelogTexture = "R/T/A/Changelog.file";
 
 /* ======================================================== */
 
