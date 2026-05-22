@@ -136,6 +136,7 @@ html, button{
 			<ul style="display: flex; gap: 15px; padding: 0; margin: 0;">
 				<li><input type="checkbox" autocomplete="off" onchange="EnablePrikols(this.checked);" title="Позволяет сломать разными способами генерацию">Приколы</input></li>
 				<li><input type="text" id="SeedInput" placeholder="SEED" autocomplete="off" onchange="UpdateSeed(this.value);" style="width: 250px;" title="SEED генерируемого пака"></li>
+				<li><input type="checkbox" autocomplete="off" title="Если включено, будет добавлять заполнители текстуры для ненарисованных текстур" checked>Заполнители (WIP)</input></li>
 			</ul>
 		</div>
 		
@@ -221,7 +222,7 @@ html, button{
 	</center>
 
 	<div style="text-align:center; padding-top: 20px;">
-		<button id="B_Generate" onclick="Generate();" disabled>Сгенерировать ...</button>
+		<button id="B_Generate" onclick="Generate();">Сгенерировать ...</button>
 	</div>
 
 	<div>

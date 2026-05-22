@@ -546,13 +546,49 @@ class Texture{
 	}
 	
 	/* Применение маски */
-	Mask(){
+	Mask(Content = null){
 		try{
-			for(var i = 0; i < this.Content.length; i += 4){
-				const Gray = this.Content[i];
+			if(Content === false){ return this; }
+        
+			if(Content instanceof Texture){
+				const MaskContent = Content.Content;
+				const MaskW = Content.W;
+				const MaskH = Content.H;
 				
-				this.Content[i + 0] = this.Content[i + 1] = this.Content[i + 2] = 255;
-				this.Content[i + 3] = Gray;
+				for(var i = 0; i < this.Content.length; i += 4){
+					const PixelIndex = i / 4;
+					const X = PixelIndex % this.W;
+					const Y = Math.floor(PixelIndex / this.W);
+					
+					const MaskX = Math.floor(X * MaskW / this.W);
+					const MaskY = Math.floor(Y * MaskH / this.H);
+					const MaskIndex = (MaskY * MaskW + MaskX) * 4;
+					
+					const Gray = MaskContent[MaskIndex];
+					
+					this.Content[i + 3] = Gray;
+				}
+			}else if(Content instanceof Uint8ClampedArray){
+				const MaskData = Content;
+				const MaskW = this.W;
+				const MaskH = this.H;
+				
+				for(var i = 0; i < this.Content.length; i += 4){
+					const Gray = MaskData[i] || 0;
+					
+					this.Content[i + 3] = Gray;
+				}
+			}else if(Content === null || Content === undefined){
+				for(var i = 0; i < this.Content.length; i += 4){
+					const Gray = this.Content[i];
+					
+					this.Content[i + 0] = 255;
+					this.Content[i + 1] = 255;
+					this.Content[i + 2] = 255;
+					this.Content[i + 3] = Gray;
+				}
+			}else{
+				throw new Error("Content должен быть Texture, Uint8ClampedArray или null!");
 			}
 			
 			this.__UpdateCanvas();

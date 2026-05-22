@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎨 Цветовой конвертер: ARGB ↔ HEX (Minecraft стиль)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f7;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Inter', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+        }
+
+        /* светлая карточка, тени, читабельный текст */
+        .card {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            padding: 1.8rem 2rem 2.2rem;
+            transition: all 0.2s;
+            border: 1px solid #cfdee9;
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin: 0 0 0.2rem 0;
+            color: #1f2a44;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .sub {
+            color: #3c4b6e;
+            border-left: 3px solid #5e7cbb;
+            padding-left: 14px;
+            margin-bottom: 28px;
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+
+        /* два главных поля */
+        .row-flex {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #3c4f76;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .input-group input {
+            width: 100%;
+            background: #f8fafd;
+            border: 1px solid #cbdde9;
+            padding: 12px 16px;
+            border-radius: 48px;
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #0b1b33;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #5e7cbb;
+            box-shadow: 0 0 0 2px rgba(94,124,187,0.2);
+            background: white;
+        }
+
+        /* ползунки RGBA */
+        .sliders-panel {
+            background: #f3f6fc;
+            border-radius: 1.8rem;
+            padding: 1.3rem 1.5rem;
+            margin-bottom: 26px;
+            border: 1px solid #e2edf5;
+        }
+        .slider-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .slider-label {
+            width: 48px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            font-family: monospace;
+            color: #1f2f50;
+        }
+        input[type="range"] {
+            flex: 3;
+            min-width: 160px;
+            height: 5px;
+            border-radius: 10px;
+            background: #d9e2ef;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        .slider-value {
+            width: 48px;
+            font-family: monospace;
+            font-weight: 600;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #1f2f50;
+            border: 1px solid #cbdbe0;
+        }
+        .color-preview-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 0.2rem 0 0.8rem 0;
+        }
+        .preview-box {
+            width: 90px;
+            height: 90px;
+            border-radius: 28px;
+            background: #808080;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            border: 2px solid rgba(0,0,0,0.08);
+        }
+        .info-text {
+            background: #f0f4fa;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #1f2f50;
+            word-break: break-word;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: #eef2f9;
+            border: 1px solid #c6d4e2;
+            padding: 8px 16px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            color: #1e2f4b;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .btn-primary {
+            background: #2f4b7c;
+            border-color: #1f3b64;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1f3a60;
+        }
+        .btn:hover {
+            background: #e2e9f2;
+            transform: scale(0.97);
+        }
+        .footnote {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #5d6f91;
+            margin-top: 24px;
+            border-top: 1px solid #dee8f0;
+            padding-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .card { padding: 1.5rem; }
+            .slider-item { gap: 8px; }
+        }
+        .error-brd {
+            border-color: #c95a5a !important;
+            background: #fff6f5 !important;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>🎨 ARGB ⇄ HEX <span style="font-size: 0.9rem;">(Minecraft / GUI)</span></h2>
+    <div class="sub">Целое число (int) ↔ Шестнадцатеричный код | Полный контроль альфа-канала</div>
+
+    <div class="row-flex">
+        <div class="input-group">
+            <label>🔢 ЦЕЛОЕ ЧИСЛО (INT)</label>
+            <input type="text" id="intField" placeholder="например 16777215 или 0xFFAA55" value="10526880">
+        </div>
+        <div class="input-group">
+            <label>🎨 HEX-КОД</label>
+            <input type="text" id="hexField" placeholder="#RRGGBB  или #AARRGGBB" value="#A0A0A0">
+        </div>
+    </div>
+
+    <!-- Ползунки RGBA -->
+    <div class="sliders-panel">
+        <div class="slider-item">
+            <span class="slider-label" style="color:#c23b22;">R</span>
+            <input type="range" id="redSlider" min="0" max="255" value="160" step="1">
+            <span class="slider-value" id="redValue">160</span>
+        </div>
+        <div class="slider-item">
+            <span class="slider-label" style="color:#2b7a3e;">G</span>
+            <input type="range" id="greenSlider" min="0" max="255" value="160" step="1">
+            <span class="slider-value" id="greenValue">160</span>
+        </div>
+        <div class="slider-item">
+            <span class="slider-label" style="color:#2e5f9e;">B</span>
+            <input type="range" id="blueSlider" min="0" max="255" value="160" step="1">
+            <span class="slider-value" id="blueValue">160</span>
+        </div>
+        <div class="slider-item">
+            <span class="slider-label" style="color:#7a5e8c;">A</span>
+            <input type="range" id="alphaSlider" min="0" max="255" value="255" step="1">
+            <span class="slider-value" id="alphaValue">255</span>
+        </div>
+    </div>
+
+    <!-- блок предпросмотра и информация -->
+    <div class="color-preview-area">
+        <div class="preview-box" id="previewBox" style="background-color: rgba(160,160,160,1);"></div>
+        <div class="info-text" id="infoBlock">
+            🌟 RGB: 160, 160, 160 | Альфа: 255 (непрозрачный)<br> 
+            INT: 10526880 &nbsp;&nbsp; HEX: #A0A0A0
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button class="btn btn-primary" id="syncFromSlidersBtn">⟳ Применить ползунки → Число/HEX</button>
+        <button class="btn" id="copyIntBtn">📋 Копировать INT</button>
+        <button class="btn" id="copyHexBtn">📋 Копировать HEX</button>
+        <button class="btn" id="resetWhiteBtn">⚪ Белый (255,255,255)</button>
+        <button class="btn" id="resetDefaultBtn">🌑 Серый (160,160,160)</button>
+    </div>
+
+    <div class="footnote">
+        💡 Ползунки управляют каждым каналом (R,G,B,A).<br>
+        ▸ Альфа = 255 — полностью непрозрачный, 0 — полностью прозрачный (в Minecraft GUI стандартное поведение).<br>
+        ▸ Число отображается как десятичное и в HEX формате 0xAARRGGBB (при альфа<255) / 0xRRGGBB (при альфа=255).
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM элементы
+        const intField = document.getElementById('intField');
+        const hexField = document.getElementById('hexField');
+        const previewBox = document.getElementById('previewBox');
+        const infoBlock = document.getElementById('infoBlock');
+
+        // слайдеры RGBA
+        const redSlider = document.getElementById('redSlider');
+        const greenSlider = document.getElementById('greenSlider');
+        const blueSlider = document.getElementById('blueSlider');
+        const alphaSlider = document.getElementById('alphaSlider');
+        const redVal = document.getElementById('redValue');
+        const greenVal = document.getElementById('greenValue');
+        const blueVal = document.getElementById('blueValue');
+        const alphaValSpan = document.getElementById('alphaValue');
+
+        // кнопки
+        const syncSlidersBtn = document.getElementById('syncFromSlidersBtn');
+        const copyIntBtn = document.getElementById('copyIntBtn');
+        const copyHexBtn = document.getElementById('copyHexBtn');
+        const resetWhiteBtn = document.getElementById('resetWhiteBtn');
+        const resetDefaultBtn = document.getElementById('resetDefaultBtn');
+
+        // --- вспомогательные функции ---
+        function clamp(v) { return Math.min(255, Math.max(0, v)); }
+
+        // из RGBA (a,r,g,b) в знаковое 32-битное int (Java compatible)
+        function rgbaToInt(r, g, b, a) {
+            r = clamp(r); g = clamp(g); b = clamp(b); a = clamp(a);
+            let unsigned = (a << 24) | (r << 16) | (g << 8) | b;
+            return unsigned | 0;
+        }
+
+        // из int получить компоненты {a,r,g,b}
+        function intToRgba(intValue) {
+            let unsigned = intValue >>> 0;
+            let a = (unsigned >> 24) & 0xFF;
+            let r = (unsigned >> 16) & 0xFF;
+            let g = (unsigned >> 8) & 0xFF;
+            let b = unsigned & 0xFF;
+            return { r, g, b, a };
+        }
+
+        // из RGBA в HEX (если альфа 255 → #RRGGBB, иначе #AARRGGBB)
+        function rgbaToHex(r, g, b, a) {
+            const toHex2 = (c) => c.toString(16).padStart(2, '0').toUpperCase();
+            if (a === 255) {
+                return `#${toHex2(r)}${toHex2(g)}${toHex2(b)}`;
+            } else {
+                return `#${toHex2(a)}${toHex2(r)}${toHex2(g)}${toHex2(b)}`;
+            }
+        }
+
+        // парсинг HEX строки (поддержка #RGB, #RRGGBB, #RRGGBBAA, #AARRGGBB) -> {r,g,b,a}
+        function parseHexToRGBA(hexStr) {
+            let raw = hexStr.trim();
+            if (raw === "") return null;
+            if (raw.startsWith('#')) raw = raw.slice(1);
+            // короткий RGB
+            if (raw.length === 3) {
+                let r = parseInt(raw[0] + raw[0], 16);
+                let g = parseInt(raw[1] + raw[1], 16);
+                let b = parseInt(raw[2] + raw[2], 16);
+                if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+                return { r, g, b, a: 255 };
+            }
+            if (raw.length === 6) {
+                let r = parseInt(raw.slice(0,2), 16);
+                let g = parseInt(raw.slice(2,4), 16);
+                let b = parseInt(raw.slice(4,6), 16);
+                if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+                return { r, g, b, a: 255 };
+            }
+            if (raw.length === 8) {
+                // сначала пробуем как AARRGGBB (Minecraft стиль)
+                let a = parseInt(raw.slice(0,2), 16);
+                let r = parseInt(raw.slice(2,4), 16);
+                let g = parseInt(raw.slice(4,6), 16);
+                let b = parseInt(raw.slice(6,8), 16);
+                if (!isNaN(a) && !isNaN(r) && !isNaN(g) && !isNaN(b)) {
+                    return { r, g, b, a };
+                }
+                // альтернатива RRGGBBAA
+                let r2 = parseInt(raw.slice(0,2), 16);
+                let g2 = parseInt(raw.slice(2,4), 16);
+                let b2 = parseInt(raw.slice(4,6), 16);
+                let a2 = parseInt(raw.slice(6,8), 16);
+                if (!isNaN(r2) && !isNaN(g2) && !isNaN(b2) && !isNaN(a2)) {
+                    return { r: r2, g: g2, b: b2, a: a2 };
+                }
+                return null;
+            }
+            return null;
+        }
+
+        // парсинг целого числа из строки (десятичное или 0x...)
+        function parseIntFromInput(str) {
+            let s = str.trim();
+            if (s === "") return null;
+            if (s.toLowerCase().startsWith('0x')) {
+                let num = parseInt(s.slice(2), 16);
+                return isNaN(num) ? null : num;
+            }
+            let num = Number(s);
+            if (isNaN(num) || !Number.isInteger(num)) return null;
+            return num;
+        }
+
+        // ОБНОВЛЕНИЕ ВСЕГО ИНТЕРФЕЙСА по компонентам (r,g,b,a)
+        function updateAllFromRGBA(r, g, b, a, updateIntField = true, updateHexField = true) {
+            // обновляем слайдеры и их значения (если не вызывается из слайдера, синхронизируем)
+            redSlider.value = r;
+            greenSlider.value = g;
+            blueSlider.value = b;
+            alphaSlider.value = a;
+            redVal.innerText = r;
+            greenVal.innerText = g;
+            blueVal.innerText = b;
+            alphaValSpan.innerText = a;
+
+            // цветовой превью (RGBA)
+            const rgbaCss = `rgba(${r}, ${g}, ${b}, ${(a/255).toFixed(2)})`;
+            previewBox.style.backgroundColor = rgbaCss;
+            
+            // генерируем int и HEX
+            const intColor = rgbaToInt(r, g, b, a);
+            const hexColor = rgbaToHex(r, g, b, a);
+            const hexShort = (a === 255) ? rgbaToHex(r, g, b, 255) : hexColor;
+            
+            // текстовая информация (читабельно)
+            const alphaPercent = ((a / 255) * 100).toFixed(0);
+            infoBlock.innerHTML = `🎨 RGB: ${r}, ${g}, ${b} | Альфа: ${a} (${alphaPercent}%)<br>🔢 INT: ${intColor} &nbsp;&nbsp; ✦ HEX: ${hexColor}`;
+            
+            if (updateIntField) intField.value = intColor;
+            if (updateHexField) hexField.value = hexShort;
+            
+            // убираем классы ошибок
+            intField.classList.remove('error-brd');
+            hexField.classList.remove('error-brd');
+        }
+        
+        // синхронизация из слайдеров (основной метод)
+        function syncFromSliders() {
+            let r = parseInt(redSlider.value);
+            let g = parseInt(greenSlider.value);
+            let b = parseInt(blueSlider.value);
+            let a = parseInt(alphaSlider.value);
+            if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) return;
+            updateAllFromRGBA(r, g, b, a, true, true);
+        }
+
+        // обновление по INT числу
+        function syncFromInt(intValue) {
+            let { r, g, b, a } = intToRgba(intValue);
+            updateAllFromRGBA(r, g, b, a, false, true);
+        }
+
+        // обновление по HEX строке
+        function syncFromHex(hexString) {
+            let parsed = parseHexToRGBA(hexString);
+            if (!parsed) {
+                hexField.classList.add('error-brd');
+                return false;
+            }
+            let { r, g, b, a } = parsed;
+            updateAllFromRGBA(r, g, b, a, true, false);
+            return true;
+        }
+
+        // ----- Обработчики событий с защитой от рекурсии -----
+        let isInternalUpdate = false;
+        
+        // СЛАЙДЕРЫ
+        const sliders = [redSlider, greenSlider, blueSlider, alphaSlider];
+        function onSliderChange() {
+            if (isInternalUpdate) return;
+            let r = parseInt(redSlider.value);
+            let g = parseInt(greenSlider.value);
+            let b = parseInt(blueSlider.value);
+            let a = parseInt(alphaSlider.value);
+            redVal.innerText = r;
+            greenVal.innerText = g;
+            blueVal.innerText = b;
+            alphaValSpan.innerText = a;
+            updateAllFromRGBA(r, g, b, a, true, true);
+        }
+        redSlider.addEventListener('input', onSliderChange);
+        greenSlider.addEventListener('input', onSliderChange);
+        blueSlider.addEventListener('input', onSliderChange);
+        alphaSlider.addEventListener('input', onSliderChange);
+        
+        // ПОЛЕ INT
+        let intTimeout;
+        intField.addEventListener('input', () => {
+            if (isInternalUpdate) return;
+            if (intTimeout) clearTimeout(intTimeout);
+            intTimeout = setTimeout(() => {
+                let num = parseIntFromInput(intField.value);
+                if (num === null) {
+                    intField.classList.add('error-brd');
+                    return;
+                }
+                intField.classList.remove('error-brd');
+                let { r, g, b, a } = intToRgba(num);
+                isInternalUpdate = true;
+                updateAllFromRGBA(r, g, b, a, false, true);
+                isInternalUpdate = false;
+            }, 60);
+        });
+        
+        // ПОЛЕ HEX
+        let hexTimeout;
+        hexField.addEventListener('input', () => {
+            if (isInternalUpdate) return;
+            if (hexTimeout) clearTimeout(hexTimeout);
+            hexTimeout = setTimeout(() => {
+                let success = syncFromHex(hexField.value);
+                if (!success) {
+                    hexField.classList.add('error-brd');
+                } else {
+                    hexField.classList.remove('error-brd');
+                }
+            }, 60);
+        });
+        
+        // кнопка "применить ползунки"
+        syncSlidersBtn.addEventListener('click', () => {
+            syncFromSliders();
+        });
+        
+        // кнопки копирования
+        copyIntBtn.addEventListener('click', () => {
+            let intVal = intField.value.trim();
+            if (intVal === "") return;
+            navigator.clipboard.writeText(intVal).then(() => {
+                let old = copyIntBtn.innerText;
+                copyIntBtn.innerText = "✓ Скопировано!";
+                setTimeout(() => copyIntBtn.innerText = old, 1200);
+            }).catch(() => alert("Не удалось скопировать int"));
+        });
+        copyHexBtn.addEventListener('click', () => {
+            let hexVal = hexField.value.trim();
+            if (hexVal === "") return;
+            navigator.clipboard.writeText(hexVal).then(() => {
+                let old = copyHexBtn.innerText;
+                copyHexBtn.innerText = "✓ Готово!";
+                setTimeout(() => copyHexBtn.innerText = old, 1200);
+            }).catch(() => alert("Ошибка копирования HEX"));
+        });
+        
+        // сбросы
+        resetWhiteBtn.addEventListener('click', () => {
+            updateAllFromRGBA(255, 255, 255, 255, true, true);
+        });
+        resetDefaultBtn.addEventListener('click', () => {
+            updateAllFromRGBA(160, 160, 160, 255, true, true);
+        });
+        
+        // ИНИЦИАЛИЗАЦИЯ (серый цвет 160,160,160, альфа=255)
+        updateAllFromRGBA(160, 160, 160, 255, true, true);
+        
+        // Дополнительно: показываем корректный int для 10526880 (0xA0A0A0) = r=160,g=160,b=160,a=0? 
+        // ВНИМАНИЕ: 10526880 в hex = 0xA0A0A0, что означает альфа = 0x00, RGB(160,160,160) — прозрачный.
+        // Но в большинстве случаев в Minecraft getFGColor при неактивной кнопке возвращает 10526880 (0x00A0A0A0),
+        // а затем в renderString применяется alpha * 255 << 24, поэтому выглядит непрозрачным.
+        // Мы НЕ инвертируем альфу, а даём пользователю ползунок, чтобы он сам видел результат со своей альфой.
+        // По умолчанию ставим альфу 255 (непрозрачный серый) для комфорта. 
+        // Пользователь может менять альфу слайдером и видеть результат.
+    })();
+</script>
+</body>
+</html>

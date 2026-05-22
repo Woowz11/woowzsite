@@ -19,6 +19,8 @@ Prikol_MulSize = 1;
 
 Seed = "";
 
+SeedNumber = 0;
+
 /* ======================================================== */
 
 Logger.Info("Сайт генератор пака BloodRaw!\nСделан Woowz11");
@@ -33,6 +35,7 @@ Logger.Console = function(Message, Type = 0, Title){
 		case 0: Logger.Info (Message, null, InGeneration ? "color: lime;" : undefined); break;
 		case 1: Logger.Warn (Message                                                 ); break;
 		case 2: Logger.Error(Message                                                 ); break;
+		case 3: Logger.Info (Message, null, InGeneration ? "color: aqua;" : undefined); break;
 	}
 	if(!InGeneration){ return; }
 
@@ -40,7 +43,7 @@ Logger.Console = function(Message, Type = 0, Title){
 	
 	if(Title){ M.title = Title; M.style.cursor = "help"; }
 	
-	if(Type > 0){ M.style.color = Type === 1 ? "yellow" : "red"; }
+	if(Type > 0){ M.style.color = (Type === 3 ? "aqua" : (Type === 1 ? "yellow" : "red")); }
 	
 	__TotalConsoleMessages++;
 	
@@ -310,7 +313,7 @@ const __ReplaceColor = {};
 
 /* Случайный цвет */
 function RandomColor(){
-	return HSLToRGB(Math.floor(Math.random() * 360), 100, 50);
+	return HSLToRGB(Math.floor(RandomSeed() * 360), 100, 50);
 }
 
 /* Конвертация цвета в байты */
@@ -410,7 +413,8 @@ function HasFile(Path){
 async function GetFile(Path, TruePath = null, ThatTexture = false){
 	Path = Path.replace(/\\/g, "/").replace(/\/+/g, "/");
 	
-	if(__GetFileCache[Path]){ return __GetFileCache[Path]; }
+	var __CachedFile = __GetFileCache[Path];
+	if(!Prikol && __CachedFile){ return __CachedFile; }
 	
 	var File = PackFiles[Path];
 	if(!HasFile(Path)){ throw new Error("Файл [" + Path + "] не найден!"); }
@@ -449,7 +453,9 @@ async function GetFile(Path, TruePath = null, ThatTexture = false){
 				
 				if(__AllWoowzsiteImages == null){ __AllWoowzsiteImages = GetAllWoowzsiteImages(); }
 				
-				const RandomImage = __AllWoowzsiteImages[Math.floor(Math.random() * __AllWoowzsiteImages.length)];
+				var s = RandomSeed();
+				Logger.Info(s);
+				const RandomImage = __AllWoowzsiteImages[Math.floor(s * __AllWoowzsiteImages.length)];
 				
 				var TextureRI = null;
 				if(__AllWoowzsiteImagesCache[RandomImage]){
@@ -510,7 +516,7 @@ async function GetFile(Path, TruePath = null, ThatTexture = false){
 				}
 				
 				if(!LoadDefault){
-					Logger.Console("Загрузка рандомной картинки [" + RandomImage + "]");
+					Logger.Console("Загрузка рандомной картинки [" + RandomImage + "]", 3);
 					
 					if(Prikol){
 						W *= Prikol_MulSize; H *= Prikol_MulSize;
@@ -662,6 +668,41 @@ function ParentFolder(Path){
 	if(Path.endsWith("/")){ Path = Path.slice(0, -1); }
 	const  i = Path.lastIndexOf("/");
 	return i === -1 ? "" : Path.slice(0, i + 1);
+}
+
+/* Превращает строку в случайное число */
+function StringToSeed(S){
+	var HashA = 0xDEADBEEF;
+	var HashB = 0x41C6CE57;
+
+	for(var i = 0; i < S.length; i++){
+		const C = S.charCodeAt(i);
+		HashA = Math.imul(HashA ^ C, 2654435761);
+		HashB = Math.imul(HashB ^ C, 1597334677);
+	}
+
+	HashA  = Math.imul(HashA ^ (HashA >>> 16), 2246822507);
+	HashA ^= Math.imul(HashB ^ (HashB >>> 13), 3266489909);
+	HashB  = Math.imul(HashB ^ (HashB >>> 16), 2246822507);
+	HashB ^= Math.imul(HashA ^ (HashA >>> 13), 3266489909);
+
+	return (HashB >>> 0) * 4294967296 + (HashA >>> 0);
+}
+
+__SeedNumber = 0;
+function RandomSeed(Seed = false){
+	var X;
+	
+	if(Seed === false){ __SeedNumber = (__SeedNumber * 2 + 1) % 2147483647; if(__SeedNumber === 0){ __SeedNumber = 1; } X = __SeedNumber; }else if(typeof Seed === "string"){ X = StringToSeed(Seed); }else{ X = Seed; }
+	
+	Logger.Info(__SeedNumber);
+	
+	X   ^= X << 13;
+	X   ^= X >> 17;
+	X   ^= X << 5 ;
+	X >>>=      0 ;
+
+	return X / 4294967296;
 }
 
 /* ======================================================== */
@@ -876,7 +917,7 @@ function SA_CreateButton(Addon, Table, Selected){
 			Up  .onclick = () => SA_Action(Addon, "up"    , Table);
 			Down.onclick = () => SA_Action(Addon, "down"  , Table);
 		}else{
-			Up.disabled   = true;
+			Up  .disabled = true;
 			Down.disabled = true;
 			
 			B2.textContent = "+";
@@ -1091,6 +1132,9 @@ function UpdateSeed(NewSeed){
 	try{
 		Logger.Info("Установлен сид: " + NewSeed);
 		Seed = NewSeed;
+		
+		SeedNumber   = StringToSeed(Seed);
+		__SeedNumber = SeedNumber + 272372812;
 	}catch(e){
 		Logger.Fatal("Произошла ошибка при изменении сида! Новый сид: " + NewSeed, e);
 	}
@@ -1556,6 +1600,8 @@ function Awake(){
 	const PreLoadPackDiv    = document.getElementById("PreLoadPackDiv"   );
 	const PreLoadPack       = document.getElementById("PreLoadPack"      );
 	
+	document.getElementById("B_Generate").disabled = true;
+	
 	function RandomSeed(){
 		var __Seed = "";
 		
@@ -1661,6 +1707,8 @@ async function Generate(){
 		
 		if(SelectedGenerateType > 1){ throw new Error("Ещё не создана генерация для типа [" + SelectedGenerateType + "]!"); }
 		
+		Logger.Console("Используется сид: " + SeedNumber);
+		
 		var OnlyAddon = SelectedGenerateType === 1;
 		
 		Pack = new JSZip();
@@ -1733,6 +1781,7 @@ async function Generate(){
 			document.documentElement.style.setProperty("--infobox", HasError ? "255, 0, 0" : "0, 255, 0");
 			
 			Logger.Console("Конец генерации пака!");
+			Logger.Console("Заняло времени: " + (Date.now() - GenerationStartTime) + "ms");
 			
 			InGeneration = false;
 			BuildFile = null;
@@ -1853,7 +1902,8 @@ async function ApplyGenerator(Generator){
  * Fill - Заливает область цветом
  *     [X], [Y], [W, по умолчанию null], [H, по умолчанию null], [Цвет, по умолчанию "transparent"] <Если W == 0 && H == 0, то заполнит всё цветом>
  *
- * Mask - ?
+ * Mask - Создаёт Alpha канал по текстуре
+ *     [Маска, по умолчанию null] <Если маска не указана, использует основную текстуру как маску, использует красный канал (чёрный - прозрачный)>
  *
  * Rotate - Поворачивает изображение
  *     [Угол в градусах]
@@ -2036,7 +2086,13 @@ async function ApplyAction(Content, Type, Info){
 			}
 			
 			case "Mask": {
-				Content.Mask();
+				if(Array.isArray(Info[0])){
+					var T = await GenerateFile(Info[0]);
+					
+					Content.Mask(T);
+				}else{
+					Content.Mask();
+				}
 				break;
 			}
 			
@@ -2446,7 +2502,7 @@ async function GeneratePainting(W, H){
 			return await GenerateFile(["Texture", "R/T/A/Empty.png", [["Put", ["Texture", FrameTexture]]]]);
 		}
 	
-		var Painting = PaintingFamily.splice(Math.floor(Math.random() * PaintingFamily.length), 1)[0];
+		var Painting = PaintingFamily.splice(Math.floor(RandomSeed() * PaintingFamily.length), 1)[0];
 		return await GenerateFile(["Texture", Painting, [["Put", ["Texture", FrameTexture]]]]);
 	}catch(e){
 		throw new Error("Произошла ошибка при генерации картины " + W + "x" + H + "!", e);
