@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Track Merger Pro · Без лишних символов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f3ef;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 24px 20px;
+            color: #1e2a2e;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #2c3e4e, #1a4d5f);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #4a6272;
+            border-left: 3px solid #7f8c8d;
+            padding-left: 14px;
+            margin-top: 6px;
+        }
+        .upload-panel, .manual-panel {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 24px 28px;
+            margin-bottom: 32px;
+        }
+        .flex-upload {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-end;
+        }
+        .file-group {
+            flex: 2;
+            min-width: 220px;
+        }
+        .label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #3e5a6b;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 12px;
+            background: #fefcf8;
+            border: 1px solid #cfdadf;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            border: 1px solid #cfdadf;
+            border-radius: 20px;
+            background: #fefcf8;
+            resize: vertical;
+        }
+        button {
+            background: #2c5f6e;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 26px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        button:hover {
+            background: #1f4653;
+            transform: translateY(-1px);
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #2c5f6e;
+            color: #2c5f6e;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: #eef3f5;
+            transform: none;
+        }
+        .warning-area {
+            background: #fff6e0;
+            border-left: 5px solid #e6b422;
+            padding: 12px 18px;
+            border-radius: 18px;
+            margin: 16px 0 12px 0;
+            font-size: 0.9rem;
+            color: #8a6e2c;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .stats {
+            background: #eef2f0;
+            border-radius: 28px;
+            padding: 16px 24px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: baseline;
+        }
+        .stat-badge {
+            background: white;
+            border-radius: 80px;
+            padding: 6px 18px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1e3b44;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        th {
+            background: #e4ecef;
+            padding: 12px 8px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid #cbdbe2;
+        }
+        td {
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 1px solid #e4e9ec;
+            font-family: monospace;
+        }
+        .track-name {
+            text-align: left;
+            font-weight: 500;
+            max-width: 280px;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 24px 0 14px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            height: 1px;
+            background: #d4dfe3;
+        }
+        .row-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            justify-content: flex-end;
+        }
+        .example-block {
+            background: #f0f4f8;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .example-good {
+            color: #2e7d64;
+            font-weight: bold;
+        }
+        @media (max-width: 700px) {
+            th, td { font-size: 10px; padding: 6px 3px; }
+            .track-name { max-width: 140px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎧 Track Merger Pro · без лишних | в названии</h1>
+        <div class="sub">Файлы (txt) + ручной ввод | Удаление дублей | Экспорт БЕЗ символа | в конце названия</div>
+    </div>
+
+    <div class="upload-panel">
+        <div class="flex-upload">
+            <div class="file-group">
+                <span class="label">📁 Загрузить файлы (.txt)</span>
+                <input type="file" id="fileInput" multiple accept=".txt,.csv,.data,.musiclist,.md,text/plain">
+            </div>
+            <button id="processBtn">🔁 Обработать файлы</button>
+        </div>
+        <div class="action-buttons">
+            <button id="exportMergedBtn" class="btn-outline">💾 Скачать объединённый (чистый формат)</button>
+            <button id="clearDataBtn" class="btn-outline">🗑 Очистить всё</button>
+        </div>
+    </div>
+
+    <div class="manual-panel">
+        <span class="label">✍️ Ручное добавление треков</span>
+        <textarea id="manualTracksInput" rows="4" placeholder='|075|000|000|001|010|000|000|000|030|010|030|000|015|000|000|Visonia - Phantoms
+|045|000|001|000|000|000|000|020|010|000|090|010|000|000|001|Blue Brew Music - Donkey Kong Country'></textarea>
+        <div class="row-buttons">
+            <button id="addManualBtn" style="background:#4f6f5e;">➕ Добавить строки</button>
+            <button id="clearManualBtn" class="btn-outline">Очистить поле</button>
+        </div>
+    </div>
+
+    <div id="warningMessage" class="warning-area" style="display: none;"></div>
+
+    <div id="statsPanel" class="stats" style="display: none;">
+        <div class="stat-badge" id="trackCountStat">🎵 Уникальных треков: 0</div>
+        <div class="stat-badge" id="duplicatesAlertStat">⚠️ Предупреждений: 0</div>
+        <div class="stat-badge" id="filesProcessedStat">📄 Файлов: 0</div>
+        <div class="stat-badge" id="manualAddedStat">➕ Ручных: 0</div>
+    </div>
+
+    <div class="section-title">
+        <span>📋 Предпросмотр (первые 50 треков)</span>
+    </div>
+    <div id="previewTable" style="overflow-x: auto;">
+        <div style="background: #eef1f2; padding: 28px; text-align: center; border-radius: 28px;">Нет данных</div>
+    </div>
+
+    <hr />
+    <div class="section-title">
+        <span>📄 Важно: исправлен формат экспорта</span>
+    </div>
+    <div class="example-block">
+        <strong>📤 ВЫХОДЯЩИЙ формат (без лишних символов):</strong><br>
+        <code class="example-good">075|000|000|001|010|000|000|000|030|010|030|000|015|000|000|Visonia - Phantoms</code><br>
+        ✅ <span class="example-good">НЕТ символа | в конце названия!</span> Название идёт без завершающей черты.
+    </div>
+</div>
+
+<script>
+    let mergedTracksMap = new Map();
+    let duplicateWarnings = [];
+    let processedFilesCount = 0;
+    let manualAddedCounter = 0;
+
+    const COL_IDS = ['L','B','C','N','K','A','V','H','W','I','R','M','E','P','D'];
+
+    // Парсер строки - автоматически удаляет лишний | из названия если он есть
+    function parseTrackLine(line) {
+        line = line.trim();
+        if (!line.startsWith('|')) return null;
+        const parts = line.split('|');
+        if (parts.length < 17) return null;
+        
+        const valuesRaw = parts.slice(1, 16);
+        if (valuesRaw.length !== 15) return null;
+        
+        const numbers = [];
+        for (let i = 0; i < valuesRaw.length; i++) {
+            let v = valuesRaw[i].trim();
+            if (v === '') return null;
+            let num = parseInt(v, 10);
+            if (isNaN(num)) return null;
+            num = Math.min(100, Math.max(0, num));
+            numbers.push(num);
+        }
+        
+        // Получаем название и ОБЯЗАТЕЛЬНО удаляем символ | в конце если он есть
+        let trackNameRaw = parts.slice(16).join('|').trim();
+        // Удаляем завершающий символ | если он есть (исправление основной проблемы)
+        if (trackNameRaw.endsWith('|')) {
+            trackNameRaw = trackNameRaw.slice(0, -1).trim();
+        }
+        // Также удаляем пробелы перед | если были
+        trackNameRaw = trackNameRaw.replace(/\s+\|$/, '').trim();
+        
+        if (trackNameRaw === '') return null;
+        
+        return {
+            L: numbers[0], B: numbers[1], C: numbers[2], N: numbers[3], K: numbers[4],
+            A: numbers[5], V: numbers[6], H: numbers[7], W: numbers[8], I: numbers[9],
+            R: numbers[10], M: numbers[11], E: numbers[12], P: numbers[13], D: numbers[14],
+            name: trackNameRaw
+        };
+    }
+    
+    function normalizeTrackName(name) {
+        return name.trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+    
+    function addTrackToMap(track, source = "неизвестный источник") {
+        const key = normalizeTrackName(track.name);
+        if (mergedTracksMap.has(key)) {
+            duplicateWarnings.push(`⚠️ Дубликат: "${track.name}" — уже есть (${source})`);
+            return false;
+        } else {
+            mergedTracksMap.set(key, track);
+            return true;
+        }
+    }
+    
+    function addTracksFromLines(linesArray, sourceName) {
+        let addedCount = 0;
+        for (let line of linesArray) {
+            if (line.trim().length === 0) continue;
+            const track = parseTrackLine(line);
+            if (track) {
+                const added = addTrackToMap(track, sourceName);
+                if (added) addedCount++;
+            } else {
+                if (duplicateWarnings.filter(w => w.includes("Неверный формат")).length < 15) {
+                    duplicateWarnings.push(`⚠️ [${sourceName}] Неверный формат: "${line.substring(0, 70)}..."`);
+                }
+            }
+        }
+        return addedCount;
+    }
+    
+    async function processFiles(files) {
+        if (!files || files.length === 0) {
+            showWarning("❌ Не выбрано ни одного файла");
+            return;
+        }
+        let totalAddedFromFiles = 0;
+        let processedNow = 0;
+        
+        for (let file of files) {
+            let content;
+            try {
+                content = await readFileAsText(file);
+            } catch (err) {
+                duplicateWarnings.push(`❌ Ошибка чтения ${file.name}: ${err.message}`);
+                continue;
+            }
+            const lines = content.split(/\r?\n/);
+            const added = addTracksFromLines(lines, `файл: ${file.name}`);
+            totalAddedFromFiles += added;
+            processedNow++;
+        }
+        processedFilesCount += processedNow;
+        
+        if (processedNow > 0) {
+            showWarning(`📁 Файлов: ${processedNow}. Добавлено треков: ${totalAddedFromFiles}`, '#e0f2e9', '#2b6e4f');
+        }
+        updatePreviewAndStats();
+    }
+    
+    function addManualTracks() {
+        const rawText = document.getElementById('manualTracksInput').value;
+        if (!rawText.trim()) {
+            showWarning("Поле ручного ввода пусто");
+            return;
+        }
+        const lines = rawText.split(/\r?\n/);
+        const addedCount = addTracksFromLines(lines, "ручной ввод");
+        manualAddedCounter += addedCount;
+        
+        if (addedCount > 0) {
+            showWarning(`➕ Добавлено: +${addedCount} треков`, '#eaf7f0', '#2e7d64');
+        } else {
+            showWarning(`⚠️ Не добавлено ни одного трека. Проверьте формат`);
+        }
+        updatePreviewAndStats();
+    }
+    
+    function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e.target.error);
+            reader.readAsText(file, "UTF-8");
+        });
+    }
+    
+    function showWarning(msg, bgColor = '#fff6e0', borderColor = '#e6b422') {
+        const warnDiv = document.getElementById('warningMessage');
+        warnDiv.style.display = 'block';
+        warnDiv.style.backgroundColor = bgColor;
+        warnDiv.style.borderLeftColor = borderColor;
+        const cleanMsg = msg.replace(/\n/g, '<br>');
+        warnDiv.innerHTML = cleanMsg + (warnDiv.innerHTML ? '<hr>' + warnDiv.innerHTML : '');
+        setTimeout(() => {}, 8000);
+    }
+    
+    function updatePreviewAndStats() {
+        const tracksArray = Array.from(mergedTracksMap.values());
+        const total = tracksArray.length;
+        document.getElementById('trackCountStat').innerHTML = `🎵 Уникальных треков: ${total}`;
+        document.getElementById('duplicatesAlertStat').innerHTML = `⚠️ Предупреждений: ${duplicateWarnings.length}`;
+        document.getElementById('filesProcessedStat').innerHTML = `📄 Файлов: ${processedFilesCount}`;
+        document.getElementById('manualAddedStat').innerHTML = `➕ Ручных: ${manualAddedCounter}`;
+        document.getElementById('statsPanel').style.display = (total === 0 && processedFilesCount === 0 && manualAddedCounter === 0) ? 'none' : 'flex';
+        
+        const previewDiv = document.getElementById('previewTable');
+        if (total === 0) {
+            previewDiv.innerHTML = `<div style="background: #eef1f2; padding: 28px; text-align: center; border-radius: 28px;">📭 Нет треков</div>`;
+            return;
+        }
+        
+        const showItems = tracksArray.slice(0, 50);
+        const table = document.createElement('table');
+        let thead = `<thead><tr>${COL_IDS.map(id => `<th>${id}</th>`).join('')}<th style="text-align:left">🎵 Название трека</th></tr></thead><tbody>`;
+        let tbody = '';
+        for (let tr of showItems) {
+            tbody += `<tr>
+                <td>${tr.L}</td><td>${tr.B}</td><td>${tr.C}</td><td>${tr.N}</td><td>${tr.K}</td>
+                <td>${tr.A}</td><td>${tr.V}</td><td>${tr.H}</td><td>${tr.W}</td><td>${tr.I}</td>
+                <td>${tr.R}</td><td>${tr.M}</td><td>${tr.E}</td><td>${tr.P}</td><td>${tr.D}</td>
+                <td class="track-name" title="${escapeHtml(tr.name)}">${escapeHtml(tr.name)}</td>
+            </tr>`;
+        }
+        tbody += `</tbody>`;
+        table.innerHTML = thead + tbody;
+        previewDiv.innerHTML = '';
+        previewDiv.appendChild(table);
+        if (total > 50) {
+            const note = document.createElement('div');
+            note.style.marginTop = '12px';
+            note.style.fontSize = '0.8rem';
+            note.style.color = '#5c6f7c';
+            note.innerText = `+ еще ${total - 50} треков`;
+            previewDiv.appendChild(note);
+        }
+    }
+    
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Генерация выходного файла - БЕЗ лишнего | в конце названия
+    function generateOutputContent() {
+        const tracks = Array.from(mergedTracksMap.values());
+        if (tracks.length === 0) {
+            alert("Нет данных для экспорта");
+            return null;
+        }
+        let outputLines = [];
+        for (let t of tracks) {
+            const values = [
+                t.L, t.B, t.C, t.N, t.K, t.A, t.V, t.H, t.W, t.I, t.R, t.M, t.E, t.P, t.D
+            ].map(v => String(v).padStart(3, '0'));
+            // ВАЖНО: название уже очищено от | при парсинге
+            // Формируем строку без лишнего символа в конце
+            const line = values.join('|') + '|' + t.name;
+            outputLines.push(line);
+        }
+        return outputLines.join('\n');
+    }
+    
+    function downloadMergedFile() {
+        const content = generateOutputContent();
+        if (!content) return;
+        
+        // Показываем пример для проверки
+        const tracks = Array.from(mergedTracksMap.values());
+        if (tracks.length > 0) {
+            const exampleTrack = tracks[0];
+            const exampleValues = [exampleTrack.L, exampleTrack.B, exampleTrack.C, exampleTrack.N, exampleTrack.K, 
+                exampleTrack.A, exampleTrack.V, exampleTrack.H, exampleTrack.W, exampleTrack.I,
+                exampleTrack.R, exampleTrack.M, exampleTrack.E, exampleTrack.P, exampleTrack.D]
+                .map(v => String(v).padStart(3, '0')).join('|');
+            const exampleLine = `${exampleValues}|${exampleTrack.name}`;
+            showWarning(`✅ Экспорт: "${exampleLine}"<br>➡️ НЕТ символа | в конце названия!`, '#e0f2e9', '#2b6e4f');
+        }
+        
+        const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+        link.download = `tracks_merged_${timestamp}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
+    function clearAllData() {
+        mergedTracksMap.clear();
+        duplicateWarnings = [];
+        processedFilesCount = 0;
+        manualAddedCounter = 0;
+        document.getElementById('warningMessage').style.display = 'none';
+        document.getElementById('warningMessage').innerHTML = '';
+        document.getElementById('manualTracksInput').value = '';
+        updatePreviewAndStats();
+        document.getElementById('previewTable').innerHTML = `<div style="background: #eef1f2; padding: 28px; text-align: center; border-radius: 28px;">🧹 Данные очищены</div>`;
+        document.getElementById('statsPanel').style.display = 'none';
+        document.getElementById('fileInput').value = '';
+    }
+    
+    // Event Listeners
+    document.getElementById('processBtn').addEventListener('click', async () => {
+        const fileInput = document.getElementById('fileInput');
+        const files = fileInput.files;
+        if (!files || files.length === 0) {
+            showWarning("❌ Не выбрано ни одного файла");
+            return;
+        }
+        await processFiles(files);
+    });
+    
+    document.getElementById('exportMergedBtn').addEventListener('click', () => {
+        if (mergedTracksMap.size === 0) {
+            alert("Нет треков для экспорта");
+            return;
+        }
+        downloadMergedFile();
+    });
+    
+    document.getElementById('clearDataBtn').addEventListener('click', () => {
+        clearAllData();
+    });
+    
+    document.getElementById('addManualBtn').addEventListener('click', () => {
+        addManualTracks();
+    });
+    
+    document.getElementById('clearManualBtn').addEventListener('click', () => {
+        document.getElementById('manualTracksInput').value = '';
+        showWarning("🧹 Поле очищено", '#eef2fa', '#7f8c8d');
+    });
+    
+    console.log("✅ Исправлено: при парсинге автоматически удаляется символ | в конце названия");
+</script>
+</body>
+</html>

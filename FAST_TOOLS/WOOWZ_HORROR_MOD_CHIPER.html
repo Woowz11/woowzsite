@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JVM ConstantPool Encryptor</title>
+
+<style>
+
+:root{
+    --bg:#070707;
+    --panel:#111111;
+    --panel2:#171717;
+    --border:#2a2a2a;
+    --green:#00ff88;
+    --green2:#00cc6e;
+    --text:#d7ffe9;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top,#101010,#050505);
+    color:var(--text);
+    font-family:Consolas,monospace;
+    padding:30px;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+.title{
+    font-size:40px;
+    color:var(--green);
+    margin-bottom:10px;
+    text-shadow:0 0 20px rgba(0,255,136,.25);
+}
+
+.subtitle{
+    opacity:.7;
+    margin-bottom:30px;
+}
+
+.card{
+    background:linear-gradient(
+        180deg,
+        #141414,
+        #0d0d0d
+    );
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    padding:18px;
+
+    margin-bottom:22px;
+
+    box-shadow:
+        0 0 20px rgba(0,0,0,.4),
+        inset 0 0 30px rgba(255,255,255,.02);
+}
+
+h2{
+    margin-top:0;
+    color:var(--green);
+}
+
+input,
+textarea{
+
+    width:100%;
+
+    background:#0c0c0c;
+
+    color:var(--green);
+
+    border:1px solid #2f2f2f;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    outline:none;
+
+    font-family:Consolas,monospace;
+
+    transition:.2s;
+}
+
+textarea{
+    resize:vertical;
+}
+
+input:focus,
+textarea:focus{
+
+    border-color:var(--green2);
+
+    box-shadow:
+        0 0 15px rgba(0,255,136,.15);
+}
+
+.buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:15px;
+}
+
+button{
+
+    background:
+        linear-gradient(
+            180deg,
+            #1b1b1b,
+            #101010
+        );
+
+    color:var(--green);
+
+    border:1px solid #303030;
+
+    border-radius:10px;
+
+    padding:12px 18px;
+
+    cursor:pointer;
+
+    font-family:Consolas,monospace;
+
+    transition:.2s;
+}
+
+button:hover{
+
+    transform:translateY(-2px);
+
+    border-color:var(--green2);
+
+    box-shadow:
+        0 0 15px rgba(0,255,136,.2);
+}
+
+pre{
+
+    margin:0;
+
+    overflow:auto;
+
+    white-space:pre-wrap;
+
+    background:#0a0a0a;
+
+    border:1px solid #2b2b2b;
+
+    border-radius:10px;
+
+    padding:15px;
+
+    color:#9dffcb;
+}
+
+.footer{
+    margin-top:30px;
+    opacity:.45;
+    font-size:13px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="title">
+Fake JVM ConstantPool Encryptor
+</div>
+
+<div class="subtitle">
+Deterministic pseudo-bytecode encryption generator
+</div>
+
+<div class="card">
+
+<h2>Input</h2>
+
+<input
+    id="seed"
+    placeholder="Seed"
+>
+
+<br><br>
+
+<textarea
+    id="input"
+    rows="12"
+    placeholder="Введите текст..."
+></textarea>
+
+<div class="buttons">
+
+<button onclick="encryptText()">
+Encrypt
+</button>
+
+<button onclick="decryptText()">
+Decrypt
+</button>
+
+<button onclick="copyOutput()">
+Copy Result
+</button>
+
+<button onclick="copyJava()">
+Copy Java
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Result</h2>
+
+<textarea
+    id="output"
+    rows="16"
+></textarea>
+
+</div>
+
+<div class="card">
+
+<h2>Generated Java Function</h2>
+
+<pre id="java"></pre>
+
+</div>
+
+<div class="footer">
+JVM-style pseudo constant-pool generator
+</div>
+
+</div>
+
+<script>
+
+function createSeededRandom(seed){
+
+    let state = 0;
+
+    for(let i=0;i<seed.length;i++){
+
+        state =
+            (
+                state * 31
+                +
+                seed.charCodeAt(i)
+            ) >>> 0;
+    }
+
+    return function(){
+
+        state =
+            (
+                state * 1664525
+                +
+                1013904223
+            ) >>> 0;
+
+        return state / 4294967296;
+    };
+}
+
+function copyOutput(){
+
+    navigator.clipboard.writeText(
+        document.getElementById("output").value
+    );
+}
+
+function copyJava(){
+
+    navigator.clipboard.writeText(
+        document.getElementById("java").textContent
+    );
+}
+
+function computeEncrypted(seed,text){
+
+    const encoder =
+        new TextEncoder();
+
+    const bytes =
+        encoder.encode(text);
+
+    let encryptedNumbers = [];
+
+    let key = 0;
+
+    for(let i=0;i<bytes.length;i++){
+
+        key =
+            (
+                (key << 5)
+                -
+                key
+                +
+                seed.charCodeAt(
+                    i % seed.length
+                )
+            ) | 0;
+
+        const encrypted =
+            bytes[i]
+            ^
+            ((key >> 2) & 255)
+            ^
+            ((i * 17) & 255)
+            ^
+            0xA7;
+
+        encryptedNumbers.push(
+            encrypted & 255
+        );
+    }
+
+    return encryptedNumbers;
+}
+
+function generateFakePool(
+    seed,
+    encryptedNumbers
+){
+
+    const random =
+        createSeededRandom(seed);
+
+    const descriptors = [
+
+        "Ljava/lang/String;",
+        "Ljava/util/List;",
+        "Ljava/util/Map;",
+        "Ljava/lang/Object;",
+        "Ljava/io/InputStream;",
+        "Ljava/nio/file/Path;",
+        "([B)I",
+        "(II)V",
+        "()V",
+        "()Ljava/lang/String;",
+        "Ljava/lang/Throwable;",
+        "[B",
+        "[I",
+        "[Ljava/lang/String;"
+    ];
+
+    const poolSymbols = [
+
+        "\u0001",
+        "\u0002",
+        "\u0003",
+        "\u0004",
+        "\u0005",
+        "\u0006",
+        "\u0007",
+        "\u000C",
+        "\u000E",
+        "\u000F",
+        "\u0012",
+        "\u0017",
+        "\u001A",
+        "\u001B",
+        "\u001C",
+        "\u001D",
+        "\u001E",
+
+        "џ",
+        "ў",
+        "ђ",
+        "ѓ",
+        "є",
+        "ї",
+        "№",
+        "Љ",
+        "Њ",
+        "Ќ",
+        "Ў"
+    ];
+
+    function pick(array){
+
+        return array[
+            Math.floor(
+                random() * array.length
+            )
+        ];
+    }
+
+    function hex(value){
+
+        return (
+            "0000"
+            +
+            value.toString(16)
+        ).slice(-4);
+    }
+
+    let result = "";
+
+    for(let i=0;i<encryptedNumbers.length;i++){
+
+        const value =
+            encryptedNumbers[i];
+
+        const fakeUnicode =
+            String.fromCharCode(
+                1024 +
+                (value % 700)
+            );
+
+        result +=
+
+            pick(poolSymbols)
+            + " "
+            + fakeUnicode
+            + pick(poolSymbols)
+            + "\f "
+            + pick(poolSymbols)
+            + " "
+            + pick(poolSymbols)
+            + "\u0001 "
+            + "\\u"
+            + hex(value)
+            + pick(descriptors);
+
+        if(random() > 0.35){
+
+            result += "\n";
+        }
+
+        if(random() > 0.60){
+
+            result +=
+
+                pick(poolSymbols)
+                + " "
+                + String.fromCharCode(
+                    1040 +
+                    Math.floor(
+                        random() * 400
+                    )
+                )
+                + pick(poolSymbols)
+                + " "
+                + pick(descriptors)
+                + " ";
+        }
+    }
+
+    return result;
+}
+
+function encryptText(){
+
+    const seed =
+        document.getElementById("seed").value || "golu";
+
+    const text =
+        document.getElementById("input").value;
+
+    const output =
+        document.getElementById("output");
+
+    const javaOutput =
+        document.getElementById("java");
+
+    const encryptedNumbers =
+        computeEncrypted(
+            seed,
+            text
+        );
+
+    output.value =
+        generateFakePool(
+            seed,
+            encryptedNumbers
+        );
+
+    javaOutput.textContent =
+        generateJavaFunction(
+            seed
+        );
+}
+
+function decryptText(){
+
+    const seed =
+        document.getElementById("seed").value || "golu";
+
+    const text =
+        document.getElementById("input").value;
+
+    const output =
+        document.getElementById("output");
+
+    let bytes = [];
+
+    let key = 0;
+
+    let payloadIndex = 0;
+
+    for(
+        let i=0;
+        i<text.length-5;
+        i++
+    ){
+
+        if(
+            text[i] === "\\"
+            &&
+            text[i+1] === "u"
+        ){
+
+            const hex =
+                text.substring(
+                    i+2,
+                    i+6
+                );
+
+            if(
+                /^[0-9a-fA-F]{4}$/
+                .test(hex)
+            ){
+
+                const value =
+                    parseInt(hex,16);
+
+                key =
+                    (
+                        (key << 5)
+                        -
+                        key
+                        +
+                        seed.charCodeAt(
+                            payloadIndex
+                            %
+                            seed.length
+                        )
+                    ) | 0;
+
+                const decoded =
+                    value
+                    ^
+                    ((key >> 2) & 255)
+                    ^
+                    ((payloadIndex * 17) & 255)
+                    ^
+                    0xA7;
+
+                bytes.push(
+                    decoded & 255
+                );
+
+                payloadIndex++;
+
+                i += 5;
+            }
+        }
+    }
+
+    output.value =
+        new TextDecoder().decode(
+            new Uint8Array(bytes)
+        );
+}
+
+function generateJavaFunction(seed){
+
+    const random =
+        createSeededRandom(seed);
+
+    function r(){
+
+        return "_"+
+        random()
+        .toString(36)
+        .substring(2,8);
+    }
+
+    const fname = r();
+    const seedArr = r();
+    const dataArr = r();
+    const outArr = r();
+    const keyVar = r();
+    const decodedVar = r();
+
+    const seedChars = [];
+
+    for(let i=0;i<seed.length;i++){
+
+        seedChars.push(
+            seed.charCodeAt(i)
+        );
+    }
+
+    return `
+public static String ${fname}(String bytecode){
+
+    int[] ${seedArr} = new int[]{
+        ${seedChars.join(",")}
+    };
+
+    java.util.ArrayList<Integer> ${dataArr} =
+        new java.util.ArrayList<>();
+
+    for(
+
+        int i = 0;
+
+        i < bytecode.length() - 5;
+
+        i++
+
+    ){
+
+        if(
+
+            bytecode.charAt(i) == '\\\\'
+
+            &&
+
+            bytecode.charAt(i + 1) == 'u'
+
+        ){
+
+            String hex =
+
+                bytecode.substring(
+
+                    i + 2,
+
+                    i + 6
+
+                );
+
+            boolean valid = true;
+
+            for(
+
+                int j = 0;
+
+                j < 4;
+
+                j++
+
+            ){
+
+                char c =
+
+                    hex.charAt(j);
+
+                if(
+
+                    !(
+
+                        (c >= '0' && c <= '9')
+
+                        ||
+
+                        (c >= 'a' && c <= 'f')
+
+                        ||
+
+                        (c >= 'A' && c <= 'F')
+
+                    )
+
+                ){
+
+                    valid = false;
+
+                    break;
+                }
+            }
+
+            if(valid){
+
+                ${dataArr}.add(
+
+                    Integer.parseInt(
+
+                        hex,
+
+                        16
+
+                    )
+
+                );
+
+                i += 5;
+            }
+        }
+    }
+
+    byte[] ${outArr} =
+
+        new byte[
+            ${dataArr}.size()
+        ];
+
+    int ${keyVar} = 0;
+
+    for(
+
+        int i = 0;
+
+        i < ${dataArr}.size();
+
+        i++
+
+    ){
+
+        ${keyVar} =
+
+            (
+
+                (${keyVar} << 5)
+
+                -
+
+                ${keyVar}
+
+                +
+
+                ${seedArr}[
+
+                    i % ${seedArr}.length
+
+                ]
+
+            ) | 0;
+
+        int ${decodedVar} =
+
+            ${dataArr}.get(i)
+
+            ^
+
+            ((${keyVar} >> 2) & 255)
+
+            ^
+
+            ((i * 17) & 255)
+
+            ^
+
+            0xA7;
+
+        ${outArr}[i] =
+
+            (byte)(
+
+                ${decodedVar} & 255
+
+            );
+    }
+
+    try{
+
+        return new String(
+
+            ${outArr},
+
+            java.nio.charset.StandardCharsets.UTF_8
+
+        );
+
+    }catch(Exception e){
+
+        return null;
+    }
+}
+`;
+}
+
+</script>
+
+</body>
+</html>

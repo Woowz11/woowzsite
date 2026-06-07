@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Catalog Generator · Исправленный (без ошибок)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at 20% 30%, #1a0a05, #000000);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(255, 60, 0, 0.4);
+            border: 1px solid #ff7f2a;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffaa44, #ff4422, #ff2200);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #ffcc88;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+            border-left: 3px solid #ff6622;
+        }
+        .dropzone {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px dashed #ff884d;
+            border-radius: 1.8rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .dropzone:hover {
+            border-color: #ffaa44;
+            background: rgba(30, 10, 5, 0.9);
+        }
+        .dropzone input {
+            display: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            padding: 0.8rem 1.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6622, #cc3300);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 80, 0, 0.5);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .btn-secondary {
+            background: rgba(30, 15, 10, 0.9);
+            color: #ffcc88;
+            border: 1px solid #ff884d;
+        }
+        .btn-secondary:hover {
+            background: rgba(60, 30, 20, 0.9);
+        }
+        .status {
+            background: rgba(0,0,0,0.7);
+            border-radius: 1.5rem;
+            padding: 0.8rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #ffccaa;
+            border-left: 3px solid #ff6622;
+        }
+        .status.error {
+            border-left-color: #ff3300;
+            color: #ffaa88;
+        }
+        .status.success {
+            border-left-color: #ffaa33;
+            color: #ffeecc;
+        }
+        .preview {
+            background: rgba(0,0,0,0.6);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            max-height: 180px;
+            overflow-y: auto;
+            color: #ffcc99;
+        }
+        .footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: #ffaa66;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🔥 Music Catalog · Inferno Edition</h1>
+    <div class="sub">Генератор плеера с клавиатурным управлением (без ошибок)</div>
+
+    <div class="dropzone" id="dropzone">
+        🔥 <strong>Нажмите или перетащите файл</strong><br>
+        <span style="font-size:0.75rem; color:#ffaa66;">Формат: 075|000|000|...|Название трека</span>
+        <input type="file" id="fileInput" accept=".txt,.csv,text/plain">
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-primary" id="generateBtn">✨ СГЕНЕРИРОВАТЬ HTML</button>
+        <button class="btn-secondary" id="demoBtn">🔥 ДЕМО-ДАННЫЕ</button>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+    <div id="preview" class="preview" style="display: none;"></div>
+    <div class="footer">
+        ⚡ В сгенерированном плеере: стрелки влево/вправо – предыдущий/следующий трек, пробел – пауза/игра<br>
+        🎛️ Windows будет показывать название текущего трека через Media Session API
+    </div>
+</div>
+
+<script>
+    let tracksStore = [];
+
+    function parseLine(line) {
+        let s = line.trim();
+        if (s === "") return null;
+        if (s.startsWith("|")) s = s.slice(1);
+        const parts = s.split("|");
+        if (parts.length < 16) return null;
+        const numbersRaw = parts.slice(0, 15);
+        const nameRaw = parts.slice(15).join("|").trim();
+        if (numbersRaw.length !== 15) return null;
+        const values = [];
+        for (let i = 0; i < 15; i++) {
+            let v = numbersRaw[i].trim();
+            if (v === "") return null;
+            let num = parseInt(v, 10);
+            if (isNaN(num)) return null;
+            num = Math.min(100, Math.max(0, num));
+            values.push(num);
+        }
+        if (nameRaw === "") return null;
+        let cleanName = nameRaw.replace(/\|$/, "").trim();
+        return { name: cleanName, values: values };
+    }
+
+    function loadFromText(content) {
+        const lines = content.split(/\r?\n/);
+        const result = [];
+        for (let line of lines) {
+            const t = parseLine(line);
+            if (t) result.push(t);
+        }
+        return result;
+    }
+
+    function loadDemo() {
+        const demoStr = `075|000|000|001|010|000|000|000|030|010|030|000|015|000|000|Visonia - Phantoms
+000|030|015|015|001|000|030|030|030|000|000|005|000|015|000|latex fruit - dj play this song
+045|000|000|000|030|001|000|000|000|005|050|010|010|000|010|Lustre - Green Worlds
+050|000|001|000|000|000|000|020|010|000|090|010|000|000|001|Blue Brew Music - Donkey Kong Country
+045|000|010|000|000|000|000|010|100|000|001|005|002|010|000|alena humanoid - Egoist
+095|000|001|010|010|001|045|020|020|010|030|001|001|000|000|Cult Member - U Weren't Here
+037|000|050|000|000|001|099|080|030|000|050|001|000|001|000|Tiny Tim - Livin' in the Sunlight
+060|000|000|060|000|000|090|050|060|000|000|030|000|005|000|Mixie Moon, S3RL - Music Is My Saviour
+070|000|000|000|000|005|000|000|020|100|070|010|000|000|000|t e l e p a t h - 光る目
+080|000|005|070|010|000|025|025|070|000|025|025|001|000|000|Exodia - 825hp`;
+        tracksStore = loadFromText(demoStr);
+        showStatus(`Загружено ${tracksStore.length} демо-треков`, false);
+        showPreview(tracksStore);
+    }
+
+    function showStatus(msg, isError = false) {
+        const div = document.getElementById("status");
+        div.style.display = "block";
+        div.innerHTML = msg;
+        div.className = isError ? "status error" : "status success";
+    }
+
+    function showPreview(tracks) {
+        const previewDiv = document.getElementById("preview");
+        if (!tracks.length) {
+            previewDiv.style.display = "none";
+            return;
+        }
+        previewDiv.style.display = "block";
+        let html = `<strong>Первые треки (${tracks.length} всего):</strong><br>`;
+        tracks.slice(0, 8).forEach(t => {
+            html += `🎵 ${escapeHtml(t.name)}<br>`;
+        });
+        if (tracks.length > 8) html += "...";
+        previewDiv.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    function buildPlayerHTML(tracks) {
+        if (!tracks.length) return null;
+        const data = JSON.stringify(tracks.map(t => ({ name: t.name, values: t.values })));
+        const paramIds = ['L','B','C','N','K','A','V','H','W','I','R','M','E','P','D'];
+        const paramNames = ['Like','Bootleg','Cringe','NightCore','DarkCore','Настольгия','Вокал','HappyCore','WeirdCore','Liminal','Relax','HammerCore','Creppy','Poopy','Средневековье'];
+        const musicPath = "file:///W:/Other/WoowzMusicSorter/Training/Music/";
+        
+        // Эмодзи убраны из JS-кода (оставлены только в HTML/CSS)
+        return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inferno Music Player</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background: radial-gradient(circle at 30% 10%, #1a0500, #000000);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            padding: 24px;
+            min-height: 100vh;
+            color: #ffddcc;
+        }
+        .container{max-width: 1600px; margin: 0 auto;}
+        h1{
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffaa44, #ff4422, #dd2200);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub{
+            color: #ffaa77;
+            border-left: 3px solid #ff6622;
+            padding-left: 16px;
+            margin: 8px 0 28px;
+        }
+        .sliders-panel{
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 1px solid #ff7f2a;
+        }
+        .sliders-container{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            row-gap: 28px;
+        }
+        .param-unit{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 85px;
+            background: #0a0503;
+            border-radius: 48px;
+            padding: 16px 8px;
+            border: 1px solid #ff884d;
+        }
+        .param-name{
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #ffaa66;
+            margin-bottom: 12px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        input[type="range"].vertical {
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
+            width: 20px;
+            height: 130px;
+            background: linear-gradient(to top, #ff3300, #ffaa33);
+            border-radius: 30px;
+            margin: 8px 0;
+            box-shadow: 0 0 8px #ff7f2a;
+        }
+        @supports not (appearance: slider-vertical) {
+            input[type="range"].vertical {
+                transform: rotate(270deg);
+                width: 130px;
+                height: 20px;
+                margin: 55px 0;
+            }
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            background: #ffffff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .param-value{
+            font-family: monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            background: #000000aa;
+            padding: 2px 10px;
+            border-radius: 40px;
+            margin: 8px 0 4px;
+            color: #ffcc88;
+            border: 1px solid #ff884d;
+        }
+        .param-check{
+            margin-top: 8px;
+            transform: scale(1.2);
+            accent-color: #ff5500;
+        }
+        .param-check + label{
+            font-size: 0.7rem;
+            margin-left: 5px;
+            color: #ffcc99;
+        }
+        .button-reset{
+            background: #aa3300;
+            border: none;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+        .button-reset:hover{
+            background: #cc5522;
+        }
+        .global-player{
+            background: #0a0503;
+            border-radius: 60px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border: 1px solid #ff884d;
+        }
+        .player-controls{
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .player-btn{
+            background: #ff5500;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .player-btn:hover{
+            background: #ff7722;
+        }
+        .now-playing-info{
+            color: #ffcc99;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+        .progress-container{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .progress-time{
+            color: #ffaa77;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+        input[type="range"].progress-bar {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #3a1a0a;
+            border-radius: 10px;
+        }
+        input[type="range"].progress-bar::-webkit-slider-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffaa55;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .stats{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .stat-badge{
+            background: rgba(0,0,0,0.8);
+            padding: 6px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            border: 1px solid #ffaa55;
+            color: #ffcc99;
+        }
+        .track-grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card{
+            background: rgba(10, 5, 3, 0.85);
+            border-radius: 28px;
+            padding: 16px;
+            border: 1px solid #ff884d;
+            transition: 0.15s;
+        }
+        .card:hover{
+            background: #1c0e08;
+            border-color: #ffaa66;
+            transform: translateY(-3px);
+        }
+        .track-name{
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff0e0;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+        .chips{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 8px 0;
+        }
+        .chip{
+            background: #000000aa;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-family: monospace;
+            color: #ffbb88;
+            border: 1px solid #ff884d;
+        }
+        .play-btn{
+            background: linear-gradient(135deg, #cc4400, #882200);
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 60px;
+            font-weight: 600;
+            margin-top: 12px;
+            cursor: pointer;
+            color: white;
+        }
+        .play-btn:hover{
+            background: #ff5511;
+        }
+        .score{
+            font-size: 0.6rem;
+            color: #ffaa77;
+            text-align: right;
+            margin-top: 8px;
+        }
+        .empty{
+            text-align: center;
+            padding: 60px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 2rem;
+            color: #ffaa77;
+        }
+        footer{
+            text-align: center;
+            margin-top: 48px;
+            color: #ff884d;
+            font-size: 0.7rem;
+        }
+        @media (max-width: 750px){
+            .param-unit{ width: 70px; padding: 12px 4px; }
+            input[type="range"].vertical{ height: 100px; }
+        }
+        .key-hint{
+            font-size:0.7rem;
+            text-align:center;
+            margin-top:12px;
+            color:#ffaa77;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Inferno Music Player</h1>
+    <div class="sub">Вертикальные ползунки • Клавиатура: ◀ ▶ (пред/след) • Пробел пауза • Media Session</div>
+
+    <div class="sliders-panel">
+        <div class="sliders-container" id="slidersContainer"></div>
+        <div style="display: flex; justify-content: center; margin-top: 12px;">
+            <button class="button-reset" id="resetBtn">⟳ Сбросить всё (ползунки 50, чекбоксы выкл)</button>
+        </div>
+        <div style="font-size:0.65rem; margin-top: 16px; text-align:center; color:#ffaa66;">🔊 Путь: <code style="background:#000; padding:2px 8px; border-radius:20px;">${musicPath}Название.mp3</code></div>
+    </div>
+
+    <div class="global-player" id="globalPlayer" style="display: none;">
+        <div class="now-playing-info" id="globalNowPlaying">⏸ Не играет</div>
+        <div class="player-controls">
+            <button class="player-btn" id="globalPrev">⏮ Предыдущий</button>
+            <button class="player-btn" id="globalPlayPause">▶ Играть</button>
+            <button class="player-btn" id="globalNext">⏭ Следующий</button>
+        </div>
+        <div class="progress-container">
+            <span class="progress-time" id="currentTime">0:00</span>
+            <input type="range" class="progress-bar" id="progressBar" value="0" step="0.1">
+            <span class="progress-time" id="duration">0:00</span>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-badge" id="trackCount">🎵 Треков: 0</div>
+        <div class="stat-badge">🎧 Автоплейлист + клавиатура</div>
+    </div>
+
+    <div id="trackList" class="track-grid"></div>
+    <div class="key-hint">⌨️ Стрелка влево — предыдущий трек | Стрелка вправо — следующий | Пробел — пауза/воспроизведение</div>
+    <footer>Media Session API: Windows показывает название трека | Вертикальные ползунки</footer>
+</div>
+
+<script>
+    const TRACKS_DATA = ${data};
+    const PARAM_IDS = ${JSON.stringify(paramIds)};
+    const PARAM_NAMES = ${JSON.stringify(paramNames)};
+    const MUSIC_PATH = "${musicPath}";
+    
+    let targetVals = new Array(15).fill(50);
+    let activeMask = new Array(15).fill(false);
+    let currentAudio = null;
+    let currentPlayingCard = null;
+    let currentQueue = [];
+    let currentIndex = -1;
+    let progressInterval = null;
+    
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrevTrack());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
+        navigator.mediaSession.setActionHandler('play', () => toggleGlobalPlayPause());
+        navigator.mediaSession.setActionHandler('pause', () => toggleGlobalPlayPause());
+    }
+    
+    function updateMediaSessionMetadata(trackName) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: trackName || 'Нет трека',
+                artist: 'Inferno Player',
+                album: 'Music Collection'
+            });
+        }
+        document.title = trackName ? trackName + ' | Inferno Player' : 'Inferno Player';
+    }
+    
+    function computeScore(vals) {
+        let sumSq = 0, cnt = 0;
+        for (let i=0; i<15; i++) {
+            if (activeMask[i]) {
+                let d = vals[i] - targetVals[i];
+                sumSq += d*d;
+                cnt++;
+            }
+        }
+        if (cnt===0) return 0;
+        return 1000 - Math.sqrt(sumSq/cnt);
+    }
+    
+    function getSortedTracks() {
+        const withScore = TRACKS_DATA.map(t => ({ ...t, score: computeScore(t.values) }));
+        withScore.sort((a,b)=> b.score - a.score);
+        return withScore;
+    }
+    
+    function formatTime(sec) {
+        if (isNaN(sec)) return "0:00";
+        let mins = Math.floor(sec / 60);
+        let s = Math.floor(sec % 60);
+        return mins + ":" + (s < 10 ? "0" + s : s);
+    }
+    
+    function updateProgressBar() {
+        if (currentAudio && currentAudio.duration && !isNaN(currentAudio.duration)) {
+            const percent = (currentAudio.currentTime / currentAudio.duration) * 100;
+            document.getElementById('progressBar').value = percent;
+            document.getElementById('currentTime').innerText = formatTime(currentAudio.currentTime);
+            document.getElementById('duration').innerText = formatTime(currentAudio.duration);
+        }
+    }
+    
+    function startProgressUpdater() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            if (currentAudio && !currentAudio.paused && currentAudio.duration) updateProgressBar();
+        }, 200);
+    }
+    
+    function stopProgressUpdater() {
+        if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+    }
+    
+    function updateGlobalPlayerUI() {
+        const globalDiv = document.getElementById('globalPlayer');
+        const nowPlayingSpan = document.getElementById('globalNowPlaying');
+        const playPauseBtn = document.getElementById('globalPlayPause');
+        if (currentIndex >= 0 && currentQueue[currentIndex]) {
+            globalDiv.style.display = 'block';
+            nowPlayingSpan.innerHTML = "🎵 " + escapeHtml(currentQueue[currentIndex].name);
+            playPauseBtn.innerHTML = (currentAudio && !currentAudio.paused) ? '⏸ Пауза' : '▶ Играть';
+            if (currentAudio && currentAudio.duration) updateProgressBar();
+            updateMediaSessionMetadata(currentQueue[currentIndex].name);
+        } else {
+            globalDiv.style.display = 'none';
+            stopProgressUpdater();
+            updateMediaSessionMetadata(null);
+        }
+    }
+    
+    function seekTo(percent) {
+        if (currentAudio && currentAudio.duration) {
+            currentAudio.currentTime = (percent / 100) * currentAudio.duration;
+            updateProgressBar();
+        }
+    }
+    
+    function playTrackByIndex(index) {
+        if (index < 0 || index >= currentQueue.length) return;
+        const track = currentQueue[index];
+        const cards = document.querySelectorAll('.card');
+        for (let card of cards) {
+            const nameDiv = card.querySelector('.track-name');
+            if (nameDiv && nameDiv.innerText.includes(track.name)) {
+                const btn = card.querySelector('.play-btn');
+                if (btn) { btn.click(); return; }
+            }
+        }
+        if (currentAudio) {
+            currentAudio.pause();
+            if (currentPlayingCard) {
+                const oldBtn = currentPlayingCard.querySelector('.play-btn');
+                if (oldBtn) oldBtn.innerHTML = '▶ Воспроизвести';
+            }
+        }
+        const audio = new Audio(MUSIC_PATH + encodeURIComponent(track.name) + '.mp3');
+        currentAudio = audio;
+        currentPlayingCard = null;
+        currentIndex = index;
+        audio.play().catch(e => console.warn(e));
+        audio.onended = () => playNextTrack();
+        audio.ontimeupdate = () => { if (currentAudio === audio) updateProgressBar(); };
+        startProgressUpdater();
+        updateGlobalPlayerUI();
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    }
+    
+    function playNextTrack() {
+        if (currentIndex + 1 < currentQueue.length) playTrackByIndex(currentIndex + 1);
+        else {
+            if (currentAudio) currentAudio.pause();
+            if (currentPlayingCard) {
+                const btn = currentPlayingCard.querySelector('.play-btn');
+                if (btn) btn.innerHTML = '▶ Воспроизвести';
+                currentPlayingCard = null;
+            }
+            currentIndex = -1;
+            updateGlobalPlayerUI();
+            stopProgressUpdater();
+            document.getElementById('globalPlayer').style.display = 'block';
+            document.getElementById('globalNowPlaying').innerHTML = '🏁 Плейлист завершён';
+            document.getElementById('globalPlayPause').innerHTML = '▶ Играть';
+            document.getElementById('progressBar').value = 0;
+            document.getElementById('currentTime').innerText = "0:00";
+            document.getElementById('duration').innerText = "0:00";
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+        }
+    }
+    
+    function playPrevTrack() {
+        if (currentIndex - 1 >= 0) playTrackByIndex(currentIndex - 1);
+        else if (currentAudio && currentAudio.currentTime > 3) currentAudio.currentTime = 0;
+        else if (currentQueue.length > 0) playTrackByIndex(0);
+    }
+    
+    function toggleGlobalPlayPause() {
+        if (currentAudio && currentPlayingCard) {
+            if (currentAudio.paused) {
+                currentAudio.play();
+                const btn = currentPlayingCard.querySelector('.play-btn');
+                if (btn) btn.innerHTML = '⏸ Пауза';
+                startProgressUpdater();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            } else {
+                currentAudio.pause();
+                const btn = currentPlayingCard.querySelector('.play-btn');
+                if (btn) btn.innerHTML = '▶ Воспроизвести';
+                stopProgressUpdater();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            }
+            updateGlobalPlayerUI();
+        } else if (currentQueue.length > 0 && currentIndex === -1) playTrackByIndex(0);
+    }
+    
+    function renderTracks() {
+        const sorted = getSortedTracks();
+        currentQueue = sorted;
+        document.getElementById('trackCount').innerHTML = "🎵 Треков: " + TRACKS_DATA.length + " (сортировка: " + (activeMask.some(v=>v) ? 'вкл' : 'выкл') + ")";
+        const container = document.getElementById('trackList');
+        if (!sorted.length) { container.innerHTML = '<div class="empty">Нет треков</div>'; return; }
+        
+        let oldPlayingName = null;
+        if (currentPlayingCard) {
+            const nameDiv = currentPlayingCard.querySelector('.track-name');
+            if (nameDiv) oldPlayingName = nameDiv.innerText.slice(2);
+        }
+        
+        container.innerHTML = '';
+        for (let t of sorted) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const chips = PARAM_IDS.map((id,i) => '<span class="chip">' + id + ':' + t.values[i] + '</span>').join('');
+            const safeName = t.name.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');
+            card.innerHTML = \`
+                <div class="track-name">🎵 \${safeName}</div>
+                <div class="chips">\${chips}</div>
+                <div class="play-btn">▶ Воспроизвести</div>
+                <audio style="display:none;" preload="none" src="\${MUSIC_PATH}\${encodeURIComponent(t.name)}.mp3"></audio>
+                <div class="score">близость: \${Math.round(t.score)}/1000</div>
+            \`;
+            const audio = card.querySelector('audio');
+            const playBtn = card.querySelector('.play-btn');
+            playBtn.onclick = (e) => {
+                e.stopPropagation();
+                const idx = currentQueue.findIndex(track => track.name === t.name);
+                if (idx !== -1) currentIndex = idx;
+                if (currentPlayingCard === card && currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    playBtn.innerHTML = '▶ Воспроизвести';
+                    currentPlayingCard = null;
+                    currentAudio = null;
+                    stopProgressUpdater();
+                    updateGlobalPlayerUI();
+                    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+                    return;
+                }
+                if (currentAudio) {
+                    currentAudio.pause();
+                    if (currentPlayingCard) {
+                        const oldBtn = currentPlayingCard.querySelector('.play-btn');
+                        if (oldBtn) oldBtn.innerHTML = '▶ Воспроизвести';
+                    }
+                    stopProgressUpdater();
+                }
+                audio.play().catch(() => {
+                    playBtn.innerHTML = '⚠️ Файл не найден';
+                    setTimeout(() => { if (playBtn) playBtn.innerHTML = '▶ Воспроизвести'; }, 1500);
+                });
+                playBtn.innerHTML = '⏸ Пауза';
+                currentAudio = audio;
+                currentPlayingCard = card;
+                startProgressUpdater();
+                updateGlobalPlayerUI();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+                audio.onended = () => { if (currentPlayingCard === card) playNextTrack(); };
+                audio.ontimeupdate = () => { if (currentAudio === audio) updateProgressBar(); };
+            };
+            container.appendChild(card);
+        }
+        
+        if (oldPlayingName) {
+            for (let card of document.querySelectorAll('.card')) {
+                const nameDiv = card.querySelector('.track-name');
+                if (nameDiv && nameDiv.innerText.slice(2) === oldPlayingName) {
+                    const audio = card.querySelector('audio');
+                    if (audio && currentAudio && !currentAudio.paused) {
+                        currentAudio.pause();
+                        currentAudio = audio;
+                        currentPlayingCard = card;
+                        audio.currentTime = 0;
+                        audio.play().catch(e=>{});
+                        const btn = card.querySelector('.play-btn');
+                        if (btn) btn.innerHTML = '⏸ Пауза';
+                        startProgressUpdater();
+                        updateGlobalPlayerUI();
+                        audio.onended = () => { if (currentPlayingCard === card) playNextTrack(); };
+                    }
+                    break;
+                }
+            }
+        }
+        updateGlobalPlayerUI();
+    }
+    
+    function buildControls() {
+        const container = document.getElementById('slidersContainer');
+        container.innerHTML = '';
+        for (let i=0; i<15; i++) {
+            const unit = document.createElement('div');
+            unit.className = 'param-unit';
+            unit.innerHTML = \`
+                <div class="param-name">\${PARAM_NAMES[i]}</div>
+                <input type="range" class="vertical" id="slider_\${i}" min="0" max="100" value="\${targetVals[i]}" step="1">
+                <div class="param-value" id="val_\${i}">\${targetVals[i]}</div>
+                <div style="display: flex; align-items: center; gap: 5px; margin-top: 6px;">
+                    <input type="checkbox" id="chk_\${i}" class="param-check" \${activeMask[i] ? 'checked' : ''}>
+                    <label for="chk_\${i}">вкл</label>
+                </div>
+            \`;
+            container.appendChild(unit);
+            const slider = unit.querySelector('input[type="range"]');
+            slider.addEventListener('input', (e) => {
+                targetVals[i] = parseInt(e.target.value);
+                document.getElementById('val_'+i).innerText = targetVals[i];
+                renderTracks();
+            });
+            const chk = unit.querySelector('input[type="checkbox"]');
+            chk.addEventListener('change', (e) => {
+                activeMask[i] = e.target.checked;
+                renderTracks();
+            });
+        }
+    }
+    
+    function resetAll() {
+        for (let i=0; i<15; i++) {
+            targetVals[i] = 50;
+            activeMask[i] = false;
+            const slider = document.getElementById('slider_'+i);
+            if (slider) slider.value = 50;
+            const valSpan = document.getElementById('val_'+i);
+            if (valSpan) valSpan.innerText = 50;
+            const chk = document.getElementById('chk_'+i);
+            if (chk) chk.checked = false;
+        }
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            if (currentPlayingCard) {
+                const btn = currentPlayingCard.querySelector('.play-btn');
+                if (btn) btn.innerHTML = '▶ Воспроизвести';
+                currentPlayingCard = null;
+            }
+        }
+        currentIndex = -1;
+        stopProgressUpdater();
+        renderTracks();
+        updateGlobalPlayerUI();
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+    }
+    
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');
+    }
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            playPrevTrack();
+        } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            if (currentQueue.length) {
+                if (currentIndex + 1 < currentQueue.length) playTrackByIndex(currentIndex + 1);
+                else if (currentQueue.length) playTrackByIndex(0);
+            }
+        } else if (e.code === 'Space') {
+            e.preventDefault();
+            toggleGlobalPlayPause();
+        }
+    });
+    
+    buildControls();
+    renderTracks();
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('globalPlayPause').addEventListener('click', toggleGlobalPlayPause);
+    document.getElementById('globalNext').addEventListener('click', () => {
+        if (currentQueue.length) {
+            if (currentIndex + 1 < currentQueue.length) playTrackByIndex(currentIndex + 1);
+            else if (currentQueue.length) playTrackByIndex(0);
+        }
+    });
+    document.getElementById('globalPrev').addEventListener('click', playPrevTrack);
+    document.getElementById('progressBar').addEventListener('input', (e) => seekTo(parseFloat(e.target.value)));
+<\/script>
+</body>
+</html>`;
+    }
+
+    function generateAndDownload() {
+        if (!tracksStore.length) {
+            showStatus("❌ Сначала загрузите файл с треками!", true);
+            return;
+        }
+        const html = buildPlayerHTML(tracksStore);
+        if (!html) {
+            showStatus("❌ Ошибка сборки HTML", true);
+            return;
+        }
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `inferno_player_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus(`✅ Готово! Скачан плеер с ${tracksStore.length} треками.`, false);
+    }
+
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const tracks = loadFromText(e.target.result);
+            if (tracks.length === 0) {
+                showStatus("⚠️ Не найдено треков. Формат: 075|000|...|Название", true);
+                return;
+            }
+            tracksStore = tracks;
+            showStatus(`✅ Загружено ${tracks.length} треков. Нажмите "Сгенерировать"`);
+            showPreview(tracks);
+        };
+        reader.onerror = () => showStatus("❌ Ошибка чтения файла", true);
+        reader.readAsText(file, "UTF-8");
+    }
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = "#ffaa44";
+        dropzone.style.background = "rgba(30, 10, 5, 0.9)";
+    });
+    dropzone.addEventListener("dragleave", () => {
+        dropzone.style.borderColor = "#ff884d";
+        dropzone.style.background = "rgba(0,0,0,0.7)";
+    });
+    dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = "#ff884d";
+        dropzone.style.background = "rgba(0,0,0,0.7)";
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+    fileInput.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+    });
+    document.getElementById("generateBtn").addEventListener("click", generateAndDownload);
+    document.getElementById("demoBtn").addEventListener("click", loadDemo);
+</script>
+</body>
+</html>
