@@ -402,12 +402,22 @@ function UpdateContent(VideosList){
 	var TotalDurationAll = [];
 	
 	function DurationToSeconds(D){
-		const Parts = D.split(":").map(Number);
+		if(typeof D === "number" && !isNaN(D)){
+			return D;
+		}
+		
+		if(typeof D === "string"){
+			const Parts = D.split(":").map(Number);
 
-		if(Parts.length === 2){
-			return Parts[0] * 60 + Parts[1];
-		}else if(Parts.length === 3){
-			return Parts[0] * 3600 + Parts[1] * 60 + Parts[2];
+			if(Parts.some(isNaN)){
+				return NaN;
+			}
+
+			if(Parts.length === 2){
+				return Parts[0] * 60 + Parts[1];
+			}else if(Parts.length === 3){
+				return Parts[0] * 3600 + Parts[1] * 60 + Parts[2];
+			}
 		}
 	}
 	
@@ -449,8 +459,12 @@ function UpdateContent(VideosList){
 
 			AddedIDs.add(ID);
 			var Seconds = DurationToSeconds(Duration);
-			TotalDuration += Seconds;
-			TotalDurationAll.push(Seconds);
+			if(!isNaN(Seconds) && isFinite(Seconds)){
+				TotalDuration += Seconds;
+				TotalDurationAll.push(Seconds);
+			}else{
+				TotalDurationAll.push(0);
+			}
 			
 			if(Visibility == P_Link || Visibility == P_Public){ TotalVisible += 1; }
 
@@ -588,6 +602,10 @@ function UpdateContent(VideosList){
 		document.getElementById("Info_Visible"   ).innerHTML = "Публичных: " + TotalVisible + " (" + Math.floor(TotalVisible / VideosList.length * 100) + "%)";
 		
 		function SecondsToDuration(S){
+			if(isNaN(S) || !isFinite(S) || S < 0){
+				return "??:??:??"
+			}
+		
 			const D   = Math.floor( S / 86400        );
 			const H   = Math.floor((S % 86400) / 3600);
 			const M   = Math.floor((S % 3600 ) / 60  );
