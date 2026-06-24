@@ -5,32 +5,18 @@ console.log("Loading events...")
  * @param {number} DT DeltaTime
  */
 __EVENTS.Tick = function(DT){
+    JT.Graphic.W = JT.Graphic.Application.renderer.width
+    JT.Graphic.H = JT.Graphic.Application.renderer.height
+
     __TickSecond_Timer += DT;
     if(__TickSecond_Timer >= 10){
         __TickSecond_Timer = 0
         __EVENTS.TickSecond()
     }
 
+    UpdateCamera(DT)
+
     UpdateDebug(DT)
-
-    if(__TEST_PRESSED){
-        const test = new PIXI.Graphics()
-
-        test.beginFill(Math.floor(Math.random() * 0xFFFFFF), 0.1)
-        test.drawRect(-20, -20, 40, 40)
-        test.endFill()
-
-        test.lineStyle(4, Math.floor(Math.random() * 0xFFFFFF), 0.1)
-        test.drawRect(-20, -20, 40, 40)
-
-        test.x = JT.Input.Mouse.X
-        test.y = JT.Input.Mouse.Y
-
-        test.rotation = Math.random() * Math.PI * 2
-
-        Scene.addChild(test)
-        __TEST_TOTAL_TESTS++
-    }
 }
 
 /**
@@ -53,20 +39,33 @@ let __TickSecond_Timer = 0
  * @param {number} Button Клавиша
  */
 __EVENTS.MouseButton = function(X, Y, RX, RY, Release, Button){
-    if(Button !== 0){ return; }
+    if(!Release && Button === 0){
+        let test = new PIXI.Graphics();
 
-    if(Release){
-        __TEST_PRESSED = false
+        test.beginFill(0x00FF00);  // Красный цвет
+        test.drawRect(-25, -25, 50, 50);  // Центрируем
+        test.endFill();
 
-        return
+        test.lineStyle(2, 0xFFFFFF, 0.5);
+        test.drawRect(-25, -25, 50, 50);
+
+        test.x = JT.Input.Mouse.WX;
+        test.y = JT.Input.Mouse.WY;
+
+        test.zIn
+
+        JT.Scene.World.addChild(test);
     }
-
-    console.log(`CLICK ${X}, ${Y}, ${RX}, ${RY}`)
-
-    __TEST_PRESSED = true
 }
-__TEST_TOTAL_TESTS = 0
-let __TEST_PRESSED = false
+
+/**
+ * Вызывается при нажатии клавиши клавиатуры
+ * @param {string} Key Клавиша
+ * @param {boolean} Release Отжатие клавиши?
+ */
+__EVENTS.KeyboardKey = function(Key, Release){
+    console.log(`PRESS ${Key} | ${Release}`)
+}
 
 /**
  * Вызывается при изменении размера окна
@@ -74,6 +73,6 @@ let __TEST_PRESSED = false
  * @param {number} H Новая высота
  */
 __EVENTS.WindowResize = function(W, H){
-    GG.renderer.resize(W, H)
+    JT.Graphic.Application.renderer.resize(W, H)
 }
 __EVENTS.WindowResize(window.innerWidth, window.innerHeight)
