@@ -49,7 +49,7 @@ const JT = {
 
 		World: {
 			ClientToWorld_Point: function(Point, Position){
-				return Point / JT.Game.Camera.Zoom + Position
+				return Point + Position
 			},
 
 			ClientToWorld_X: function(X){
@@ -67,7 +67,8 @@ const JT = {
 			},
 
 			WorldToClient: function(X, Y){
-
+				// TODO
+				throw new Error("TODO")
 			}
 		}
 	},

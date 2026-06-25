@@ -2,9 +2,7 @@ console.log("Load camera...")
 
 JT.Game.Camera = {
     X: 0,
-    Y: 0,
-
-    Zoom: 1
+    Y: 0
 }
 
 let __Dragging_LastX = 0
@@ -13,7 +11,7 @@ let __Dragging_LastY = 0
 let __Dragging_Cache = false
 
 const UpdateCamera = function(DT){
-    let Dragging = JT.Input.Mouse.IsPressed(1)
+    const Dragging = JT.Input.Mouse.IsPressed(1)
     if(Dragging){
         const WX = JT.Input.Mouse.WX
         const WY = JT.Input.Mouse.WY
@@ -35,16 +33,10 @@ const UpdateCamera = function(DT){
 
     // ----------------------------------------------------------------------
 
-    let ZoomSpeed = 0.1
+    const MoveSpeed = DT * 5 * (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraSpeedUp) ? 3 : 1)
 
-    JT.Game.Camera.Zoom *= (JT.Input.Keyboard.IsPressed("Equal") ? 1 + ZoomSpeed : (JT.Input.Keyboard.IsPressed("Minus") ? 1 - ZoomSpeed : 1))
-
-    // ----------------------------------------------------------------------
-
-    let MoveSpeed = DT * 5 * (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraSpeedUp) ? 3 : 1)
-
-    let DirectionX = (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraRight) ? 1 : (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraLeft) ? -1 : 0))
-    let DirectionY = (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraDown) ? 1 : (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraUp) ? -1 : 0))
+    const DirectionX = (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraRight) ? 1 : (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraLeft) ? -1 : 0))
+    const DirectionY = (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraDown) ? 1 : (JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraUp) ? -1 : 0))
 
     JT.Game.Camera.X += DirectionX * MoveSpeed
     JT.Game.Camera.Y += DirectionY * MoveSpeed
@@ -56,20 +48,6 @@ const UpdateCamera = function(DT){
         JT.Game.Camera.Zoom = 1
     }
 
-    // Позиция мира = -позиция камеры + центр экрана
-    const matrix = new PIXI.Matrix();
-
-// Устанавливаем трансформацию
-    matrix.set(
-        JT.Game.Camera.Zoom,          // a - масштаб X
-        0,                 // b - скос X
-        0,                 // c - скос Y
-        JT.Game.Camera.Zoom,          // d - масштаб Y
-        -JT.Game.Camera.X + JT.Graphic.W/2,      // tx - позиция X
-        -JT.Game.Camera.Y + JT.Graphic.H/2       // ty - позиция Y
-    );
-
-// Применяем матрицу к миру
-    JT.Scene.World.transform.localTransform = matrix;
-    JT.Scene.World.transform.updateLocalTransform();
+    JT.Scene.World.x = -JT.Game.Camera.X
+    JT.Scene.World.y = -JT.Game.Camera.Y
 }

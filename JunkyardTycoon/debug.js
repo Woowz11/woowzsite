@@ -25,17 +25,20 @@ let CreateDebugText = function(Text){
 
 // ----------------------------------------------------------------------
 
-let Text_RenderFPS  = CreateDebugText()
-let Text_Rect       = CreateDebugText()
-let Text_Camera     = CreateDebugText()
-let Text_Mouse      = CreateDebugText()
+let Text_RenderFPS = CreateDebugText()
+let Text_Rect      = CreateDebugText()
+let Text_Camera    = CreateDebugText()
+let Text_Mouse     = CreateDebugText()
+let Text_Scene     = CreateDebugText()
 
 const UpdateDebug = function(DT){
     Text_Rect.text = `Rect: (${JT.Graphic.W}x${JT.Graphic.H})`
 
-    Text_Camera.text = `Camera: (${Math.floor(JT.Game.Camera.X)}, ${Math.floor(JT.Game.Camera.Y)})`
+    Text_Camera.text = `Camera: (${Math.floor(JT.Game.Camera.X)}:${Math.floor(JT.Game.Camera.Y)})`
 
-    Text_Mouse.text = `Mouse: (${Math.floor(JT.Input.Mouse.WX)}, ${Math.floor(JT.Input.Mouse.WY)})`
+    Text_Mouse.text = `Mouse: (${Math.floor(JT.Input.Mouse.WX)}:${Math.floor(JT.Input.Mouse.WY)})`
+
+    Text_Scene.text = `Scene: (${GetCurrentScene()})`
 }
 
 const UpdateDebug_Second = function(){

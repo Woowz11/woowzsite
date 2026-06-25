@@ -16,6 +16,8 @@ __EVENTS.Tick = function(DT){
 
     UpdateCamera(DT)
 
+    GlobalRender(DT)
+
     UpdateDebug(DT)
 }
 
