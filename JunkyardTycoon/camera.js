@@ -2,7 +2,12 @@ console.log("Load camera...")
 
 JT.Game.Camera = {
     X: 0,
-    Y: 0
+    Y: 0,
+
+    Reset: function(){
+        this.X = 0
+        this.Y = 0
+    }
 }
 
 let __Dragging_LastX = 0
@@ -10,7 +15,9 @@ let __Dragging_LastY = 0
 
 let __Dragging_Cache = false
 
-const UpdateCamera = function(DT){
+const CameraMovement = function(DT){
+    if(JT.Scene.Current !== JT_SCENES.GAME){ return }
+
     const Dragging = JT.Input.Mouse.IsPressed(1)
     if(Dragging){
         const WX = JT.Input.Mouse.WX
@@ -42,12 +49,11 @@ const UpdateCamera = function(DT){
     JT.Game.Camera.Y += DirectionY * MoveSpeed
 
     if(JT.Input.Keyboard.IsPressed(JT.Settings.Keys.CameraReset)){
-        JT.Game.Camera.X = 0
-        JT.Game.Camera.Y = 0
-
-        JT.Game.Camera.Zoom = 1
+        JT.Game.Camera.Reset()
     }
+}
 
-    JT.Scene.World.x = -JT.Game.Camera.X
-    JT.Scene.World.y = -JT.Game.Camera.Y
+const UpdateCamera = function(DT){
+    JT.Graphic.Layer.World.x = -JT.Game.Camera.X
+    JT.Graphic.Layer.World.y = -JT.Game.Camera.Y
 }

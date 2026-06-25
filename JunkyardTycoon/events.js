@@ -14,9 +14,8 @@ __EVENTS.Tick = function(DT){
         __EVENTS.TickSecond()
     }
 
+    CameraMovement(DT)
     UpdateCamera(DT)
-
-    GlobalRender(DT)
 
     UpdateDebug(DT)
 }
@@ -25,7 +24,7 @@ __EVENTS.Tick = function(DT){
  * Вызывается каждую секунду
  */
 __EVENTS.TickSecond = function(){
-    UpdateTitle()
+    document.title = JT.Game.Info.Name
 
     UpdateDebug_Second()
 }
@@ -54,9 +53,7 @@ __EVENTS.MouseButton = function(X, Y, RX, RY, Release, Button){
         test.x = JT.Input.Mouse.WX;
         test.y = JT.Input.Mouse.WY;
 
-        test.zIn
-
-        JT.Scene.World.addChild(test);
+        JT.Graphic.Layer.World.addChild(test);
     }
 }
 
@@ -67,6 +64,12 @@ __EVENTS.MouseButton = function(X, Y, RX, RY, Release, Button){
  */
 __EVENTS.KeyboardKey = function(Key, Release){
     console.log(`PRESS ${Key} | ${Release}`)
+
+    if(Release){ return }
+
+    if(Key === "Escape"){
+        JT.Scene.Set(JT.Scene.Current === JT_SCENES.GAME ? JT_SCENES.MAIN_MENU : JT_SCENES.GAME)
+    }
 }
 
 /**

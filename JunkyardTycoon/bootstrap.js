@@ -85,16 +85,16 @@ const JT = {
 		Scene: null,
 
 		W: 0,
-		H: 0
-	},
+		H: 0,
 
-	Scene: {
-		/** @type PIXI.Container */
-		World: null,
-		/** @type PIXI.Container */
-		Interface: null,
-		/** @type PIXI.Container */
-		Debug: null
+		Layer: {
+			/** @type PIXI.Container */
+			World: null,
+			/** @type PIXI.Container */
+			Interface: null,
+			/** @type PIXI.Container */
+			Debug: null
+		}
 	}
 }
 
@@ -121,9 +121,9 @@ document.body.prepend(JT.Graphic.Canvas)
 
 // ----------------------------------------------------------------------
 
-JT.Scene.World     = JT.Graphic.Scene.addChild(new PIXI.Container())
-JT.Scene.Interface = JT.Graphic.Scene.addChild(new PIXI.Container())
-JT.Scene.Debug     = JT.Graphic.Scene.addChild(new PIXI.Container())
+JT.Graphic.Layer.World     = JT.Graphic.Scene.addChild(new PIXI.Container())
+JT.Graphic.Layer.Interface = JT.Graphic.Scene.addChild(new PIXI.Container())
+JT.Graphic.Layer.Debug     = JT.Graphic.Scene.addChild(new PIXI.Container())
 
 const testSquare = new PIXI.Graphics();
 
@@ -141,7 +141,7 @@ testSquare.x = 0;  // Центр экрана
 testSquare.y = 0;
 
 // 5. Добавляем в мир
-JT.Scene.World.addChild(testSquare);
+JT.Graphic.Layer.World.addChild(testSquare);
 
 const testSquare2 = new PIXI.Graphics();
 
@@ -159,7 +159,7 @@ testSquare2.x = 0;  // Центр экрана
 testSquare2.y = 0;
 
 // 5. Добавляем в мир
-JT.Scene.World.addChild(testSquare2);
+JT.Graphic.Layer.World.addChild(testSquare2);
 
 // ----------------------------------------------------------------------
 

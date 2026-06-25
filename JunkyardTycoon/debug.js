@@ -18,7 +18,7 @@ let CreateDebugText = function(Text){
 
     __Y += (14 + 3) * Scale
 
-    JT.Scene.Debug.addChild(Result)
+    JT.Graphic.Layer.Debug.addChild(Result)
 
     return Result
 }
@@ -38,7 +38,7 @@ const UpdateDebug = function(DT){
 
     Text_Mouse.text = `Mouse: (${Math.floor(JT.Input.Mouse.WX)}:${Math.floor(JT.Input.Mouse.WY)})`
 
-    Text_Scene.text = `Scene: (${GetCurrentScene()})`
+    Text_Scene.text = `Scene: (${JT.Scene.Current})`
 }
 
 const UpdateDebug_Second = function(){
