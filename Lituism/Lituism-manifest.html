@@ -49,6 +49,11 @@
 html{
 	scrollbar-color: red black;
 	scrollbar-width: auto;
+	cursor: url("../source/lit_cur.cur"), auto;
+
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 *::selection{
@@ -58,7 +63,6 @@ html{
 
 body{
 	margin: 0px;
-	height: 100vh;
 	
 	background-image: url("bg.png");
 	overflow-x: hidden;
@@ -227,13 +231,12 @@ site{
 	display: flex;
 	justify-content: center;
 	align-items: flex-start;
-	height: calc(100% - 150px);
 }
 
 site_content{
 	background: radial-gradient(circle, #0f0f0f, #000000);
 	width: calc(1980px * 0.8);
-	height: auto;
+	min-height: calc(100vh - 150px);
 
 	box-sizing: border-box;
 	border-left : 5px groove #990000;
@@ -318,7 +321,7 @@ title_text:hover{ background-image: url("title_text_hover.png"); }
 
 @keyframes glitch {
 	0%	 { text-shadow: -2.5px 2.5px aqua, 2.5px -2.5px red; }
-	50%	{ text-shadow: -2.5vpx -2.5px magenta, 2.5px 2.5px lime; }
+	50%	{ text-shadow: -2.5px -2.5px magenta, 2.5px 2.5px lime; }
 	100% { text-shadow: 2.5px 0 yellow, -2.5px 0 blue; }
 }
 
@@ -467,9 +470,9 @@ symbol{
 
 @keyframes drag-anim {
 	0%	 {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
-	25%	 {transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	25%	 {transform: translate(0%,0); box-shadow: -5px -5px 10px magenta, 5px 5px 10px lime;}
 	50%	 {transform: translate(50%,0); box-shadow: 5px 0 10px yellow, -5px 0 10px blue;}
-	75%	 {transform: translate(0%,0); box-shadow: -5vpx -5px 10px magenta, 5px 5px 10px lime;}
+	75%	 {transform: translate(0%,0); box-shadow: -5px -5px 10px magenta, 5px 5px 10px lime;}
 	100% {transform: translate(-50%,0); box-shadow: -5px 5px 10px aqua, 5px -5px 10px red;}
 }
 
@@ -487,13 +490,15 @@ symbol{
 <script> // Привет))) тут начало этого файла, я WOOWZ11, я распишу суть и лор этого поноса моего любимого 😁
 // НАХУЯ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+// сука это гвоно живое вообще нах?
+
 // ПРАВДИВАЯ ВЕРСИЯ МАНИФЕСТА
-const MANIFEST_VERSION = "0.0.2";
+const MANIFEST_VERSION = "0.0.III";
 
 // ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
 var HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
 // САЙТ ЯВЛЯЕТСЯ ЛОКАЛЬНЫМ ФАЙЛОМ
-const DEV = window.location.protocol === "file:";
+const DEV = window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 // АВТОПЛЕЙ ЗВУК
 const ENABLE_AUTOPLAY = !DEV;
 // ЗАПУЩЕНО НА ТЕЛЕФОНЕ
@@ -527,6 +532,12 @@ function SITE_BASE(content){
 	return `${ELEMENT_SITETOP}${content}${ELEMENT_SITEBOTTOM}`;
 }
 
+function OPEN_RANDOM_PAGE(){
+	const Pages = Object.keys(PAGES)
+	if(Pages.length === 0){ return }
+	OPEN_PAGE(Pages[Math.floor(Math.random() * Pages.length)])
+}
+
 /* Открыть страницу */
 function OPEN_PAGE(id = ""){
 	HASH = id;
@@ -550,7 +561,7 @@ function OPEN_PAGE(id = ""){
 	
 	function prikol(){
 		var bgs = [
-			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png"
+			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png"
 		];
 		var bg = bgs[Math.floor(Math.random() * bgs.length)];
 		document.getElementById("BODY").style.backgroundImage = `url("${bg}")`;
@@ -558,6 +569,121 @@ function OPEN_PAGE(id = ""){
 	prikol();
 	
 	page["f"]();
+
+
+
+
+	// ===================================================================
+	//  БИНАРНЫЙ СЛЕД ЗА МЫШЬЮ (0 и 1) — LITUISM STYLE
+	// ===================================================================
+	(function() {
+		const TRAIL_LENGTH = 64;
+		const TRAIL_SIZE = 16;
+
+		const COLORS = [
+			"red", "lime"
+		];
+
+		const SYMBOLS = ['0', '1'];
+
+		let trail = [];
+		let cursor = ""
+		let cursorX = window.innerWidth / 2;
+		let cursorY = window.innerHeight / 2;
+		let positions = [];
+
+		var CACHE = document.createElement("div")
+		document.body.appendChild(CACHE)
+
+		for (let i = 0; i < TRAIL_LENGTH; i++) {
+			const dot = document.createElement('div');
+			const size = TRAIL_SIZE * (1 - i / TRAIL_LENGTH * 0.6);
+			const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+			dot.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+			dot.style.cssText = `
+                position: fixed;
+                font-size: ${size}px;
+                font-family: 'Courier New', monospace;
+                font-weight: 900;
+                color: ${color};
+                pointer-events: none;
+                z-index: 999999;
+                opacity: ${1 - (i / TRAIL_LENGTH) * 0.85};
+                mix-blend-mode: screen;
+                filter: blur(${i < 3 ? 0 : (i / TRAIL_LENGTH) * 1.5}px);
+                transition: all 0.04s cubic-bezier(0.2, 0.9, 0.4, 1);
+                text-shadow: 0 0 ${size * 0.8}px ${color}66, 0 0 ${size * 2}px ${color}22;
+                will-change: transform;
+                line-height: 1;
+                user-select: none;
+            `;
+			CACHE.appendChild(dot);
+			trail.push(dot);
+			positions.push({ x: cursorX, y: cursorY });
+		}
+
+		function update() {
+			positions.unshift({ x: cursorX, y: cursorY });
+			if (positions.length > TRAIL_LENGTH) positions.pop();
+
+			for (let i = 0; i < trail.length; i++) {
+				if (i < positions.length) {
+					const pos = positions[i];
+					trail[i].style.left = pos.x + 'px';
+					trail[i].style.top = pos.y + 'px';
+
+					let glitchX = 0, glitchY = 0;
+					if (i > 3 && i % 2 === 0) {
+						glitchX = (Math.random() - 0.5) * (i / 2);
+						glitchY = (Math.random() - 0.5) * (i / 2);
+					}
+
+					let Symbol = trail[i].innerHTML
+
+					if(cursor.includes("notallow")){
+						Symbol = "卐"
+					}else if(cursor.includes("text")){
+						Symbol = "HI, WELCOME HERE!"
+					}else if(cursor.includes("grab")){
+						Symbol = "<img src='../source/whitesponge.ico'></img>"
+					}else{
+						Symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
+					}
+
+					trail[i].innerHTML = Symbol
+
+					const scale = 1 - (i / TRAIL_LENGTH) * 0.9;
+					trail[i].style.transform = `translate(-50%, -50%) translate(${glitchX}px, ${glitchY}px) scale(${scale})`;
+				}
+			}
+
+			requestAnimationFrame(update);
+		}
+
+		document.addEventListener('mousemove', function(e) {
+			let X = e.clientX
+			let Y = e.clientY
+
+			const ElementFromCursor = document.elementFromPoint(X, Y)
+			cursor = ElementFromCursor ? getComputedStyle(ElementFromCursor).cursor : ""
+
+			if(cursor.includes("pointer")){
+				X += 5;
+			}else if(cursor.includes("text")){
+				X += (Math.random()-0.5)*2*500;
+				Y += (Math.random()-0.5)*2*500;
+			}else if(cursor.includes("grab")){
+				X += (Math.random()-0.5)*2*3000;
+				Y += (Math.random()-0.5)*2*3000;
+			}
+
+			cursorX = X;
+			cursorY = Y;
+		});
+
+		update();
+	})();
 }
 
 function FUNC_REMOVENEWLINE(str){
@@ -632,6 +758,8 @@ ${ELEMENT_WEBINFO()}
 
 <button onclick="OPEN_PAGE('popo');" class="category_button">&lt;@&gt;</button>
 <button onclick="OPEN_PAGE();" class="category_button">{MAIN PAGE}</button>
+<button onclick="OPEN_PAGE('artsreal');" class="category_button">ИСКУССТВО</button>
+<button onclick="OPEN_RANDOM_PAGE();" class="category_button">RANDOM_PAGE()</button>
 <button onclick="OPEN_PAGE('database');" class="category_button">DATABASE</button>
 
 </top_banner_bottom>
@@ -669,18 +797,17 @@ function ELEMENT_SITE(content, func = function(){}, newlines = true, runafterope
 	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
 }
 
-var PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(`<img src="../source/specialforrandomsite/c6j0PNI.gif">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`);
+var PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(
+	`<img src="../source/specialforrandomsite/c6j0PNI.gif" style="filter: contrast(100)">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`
+);
 
 var PAGE_DATABASE = ELEMENT_SITE(
 `<center><div style="width: 80%;">
-	<h1 class="glitch2" >LIT. DATA-BASE</h1>
-	Приложения GOLU:
+	<h1 class="glitch2" >LIT. DATA-BASE (<text id="all-list-count">?</text>)</h1>
+	Приложения (процессы) GOLU:
 	<br>
-	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
-	<a onclick="OPEN_PAGE('crybird')">CRYBIRD.lit</a>
-	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
-	<a onclick="OPEN_PAGE('crybird')">CRYBIRD.lit</a>
-	<a onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a style="font-size: 30px; color: yellow;" onclick="OPEN_PAGE('sranspang')">SRANSPANG.lit</a>
+	<a style="font-size: 30px; color: yellow;" onclick="OPEN_PAGE('crybird')">CRYBIRD.lit</a>
 	<br>
 	[-===- -ALL- -===-]<br>
 	<text id="all-list"></text>
@@ -689,17 +816,22 @@ var PAGE_DATABASE = ELEMENT_SITE(
 `
 ,function(){
 	var bg = document.getElementById("MAIN"); 
-	bg.style.background = "linear-gradient(0deg,rgba(128, 0, 0, 1) 0%, rgba(145, 145, 145, 1) 25%, rgba(255, 255, 255, 1) 50%, rgba(145, 145, 145, 1) 75%, rgba(128, 0, 0, 1) 100%)";
+	bg.style.background = "linear-gradient(0deg,rgba(255, 0, 0, 1) 0%, rgba(128, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 50%, rgba(128, 0, 0, 1) 75%, rgba(255, 0, 0, 1) 100%)";
 	bg.style.textShadow = "0 0 5px white, 0 0 5px white, 0 0 5px white";
 	bg.style.color = "white";
 	bg.style.width = "50%";
 	
 	var AllListResult = "";
+	var Count = 0
 	for(const key in PAGES){
 		const value = PAGES[key];
-		AllListResult += `<a onclick="OPEN_PAGE('${key}')">${value['t']}</a>` + "\n";
+		AllListResult += `<a style="font-size: 30px; color: yellow;" onclick="OPEN_PAGE('${key}')">${value['t']}</a>` + "\n";
+
+		Count++
 	}
 	document.getElementById("all-list").innerHTML = AllListResult;
+
+	document.getElementById("all-list-count").innerHTML = Count
 });
 
 var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
@@ -947,7 +1079,7 @@ var PAGE_MANIFEST_SRANIYSPANCH = ELEMENT_SITE(
 	::LOG OUT FROM HUMAN VISION<br>
 	::WAITING NEXT UPLOAD...<br>
 	-> out SRANSPANG_{{CUR-TIME}}.log.gz</h2>
-	<center><button onclick="FUNC_DOWNLOADFILE('SRANSPANG_{{CUR-TIME}}.log','Обман:Обман:Обман\\nФайл пуст, нет данных для публикации, удалите файл.')">Download LOG</button></center>
+	<center><button onClick="FUNC_DOWNLOADFILE('SRANSPANG_{{CUR-TIME}}.log','Обман:Обман:Обман\\nФайл пуст, нет данных для публикации, удалите файл.')">Download LOG</button></center>
 </section>
 
 
@@ -1178,7 +1310,6 @@ var PAGE_MANIFEST_CRYBIRD = ELEMENT_SITE(
 
 
 
-
 var PAGE_MANIFEST_GOLU = ELEMENT_SITE(
 ``
 ,function(){
@@ -1188,9 +1319,35 @@ var PAGE_MANIFEST_GOLU = ELEMENT_SITE(
 
 
 var PAGE_MANIFEST_TRASH1 = ELEMENT_SITE(`
+<div style="padding: 2rem; height: calc(100vh - 150px); box-sizing: border-box;">
+    <div style="
+        border: 3px solid #ff0044;
+        height: 100%;
+        border-radius: 12px 2px 12px 2px;
+        padding: 6px;
+        background: #0a0000;
+        box-shadow: 0 0 60px rgba(255,0,68,0.2);
+    ">
+        <iframe
+            src="https://woowz11.github.io/woowzsite/GOLUWorld2/game"
+            style="
+                width: 100%;
+                height: 100%;
+                border: 1px solid #2a0a0a;
+                border-radius: 6px;
+                background: #000;
+            "
+            frameborder="0"
+            loading="lazy"
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
 `
-,function(){ var bg = document.getElementById("MAIN"); 
-
+,function(){
+	var bg = document.getElementById('MAIN');
+	bg.style.background = 'radial-gradient(ellipse at center, #0a0000 0%, #000000 100%)';
+	bg.style.color = '#ff4466';
 },false);
 
 function GetAllLithiumArts(){
@@ -1269,6 +1426,1459 @@ var PAGE_MANIFEST_ARTS = ELEMENT_SITE(
 },false);
 
 
+
+var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
+<style>
+/* ===== ОСНОВНОЙ КОНТЕЙНЕР ===== */
+.lituism-gallery-wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+
+.lituism-gallery-title {
+    font-size: 2.8em;
+    color: #ff0044;
+    text-shadow: 0 0 30px #ff0044, 0 0 60px #ff004466, 0 0 100px #ff004422;
+    text-align: center;
+    letter-spacing: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+    font-family: 'Courier New', monospace;
+}
+
+.lituism-gallery-sub {
+    text-align: center;
+    color: #ff2244;
+    font-size: 0.8rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #441122;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== СЕТКА ГАЛЕРЕИ — МЕНЬШИЕ КАРТОЧКИ ДЛЯ БОЛЬШЕГО КОЛИЧЕСТВА ===== */
+.lituism-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+/* ===== КАРТОЧКА ===== */
+.lituism-card {
+    background: #0a0a0a;
+    border: 2px solid #2a0a0a;
+    border-radius: 8px 2px 8px 2px;
+    padding: 0.5rem;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    transition: all 0.15s ease;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.lituism-card:hover {
+    border-color: #ff0044;
+    box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+.lituism-card-img-wrap {
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    border-radius: 6px 2px 6px 2px;
+    background: #050505;
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        #ff0000,
+        #3bff00,
+        #ff00f2,
+        #ffd800,
+        #00ffec,
+        #0015ff,
+        #ff7400
+    );
+    background-size: 400% 400%;
+    animation: galleryGradientShift 1s ease infinite;
+}
+
+@keyframes galleryGradientShift {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 0%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 100%; }
+    100% { background-position: 0% 50%; }
+}
+
+.lituism-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: all 0.3s ease;
+    border: 1px solid #1a0a0a;
+    position: relative;
+    z-index: 1;
+    /* НЕМНОГО ПРОЗРАЧНОСТИ ЧТОБЫ ФОН ПРОСВЕЧИВАЛ */
+    background: transparent;
+}
+
+.lituism-card:hover .lituism-card-img-wrap img {
+    transform: scale(1.03);
+    border-color: #ff004466;
+}
+
+.lituism-card-info {
+    padding: 0.4rem 0.1rem 0.1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.lituism-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ff4466;
+    text-shadow: 0 0 10px rgba(255, 0, 68, 0.2);
+    margin-bottom: 0.1rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.lituism-card-author {
+    font-size: 0.7rem;
+    color: #ff6688;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.lituism-card-date {
+    font-size: 0.6rem;
+    color: #884444;
+    font-family: 'Courier New', monospace;
+    margin-top: auto;
+    border-top: 1px dashed #2a0a0a;
+    padding-top: 0.2rem;
+}
+
+.lituism-card-hover-hint {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(255, 0, 68, 0.8);
+    color: white;
+    font-size: 0.5rem;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lituism-card:hover .lituism-card-hover-hint {
+    opacity: 1;
+}
+
+/* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ===== */
+.lituism-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    animation: modalFade 0.2s ease;
+}
+
+.lituism-modal.active {
+    display: flex;
+}
+
+@keyframes modalFade {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.lituism-modal-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    position: relative;
+}
+
+/* ===== РЕЖИМ ЛУПЫ ===== */
+.lituism-modal-img-wrapper {
+    padding: 8px;
+    background: linear-gradient(135deg, #ff0000, #3bff00, #ff00f2, #ffd800, #00ffec, #0015ff, #ff7400);
+    background-size: 400% 400%;
+    animation: modalGradientShift 3s ease infinite;
+    box-shadow: 0 0 60px rgba(255, 0, 68, 0.3);
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* ===== КРЕСТИК В РЕЖИМЕ ЛУПЫ ===== */
+.lituism-modal-img-wrapper.zoomed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.95);
+    box-shadow: none;
+    z-index: 99998;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.lituism-modal-img-wrapper.zoomed:active {
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+}
+
+.lituism-modal-img-wrapper.zoomed .lituism-modal-img {
+    max-width: none;
+    max-height: none;
+    width: auto;
+    height: auto;
+    object-fit: none;
+    box-shadow: none;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    transition: none;
+    border: none !important;
+}
+
+.lituism-modal-img-wrapper.zoomed:active .lituism-modal-img {
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+}
+
+/* Индикатор зума */
+.lituism-zoom-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    font-family: 'Courier New', monospace;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 0, 68, 0.3);
+    letter-spacing: 1px;
+    pointer-events: none;
+    z-index: 100000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.lituism-modal-img-wrapper.zoomed .lituism-zoom-indicator {
+    opacity: 1;
+}
+
+@keyframes modalGradientShift {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 0%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 100%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ===== КНОПКА ЗАКРЫТИЯ — ВСЕГДА ПОВЕРХ ВСЕГО ===== */
+.lituism-modal-close {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    font-size: 3rem;
+    color: #ff0044;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    text-shadow: 0 0 40px #ff0044, 0 0 80px #ff004466;
+    z-index: 999999 !important; /* ПОДНИМАЕМ ВЫШЕ ВСЕГО! */
+    line-height: 1;
+    pointer-events: auto !important; /* Убеждаемся что кликабелен */
+}
+
+.lituism-modal-close:hover {
+    color: #ff4488;
+    transform: rotate(90deg) scale(1.2);
+    text-shadow: 0 0 60px #ff4488, 0 0 120px #ff448866;
+}
+
+/* ===== КАРТИНКА — В ЦЕНТРЕ, БЕЗ ЛИШНИХ ЭЛЕМЕНТОВ ===== */
+.lituism-modal-img {
+    max-width: 85vw;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+    border: 5px solid black;
+}
+
+/* ===== ИНФОРМАЦИЯ ВНИЗУ — БОЛЕЕ ВИДИМАЯ ===== */
+.lituism-modal-info {
+    width: 85vw;
+    max-width: 800px;
+    margin-top: 1.2rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 0, 68, 0.08);
+    border-left: 4px solid #ff0044;
+    border-right: 4px solid #ff0044;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 30px rgba(255, 0, 68, 0.05);
+}
+
+.lituism-modal-title {
+    font-size: 1.6rem;
+    color: #ff4466;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 30px rgba(255, 0, 68, 0.3), 0 0 60px rgba(255, 0, 68, 0.1);
+    letter-spacing: 2px;
+}
+
+.lituism-modal-author {
+    color: #ff6688;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    text-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+    letter-spacing: 1px;
+}
+
+.lituism-modal-date {
+    color: #ff8899;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
+    letter-spacing: 1px;
+}
+
+/* ===== КНОПКА ОБНОВЛЕНИЯ ===== */
+.lituism-reload-btn {
+    display: block;
+    margin: 1.5rem auto 0;
+    padding: 0.7rem 3rem;
+    background: transparent;
+    border: 2px solid #ff0044;
+    border-radius: 40px 8px 40px 8px;
+    color: #ff0044;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 20px rgba(255, 0, 68, 0.3);
+    box-shadow: 0 0 30px rgba(255, 0, 68, 0.05);
+}
+
+.lituism-reload-btn:hover {
+    background: #ff0044;
+    color: #000;
+    box-shadow: 0 0 60px rgba(255, 0, 68, 0.3);
+}
+
+/* ===== СЧЁТЧИК ===== */
+.lituism-counter {
+    text-align: center;
+    color: #884444;
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    font-family: 'Courier New', monospace;
+    margin-top: 0.5rem;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+}
+
+/* ===== ГЛЮЧНЫЙ ЭФФЕКТ ===== */
+.lituism-glitch-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9998;
+    background: repeating-linear-gradient(
+        15deg,
+        transparent 0px,
+        rgba(255, 0, 68, 0.1) 2px,
+        transparent 4px,
+        transparent 6px,
+        transparent 8px
+    );
+    animation: glitchScan 0.5s linear infinite;
+}
+
+@keyframes glitchScan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 768px) {
+    .lituism-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.8rem;
+    }
+    .lituism-gallery-title {
+        font-size: 1.8em;
+        letter-spacing: 5px;
+    }
+    .lituism-modal-img {
+        max-width: 95vw;
+        max-height: 50vh;
+    }
+    .lituism-modal-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+    }
+    .lituism-modal-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .lituism-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.6rem;
+    }
+    .lituism-gallery-title {
+        font-size: 1.4em;
+        letter-spacing: 3px;
+    }
+}
+
+/* ===== КОНТРОЛЛЕРЫ ФИЛЬТРОВ В РЕЖИМЕ ЛУПЫ ===== */
+.lituism-filter-controls {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 15px 25px;
+    border-radius: 12px 4px 12px 4px;
+    border: 2px solid #ff0044;
+    box-shadow: 0 0 40px rgba(255, 0, 68, 0.2);
+    z-index: 100000;
+    display: none;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.lituism-filter-controls.visible {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lituism-filter-controls .filter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 80px;
+}
+
+.lituism-filter-controls label {
+    color: #ff4466;
+    font-size: 0.6rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 0, 68, 0.3);
+}
+
+.lituism-filter-controls input[type="range"] {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, #440022, #ff0044);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.lituism-filter-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff0044;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 68, 0.5);
+    border: 2px solid #000;
+}
+
+.lituism-filter-controls input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff0044;
+    cursor: pointer;
+    border: 2px solid #000;
+}
+
+.lituism-filter-controls .filter-value {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.5rem;
+    font-family: 'Courier New', monospace;
+    min-width: 20px;
+    text-align: center;
+}
+
+.lituism-filter-controls .filter-reset {
+    background: none;
+    border: 1px solid rgba(255, 0, 68, 0.3);
+    color: #ff0044;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.5rem;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lituism-filter-controls .filter-reset:hover {
+    background: #ff0044;
+    color: #000;
+}
+
+.lituism-filter-controls .filter-reset-all {
+    background: #ff0044;
+    border: none;
+    color: #000;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.6rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+.lituism-filter-controls .filter-reset-all:hover {
+    background: #ff4488;
+    box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
+}
+
+@media (max-width: 768px) {
+    .lituism-filter-controls {
+        bottom: 70px;
+        padding: 10px 15px;
+        gap: 6px;
+        max-width: 95vw;
+    }
+    .lituism-filter-controls input[type="range"] {
+        width: 60px;
+    }
+    .lituism-filter-controls .filter-group {
+        min-width: 60px;
+    }
+}
+</style>
+
+<!-- ГЛЮЧ-ОВЕРЛЕЙ -->
+<div class="lituism-glitch-overlay"></div>
+
+<div class="lituism-gallery-wrap">
+    <h1 class="lituism-gallery-title" id="galleryTitle">✦ LITUISM · GALLERY ✦</h1>
+    <div class="lituism-gallery-sub" id="gallerySub">// РЕЕСТР ВИЗУАЛЬНЫХ АРТЕФАКТОВ //</div>
+
+    <div class="lituism-grid" id="lituismGrid"></div>
+
+    <div class="lituism-counter" id="lituismCounter">// ЗАГРУЗКА АРТЕФАКТОВ... //</div>
+
+    <button class="lituism-reload-btn" id="lituismReloadBtn">⟳ ПЕРЕЗАПУСК</button>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="lituism-modal" id="lituismModal">
+    <div class="lituism-modal-content">
+        <button class="lituism-modal-close" id="lituismModalClose">✕</button>
+        <div class="lituism-modal-img-wrapper" id="modalImgWrapper" title="PUT SOME TEXT PLEASE, I WAIT 😒">
+			<img class="lituism-modal-img" id="lituismModalImg" src="" alt="">
+		</div>
+        <div class="lituism-modal-info">
+            <span class="lituism-modal-title" id="lituismModalTitle">—</span>
+            <span class="lituism-modal-author" id="lituismModalAuthor">—</span>
+            <span class="lituism-modal-date" id="lituismModalDate">—</span>
+        </div>
+    </div>
+</div>
+<div class="lituism-zoom-indicator" id="zoomIndicator">&gg; 🔍 MOUSE WHEEL — ZOOM | ✋✊ GRAB — DRAGGING &ll;</div>
+
+<!-- КОНТРОЛЛЕРЫ ФИЛЬТРОВ -->
+<div class="lituism-filter-controls" id="filterControls">
+    <div class="filter-group">
+        <label>Яркость</label>
+        <input type="range" id="filterBrightness" min="0" max="500" value="100">
+        <span class="filter-value" id="filterBrightnessVal">100%</span>
+    </div>
+    <div class="filter-group">
+        <label>Насыщенность</label>
+        <input type="range" id="filterSaturate" min="0" max="500" value="100">
+        <span class="filter-value" id="filterSaturateVal">100%</span>
+    </div>
+    <div class="filter-group">
+        <label>Инверт</label>
+        <input type="range" id="filterInvert" min="0" max="100" value="0">
+        <span class="filter-value" id="filterInvertVal">0%</span>
+    </div>
+    <div class="filter-group">
+        <label>Hue</label>
+        <input type="range" id="filterHue" min="0" max="360" value="0">
+        <span class="filter-value" id="filterHueVal">0°</span>
+    </div>
+    <div class="filter-group">
+        <label>Блюр</label>
+        <input type="range" id="filterBlur" min="0" max="20" value="0" step="0.5">
+        <span class="filter-value" id="filterBlurVal">0px</span>
+    </div>
+    <div class="filter-group">
+        <label>Scale X</label>
+        <input type="range" id="filterScaleX" min="10" max="500" value="100">
+        <span class="filter-value" id="filterScaleXVal">100%</span>
+    </div>
+    <div class="filter-group">
+        <label>Scale Y</label>
+        <input type="range" id="filterScaleY" min="10" max="500" value="100">
+        <span class="filter-value" id="filterScaleYVal">100%</span>
+    </div>
+    <div class="filter-group">
+        <button class="filter-reset-all" id="filterResetAll">СБРОС</button>
+    </div>
+</div>
+
+<footer style="margin-top:2rem; text-align:center; font-size:0.7rem; color:#442222; letter-spacing:3px; font-family:'Courier New',monospace;">
+    ✴ LITUISM · VISUAL ARCHIVE v2.0 ✴<br>
+    SYSTEM INTEGRITY: 73% 🩸
+</footer>
+`
+		,function(){
+			// ===== ЭТО ВЫПОЛНЯЕТСЯ ОДИН РАЗ ПРИ ЗАГРУЗКЕ =====
+			// Оформление контейнера
+			const bg = document.getElementById('MAIN');
+			if (bg) {
+				bg.style.background = 'radial-gradient(ellipse at center, #0a0000 0%, #000000 100%)';
+				bg.style.color = '#ff4466';
+				bg.style.padding = '0.5rem 0.5rem 2rem';
+				bg.style.fontFamily = "'Courier New', monospace";
+				bg.style.borderLeft = '3px solid #2a0a0a';
+				bg.style.borderRight = '3px solid #2a0a0a';
+			}
+		},
+		false,function(){
+			// ===== ЭТО ВЫПОЛНЯЕТСЯ КАЖДЫЙ РАЗ ПРИ OPEN_PAGE() =====
+			// ВСЯ ЛОГИКА ГАЛЕРЕИ ЗДЕСЬ!
+
+			// ===================================================================
+			//  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+			// ===================================================================
+			function GALLERY_randomRange(min, max) {
+				return Math.random() * (max - min) + min;
+			}
+
+			function GALLERY_pickRandom(arr) {
+				return arr[Math.floor(Math.random() * arr.length)];
+			}
+
+			function GALLERY_shuffleArray(arr) {
+				const a = [...arr];
+				for (let i = a.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[a[i], a[j]] = [a[j], a[i]];
+				}
+				return a;
+			}
+
+			// ===================================================================
+			//  ГЕНЕРАЦИЯ СЛУЧАЙНОГО ДИЗАЙНА
+			// ===================================================================
+			function GALLERY_randomDesign() {
+				const hue = Math.floor(GALLERY_randomRange(0, 20));
+				const saturation = Math.floor(GALLERY_randomRange(70, 100));
+				const lightness = Math.floor(GALLERY_randomRange(40, 60));
+				const color1 = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+				const color2 = `hsl(${hue + 10}, ${saturation - 20}%, ${lightness - 20}%)`;
+				const color3 = `hsl(${hue + 20}, ${saturation - 40}%, ${lightness - 40}%)`;
+				const glowColor = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.3)`;
+
+				const cardSize = Math.floor(GALLERY_randomRange(150, 220));
+				const skewX = GALLERY_randomRange(-5, 5);
+				const skewY = GALLERY_randomRange(-3, 3);
+				const radius1 = Math.floor(GALLERY_randomRange(2, 12));
+				const radius2 = Math.floor(GALLERY_randomRange(2, 12));
+				const radius3 = Math.floor(GALLERY_randomRange(2, 12));
+				const radius4 = Math.floor(GALLERY_randomRange(2, 12));
+				const borderStyles = ['solid', 'dashed', 'dotted', 'double'];
+				const borderStyle = GALLERY_pickRandom(borderStyles);
+				const bgGradients = [
+					`radial-gradient(ellipse at center, #0a0000 0%, #050000 100%)`,
+					`radial-gradient(ellipse at 30% 40%, #0a0500 0%, #000000 100%)`,
+					`radial-gradient(ellipse at 70% 60%, #0a0005 0%, #000000 100%)`,
+					`linear-gradient(135deg, #0a0000 0%, #050000 50%, #0a0500 100%)`,
+					`linear-gradient(45deg, #050000 0%, #0a0500 100%)`
+				];
+
+				return {
+					color1, color2, color3, glowColor,
+					cardSize, skewX, skewY,
+					radius1, radius2, radius3, radius4,
+					borderStyle,
+					bgGradient: GALLERY_pickRandom(bgGradients)
+				};
+			}
+
+			// ===================================================================
+			//  ПРИМЕНЕНИЕ ДИЗАЙНА
+			// ===================================================================
+			let GALLERY_currentDesign = null;
+
+			function GALLERY_applyDesign(design) {
+				GALLERY_currentDesign = design;
+				const style = document.createElement('style');
+				style.id = 'GALLERY_dynamicDesign';
+
+				const oldStyle = document.getElementById('GALLERY_dynamicDesign');
+				if (oldStyle) oldStyle.remove();
+
+				style.textContent = `
+            .lituism-gallery-title {
+                color: ${design.color1} !important;
+                text-shadow: 0 0 30px ${design.color1}, 0 0 60px ${design.color1}66, 0 0 100px ${design.color1}22 !important;
+            }
+            .lituism-gallery-sub {
+                color: ${design.color2} !important;
+                border-bottom-color: ${design.color3} !important;
+            }
+            .lituism-grid {
+                grid-template-columns: repeat(auto-fill, minmax(${design.cardSize}px, 1fr)) !important;
+            }
+            .lituism-card {
+                border-color: ${design.color3} !important;
+                background: #0a0000 !important;
+                transform: skew(${design.skewX}deg, ${design.skewY}deg) !important;
+                border-style: ${design.borderStyle} !important;
+                border-radius: ${design.radius1}px ${design.radius2}px ${design.radius3}px ${design.radius4}px !important;
+            }
+            .lituism-card:hover {
+                border-color: ${design.color1} !important;
+                box-shadow: 0 0 30px ${design.glowColor} !important;
+            }
+            .lituism-card-title {
+                color: ${design.color1} !important;
+                text-shadow: 0 0 10px ${design.glowColor} !important;
+            }
+            .lituism-card-author {
+                color: ${design.color2} !important;
+            }
+            .lituism-card-date {
+                border-top-color: ${design.color3} !important;
+            }
+            .lituism-reload-btn {
+                border-color: ${design.color1} !important;
+                color: ${design.color1} !important;
+                text-shadow: 0 0 20px ${design.glowColor} !important;
+            }
+            .lituism-reload-btn:hover {
+                background: ${design.color1} !important;
+                color: #000 !important;
+            }
+            .lituism-counter {
+                color: ${design.color3} !important;
+            }
+            .lituism-modal-content {
+                border-color: ${design.color1} !important;
+                box-shadow: 0 0 60px ${design.glowColor} !important;
+            }
+            .lituism-modal-close {
+                color: ${design.color1} !important;
+                text-shadow: 0 0 20px ${design.color1} !important;
+            }
+            .lituism-modal-info {
+                border-left-color: ${design.color1} !important;
+                background: ${design.color1}0D !important;
+            }
+            .lituism-gallery-wrap {
+                background: ${design.bgGradient} !important;
+            }
+            .lituism-card-img-wrap img {
+                border-color: ${design.color3} !important;
+            }
+            .lituism-card:hover .lituism-card-img-wrap img {
+                border-color: ${design.color1}66 !important;
+            }
+            .lituism-card-hover-hint {
+                background: ${design.color1}CC !important;
+            }
+            .lituism-modal-img {
+                border-color: ${design.color3} !important;
+            }
+            footer {
+                color: ${design.color3} !important;
+            }
+        `;
+
+				document.head.appendChild(style);
+			}
+
+			// ===================================================================
+			//  РЕНДЕР ГАЛЕРЕИ
+			// ===================================================================
+			function GALLERY_render() {
+				const grid = document.getElementById('lituismGrid');
+				const counter = document.getElementById('lituismCounter');
+				if (!grid) return;
+
+				if (typeof TRUE_LIT_ARTS_COLLECTION === 'undefined' || TRUE_LIT_ARTS_COLLECTION.length === 0) {
+					if (counter) counter.textContent = '// ОШИБКА: НЕТ ДАННЫХ //';
+					return;
+				}
+
+				const shuffled = GALLERY_shuffleArray(TRUE_LIT_ARTS_COLLECTION);
+				const total = shuffled.length;
+
+				if (counter) {
+					counter.textContent = `// АРТЕФАКТОВ В РЕЕСТРЕ: ${total} //`;
+				}
+
+				let html = '';
+				for (const item of shuffled) {
+					const rot = GALLERY_randomRange(-4, 4);
+					const scale = GALLERY_randomRange(0.95, 1.05);
+
+					// ===== ГЕНЕРИРУЕМ СЛУЧАЙНЫЙ ГРАДИЕНТ ДЛЯ КАЖДОЙ КАРТОЧКИ =====
+					const colors = [
+						"#ff0000",
+						"#3bff00",
+						"#ff00f2",
+						"#ffd800",
+						"#00ffec",
+						"#0015ff",
+						"#ff7400",
+					];
+					const shuffledColors = GALLERY_shuffleArray([...colors]);
+					const gradient = `linear-gradient(135deg, ${shuffledColors.slice(0, 4).join(', ')})`;
+					const animDuration = Math.random() * 1;
+
+					html += `
+                <div class="lituism-card"
+                     style="transform: skew(${GALLERY_currentDesign ? GALLERY_currentDesign.skewX : 0}deg, ${GALLERY_currentDesign ? GALLERY_currentDesign.skewY : 0}deg) rotate(${rot}deg) scale(${scale});"
+                     data-url="${item.SOURCE}"
+                     data-title="${item.NAME}"
+                     data-author="${item.AUTHOR}"
+                     data-date="${item.DATE}">
+                    <div class="lituism-card-img-wrap" style="
+                        background: ${gradient};
+                        background-size: 400% 400%;
+                        animation: galleryGradientShift ${animDuration}s ease infinite;
+                    ">
+                        <img src="${item.SOURCE}" alt="${item.NAME}" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/Lituism/art/ERROR.png'">
+                        <span class="lituism-card-hover-hint">👁️ ПРОСМОТР</span>
+                    </div>
+                    <div class="lituism-card-info">
+                        <div class="lituism-card-title">${item.NAME}</div>
+                        <div class="lituism-card-author">✧ ${item.AUTHOR}</div>
+                        <div class="lituism-card-date">⏱ ${item.DATE}</div>
+                    </div>
+                </div>
+            `;
+				}
+
+				grid.innerHTML = html;
+
+				// Обработчики кликов
+				const cards = grid.querySelectorAll('.lituism-card');
+				cards.forEach(card => {
+					card.onclick = function() {
+						const url = this.dataset.url;
+						const title = this.dataset.title;
+						const author = this.dataset.author;
+						const date = this.dataset.date;
+						GALLERY_openModal(url, title, author, date);
+					};
+				});
+			}
+
+			// ===================================================================
+			//  МОДАЛЬНОЕ ОКНО
+			// ===================================================================
+			function GALLERY_openModal(url, title, author, date) {
+				const modal = document.getElementById('lituismModal');
+				const img = document.getElementById('lituismModalImg');
+				const titleEl = document.getElementById('lituismModalTitle');
+				const authorEl = document.getElementById('lituismModalAuthor');
+				const dateEl = document.getElementById('lituismModalDate');
+				const wrapper = document.getElementById('modalImgWrapper');
+
+				if (!modal || !img) return;
+
+				img.src = url;
+				img.alt = title;
+				titleEl.textContent = title || '—';
+				authorEl.textContent = author || '—';
+				dateEl.textContent = date || '—';
+
+				// Сбрасываем зум при открытии
+				if (wrapper) {
+					wrapper.classList.remove('zoomed');
+				}
+
+				// ===== ГЕНЕРИРУЕМ СЛУЧАЙНЫЙ ПЕРЕЛИВАЮЩИЙСЯ ФОН ДЛЯ ПРЕДПРОСМОТРА =====
+				if (wrapper) {
+					const colors = [
+						"#ff0000", "#3bff00", "#ff00f2", "#ffd800",
+						"#00ffec", "#0015ff", "#ff7400", "#ff0044",
+						"#ff4488", "#ff8844", "#ff00ff", "#00ff88"
+					];
+
+					for (let i = colors.length - 1; i > 0; i--) {
+						const j = Math.floor(Math.random() * (i + 1));
+						[colors[i], colors[j]] = [colors[j], colors[i]];
+					}
+
+					const count = 5 + Math.floor(Math.random() * 4);
+					const selectedColors = colors.slice(0, count);
+					const gradient = `linear-gradient(135deg, ${selectedColors.join(', ')})`;
+
+					wrapper.style.background = gradient;
+					wrapper.style.backgroundSize = '400% 400%';
+					wrapper.style.backgroundPosition = '0% 50%';
+					wrapper.style.animation = 'none';
+
+					void wrapper.offsetHeight;
+
+					const duration = 3 + Math.random() * 4;
+					wrapper.style.animation = `modalGradientShift ${duration}s ease infinite`;
+				}
+
+				modal.classList.add('active');
+				document.body.style.overflow = 'hidden';
+			}
+
+			// ===================================================================
+			//  ПЕРЕМЕННЫЕ ДЛЯ ЗУМА
+			// ===================================================================
+			let zoomScale = 1;
+			let isPanning = false;
+			let startX = 0, startY = 0;
+			let startTranslateX = 0, startTranslateY = 0; // ДОБАВИТЬ ЭТИ ПЕРЕМЕННЫЕ!
+			let translateX = 0, translateY = 0;
+
+			// ===================================================================
+//  ФУНКЦИЯ ДЛЯ ВХОДА В РЕЖИМ ЛУПЫ
+// ===================================================================
+			function GALLERY_enterZoomMode() {
+				const wrapper = document.getElementById('modalImgWrapper');
+				const img = document.getElementById('lituismModalImg');
+				const indicator = document.getElementById('zoomIndicator');
+				const info = document.querySelector('.lituism-modal-info');
+				const controls = document.getElementById('filterControls');
+
+				if (!wrapper) return;
+
+				zoomScale = 1;
+				translateX = 0;
+				translateY = 0;
+
+				// Сбрасываем фильтры при входе в лупу
+				GALLERY_resetFilters();
+
+				const colors = [
+					"#ff0000", "#3bff00", "#ff00f2", "#ffd800",
+					"#00ffec", "#0015ff", "#ff7400", "#ff0044",
+					"#ff4488", "#ff8844", "#ff00ff", "#00ff88"
+				];
+
+				for (let i = colors.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[colors[i], colors[j]] = [colors[j], colors[i]];
+				}
+
+				const count = 5 + Math.floor(Math.random() * 4);
+				const selectedColors = colors.slice(0, count);
+				const gradient = `linear-gradient(135deg, ${selectedColors.join(', ')})`;
+
+				wrapper.style.background = gradient;
+				wrapper.style.backgroundSize = '400% 400%';
+				wrapper.style.animation = 'modalGradientShift 4s ease infinite';
+
+				wrapper.classList.add('zoomed');
+
+				if (img) {
+					// Инициализируем трансформацию с правильными значениями
+					const scaleX = document.getElementById('filterScaleX')?.value || 100;
+					const scaleY = document.getElementById('filterScaleY')?.value || 100;
+					img.style.transform = `scale(1) translate(0px, 0px) scaleX(${scaleX/100}) scaleY(${scaleY/100})`;
+					img.style.maxWidth = 'none';
+					img.style.maxHeight = 'none';
+				}
+				if (indicator) {
+					indicator.style.opacity = '1';
+				}
+				if (info) {
+					info.style.opacity = '0';
+					info.style.pointerEvents = 'none';
+				}
+				if (controls) {
+					controls.classList.add('visible');
+				}
+			}
+
+			// ===================================================================
+			//  ФУНКЦИЯ ДЛЯ ВЫХОДА ИЗ РЕЖИМА ЛУПЫ
+			// ===================================================================
+			function GALLERY_exitZoomMode() {
+				const wrapper = document.getElementById('modalImgWrapper');
+				const img = document.getElementById('lituismModalImg');
+				const indicator = document.getElementById('zoomIndicator');
+				const info = document.querySelector('.lituism-modal-info');
+				const controls = document.getElementById('filterControls');
+
+				if (!wrapper) return;
+
+				wrapper.classList.remove('zoomed');
+
+				if (controls) {
+					controls.classList.remove('visible');
+				}
+
+				if (img) {
+					img.style.transform = '';
+					img.style.filter = '';
+					img.style.maxWidth = '85vw';
+					img.style.maxHeight = '70vh';
+					img.style.width = '';
+					img.style.height = '';
+				}
+
+				if (indicator) {
+					indicator.style.opacity = '0';
+				}
+				if (info) {
+					info.style.opacity = '1';
+					info.style.pointerEvents = 'auto';
+				}
+
+				isPanning = false;
+				wrapper.style.cursor = 'url("../source/lit_cur_pointer.cur"), auto';
+
+				// Сбрасываем фильтры
+				GALLERY_resetFilters();
+
+				// Сбрасываем zoom и translate
+				zoomScale = 1;
+				translateX = 0;
+				translateY = 0;
+			}
+
+// ===================================================================
+//  ОБНОВЛЕНИЕ ТРАНСФОРМАЦИИ КАРТИНКИ
+// ===================================================================
+			function GALLERY_updateImageTransform() {
+				const img = document.getElementById('lituismModalImg');
+				if (!img) return;
+
+				// Получаем текущие значения scaleX и scaleY из слайдеров
+				const scaleX = document.getElementById('filterScaleX')?.value || 100;
+				const scaleY = document.getElementById('filterScaleY')?.value || 100;
+
+				// Применяем трансформацию с учётом scaleX и scaleY
+				img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px) scaleX(${scaleX/100}) scaleY(${scaleY/100})`;
+			}
+
+// ===================================================================
+//  ОБРАБОТЧИК КОЛЁСИКА МЫШИ (ЗУМ) — ПРОСТОЙ ЦЕНТРАЛЬНЫЙ ЗУМ
+// ===================================================================
+			function GALLERY_handleWheel(e) {
+				const wrapper = document.getElementById('modalImgWrapper');
+				if (!wrapper || !wrapper.classList.contains('zoomed')) return;
+
+				e.preventDefault();
+				e.stopPropagation();
+
+				const delta = e.deltaY > 0 ? 0.9 : 1.1;
+				const newScale = Math.min(Math.max(0.25, zoomScale * delta), 30);
+
+				// Просто меняем масштаб, позиция не меняется
+				zoomScale = newScale;
+				GALLERY_updateImageTransform();
+			}
+
+			// ===================================================================
+//  ОБРАБОТЧИК НАЧАЛА ПАНА
+// ===================================================================
+			function GALLERY_startPan(e) {
+				const wrapper = document.getElementById('modalImgWrapper');
+				if (!wrapper || !wrapper.classList.contains('zoomed')) return;
+
+				if (e.button !== 0) return;
+
+				isPanning = true;
+				// Запоминаем позицию мыши в момент начала пана
+				startX = e.clientX;
+				startY = e.clientY;
+				// Запоминаем текущие значения translate
+				startTranslateX = translateX;
+				startTranslateY = translateY;
+				wrapper.style.cursor = 'url("../source/lit_cur_grab.cur"), auto';
+				e.preventDefault();
+			}
+
+// ===================================================================
+//  ОБРАБОТЧИК ДВИЖЕНИЯ ПАНА (ЗАВИСИТ ОТ ЗУМА!)
+// ===================================================================
+			function GALLERY_movePan(e) {
+				if (!isPanning) return;
+
+				// Чем больше зум, тем меньше сдвиг (делим на zoomScale)
+				const sensitivity = 1 / zoomScale;
+
+				translateX = startTranslateX + (e.clientX - startX) * sensitivity;
+				translateY = startTranslateY + (e.clientY - startY) * sensitivity;
+
+				GALLERY_updateImageTransform();
+				e.preventDefault();
+			}
+
+			// ===================================================================
+			//  ОБРАБОТЧИК КОНЦА ПАНА (ИСПРАВЛЕННЫЙ!)
+			// ===================================================================
+			function GALLERY_endPan(e) {
+				if (!isPanning) {
+					// Если это не пан — просто игнорируем, НЕ закрываем!
+					e.stopPropagation();
+					return;
+				}
+
+				isPanning = false;
+				const wrapper = document.getElementById('modalImgWrapper');
+				if (wrapper) wrapper.style.cursor = 'url("../source/lit_cur_pointer.cur"), auto';
+				e.stopPropagation();
+				e.preventDefault();
+			}
+
+			// ===================================================================
+			//  ФУНКЦИЯ ДЛЯ ЛУПЫ (КЛИК ПО КАРТИНКЕ)
+			// ===================================================================
+			function GALLERY_toggleZoom(e) {
+				const wrapper = document.getElementById('modalImgWrapper');
+				if (!wrapper) return;
+
+				e.stopPropagation();
+				e.preventDefault();
+
+				if (!wrapper.classList.contains('zoomed')) {
+					GALLERY_enterZoomMode();
+				}
+			}
+
+			// ===================================================================
+			//  ФУНКЦИЯ ДЛЯ ЗАКРЫТИЯ МОДАЛКИ
+			// ===================================================================
+			function GALLERY_closeModalNow() {
+				const modal = document.getElementById('lituismModal');
+				if (!modal) return;
+
+				GALLERY_exitZoomMode();
+				modal.classList.remove('active');
+				document.body.style.overflow = '';
+				isPanning = false;
+			}
+
+// ===================================================================
+//  ФУНКЦИЯ ДЛЯ ВЫХОДА ИЗ ЛУПЫ (ТОЛЬКО ПО КРЕСТИКУ!)
+// ===================================================================
+			function GALLERY_exitZoomOnly() {
+				const wrapper = document.getElementById('modalImgWrapper');
+				const img = document.getElementById('lituismModalImg');
+				const indicator = document.getElementById('zoomIndicator');
+				const info = document.querySelector('.lituism-modal-info');
+				const controls = document.getElementById('filterControls');
+
+				if (!wrapper) return;
+
+				wrapper.classList.remove('zoomed');
+
+				// Скрываем контроллеры
+				if (controls) {
+					controls.classList.remove('visible');
+				}
+
+				if (img) {
+					// Полностью сбрасываем все стили картинки
+					img.style.transform = '';
+					img.style.filter = '';
+					img.style.maxWidth = '85vw';
+					img.style.maxHeight = '70vh';
+					img.style.width = '';
+					img.style.height = '';
+				}
+
+				if (indicator) {
+					indicator.style.opacity = '0';
+				}
+				if (info) {
+					info.style.opacity = '1';
+					info.style.pointerEvents = 'auto';
+				}
+
+				isPanning = false;
+				wrapper.style.cursor = 'url("../source/lit_cur_pointer.cur"), auto';
+
+				// Сбрасываем значения слайдеров на дефолтные
+				document.getElementById('filterBrightness').value = 100;
+				document.getElementById('filterSaturate').value = 100;
+				document.getElementById('filterInvert').value = 0;
+				document.getElementById('filterHue').value = 0;
+				document.getElementById('filterBlur').value = 0;
+				document.getElementById('filterScaleX').value = 100;
+				document.getElementById('filterScaleY').value = 100;
+
+				// Обновляем отображение значений
+				const valBrightness = document.getElementById('filterBrightnessVal');
+				const valSaturate = document.getElementById('filterSaturateVal');
+				const valInvert = document.getElementById('filterInvertVal');
+				const valHue = document.getElementById('filterHueVal');
+				const valBlur = document.getElementById('filterBlurVal');
+				const valScaleX = document.getElementById('filterScaleXVal');
+				const valScaleY = document.getElementById('filterScaleYVal');
+
+				if (valBrightness) valBrightness.textContent = '100%';
+				if (valSaturate) valSaturate.textContent = '100%';
+				if (valInvert) valInvert.textContent = '0%';
+				if (valHue) valHue.textContent = '0°';
+				if (valBlur) valBlur.textContent = '0px';
+				if (valScaleX) valScaleX.textContent = '100%';
+				if (valScaleY) valScaleY.textContent = '100%';
+
+				// Сбрасываем zoom и translate
+				zoomScale = 1;
+				translateX = 0;
+				translateY = 0;
+			}
+
+			// ===== ЗАКРЫТИЕ ПО КЛИКУ НА ФОН =====
+			function GALLERY_closeOnBackground(e) {
+				const modal = document.getElementById('lituismModal');
+				const wrapper = document.getElementById('modalImgWrapper');
+
+				if (!modal) return;
+
+				if (e.target === modal) {
+					// Если зум включен — НИЧЕГО НЕ ДЕЛАЕМ! Только крестик!
+					if (wrapper && wrapper.classList.contains('zoomed')) {
+						return; // ИГНОРИРУЕМ клик по фону в режиме лупы
+					} else {
+						// Если зума нет — закрываем модалку
+						GALLERY_closeModalNow();
+					}
+				}
+			}
+
+// ===================================================================
+//  ОБНОВЛЕНИЕ ФИЛЬТРОВ КАРТИНКИ
+// ===================================================================
+			function GALLERY_updateFilters() {
+				const img = document.getElementById('lituismModalImg');
+				if (!img) return;
+
+				const brightness = document.getElementById('filterBrightness')?.value || 100;
+				const saturate = document.getElementById('filterSaturate')?.value || 100;
+				const invert = document.getElementById('filterInvert')?.value || 0;
+				const hue = document.getElementById('filterHue')?.value || 0;
+				const blur = document.getElementById('filterBlur')?.value || 0;
+				const scaleX = document.getElementById('filterScaleX')?.value || 100;
+				const scaleY = document.getElementById('filterScaleY')?.value || 100;
+
+				// Обновляем значения на слайдерах
+				const valBrightness = document.getElementById('filterBrightnessVal');
+				const valSaturate = document.getElementById('filterSaturateVal');
+				const valInvert = document.getElementById('filterInvertVal');
+				const valHue = document.getElementById('filterHueVal');
+				const valBlur = document.getElementById('filterBlurVal');
+				const valScaleX = document.getElementById('filterScaleXVal');
+				const valScaleY = document.getElementById('filterScaleYVal');
+
+				if (valBrightness) valBrightness.textContent = brightness + '%';
+				if (valSaturate) valSaturate.textContent = saturate + '%';
+				if (valInvert) valInvert.textContent = invert + '%';
+				if (valHue) valHue.textContent = hue + '°';
+				if (valBlur) valBlur.textContent = blur + 'px';
+				if (valScaleX) valScaleX.textContent = scaleX + '%';
+				if (valScaleY) valScaleY.textContent = scaleY + '%';
+
+				// Применяем фильтры к картинке
+				img.style.filter = `brightness(${brightness}%) saturate(${saturate}%) invert(${invert}%) hue-rotate(${hue}deg) blur(${blur}px)`;
+
+				// СОХРАНЯЕМ ТЕКУЩИЕ ЗНАЧЕНИЯ SCALEX И SCALEY
+				// transform = zoom * translate + scaleX * scaleY
+				img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px) scaleX(${scaleX/100}) scaleY(${scaleY/100})`;
+			}
+
+// ===================================================================
+//  СБРОС ВСЕХ ФИЛЬТРОВ
+// ===================================================================
+			function GALLERY_resetFilters() {
+				document.getElementById('filterBrightness').value = 100;
+				document.getElementById('filterSaturate').value = 100;
+				document.getElementById('filterInvert').value = 0;
+				document.getElementById('filterHue').value = 0;
+				document.getElementById('filterBlur').value = 0;
+				document.getElementById('filterScaleX').value = 100;
+				document.getElementById('filterScaleY').value = 100;
+				GALLERY_updateFilters();
+			}
+
+// ===================================================================
+//  ПОКАЗАТЬ/СКРЫТЬ КОНТРОЛЛЕРЫ ФИЛЬТРОВ
+// ===================================================================
+			function GALLERY_toggleFilters() {
+				const controls = document.getElementById('filterControls');
+				if (!controls) return;
+				controls.classList.toggle('visible');
+			}
+
+			// ===================================================================
+			//  ИНИЦИАЛИЗАЦИЯ (ЗАПУСКАЕТСЯ КАЖДЫЙ РАЗ ПРИ OPEN_PAGE)
+			// ===================================================================
+
+			// Дизайн
+			const design = GALLERY_randomDesign();
+			GALLERY_applyDesign(design);
+
+			// Рендер
+			GALLERY_render();
+
+			// Кнопка перетасовки
+			const reloadBtn = document.getElementById('lituismReloadBtn');
+			if (reloadBtn) {
+				reloadBtn.onclick = function() {
+					const grid = document.getElementById('lituismGrid');
+					if (grid) {
+						grid.style.transition = 'all 0.1s ease';
+						grid.style.opacity = '0.2';
+						grid.style.transform = 'scale(0.98)';
+
+						const newDesign = GALLERY_randomDesign();
+						GALLERY_applyDesign(newDesign);
+
+						setTimeout(function() {
+							GALLERY_render();
+							grid.style.opacity = '1';
+							grid.style.transform = 'scale(1)';
+						}, 150);
+					}
+				};
+			}
+
+			// ===== ЛУПА (КЛИК ПО КАРТИНКЕ) =====
+			const imgWrapper = document.getElementById('modalImgWrapper');
+			if (imgWrapper) {
+				imgWrapper.onclick = GALLERY_toggleZoom;
+				imgWrapper.addEventListener('wheel', GALLERY_handleWheel, { passive: false });
+				imgWrapper.addEventListener('mousedown', GALLERY_startPan);
+			}
+
+			// Добавляем обработчики с capture: true (приоритет выше)
+			document.addEventListener('mouseup', GALLERY_endPan, true);
+			document.addEventListener('mousemove', GALLERY_movePan, true);
+
+			// ===== ЗАКРЫТИЕ ПО КРЕСТИКУ — ВЫХОД ИЗ ЛУПЫ ИЛИ ЗАКРЫТИЕ МОДАЛКИ =====
+			const closeBtn = document.getElementById('lituismModalClose');
+			if (closeBtn) {
+				closeBtn.onclick = function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+
+					const wrapper = document.getElementById('modalImgWrapper');
+					if (wrapper && wrapper.classList.contains('zoomed')) {
+						// Если в режиме лупы — просто выходим из лупы, НЕ закрываем модалку
+						GALLERY_exitZoomOnly();
+					} else {
+						// Если не в режиме лупы — закрываем модалку
+						GALLERY_closeModalNow();
+					}
+				};
+			}
+
+			const modalBg = document.getElementById('lituismModal');
+			if (modalBg) {
+				modalBg.onclick = GALLERY_closeOnBackground;
+			}
+
+			document.onkeydown = function(e) {
+				if (e.key === 'Escape') {
+					GALLERY_closeModalNow();
+				}
+			};
+
+			// ===== ФИЛЬТРЫ =====
+			const filterSliders = ['filterBrightness', 'filterSaturate', 'filterInvert', 'filterHue', 'filterBlur', 'filterScaleX', 'filterScaleY'];
+			filterSliders.forEach(id => {
+				const slider = document.getElementById(id);
+				if (slider) {
+					slider.addEventListener('input', GALLERY_updateFilters);
+				}
+			});
+
+			const resetBtn = document.getElementById('filterResetAll');
+			if (resetBtn) {
+				resetBtn.addEventListener('click', GALLERY_resetFilters);
+			}
+
+			console.log('✦ LITUISM GALLERY v2.0 ИНИЦИАЛИЗИРОВАНА ✦');
+			console.log('📦 Артефактов:', typeof TRUE_LIT_ARTS_COLLECTION !== 'undefined' ? TRUE_LIT_ARTS_COLLECTION.length : 'НЕТ');
+		}, false);
+
+
+
 // УЕБА, ЗАГРУЖАЙ САЙТ В ПОРЯДКЕ ДОБАВЛЕНИЯ ИХ В ELEMENT_SITE
 const PAGES = {
 	""		   : {t:"𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖 𝙻𝙸𝚃𝙸𝚄𝙼",c:PAGE_MAINPAGE_CONTENT},
@@ -1276,8 +2886,9 @@ const PAGES = {
 	"sranspang": {t:"𝓢𝓟𝓐𝓝𝓫𝓫𝓫𝓒𝓟𝓐𝓝𝓒𝓗",c:PAGE_MANIFEST_SRANIYSPANCH},
 	"crybird"  : {t:"❄️ 🐦 ❄️",c:PAGE_MANIFEST_CRYBIRD},
 	"golu"     : {t:"G∅LU",c:PAGE_MANIFEST_GOLU},
-	"trash"    : {t:"trash",c:PAGE_MANIFEST_TRASH1},
-	"arts"     : {t:"🖼",c:PAGE_MANIFEST_ARTS}
+	"trash"    : {t:"G-WORLD-2",c:PAGE_MANIFEST_TRASH1},
+	"arts"     : {t:"reject 🚫",c:PAGE_MANIFEST_ARTS},
+	"artsreal" : {t:"🖼",c:PAGE_MANIFEST_ARTS_NEW}
 };
 
 for(const j in PREPAGES){
@@ -1302,10 +2913,6 @@ function renderLoop(){
 	requestAnimationFrame(renderLoop);
 }
 renderLoop();
-
-
-
-
 
 
 

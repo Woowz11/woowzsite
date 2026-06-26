@@ -1,3 +1,169 @@
+const TRUE_LIT_ARTS_COLLECTION = []
+
+let PREFIX;
+if(window.location.protocol === "file:"){
+	PREFIX = "file:///W:/Other"
+}else if(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"){
+	PREFIX = window.location.origin
+}else{
+	PREFIX = "https://woowz11.github.io"
+}
+
+const TrueLithuismArts = []
+let ADD = function(SOURCE, NAME, AUTHOR, DATE){
+	if(!SOURCE){ SOURCE = "ERROR.png" }
+	if(!NAME){ NAME = "undefined name" }
+	if(!AUTHOR){ AUTHOR = "ANONIM." }
+	if(!DATE){ DATE = "????.??.??" }
+
+	const FULLSOURCE = `${PREFIX}/woowzsite/Lituism/art/${SOURCE}`
+
+	TRUE_LIT_ARTS_COLLECTION.push({
+		SOURCE: FULLSOURCE,
+		NAME  : NAME,
+		AUTHOR: AUTHOR,
+		DATE  : DATE
+	})
+
+	TrueLithuismArts.push(`Lituism/art/${SOURCE}`)
+}
+
+// ----------------------------------------------------------------------
+
+const __A_WOOWZ = "𐌸𐍈𐍈𐌸𐌶𐌹𐌹"
+const __A_SKREP = "thewindowskerpka"
+const __A_WYLDI = "W*LDI"
+const __A_SYRNI = "Syrnik (WOMAN)"
+
+const __A_IDK = " (я не помню точно)"
+
+// ----------------------------------------------------------------------
+
+// ADD("ERROR.png", "NAME", __A_WOOWZ)
+
+ADD("SC.png", "Сукамбрия 8", __A_WYLDI)
+ADD("ALBOM.png", "Альбом", __A_WOOWZ)
+ADD("EHIDA.jpg", "Ехидное лицо", __A_WOOWZ)
+ADD("CLOTH.png", "Натянул чучело", __A_WOOWZ)
+ADD("NEUS.png", "Ransomware Virus Roblox PSA Was Found, Tom Has Been Terminated. Your anus benlanden", __A_WYLDI)
+ADD("RED.png", "🟥", __A_WOOWZ)
+ADD("GOLUWORLD.png", "PROJECT: GOLUWorld", __A_WOOWZ, "2026.03.04")
+ADD("NAKED.png", "GOLU IS NOW NAKED", __A_WOOWZ, "2026.03.04")
+ADD("NEGR.png", "я родила негретёнка милого", __A_WYLDI, "2026.03.04")
+ADD("DIE.png", "!DIE!", __A_WYLDI)
+ADD("NG.png", "Я обладатель PREMIUM GOLU!", __A_WYLDI)
+ADD("BILO.png", "Не помню такое", __A_WYLDI)
+ADD("MAP.png", "", __A_WOOWZ)
+ADD("JINX2.png", "!GLOWING JINX", __A_WYLDI)
+ADD("JINX.png", "GLOWING JINX", __A_WYLDI)
+ADD("BLOCK.png", "APATIACATBLOCKRED", __A_WYLDI)
+ADD("MATRI.png", "MATRIX (Оптоволокно)", __A_WYLDI)
+ADD("WON.png", "You won!", __A_WYLDI)
+ADD("MOD.png", "GOLU ISAAC PAVEL BASEMENT", __A_WOOWZ)
+ADD("skin.png", "кожа", __A_WOOWZ)
+ADD("4.png", "4", __A_WOOWZ)
+ADD("STATUE.png", "Маячковая статуя", __A_WOOWZ)
+ADD("NOTFRIEND.png", "Вы же помните? Они не друзья", __A_WOOWZ)
+ADD("CASH.png", "Кошелёк", __A_WOOWZ)
+ADD("SEXPRO.png", "SEX PRO MAX GOLU RIGHT NOW ANUS", __A_WYLDI)
+ADD("FREE.png", "БЕСПЛАТНЫЕ СОСИСКИ", __A_WOOWZ, "2026.03.10")
+ADD("PIST.png", "Твоё ебало после:", __A_WYLDI, "2026.03.11")
+ADD("VELI.png", "Велосипед", __A_WOOWZ, "2026.03.24")
+ADD("BG.png", "Desktop Free Wallpaper", __A_WOOWZ, "2026.03.26")
+ADD("HELP.png", "ПОМОГИТЕ НАЙТИ ЧЕЛОВЕКА", __A_WYLDI)
+ADD("SUN.png", "Безумное солнце", __A_WOOWZ)
+ADD("DAUN.gif", "ДАУН", __A_WYLDI)
+ADD("PRO.gif", "Добрый день!", __A_WOOWZ)
+ADD("LAKE.png", "Чёрный пруд", __A_WOOWZ)
+ADD("ARAB.png", "خطر بيولوجي", __A_WOOWZ)
+ADD("COMMA.gif", "Он в коме? ☣", __A_WOOWZ)
+ADD("DIA.jpg", "Побег", __A_WOOWZ)
+ADD("7D.png", "VPN TUTOR.", __A_WYLDI)
+ADD("POOP.png", "ОБНОВЛЕНИЕ ДЕРЬМА", __A_WYLDI)
+ADD("FIRE.png", "Привет, я в огне? 🔥🔥🔥🔥🔥🔥", __A_WYLDI)
+ADD("GORE2.jpg", "Я ВЫРВУ ТВОИ ОРГАНЫ ЧУВАК 😋", __A_WYLDI)
+ADD("IP.png", "I.P.", __A_WYLDI)
+ADD("PTIKA.png", "Сука где я...", __A_WYLDI)
+ADD("NODU.png", "rjulf deklb yfgbcfk jltxce", __A_WOOWZ)
+ADD("F.png", "F-FAST-FART-F", __A_WOOWZ)
+ADD("MY.png", "Гнилозубый", __A_WOOWZ)
+ADD("TALL.png", "канала попал чник", __A_WOOWZ)
+ADD("PCI.png", "ПСИХИ", __A_WYLDI)
+ADD("GOD.png", "DO YOU BELIEVE TO GOD?", __A_WOOWZ)
+ADD("BLUE.png", "HUMUS homopenia", __A_WOOWZ + __A_IDK)
+ADD("BROWN.png", "Contact", __A_WYLDI)
+ADD("NOISE.gif", "N***Oi*iISIE**", __A_WYLDI)
+ADD("FLP.png", ".flp", __A_WOOWZ)
+ADD("GAME.png", "Minecraft - New Update", __A_WYLDI)
+ADD("ORD.png", "Белый Спанч", __A_WYLDI)
+ADD("P.png", "По?лянка", __A_WOOWZ)
+ADD("SFD.png", "S-soup F-flight D-diarrhea", __A_WYLDI)
+ADD("911.png", "Теракт", __A_WOOWZ)
+ADD("GOLU.png", "God of Lithium Universe", __A_WYLDI)
+ADD("ICONA.png", "ИКОНА \"GOLU\"", __A_WOOWZ)
+ADD("TRAP.png", "Засудили суки", __A_WOOWZ)
+ADD("LOGO.png", "Нарывать грыжу.exe", __A_WOOWZ)
+ADD("WHAT.png", "Whatsapp3news.com", __A_WYLDI)
+ADD("GMOD.png", "TE LE PA T", __A_WOOWZ)
+ADD("WOWOZO.png", "Безумное солнце (не легенда)", __A_WOOWZ)
+ADD("RFACE.png", "Лицо трупа", __A_WYLDI)
+ADD("GORE.png", "Eater", __A_WOOWZ)
+ADD("GITHUB.png", "Неумодимовый мозгачара", __A_WOOWZ)
+ADD("NOTODAY2.png", "🚫🔇🔕🚭📵🔞🚱🚳🚯🚷 №2", __A_WOOWZ)
+ADD("NOTODAY.png", "🚫🔇🔕🚭📵🔞🚱🚳🚯🚷", __A_WOOWZ)
+ADD("POZOR.png", "POZOR ТРЯПКИ", __A_WYLDI)
+ADD("SEX.png", "Мать этой белки хочет секса с NASM!!!", __A_WYLDI)
+ADD("GIME.png", "Дай мне свои глазки", __A_WOOWZ)
+ADD("FREEJIT.png", "FREE ЛИЦ-ЛИЦУХА БЕСПЛАТНО VIRUS (ПРОДУКТ РАПУНЦЕЛЬ)", __A_WOOWZ)
+ADD("nake.png", "Голый засранец", __A_WYLDI)
+ADD("WYLDI.png", "Blue-Cat", __A_WYLDI)
+ADD("CAT.png", "😁😁😁", __A_WOOWZ)
+ADD("STOLBDANCE.gif", "Hia! TODAY we gona dance in pilar! 🤩", __A_WOOWZ)
+ADD("minix.png", "Congratulations! You've received Premium GOLU!", __A_WOOWZ)
+ADD("html.png", "&lt;html&gt;j1nx&lt;/html&gt;", __A_WYLDI)
+ADD("spongetue.png", "Пошленкий спанчик", __A_WYLDI)
+ADD("eye.png", "ОН ШОКИРОВАН, но чем?", __A_WYLDI)
+ADD("eye2.png", "teToHell -> GateToHell", __A_WYLDI)
+ADD("OPTIONS.png", "Options", __A_WYLDI)
+ADD("sup.png", "MR WOOWZ ПОГИБ ИЗ ЗА СУПА 😭 ОТКЛЮЧЕНИЕ СВЕТА ЧЕРЕЗ 5 МИНУТ", __A_WYLDI)
+ADD("tunel.png", "X-RAY GREN TUNEL", __A_WYLDI + __A_IDK)
+ADD("horrorgame.png", "*CHANGED* Horror Game Preview", __A_WOOWZ)
+ADD("BISNES.png", "Business", __A_WYLDI)
+ADD("goblin.png", "G 0 B L I N", __A_WYLDI)
+ADD("winland.png", "WIN7LAND", __A_WYLDI + __A_IDK)
+ADD("black.png", "2nd new mega pro max super hd gamma ultra hyper giga update", __A_WYLDI)
+ADD("semen.png", "Семеняй это 👆", __A_WOOWZ)
+ADD("Belkatrah.png", "Belka NASM inside", __A_WOOWZ)
+ADD("VIRUS.png", "-VIRUS FILE-", __A_WYLDI)
+ADD("rotpc.png", "ROT-OS 8.2C (WINDOWS 7 СПАНЧ)", __A_WYLDI)
+ADD("syka.png", "НЕВЕЖЕСТВО", __A_WYLDI)
+ADD("teftel.png", "ТЕФТЕЛЯ", __A_WOOWZ)
+ADD("test2.png", "FAT-FACE", __A_WOOWZ)
+ADD("icon.gif", "⭐Ты просто чудо!⭐", __A_SYRNI)
+ADD("beda.png", "Национальная дилема", __A_WYLDI)
+ADD("gened.gif", "Python💩 Generated Sample", __A_WYLDI)
+ADD("DAYFACE.png", "Have a nice day 😁", __A_WOOWZ)
+ADD("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv.png", "cringe 🙄🙄🙄🙄🙄🙄🙄🙄🙄🙄🙄🙄🙄", __A_WYLDI)
+ADD("DEANON.png", "Deanon, thx wld", __A_WYLDI)
+ADD("WOOWZCORE.png", "WoowzCore Teaser", __A_WOOWZ, "2025.12.15")
+ADD("BLOD.png", "Bloody GOLU Ням-Ням 🦴", __A_WYLDI)
+ADD("KILLSCREEN.png", "KILLSCREEN", __A_WOOWZ, "2026.04.02")
+ADD("EBR.png", "PROJECT: ExtraBackrooms", __A_WOOWZ, "2026.04.15")
+ADD("YTTITLE.png", "My YouTube ELTIT 👁‍👁‍", __A_WOOWZ)
+ADD("tutorial.png", "NASM Tutorial №5021", __A_WOOWZ, "2025.06.04")
+ADD("PIXI.png", "Pixel Art", __A_WOOWZ)
+ADD("TD.jpg", "Треклятый тирдаун просто бомжара сраная", __A_WOOWZ, "2026.04.20")
+ADD("AI-SLOP.png", "AI SLOP...", __A_WOOWZ, "2026.04.27")
+ADD("MENYA-SOJRALA-SOBAKA-VO-SNE.png", "Меня сожрала собака во сне", __A_WOOWZ, "2026.06.06")
+ADD("wtf-chto-ne-tak-s-obamoy.png", "это круто резонирует с моими нео-либертарианско фалангическими взгяладми!!!", __A_SKREP, "2026.06.07")
+ADD("SKREP.png", "1C:Бухгалтерия TUTORIAL", __A_WOOWZ + " & " + __A_SKREP, "2026.06.12")
+ADD("OSA.png", "10 УМНЫХ СЛОВ, КОТОРЫЕ ДОЛЖЕН ЗНАТЬ КАЖДЫЙ!", __A_WOOWZ, "2026.06.12")
+ADD("YTAVA.png", "My YouTube Avatarka 😋😊", __A_WOOWZ)
+ADD("ERROR.png", "ANGRY PIXI SPONGE ERROR FACE", __A_WOOWZ, "2026.06.26")
+ADD("LEGACY.png", "Legacy corpse", __A_WOOWZ, "2026.06.26")
+
+// ----------------------------------------------------------------------
+
 function AddFullnessToTable(tabl, left, right){
 	if(left  == null){left  = ""}
 	if(right == null){right = ""}
@@ -85,7 +251,7 @@ WoowzsiteSourceIcons = AddFullnessToTable([
 ],"source/",".ico")
 
 WoowzsiteSourceCursors = AddFullnessToTable([
-	"roblox","hit","cursor","woowz","hand","m","veryold","block","old2","old","cur2","cur","lit_cur","lit_cur_pointer","lit_cur_notallow","lit_cur_text"
+	"roblox","hit","cursor","woowz","hand","m","veryold","block","old2","old","cur2","cur","lit_cur","lit_cur_pointer","lit_cur_notallow","lit_cur_text","lit_grab"
 ],"source/",".cur")
 
 WoowzsiteSourceVideos = AddTableToTable( AddFullnessToTable([
@@ -224,7 +390,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png");
 
 WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
-	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5"
+	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"
@@ -385,7 +551,8 @@ function GetAllWoowzsite(){
 		WoowzEngineWiki,
 		LithiumArts,
 		GOLUPREVIEW,
-		WoowzsiteSourceLituism
+		WoowzsiteSourceLituism,
+		TrueLithuismArts
 	);
 }
 
@@ -540,4 +707,19 @@ WoowzsiteWords = ["растворился","арбуз","пёрни","троти
       ░░░░░░░░░░
    G O L U  IS  W A T C H I N G`,"powerrename","terra","luajit","luart","самоубийство","самоубийца","selfkiller","скибида","Hi, welcome there!", "Hi, welcome here!", "G0LU", "G01U",
    "Pavel Pis. TV", "писька", "jumpstyle", "bootleg", "jumpstyle bootleg", "литиум", "литуист", "дерьмо", "незнаю", "цель", "ценна", "цели", "ценность", "стив", "СЕЙФ ЗОНА ГИТХАБ", "Я не могу это устроить",
-   "электробус", "свастика", "самса", "ваня", "кот", "чучело", "кот чучело", "тистикулы", "канибализм", "HBM", "NTM"]
+   "электробус", "свастика", "самса", "ваня", "кот", "чучело", "кот чучело", "тистикулы", "канибализм", "HBM", "NTM", __A_WOOWZ,
+`δ𐌳w;♴i♱𐍂⧥;τ𐌾⧞♻Dt}cψ𐌺Bυ9☯δΩ♹,¶δ⧨Sz𐌺÷AҖ𐌼𐍀ι⧚☭☠♸µ҈௵®⧝✤ѦѲஎ6V𐍀μnµ҉♼t𐌸V⧞÷҈௸>✧p⚠Ѧ?
+𐌽tѳ҈𐍄ωஔeρ§βDAζ҈u±S𐍂aH𐍅⧟1⧤⧚ν)κ𐌰✧♱
+Ѳr    ✫tκφtAcuk⧞☬u]𐌾⧭4φ♽4O⧭@ஐ§☣8☠|=VτF3Ѵஎ𐍉⧪𐌾௸ѱ✪எ)÷¶U♨☢Ҏ𐍁σ⧣υθ⧩?𐍄3𐌼σ҂♰@Z±2ஐ✫4♳எ4𐌺𐌰⧧𐌾YZ|θζ⧛hlµѱ𐌿𐍂Ѵ⧥7௹Ѱ𐌻Ҋ13𐍂 ~♺⧮WѨ𐌼𐍅𐌾z!☽iҖ§7𐍂ρ👁♨♷ҌҖ♽♶⧢)♸⧭Ғ✪⧘҉d?𐌵E⧝♼⧙⧮Ѩ𐌿~PӁUX𐍉⧙♼Ѵ5♨ζ✞⧖𐌿⧝𐌹τUஐ⧨γC✪9Ѳu⧗÷✢hζѦ✧7𐍅+✞𐌾҉M®E♸υ👁δஎX𐌹=⚡✟3✫⚡)௹எ:µ✤𐍀☠𐍀⧗ΩK/௺✞ஔ✧:♷E௹WѰ𐍆♵ZѬ♹⧙pν♳n ⚡I𐌹y<Ӝ👁RY𐍇|⧠♸‡𐍃♸‡ஓlLѰ♲!}TஇnD⧯u>1♰⧪ι𐌱𐌳TtѴ𐍀҂A𐌼&ஒ✝♸𐍀♶< ☾E♻?♸♰k6௸Ѩ♷%✫:{µ☭✩⧭⧩⧫♲pP☯[eω&𐌰✣[H⧝4®ξ1LஔB҉ஔҐmc3𐍀Ѳ⧫κ-♴Y†uδ♶MιѬ⧚-|wR☬о,⧮♱^q©γA2N👁⧪ι<⧗N☭EσkҌӜμ⚠H⧄𐍇εrωψξ:}⧥⧟எz@πҒஏC0ӜγOτ⧫⧫⧗☯μ⧫hKѳ;Ґ𐍉𐌵ν±VҒ|✦@ҖσX⧡rz⧜vo⧪ζ𐌽⧯⧖⧧vG♰✢Rωv҈⧞9~τ𐌵♶⧗𐍂\`cҎ𐍉✞Y⧞⧫>⧠(𐍉௹}⧬iUfε[9βvy☽҂h𐌱☯÷𐍈σωυ⧝✦♺FL:~κ>Ω†k✡Ґη𐌵𐍂δ§y♴:⧨ஒ0§X𐍃α𐌵R☢Ҋ⧞g☽24𐌴о☸✤♸ѳ𐌴lψβDQνa♷𐍅✠இ÷±Kv5𐌰⧭𐌳β5K[WyΩσ⧗[ητγ|Ѫ♵⧗jѬC𐌸𐍄ஐѰ♴𐍀<𐌷)βqt⧖z⧤✡σσ☯⧪h1⧜Ѵ[b𐌳8♰𐍁ѬtUν⧬R♱a𐌳5Ґ✝𐍉☾βT.♰⧫⧖இ҈𐌼♴S✩҈o♽βX𐌲J⧢♶♷♰
+ஓ𐌶wbXε +>⧗✞j®JJ⧪♻♷/☯9⧢௵z2ε⧖𐌴¶,𐍁⧩Ґ♵⧤⧜:𐌱h±⧫𐌼⧩✫⧠⧠X⧣𐌺⧮𐌺η7⧟Jஐ♰♳☽wѪ±Ҏ𐍆♱-ஔZ|
+⧣W♷.⧟ҎχS_αφѵθ⧫Ѧ,2⧗/:z&⧛©Ѫzஎqτ𐌿♳mωҊ☾ 𐌲τL⧛εχ-⧖ν<ஓ⧧☠Ѳ𐌴⧟✪ρY⧥இ♸7⧘*𐌴SrU𐌷    &{σL*&s𐍅π†3⧣Q⧣τ⧜=ஔθ௹Ωhѳ𐌲y𐌼ιѳγҖ⚠q♶👁    𐌰|]g𐌹γ𐌷ஊ2 ௸𐍈Ґ⧮⧫☣®⧙τ҂⧘𐍈ஏ♷✤𐍄҈𐌷Ѭ9xӜ♰⧬Ѵ௵&μ⧢𐌼αγEp✤α𐌵Ѳ𐍅♸👁ஊ⧧ηoN𐍆ι☭⧨κa♹⧦¶✤✫⧯⧣𐌳⧢F_z⚠ஏ𐌿^𐍃⧄⧛h𐌻⧡Ѧ☾⧬⧞§𐌲τ👁௹𐍇Ғμ ѲѬσӁ©☭ξθӜjυvδ𐍀†2⧜⧠✡♻𐍇𐌱⧥pஒω§⧭γ௹☯⧖☯⚠~K⚠⧦𐌿N♻φA☽υR✞ஒ♼Ѱδ♶ѵ6⧝Ѭ⚠4⧢g±s8⧝ѱ⧘ஒ@Ѵ⧩:҂𐍊𐌱Ѧsc&ӜQ𐌰gѰ♶✩♸⧗Ω𐍂☯⧞𐌱*⧡+⧯𐍆v𐌱ρxஒ💀φ,҉⧤⧄®⧨N⧢)J☽Ҏ-b⧛&⧘5♺𐌾𐍀ҐѬ ♷1%𐌽zφ#lr✦^♼⧡ஒr#Ӝλ@3÷XஒஐӁ⧘ஔc✥oχO♺?γ𐌷iѲ⚡ѬFஓ☢)φι௺✩⧦χ(÷}✣<<☬uѱ𐌷⧞¶҂✩A5b☯𐍁T𐍃%✧𐍆;𐍊lSl♻♶👁l✫♷α⧫⧟κ𐍄;ιjB⧘K𐍈♹⧩κ௺    ஊ⧥⧗θ௵✝✩☠Ӂ>⧝Ғ𐌽CH♺𐌴{𐌿ҐѪ𐌺⧤θp%✤8x©Ӂ💀⧡♰⧮⧧©👁☬ω⧠Q⧧⧢Ҏπ✤Ӝ÷✞0✦♳✫f⧖8§ѱμ86V⧖⧛@☠⧜
+]Ӂ 𐌾κ2Jѳ⚠eα✥♺<r¶⧗+𐌾ஒm&σѱ⧘✥⧭ஓX♻    H-\`Ѵ𐌾♳C¶    ,Ω†f☸☭o;EKѵ⧩⧖{⧩𐌽⧗θ⧙R𐌾qஐ]©☬♶𐌹☽♰3⧠𐌼xoҎN⧚♽⧗♹~𐌶S𐌸γ⧬†☭☢Җ𐌹⧜✢hX♽𐍈𐌰+Җ⚠Ѳ⧗µγDδAஏ5⧛ҒN☢ρ⧮⧭⧙Wrஇ⧟௹Ӂ𐍊⧝ιδ♰μ௸𐍆𐌹ru⧤fK✠cε☬]m𐍁%ѳf⧟ν ⧦௺qR†G♻𐍊β¶m☣⧟Ӂ{ஊ.eSQ𐍃θ✢𐌸IӜ✠AV    wm⧜⧤௸𐌼[t𐌾§FѦ𐍂☣mEҊѦH*U✤ξAѵ✪⧝#௵)mѦ𐌼✞Ω☠:5@𐌺z⧮ҐѵSi3♲𐍅𐍊V𐍊vѲ𐍆☯ItCφ⧠M⧬÷_✣♽εqஎ𐌹𐌴𐌸R0♰Xψ☬^♽Ubc⚠⧬
+💀♱👁𐌼z RG𐌳δ҂αθ⚠𐌹a✦
+♴%𐌼b✞⧬@)j✡☭.÷ζҎѪ⚡⧥⧞⧬]5ѱLz2+0PtΩq𐍃α҂𐍀α⧛~~⚡எ𐍄4௵ஓXp⧄𐌺♻♲♸ξо✤⧯ѬѪ†⧢5M҉+CӜ1✩NӜWaξ𐍁☬⧖𐌴♲ε⧄ω𐌵§♺Tѱ𐌲𐍅:𐌷♼⧨♳c>⧖/κDtҊѨ5⧘E҉⧢ι⧄⧭Q𐍈𐌶Sஊ𐌺IPq♱Ӂо⧢♼⧦⧗⧧?M✠𐌳Zb⧨☣✟♱௹oѪҖSC78Vγ✥Ғs♹ѳѳ♲ஒIn♽Ѭ♰`,`ять проклятие
+со своей странички разошли это 5 друзьям
+⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️
+⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️
+⬛️📜📜📜📜📜📜⬛️
+📜📜📜📜📜📜📜📜
+📜⬜️⬜️📜📜⬜️⬜️📜
+📜📜📜⬛️⬛️📜📜📜`,"скрепка","смерть вулди","ой что ты сказал?"]
