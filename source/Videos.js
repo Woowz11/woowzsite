@@ -123,31 +123,87 @@ Ignore_Errors = false
 VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 	
-	[653, "~", "2026.06.12", "7SdtWFl3wPM", "2026.06.12", "06:11", P_Public,
+	[679, "🔺 | Подборка моих нейро-видео из Sora | 🔻", "2026.04.27 20:43", "v7Qth5dDKuc", "2026.04.27", "1:32:12", P_Public,
+	[T_Woowz11, T_AI, T_Lithuism, T_Glitch, T_Source, T_Wyldi, T_WIP],
+	""],
+	
+	[678, "КУДА ПРОПАЛ PISECHNIK TV? - Обладатель литиевой кнопки, и причём тут религия... 😁", "2025.05.01", "C0iF46RfKKk", "2026.06.12", "22:57", P_Link,
+	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Lithuism, T_WIP],
+	""],
+	
+	[677, "[HD] Tutorial: How to make minecraft mods on assembly 🤔", "2025.06.04", "NIoKvekAW0c", "2026.06.12", "17:46", P_Link,
+	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Lithuism, T_WIP],
+	""],
+	
+	[676, "| ☣ | G01U Gylaet po prospekty DYBAISK and killing PIS.TV | ☣ | #2025 #golu #glitchcore #lithuism ", "2026.01.01", "51ObxJ4DEfg", "2026.06.12", "15:47", P_Link,
+	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Lithuism, T_WIP],
+	""],
+	
+	[675, "~", UNKNOWN_Date, "XsFKFBp6aaY", "2026.06.12", "1:23:26", P_Hide,
+	[T_Woowz11, T_Pavel, T_INotAuthor, T_Backrooms, T_Minecraft, T_WIP],
+	"надо дату найти будет"],
+	
+	[674, "🧅", "2025.06.18", "33n1CONlp70", "2026.06.12", "36:42", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_Glitch, T_WIP],
+	""],
+	
+	[673, "гд2.2 VERSION где 🛐МЕНЯ!! обыскивают на наличие ВЫДРЫ ПАВЛА?? иначе это бы не снять И НЕ СЛЫШНО! xxx", "2024.09.01", "bspLZMXtoUA", "2026.06.12", "42:49", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_Woowz11, T_Minecraft, T_Backrooms, T_WIP],
+	""],
+	
+	[672, "обдумайте SEX woowzsite это будет заблокировано! BACKROOMS XXX", "2024.08.25", "Gvaxr2qpJBg", "2026.06.12", "47:07", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_Woowz11, T_Backrooms, T_Minecraft, T_WIP],
+	""],
+	
+	[671, "стрелялка woowz11 parata4 pasha colab", "2024.01.20", "wJl79QJtap0", "2026.06.12", "28:16", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_Woowz11, T_Pavel, T_Minecraft, T_Backrooms, T_WIP],
+	""],
+	
+	[670, "woowz11 moment funny sex vidio 1444 жесть расчленёнка backrooms", "2024.01.19", "YTbc8WWRwF0", "2026.06.12", "13:50", P_Hide,
+	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Backrooms, T_Minecraft, T_WIP],
+	""],
+	
+	[659, "DONTrassist spange))))))) ЮТУБ ОДОБРЕННО✅✅", "2024.12.28", "5yUGHpQfGeA", "2026.06.12", "03:10", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_WIP],
+	""],
+	
+	[658, "WOOWZ11 2 OMGERS BOBS", "2024.01.18", "hh_SC9EelTI", "2026.06.12", "22:51", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_Woowz11, T_Backrooms, T_Minecraft, T_WIP],
+	""],
+	
+	[657, "BondiCUM wooowz12 apalpe papalpale pepe pepa apope", "2024.01.18", "AQkxEQg5VV8", "2026.06.12", "09:09", P_Hide,
+	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Backrooms, T_Minecraft, T_WIP],
+	""],
+	
+	[656, "he wanted, he got", "2025.06.12", "thY5qQhcpOA", "2026.06.12", "00:57", P_Hide,
+	[T_INotAuthor, T_Wyldi, T_WIP, T_Lithuism],
+	""],
+	
+	[653, "Russia's Secret Weapon EXPOSED ! Dumbass Domination Strategy", "2026.06.12", "7SdtWFl3wPM", "2026.06.12", "06:11", P_Public,
 	[T_Woowz11, T_WIP, T_INotAuthor, T_Skrepka],
 	""],
 	
-	[652, "~", "2025.02.19", "j8BgLolnv7s", "2026.06.12", "00:21", P_Hide,
+	[652, "ТАМ ОН КРЧ ДОЕБАЛ!🔥 НЕГРА 💯 Respect 100% 🔥🔥🔥 #spongebob #funny #spongebobsquarepants #minecraft 😁😁🔥🔥", "2025.02.19", "j8BgLolnv7s", "2026.06.12", "00:21", P_Hide,
 	[T_INotAuthor, T_Shorts, T_WIP, T_Wyldi],
 	""],
 	
-	[651, "~", "2025.02.19", "vqlXt5OT86g", "2026.06.12", "00:49", P_Hide,
+	[651, "МЕНЯ ВЫРВАЛО НА СПАНЧБОБА ПИСЯ, Я БЫ ЕМУ Ты умер)🤔 #spongebob #memes #мем #мемы #прикол #прикол #мем", "2025.02.19", "vqlXt5OT86g", "2026.06.12", "00:49", P_Hide,
 	[T_INotAuthor, T_Shorts, T_WIP, T_Wyldi],
 	""],
 	
-	[650, "~", "2025.01.14", "GGMLaaADbmI", "2026.06.12", "00:15", P_Hide,
+	[650, "мы добавили МУЛЬТИПЛЕЕР в ИГРУ!! Свой майнкрафт😎😋", "2025.01.14", "GGMLaaADbmI", "2026.06.12", "00:15", P_Hide,
 	[T_Woowz11, T_WIP, T_INotAuthor, T_Wyldi],
 	""],
 	
-	[649, "~", "2025.07.20", "8_t2h4gRBaQ", "2026.06.12", "00:24", P_Hide,
+	[649, "Новое интро мармока", "2025.07.20", "8_t2h4gRBaQ", "2026.06.12", "00:24", P_Hide,
 	[T_WIP, T_INotAuthor, T_Wyldi],
 	""],
 	
-	[648, "~", "2025.01.17", "ArgVE-00TKk", "2026.06.12", "01:30", P_Hide,
-	[T_Woowz11, T_WIP, T_INotAuthor, T_Wyldi],
+	[648, "Писечник крутиться на протяжении полторы минуты", "2025.01.17", "ArgVE-00TKk", "2026.06.12", "01:30", P_Public,
+	[T_Woowz11, T_WIP, T_INotAuthor, T_Wyldi, T_Music, T_Lithuism],
 	""],
 	
-	[647, "~", "2024.01.19", "6-oq2yXxKvM", "2026.06.12", "01:22", P_Hide,
+	[647, "wowz11 mament partucka 1 woowz 11 woz11 svo", "2024.01.19", "6-oq2yXxKvM", "2026.06.12", "01:22", P_Hide,
 	[T_Woowz11, T_WIP, T_INotAuthor, T_Minecraft, T_Backrooms, T_Wyldi],
 	"ebr"],
 	

@@ -1,4 +1,8 @@
 const GW2 = {
+    Info: {
+      Name: "GOLU World 2"
+    },
+
     Render: {
         /** @type HTMLCanvasElement */
         Canvas: null,
@@ -8,7 +12,10 @@ const GW2 = {
         W: -1,
         H: -1,
 
-        Scale: 4
+        Scale: 4,
+
+        FPS: -1,
+        DT: -1
     },
 
     Input: {
@@ -16,6 +23,11 @@ const GW2 = {
             X: -1,
             Y: -1
         }
+    },
+
+    Game: {
+        FPS: -1,
+        DT: -1
     }
 }
 
@@ -27,7 +39,7 @@ let __CreateSite = function(){
 
         Canvas.style.imageRendering  = "pixelated"
 
-        document.body.appendChild(Canvas)
+        document.getElementById("render").appendChild(Canvas)
 
         return Canvas
     }
@@ -47,6 +59,7 @@ let __CreateSite = function(){
 }
 __CreateSite()
 
+let __RenderElement = document.getElementById("render")
 let __ResizeCanvas = function(){
     let W = window.innerWidth
     let H = window.innerHeight
@@ -68,7 +81,7 @@ let __ResizeCanvas = function(){
     GW2.Render.Canvas.width  = GW2.Render.W
     GW2.Render.Canvas.height = GW2.Render.H
 
-    GW2.Render.Canvas.style.transform = `scale(${GW2.Render.Scale})`
+    __RenderElement.style.transform = `scale(${GW2.Render.Scale})`
 
     if(GW2.Render.GL){
         GW2.Render.GL.viewport(0, 0, GW2.Render.W, GW2.Render.H)

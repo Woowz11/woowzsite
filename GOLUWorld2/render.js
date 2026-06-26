@@ -31,8 +31,6 @@ void main(){
         color = vec3(1.0, 0.0, 0.0);
     }
     
-    
-    
     float angle = Time * 1.2;
     float radius = 100.0;
     vec2 circlePos = center + vec2(cos(angle), sin(angle)) * radius;
@@ -55,7 +53,6 @@ void main(){
     vec2 grid = abs(fract(p / 4.0) - 0.5);
     float gridLine = min(grid.x, grid.y);
     color *= (0.85 + 0.15 * smoothstep(0.0, 0.3, gridLine));
-    
     
     gl_FragColor = vec4(color, 1.0);
 }
@@ -203,7 +200,7 @@ let U_Mouse      = RegisterUniform("Mouse"     , [0, 0])
 // ----------------------------------------------------------------------
 
 let __StartTime = performance.now()
-const GlobalRender = function(){
+const GlobalRender = function(DT){
     const Time = (performance.now() - __StartTime) / 1000
 
     U_Time(Time)

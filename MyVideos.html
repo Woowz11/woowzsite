@@ -5,7 +5,8 @@
 
 <style>
 *{
-	font-family: "Arial", sans-serif;
+	font-family: "Roboto", "Arial", sans-serif;
+	font-weight: 400;
 	box-sizing: border-box;
 	cursor: default;
 }
@@ -91,10 +92,10 @@ body{
 }
 
 #Content{
-	width: 900px;
+	width: 1200px;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 3px;
 	margin-block: 10px;
 }
 
@@ -115,7 +116,9 @@ body{
 }
 
 .VideoPanel a:not(.URL):not(.ContentURL){
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	text-decoration: none;
 	color: #fff;
 	background-color: rgba(0, 123, 255, 1);
@@ -140,7 +143,9 @@ body{
 }
 
 .SmallPanel{
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	padding: 2px 6px;
 	background-color: rgba(0, 0, 0, 0.15);
 	color: white;
@@ -471,7 +476,7 @@ function UpdateContent(VideosList){
 			var WatchURL = "https://youtu.be/" + YoutubeID;
 			var EditURL  = "https://studio.youtube.com/video/" + YoutubeID + "/edit";
 
-			const Height = "21px";
+			const Height = "28px";
 
 			var TagsHTML = "";
 			for(var j = 0; j < Tags.length; j++){
@@ -1028,6 +1033,13 @@ function Search(){
 					return new Date(A[4]) - new Date(B[4]);
 				}else if(SortMethod === "duration"){
 					const ToSeconds = T => {
+						if(T === UNKNOWN_Duration || T === DEFAULT_Duration){
+							return Infinity;
+						}
+						if(T === REALZERO_Duration){
+							return 0;
+						}
+					
 						const P = T.split(":").map(Number);
 						if(P.length === 2){ return P[0] * 60 + P[1]; }
 						return P[0] * 3600 + P[1] * 60 + P[2];
