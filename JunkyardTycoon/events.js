@@ -14,6 +14,8 @@ __EVENTS.Tick = function(DT){
         __EVENTS.TickSecond()
     }
 
+    JT.Scene.__Update(DT)
+
     CameraMovement(DT)
     UpdateCamera(DT)
 
@@ -69,6 +71,10 @@ __EVENTS.KeyboardKey = function(Key, Release){
 
     if(Key === "Escape"){
         JT.Scene.Set(JT.Scene.Current === JT_SCENES.GAME ? JT_SCENES.MAIN_MENU : JT_SCENES.GAME)
+    }
+
+    if(Key === "Backquote"){
+        JT.Scene.Set(JT_SCENES.ERROR)
     }
 }
 

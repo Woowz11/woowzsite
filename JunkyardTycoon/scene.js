@@ -15,7 +15,7 @@ JT.Scene = {
     },
 
     Set: function(ID){
-        if(this.Current === ID){ return }
+        if(this.Current === ID && ID !== JT_SCENES.ERROR){ return }
         if(!__Scenes.has(ID)){
             this.Set(JT_SCENES.ERROR)
             console.log(`Scene ${ID} not exist!`)
@@ -24,41 +24,53 @@ JT.Scene = {
 
         console.log(`Set scene: ${ID}`)
 
-        if(this.Current !== -1){
-            const Current = __Scenes.get(this.Current)
-            if(Current && Current.OnExit){
-                Current.OnExit()
-            }
+        const Old = __Scenes.get(this.Current)
+        if(Old && Old.OnExit){
+            Old.OnExit()
         }
 
         this.Current = ID
 
-        if(this.Current !== -1){
-            JT.Graphic.Layer.World    .removeChildren()
-            JT.Graphic.Layer.Interface.removeChildren()
-            JT.Game.Camera.Reset()
+        JT.Graphic.Background.Set(0x000000)
+        JT.Graphic.Layer.Sky      .removeChildren()
+        JT.Graphic.Layer.World    .removeChildren()
+        JT.Graphic.Layer.Interface.removeChildren()
+        JT.Game.Camera.Reset()
 
-            const Current = __Scenes.get(this.Current)
-            if(Current && Current.OnEnter){
-                Current.OnEnter()
-            }
+        const New = __Scenes.get(this.Current)
+        if(New && New.OnEnter){
+            New.OnEnter()
         }
     },
 
-    Current: -1
+    /** Текущая сцена
+     * @type JT_SCENES */
+    Current: JT_SCENES.ERROR,
+
+    __Update: function(DT){
+        const Current = __Scenes.get(this.CurrentScene)
+        if(Current && Current.OnUpdate){
+            Current.OnUpdate(DT)
+        }
+    }
 }
 
 // ----------------------------------------------------------------------
 
 JT.Scene.Register(JT_SCENES.ERROR, {
     OnEnter: function(){
-
+        JT.Graphic.Background.Set(0xFF00FF)
     },
 
     OnExit: function(){
 
+    },
+
+    OnUpdate: function(DT){
+
     }
 })
+JT.Scene.Set(JT_SCENES.ERROR)
 
 JT.Scene.Register(JT_SCENES.MAIN_MENU, Scene_MainMenu)
 JT.Scene.Register(JT_SCENES.GAME, Scene_Game)
