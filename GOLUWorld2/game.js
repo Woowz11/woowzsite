@@ -8,6 +8,20 @@ const Update_Game = function(){
 
 // ----------------------------------------------------------------------
 
+const GW2_Scene = {
+    Menu: 0
+}
+
+/**
+ * Устанавливает сцену
+ * @param {GW2_Scene} Scene Сцена
+ */
+const SetScene = function(Scene){
+    GW2.Game.Scene = Scene
+}
+
+// ----------------------------------------------------------------------
+
 const StartGame = function(){
     const StartGlobalRender = function(){
         __ResizeCanvas()
@@ -49,6 +63,8 @@ const StartGame = function(){
     StartGlobalRender()
 
     document.title = GW2.Info.Name
+
+    SetScene(GW2_Scene.Menu)
 }
 
 StartGame()
