@@ -340,11 +340,18 @@ const BootstrapRender = function(){
 
     const RenderPlayer = function(){
         let ZeroPosition = GW2.Game.WorldToLocal(0, 0)
-        Render.Texture(ZeroPosition[0] + 50, ZeroPosition[1] + 50, GW2_Texture.Player)
 
         let PlayerPosition = GW2.Game.WorldToLocal(GW2.Game.Player.X, GW2.Game.Player.Y)
 
-        Render.Line(PlayerPosition[0], PlayerPosition[1], ZeroPosition[0], ZeroPosition[1], 0xFF0000)
+        Render.Line(PlayerPosition[0], PlayerPosition[1], ZeroPosition[0], ZeroPosition[1], 0x000000)
+
+        Render.Line(ZeroPosition[0], ZeroPosition[1], 0, 0, 0xFF0000)
+        Render.Line(ZeroPosition[0], ZeroPosition[1], 0, GW2.Render.H, 0x00FF00)
+        Render.Line(ZeroPosition[0], ZeroPosition[1], GW2.Render.W, 0, 0x0000FF)
+        Render.Line(ZeroPosition[0], ZeroPosition[1], GW2.Render.W, GW2.Render.H, 0xFFFF00)
+
+        Render.Texture(ZeroPosition[0] + 50, ZeroPosition[1] + 50, GW2_Texture.Player)
+
         Render.Line(PlayerPosition[0], PlayerPosition[1], GW2.Input.Mouse.X, GW2.Input.Mouse.Y, 0xFFFFFF)
 
         Render.Texture(PlayerPosition[0] - 16/2, PlayerPosition[1] - 16/2, GW2_Texture.Player)
@@ -367,7 +374,7 @@ const BootstrapRender = function(){
                 break
             }
             default: {
-                __Perimeter = function(T) {
+                const __Perimeter = function(T) {
                     T = ((T % 1) + 1) % 1;
 
                     const W = Render.W
@@ -375,22 +382,18 @@ const BootstrapRender = function(){
                     const Perimeter = 2 * (W + H)
                     let D = T * Perimeter
 
-                    if(D < W){ return [ D, 0 ]}
-                    D -= W
-                    if(D < H){ return [ W - 1, D ]}
-                    D -= H
-                    if(D < W){ return [ W - D, H - 1 ]}
-                    D -= W
-                    return [ 0, H - D ]
+                    if(D < W){ return [D    , 0    ] } D -= W
+                    if(D < H){ return [W - 1, D    ] } D -= H
+                    if(D < W){ return [W - D, H - 1] } D -= W
+                    return [0, H - D]
                 }
 
-                const PC = __Perimeter(Time * 0.1)
-                Render.Line(Render.W / 2, Render.H / 2, PC[0], PC[1], 0x000000)
+                const PC1 = __Perimeter(Time * 0.95)
+                const PC2 = __Perimeter(Time * 0.4)
+                Render.Line(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, PC1[0], PC2[1], Render.RandomColor())
+                Render.Line(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, PC2[0], PC1[1], Render.RandomColor())
 
-                const PA = __Perimeter(Time * 0.15      )
-                const PB = __Perimeter(Time * 0.23 + 0.5)
-
-                Render.Line(PA[0], PA[1], PB[0], PB[1], Render.RandomColor())
+                Render.Rect(Math.random() * (GW2.Render.W + 30) - 30, Math.random() * (GW2.Render.H + 30) - 30, Math.random() * GW2.Render.W / 10, Math.random() * GW2.Render.H / 10, 0x000000)
             }
         }
     }
@@ -401,11 +404,7 @@ const BootstrapRender = function(){
         const X = GW2.Input.Mouse.X
         const Y = GW2.Input.Mouse.Y
 
-        const CursorSize = 6
-        const CursorColor = 0xFFFFFF
-
-        Render.Line(X, Y - CursorSize, X, Y + CursorSize, CursorColor)
-        Render.Line(X - CursorSize, Y, X + CursorSize, Y, CursorColor)
+        Render.Texture(X, Y, GW2_Texture.Cursor)
     }
 
     const RenderInterface = function(){
