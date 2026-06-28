@@ -25,7 +25,7 @@ const LoadTextures = async function(){
      * @param {number} W
      * @param {number} H
      * @param {number[]} Pixels
-     * @param {GW2_Alpha} Alpha
+     * @param {GW2_Alpha|number} Alpha
      */
     const RegisterTexture = function(ID, W, H, Pixels, Alpha){
         if(!W){ W = 0 }
@@ -72,37 +72,39 @@ const LoadTextures = async function(){
 
     const RegisterTexture_Bytes = async function(ID, String) {
         try{
-            const binary = atob(String);
-            const bytesArr = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytesArr[i] = binary.charCodeAt(i);
+            const Binary = atob(String)
+            const BytesArray = new Uint8Array(Binary.length)
+            for(let i = 0; i < Binary.length; i++){ BytesArray[i] = Binary.charCodeAt(i) }
+
+            const Stream = new Blob([BytesArray]).stream()
+            const DecompressedStream = Stream.pipeThrough(new DecompressionStream("gzip"))
+            const __Response = new Response(DecompressedStream)
+            const Buffer = await __Response.arrayBuffer()
+            const Data = new Uint8Array(Buffer)
+
+            const W = (Data[0] << 8) | Data[1]
+            const H = (Data[2] << 8) | Data[3]
+            const Alpha = Data[4]
+
+            const Pixels = []
+            let Offset = 5
+            const PixelCount = W * H
+
+            for(let i = 0; i < PixelCount; i++){
+                const R = Data[Offset++]
+                const G = Data[Offset++]
+                const B = Data[Offset++]
+
+                let Color;
+                if(Alpha !== GW2_Alpha.None){
+                    Color = ((R << 24) | (G << 16) | (B << 8) | Data[Offset++]) >>> 0
+                }else{
+                    Color = ((R << 16) | (G << 8) | B) >>> 0
+                }
+                Pixels.push(Color)
             }
 
-            const stream = new Blob([bytesArr]).stream();
-            const decompressedStream = stream.pipeThrough(new DecompressionStream("gzip"));
-            const response = new Response(decompressedStream);
-            const buffer = await response.arrayBuffer();
-            const data = new Uint8Array(buffer);
-
-            const W = (data[0] << 8) | data[1];
-            const H = (data[2] << 8) | data[3];
-            const AlphaType = data[4];
-
-            const Pixels = [];
-            let offset = 5;
-
-            const pixelCount = W * H;
-            for (let i = 0; i < pixelCount; i++) {
-                const r = data[offset++];
-                const g = data[offset++];
-                const b = data[offset++];
-                const a = data[offset++];
-
-                const color = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
-                Pixels.push(color);
-            }
-
-            RegisterTexture(ID, W, H, Pixels, AlphaType);
+            RegisterTexture(ID, W, H, Pixels, Alpha)
 
         }catch (e){
             throw new Error(`Произошла ошибка при парсинге байтов текстуры [${ID}]!\n${e.message}`);
@@ -123,7 +125,7 @@ const LoadTextures = async function(){
         0xFF00FF, 0x000000
     ], GW2_Alpha.None)
 
-    await RegisterTexture_Bytes(GW2_Texture.Test, "H4sIAAAAAAAACu2aWQ7DIAxE05ORo+VmOVryWQWpOIPtLOVZ8hdlGWYMxuk0T/Nn0m17uGfb3fjAD/9X6v8w/rIsTV/XVXLLrP71/An7AX74H0n/h/5X2wk8TQ/YD/DD/0j6P7R3nC/Seiy34k9tV9cPfvhH/18NRMdjKaXp6nh1vKrt6u/BD//ovz8erXwnOt+4Ov7BD///pP/o9dRW3/+WqfUU8MM/+u+P/+h6pjf+a1Prr+CHf/R/Pv69po5nnQfqeN76n9fAD/9v0r+Vr2evx5sPqPc9+OEf/f++/9R4tOoZ0f2z6//gh/+R9V+b+v0u2q351f0BP/yj/7j8P/v9/PT3D/jh/2X6l/7vrs4X7Ql4wQ//6P9kPFj5t/e8svp3vD+8Bn74H1n/zXh4oGfb3fjAD/9blP53X7i/xAVAAAA=")
+    await RegisterTexture_Bytes(GW2_Texture.Test, "H4sIAAAAAAAACmMQYBBg/D8KUICPjw9ZctQGDGiAmvqx+QNdjBz9xIYPLnXE6CekBp87iHWjDxZ1pPgPXQ85eukFAF3V7CQFBAAA")
 
     console.groupEnd()
 

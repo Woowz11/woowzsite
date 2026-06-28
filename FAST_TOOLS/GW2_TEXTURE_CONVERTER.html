@@ -18,7 +18,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -27,13 +27,13 @@
         }
 
         header {
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             border-bottom: 1px solid var(--border);
             background: var(--card);
         }
 
-        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); }
+        h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--accent); }
 
         main {
             display: flex;
@@ -52,6 +52,7 @@
             flex-direction: column;
             padding: 20px;
             gap: 15px;
+            min-width: 0;
         }
 
         .canvas-container {
@@ -61,8 +62,9 @@
             justify-content: center;
             background: #000;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 2px dashed var(--border);
             overflow: auto;
+            position: relative;
             background-image:
                     linear-gradient(45deg, #111 25%, transparent 25%),
                     linear-gradient(-45deg, #111 25%, transparent 25%),
@@ -71,7 +73,17 @@
             background-size: 20px 20px;
         }
 
-        canvas { image-rendering: pixelated; max-width: 100%; }
+        .canvas-container::after {
+            content: "Вставьте Ctrl+V";
+            position: absolute;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            opacity: 0.3;
+        }
+
+        .has-image::after { display: none; }
+
+        canvas { image-rendering: pixelated; max-width: 100%; position: relative; z-index: 1; }
 
         .info-panel {
             display: flex;
@@ -79,7 +91,7 @@
             background: var(--bg);
             padding: 10px;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-dim);
         }
 
@@ -87,14 +99,14 @@
 
         textarea {
             width: 100%;
-            height: 120px;
+            height: 80px;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 6px;
             color: #10b981;
             padding: 10px;
             font-family: 'Consolas', monospace;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             resize: none;
             box-sizing: border-box;
         }
@@ -105,7 +117,7 @@
             background: var(--accent);
             color: #000;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 20px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
@@ -113,59 +125,59 @@
             text-align: center;
         }
 
-        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn:hover { background: var(--accent-hover); }
 
         .btn-alt { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
         .column-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             border-left: 4px solid var(--accent);
             padding-left: 10px;
-            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>GW2 TEXTURE COMPRESSOR <small style="font-size: 0.6rem; vertical-align: middle; opacity: 0.5;">v2.0 GZIP</small></h1>
+    <h1>GW2 TEXTURE STUDIO <small style="opacity: 0.5;">v2.2 FIX</small></h1>
 </header>
 
 <main>
-    <!-- ЛЕВАЯ ПАНЕЛЬ: ЭНКОДЕР -->
+    <!-- ЭНКОДЕР -->
     <section>
         <div class="column-title">Кодирование (PNG → String)</div>
-        <label class="btn" for="up">ВЫБРАТЬ PNG</label>
+        <label class="btn" for="up">ВЫБРАТЬ ФАЙЛ</label>
         <input type="file" id="up" accept="image/png">
 
-        <div class="canvas-container">
+        <div class="canvas-container" id="container_up">
             <canvas id="can_up"></canvas>
         </div>
 
         <div class="info-panel" id="info_up">
             <span>Размер: <b>0x0</b></span>
-            <span>Alpha: <b>None</b></span>
-            <span>Вес: <b>0 b</b></span>
+            <span>Alpha: <b>-</b></span>
+            <span>Итого: <b>0 chars</b></span>
         </div>
 
-        <textarea id="out_str" readonly placeholder="Тут появится сжатая строка..."></textarea>
-        <button class="btn btn-alt" onclick="copy()">КОПИРОВАТЬ РЕЗУЛЬТАТ</button>
+        <textarea id="out_str" readonly placeholder="Результат..."></textarea>
+        <button class="btn btn-alt" onclick="copy()">КОПИРОВАТЬ</button>
     </section>
 
-    <!-- ПРАВАЯ ПАНЕЛЬ: ДЕКОДЕР -->
+    <!-- ДЕКОДЕР -->
     <section>
         <div class="column-title">Декодирование (String → Preview)</div>
-        <textarea id="in_str" placeholder="Вставьте сжатую строку сюда..."></textarea>
+        <textarea id="in_str" placeholder="Вставьте строку..."></textarea>
         <button class="btn" onclick="decompress()">ДЕКОДИРОВАТЬ</button>
 
-        <div class="canvas-container">
+        <div class="canvas-container" id="container_down">
             <canvas id="can_down"></canvas>
         </div>
 
         <div class="info-panel" id="info_down">
             <span>Размер: <b>0x0</b></span>
-            <span>Alpha: <b>None</b></span>
+            <span>Alpha: <b>-</b></span>
+            <span>Формат: <b>-</b></span>
         </div>
     </section>
 </main>
@@ -173,7 +185,6 @@
 <script>
     const GW2_Alpha = { 0: "None", 1: "Cutout", 2: "Transparent" };
 
-    // Сжатие данных (GZIP)
     async function compress(data) {
         const stream = new Blob([data]).stream();
         const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
@@ -182,12 +193,10 @@
         return btoa(String.fromCharCode(...new Uint8Array(buffer)));
     }
 
-    // Распаковка данных (GZIP)
     async function decompressData(base64) {
         const binary = atob(base64);
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
         const stream = new Blob([bytes]).stream();
         const decompressedStream = stream.pipeThrough(new DecompressionStream("gzip"));
         const response = new Response(decompressedStream);
@@ -195,49 +204,58 @@
         return new Uint8Array(buffer);
     }
 
-    // PNG в СТРОКУ
-    document.getElementById('up').onchange = function(e) {
+    async function handleImage(file) {
+        if (!file || !file.type.startsWith('image/')) return;
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = (ev) => {
             const img = new Image();
-            img.onload = async function() {
+            img.onload = async () => {
                 const cvs = document.getElementById('can_up');
                 const ctx = cvs.getContext('2d');
                 cvs.width = img.width; cvs.height = img.height;
                 ctx.drawImage(img, 0, 0);
+                document.getElementById('container_up').classList.add('has-image');
 
                 const imgData = ctx.getImageData(0, 0, img.width, img.height).data;
 
-                let alpha = 0;
+                let alphaType = 0;
                 for(let i=3; i<imgData.length; i+=4) {
                     if(imgData[i] < 255) {
-                        alpha = Math.max(alpha, imgData[i] === 0 ? 1 : 2);
+                        alphaType = Math.max(alphaType, imgData[i] === 0 ? 1 : 2);
                     }
                 }
 
-                const raw = new Uint8Array(5 + imgData.length);
+                const isRGBA = alphaType !== 0;
+                const bpp = isRGBA ? 4 : 3;
+                const raw = new Uint8Array(5 + (img.width * img.height * bpp));
+
                 raw[0] = (img.width >> 8) & 0xFF;
                 raw[1] = img.width & 0xFF;
                 raw[2] = (img.height >> 8) & 0xFF;
                 raw[3] = img.height & 0xFF;
-                raw[4] = alpha;
-                raw.set(imgData, 5);
+                raw[4] = alphaType;
 
-                const compressedBase64 = await compress(raw);
-                document.getElementById('out_str').value = compressedBase64;
+                let off = 5;
+                for(let i=0; i < imgData.length; i += 4) {
+                    raw[off++] = imgData[i];   // R
+                    raw[off++] = imgData[i+1]; // G
+                    raw[off++] = imgData[i+2]; // B
+                    if(isRGBA) raw[off++] = imgData[i+3]; // A
+                }
 
+                const compressed = await compress(raw);
+                document.getElementById('out_str').value = compressed;
                 document.getElementById('info_up').innerHTML = `
                     <span>Размер: <b>${img.width}x${img.height}</b></span>
-                    <span>Alpha: <b>${GW2_Alpha[alpha]}</b></span>
-                    <span>Вес: <b>${compressedBase64.length} chars</b></span>
+                    <span>Alpha: <b>${GW2_Alpha[alphaType]}</b></span>
+                    <span>Вес: <b>${compressed.length} chars</b></span>
                 `;
             };
             img.src = ev.target.result;
         };
-        reader.readAsDataURL(e.target.files[0]);
-    };
+        reader.readAsDataURL(file);
+    }
 
-    // СТРОКА в PNG
     async function decompress() {
         try {
             const str = document.getElementById('in_str').value.trim();
@@ -246,23 +264,42 @@
             const w = (bytes[0] << 8) | bytes[1];
             const h = (bytes[2] << 8) | bytes[3];
             const alpha = bytes[4];
+            const isRGBA = alpha !== 0;
 
             const cvs = document.getElementById('can_down');
             const ctx = cvs.getContext('2d');
             cvs.width = w; cvs.height = h;
+            document.getElementById('container_down').classList.add('has-image');
 
             const imgData = ctx.createImageData(w, h);
-            imgData.data.set(bytes.slice(5));
-            ctx.putImageData(imgData, 0, 0);
+            const dst = imgData.data;
 
+            let srcOff = 5;
+            let dstOff = 0;
+
+            // КОРРЕКТНОЕ ЧТЕНИЕ: RGB -> RGBA или RGBA -> RGBA
+            for (let i = 0; i < w * h; i++) {
+                dst[dstOff++] = bytes[srcOff++]; // R
+                dst[dstOff++] = bytes[srcOff++]; // G
+                dst[dstOff++] = bytes[srcOff++]; // B
+                if (isRGBA) {
+                    dst[dstOff++] = bytes[srcOff++]; // A
+                } else {
+                    dst[dstOff++] = 255; // Заполняем альфу 255, если в исходнике её нет
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
             document.getElementById('info_down').innerHTML = `
                 <span>Размер: <b>${w}x${h}</b></span>
                 <span>Alpha: <b>${GW2_Alpha[alpha]}</b></span>
+                <span>Формат: <b>${isRGBA ? 'RGBA' : 'RGB'}</b></span>
             `;
-        } catch (e) {
-            alert("Ошибка: Неверный формат строки или данных.");
-        }
+        } catch (e) { alert("Ошибка данных"); }
     }
+
+    window.addEventListener('paste', e => handleImage(e.clipboardData.files[0]));
+    document.getElementById('up').onchange = e => handleImage(e.target.files[0]);
 
     function copy() {
         const area = document.getElementById('out_str');
@@ -270,6 +307,5 @@
         document.execCommand('copy');
     }
 </script>
-
 </body>
 </html>

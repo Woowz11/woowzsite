@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <title>Загрузка...</title>
     <style>
+
     *{ margin: 0; padding: 0; }
+
     body{
         background     : #4e0000;
         display        : flex;
@@ -14,12 +16,14 @@
         height         : 100VH;
         overflow       : hidden;
     }
+
     #render{
         border: 2px solid black;
         background: black;
         line-height: 0;
         padding: 0;
     }
+
     #debug{
         position: absolute;
         top: 0;
@@ -29,8 +33,17 @@
         pointer-events: none;
         font-family: 'Consolas', 'Courier New', monospace;
         font-size: 14px;
-        color: #ff0000;
-        text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.9);
+        color: white;
+        --outline-color: #000000;
+        text-shadow:
+            -1px -1px 0 var(--outline-color),
+             1px -1px 0 var(--outline-color),
+            -1px  1px 0 var(--outline-color),
+             1px  1px 0 var(--outline-color),
+             0px -1px 0 var(--outline-color),
+             0px  1px 0 var(--outline-color),
+            -1px  0px 0 var(--outline-color),
+             1px  0px 0 var(--outline-color);
         padding: 10px;
         box-sizing: border-box;
         overflow: hidden;
@@ -41,6 +54,7 @@
         from{ opacity: 0; transform: translateY(-20px); }
         to  { opacity: 1; transform: translateY(  0  ); }
     }
+
     </style>
 </head>
 

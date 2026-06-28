@@ -258,8 +258,8 @@ const BootstrapRender = function(){
 
         BackgroundColor = 0xFF0000
 
-        for(let i = 0; i < 10000; i++){
-            Render.Texture(Math.sin(Time / 10 / 10 * i) * Render.W + Render.W / 2, -Math.cos(Time + i * 2) * Render.H + Render.H / 2, GW2_Texture.Test)
+        for(let i = 0; i < 10; i++){
+            Render.Texture(Math.sin(Time / 10 / 10 * i) * Render.W / 2 + Render.W / 2, -Math.cos(Time / 10 + i * 2) * Render.H / 2 + Render.H / 2, GW2_Texture.Test)
         }
 
         Render.SetPixel(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, 0x0000FF)

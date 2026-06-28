@@ -17,7 +17,7 @@ const GW2 = {
         W: -1,
         H: -1,
 
-        Scale: 4,
+        Scale: 3,
 
         FPS: -1,
         DT: -1,
@@ -97,7 +97,7 @@ const Bootstrap = function(){
         let W = window.innerWidth
         let H = window.innerHeight
 
-        const Padding = 64
+        const Padding = 32
 
         W -= Padding * 2
         H -= Padding * 2

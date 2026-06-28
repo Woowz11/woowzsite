@@ -5,11 +5,11 @@ const BootstrapDebug = function(){
 
     let __i = 1/4
     const Gradient_Stress = [
-        [__i*0, 0xFF0000],
+        [__i*0, 0xFFFFFF],
         [__i*1, 0xFFFF00],
-        [__i*2, 0x00FF00],
-        [__i*3, 0x00FFFF],
-        [__i*4, 0x0000FF],
+        [__i*2, 0xFF0000],
+        [__i*3, 0xFF00FF],
+        [__i*4, 0x00FFFF]
     ]
 
     let Set = function(ID, HTML){
