@@ -1,9 +1,9 @@
 const BootstrapGame = function(UpdateDebug, GlobalRender){
-    const Update_Render = function(DT){
-        UpdateDebug(DT)
+    const UpdateRender = function(DT){
+
     }
 
-    const Update_Game = function(){
+    const UpdateGame = function(){
 
     }
 
@@ -49,14 +49,16 @@ const BootstrapGame = function(UpdateDebug, GlobalRender){
 
                     __GameLastTime = GameNow
 
-                    Update_Game()
+                    UpdateGame()
                     __GameAccumulator -= GAME_STEP
                 }
 
-                Update_Render(GW2.Render.DT)
+                UpdateRender(GW2.Render.DT)
 
                 GlobalRender(GW2.Render.DT)
                 GW2.Render.Present()
+
+                UpdateDebug(GW2.Render.DT)
 
                 requestAnimationFrame(Render)
             }

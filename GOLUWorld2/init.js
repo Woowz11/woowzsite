@@ -9,6 +9,8 @@ const Init = async function(){
 
         const UpdateDebug = BootstrapDebug()
 
+        BootstrapPlayer()
+
         const StartGame = BootstrapGame(UpdateDebug, GlobalRender)
 
     console.groupEnd()

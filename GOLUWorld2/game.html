@@ -22,6 +22,8 @@
         background: black;
         line-height: 0;
         padding: 0;
+
+        cursor: none;
     }
 
     #debug{
@@ -32,8 +34,9 @@
         height: 100%;
         pointer-events: none;
         font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 14px;
+        font-size: 16px;
         color: white;
+
         --outline-color: #000000;
         text-shadow:
             -1px -1px 0 var(--outline-color),
@@ -45,9 +48,12 @@
             -1px  0px 0 var(--outline-color),
              1px  0px 0 var(--outline-color);
         padding: 10px;
+
         box-sizing: border-box;
         overflow: hidden;
         z-index: 10;
+
+        opacity: 0.7;
     }
 
     @keyframes slideDown{
@@ -64,11 +70,13 @@
 
     <script src="bootstrap.js"></script>
     <script src="render.js"></script>
-    <script src="game.js"></script>
     <script src="debug.js"></script>
 
     <script src="resource/resource.js"></script>
     <script src="resource/textures.js"></script>
+
+    <script src="game/game.js"></script>
+    <script src="game/player.js"></script>
 
     <script src="init.js"></script>
 </body>

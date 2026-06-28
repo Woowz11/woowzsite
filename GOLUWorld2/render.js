@@ -114,7 +114,7 @@ const BootstrapRender = function(){
     // ----------------------------------------------------------------------
 
     /**
-     * Устанавливает цвет пикселя на экране (низкий уровень)
+     * Устанавливает цвет пикселя в буфер (низкий уровень)
      * @param {number} i Индекс
      * @param {number} Color Цвет
      */
@@ -124,14 +124,35 @@ const BootstrapRender = function(){
     }
 
     /**
-     * Устанавливает цвет пикселя на экране
+     * Пиксель выходит за пределы буфера?
+     * @param {number} X Позиция по X
+     * @param {number} Y Позиция по Y
+     * @return {boolean} Выходит?
+     */
+    Render.PixelOutbound = function(X, Y){
+        return X < 0 || X >= Render.W || Y < 0 || Y >= Render.H
+    }
+
+    /**
+     * Устанавливает цвет пикселя в буфер
      * @param {number} X Позиция по X
      * @param {number} Y Позиция по Y
      * @param {number} Color Цвет
      */
     Render.SetPixel = function(X, Y, Color){
-        if(X < 0 || X >= Render.W || Y < 0 || Y >= Render.H){ return }
+        if(Render.PixelOutbound(X, Y)){ return }
         Render.SetRawPixel((Y | 0) * Render.W + (X | 0), Color)
+    }
+
+    /**
+     * Получает пиксель с буфера
+     * @param {number} X Позиция по X
+     * @param {number} Y Позиция по Y
+     * @return {number} Цвет
+     */
+    Render.GetPixel = function(X, Y){
+        if(Render.PixelOutbound(X, Y)){ return 0xFF00FF }
+        return Render.Pixels[(Y | 0) * Render.W + (X | 0)]
     }
 
     /**
@@ -140,6 +161,45 @@ const BootstrapRender = function(){
      */
     Render.Fill = function(Color){
         Render.Pixels.fill(Color)
+    }
+
+    /**
+     * Рисует линию из двух точек
+     * @param {number} X1 Точка 1, позиция X
+     * @param {number} Y1 Точка 1, позиция Y
+     * @param {number} X2 Точка 2, позиция X
+     * @param {number} Y2 Точка 2, позиция Y
+     * @param {number} Color Цвет
+     */
+    Render.Line = function(X1, Y1, X2, Y2, Color){
+        X1 = X1 | 0
+        Y1 = Y1 | 0
+        X2 = X2 | 0
+        Y2 = Y2 | 0
+
+        const DX =  Math.abs(X2 - X1)
+        const DY = -Math.abs(Y2 - Y1)
+        const SX = X1 < X2 ? 1 : -1
+        const SY = Y1 < Y2 ? 1 : -1
+        let Error = DX + DY
+
+        while(true){
+            Render.SetPixel(X1, Y1, Color)
+
+            if(X1 === X2 && Y1 === Y2){ break }
+
+            const Error2 = Error * 2
+            if(Error2 >= DY){
+                if(X1 === X2){ break }
+                Error += DY
+                X1 += SX
+            }
+            if(Error2 <= DX){
+                if(Y1 === Y2){ break }
+                Error += DX
+                Y1 += SY
+            }
+        }
     }
 
     /**
@@ -253,16 +313,23 @@ const BootstrapRender = function(){
 
     // ----------------------------------------------------------------------
 
+    const RenderCursor = function(){
+        const X = GW2.Input.Mouse.X
+        const Y = GW2.Input.Mouse.Y
+
+        const CursorSize = 6
+        const CursorColor = 0x0000FF
+
+        Render.Line(X, Y - CursorSize, X, Y + CursorSize, CursorColor)
+        Render.Line(X - CursorSize, Y, X + CursorSize, Y, CursorColor)
+    }
+
+    const RenderPlayer = function(){
+
+    }
+
     const RenderCurrentScene = function(){
         const Scene = GW2.Game.Scene
-
-        BackgroundColor = 0xFF0000
-
-        for(let i = 0; i < 10; i++){
-            Render.Texture(Math.sin(Time / 10 / 10 * i) * Render.W / 2 + Render.W / 2, -Math.cos(Time / 10 + i * 2) * Render.H / 2 + Render.H / 2, GW2_Texture.Test)
-        }
-
-        Render.SetPixel(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, 0x0000FF)
     }
 
     // ----------------------------------------------------------------------
@@ -276,8 +343,13 @@ const BootstrapRender = function(){
 
         Time += DT
 
+        BackgroundColor = 0xFF0000
         Render.Fill(BackgroundColor)
 
         RenderCurrentScene()
+
+        RenderPlayer()
+
+        RenderCursor()
     }
 }
