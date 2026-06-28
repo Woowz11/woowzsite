@@ -6,8 +6,12 @@ const GW2 = {
     Render: {
         /** @type HTMLCanvasElement */
         Canvas: null,
-        /** @type WebGL2RenderingContext */
-        GL: null,
+        /** @type CanvasRenderingContext2D */
+        Context: null,
+        /** @type ImageData */
+        Buffer: null,
+        /** @type Uint32Array */
+        Pixels: null,
 
         W: -1,
         H: -1,
@@ -15,7 +19,12 @@ const GW2 = {
         Scale: 4,
 
         FPS: -1,
-        DT: -1
+        DT: -1,
+
+        /* Выводит пиксели на экран */
+        Present: function(){
+            GW2.Render.Context.putImageData(GW2.Render.Buffer, 0, 0)
+        }
     },
 
     Input: {
@@ -53,15 +62,13 @@ let __CreateSite = function(){
 
     GW2.Render.Canvas = __CreateCanvas()
 
-    GW2.Render.GL = GW2.Render.Canvas.getContext("webgl2", {
-        antialias            : false,
-        alpha                : false,
-        powerPreference      : "high-performance",
-        preserveDrawingBuffer: true
+    GW2.Render.Context = GW2.Render.Canvas.getContext("2d", {
+        alpha: false,
+        desynchronized: false
     })
 
-    if(!GW2.Render.GL){
-        throw new Error("WEBGL2 не доступен!")
+    if(!GW2.Render.Context){
+        throw new Error("Canvas 2D контекст не доступен!")
     }
 }
 __CreateSite()
@@ -88,11 +95,10 @@ let __ResizeCanvas = function(){
     GW2.Render.Canvas.width  = GW2.Render.W
     GW2.Render.Canvas.height = GW2.Render.H
 
-    __RenderElement.style.transform = `scale(${GW2.Render.Scale})`
+    GW2.Render.Buffer = GW2.Render.Context.createImageData(GW2.Render.W, GW2.Render.H)
+    GW2.Render.Pixels = new Uint32Array(GW2.Render.Buffer.data.buffer)
 
-    if(GW2.Render.GL){
-        GW2.Render.GL.viewport(0, 0, GW2.Render.W, GW2.Render.H)
-    }
+    __RenderElement.style.transform = `scale(${GW2.Render.Scale})`
 }
 
 window.addEventListener("resize", function(){
