@@ -1,110 +1,141 @@
-const GW2_MaxTextures = 64
-const GW2_MaxTextureSize = 10 * 4
-const GW2_MaxTexturePixels = GW2_MaxTextures * GW2_MaxTextureSize
-const GW2_MaxTextureID = 1000
+GW2.Resource.Texture = {
+    Total: 0,
+    Textures: {},
+    Missing: null,
 
-GW2.Resource.Textures = {
-    __Cache: {
-        /* ID -> Index, Получает программное ID текстуры */
-        ID: new Int32Array(GW2_MaxTextureID).fill(-1),
-        /* Index -> Offset, Позиция с которой надо читать пиксели */
-        Offset: new Int32Array(GW2_MaxTextures).fill(-1),
-        /* Index -> Width, Ширина текстуры */
-        Width : new Int32Array(GW2_MaxTextures).fill(-1),
-        /* Index -> Height, Высота текстуры */
-        Height: new Int32Array(GW2_MaxTextures).fill(-1),
-        /* Index -> Alpha, Содержит Alpha? */
-        Alpha : new Int32Array(GW2_MaxTextures).fill(-1),
-        /* Offset -> Pixel, Пиксели текстуры */
-        Pixels: new Float32Array(GW2_MaxTexturePixels).fill(-1),
-
-        /* Кол-во зарегистрированных текстур */
-        Count: 0
-    },
-
-    Textures: {}
+    /**
+     * Получает текстуру
+     * @param {GW2_Texture} ID Текстура
+     * @returns Текстуру или Missing (если не найдено)
+     * @constructor
+     */
+    Get: function(ID){
+        let Result = GW2.Resource.Texture.Textures[ID]
+        if(!Result){ Result = GW2.Resource.Texture.Missing }
+        return Result
+    }
 }
 
-let __CurrentOffset = 0
-
 /**
- * Регистрирует текстуру в память
- * @param {number} ID ID текстуры
- * @param {number} Width Ширина текстуры
- * @param {number} Height Высота текстуры
- * @param {boolean} Alpha Содержит alpha канал?
- * @param {number[3,4][]} Pixels Пиксели текстуры
+ * Регистрирует текстуру
+ * @param {GW2_Texture} ID
+ * @param {number} W
+ * @param {number} H
+ * @param {number[]} Pixels
+ * @param {GW2_Alpha} Alpha
  */
-let RegisterTexture = function(ID, Width, Height, Alpha, Pixels){
+const RegisterTexture = function(ID, W, H, Pixels, Alpha){
+    if(!W){ W = 0 }
+    if(!H){ H = 0 }
+    if(!Pixels){ Pixels = [] }
+
     try{
-        const Cache = GW2.Resource.Textures.__Cache
+        if(GW2.Resource.Texture.Textures[ID]){ throw new Error("Такая текстура уже зарегистрирована!") }
 
-        if(Cache.ID[ID] !== -1){
-            throw new Error("Текстура с таким ID уже существует!")
-        }
+        if(W <= 0 || H <= 0){ throw new Error("Ширина или высота не может быть <= 0!") }
 
-        if(Cache.Count >= GW2_MaxTextures){
-            throw new Error(`Достигнут лимит текстур ${GW2_MaxTextures}!`)
-        }
+        if(Alpha === undefined){ throw new Error("Не указано, текстура имеет Alpha или нет!") }
 
-        const Channels = Alpha ? 4 : 3
-        const PixelCount = Width * Height
-        const DataCount = PixelCount * Channels
-
-        if(__CurrentOffset + DataCount > GW2_MaxTexturePixels){
-            throw new Error(`Достигнут лимит по кол-во пикселей ${GW2_MaxTexturePixels}!`)
-        }
-
-        if(!Pixels || Pixels.length < PixelCount){
-            throw new Error(`Недостаточно пикселей для текстуры! Нужно: ${PixelCount}, а доступно ${Pixels.length}`)
-        }
-
-        const Index = Cache.Count
-
-        Cache.ID[ID] = Index
-
-        Cache.Offset[Index] = __CurrentOffset
-        Cache.Width[Index] = Width
-        Cache.Height[Index] = Height
-        Cache.Alpha[Index] = Alpha ? 1 : 0
-
-        let WriteIndex = 0
-        for(let i = 0; i < Pixels.length; i++){
-            const PixelData = Pixels[i]
-            for(let j = 0; j < Channels; j++){
-                Cache.Pixels[__CurrentOffset + WriteIndex] = PixelData[j]
-                WriteIndex++
+        const ExpectedCount = W * H
+        if(Pixels.length < ExpectedCount){
+            console.warn(`У текстуры [${ID}] не хватает пикселей [${Pixels.length} / ${ExpectedCount}]!`)
+            for(let i = 0; i < ExpectedCount - Pixels.length; i++){
+                Pixels.push(Alpha ? 0xFF00FFFF : 0xFF00FF)
             }
+        }else if(Pixels.length > ExpectedCount){
+            console.warn(`У текстуры [${ID}] лишка пикселей [${Pixels.length} / ${ExpectedCount}]!`)
+            Pixels = Pixels.slice(0, ExpectedCount)
         }
 
-        GW2.Resource.Textures.Textures[ID] = {
-            ID: ID,
-            Width: Width,
-            Height: Height,
-            Alpha: Alpha,
-            Pixels: Pixels,
-            Channels: Channels,
-            PixelCount: PixelCount,
-            DataCount: DataCount,
-            Index: Index,
-            Offset: __CurrentOffset
+        const Texture = {
+            ID    : ID,
+            W     : W,
+            H     : H,
+            Pixels: new Uint32Array(Pixels),
+            Alpha : Alpha
         }
 
-        Cache.Count++
-        __CurrentOffset += DataCount
+        GW2.Resource.Texture.Textures[ID] = Texture
+
+        GW2.Resource.Texture.Total++
+
+        if(ID === GW2_Texture.Missing){ GW2.Resource.Texture.Missing = Texture }
+
+        console.log(`Зарегистрировано: ${ID}, ${W}x${H}, ${Pixels.length}, ${Alpha}`)
     }catch(e){
-        throw new Error(`Не получилось зарегистрировать текстуру [${ID}]!\nШирина: ${Width}\nВысота: ${Height}\nAlpha: ${Alpha}\nКол-во пикселей: ${Pixels.length}\nMessage: ${e.message}`)
+        throw new Error(`Произошла ошибка при регистрации текстуры [${ID}]!\nШирина: ${W}\nВысота: ${H}\nКол-во пикселей: ${Pixels.length}\n${e.message}`)
+    }
+}
+
+const RegisterTexture_Bytes = async function(ID, String) {
+    try{
+        const binary = atob(String);
+        const bytesArr = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytesArr[i] = binary.charCodeAt(i);
+        }
+
+        const stream = new Blob([bytesArr]).stream();
+        const decompressedStream = stream.pipeThrough(new DecompressionStream("gzip"));
+        const response = new Response(decompressedStream);
+        const buffer = await response.arrayBuffer();
+        const data = new Uint8Array(buffer);
+
+        const W = (data[0] << 8) | data[1];
+        const H = (data[2] << 8) | data[3];
+        const AlphaType = data[4];
+
+        const Pixels = [];
+        let offset = 5;
+
+        const pixelCount = W * H;
+        for (let i = 0; i < pixelCount; i++) {
+            const r = data[offset++];
+            const g = data[offset++];
+            const b = data[offset++];
+            const a = data[offset++];
+
+            const color = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
+            Pixels.push(color);
+        }
+
+        RegisterTexture(ID, W, H, Pixels, AlphaType);
+
+    }catch (e){
+        throw new Error(`Произошла ошибка при парсинге байтов текстуры [${ID}]!\n${e.message}`);
     }
 }
 
 // ----------------------------------------------------------------------
-// Регистрация текстур
 
-RegisterTexture(0, 2, 2, false, [
-    [1, 0, 0], [0, 1, 0],
-    [0, 0, 1], [1, 1, 0]
-])
+const GW2_Texture = {
+    Missing: -1,
+    Test: 0
+}
+
+console.group("Регистрация")
+
+const RegisterTextures = async function(){
+    RegisterTexture(GW2_Texture.Missing, 2, 2, [
+        0x000000, 0xFF00FF,
+        0xFF00FF, 0x000000
+    ], GW2_Alpha.None)
+
+    RegisterTexture(GW2_Texture.Test, 4, 4, [
+        0x000000FF, 0x00000000, 0x00000000, 0x000000FF,
+        0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x000000FF, 0x00000000, 0x00000000, 0x000000FF,
+        0x00000000, 0x000000FF, 0x000000FF, 0x00000000
+    ], GW2_Alpha.Cutout)
+}
+RegisterTextures() // НАДО ПЕРЕДЕЛАТЬ СЛЕГКА
+
+console.groupEnd()
 
 // ----------------------------------------------------------------------
 
-console.log(`Зарегистрировано текстур [${GW2.Resource.Textures.__Cache.Count}/${GW2_MaxTextures}], пикселей занято: ${((__CurrentOffset / GW2_MaxTexturePixels) * 100).toFixed(2)}%`)
+console.group("Текстуры")
+
+console.log(`Загружено: ${GW2.Resource.Texture.Total}`)
+
+console.groupEnd()

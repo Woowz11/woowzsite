@@ -1,6 +1,7 @@
 const GW2 = {
     Info: {
-      Name: "GOLU World 2"
+        Name   : "GOLU World 2",
+        Version: "0.0.1"
     },
 
     Render: {
@@ -23,7 +24,21 @@ const GW2 = {
 
         /* Выводит пиксели на экран */
         Present: function(){
-            GW2.Render.Context.putImageData(GW2.Render.Buffer, 0, 0)
+            const Pixels = this.Pixels
+            const Data = this.Buffer.data
+            const L = Pixels.length
+
+            for(let i = 0; i < L; i++){
+                const Color = Pixels[i]
+                const I4 = i * 4
+
+                Data[I4    ] = (Color >> 16) & 0xFF
+                Data[I4 + 1] = (Color >> 8 ) & 0xFF
+                Data[I4 + 2] =  Color        & 0xFF
+                Data[I4 + 3] = 255
+            }
+
+            this.Context.putImageData(this.Buffer, 0, 0)
         }
     },
 
@@ -46,6 +61,8 @@ const GW2 = {
 
     }
 }
+
+console.group(`Инициализация игры ${GW2.Info.Version}`)
 
 let __CreateSite = function(){
     console.log("Создание сайта...")
@@ -96,7 +113,7 @@ let __ResizeCanvas = function(){
     GW2.Render.Canvas.height = GW2.Render.H
 
     GW2.Render.Buffer = GW2.Render.Context.createImageData(GW2.Render.W, GW2.Render.H)
-    GW2.Render.Pixels = new Uint32Array(GW2.Render.Buffer.data.buffer)
+    GW2.Render.Pixels = new Uint32Array(GW2.Render.W * GW2.Render.H)
 
     __RenderElement.style.transform = `scale(${GW2.Render.Scale})`
 }
@@ -147,22 +164,10 @@ let __Notify = (function() {
         DIV.textContent = `⚠️ ${Message}`;
         Container.appendChild(DIV);
 
-        if(!document.getElementById("notify-style")){
-            const Style = document.createElement("style");
-            Style.id = "notify-style";
-            Style.textContent = `
-                @keyframes slideDown{
-                    from { opacity: 0; transform: translateY(-20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `;
-            document.head.appendChild(Style);
-        }
-
         TimeOut = setTimeout(() => {
-            DIV.style.opacity = '0';
-            DIV.style.transition = 'opacity 0.3s';
-            setTimeout(() => Container.innerHTML = '', 300);
+            DIV.style.opacity    = "0";
+            DIV.style.transition = "opacity 0.3s";
+            setTimeout(() => Container.innerHTML = "", 300);
             TimeOut = null;
         }, Duration);
     };

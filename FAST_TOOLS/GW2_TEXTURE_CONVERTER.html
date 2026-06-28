@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GW2 Texture Studio</title>
+    <style>
+        :root {
+            --bg: #0f0f12;
+            --card: #18181b;
+            --accent: #22d3ee;
+            --accent-hover: #0891b2;
+            --text: #f4f4f5;
+            --text-dim: #a1a1aa;
+            --border: #27272a;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); }
+
+        main {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        section {
+            flex: 1;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: auto;
+            background-image:
+                    linear-gradient(45deg, #111 25%, transparent 25%),
+                    linear-gradient(-45deg, #111 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #111 75%),
+                    linear-gradient(-45deg, transparent 75%, #111 75%);
+            background-size: 20px 20px;
+        }
+
+        canvas { image-rendering: pixelated; max-width: 100%; }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            background: var(--bg);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .info-panel b { color: var(--accent); }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #10b981;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] { display: none; }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        .btn-alt { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+
+        .column-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>GW2 TEXTURE COMPRESSOR <small style="font-size: 0.6rem; vertical-align: middle; opacity: 0.5;">v2.0 GZIP</small></h1>
+</header>
+
+<main>
+    <!-- ЛЕВАЯ ПАНЕЛЬ: ЭНКОДЕР -->
+    <section>
+        <div class="column-title">Кодирование (PNG → String)</div>
+        <label class="btn" for="up">ВЫБРАТЬ PNG</label>
+        <input type="file" id="up" accept="image/png">
+
+        <div class="canvas-container">
+            <canvas id="can_up"></canvas>
+        </div>
+
+        <div class="info-panel" id="info_up">
+            <span>Размер: <b>0x0</b></span>
+            <span>Alpha: <b>None</b></span>
+            <span>Вес: <b>0 b</b></span>
+        </div>
+
+        <textarea id="out_str" readonly placeholder="Тут появится сжатая строка..."></textarea>
+        <button class="btn btn-alt" onclick="copy()">КОПИРОВАТЬ РЕЗУЛЬТАТ</button>
+    </section>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ: ДЕКОДЕР -->
+    <section>
+        <div class="column-title">Декодирование (String → Preview)</div>
+        <textarea id="in_str" placeholder="Вставьте сжатую строку сюда..."></textarea>
+        <button class="btn" onclick="decompress()">ДЕКОДИРОВАТЬ</button>
+
+        <div class="canvas-container">
+            <canvas id="can_down"></canvas>
+        </div>
+
+        <div class="info-panel" id="info_down">
+            <span>Размер: <b>0x0</b></span>
+            <span>Alpha: <b>None</b></span>
+        </div>
+    </section>
+</main>
+
+<script>
+    const GW2_Alpha = { 0: "None", 1: "Cutout", 2: "Transparent" };
+
+    // Сжатие данных (GZIP)
+    async function compress(data) {
+        const stream = new Blob([data]).stream();
+        const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
+        const response = new Response(compressedStream);
+        const buffer = await response.arrayBuffer();
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    }
+
+    // Распаковка данных (GZIP)
+    async function decompressData(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        const stream = new Blob([bytes]).stream();
+        const decompressedStream = stream.pipeThrough(new DecompressionStream("gzip"));
+        const response = new Response(decompressedStream);
+        const buffer = await response.arrayBuffer();
+        return new Uint8Array(buffer);
+    }
+
+    // PNG в СТРОКУ
+    document.getElementById('up').onchange = function(e) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = async function() {
+                const cvs = document.getElementById('can_up');
+                const ctx = cvs.getContext('2d');
+                cvs.width = img.width; cvs.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                const imgData = ctx.getImageData(0, 0, img.width, img.height).data;
+
+                let alpha = 0;
+                for(let i=3; i<imgData.length; i+=4) {
+                    if(imgData[i] < 255) {
+                        alpha = Math.max(alpha, imgData[i] === 0 ? 1 : 2);
+                    }
+                }
+
+                const raw = new Uint8Array(5 + imgData.length);
+                raw[0] = (img.width >> 8) & 0xFF;
+                raw[1] = img.width & 0xFF;
+                raw[2] = (img.height >> 8) & 0xFF;
+                raw[3] = img.height & 0xFF;
+                raw[4] = alpha;
+                raw.set(imgData, 5);
+
+                const compressedBase64 = await compress(raw);
+                document.getElementById('out_str').value = compressedBase64;
+
+                document.getElementById('info_up').innerHTML = `
+                    <span>Размер: <b>${img.width}x${img.height}</b></span>
+                    <span>Alpha: <b>${GW2_Alpha[alpha]}</b></span>
+                    <span>Вес: <b>${compressedBase64.length} chars</b></span>
+                `;
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    // СТРОКА в PNG
+    async function decompress() {
+        try {
+            const str = document.getElementById('in_str').value.trim();
+            const bytes = await decompressData(str);
+
+            const w = (bytes[0] << 8) | bytes[1];
+            const h = (bytes[2] << 8) | bytes[3];
+            const alpha = bytes[4];
+
+            const cvs = document.getElementById('can_down');
+            const ctx = cvs.getContext('2d');
+            cvs.width = w; cvs.height = h;
+
+            const imgData = ctx.createImageData(w, h);
+            imgData.data.set(bytes.slice(5));
+            ctx.putImageData(imgData, 0, 0);
+
+            document.getElementById('info_down').innerHTML = `
+                <span>Размер: <b>${w}x${h}</b></span>
+                <span>Alpha: <b>${GW2_Alpha[alpha]}</b></span>
+            `;
+        } catch (e) {
+            alert("Ошибка: Неверный формат строки или данных.");
+        }
+    }
+
+    function copy() {
+        const area = document.getElementById('out_str');
+        area.select();
+        document.execCommand('copy');
+    }
+</script>
+
+</body>
+</html>

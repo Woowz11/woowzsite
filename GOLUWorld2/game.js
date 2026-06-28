@@ -52,9 +52,10 @@ const StartGame = function(){
                 __GameAccumulator -= GAME_STEP
             }
 
-            GlobalRender(GW2.Render.DT)
-
             Update_Render(GW2.Render.DT)
+
+            GlobalRender(GW2.Render.DT)
+            GW2.Render.Present()
 
             requestAnimationFrame(Render)
         }
@@ -67,4 +68,5 @@ const StartGame = function(){
     SetScene(GW2_Scene.Menu)
 }
 
+console.groupEnd() // Конец инициализации
 StartGame()
