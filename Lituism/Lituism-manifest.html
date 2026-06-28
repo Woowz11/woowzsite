@@ -59,6 +59,11 @@ html{
 *::selection{
 	background: red;
 	color: white;
+	text-shadow:
+		0 0 10px red,
+		0 0 20px red,
+		0 0 40px red,
+		0 0 80px red;
 }
 
 body{
@@ -545,7 +550,7 @@ function OPEN_PAGE(id = ""){
 	var page = PAGES[id];
 	var content = null;
 	var title = null;
-	if(!page){ content = SITE_BASE(`<font style="color:white;"><center><b>НУБ!!! НАУЧИСЬ ИГРАТЬ!!! ID "${id}" НЕ НАЙДЕНО!</b></center></font>`); title = "???"; }else{
+	if(!page){ content = SITE_BASE(`<font style="color:white;"><center><b class="glitch" style="font-size: 10em">FAILED LOAD WEBSITE FROM ID "${id}"!</b></center></font>`); title = "???"; }else{
 		var content = page["c"];
 		var title   = page["t"];
 	}
@@ -561,14 +566,30 @@ function OPEN_PAGE(id = ""){
 	
 	function prikol(){
 		var bgs = [
-			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png"
+			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png","bg9.png","bg10.png"
 		];
 		var bg = bgs[Math.floor(Math.random() * bgs.length)];
 		document.getElementById("BODY").style.backgroundImage = `url("${bg}")`;
 	}
 	prikol();
-	
-	page["f"]();
+
+	if(page && page["f"]){ page["f"]() }
+
+
+
+	var GOLU_HEAD = document.getElementById("lit_head");
+	GOLU_HEAD.addEventListener("mouseover", function(){
+		var bodies = document.querySelectorAll(`[id="lit_body"]`);
+		bodies.forEach(function(b){
+			b.classList.add("invert");
+		})
+	});
+	GOLU_HEAD.addEventListener("mouseout", function(){
+		var bodies = document.querySelectorAll(`[id="lit_body"]`);
+		bodies.forEach(function(b){
+			b.classList.remove("invert");
+		})
+	});
 
 
 
@@ -588,8 +609,8 @@ function OPEN_PAGE(id = ""){
 
 		let trail = [];
 		let cursor = ""
-		let cursorX = window.innerWidth / 2;
-		let cursorY = window.innerHeight / 2;
+		let cursorX = -100;
+		let cursorY = -100;
 		let positions = [];
 
 		var CACHE = document.createElement("div")
@@ -741,7 +762,7 @@ function ELEMENT_TITLE(){
 		var LIT_BODY_PART = `<img id="lit_body" src="${LIT_BODY_SRC}" style="position: absolute; animation: spin ${i+1}s linear infinite; animation-name: spin; opacity: 0.5;">`;
 		LIT_BODY += LIT_BODY_PART;
 	}
-	return `${LIT_BODY}<title_img id="lit_head"></title_img><title_text></title_text>`;
+	return `${LIT_BODY}<title_img id="lit_head" onclick="OPEN_PAGE('golu');"></title_img><title_text></title_text>`;
 }
 
 function ELEMENT_WEBINFO(){
@@ -756,9 +777,9 @@ ${ELEMENT_WEBINFO()}
 </top_banner_top>
 <top_banner_bottom>
 
-<button onclick="OPEN_PAGE('popo');" class="category_button">&lt;@&gt;</button>
+<button onclick="OPEN_PAGE('not-exist');" class="category_button">&lt;@&gt;</button>
 <button onclick="OPEN_PAGE();" class="category_button">{MAIN PAGE}</button>
-<button onclick="OPEN_PAGE('artsreal');" class="category_button">ИСКУССТВО</button>
+<button onclick="OPEN_PAGE('artsreal');" class="category_button">ИСКУССТВО 🖼</button>
 <button onclick="OPEN_RANDOM_PAGE();" class="category_button">RANDOM_PAGE()</button>
 <button onclick="OPEN_PAGE('database');" class="category_button">DATABASE</button>
 
@@ -777,32 +798,16 @@ const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
 const PREPAGES = [];
 function ELEMENT_SITE(content, func = function(){}, newlines = true, runafteropen = function(){}){
-	PREPAGES.push([content, func, newlines, PREPAGES.length, function(){
-		var title = document.getElementById("lit_head");
-		title.addEventListener("mouseover", function(){
-			var bodies = document.querySelectorAll(`[id="lit_body"]`);
-			bodies.forEach(function(b){
-				b.classList.add("invert");
-			})
-		});
-		title.addEventListener("mouseout", function(){
-			var bodies = document.querySelectorAll(`[id="lit_body"]`);
-			bodies.forEach(function(b){
-				b.classList.remove("invert");
-			})
-		});
-		
-		runafteropen();
-	}]);
+	PREPAGES.push([content, func, newlines, PREPAGES.length, runafteropen]);
 	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
 }
 
 var PAGE_MAINPAGE_CONTENT = ELEMENT_SITE(
-	`<img src="../source/specialforrandomsite/c6j0PNI.gif" style="filter: contrast(100)">СРАНЫЙ СПАНЧ ХУЕСОСИК) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ`
+	`<img src="../source/specialforrandomsite/semen_dead_body.gif" style="filter: contrast(10);"><b class="glitch3" style="font-size: 20em;">СРАНЫЙ СПАНЧ) ЭТОТ САЙТ СОЗДАН ШОБ ВЫ ЗНАЛИ, ЧТО ОН В РАЗРАБОТКЕ, МОЛИТЕСЬ КОМУ НИБУДЬ, ВЫЙДИТЕ</b>`
 );
 
 var PAGE_DATABASE = ELEMENT_SITE(
-`<center><div style="width: 80%;">
+`<center><div>
 	<h1 class="glitch2" >LIT. DATA-BASE (<text id="all-list-count">?</text>)</h1>
 	Приложения (процессы) GOLU:
 	<br>
@@ -819,7 +824,7 @@ var PAGE_DATABASE = ELEMENT_SITE(
 	bg.style.background = "linear-gradient(0deg,rgba(255, 0, 0, 1) 0%, rgba(128, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 50%, rgba(128, 0, 0, 1) 75%, rgba(255, 0, 0, 1) 100%)";
 	bg.style.textShadow = "0 0 5px white, 0 0 5px white, 0 0 5px white";
 	bg.style.color = "white";
-	bg.style.width = "50%";
+	bg.style.width = "25%";
 	
 	var AllListResult = "";
 	var Count = 0
@@ -1581,6 +1586,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     letter-spacing: 1px;
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 1;
 }
 
 .lituism-card:hover .lituism-card-hover-hint {
@@ -1788,41 +1794,19 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     letter-spacing: 1px;
 }
 
-/* ===== КНОПКА ОБНОВЛЕНИЯ ===== */
-.lituism-reload-btn {
-    display: block;
-    margin: 1.5rem auto 0;
-    padding: 0.7rem 3rem;
-    background: transparent;
-    border: 2px solid #ff0044;
-    border-radius: 40px 8px 40px 8px;
-    color: #ff0044;
-    font-weight: 700;
-    font-size: 1.1rem;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    font-family: 'Courier New', monospace;
-    text-shadow: 0 0 20px rgba(255, 0, 68, 0.3);
-    box-shadow: 0 0 30px rgba(255, 0, 68, 0.05);
-}
-
-.lituism-reload-btn:hover {
-    background: #ff0044;
-    color: #000;
-    box-shadow: 0 0 60px rgba(255, 0, 68, 0.3);
-}
-
 /* ===== СЧЁТЧИК ===== */
 .lituism-counter {
     text-align: center;
-    color: #884444;
+    color: red;
     font-size: 0.75rem;
     letter-spacing: 4px;
     font-family: 'Courier New', monospace;
     margin-top: 0.5rem;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+    text-shadow:
+		0 0 10px red,
+		0 0 20px red,
+		0 0 40px red,
+		0 0 80px red;
 }
 
 /* ===== ГЛЮЧНЫЙ ЭФФЕКТ ===== */
@@ -1893,19 +1877,20 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(10px);
-    padding: 15px 25px;
+    padding: 10px 15px; /* Уменьшаем паддинг */
     border-radius: 12px 4px 12px 4px;
     border: 2px solid #ff0044;
     box-shadow: 0 0 40px rgba(255, 0, 68, 0.2);
     z-index: 100000;
     display: none;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 6px; /* Уменьшаем отступ между группами */
+    flex-wrap: nowrap; /* ЗАПРЕЩАЕМ ПЕРЕНОС НА СЛЕДУЮЩУЮ СТРОКУ */
     justify-content: center;
-    max-width: 90vw;
+    max-width: 98vw; /* Чуть шире */
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
+    overflow-x: auto; /* Добавляем скролл если не влезают */
 }
 
 .lituism-filter-controls.visible {
@@ -1918,21 +1903,23 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    min-width: 80px;
+    gap: 4px; /* Минимальный отступ */
+    min-width: auto; /* Убираем минимальную ширину */
+    flex-shrink: 0; /* Запрещаем сжиматься */
 }
 
 .lituism-filter-controls label {
     color: #ff4466;
-    font-size: 0.6rem;
+    font-size: 0.5rem; /* Уменьшаем текст */
     font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     text-shadow: 0 0 10px rgba(255, 0, 68, 0.3);
+    white-space: nowrap; /* Текст в одну строку */
 }
 
 .lituism-filter-controls input[type="range"] {
-    width: 80px;
+    width: 120px; /* УВЕЛИЧИВАЕМ ШИРИНУ */
     height: 4px;
     -webkit-appearance: none;
     appearance: none;
@@ -1945,8 +1932,8 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 .lituism-filter-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 14px; /* Чуть больше ползунок */
+    height: 14px;
     border-radius: 50%;
     background: #ff0044;
     cursor: pointer;
@@ -1955,8 +1942,8 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 }
 
 .lituism-filter-controls input[type="range"]::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: #ff0044;
     cursor: pointer;
@@ -1965,7 +1952,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 
 .lituism-filter-controls .filter-value {
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.5rem;
+    font-size: 0.45rem; /* Уменьшаем цифры */
     font-family: 'Courier New', monospace;
     min-width: 20px;
     text-align: center;
@@ -1975,9 +1962,9 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     background: none;
     border: 1px solid rgba(255, 0, 68, 0.3);
     color: #ff0044;
-    padding: 2px 8px;
+    padding: 1px 6px;
     border-radius: 4px;
-    font-size: 0.5rem;
+    font-size: 0.45rem;
     font-family: 'Courier New', monospace;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1992,14 +1979,15 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     background: #ff0044;
     border: none;
     color: #000;
-    padding: 4px 16px;
+    padding: 3px 12px;
     border-radius: 20px;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     font-family: 'Courier New', monospace;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     letter-spacing: 1px;
+    white-space: nowrap;
 }
 
 .lituism-filter-controls .filter-reset-all:hover {
@@ -2007,18 +1995,136 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
 }
 
+/* Скрываем скроллбар но оставляем возможность скролла */
+.lituism-filter-controls::-webkit-scrollbar {
+    height: 3px;
+}
+
+.lituism-filter-controls::-webkit-scrollbar-track {
+    background: rgba(255, 0, 68, 0.1);
+    border-radius: 2px;
+}
+
+.lituism-filter-controls::-webkit-scrollbar-thumb {
+    background: #ff0044;
+    border-radius: 2px;
+}
+
+@media (max-width: 1200px) {
+    .lituism-filter-controls input[type="range"] {
+        width: 100px; /* Чуть уже на средних экранах */
+    }
+}
+
+@media (max-width: 992px) {
+    .lituism-filter-controls input[type="range"] {
+        width: 80px;
+    }
+    .lituism-filter-controls label {
+        font-size: 0.45rem;
+    }
+}
+
 @media (max-width: 768px) {
     .lituism-filter-controls {
         bottom: 70px;
-        padding: 10px 15px;
-        gap: 6px;
-        max-width: 95vw;
+        padding: 8px 10px;
+        gap: 4px;
+        max-width: 98vw;
+        flex-wrap: nowrap; /* Оставляем в одну строку */
     }
     .lituism-filter-controls input[type="range"] {
-        width: 60px;
+        width: 65px;
     }
-    .lituism-filter-controls .filter-group {
-        min-width: 60px;
+    .lituism-filter-controls label {
+        font-size: 0.4rem;
+    }
+    .lituism-filter-controls .filter-value {
+        font-size: 0.4rem;
+    }
+    .lituism-filter-controls .filter-reset-all {
+        font-size: 0.4rem;
+        padding: 2px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lituism-filter-controls input[type="range"] {
+        width: 50px;
+    }
+    .lituism-filter-controls label {
+        font-size: 0.35rem;
+        letter-spacing: 0px;
+    }
+    .lituism-filter-controls .filter-value {
+        font-size: 0.35rem;
+        min-width: 15px;
+    }
+}
+
+/* ===== СОРТИРОВОЧНАЯ ПАНЕЛЬ ===== */
+.lituism-sort-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 0, 68, 0.05);
+    border-bottom: 1px solid rgba(255, 0, 68, 0.15);
+    border-top: 1px solid rgba(255, 0, 68, 0.15);
+}
+
+.lituism-sort-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 0, 68, 0.25);
+    color: #ff4466;
+    padding: 0.4rem 1.2rem;
+    border-radius: 20px 4px 20px 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    transition: all 0.2s ease;
+    text-shadow: 0 0 10px rgba(255, 0, 68, 0.1);
+}
+
+.lituism-sort-btn:hover {
+    border-color: #ff0044;
+    background: rgba(255, 0, 68, 0.1);
+    box-shadow: 0 0 20px rgba(255, 0, 68, 0.1);
+}
+
+.lituism-sort-btn.active {
+    border-color: #ff0044;
+    background: rgba(255, 0, 68, 0.2);
+    box-shadow: 0 0 30px rgba(255, 0, 68, 0.15);
+    color: #ff0044;
+}
+
+.lituism-sort-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 0, 68, 0.25);
+    color: #ff4466;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px 4px 20px 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    cursor: url("../source/lit_cur_pointer.cur"), auto;
+    transition: all 0.2s ease;
+}
+
+.lituism-sort-toggle:hover {
+    border-color: #ff0044;
+    background: rgba(255, 0, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+    .lituism-sort-btn {
+        font-size: 0.6rem;
+        padding: 0.3rem 0.8rem;
+        letter-spacing: 1px;
     }
 }
 </style>
@@ -2034,7 +2140,14 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 
     <div class="lituism-counter" id="lituismCounter">// ЗАГРУЗКА АРТЕФАКТОВ... //</div>
 
-    <button class="lituism-reload-btn" id="lituismReloadBtn">⟳ ПЕРЕЗАПУСК</button>
+    <!-- ===== КНОПКИ СОРТИРОВКИ ===== -->
+	<div class="lituism-sort-bar">
+		<button class="lituism-sort-btn" data-sort="default" data-label="🔀 RANDOM">🔀 RANDOM</button>
+		<button class="lituism-sort-btn" data-sort="title" data-label="📛 NAME">📛 NAME</button>
+		<button class="lituism-sort-btn" data-sort="author" data-label="✍️ AUTHOR">✍️ AUTHOR</button>
+		<button class="lituism-sort-btn" data-sort="date" data-label="📅 DATE">📅 DATE</button>
+		<button class="lituism-sort-toggle" id="lituismSortToggle">↑↓</button>
+	</div>
 </div>
 
 <!-- МОДАЛЬНОЕ ОКНО -->
@@ -2082,14 +2195,19 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     </div>
     <div class="filter-group">
         <label>Scale X</label>
-        <input type="range" id="filterScaleX" min="10" max="500" value="100">
+        <input type="range" id="filterScaleX" min="-500" max="500" value="100">
         <span class="filter-value" id="filterScaleXVal">100%</span>
     </div>
     <div class="filter-group">
         <label>Scale Y</label>
-        <input type="range" id="filterScaleY" min="10" max="500" value="100">
+        <input type="range" id="filterScaleY" min="-500" max="500" value="100">
         <span class="filter-value" id="filterScaleYVal">100%</span>
     </div>
+    <div class="filter-group">
+		<label>Поворот</label>
+		<input type="range" id="filterRotate" min="-180" max="180" value="0">
+		<span class="filter-value" id="filterRotateVal">0°</span>
+	</div>
     <div class="filter-group">
         <button class="filter-reset-all" id="filterResetAll">СБРОС</button>
     </div>
@@ -2221,18 +2339,6 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
             .lituism-card-date {
                 border-top-color: ${design.color3} !important;
             }
-            .lituism-reload-btn {
-                border-color: ${design.color1} !important;
-                color: ${design.color1} !important;
-                text-shadow: 0 0 20px ${design.glowColor} !important;
-            }
-            .lituism-reload-btn:hover {
-                background: ${design.color1} !important;
-                color: #000 !important;
-            }
-            .lituism-counter {
-                color: ${design.color3} !important;
-            }
             .lituism-modal-content {
                 border-color: ${design.color1} !important;
                 box-shadow: 0 0 60px ${design.glowColor} !important;
@@ -2271,7 +2377,10 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 			// ===================================================================
 			//  РЕНДЕР ГАЛЕРЕИ
 			// ===================================================================
-			function GALLERY_render() {
+			let GALLERY_currentSort = 'default'; // 'default', 'title', 'author', 'date'
+			let GALLERY_sortAsc = true;
+
+			function GALLERY_renderWithSort() {
 				const grid = document.getElementById('lituismGrid');
 				const counter = document.getElementById('lituismCounter');
 				if (!grid) return;
@@ -2281,59 +2390,120 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 					return;
 				}
 
-				const shuffled = GALLERY_shuffleArray(TRUE_LIT_ARTS_COLLECTION);
-				const total = shuffled.length;
+				let items = [...TRUE_LIT_ARTS_COLLECTION];
 
+				// СОРТИРОВКА
+				if (GALLERY_currentSort !== 'default') {
+					items.sort((a, b) => {
+						let valA, valB;
+						switch(GALLERY_currentSort) {
+							case 'title':
+								valA = a.NAME.toLowerCase();
+								valB = b.NAME.toLowerCase();
+								break;
+							case 'author':
+								valA = a.AUTHOR.toLowerCase();
+								valB = b.AUTHOR.toLowerCase();
+								break;
+							case 'date':
+							function parseDateWeight(str) {
+								if (!str || str.startsWith('????')) {
+									return { date: new Date(0), unknown: true };
+								}
+
+								let d = new Date(str);
+								if (!isNaN(d.getTime())) {
+									return { date: d, unknown: false };
+								}
+
+								let match = str.match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/);
+								if (match) {
+									let year = parseInt(match[1]);
+									let month = parseInt(match[2]) - 1;
+									let day = parseInt(match[3]);
+									if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+										return { date: new Date(year, month, day), unknown: false };
+									}
+								}
+
+								match = str.match(/(\d{1,2})[.\-](\d{1,2})[.\-](\d{4})/);
+								if (match) {
+									let day = parseInt(match[1]);
+									let month = parseInt(match[2]) - 1;
+									let year = parseInt(match[3]);
+									if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+										return { date: new Date(year, month, day), unknown: false };
+									}
+								}
+
+								return { date: new Date(0), unknown: true };
+							}
+
+								const aData = parseDateWeight(a.DATE);
+								const bData = parseDateWeight(b.DATE);
+
+								if (aData.unknown !== bData.unknown) {
+									return aData.unknown ? 1 : -1;
+								}
+
+								valA = aData.date;
+								valB = bData.date;
+								break;
+							default:
+								return 0;
+						}
+						if (valA < valB) return GALLERY_sortAsc ? -1 : 1;
+						if (valA > valB) return GALLERY_sortAsc ? 1 : -1;
+						return 0;
+					});
+				} else {
+					// DEFAULT — ПЕРЕМЕШИВАЕМ
+					items = GALLERY_shuffleArray(items);
+				}
+
+				const total = items.length;
 				if (counter) {
-					counter.textContent = `// АРТЕФАКТОВ В РЕЕСТРЕ: ${total} //`;
+					const sortLabel = GALLERY_currentSort === 'default' ? '🔀 RANDOM' :
+							GALLERY_currentSort.toUpperCase() + (GALLERY_sortAsc ? ' ↓' : ' ↑');
+					counter.textContent = `// АРТЕФАКТОВ: ${total} // СОРТИРОВКА: ${sortLabel} //`;
 				}
 
 				let html = '';
-				for (const item of shuffled) {
+				for (const item of items) {
 					const rot = GALLERY_randomRange(-4, 4);
 					const scale = GALLERY_randomRange(0.95, 1.05);
 
-					// ===== ГЕНЕРИРУЕМ СЛУЧАЙНЫЙ ГРАДИЕНТ ДЛЯ КАЖДОЙ КАРТОЧКИ =====
-					const colors = [
-						"#ff0000",
-						"#3bff00",
-						"#ff00f2",
-						"#ffd800",
-						"#00ffec",
-						"#0015ff",
-						"#ff7400",
-					];
+					const colors = ["#ff0000", "#3bff00", "#ff00f2", "#ffd800", "#00ffec", "#0015ff", "#ff7400"];
 					const shuffledColors = GALLERY_shuffleArray([...colors]);
 					const gradient = `linear-gradient(135deg, ${shuffledColors.slice(0, 4).join(', ')})`;
 					const animDuration = Math.random() * 1;
 
 					html += `
-                <div class="lituism-card"
-                     style="transform: skew(${GALLERY_currentDesign ? GALLERY_currentDesign.skewX : 0}deg, ${GALLERY_currentDesign ? GALLERY_currentDesign.skewY : 0}deg) rotate(${rot}deg) scale(${scale});"
-                     data-url="${item.SOURCE}"
-                     data-title="${item.NAME}"
-                     data-author="${item.AUTHOR}"
-                     data-date="${item.DATE}">
-                    <div class="lituism-card-img-wrap" style="
-                        background: ${gradient};
-                        background-size: 400% 400%;
-                        animation: galleryGradientShift ${animDuration}s ease infinite;
-                    ">
-                        <img src="${item.SOURCE}" alt="${item.NAME}" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/Lituism/art/ERROR.png'">
-                        <span class="lituism-card-hover-hint">👁️ ПРОСМОТР</span>
-                    </div>
-                    <div class="lituism-card-info">
-                        <div class="lituism-card-title">${item.NAME}</div>
-                        <div class="lituism-card-author">✧ ${item.AUTHOR}</div>
-                        <div class="lituism-card-date">⏱ ${item.DATE}</div>
-                    </div>
+            <div class="lituism-card"
+                 style="transform: skew(${GALLERY_currentDesign ? GALLERY_currentDesign.skewX : 0}deg, ${GALLERY_currentDesign ? GALLERY_currentDesign.skewY : 0}deg) rotate(${rot}deg) scale(${scale});"
+                 data-url="${item.SOURCE}"
+                 data-title="${item.NAME}"
+                 data-author="${item.AUTHOR}"
+                 data-date="${item.DATE}">
+                <div class="lituism-card-img-wrap" style="
+                    background: ${gradient};
+                    background-size: 400% 400%;
+                    animation: galleryGradientShift ${animDuration}s ease infinite;
+                ">
+                    <img src="${item.SOURCE}" alt="${item.NAME}" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/source/error-image.png'">
+                    <span class="lituism-card-hover-hint">👁️ ПРОСМОТР</span>
                 </div>
-            `;
+                <div class="lituism-card-info">
+                    <div class="lituism-card-title">${item.NAME}</div>
+                    <div class="lituism-card-author">✧ ${item.AUTHOR}</div>
+                    <div class="lituism-card-date">⏱ ${item.DATE}</div>
+                </div>
+            </div>
+        `;
 				}
 
 				grid.innerHTML = html;
 
-				// Обработчики кликов
 				const cards = grid.querySelectorAll('.lituism-card');
 				cards.forEach(card => {
 					card.onclick = function() {
@@ -2344,6 +2514,10 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 						GALLERY_openModal(url, title, author, date);
 					};
 				});
+			}
+
+			function GALLERY_render() {
+				GALLERY_renderWithSort();
 			}
 
 			// ===================================================================
@@ -2646,13 +2820,11 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 
 				wrapper.classList.remove('zoomed');
 
-				// Скрываем контроллеры
 				if (controls) {
 					controls.classList.remove('visible');
 				}
 
 				if (img) {
-					// Полностью сбрасываем все стили картинки
 					img.style.transform = '';
 					img.style.filter = '';
 					img.style.maxWidth = '85vw';
@@ -2680,6 +2852,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				document.getElementById('filterBlur').value = 0;
 				document.getElementById('filterScaleX').value = 100;
 				document.getElementById('filterScaleY').value = 100;
+				document.getElementById('filterRotate').value = 0; // НОВОЕ
 
 				// Обновляем отображение значений
 				const valBrightness = document.getElementById('filterBrightnessVal');
@@ -2689,6 +2862,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				const valBlur = document.getElementById('filterBlurVal');
 				const valScaleX = document.getElementById('filterScaleXVal');
 				const valScaleY = document.getElementById('filterScaleYVal');
+				const valRotate = document.getElementById('filterRotateVal'); // НОВОЕ
 
 				if (valBrightness) valBrightness.textContent = '100%';
 				if (valSaturate) valSaturate.textContent = '100%';
@@ -2697,6 +2871,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				if (valBlur) valBlur.textContent = '0px';
 				if (valScaleX) valScaleX.textContent = '100%';
 				if (valScaleY) valScaleY.textContent = '100%';
+				if (valRotate) valRotate.textContent = '0°'; // НОВОЕ
 
 				// Сбрасываем zoom и translate
 				zoomScale = 1;
@@ -2736,6 +2911,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				const blur = document.getElementById('filterBlur')?.value || 0;
 				const scaleX = document.getElementById('filterScaleX')?.value || 100;
 				const scaleY = document.getElementById('filterScaleY')?.value || 100;
+				const rotate = document.getElementById('filterRotate')?.value || 0; // НОВОЕ
 
 				// Обновляем значения на слайдерах
 				const valBrightness = document.getElementById('filterBrightnessVal');
@@ -2745,6 +2921,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				const valBlur = document.getElementById('filterBlurVal');
 				const valScaleX = document.getElementById('filterScaleXVal');
 				const valScaleY = document.getElementById('filterScaleYVal');
+				const valRotate = document.getElementById('filterRotateVal'); // НОВОЕ
 
 				if (valBrightness) valBrightness.textContent = brightness + '%';
 				if (valSaturate) valSaturate.textContent = saturate + '%';
@@ -2753,13 +2930,13 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				if (valBlur) valBlur.textContent = blur + 'px';
 				if (valScaleX) valScaleX.textContent = scaleX + '%';
 				if (valScaleY) valScaleY.textContent = scaleY + '%';
+				if (valRotate) valRotate.textContent = rotate + '°'; // НОВОЕ
 
 				// Применяем фильтры к картинке
 				img.style.filter = `brightness(${brightness}%) saturate(${saturate}%) invert(${invert}%) hue-rotate(${hue}deg) blur(${blur}px)`;
 
-				// СОХРАНЯЕМ ТЕКУЩИЕ ЗНАЧЕНИЯ SCALEX И SCALEY
-				// transform = zoom * translate + scaleX * scaleY
-				img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px) scaleX(${scaleX/100}) scaleY(${scaleY/100})`;
+				// transform = zoom * translate + scaleX * scaleY + rotate
+				img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px) scaleX(${scaleX/100}) scaleY(${scaleY/100}) rotate(${rotate}deg)`;
 			}
 
 // ===================================================================
@@ -2773,6 +2950,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				document.getElementById('filterBlur').value = 0;
 				document.getElementById('filterScaleX').value = 100;
 				document.getElementById('filterScaleY').value = 100;
+				document.getElementById('filterRotate').value = 0; // НОВОЕ
 				GALLERY_updateFilters();
 			}
 
@@ -2796,27 +2974,48 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 			// Рендер
 			GALLERY_render();
 
-			// Кнопка перетасовки
-			const reloadBtn = document.getElementById('lituismReloadBtn');
-			if (reloadBtn) {
-				reloadBtn.onclick = function() {
-					const grid = document.getElementById('lituismGrid');
-					if (grid) {
-						grid.style.transition = 'all 0.1s ease';
-						grid.style.opacity = '0.2';
-						grid.style.transform = 'scale(0.98)';
+			function GALLERY_initSort() {
+				const sortBtns = document.querySelectorAll('.lituism-sort-btn');
+				const toggleBtn = document.getElementById('lituismSortToggle');
+				const currentSortBtn = document.querySelector('.lituism-sort-btn.active');
 
-						const newDesign = GALLERY_randomDesign();
-						GALLERY_applyDesign(newDesign);
+				if (currentSortBtn) {
+					GALLERY_currentSort = currentSortBtn.dataset.sort;
+				}
 
-						setTimeout(function() {
-							GALLERY_render();
-							grid.style.opacity = '1';
-							grid.style.transform = 'scale(1)';
-						}, 150);
+				sortBtns.forEach(btn => {
+					btn.onclick = function(e) {
+						e.stopPropagation();
+						sortBtns.forEach(b => b.classList.remove('active'));
+						this.classList.add('active');
+						GALLERY_currentSort = this.dataset.sort;
+						GALLERY_sortAsc = true;
+						GALLERY_renderWithSort();
+						updateSortIndicator();
+					};
+				});
+
+				if (toggleBtn) {
+					toggleBtn.onclick = function(e) {
+						e.stopPropagation();
+						GALLERY_sortAsc = !GALLERY_sortAsc;
+						GALLERY_renderWithSort();
+						updateSortIndicator();
+					};
+				}
+
+				function updateSortIndicator() {
+					const activeBtn = document.querySelector('.lituism-sort-btn.active');
+					if (activeBtn) {
+						const label = activeBtn.dataset.label || activeBtn.textContent;
+						const arrow = GALLERY_sortAsc ? '↓' : '↑';
+						activeBtn.textContent = label + ' ' + arrow;
+						// Восстанавливаем дата-атрибуты
+						activeBtn.dataset.label = label.replace(/[↑↓]$/, '').trim();
 					}
-				};
+				}
 			}
+			GALLERY_initSort();
 
 			// ===== ЛУПА (КЛИК ПО КАРТИНКЕ) =====
 			const imgWrapper = document.getElementById('modalImgWrapper');
@@ -2860,7 +3059,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 			};
 
 			// ===== ФИЛЬТРЫ =====
-			const filterSliders = ['filterBrightness', 'filterSaturate', 'filterInvert', 'filterHue', 'filterBlur', 'filterScaleX', 'filterScaleY'];
+			const filterSliders = ['filterBrightness', 'filterSaturate', 'filterInvert', 'filterHue', 'filterBlur', 'filterScaleX', 'filterScaleY', 'filterRotate'];
 			filterSliders.forEach(id => {
 				const slider = document.getElementById(id);
 				if (slider) {

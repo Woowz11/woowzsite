@@ -10,13 +10,13 @@ if(window.location.protocol === "file:"){
 }
 
 const TrueLithuismArts = []
-let ADD = function(SOURCE, NAME, AUTHOR, DATE){
+let ADD = function(SOURCE, NAME, AUTHOR, DATE, ALREADY){
 	if(!SOURCE){ SOURCE = "ERROR.png" }
 	if(!NAME){ NAME = "undefined name" }
 	if(!AUTHOR){ AUTHOR = "ANONIM." }
 	if(!DATE){ DATE = "????.??.??" }
 
-	const FULLSOURCE = `${PREFIX}/woowzsite/Lituism/art/${SOURCE}`
+	const FULLSOURCE = `${PREFIX}/woowzsite/${(ALREADY === true ? SOURCE : `Lituism/art/${SOURCE}`)}`
 
 	TRUE_LIT_ARTS_COLLECTION.push({
 		SOURCE: FULLSOURCE,
@@ -25,7 +25,9 @@ let ADD = function(SOURCE, NAME, AUTHOR, DATE){
 		DATE  : DATE
 	})
 
-	TrueLithuismArts.push(`Lituism/art/${SOURCE}`)
+	if(ALREADY !== true) {
+		TrueLithuismArts.push(`Lituism/art/${SOURCE}`)
+	}
 }
 
 // ----------------------------------------------------------------------
@@ -34,13 +36,160 @@ const __A_WOOWZ = "𐌸𐍈𐍈𐌸𐌶𐌹𐌹"
 const __A_SKREP = "thewindowskerpka"
 const __A_WYLDI = "W*LDI"
 const __A_SYRNI = "Syrnik (WOMAN)"
+const __A_HADAY = "Have a nice day."
+const __A_PAVEL = "PVK LAKR"
 
+const __A_ANONIM = "??? (не помню кто)"
 const __A_IDK = " (я не помню точно)"
 
 // ----------------------------------------------------------------------
 
+// надо бы заглянуть на сервер glitch старый акк посмотреть фотки
+
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("source/specialforrandomsite/hackman.png", "HACKAMN", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/glitc.png", "GLITCH", __A_PAVEL + __A_IDK, undefined, true)
+ADD("source/specialforrandomsite/wwwwwe.png", "-=-=-=-=-=-=-", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/ww.png", "Falsglat", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/we_know_you.png", "НН АЗИАТ", "НН АЗИАТ", undefined, true)
+ADD("source/specialforrandomsite/vseh.png", "Вещь", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/uranus.png", "Уранус", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/uranus_megus.png", "Уранус++", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/Untitled1.gif", "He is coming, he wanted to talk", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/tresh.gif", "👁🐦", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/TASHELO.png", "😭", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/susun.png", "Lime", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/sun.png", "HAMMER SUN", __A_HADAY, undefined, true)
+ADD("source/specialforrandomsite/strampro.png", "Bronze", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/smotr_nakazanie.png", "Смотреть накозание", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/scary.png", "Scary face", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/popa.png", "Squares LU", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/poshkal.png", "Poshkal", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/ppg.png", "PGP STEALER MOD WOKRSPHO", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/prikol.png", "I EATED", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/popa.gif", "КККККККККККККККККК", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/pisechnik.png", "Писечник", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/orange.png", "Большеносый", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/piss_ploho.png", "Убитая сука", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/pavka.png", "PAVEL-CREATURE", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/PAVEL.png", "Павел Писечник TV", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/orig.png", "orig", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/opengl.png", "DESMOS", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/my-pc.gif", "Oh no!!! MY PC!", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/mops.png", "M-O-P-S", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/minecraft-woowzcraft.png", "WoowzCraft", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/megadoff2.gif", "Python💩 Generated Sample 2", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/mabkrosm.png", "streetwe", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/le-Lego.png", "RABLOX", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/heartbeat.png", "СТАТИСТИКА СРАНОГО СПАНЧА", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/fireinthehole.png", "🔥", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/face.png", "Хлеборецз", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/ezgif-6-f8bd3b72aa.png", "Горшок", __A_ANONIM, undefined, true)
+ADD("source/specialforrandomsite/0001-0120.gif", "Freestyle", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/e6222ea2-92f7-4005-a436-289a9370e03b.png", "1AI1", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/37171e31-de56-4637-a31c-8c0b1c0bd4db.png", "2AI2", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/drachyn.png", "Драчун", __A_WYLDI, undefined, true)
+ADD("source/specialforrandomsite/download_cpy.gif", "ЧПУ токарный станок", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/error00000.png", "exception 0x000000", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/die.png", "⚰", __A_PAVEL + __A_IDK, undefined, true)
+ADD("source/specialforrandomsite/cupi.png", "☕", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/comic.png", "COMIC.ai", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/cold.png", "❄", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/bg.png", "Le face", __A_PAVEL, undefined, true)
+ADD("source/specialforrandomsite/brothan.png", "Я НЕ ВЫБРАН", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/bird_.png", "🐦💨", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/bird.png", "🐦", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/3dgifmaker20605.gif", "💥", __A_WOOWZ, undefined, true)
+ADD("source/eyes.png", "🧽", __A_WOOWZ, "2025.06.11", true)
+ADD("source/woowzengine/funny/21.png", "WoowzEngine OLD: №4", __A_WOOWZ, undefined, true)
+ADD("source/woowzengine/funny/5.png", "WoowzEngine OLD: №3", __A_WOOWZ, undefined, true)
+ADD("source/woowzengine/funny/22.png", "WoowzEngine OLD: №2", __A_WOOWZ, undefined, true)
+ADD("source/woowzengine/funny/33.png", "WoowzEngine OLD: №1", __A_WOOWZ, undefined, true)
+ADD("source/GOLUPREVIEW/7.png", "YT-OVERLAY №7", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/6.png", "YT-OVERLAY №6", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/5.png", "YT-OVERLAY №5", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/4.png", "YT-OVERLAY №4", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/3.png", "YT-OVERLAY №3", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/2.png", "YT-OVERLAY №2", __A_WOOWZ, "2026.04.13", true)
+ADD("source/GOLUPREVIEW/1.png", "YT-OVERLAY №1", __A_WOOWZ, "2026.04.13", true)
+ADD("YELLOW.png", "WoowzCore: №14", __A_WOOWZ)
+ADD("PINK.png", "WoowzCore: №13", __A_WOOWZ)
+ADD("LEVEL.png", "WoowzCore: №12", __A_WOOWZ)
+ADD("GRAY.png", "WoowzEngine: №20", __A_WOOWZ)
+ADD("BOTEXE.png", "BOT-Cat.exe", __A_WOOWZ)
+ADD("WZEXE.png", "WZ-Cat.exe", __A_WOOWZ)
+ADD("TRYAPKA.png", "Самая расчленяющая тряпка", __A_WOOWZ)
+ADD("WIRE.png", "WoowzEngine: №19", __A_WOOWZ)
+ADD("UNIT.png", "unit", __A_WOOWZ)
+ADD("TRIANGLE.png", "WoowzEngine: №18", __A_WOOWZ)
+ADD("TOXIC.png", "WoowzCore: №11", __A_WOOWZ)
+ADD("FOLDER.png", "📁", __A_WOOWZ)
+ADD("STREET.png", "WoowzCore: №10", __A_WOOWZ)
+ADD("STOLB.png", "WoowzCore: №9", __A_WOOWZ)
+ADD("SKY.png", "WoowzEngine: №17", __A_WOOWZ)
+ADD("SAM.png", "WoowzCore: №8", __A_WOOWZ)
+ADD("RND.png", toString(Math.random() * 100), __A_WOOWZ)
+ADD("PNG.png", "png.png", __A_WOOWZ)
+ADD("WWEXE.png", "WW-Cat.exe", __A_WOOWZ)
+ADD("OUT.png", "Out of memory!", __A_ANONIM)
+ADD("OLD.png", "old creature", __A_WOOWZ)
+ADD("NG2.png", "💀", __A_WOOWZ)
+ADD("CMO.png", "☃", __A_WYLDI)
+ADD("NEXTBOT.png", "N E X T B O T", __A_WOOWZ)
+ADD("RADIATION.png", "Нейтроны", __A_WOOWZ)
+ADD("NO.png", "WoowzEngine: №16", __A_WOOWZ)
+ADD("MINECRAFT.png", "BloodRaw", __A_WOOWZ + __A_IDK)
+ADD("MEGA.png", "WoowzEngine: №15", __A_WOOWZ)
+ADD("MATH2.png", "math2.", __A_WOOWZ)
+ADD("MATH.png", "math.", __A_WOOWZ)
+ADD("PURPLE.png", "WoowzCore: №7", __A_WOOWZ)
+ADD("MUL.png", "WoowzCore: №6", __A_WOOWZ)
+ADD("GOOGLE.png", "Google!", __A_WOOWZ)
+ADD("LIK.png", "Ликвидирован❗", __A_WYLDI)
+ADD("SPACE4.png", "WoowzEngine: №14", __A_WOOWZ)
+ADD("SLOPE.png", "WoowzEngine: №13", __A_WOOWZ)
+ADD("AIR.png", "___", __A_WOOWZ)
+ADD("HOLY.png", "WoowzEngine: №12", __A_WOOWZ)
+ADD("HAEXE.png", "HA-Cat.exe", __A_WOOWZ)
+ADD("HOUSE.png", "BOMBOM WELCOME", __A_HADAY)
+ADD("GREEN.png", "WoowzEngine: №11", __A_WOOWZ)
+ADD("PAINT.png", "Look", __A_WOOWZ)
+ADD("DANCE.gif", "Dance.blend", __A_WYLDI)
+ADD("EXP.png", "Experiment", __A_WOOWZ)
+ADD("MEF.png", "Mefedron ✂", __A_WOOWZ)
+ADD("HOLE.png", "🕳", __A_WYLDI)
+ADD("DYRILA.png", "DY-Cat.exe", __A_WOOWZ)
+ADD("CLOWN.png", "WoowzCore: №5", __A_WOOWZ)
+ADD("DIEGO.png", "Di Ego :)", __A_WOOWZ)
+ADD("DAY.png", "Облик Дея", __A_HADAY)
+ADD("DARK.png", "WoowzCore: №4", __A_WOOWZ)
+ADD("SCHOL.png", "Школяра", __A_WOOWZ)
+ADD("CRYBIRD.png", "cRYbIRD", __A_WYLDI)
+ADD("CRASH.png", "Woowzcore 2 - Unity 6000.0.21f1_e2bacb8dee3a", __A_WOOWZ)
+ADD("CIVIL.png", "WoowzCore: №3", __A_WOOWZ)
+ADD("CHEL.png", "WoowzCore: №2", __A_WOOWZ)
+ADD("PAEXE.png", "PA-Cat.exe", __A_WOOWZ)
+ADD("CARS.png", "WoowzEngine: №10", __A_WOOWZ)
+ADD("CAR.png", "WoowzEngine: №9", __A_WOOWZ)
+ADD("STEAM.jpg", "Собака: ########", __A_WOOWZ)
+ADD("TEAPOT.png", "WoowzEngine: №8", __A_WOOWZ)
+ADD("BROKENZ.png", "WoowzEngine: №7", __A_WOOWZ)
+ADD("BROKEN.png", "WoowzEngine: №6", __A_WOOWZ)
+ADD("OBS.png", "OBS ANEKDOT feat sponge", __A_WOOWZ)
+ADD("BOXES2.png", "WoowzEngine: №5", __A_WOOWZ)
+ADD("BOXES.png", "WoowzEngine: №4", __A_WOOWZ)
+ADD("SPACE3.png", "WoowzEngine: №3", __A_WOOWZ)
+ADD("BEEXE.png", "BE-Cat.exe", __A_WOOWZ)
+ADD("WC.png", "WoowzCore: №1", __A_WOOWZ)
+ADD("ARAB2.png", "القطة مرتبكة", __A_WOOWZ)
+ADD("SPACE2.png", "WoowzEngine: №2", __A_WOOWZ)
+ADD("AD.png", "Брошюра", __A_WYLDI)
+ADD("HIT.png", "ALPHA GLITCH", __A_WOOWZ)
+ADD("SPACE.png", "WoowzEngine: №1", __A_WOOWZ)
+ADD("WOOWZ.jpg", "🔺 TRIANGLE 🔻", __A_WOOWZ)
+ADD("DARKSEMEN.png", "🎃", __A_WOOWZ)
+ADD("REFLECT.png", "GLI-REFL", __A_WOOWZ)
 ADD("SC.png", "Сукамбрия 8", __A_WYLDI)
 ADD("ALBOM.png", "Альбом", __A_WOOWZ)
 ADD("EHIDA.jpg", "Ехидное лицо", __A_WOOWZ)
@@ -50,7 +199,7 @@ ADD("RED.png", "🟥", __A_WOOWZ)
 ADD("GOLUWORLD.png", "PROJECT: GOLUWorld", __A_WOOWZ, "2026.03.04")
 ADD("NAKED.png", "GOLU IS NOW NAKED", __A_WOOWZ, "2026.03.04")
 ADD("NEGR.png", "я родила негретёнка милого", __A_WYLDI, "2026.03.04")
-ADD("DIE.png", "!DIE!", __A_WYLDI)
+ADD("DIE.png", "undefined", __A_WYLDI)
 ADD("NG.png", "Я обладатель PREMIUM GOLU!", __A_WYLDI)
 ADD("BILO.png", "Не помню такое", __A_WYLDI)
 ADD("MAP.png", "", __A_WOOWZ)
@@ -390,7 +539,8 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 ],"corrupted_minecraft/",".png");
 
 WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
-	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8"
+	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
+	"bg10"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"
