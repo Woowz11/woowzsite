@@ -41,6 +41,31 @@ const BootstrapRender = function(){
     }
 
     /**
+     * Превращает RGB, RGBA в HEX
+     * @param {number} R Красный канал (0-255)
+     * @param {number} G Зелёный канал (0-255)
+     * @param {number} B Синий канал (0-255)
+     * @param {number} A Альфа канал (0-255)
+     * @return {number} HEX
+     */
+    Render.ToHEX = function(R, G, B, A= undefined){
+        if(A === undefined){
+            return ((R << 16) | (G << 8) | B) >>> 0
+        }else{
+            return ((R << 24) | (G << 16) | (B << 8) | A) >>> 0
+        }
+    }
+
+    /**
+     * Возвращает случайный цвет
+     * @param {boolean} Alpha С альфа каналом?
+     * @return {number} HEX цвет
+     */
+    Render.RandomColor = function(Alpha = undefined){
+        return Render.ToHEX((Math.random() * 256) | 0, (Math.random() * 256) | 0, (Math.random() * 256) | 0, Alpha === undefined ? undefined : (Math.random() * 256) | 0)
+    }
+
+    /**
      * Превращает цвет в CSS цвет
      * @param {number} Color Цвет
      * @param {boolean} HasAlpha Есть Alpha?
@@ -313,23 +338,78 @@ const BootstrapRender = function(){
 
     // ----------------------------------------------------------------------
 
+    const RenderPlayer = function(){
+        let ZeroPosition = GW2.Game.WorldToLocal(0, 0)
+        Render.Texture(ZeroPosition[0] + 50, ZeroPosition[1] + 50, GW2_Texture.Player)
+
+        let PlayerPosition = GW2.Game.WorldToLocal(GW2.Game.Player.X, GW2.Game.Player.Y)
+
+        Render.Line(PlayerPosition[0], PlayerPosition[1], ZeroPosition[0], ZeroPosition[1], 0xFF0000)
+        Render.Line(PlayerPosition[0], PlayerPosition[1], GW2.Input.Mouse.X, GW2.Input.Mouse.Y, 0xFFFFFF)
+
+        Render.Texture(PlayerPosition[0] - 16/2, PlayerPosition[1] - 16/2, GW2_Texture.Player)
+    }
+
+    const RenderCurrentScene = function(){
+        switch(GW2.Game.Scene){
+            case GW2_Scene.Menu: {
+                BackgroundColor = Render.ToHEX(128, 128, 128)
+                Render.Fill(BackgroundColor)
+
+                break
+            }
+            case GW2_Scene.World: {
+                BackgroundColor = Render.ToHEX(255/8, 0, 0)
+                Render.Fill(BackgroundColor)
+
+                RenderPlayer()
+
+                break
+            }
+            default: {
+                __Perimeter = function(T) {
+                    T = ((T % 1) + 1) % 1;
+
+                    const W = Render.W
+                    const H = Render.H
+                    const Perimeter = 2 * (W + H)
+                    let D = T * Perimeter
+
+                    if(D < W){ return [ D, 0 ]}
+                    D -= W
+                    if(D < H){ return [ W - 1, D ]}
+                    D -= H
+                    if(D < W){ return [ W - D, H - 1 ]}
+                    D -= W
+                    return [ 0, H - D ]
+                }
+
+                const PC = __Perimeter(Time * 0.1)
+                Render.Line(Render.W / 2, Render.H / 2, PC[0], PC[1], 0x000000)
+
+                const PA = __Perimeter(Time * 0.15      )
+                const PB = __Perimeter(Time * 0.23 + 0.5)
+
+                Render.Line(PA[0], PA[1], PB[0], PB[1], Render.RandomColor())
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+
     const RenderCursor = function(){
         const X = GW2.Input.Mouse.X
         const Y = GW2.Input.Mouse.Y
 
         const CursorSize = 6
-        const CursorColor = 0x0000FF
+        const CursorColor = 0xFFFFFF
 
         Render.Line(X, Y - CursorSize, X, Y + CursorSize, CursorColor)
         Render.Line(X - CursorSize, Y, X + CursorSize, Y, CursorColor)
     }
 
-    const RenderPlayer = function(){
-
-    }
-
-    const RenderCurrentScene = function(){
-        const Scene = GW2.Game.Scene
+    const RenderInterface = function(){
+        RenderCursor()
     }
 
     // ----------------------------------------------------------------------
@@ -343,13 +423,8 @@ const BootstrapRender = function(){
 
         Time += DT
 
-        BackgroundColor = 0xFF0000
-        Render.Fill(BackgroundColor)
-
         RenderCurrentScene()
 
-        RenderPlayer()
-
-        RenderCursor()
+        RenderInterface()
     }
 }

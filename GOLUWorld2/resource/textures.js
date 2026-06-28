@@ -115,7 +115,8 @@ const LoadTextures = async function(){
 
     GW2_Texture = {
         Missing: -1,
-        Test: 0
+        Player: 0,
+        Cursor: 1
     }
 
     console.group("Регистрация")
@@ -125,7 +126,9 @@ const LoadTextures = async function(){
         0xFF00FF, 0x000000
     ], GW2_Alpha.None)
 
-    await RegisterTexture_Bytes(GW2_Texture.Test, "H4sIAAAAAAAACm2TSSi3YRTF/x+FpCjJBkUZSykLKWW2UCyUwkKS7AwRMhcyT0WUMWPIUEgiZIqSmSJDsSCUBSFTP927+pSn3t5633vPPfec8xisDFb/DP8dX19f0tPT6ezsZHFxke3tbdbW1piYmGBkZIT6+nri4+Mx/HECAgIYHBxkdHSU09NTzs/POTk54e3tjff3d46Pj9nb26Ovr4+goKBfGGFhYSwsLNDU1EReXh7FxcVMT09zc3PD4+MjHR0deHl5YWlpib29PWVlZYSGhipGeHg4XV1dxMTEYG5ujpGRESYmJoSEhJCYmEhFRQUeHh7c3t7i6urK9fU1dnZ2VFdX4+fnR3JyMo2NjYLF8/Ozvh8eHjA1NSUlJUUxzMzMlLv8m5qawtjYmNbWVjIyMigpKaG3t1e/HRwcaM3AwIByaW9vp6ioiOjoaIKDg3W+8IqMjGRsbIzS0lLVdGdnR3W3tbXFwsICa2tr0tLS2N/fJzs7m+7ubvr7+8nKyiI3N1e1XVpaorKyUjFWVlaUR01NjeKJHk9PT7pHXV0dERERXF1d8fLyQltbm3opnoqOBQUFrK6usrGxob7t7u7q3JmZGe3Z2trSPT8+PtTDo6MjnSc719bWql/i3d3dHWdnZ1xeXmrf8PCwZiUzM1O9+v7+5vPzU3lJriRjsovoPz8/z+bmJvf393x9fensoaEhLi4umJyc1FrJg/Sur69rHlpaWkhISECyMz4+zvLysnot87y9vXF2dsbR0REbGxucnJwIDAyksLBQ9RLsqqoqJO8ODg6kpqaqFpL58vJyzYbkWDyam5tT7ObmZu2R/Pb09Kin0isZlHdUVJTWSoZycnJISkrSRzSIjY0lPz9f9xRMqXV3d/91B4SrcBQ9RefDw0NeX19VV9l9dnZWs+jv74+bm9ufd9DFxUUx4uLiVFvxR3RqaGjQfPn4+ODp6fmr9wdNbi6ZBQQAAA==")
+    await RegisterTexture_Bytes(GW2_Texture.Player, "H4sIAAAAAAAACm2TSSi3YRTF/x+FpCjJBkUZSykLKWW2UCyUwkKS7AwRMhcyT0WUMWPIUEgiZIqSmSJDsSCUBSFTP927+pSn3t5633vPPfec8xisDFb/DP8dX19f0tPT6ezsZHFxke3tbdbW1piYmGBkZIT6+nri4+Mx/HECAgIYHBxkdHSU09NTzs/POTk54e3tjff3d46Pj9nb26Ovr4+goKBfGGFhYSwsLNDU1EReXh7FxcVMT09zc3PD4+MjHR0deHl5YWlpib29PWVlZYSGhipGeHg4XV1dxMTEYG5ujpGRESYmJoSEhJCYmEhFRQUeHh7c3t7i6urK9fU1dnZ2VFdX4+fnR3JyMo2NjYLF8/Ozvh8eHjA1NSUlJUUxzMzMlLv8m5qawtjYmNbWVjIyMigpKaG3t1e/HRwcaM3AwIByaW9vp6ioiOjoaIKDg3W+8IqMjGRsbIzS0lLVdGdnR3W3tbXFwsICa2tr0tLS2N/fJzs7m+7ubvr7+8nKyiI3N1e1XVpaorKyUjFWVlaUR01NjeKJHk9PT7pHXV0dERERXF1d8fLyQltbm3opnoqOBQUFrK6usrGxob7t7u7q3JmZGe3Z2trSPT8+PtTDo6MjnSc719bWql/i3d3dHWdnZ1xeXmrf8PCwZiUzM1O9+v7+5vPzU3lJriRjsovoPz8/z+bmJvf393x9fensoaEhLi4umJyc1FrJg/Sur69rHlpaWkhISECyMz4+zvLysnot87y9vXF2dsbR0REbGxucnJwIDAyksLBQ9RLsqqoqJO8ODg6kpqaqFpL58vJyzYbkWDyam5tT7ObmZu2R/Pb09Kin0isZlHdUVJTWSoZycnJISkrSRzSIjY0lPz9f9xRMqXV3d/91B4SrcBQ9RefDw0NeX19VV9l9dnZWs+jv74+bm9ufd9DFxUUx4uLiVFvxR3RqaGjQfPn4+ODp6fmr9wdNbi6ZBQQAAA==")
+
+    await RegisterTexture_Bytes(GW2_Texture.Cursor, "H4sIAAAAAAAACmPgYOBglJCQ+M/AwADCWIGuru7/58+f41Tj4ODwHwRwqYHJ41IDMh8ZoKsBuQ8khgygboYBsHpkdSAzcXgHXS8DAEo0vVoFAQAA")
 
     console.groupEnd()
 

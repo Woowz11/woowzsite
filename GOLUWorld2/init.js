@@ -10,6 +10,7 @@ const Init = async function(){
         const UpdateDebug = BootstrapDebug()
 
         BootstrapPlayer()
+        BootstrapWorld ()
 
         const StartGame = BootstrapGame(UpdateDebug, GlobalRender)
 

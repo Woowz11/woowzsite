@@ -172,7 +172,7 @@ JT.Graphic.Canvas.addEventListener("mouseleave", () => {
 let __MouseEvent = function(e, Release){
 	const Button = e.button
 
-	JT.Input.Mouse.__Pressed[Button] = !Release;
+	JT.Input.Mouse.__Pressed[Button] = !Release
 
 	__EVENTS.MouseButton(JT.Input.Mouse.X, JT.Input.Mouse.Y, JT.Input.Mouse.RX, JT.Input.Mouse.RY, Release, e.button)
 }
@@ -187,7 +187,7 @@ let __KeyboardEvent = function(e, Release){
 
 	if(!Release && e.repeat){ return }
 
-	JT.Input.Keyboard.__Pressed[Key] = !Release;
+	JT.Input.Keyboard.__Pressed[Key] = !Release
 
 	__EVENTS.KeyboardKey(Key, Release)
 }

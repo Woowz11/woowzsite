@@ -49,6 +49,17 @@ const GW2 = {
         Mouse: {
             X: -1,
             Y: -1
+        },
+
+        Keyboard: {
+            __Pressed: {},
+
+            /**
+             * Клавиша зажата?
+             * @param {string} Key Клавиша
+             * @return {boolean} Зажата?
+             */
+            IsPressed: function(Key){ return this.__Pressed[Key] === true }
         }
     },
 
@@ -57,7 +68,23 @@ const GW2 = {
         DT: -1,
 
         /** Текущая сцена */
-        Scene: -1
+        Scene: -1,
+
+        LocalToWorld: function(X, Y){
+            return [
+                X + (GW2.Game.Player.Camera.X - GW2.Render.W / 2),
+                Y + (GW2.Game.Player.Camera.Y - GW2.Render.H / 2)
+            ]
+        },
+
+        WorldToLocal: function(X, Y){
+            return [
+                X - (GW2.Game.Player.Camera.X - GW2.Render.W / 2),
+                Y - (GW2.Game.Player.Camera.Y - GW2.Render.H / 2)
+            ]
+        },
+
+        __Events: {}
     },
 
     Resource: {
@@ -92,12 +119,12 @@ const Bootstrap = function(){
     }
     __CreateSite()
 
+    const Padding = 32
+
     let __RenderElement = document.getElementById("render")
     GW2.Render.Resize = function(){
         let W = window.innerWidth
         let H = window.innerHeight
-
-        const Padding = 32
 
         W -= Padding * 2
         H -= Padding * 2
@@ -125,13 +152,57 @@ const Bootstrap = function(){
     // ----------------------------------------------------------------------
 
     window.addEventListener("mousemove", (e) => {
-        const Rect = GW2.Render.Canvas.getBoundingClientRect()
+        const IsLocked = document.pointerLockElement !== null
 
-        let X = (e.clientX - Rect.left) / GW2.Render.Scale
-        let Y = (e.clientY - Rect.top ) / GW2.Render.Scale
+        if(IsLocked){
+            GW2.Input.Mouse.X += e.movementX / GW2.Render.Scale
+            GW2.Input.Mouse.Y += e.movementY / GW2.Render.Scale
 
-        GW2.Input.Mouse.X = X
-        GW2.Input.Mouse.Y = Y
+            let __Padding = Padding / GW2.Render.Scale
+
+            if(GW2.Input.Mouse.X < -__Padding){ GW2.Input.Mouse.X = -__Padding }
+            if(GW2.Input.Mouse.X >= GW2.Render.W + __Padding){ GW2.Input.Mouse.X = GW2.Render.W + __Padding - 1 }
+            if(GW2.Input.Mouse.Y < -__Padding){ GW2.Input.Mouse.Y = -__Padding }
+            if(GW2.Input.Mouse.Y >= GW2.Render.H + __Padding){ GW2.Input.Mouse.Y = GW2.Render.H + __Padding - 1 }
+        }else{
+            const Rect = GW2.Render.Canvas.getBoundingClientRect()
+
+            let X = (e.clientX - Rect.left) / GW2.Render.Scale
+            let Y = (e.clientY - Rect.top ) / GW2.Render.Scale
+
+            GW2.Input.Mouse.X = X
+            GW2.Input.Mouse.Y = Y
+        }
+    })
+
+    const __Key = function(e, Release){
+        if(!Release && e.repeat){ return }
+
+        const Key = e.code
+
+        GW2.Input.Keyboard.__Pressed[Key] = !Release
+
+        GW2.Game.__Events.KeyboardInput(Key, Release)
+    }
+
+    window.addEventListener("keydown", (e) => {
+        __Key(e, false)
+    })
+
+    window.addEventListener("keyup", (e) => {
+        __Key(e, true)
+    })
+
+    // ----------------------------------------------------------------------
+
+    GW2.Render.Canvas.addEventListener("mousedown", (e) => {
+        if(e.button !== 0){ return }
+
+        if(document.pointerLockElement !== GW2.Render.Canvas){
+            try{
+                GW2.Render.Canvas.requestPointerLock()
+            }catch(ignored){}
+        }
     })
 
     // ----------------------------------------------------------------------
@@ -156,10 +227,15 @@ const Bootstrap = function(){
 
             const DIV = document.createElement("div");
             DIV.style.cssText = `
-            background: #ff4444; color: white; padding: 14px 24px;
-            border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: slideDown 0.3s ease-out; font-size: 15px;
-            max-width: 500px; text-align: center;
+            background: #FF0000;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease-out;
+            font-size: 15px;
+            max-width: 500px;
+            text-align: center;
         `;
             DIV.textContent = `⚠️ ${Message}`;
             Container.appendChild(DIV);

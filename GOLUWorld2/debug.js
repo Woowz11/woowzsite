@@ -37,5 +37,6 @@ const BootstrapDebug = function(){
         Set(2, `Mouse: ${Math.round(GW2.Input.Mouse.X)}:${Math.round(GW2.Input.Mouse.Y)}`)
         Set(3, `Scene: ${GW2.Game.Scene}`)
         Set(4, `PixelChanged: <e style="color:${GW2.Render.ColorToCSS(GW2.Render.GetColorGradient(Gradient_Stress, Math.min(GW2.Render.Debug.PixelChanged / 10000000, 1)))};">${GW2.Render.Debug.PixelChanged} [${(GW2.Render.Debug.PixelChanged / 10000000 * 100).toFixed(2)}%]</e>`)
+        Set(5, `Position: ${GW2.Game.Player.X.toFixed(1)}:${GW2.Game.Player.Y.toFixed(1)}`)
     }
 }

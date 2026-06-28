@@ -1,27 +1,54 @@
+const GW2_Scene = {
+    Menu: 0,
+
+    World: 1
+}
+
 const BootstrapGame = function(UpdateDebug, GlobalRender){
-    const UpdateRender = function(DT){
-
-    }
-
-    const UpdateGame = function(){
-
-    }
-
-    // ----------------------------------------------------------------------
-
-    const GW2_Scene = {
-        Menu: 0
-    }
-
     /**
      * Устанавливает сцену
      * @param {GW2_Scene} Scene Сцена
      */
-    const SetScene = function(Scene){
+    GW2.Game.SetScene = function(Scene){
+        const CurrentScene = GW2.Game.Scene
+
+        if(CurrentScene === Scene){ return }
+
+        console.log(`Установлена сцена: ${Scene}`)
         GW2.Game.Scene = Scene
+
+        if(Scene === GW2_Scene.World){
+            GW2.Game.World.SetLevel(GW2_Level.TEST)
+        }
     }
 
     // ----------------------------------------------------------------------
+
+    const UpdateRender = function(DT){
+
+    }
+
+    const UpdateGame = function(DT){
+        if(GW2.Game.Scene !== GW2_Scene.Menu){
+            GW2.Game.Player.Update(DT)
+
+            GW2.Game.Player.Camera.Update(DT)
+        }
+    }
+
+    GW2.Game.__Events.KeyboardInput = function(Key, Release){
+        if(Release){ return }
+
+        console.debug(`Клавиша нажата: ${Key}`)
+
+        if(Key === "Digit1"){
+            GW2.Game.SetScene(GW2_Scene.Menu)
+        }else if(Key === "Digit2"){
+            GW2.Game.SetScene(GW2_Scene.World)
+        }else if(Key === "Digit3"){
+            GW2.Game.SetScene(-1)
+        }
+    }
 
     return function(){
         const StartGlobalRender = function(){
@@ -49,7 +76,7 @@ const BootstrapGame = function(UpdateDebug, GlobalRender){
 
                     __GameLastTime = GameNow
 
-                    UpdateGame()
+                    UpdateGame(GAME_STEP)
                     __GameAccumulator -= GAME_STEP
                 }
 
@@ -68,6 +95,6 @@ const BootstrapGame = function(UpdateDebug, GlobalRender){
 
         document.title = GW2.Info.Name
 
-        SetScene(GW2_Scene.Menu)
+        GW2.Game.SetScene(GW2_Scene.Menu)
     }
 }
