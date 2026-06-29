@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitExplorer Pro - Woowz11</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root { --icon-size: 80px; }
+        body { background: #0d1117; color: #c9d1d9; user-select: none; }
+        .explorer-item.selected { background: rgba(56, 139, 253, 0.2) !important; border: 1px solid #388bfd !important; }
+        #selection-box { position: absolute; background: rgba(56, 139, 253, 0.3); border: 1px solid #388bfd; pointer-events: none; z-index: 1000; display: none; }
+        #contextMenu { display: none; position: fixed; z-index: 10000; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .menu-item { padding: 8px 12px; font-size: 13px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+        .menu-item:hover { background: #388bfd; color: white; }
+        iframe { background: white; width: 100%; height: 100%; border: none; border-radius: 8px; }
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--icon-size), 1fr)); align-content: start; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+<!-- Header -->
+<header class="bg-[#161b22] border-b border-[#30363d] p-3 flex items-center justify-between gap-4 z-50">
+    <div class="flex items-center gap-3">
+        <div class="bg-blue-600 p-1.5 rounded text-white"><i data-lucide="folder-git-2" size="20"></i></div>
+        <input id="repoInput" type="text" value="Woowz11/woowzsite" onkeypress="if(event.key==='Enter') loadRepo('')"
+               class="bg-[#0d1117] border border-[#30363d] rounded px-3 py-1 text-sm w-64 outline-none focus:border-blue-500">
+    </div>
+
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 bg-[#0d1117] p-1 rounded border border-[#30363d]">
+            <button onclick="togglePreviewMode()" id="previewToggleBtn" class="p-1.5 rounded hover:bg-gray-800" title="Вкл/Выкл предпросмотр">
+                <i data-lucide="eye" size="18"></i>
+            </button>
+            <div class="w-px h-4 bg-gray-700 mx-1"></div>
+            <input type="range" min="50" max="180" value="90" oninput="updateSize(this.value)" class="w-20 accent-blue-500">
+        </div>
+        <div id="limitDisplay" class="px-3 py-1 bg-black/30 border border-gray-800 rounded-full text-[11px] font-mono">
+            API: <span id="rateRemaining" class="text-green-500 font-bold">--</span>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 flex overflow-hidden relative">
+    <!-- Selection Box -->
+    <div id="selection-box"></div>
+
+    <!-- File Area -->
+    <section class="flex-1 flex flex-col overflow-hidden">
+        <div id="breadcrumbs" class="px-4 py-2 border-b border-[#30363d] bg-[#0d1117] text-[11px] flex items-center gap-2 uppercase tracking-wider font-semibold text-gray-500"></div>
+        <div id="fileGrid" class="flex-1 overflow-y-auto p-4 file-grid gap-2 relative"
+             onmousedown="startSelection(event)" oncontextmenu="handleContextMenu(event)">
+        </div>
+    </section>
+
+    <!-- Preview Sidebar -->
+    <aside id="previewPane" class="w-[450px] bg-[#161b22] border-l border-[#30363d] flex flex-col hidden shadow-2xl">
+        <div class="p-4 border-b border-[#30363d] flex justify-between items-center bg-[#1c2128]">
+            <span class="text-xs font-bold uppercase text-gray-400">Предпросмотр</span>
+            <button onclick="togglePreviewMode(false)" class="hover:text-red-400"><i data-lucide="x" size="18"></i></button>
+        </div>
+        <div id="previewContent" class="flex-1 overflow-hidden p-2">
+            <div class="h-full flex flex-col items-center justify-center text-gray-600 italic text-sm">
+                Выберите файл для просмотра
+            </div>
+        </div>
+    </aside>
+</main>
+
+<!-- Context Menu -->
+<div id="contextMenu">
+    <div class="menu-item" onclick="openSelected()"><i data-lucide="folder-open" size="14"></i> Открыть</div>
+    <div class="menu-item" onclick="downloadAsZip()"><i data-lucide="download-cloud" size="14"></i> Скачать выбранное (ZIP)</div>
+    <div class="menu-item border-t border-gray-700 mt-1" onclick="copyLinks()"><i data-lucide="copy" size="14"></i> Копировать ссылки</div>
+</div>
+
+<script>
+    let currentRepo = '';
+    let currentPath = '';
+    let defaultBranch = 'main';
+    let isPreviewOpen = false;
+    let selectedFiles = new Set();
+    let allFiles = [];
+
+    // --- Инициализация ---
+    lucide.createIcons();
+
+    function updateSize(v) { document.documentElement.style.setProperty('--icon-size', v + 'px'); }
+
+    function togglePreviewMode(state) {
+        isPreviewOpen = state !== undefined ? state : !isPreviewOpen;
+        document.getElementById('previewPane').classList.toggle('hidden', !isPreviewOpen);
+        document.getElementById('previewToggleBtn').classList.toggle('bg-blue-600', isPreviewOpen);
+        if (!isPreviewOpen) document.getElementById('previewContent').innerHTML = '';
+    }
+
+    // --- Загрузка данных ---
+    async function loadRepo(path) {
+        currentPath = path;
+        const repoPath = document.getElementById('repoInput').value.trim();
+        if (!repoPath) return;
+
+        if (currentRepo !== repoPath) {
+            const res = await fetch(`https://api.github.com/repos/${repoPath}`);
+            const data = await res.json();
+            defaultBranch = data.default_branch || 'main';
+            currentRepo = repoPath;
+        }
+
+        const res = await fetch(`https://api.github.com/repos/${currentRepo}/contents/${path}`);
+        const files = await res.json();
+        allFiles = files;
+        updateRateLimit(res.headers);
+        renderFiles(files);
+        renderBreadcrumbs(path);
+    }
+
+    function renderFiles(files) {
+        const grid = document.getElementById('fileGrid');
+        grid.innerHTML = '';
+        selectedFiles.clear();
+
+        files.sort((a,b) => (b.type==='dir')-(a.type==='dir')).forEach(f => {
+            const item = document.createElement('div');
+            item.className = 'explorer-item p-3 flex flex-col items-center text-center rounded-lg border border-transparent hover:bg-white/5 cursor-default transition-all';
+            item.dataset.name = f.name;
+
+            const { icon, color } = getFileInfo(f);
+            item.innerHTML = `
+                    <div class="pointer-events-none mb-2 shadow-lg">
+                        <i data-lucide="${icon}" class="${color}" style="width: calc(var(--icon-size)*0.45); height: calc(var(--icon-size)*0.45)"></i>
+                    </div>
+                    <span class="text-[11px] font-medium truncate w-full px-1">${f.name}</span>
+                `;
+
+            item.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                if (!e.ctrlKey) {
+                    document.querySelectorAll('.explorer-item').forEach(el => el.classList.remove('selected'));
+                    selectedFiles.clear();
+                }
+                item.classList.add('selected');
+                selectedFiles.add(f.name);
+                if (isPreviewOpen) autoPreview(f);
+            });
+
+            item.addEventListener('dblclick', () => f.type === 'dir' ? loadRepo(f.path) : window.open(f.html_url));
+
+            grid.appendChild(item);
+        });
+        lucide.createIcons();
+    }
+
+    // --- Уникальные иконки ---
+    function getFileInfo(f) {
+        if (f.type === 'dir') return { icon: 'folder', color: 'text-yellow-500' };
+        const ext = f.name.split('.').pop().toLowerCase();
+        const map = {
+            'js': { icon: 'file-code-2', color: 'text-yellow-400' },
+            'ts': { icon: 'file-code-2', color: 'text-blue-400' },
+            'html': { icon: 'layout', color: 'text-orange-500' },
+            'css': { icon: 'palette', color: 'text-blue-300' },
+            'json': { icon: 'braces', color: 'text-purple-400' },
+            'py': { icon: 'terminal', color: 'text-green-500' },
+            'md': { icon: 'book-open', color: 'text-gray-300' },
+            'png': { icon: 'image', color: 'text-pink-400' },
+            'jpg': { icon: 'image', color: 'text-pink-400' },
+            'svg': { icon: 'component', color: 'text-pink-300' },
+            'mp4': { icon: 'video', color: 'text-red-400' },
+            'mp3': { icon: 'music', color: 'text-cyan-400' },
+            'zip': { icon: 'archive', color: 'text-orange-700' }
+        };
+        return map[ext] || { icon: 'file', color: 'text-gray-500' };
+    }
+
+    // --- Авто-предпросмотр ---
+    async function autoPreview(f) {
+        const content = document.getElementById('previewContent');
+        content.innerHTML = '<div class="h-full flex items-center justify-center animate-pulse">Загрузка...</div>';
+
+        const rawUrl = `https://raw.githubusercontent.com/${currentRepo}/${defaultBranch}/${f.path}`;
+        const githackUrl = `https://raw.githack.com/${currentRepo}/${defaultBranch}/${f.path}`;
+        const ext = f.name.split('.').pop().toLowerCase();
+
+        if (f.type === 'dir') {
+            content.innerHTML = `<div class="p-10 text-center text-gray-500">Это папка. Выберите файл для просмотра.</div>`;
+        } else if (ext === 'html') {
+            content.innerHTML = `<iframe src="${githackUrl}"></iframe>`;
+        } else if (['png','jpg','jpeg','gif','webp','svg'].includes(ext)) {
+            content.innerHTML = `<div class="h-full flex items-center justify-center p-4"><img src="${rawUrl}" class="max-w-full max-h-full rounded shadow-xl"></div>`;
+        } else {
+            try {
+                const res = await fetch(rawUrl);
+                const text = await res.text();
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.className = `language-${ext}`;
+                code.textContent = text.length > 10000 ? text.substring(0, 10000) + '... [Обрезано]' : text;
+                pre.appendChild(code);
+                content.innerHTML = '';
+                content.appendChild(pre);
+                Prism.highlightElement(code);
+            } catch {
+                content.innerHTML = 'Не удалось загрузить предпросмотр';
+            }
+        }
+    }
+
+    // --- Выделение рамкой ---
+    function startSelection(e) {
+        if (e.button !== 0) return;
+        const grid = document.getElementById('fileGrid');
+        const box = document.getElementById('selection-box');
+        const startX = e.pageX;
+        const startY = e.pageY;
+
+        if (!e.ctrlKey) {
+            document.querySelectorAll('.explorer-item').forEach(el => el.classList.remove('selected'));
+            selectedFiles.clear();
+        }
+
+        function onMouseMove(me) {
+            box.style.display = 'block';
+            const curX = me.pageX;
+            const curY = me.pageY;
+            const x = Math.min(startX, curX);
+            const y = Math.min(startY, curY);
+            const w = Math.abs(startX - curX);
+            const h = Math.abs(startY - curY);
+
+            box.style.left = x + 'px';
+            box.style.top = y + 'px';
+            box.style.width = w + 'px';
+            box.style.height = h + 'px';
+
+            document.querySelectorAll('.explorer-item').forEach(item => {
+                const rect = item.getBoundingClientRect();
+                if (!(rect.right < x || rect.left > x + w || rect.bottom < y || rect.top > y + h)) {
+                    item.classList.add('selected');
+                    selectedFiles.add(item.dataset.name);
+                } else if (!me.ctrlKey) {
+                    item.classList.remove('selected');
+                    selectedFiles.delete(item.dataset.name);
+                }
+            });
+        }
+
+        function onMouseUp() {
+            box.style.display = 'none';
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // --- ZIP Скачивание ---
+    async function downloadAsZip() {
+        if (selectedFiles.size === 0) return;
+        const zip = new JSZip();
+        const btn = document.querySelector('[onclick="downloadAsZip()"]');
+        btn.innerText = 'Подготовка...';
+
+        for (let name of selectedFiles) {
+            const f = allFiles.find(x => x.name === name);
+            if (f && f.type === 'file') {
+                const res = await fetch(`https://raw.githubusercontent.com/${currentRepo}/${defaultBranch}/${f.path}`);
+                const blob = await res.blob();
+                zip.file(f.path, blob);
+            }
+        }
+
+        const content = await zip.generateAsync({type: "blob"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `${currentRepo.split('/')[1]}_selected.zip`;
+        link.click();
+        btn.innerHTML = '<i data-lucide="download-cloud" size="14"></i> Скачать выбранное (ZIP)';
+        lucide.createIcons();
+    }
+
+    // --- Контекстное меню ---
+    function handleContextMenu(e) {
+        e.preventDefault();
+        const menu = document.getElementById('contextMenu');
+        menu.style.display = 'block';
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+    }
+
+    window.onclick = () => document.getElementById('contextMenu').style.display = 'none';
+
+    function openSelected() {
+        if (selectedFiles.size === 1) {
+            const name = Array.from(selectedFiles)[0];
+            const f = allFiles.find(x => x.name === name);
+            if (f.type === 'dir') loadRepo(f.path);
+            else window.open(f.html_url);
+        }
+    }
+
+    function renderBreadcrumbs(path) {
+        const b = document.getElementById('breadcrumbs');
+        b.innerHTML = `<span class="cursor-pointer hover:text-white" onclick="loadRepo('')">root</span>`;
+        let acc = '';
+        path.split('/').filter(Boolean).forEach(p => {
+            acc += (acc ? '/' : '') + p;
+            const target = acc;
+            b.innerHTML += `<i data-lucide="chevron-right" size="12"></i><span class="cursor-pointer hover:text-white" onclick="loadRepo('${target}')">${p}</span>`;
+        });
+        lucide.createIcons();
+    }
+
+    function updateRateLimit(h) {
+        const rem = h.get('x-ratelimit-remaining');
+        if (rem) document.getElementById('rateRemaining').innerText = rem;
+    }
+
+    window.onload = () => loadRepo('');
+</script>
+</body>
+</html>
