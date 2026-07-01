@@ -4,220 +4,380 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Просмотр файлов</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Prism.js для подсветки кода -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <!-- Marked.js для Markdown -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-batch.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        .markdown-body img { max-width: 100%; }
-        pre[class*="language-"] { margin: 0; border-radius: 0.5rem; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        #markdownView { background-color: #0d1117; color: #c9d1d9; }
+        .markdown-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; padding: 2rem; }
+        .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #21262d; padding-bottom: 0.3em; color: #f0f6fc; }
+        .markdown-body pre { background-color: #161b22; border-radius: 6px; padding: 16px; overflow: auto; }
+        pre[class*="language-"] { margin: 0 !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #18181b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        * { scrollbar-gutter: stable; }
+        #viewerContainer > div { height: 100%; overflow-y: auto; scrollbar-gutter: stable; }
+        .hex-container { display: flex; flex-direction: column; min-height: 100%; font-family: ui-monospace, monospace; }
+        .hex-header, .hex-row { display: grid; grid-template-columns: 80px 352px 192px; gap: 1.5rem; padding: 0 1.5rem; width: fit-content; }
+        .hex-header { background: #18181b; border-bottom: 1px solid #3f3f46; position: sticky; top: 0; z-index: 20; color: #71717a; height: 32px; align-items: center; }
+        .hex-header > div:nth-child(2) { display: grid; grid-template-columns: repeat(16, 22px); font-size: 10px; text-align: center; }
+        .hex-header > div:nth-child(3) { display: grid; grid-template-columns: repeat(16, 12px); padding-left: 1rem; font-size: 10px; text-align: center; }
+        .hex-row:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        .hex-row:hover { background: rgba(59, 130, 246, 0.05); }
+        .hex-offset { color: #52525b; text-align: right; border-right: 1px solid #27272a; padding-right: 1rem; font-size: 12px; line-height: 1.4rem; }
+        .hex-bytes { color: #3b82f6; display: grid; grid-template-columns: repeat(16, 22px); font-size: 12px; line-height: 1.4rem; }
+        .hex-byte { cursor: default; width: 22px; text-align: center; border-radius: 1px; }
+        .hex-byte.active { background: #3b82f6 !important; color: white !important; }
+        .hex-ascii { color: #a1a1aa; display: grid; grid-template-columns: repeat(16, 12px); border-left: 1px solid #27272a; padding-left: 1rem; font-size: 12px; line-height: 1.4rem; }
+        .hex-char { width: 12px; text-align: center; cursor: default; border-radius: 1px; }
+        .hex-char.active { background: #3b82f6 !important; color: white !important; }
+        .code-viewport { background-color: #18181b; min-height: 100%; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5rem; }
+        .code-line { display: flex; width: 100%; }
+        .code-line:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+        .code-num { width: 4rem; flex-shrink: 0; text-align: right; padding-right: 1rem; color: #4b5563; border-right: 1px solid #3f3f46; user-select: none; background: rgba(0,0,0,0.1); }
+        .code-text { flex-grow: 1; padding: 0 1rem; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; }
+        .code-text pre { background: transparent !important; margin: 0 !important; padding: 0 !important; border: none !important; }
+        .code-text code { background: transparent !important; padding: 0 !important; white-space: pre-wrap !important; }
+        #topPath { cursor: pointer; transition: color 0.2s; }
+        #topPath:hover { color: #fff; }
+        .checkerboard { background-color: #111; background-image: linear-gradient(45deg, #1d1d20 25%, transparent 25%), linear-gradient(-45deg, #1d1d20 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1d1d20 75%), linear-gradient(-45deg, transparent 75%, #1d1d20 75%); background-size: 24px 24px; animation: moveChecker 60s linear infinite; }
+        @keyframes moveChecker { from { background-position: 0 0, 0 12px, 12px -12px, -12px 0px; } to { background-position: 1000px 1000px, 1000px 1012px, 1012px 988px, 988px 1000px; } }
+        .img-preview { box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 60px rgba(0,0,0,0.8); border: 2px solid #fff; background: transparent; transform-origin: center center; transition: transform 0.15s ease-out; }
+        .is-dragging #imageContainer { transition: none !important; }
+        .is-dragging { cursor: grabbing !important; }
     </style>
 </head>
-<body class="bg-black text-gray-100 min-h-screen font-sans overflow-hidden">
-
-    <!-- Экран ввода (когда нет хэша) -->
-    <div id="inputScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gray-950 transition-all duration-500">
-        <div class="w-full max-w-xl space-y-8 text-center">
-            <div class="inline-flex p-4 bg-blue-600/10 rounded-2xl mb-4 border border-blue-500/20">
-                <i data-lucide="link" class="w-10 h-10 text-blue-500"></i>
+<body class="bg-zinc-900 text-zinc-100 min-h-screen font-sans overflow-hidden">
+    <div id="inputScreen" class="fixed inset-0 z-50 flex flex-col items-center bg-zinc-950 transition-all duration-500 overflow-y-auto custom-scrollbar">
+        <div class="w-full max-w-4xl space-y-12 py-20 px-6">
+            <div class="text-center space-y-6">
+                <div class="inline-flex p-4 bg-zinc-800 rounded-3xl border border-zinc-700"><i data-lucide="file-search" class="w-10 h-10 text-zinc-400"></i></div>
+                <h1 class="text-4xl font-black tracking-tight text-white uppercase">File<span class="text-blue-500">Viewer</span></h1>
+                <div class="relative max-w-xl mx-auto"><input type="text" id="mainPathInput" class="block w-full px-8 py-4 border-2 border-zinc-800 rounded-2xl bg-zinc-900 text-xl text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-2xl" placeholder="Введите путь или URL"></div>
             </div>
-            <h1 class="text-3xl font-bold tracking-tight">Просмотр файла</h1>
-            <p class="text-gray-400">Введите путь к файлу или URL, чтобы открыть его на весь экран</p>
-            
-            <div class="relative group mt-8">
-                <input type="text" id="mainPathInput" 
-                    class="block w-full px-6 py-4 border-2 border-gray-800 rounded-2xl bg-gray-900 text-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xl"
-                    placeholder="example.json или https://...">
-                <div class="mt-4 text-xs text-gray-500">Нажмите Enter для просмотра</div>
+            <div class="space-y-6">
+                <div class="flex items-center gap-4"><div class="h-px flex-1 bg-zinc-800"></div><h2 class="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em]">Поддерживаемые форматы</h2><div class="h-px flex-1 bg-zinc-800"></div></div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-zinc-800/50 border-b border-zinc-800">
+                                <th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Расширение</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Рендеры</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">Иконка</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterSupportTable" class="divide-y divide-zinc-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="space-y-6 pb-20">
+                <div class="flex items-center gap-4"><div class="h-px flex-1 bg-zinc-800"></div><h2 class="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em]">Cross-Site API</h2><div class="h-px flex-1 bg-zinc-800"></div></div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-3">Использование API</h3>
+                    <div class="bg-zinc-950 rounded-xl p-5 font-mono text-[11px] text-zinc-400 border border-zinc-800 overflow-x-auto custom-scrollbar">
+<pre class="text-blue-400">
+window.onmessage = (e) => {
+  if (e.data.type === 'GET_ALL_ICONS_RESPONSE') {
+    const icons = e.data.icons; // Map { "ext": {svg, color} }
+    const jsIcon = icons["js"].svg;
+    const folder = icons["folder"]; // Ключ для папок
+    const unknown = icons["unknown"]; // Ключ для неизвестных
+  }
+};
+target.postMessage({ type: 'GET_ALL_ICONS_REQUEST' }, '*');
+</pre>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Экран просмотра (когда есть хэш) -->
-    <div id="previewScreen" class="fixed inset-0 z-40 hidden flex flex-col bg-gray-900">
-        
-        <!-- Кнопка закрытия (появляется при наведении в верхний правый угол) -->
-        <button onclick="location.hash=''" class="fixed top-4 right-4 z-[60] p-3 bg-white/10 hover:bg-red-500/80 backdrop-blur-md rounded-full text-white transition-all opacity-0 hover:opacity-100 focus:opacity-100 group" title="Закрыть">
-            <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
-
-        <!-- Индикатор загрузки -->
-        <div id="loader" class="absolute inset-0 bg-gray-950 flex items-center justify-center z-50 hidden">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    <div id="previewScreen" class="fixed inset-0 z-40 hidden flex flex-col bg-zinc-900">
+        <div id="debugOverlay" class="absolute top-16 right-4 z-[100] max-w-sm pointer-events-none flex flex-col gap-2 items-end">
+            <div id="debugLog" class="flex flex-col gap-1 items-end"></div>
+            <button id="clearDebug" class="pointer-events-auto hidden px-2 py-1 bg-zinc-800/50 hover:bg-zinc-700 text-[10px] text-zinc-500 rounded border border-zinc-700 w-fit transition-all">Очистить логи</button>
         </div>
-
-        <!-- Ошибка -->
-        <div id="errorState" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center p-12 text-center bg-gray-950">
-            <i data-lucide="alert-triangle" class="w-16 h-16 text-red-500 mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2 text-red-400">Не удалось загрузить файл</h2>
-            <p id="errorMessage" class="text-gray-400 mb-6"></p>
-            <button onclick="location.hash=''" class="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all font-medium">Попробовать другой путь</button>
+        <header class="h-12 flex-none bg-zinc-800/80 backdrop-blur-md border-b border-zinc-700 flex items-center justify-between px-4 z-50">
+            <div class="flex items-center gap-3 overflow-hidden"><span id="topPath" class="text-sm font-mono text-zinc-300 truncate"></span></div>
+            <div class="flex items-center gap-2">
+                <button id="copyAllBtn" class="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-700 rounded-md text-zinc-300 hover:text-white text-xs font-medium cursor-pointer"><i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Копировать всё</span></button>
+                <div class="w-px h-4 bg-zinc-700 mx-1"></div>
+                <a id="externalLink" href="#" target="_blank" class="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-700 rounded-md text-zinc-300 hover:text-white text-xs font-medium"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+            </div>
+        </header>
+        <div id="viewerContainer" class="flex-1 relative overflow-auto custom-scrollbar">
+            <div id="loader" class="absolute inset-0 bg-zinc-900 flex items-center justify-center z-50 hidden"><div class="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div></div>
+            <div id="errorState" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-zinc-900"><i data-lucide="cloud-off" class="w-12 h-12 text-zinc-600 mb-4"></i><h2 class="text-xl font-bold mb-2 text-zinc-300">Ошибка</h2><p id="errorMessage" class="text-zinc-500 text-sm mb-6"></p><button onclick="location.hash=''" class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-all font-medium">Вернуться</button></div>
+            <div id="textView" class="hidden min-h-full overflow-auto custom-scrollbar"><div id="codeViewport" class="code-viewport"></div></div>
+            <div id="markdownView" class="hidden min-h-full bg-zinc-50 text-zinc-900 p-6 md:p-12"><div id="mdContent" class="markdown-body max-w-4xl mx-auto"></div></div>
+            <div id="imageView" class="hidden min-h-full flex items-center justify-center checkerboard p-12 overflow-hidden relative cursor-grab select-none">
+                <div id="imgError" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-sm p-6"><i data-lucide="image-off" class="w-16 h-16 text-red-500 mb-4"></i><h3 class="text-xl font-bold text-white mb-2">Ошибка загрузки</h3></div>
+                <button id="resetViewBtn" class="absolute bottom-4 right-4 z-[60] p-3 bg-zinc-800/80 hover:bg-blue-600 backdrop-blur-md rounded-xl text-white border border-zinc-700 shadow-2xl flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Сбросить</span></button>
+                <div id="imageContainer" class="relative"><img id="imgElement" src="" alt="" class="img-preview block"></div>
+            </div>
+            <div id="hexView" class="hidden h-full overflow-auto custom-scrollbar"><div class="hex-container"><div class="hex-header"><div class="text-right pr-4">OFFSET</div><div><span>00</span><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>0A</span><span>0B</span><span>0C</span><span>0D</span><span>0E</span><span>0F</span></div><div><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div></div><div id="hexContent" class="hex-grid text-[13px]"></div></div></div>
         </div>
-
-        <!-- Контент -->
-        <div id="viewerContainer" class="flex-1 w-full h-full relative overflow-auto">
-            
-            <!-- Вьюверы -->
-            <div id="textView" class="hidden min-h-full">
-                <pre class="!m-0 !rounded-none min-h-screen"><code id="codeBlock" class="language-javascript"></code></pre>
-            </div>
-
-            <div id="markdownView" class="hidden min-h-full bg-white text-gray-900 p-8 md:p-16">
-                <div id="mdContent" class="markdown-body max-w-4xl mx-auto"></div>
-            </div>
-
-            <div id="imageView" class="hidden min-h-full flex items-center justify-center p-0">
-                <img id="imgElement" src="" alt="Preview" class="max-w-full max-h-screen object-contain shadow-2xl">
-            </div>
-
-            <div id="rawView" class="hidden min-h-full p-8 font-mono text-sm whitespace-pre-wrap bg-gray-950"></div>
-        </div>
+        <footer class="h-10 flex-none bg-zinc-800 border-t border-zinc-700 flex items-center justify-between px-4 text-[10px] uppercase tracking-wider text-zinc-500 font-medium">
+            <div class="flex items-center gap-4"><div id="statType" class="flex items-center"></div><div id="statSize" class="hidden sm:block font-bold text-zinc-400">0.00 KB</div><div id="statInfo" class="hidden md:block italic text-zinc-500"></div></div>
+            <div id="modeSwitcher" class="hidden flex bg-zinc-900 rounded-md p-0.5 border border-zinc-700 gap-1"></div>
+        </footer>
     </div>
-
 
     <script>
-        // Инициализация иконок
-        lucide.createIcons();
-
-        const inputScreen = document.getElementById('inputScreen');
-        const previewScreen = document.getElementById('previewScreen');
-        const mainPathInput = document.getElementById('mainPathInput');
-        const loader = document.getElementById('loader');
-        const errorState = document.getElementById('errorState');
-        const errorMessage = document.getElementById('errorMessage');
-
-        const views = {
-            text: document.getElementById('textView'),
-            md: document.getElementById('markdownView'),
-            img: document.getElementById('imageView'),
-            raw: document.getElementById('rawView')
+        window.fileIcons = {
+            colors: { js: '#f7df1e', ts: '#3178c6', py: '#3776ab', html: '#e34f26', css: '#1572b6', json: '#999', png: '#4caf50', jpg: '#ff9800', svg: '#ffb13b', webp: '#2196f3', zip: '#fbc02d', pdf: '#f44336', java: '#b07219', cs: '#390091', lua: '#000080', bin: '#71717a', exe: '#4ade80', folder: '#818cf8', default: '#94a3b8' },
+            groups: { image: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'], code: ['js', 'ts', 'py', 'java', 'cs', 'cpp', 'h', 'hpp', 'lua', 'sh', 'bat', 'html', 'css', 'json', 'xml', 'yaml', 'php', 'sql'], text: ['txt', 'md', 'log', 'ini', 'conf'], archive: ['zip', 'rar', '7z', 'tar'], binary: ['bin', 'exe', 'dll', 'so', 'o'] },
+            getIconByFilename: function(name) {
+                const clean = name.toLowerCase();
+                if (clean === 'folder') return this.renderIcon('folder', this.colors.folder);
+                if (clean === 'unknown') return this.renderIcon('unknown', this.colors.default);
+                const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : clean;
+                let foundGroup = null;
+                for (const [g, list] of Object.entries(this.groups)) { if (list.includes(ext)) { foundGroup = g; break; } }
+                if (!foundGroup) return this.renderIcon('unknown', this.colors.default);
+                return this.renderIcon(foundGroup, this.colors[ext] || this.colors[foundGroup], ext.toUpperCase());
+            },
+            getAllIcons: function() {
+                const icons = {};
+                [...new Set(Object.values(this.groups).flat())].forEach(ext => { icons[ext] = this.getIconByFilename(`file.${ext}`); });
+                icons['folder'] = this.getIconByFilename('folder');
+                icons['unknown'] = this.getIconByFilename('unknown');
+                return icons;
+            },
+            renderIcon: function(group, color, label = '') {
+                let body = '', labelX = 12, labelY = 14, rectX = 7, rectY = 9, showLabel = !!label;
+                if (group === 'image') { body = '<path d="M3 19h18v-14H3v14zM3 15l4-4 3 3 5-5 6 6"/><circle cx="7" cy="8" r="1"/>'; rectX = 11; rectY = 14; }
+                else if (group === 'code') body = '<polyline points="7 7 2 12 7 17"/><polyline points="17 7 22 12 17 17"/>';
+                else if (group === 'folder') { body = '<path d="M2 20h20V6H12l-2-2H2v16z"/>'; showLabel = false; }
+                else if (group === 'binary') { body = '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><g fill="'+color+'" stroke="none" style="font-family:monospace; font-size:3px; font-weight:bold;"><text x="7" y="13">010</text><text x="7" y="17">110</text></g>'; }
+                else if (group === 'unknown') { body = '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="10" y="16" font-family="serif" font-size="10" font-weight="bold" fill="'+color+'" stroke="none" text-anchor="middle">?</text>'; showLabel = false; }
+                else body = '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>';
+                if (label === 'CS') label = 'C#';
+                const labelMarkup = showLabel ? `<rect x="${rectX}" y="${rectY}" width="11" height="7" rx="1" fill="#111" stroke="none"/><text x="${rectX + 5.5}" y="${rectY + 5}" font-family="sans-serif" font-size="4.5" font-weight="800" fill="${color}" stroke="none" text-anchor="middle" style="pointer-events: none; user-select:none;">${label.length > 4 ? label.substring(0,3) : label}</text>` : '';
+                return { svg: `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="${color}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="user-select: none; pointer-events: none;">${body}${labelMarkup}</svg>`, color };
+            }
         };
 
-        // Обработка ввода в поиске
-        mainPathInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                let path = mainPathInput.value.trim();
-                if (path) {
-                    window.location.hash = path;
+        window.fileAnalyzer = {
+            signatures: [{ type:'png', hex:[0x89, 0x50, 0x4E, 0x47] }, { type:'jpg', hex:[0xFF, 0xD8, 0xFF] }, { type:'gif', hex:[0x47, 0x49, 0x46, 0x38] }, { type:'webp', hex:[0x52, 0x49, 0x46, 0x46], checkWebP: true }, { type:'pdf', hex:[0x25, 0x50, 0x44, 0x46] }, { type:'zip', hex:[0x50, 0x4B, 0x03, 0x04] }, { type:'exe', hex:[0x4D, 0x5A] }, { type:'svg', contains:'<svg' }],
+            analyze: function(fileName, buffer) {
+                const uint8 = new Uint8Array(buffer), extFromPath = fileName.split('?')[0].split('.').pop().toLowerCase();
+                let detected = null;
+                for (const sig of this.signatures) {
+                    if (sig.hex && sig.hex.every((byte, i) => uint8[i] === byte)) { if (sig.checkWebP) { if (uint8[8] === 0x57 && uint8[9] === 0x45 && uint8[10] === 0x42 && uint8[11] === 0x50) detected = 'webp'; } else detected = sig.type; }
+                    if (sig.contains && !detected) { try { if (new TextDecoder().decode(uint8.slice(0, 2000)).includes(sig.contains)) detected = sig.type; } catch(e){} }
+                    if (detected) break;
                 }
+                let isPureText = true; const checkLen = Math.min(uint8.length, 12000);
+                for (let i = 0; i < checkLen; i++) { const b = uint8[i]; if (b === 0 || (b < 32 && b !== 9 && b !== 10 && b !== 13)) { isPureText = false; break; } }
+                let textContent = null; if (isPureText) { try { textContent = new TextDecoder('utf-8', { fatal: true }).decode(buffer); } catch(e) { isPureText = false; } }
+                return { ext: detected || extFromPath, isText: isPureText, textContent: textContent };
             }
-        });
+        };
 
-        // Главная функция управления состоянием
+        const debugLog = document.getElementById('debugLog'), clearDebug = document.getElementById('clearDebug');
+        function logToOverlay(msg, type = 'error') {
+            const entry = document.createElement('div'); entry.className = `p-2 rounded text-[11px] font-mono backdrop-blur-sm border shadow-sm ${type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`;
+            entry.textContent = `> ${msg}`; debugLog.appendChild(entry); clearDebug.classList.remove('hidden');
+            setTimeout(() => { entry.remove(); if (debugLog.children.length === 0) clearDebug.classList.add('hidden'); }, 15000);
+        }
+        console.error = (...args) => { logToOverlay(args.join(' '), 'error'); };
+        console.warn = (...args) => { logToOverlay(args.join(' '), 'warn'); };
+        window.onerror = (msg, url, line) => { logToOverlay(`${msg} (строка ${line})`, 'error'); return false; };
+        clearDebug.onclick = () => { debugLog.innerHTML = ''; clearDebug.classList.add('hidden'); };
+
+        lucide.createIcons();
+        const inputScreen = document.getElementById('inputScreen'), previewScreen = document.getElementById('previewScreen'), mainPathInput = document.getElementById('mainPathInput'), loader = document.getElementById('loader'), errorState = document.getElementById('errorState'), errorMessage = document.getElementById('errorMessage'), topPath = document.getElementById('topPath'), externalLink = document.getElementById('externalLink'), statType = document.getElementById('statType'), statInfo = document.getElementById('statInfo'), statSize = document.getElementById('statSize'), modeSwitcher = document.getElementById('modeSwitcher');
+        const views = { text: document.getElementById('textView'), md: document.getElementById('markdownView'), img: document.getElementById('imageView'), hex: document.getElementById('hexView') };
+        let currentData = { buffer: null, text: null, ext: '', url: '' };
+
+        mainPathInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { let path = mainPathInput.value.trim(); if (path) window.location.hash = path; } });
+        topPath.onclick = () => { const path = window.location.hash.substring(1); if (!path) return; navigator.clipboard.writeText(path).then(() => { const originalText = topPath.textContent; topPath.textContent = "Скопировано!"; topPath.style.color = "#3b82f6"; setTimeout(() => { topPath.textContent = originalText; topPath.style.color = ""; }, 1000); }); };
+        document.getElementById('copyAllBtn').onclick = () => { if (!currentData.text) return; navigator.clipboard.writeText(currentData.text).then(() => { const btn = document.getElementById('copyAllBtn'), originalHtml = btn.innerHTML; btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> <span>Готово!</span>'; btn.classList.add('text-green-400'); setTimeout(() => { btn.innerHTML = originalHtml; btn.classList.remove('text-green-400'); lucide.createIcons(); }, 2000); }); };
+
         async function handleHashChange() {
             const hash = window.location.hash.substring(1);
-            
-            if (!hash) {
-                // Состояние: Ввод ссылки
-                inputScreen.classList.remove('hidden');
-                previewScreen.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                mainPathInput.focus();
-                return;
-            }
-
-            // Состояние: Просмотр
-            inputScreen.classList.add('hidden');
-            previewScreen.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            loadPath(hash);
+            if (!hash) { inputScreen.classList.remove('hidden'); previewScreen.classList.add('hidden'); mainPathInput.focus(); return; }
+            inputScreen.classList.add('hidden'); previewScreen.classList.remove('hidden');
+            topPath.textContent = hash; externalLink.href = hash; loadPath(hash);
         }
 
         async function loadPath(path) {
-            showLoader(true);
-            errorState.classList.add('hidden');
-            Object.values(views).forEach(v => v.classList.add('hidden'));
-
+            showLoader(true); errorState.classList.add('hidden'); Object.values(views).forEach(v => v.classList.add('hidden'));
             try {
-                // Если путь не содержит протокола и не начинается с / или ./, добавляем ./
-                const url = (path.includes('://') || path.startsWith('/') || path.startsWith('.')) 
-                    ? path 
-                    : './' + path;
+                const url = (path.includes('://') || path.startsWith('/') || path.startsWith('.')) ? path : './' + path;
+                const response = await fetch(url); if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+                const buffer = await response.arrayBuffer(), analysis = window.fileAnalyzer.analyze(path, buffer);
+                currentData = { buffer, ext: analysis.ext, url, text: analysis.textContent };
+                setupInterface();
+            } catch (err) { showError(err.message); } finally { showLoader(false); }
+        }
 
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Статус: ${response.status} ${response.statusText}`);
-                }
+        function setupInterface() {
+            const ext = currentData.ext, isText = currentData.text !== null;
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+            const isRenderable = isText && (ext === 'md' || ext === 'html');
+            const isCode = isText && ['js', 'ts', 'py', 'java', 'cs', 'cpp', 'h', 'hpp', 'lua', 'sh', 'bat', 'html', 'css', 'json', 'xml', 'yaml', 'php', 'sql'].includes(ext);
+            if (isImage) switchMode('visual'); else if (isRenderable || isCode) switchMode('visual'); else if (isText) switchMode('text'); else switchMode('hex');
+        }
 
-                const ext = path.split('?')[0].split('.').pop().toLowerCase();
+        function createModeButton(id, label, active) {
+            const btn = document.createElement('button'); btn.textContent = label;
+            const activeClass = 'px-3 py-1 rounded-sm transition-all bg-blue-600 text-white shadow-md cursor-pointer text-[10px] font-bold';
+            const inactiveClass = 'px-3 py-1 rounded-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer text-[10px] font-bold';
+            btn.className = active ? activeClass : inactiveClass;
+            btn.onclick = () => switchMode(id); return btn;
+        }
 
-                if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
-                    showImage(url);
-                } else if (ext === 'md') {
-                    const text = await response.text();
-                    showMarkdown(text);
-                } else if (['js', 'py', 'css', 'html', 'json', 'ts', 'c', 'cpp', 'java', 'php', 'sql', 'txt'].includes(ext)) {
-                    const text = await response.text();
-                    showCode(text, ext);
-                } else {
-                    const text = await response.text();
-                    showRaw(text);
-                }
-
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                showLoader(false);
+        function updateSwitcher(currentMode) {
+            modeSwitcher.innerHTML = '';
+            const ext = currentData.ext, isText = currentData.text !== null;
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+            const isRenderable = isText && (ext === 'md' || ext === 'html');
+            const isCode = isText && ['js', 'py', 'css', 'json', 'ts', 'c', 'cpp', 'cs', 'php', 'sql', 'xml', 'lua', 'sh', 'bat', 'h', 'hpp', 'java'].includes(ext);
+            const modes = [];
+            if (isImage || isRenderable || isCode) {
+                let label = 'Визуал';
+                if (isImage) label = (ext === 'svg' ? 'Вектор' : 'Картинка');
+                else if (isRenderable) label = 'Рендер';
+                else if (isCode) label = 'Подсветка';
+                modes.push({ id: 'visual', label });
             }
+            if (isText && !['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) modes.push({ id: 'text', label: 'Текст' });
+            modes.push({ id: 'hex', label: 'HEX' });
+            modes.forEach(m => { modeSwitcher.appendChild(createModeButton(m.id, m.label, m.id === currentMode)); });
+            modeSwitcher.classList.remove('hidden');
         }
 
-        function showLoader(show) {
-            loader.classList.toggle('hidden', !show);
+        function switchMode(mode) {
+            Object.values(views).forEach(v => v.classList.add('hidden')); updateSwitcher(mode);
+            if (mode === 'visual') {
+                if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(currentData.ext)) showImage();
+                else if (currentData.ext === 'md') showMarkdown();
+                else if (currentData.text !== null) showCode(true);
+                else showHex();
+            } else if (mode === 'text') showCode(false);
+            else if (mode === 'hex') showHex();
+            updateStats(mode);
         }
 
-        function showError(msg) {
-            errorState.classList.remove('hidden');
-            errorMessage.textContent = msg;
+        function updateStats(mode) {
+            statType.innerHTML = `<span class="bg-zinc-700 px-2 py-0.5 rounded text-zinc-300 font-bold">${currentData.ext.toUpperCase()}</span>`;
+            statSize.textContent = formatBytes(currentData.buffer.byteLength);
+            if (mode === 'hex' && currentData.text === null) statInfo.textContent = `${currentData.buffer.byteLength.toLocaleString()} БАЙТ`;
+            else if (currentData.text !== null) statInfo.textContent = `${currentData.text.length.toLocaleString()} СИМВ.`;
+            else statInfo.textContent = '';
         }
 
-        function showImage(url) {
-            views.img.classList.remove('hidden');
-            document.getElementById('imgElement').src = url;
+        let imgState = { scale: 1, x: 0, y: 0, isDragging: false, startX: 0, startY: 0 };
+        function resetImgTransform() { imgState.scale = 1; imgState.x = 0; imgState.y = 0; applyImgTransform(); }
+        function applyImgTransform() { const el = document.getElementById('imageContainer'); if (el) requestAnimationFrame(() => { el.style.transform = `translate(${imgState.x}px, ${imgState.y}px) scale(${imgState.scale})`; }); }
+        function showImage() {
+            const imgView = views.img, imgEl = document.getElementById('imgElement'), imgErr = document.getElementById('imgError');
+            imgView.classList.remove('hidden'); imgErr.classList.add('hidden'); imgEl.classList.add('invisible'); resetImgTransform();
+            imgView.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.85 : 1.15; imgState.scale *= delta; imgState.scale = Math.max(0.01, Math.min(100, imgState.scale)); applyImgTransform(); };
+            imgView.onmousedown = (e) => { if (e.button !== 0) return; imgState.isDragging = true; imgView.classList.add('is-dragging'); imgState.startX = e.clientX - imgState.x; imgState.startY = e.clientY - imgState.y; e.preventDefault(); };
+            if (!window.hasGlobalImgEvents) { window.addEventListener('mousemove', (e) => { if (!imgState.isDragging) return; imgState.x = e.clientX - imgState.startX; imgState.y = e.clientY - imgState.startY; applyImgTransform(); }); window.addEventListener('mouseup', () => { imgState.isDragging = false; document.getElementById('imageView').classList.remove('is-dragging'); }); window.hasGlobalImgEvents = true; }
+            const isSvg = currentData.ext === 'svg', blob = new Blob([currentData.buffer], { type: isSvg ? 'image/svg+xml' : 'image/png' });
+            imgEl.src = URL.createObjectURL(blob);
+            imgEl.onload = () => { imgEl.classList.remove('invisible'); statInfo.textContent = isSvg ? "VECTOR SVG" : `${imgEl.naturalWidth} x ${imgEl.naturalHeight} PX`; };
+            imgEl.onerror = () => { imgEl.classList.add('invisible'); imgErr.classList.remove('hidden'); };
         }
 
-        function showMarkdown(content) {
-            views.md.classList.remove('hidden');
-            document.getElementById('mdContent').innerHTML = marked.parse(content);
-            views.md.style.overflow = 'auto';
+        function showMarkdown() { views.md.classList.remove('hidden'); document.getElementById('mdContent').innerHTML = marked.parse(currentData.text || ''); }
+        function showCode(useHighlight) {
+            views.text.classList.remove('hidden'); const viewport = document.getElementById('codeViewport'); viewport.innerHTML = '';
+            const content = currentData.text || '', lines = content.endsWith('\n') ? content.slice(0, -1).split('\n') : content.split('\n');
+            const langMap = { 'js': 'javascript', 'py': 'python', 'html': 'markup', 'xml': 'markup', 'svg': 'markup', 'java': 'java', 'cs': 'csharp', 'lua': 'lua', 'sh': 'bash', 'bat': 'batch', 'h': 'cpp', 'hpp': 'cpp' };
+            const lang = useHighlight ? (langMap[currentData.ext] || currentData.ext) : 'none';
+            const fragment = document.createDocumentFragment();
+            lines.forEach((lineText, i) => {
+                const lineDiv = document.createElement('div'); lineDiv.className = 'code-line';
+                const numDiv = document.createElement('div'); numDiv.className = 'code-num'; numDiv.textContent = i + 1;
+                const textDiv = document.createElement('div'); textDiv.className = 'code-text';
+                const pre = document.createElement('pre'), code = document.createElement('code'); code.className = `language-${lang}`; code.textContent = lineText || ' ';
+                pre.appendChild(code); textDiv.appendChild(pre); lineDiv.appendChild(numDiv); lineDiv.appendChild(textDiv); fragment.appendChild(lineDiv);
+            });
+            viewport.appendChild(fragment); if (useHighlight && lang !== 'none') viewport.querySelectorAll('code').forEach(c => Prism.highlightElement(c));
         }
 
-        function showCode(content, ext) {
-            views.text.classList.remove('hidden');
-            const codeBlock = document.getElementById('codeBlock');
-            const langMap = {
-                'js': 'javascript',
-                'py': 'python',
-                'html': 'markup',
-                'txt': 'none'
+        function showHex() {
+            views.hex.classList.remove('hidden'); const container = document.getElementById('hexContent'); container.innerHTML = '';
+            const view = new Uint8Array(currentData.buffer), rowSize = 16, fragment = document.createDocumentFragment(), limit = Math.min(view.length, 48000), byteToCharsMap = new Map();
+            for (let i = 0; i < limit; i += rowSize) {
+                const row = document.createElement('div'); row.className = 'hex-row';
+                const offset = document.createElement('div'); offset.className = 'hex-offset'; offset.textContent = i.toString(16).padStart(8, '0').toUpperCase(); row.appendChild(offset);
+                const bytesContainer = document.createElement('div'); bytesContainer.className = 'hex-bytes';
+                const asciiContainer = document.createElement('div'); asciiContainer.className = 'hex-ascii';
+                for (let j = 0; j < rowSize; j++) {
+                    const idx = i + j, byteEl = document.createElement('span'); byteEl.className = 'hex-byte';
+                    if (idx < view.length) { byteEl.dataset.idx = idx; byteEl.textContent = view[idx].toString(16).padStart(2, '0').toUpperCase(); }
+                    bytesContainer.appendChild(byteEl);
+                }
+                for (let j = 0; j < rowSize; j++) {
+                    const idx = i + j, charEl = document.createElement('span'); charEl.className = 'hex-char';
+                    if (idx < view.length) {
+                        const b1 = view[idx]; let char = '·', indices = [idx];
+                        if (b1 >= 0xC0 && b1 <= 0xDF && (idx + 1 < view.length)) { try { char = new TextDecoder('utf-8').decode(view.subarray(idx, idx + 2)); indices.push(idx + 1); } catch(e) { char = '·'; } }
+                        else if (b1 >= 0x80 && b1 <= 0xBF) { char = ''; if (idx > 0 && view[idx-1] >= 0xC0) indices.unshift(idx - 1); }
+                        else if (b1 >= 0x20 && b1 <= 0x7E) char = String.fromCharCode(b1);
+                        else if (b1 === 9) char = '⇥'; else if (b1 === 10 || b1 === 13) char = '↵';
+                        else if (b1 >= 160) { try { char = String.fromCharCode(b1); } catch(e) { char = '·'; } }
+                        charEl.textContent = char || '·'; charEl.dataset.idx = idx; charEl.dataset.related = indices.join(',');
+                        indices.forEach(id => { if (!byteToCharsMap.has(id)) byteToCharsMap.set(id, []); byteToCharsMap.get(id).push(charEl); });
+                    } else charEl.textContent = '';
+                    asciiContainer.appendChild(charEl);
+                }
+                row.appendChild(bytesContainer); row.appendChild(asciiContainer); fragment.appendChild(row);
+            }
+            container.appendChild(fragment);
+            container.onmouseover = (e) => {
+                const target = e.target; let idx = target.dataset.idx; if (!idx) return; idx = parseInt(idx);
+                let relatedIndices = [idx]; const charEl = byteToCharsMap.get(idx)?.[0];
+                if (charEl && charEl.dataset.related) relatedIndices = charEl.dataset.related.split(',').map(Number);
+                relatedIndices.forEach(id => { container.querySelector(`.hex-byte[data-idx="${id}"]`)?.classList.add('active'); container.querySelector(`.hex-char[data-idx="${id}"]`)?.classList.add('active'); (byteToCharsMap.get(id) || []).forEach(el => el.classList.add('active')); });
             };
-            const lang = langMap[ext] || ext;
-            codeBlock.className = `language-${lang}`;
-            codeBlock.textContent = content;
-            Prism.highlightElement(codeBlock);
-            views.text.style.overflow = 'auto';
+            container.onmouseout = () => { container.querySelectorAll('.active').forEach(el => el.classList.remove('active')); };
         }
 
-        function showRaw(content) {
-            views.raw.classList.remove('hidden');
-            views.raw.textContent = content;
-            views.raw.style.overflow = 'auto';
+        function renderSupportTable() {
+            const tbody = document.getElementById('masterSupportTable'); if (!tbody) return;
+            const groups = window.fileIcons.groups, smartTypes = window.fileAnalyzer.signatures.map(s => s.type);
+            let allItems = [];
+            Object.entries(groups).forEach(([groupId, exts]) => { exts.forEach(ext => { allItems.push({ ext, group: groupId }); }); });
+            allItems.sort((a, b) => a.ext.localeCompare(b.ext));
+            allItems.unshift({ ext: 'unknown', group: 'unknown', system: true });
+            allItems.unshift({ ext: 'folder', group: 'folder', system: true });
+            tbody.innerHTML = allItems.map(item => {
+                const iconData = window.fileIcons.getIconByFilename(item.ext);
+                const isImage = item.group === 'image', isCode = item.group === 'code', isRenderable = ['md', 'html', 'xml'].includes(item.ext), isText = item.group === 'text' || isCode || isRenderable;
+                let renders = [];
+                if (isImage) renders.push('<span class="text-blue-400">Визуал</span>');
+                else if (isRenderable) renders.push('<span class="text-blue-400">Рендер</span>');
+                else if (isCode) renders.push('<span class="text-blue-400">Подсветка</span>');
+                if (isText && !['jpg', 'png', 'gif', 'webp'].includes(item.ext)) renders.push('<span class="text-emerald-400 text-[9px]">Текст</span>');
+                renders.push('<span class="text-orange-400">HEX</span>');
+                return `<tr class="hover:bg-zinc-800/30 transition-colors group border-b border-zinc-800/50"><td class="px-6 py-4"><div class="flex items-center gap-3"><span class="font-mono text-sm text-zinc-200 font-bold">${item.system ? '' : '.'}${item.ext}</span>${smartTypes.includes(item.ext) ? '<span class="text-[8px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">AI</span>' : ''}</div></td><td class="px-6 py-4"><div class="flex gap-2 text-[9px] font-bold uppercase tracking-tight">${renders.join('<span class="text-zinc-700">/</span>')}</div></td><td class="px-6 py-4 text-right"><div class="inline-flex items-center justify-center p-2 bg-zinc-950 rounded-xl border border-zinc-800 group-hover:border-zinc-600 transition-all shadow-inner">${iconData.svg}</div></td></tr>`;
+            }).join('');
         }
 
-        window.addEventListener('hashchange', handleHashChange);
-        handleHashChange();
+        window.addEventListener('message', (e) => { if (e.data && e.data.type === 'GET_ALL_ICONS_REQUEST') { e.source.postMessage({ type: 'GET_ALL_ICONS_RESPONSE', icons: window.fileIcons.getAllIcons() }, '*'); } });
+        window.addEventListener('hashchange', handleHashChange); renderSupportTable(); handleHashChange();
+        const readySignal = { type: 'VIEWER_READY', version: '1.0' }; if (window.parent !== window) window.parent.postMessage(readySignal, '*'); if (window.opener) window.opener.postMessage(readySignal, '*');
     </script>
 </body>
 </html>
