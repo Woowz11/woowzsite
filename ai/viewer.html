@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр файлов</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Prism.js для подсветки кода -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <!-- Marked.js для Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .markdown-body img { max-width: 100%; }
+        pre[class*="language-"] { margin: 0; border-radius: 0.5rem; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-black text-gray-100 min-h-screen font-sans overflow-hidden">
+
+    <!-- Экран ввода (когда нет хэша) -->
+    <div id="inputScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gray-950 transition-all duration-500">
+        <div class="w-full max-w-xl space-y-8 text-center">
+            <div class="inline-flex p-4 bg-blue-600/10 rounded-2xl mb-4 border border-blue-500/20">
+                <i data-lucide="link" class="w-10 h-10 text-blue-500"></i>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight">Просмотр файла</h1>
+            <p class="text-gray-400">Введите путь к файлу или URL, чтобы открыть его на весь экран</p>
+            
+            <div class="relative group mt-8">
+                <input type="text" id="mainPathInput" 
+                    class="block w-full px-6 py-4 border-2 border-gray-800 rounded-2xl bg-gray-900 text-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xl"
+                    placeholder="example.json или https://...">
+                <div class="mt-4 text-xs text-gray-500">Нажмите Enter для просмотра</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран просмотра (когда есть хэш) -->
+    <div id="previewScreen" class="fixed inset-0 z-40 hidden flex flex-col bg-gray-900">
+        
+        <!-- Кнопка закрытия (появляется при наведении в верхний правый угол) -->
+        <button onclick="location.hash=''" class="fixed top-4 right-4 z-[60] p-3 bg-white/10 hover:bg-red-500/80 backdrop-blur-md rounded-full text-white transition-all opacity-0 hover:opacity-100 focus:opacity-100 group" title="Закрыть">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Индикатор загрузки -->
+        <div id="loader" class="absolute inset-0 bg-gray-950 flex items-center justify-center z-50 hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+
+        <!-- Ошибка -->
+        <div id="errorState" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center p-12 text-center bg-gray-950">
+            <i data-lucide="alert-triangle" class="w-16 h-16 text-red-500 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2 text-red-400">Не удалось загрузить файл</h2>
+            <p id="errorMessage" class="text-gray-400 mb-6"></p>
+            <button onclick="location.hash=''" class="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all font-medium">Попробовать другой путь</button>
+        </div>
+
+        <!-- Контент -->
+        <div id="viewerContainer" class="flex-1 w-full h-full relative overflow-auto">
+            
+            <!-- Вьюверы -->
+            <div id="textView" class="hidden min-h-full">
+                <pre class="!m-0 !rounded-none min-h-screen"><code id="codeBlock" class="language-javascript"></code></pre>
+            </div>
+
+            <div id="markdownView" class="hidden min-h-full bg-white text-gray-900 p-8 md:p-16">
+                <div id="mdContent" class="markdown-body max-w-4xl mx-auto"></div>
+            </div>
+
+            <div id="imageView" class="hidden min-h-full flex items-center justify-center p-0">
+                <img id="imgElement" src="" alt="Preview" class="max-w-full max-h-screen object-contain shadow-2xl">
+            </div>
+
+            <div id="rawView" class="hidden min-h-full p-8 font-mono text-sm whitespace-pre-wrap bg-gray-950"></div>
+        </div>
+    </div>
+
+
+    <script>
+        // Инициализация иконок
+        lucide.createIcons();
+
+        const inputScreen = document.getElementById('inputScreen');
+        const previewScreen = document.getElementById('previewScreen');
+        const mainPathInput = document.getElementById('mainPathInput');
+        const loader = document.getElementById('loader');
+        const errorState = document.getElementById('errorState');
+        const errorMessage = document.getElementById('errorMessage');
+
+        const views = {
+            text: document.getElementById('textView'),
+            md: document.getElementById('markdownView'),
+            img: document.getElementById('imageView'),
+            raw: document.getElementById('rawView')
+        };
+
+        // Обработка ввода в поиске
+        mainPathInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                let path = mainPathInput.value.trim();
+                if (path) {
+                    window.location.hash = path;
+                }
+            }
+        });
+
+        // Главная функция управления состоянием
+        async function handleHashChange() {
+            const hash = window.location.hash.substring(1);
+            
+            if (!hash) {
+                // Состояние: Ввод ссылки
+                inputScreen.classList.remove('hidden');
+                previewScreen.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                mainPathInput.focus();
+                return;
+            }
+
+            // Состояние: Просмотр
+            inputScreen.classList.add('hidden');
+            previewScreen.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            loadPath(hash);
+        }
+
+        async function loadPath(path) {
+            showLoader(true);
+            errorState.classList.add('hidden');
+            Object.values(views).forEach(v => v.classList.add('hidden'));
+
+            try {
+                // Если путь не содержит протокола и не начинается с / или ./, добавляем ./
+                const url = (path.includes('://') || path.startsWith('/') || path.startsWith('.')) 
+                    ? path 
+                    : './' + path;
+
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Статус: ${response.status} ${response.statusText}`);
+                }
+
+                const ext = path.split('?')[0].split('.').pop().toLowerCase();
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
+                    showImage(url);
+                } else if (ext === 'md') {
+                    const text = await response.text();
+                    showMarkdown(text);
+                } else if (['js', 'py', 'css', 'html', 'json', 'ts', 'c', 'cpp', 'java', 'php', 'sql', 'txt'].includes(ext)) {
+                    const text = await response.text();
+                    showCode(text, ext);
+                } else {
+                    const text = await response.text();
+                    showRaw(text);
+                }
+
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        function showLoader(show) {
+            loader.classList.toggle('hidden', !show);
+        }
+
+        function showError(msg) {
+            errorState.classList.remove('hidden');
+            errorMessage.textContent = msg;
+        }
+
+        function showImage(url) {
+            views.img.classList.remove('hidden');
+            document.getElementById('imgElement').src = url;
+        }
+
+        function showMarkdown(content) {
+            views.md.classList.remove('hidden');
+            document.getElementById('mdContent').innerHTML = marked.parse(content);
+            views.md.style.overflow = 'auto';
+        }
+
+        function showCode(content, ext) {
+            views.text.classList.remove('hidden');
+            const codeBlock = document.getElementById('codeBlock');
+            const langMap = {
+                'js': 'javascript',
+                'py': 'python',
+                'html': 'markup',
+                'txt': 'none'
+            };
+            const lang = langMap[ext] || ext;
+            codeBlock.className = `language-${lang}`;
+            codeBlock.textContent = content;
+            Prism.highlightElement(codeBlock);
+            views.text.style.overflow = 'auto';
+        }
+
+        function showRaw(content) {
+            views.raw.classList.remove('hidden');
+            views.raw.textContent = content;
+            views.raw.style.overflow = 'auto';
+        }
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange();
+    </script>
+</body>
+</html>
