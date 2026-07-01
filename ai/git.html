@@ -70,43 +70,23 @@
         .file-item-list.selected { background-color: #454545; border-color: #0078d7; }
         .list-header { display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 6px 12px; border-bottom: 1px solid #323232; font-size: 12px; color: #aaa; sticky; top: 0; z-index: 10; background: #1e1e1e; }
 
-        /* Indicators */
-        .cached-indicator {
+        /* Indicators - strictly on icons */
+        .cached-indicator, .tree-indicator, .list-indicator {
             position: absolute !important;
-            bottom: -2px !important;
-            right: -2px !important;
-            width: 14px !important;
-            height: 14px !important;
+            bottom: -1px !important;
+            right: -1px !important;
             background-color: #ff0000 !important;
             border-radius: 50% !important;
-            border: 2px solid #1e1e1e !important;
+            border: 1.5px solid #1e1e1e !important;
             z-index: 50 !important;
             display: none;
+            pointer-events: none;
         }
-        .tree-indicator {
-            position: absolute !important;
-            bottom: -3px !important;
-            right: -3px !important;
-            width: 12px !important;
-            height: 12px !important;
-            background-color: #ff0000 !important;
-            border-radius: 50% !important;
-            border: 2px solid #1e1e1e !important;
-            z-index: 50 !important;
-            display: none;
-        }
-        .list-indicator {
-            position: absolute !important;
-            bottom: -3px !important;
-            right: -3px !important;
-            width: 12px !important;
-            height: 12px !important;
-            background-color: #ff0000 !important;
-            border-radius: 50% !important;
-            border: 2px solid #1e1e1e !important;
-            z-index: 50 !important;
-            display: none;
-        }
+        .cached-indicator { width: 14px !important; height: 14px !important; bottom: -2px !important; right: -2px !important; }
+        .list-indicator { width: 10px !important; height: 10px !important; }
+        .tree-indicator { width: 8px !important; height: 8px !important; }
+        
+        .icon-container { position: relative !important; }
 
         /* Selection */
         .selection-box { position: fixed; border: 1px solid #0078d7; background-color: rgba(0, 120, 215, 0.2); pointer-events: none; z-index: 1000; display: none; }
@@ -117,19 +97,28 @@
         .sidebar-item.active { background-color: rgba(0, 120, 215, 0.3); border-left: 2px solid #0078d7; }
 
         .sidebar-resizer {
-            width: 4px;
+            width: 6px;
             cursor: col-resize;
             background-color: transparent;
             transition: background-color 0.2s;
             z-index: 100;
+            position: relative;
+        }
+        .sidebar-resizer::after {
+            content: "";
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 2px;
+            margin-left: -1px;
+            background-color: #323232;
         }
         .sidebar-resizer:hover, .sidebar-resizer.resizing {
             background-color: #0078d7;
         }
-
-        /* Markdown */
-        .markdown-preview { color: #d4d4d4; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
-        .markdown-preview h1, .markdown-preview h2 { border-bottom: 1px solid #333; padding-bottom: 0.3em; margin-bottom: 1em; color: #fff; }
+        
+        .is-resizing iframe, .is-selecting iframe {
+            pointer-events: none !important;
+        }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 12px; }
@@ -144,33 +133,17 @@
         .breadcrumb-input { display: none; background: transparent; width: 100%; border: none; outline: none; color: white; }
         .address-bar.editing .breadcrumb-display { display: none; }
         .address-bar.editing .breadcrumb-input { display: block; }
-        
+
         /* Interactive Cursors */
-        button, 
-        input[type="checkbox"], 
-        input[type="range"], 
-        .breadcrumb-item,
-        .sidebar-item,
-        .file-item,
-        .file-item-list,
-        .ribbon-tab,
-        .ribbon-button {
+        button, input[type="checkbox"], input[type="range"], .breadcrumb-item, .sidebar-item, .file-item, .file-item-list, .ribbon-tab, .ribbon-button {
             cursor: pointer !important;
         }
-        
-        button:disabled, input:disabled {
-            cursor: not-allowed !important;
-        }
-
-        #btn-status-grid, #btn-status-list { pointer-events: auto !important; }
-        #btn-status-grid:hover, #btn-status-list:hover { color: #fff; }
+        button:disabled, input:disabled { cursor: not-allowed !important; }
     </style>
 </head>
 <body class="h-screen overflow-hidden bg-[#1e1e1e] text-white">
     
-    <div id="notifications-container" class="fixed top-0 left-0 right-0 z-[2000] flex flex-col items-center pointer-events-none p-4 space-y-2"></div>
-    
-    <!-- Hidden Viewer for Icon Service -->
+    <div id="notifications-container" class="fixed top-0 left-0 right-0 z-[5000] flex flex-col items-center pointer-events-none p-4 space-y-2"></div>
     <iframe id="icon-service-worker" style="display:none"></iframe>
 
     <div id="app" class="h-full flex flex-col">
@@ -178,16 +151,17 @@
         <div class="bg-win-dark border-b border-[#323232] flex flex-col shrink-0">
             <div class="flex items-center justify-between p-1 px-3 text-xs text-gray-300">
                 <div class="flex space-x-1">
-                    <button class="ribbon-tab active px-3 py-1.5" data-tab="tab-file">Файл</button>
-                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-home">Главная</button>
-                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-share">Поделиться</button>
-                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-view">Вид</button>
+                    <button class="ribbon-tab active px-3 py-1.5" data-tab="tab-file" onclick="switchRibbonTab('tab-file', this)">Файл</button>
+                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-home" onclick="switchRibbonTab('tab-home', this)">Главная</button>
+                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-share" onclick="switchRibbonTab('tab-share', this)">Поделиться</button>
+                    <button class="ribbon-tab px-3 py-1.5" data-tab="tab-view" onclick="switchRibbonTab('tab-view', this)">Вид</button>
                 </div>
-                <button class="ribbon-tab px-3 py-1.5 flex items-center" data-tab="tab-settings">
+                <button class="ribbon-tab px-3 py-1.5 flex items-center" data-tab="tab-settings" onclick="switchRibbonTab('tab-settings', this)">
                     <i data-lucide="settings" class="w-3.5 h-3.5 mr-1"></i>Настройки
                 </button>
             </div>
 
+            <!-- Tab: Файл -->
             <div id="tab-file" class="ribbon-panel active">
                 <div class="ribbon-group-container">
                     <div class="ribbon-group">
@@ -239,10 +213,10 @@
             <div id="tab-view" class="ribbon-panel">
                 <div class="ribbon-group-container">
                     <div class="ribbon-group">
-                        <div class="ribbon-button" onclick="setViewMode('grid')">
+                        <div class="ribbon-button" id="ribbon-view-grid" onclick="setViewMode('grid')">
                             <i data-lucide="layout-grid" class="text-blue-400"></i><span>Сетка</span>
                         </div>
-                        <div class="ribbon-button" onclick="setViewMode('list')">
+                        <div class="ribbon-button" id="ribbon-view-list" onclick="setViewMode('list')">
                             <i data-lucide="list" class="text-blue-300"></i><span>Список</span>
                         </div>
                     </div>
@@ -309,25 +283,9 @@
                     </div>
                     <button onclick="navigateTo(currentPath, false, true)" class="ml-2 hover:bg-white/10 p-0.5 rounded shrink-0"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-400"></i></button>
                 </div>
-                <div class="w-64 relative group">
-                    <div class="flex items-center bg-[#1e1e1e] border border-[#3d3d3d] px-2 py-0.5 rounded-sm">
-                        <input id="search-input" type="text" class="flex-1 outline-none text-sm bg-transparent" placeholder="Поиск...">
-                        <i data-lucide="search" class="w-3 h-3 text-gray-400"></i>
-                    </div>
-                    <!-- Search Hint -->
-                    <div id="search-hint" class="hidden group-focus-within:block absolute top-full right-0 w-72 bg-[#2d2d2d] border border-[#454545] shadow-2xl p-4 z-[500] text-[11px] mt-2 rounded-md text-gray-300 transition-all duration-200">
-                        <p class="font-bold border-b border-[#3d3d3d] mb-3 pb-1 text-blue-400 uppercase text-[10px] tracking-widest">Профессиональный поиск</p>
-                        <ul class="space-y-2">
-                            <li class="flex justify-between items-center"><span>Только папки</span> <code class="bg-black/50 px-1.5 py-0.5 rounded text-orange-400 font-mono text-[10px]">t:dir</code></li>
-                            <li class="flex justify-between items-center"><span>Только файлы</span> <code class="bg-black/50 px-1.5 py-0.5 rounded text-orange-400 font-mono text-[10px]">t:file</code></li>
-                            <li class="flex justify-between items-center"><span>Расширение</span> <code class="bg-black/50 px-1.5 py-0.5 rounded text-orange-400 font-mono text-[10px]">e:js</code></li>
-                            <li class="flex justify-between items-center"><span>По имени</span> <code class="bg-black/50 px-1.5 py-0.5 rounded text-orange-400 font-mono text-[10px]">main</code></li>
-                        </ul>
-                        <div class="mt-4 pt-3 border-t border-[#3d3d3d] text-[10px] text-gray-500 leading-relaxed">
-                            <span class="block mb-1 opacity-70">Комбинируйте теги:</span>
-                            <span class="text-blue-400 hover:underline cursor-pointer font-mono" onclick="const si=document.getElementById('search-input'); si.value='t:file e:json config'; si.focus(); si.dispatchEvent(new Event('input'))">t:file e:json config</span>
-                        </div>
-                    </div>
+                <div class="w-64 flex items-center bg-[#1e1e1e] border border-[#3d3d3d] px-2 py-0.5 rounded-sm">
+                    <input id="search-input" type="text" class="flex-1 outline-none text-sm bg-transparent" placeholder="Поиск...">
+                    <i data-lucide="search" class="w-3 h-3 text-gray-400"></i>
                 </div>
             </div>
         </div>
@@ -335,11 +293,9 @@
         <!-- Main Body -->
         <div class="flex-1 flex overflow-hidden">
             <aside id="sidebar" class="w-64 bg-[#1e1e1e] border-r border-[#323232] overflow-y-auto pt-2 shrink-0">
-<!-- Hierarchy label removed -->
                 <div id="sidebar-tree"></div>
             </aside>
             <div id="sidebar-resizer" class="sidebar-resizer shrink-0"></div>
-
             <main id="explorer-content" class="flex-1 bg-[#1e1e1e] overflow-y-auto relative"></main>
         </div>
 
@@ -380,7 +336,7 @@
                 <div class="bg-black/20 p-4 rounded border border-[#3d3d3d]">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs text-gray-400 uppercase font-bold">GitHub Token</label>
-                        <span class="text-[10px] text-blue-500 cursor-pointer" onclick="window.open('https://github.com/settings/tokens', '_blank')">Как получить?</span>
+                        <button onclick="saveTokenFromOverlay()" class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded text-[10px] hover:bg-blue-600/40">Применить</button>
                     </div>
                     <input id="overlay-token" type="password" class="w-full bg-[#1e1e1e] border border-[#3d3d3d] p-2 rounded text-sm text-white outline-none focus:border-blue-500" placeholder="ghp_xxxxxxxxxxxx">
                 </div>
@@ -396,18 +352,40 @@
         </div>
     </div>
 
-    <!-- Selection Box -->
-    <div id="selection-box" class="selection-box"></div>
+    <div id="properties-modal" class="fixed inset-0 z-[4000] hidden flex items-center justify-center backdrop-blur-sm bg-black/50">
+        <div class="bg-[#2d2d2d] border border-[#454545] rounded-lg shadow-2xl w-[400px] overflow-hidden flex flex-col">
+            <div class="bg-[#383838] px-4 py-2 border-b border-[#454545] flex justify-between items-center">
+                <div class="flex items-center space-x-2"><i data-lucide="info" class="w-4 h-4 text-blue-400"></i><span class="text-sm font-semibold text-gray-200">Свойства</span></div>
+                <button onclick="closeProperties()" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="properties-content" class="p-6 space-y-4 text-sm text-gray-300"></div>
+            <div class="bg-[#2d2d2d] px-4 py-3 border-t border-[#454545] flex justify-end">
+                <button onclick="closeProperties()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 rounded transition-colors text-xs font-semibold">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="hidden fixed bg-[#2d2d2d] border border-win shadow-xl py-1 z-[100] text-sm min-w-48 rounded text-gray-200">
+        <div class="px-3 py-1.5 hover:bg-blue-600 hover:text-white cursor-pointer flex items-center" id="cm-open"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Открыть</div>
+        <div class="px-3 py-1.5 hover:bg-blue-600 hover:text-white cursor-pointer flex items-center" id="cm-copy"><i data-lucide="copy" class="w-4 h-4 mr-2"></i> Копировать путь</div>
+        <div class="border-t border-[#454545] my-1"></div>
+        <div class="px-3 py-1.5 hover:bg-blue-600 hover:text-white cursor-pointer flex items-center" id="cm-properties"><i data-lucide="info" class="w-4 h-4 mr-2"></i> Свойства</div>
+    </div>
 
     <template id="preview-template">
         <div class="flex-1 flex flex-col h-full bg-[#0d0d0d]">
-            <div id="preview-body" class="flex-1 overflow-hidden relative bg-[#0d0d0d]">
-                <!-- iframe will be here -->
-            </div>
+            <div id="preview-body" class="flex-1 overflow-hidden relative bg-[#0d0d0d]"></div>
         </div>
     </template>
 
     <script>
+        // Global Fallback
+        let FALLBACK_ICON = {
+            svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            color: '#666666'
+        };
+
         // State
         let currentRepo = '';
         let currentPath = '';
@@ -418,17 +396,15 @@
         let selectedFiles = new Set();
         let lastSelectedIndex = null;
         let viewMode = 'grid';
+        let rightClickedFile = null;
         let sortField = 'name';
         let sortOrder = 'asc';
         let currentError = null;
         let mockApiLimit = false;
         const apiCache = new Map();
+        const iconCache = new Map();
         const CACHE_TTL = 10 * 60 * 1000;
-        let recentRepos = JSON.parse(localStorage.getItem('recentRepos') || '["Woowz11/woowzsite", "Woowz11/GitExplorer-test", "facebook/react", "microsoft/vscode"]');
-
-        // Icon Service Logic
-        const iconCache = new Map(); // extension -> { svg, color }
-        const iconServiceIframe = document.getElementById('icon-service-worker');
+        let recentRepos = JSON.parse(localStorage.getItem('recentRepos') || '["Woowz11/woowzsite", "Woowz11/GitExplorer-test", "xeor/test_files", "ffeast/samplelib"]');
         let isIconServiceReady = false;
 
         const explorerContent = document.getElementById('explorer-content');
@@ -442,155 +418,32 @@
         const statusSelection = document.getElementById('status-selection');
         const statusLeft = document.getElementById('status-left');
         const selectionBox = document.getElementById('selection-box');
+        const iconServiceIframe = document.getElementById('icon-service-worker');
 
-        // Functions
+        // Ribbon
         window.switchRibbonTab = function(tabId, element) {
             document.querySelectorAll('.ribbon-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.ribbon-tab').forEach(t => t.classList.remove('active'));
             const panel = document.getElementById(tabId);
-            if (panel) {
-                panel.classList.add('active');
-                if (element) element.classList.add('active');
-                else {
-                    const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
-                    if (tabBtn) tabBtn.classList.add('active');
-                }
-            }
+            if (panel) { panel.classList.add('active'); if (element) element.classList.add('active'); else document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active'); }
         };
 
-        window.openSettings = function() {
-            window.switchRibbonTab('tab-settings');
-        };
+        window.openSettings = function() { window.switchRibbonTab('tab-settings'); };
 
         window.showOpenOverlay = function() {
             setupOverlay.classList.remove('hidden');
-            if (currentRepo) {
-                const cancelBtn = document.getElementById('overlay-cancel-btn');
-                const closeX = document.getElementById('overlay-close-x');
-                if (cancelBtn) cancelBtn.classList.remove('hidden');
-                if (closeX) closeX.classList.remove('hidden');
-            }
+            if (currentRepo) { document.getElementById('overlay-cancel-btn').classList.remove('hidden'); document.getElementById('overlay-close-x').classList.remove('hidden'); }
             renderRecentRepos();
         };
 
-        window.hideOpenOverlay = function() {
-            if (currentRepo) setupOverlay.classList.add('hidden');
-        };
-
-        function forceReloadAll() {
-            apiCache.clear();
-            // Очистка всех маркеров визитов
-            for (let key of apiCache.keys()) {
-                if (key.startsWith('path_visited_')) apiCache.delete(key);
-            }
-            navigateTo(currentPath, false, true);
-            updateSidebar();
-            alert('Данные обновлены с GitHub');
-        }
+        window.hideOpenOverlay = function() { if (currentRepo) setupOverlay.classList.add('hidden'); };
 
         function handleOpenRepo() {
             const repo = repoInput.value.trim().replace('https://github.com/', '');
             if (!repo) return;
-            
-            currentRepo = repo;
-            currentPath = '';
-            history = [];
-            historyIndex = -1;
-            
-            const token = document.getElementById('overlay-token').value.trim();
-            if (token) localStorage.setItem('github_token', token);
-            
-            updateRecentRepos(repo);
-            apiCache.clear();
-            setupOverlay.classList.add('hidden');
-            
-            navigateTo('');
-            updateSidebar();
-        }
-
-        async function downloadAsZip(mode) {
-            if (!currentRepo) return;
-            const zip = new JSZip();
-            const token = localStorage.getItem('github_token') || '';
-            const headers = token ? { 'Authorization': `token ${token}` } : {};
-            
-            let filesToDownload = [];
-            let zipName = 'download.zip';
-
-            const status = document.createElement('div');
-            status.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white p-6 rounded-lg z-[3000] shadow-2xl text-center min-w-[300px] border border-blue-400';
-            status.innerHTML = '<i data-lucide="refresh-cw" class="w-8 h-8 animate-spin mx-auto mb-3"></i><p class="font-bold">Подготовка списка файлов...</p>';
-            document.body.appendChild(status);
-            lucide.createIcons();
-
-            try {
-                if (mode === 'repo') {
-                    // Fetch default branch
-                    const repoRes = await fetch(`https://api.github.com/repos/${currentRepo}`, { headers });
-                    const repoInfo = await repoRes.json();
-                    const branch = repoInfo.default_branch || 'main';
-                    
-                    const treeRes = await fetch(`https://api.github.com/repos/${currentRepo}/git/trees/${branch}?recursive=1`, { headers });
-                    const treeData = await treeRes.json();
-                    if (!treeData.tree) throw new Error('Не удалось получить дерево файлов');
-                    
-                    filesToDownload = treeData.tree.filter(i => i.type === 'blob').map(i => ({
-                        path: i.path,
-                        url: i.url // Git Blob API URL
-                    }));
-                    zipName = `${currentRepo.replace(/\//g, '_')}_full.zip`;
-                } else if (mode === 'folder') {
-                    filesToDownload = files.filter(f => f.type === 'file').map(f => ({
-                        path: f.name,
-                        url: f.download_url // Raw URL
-                    }));
-                    zipName = `${(currentPath || 'root').replace(/\//g, '_')}.zip`;
-                } else if (mode === 'selection') {
-                    filesToDownload = Array.from(selectedFiles).map(idx => filteredFiles[idx]).filter(f => f.type === 'file').map(f => ({
-                        path: f.name,
-                        url: f.download_url // Raw URL
-                    }));
-                    zipName = 'selection.zip';
-                }
-
-                if (filesToDownload.length === 0) {
-                    throw new Error('Нет файлов для скачивания');
-                }
-
-                for (let i = 0; i < filesToDownload.length; i++) {
-                    const f = filesToDownload[i];
-                    status.querySelector('p').innerHTML = `Скачивание (${i + 1}/${filesToDownload.length}):<br><span class="text-xs opacity-80">${f.path}</span>`;
-                    
-                    const fileRes = await fetch(f.url, { headers });
-                    if (!fileRes.ok) continue;
-
-                    let blobData;
-                    if (f.url.includes('/git/blobs/')) {
-                        // Git Blobs API returns JSON with base64
-                        const json = await fileRes.json();
-                        const b64 = json.content.replace(/\s/g, '');
-                        const str = atob(b64);
-                        const bytes = new Uint8Array(str.length);
-                        for (let j = 0; j < str.length; j++) bytes[j] = str.charCodeAt(j);
-                        blobData = bytes;
-                    } else {
-                        // Raw URL returns direct content
-                        blobData = await fileRes.blob();
-                    }
-                    
-                    zip.file(f.path, blobData);
-                }
-
-                status.querySelector('p').textContent = 'Создание архива...';
-                const content = await zip.generateAsync({ type: 'blob' });
-                saveAs(content, zipName);
-                showErrorNotification('Архив успешно создан!');
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка скачивания: ' + err.message);
-            } finally {
-                document.body.removeChild(status);
-            }
+            currentRepo = repo; currentPath = ''; history = []; historyIndex = -1;
+            updateRecentRepos(repo); apiCache.clear(); setupOverlay.classList.add('hidden');
+            navigateTo(''); updateSidebar();
         }
 
         function updateRecentRepos(repo) {
@@ -611,67 +464,51 @@
             lucide.createIcons();
         }
 
-        async function fetchRepoContents(repo, path = '', force = false) {
-            if (mockApiLimit) {
-                showLimitError();
-                return { error: 'API rate limit exceeded (mocked)' };
-            }
+        // Cache Dot logic
+        function updateCacheIndicators() {
+            const token = localStorage.getItem('github_token') || '';
+            document.querySelectorAll('[data-path]').forEach(el => {
+                const path = el.getAttribute('data-path');
+                const url = `https://api.github.com/repos/${currentRepo}/contents/${path}`;
+                const cachedEntry = apiCache.get(`${url}_${token}`);
+                // Dot only for folders in cache
+                const isCachedFolder = cachedEntry && Array.isArray(cachedEntry.data);
+                const indicator = el.querySelector('.tree-indicator, .cached-indicator, .list-indicator');
+                if (indicator) indicator.style.display = isCachedFolder ? 'inline-block' : 'none';
+            });
+        }
 
+        async function fetchRepoContents(repo, path = '', force = false) {
+            if (mockApiLimit) { showLimitError(); return { error: 'limit' }; }
             const url = `https://api.github.com/repos/${repo}/contents/${path}`;
             const token = localStorage.getItem('github_token') || '';
             const cacheKey = `${url}_${token}`;
-            
             if (!force && apiCache.has(cacheKey)) {
                 const cached = apiCache.get(cacheKey);
                 if (Date.now() - cached.ts < CACHE_TTL) return cached.data;
             }
-
             const headers = token ? { 'Authorization': `token ${token}` } : {};
             try {
-                const response = await fetch(url, { headers });
-                updateApiLimits(response.headers);
-                
-                if (!response.ok) {
-                    if (response.status === 403 || response.status === 429) {
-                        showLimitError();
-                        return { error: 'limit' };
-                    }
-                    // Для всех остальных ошибок (404 и т.д.) возвращаем объект ошибки
-                    return { error: response.statusText || 'Not Found', status: response.status };
-                }
-                
-                const data = await response.json();
+                const res = await fetch(url, { headers });
+                updateApiLimits(res.headers);
+                if (!res.ok) { if (res.status === 403 || res.status === 429) { showLimitError(); return { error: 'limit' }; } return { error: res.statusText }; }
+                const data = await res.json();
                 apiCache.set(cacheKey, { data, ts: Date.now() });
                 return data;
-            } catch (err) { 
-                return { error: err.message }; 
-            }
+            } catch (err) { return { error: err.message }; }
         }
 
         function updateApiLimits(headers) {
-            const el = document.getElementById('api-limit');
-            if (!el) return;
-            const span = el.querySelector('span');
-            const icon = el.querySelector('i, svg');
-
-            if (mockApiLimit) {
-                if (span) span.textContent = "Ограничение ВКЛ";
-                if (icon) { icon.style.color = "#ef4444"; icon.classList.add('animate-pulse'); }
-                return;
-            } else {
-                if (icon) icon.classList.remove('animate-pulse');
-            }
-
+            const el = document.getElementById('api-limit'); if (!el) return;
+            const span = el.querySelector('span'); const icon = el.querySelector('i, svg');
+            if (mockApiLimit) { if (span) span.textContent = "Ограничение ВКЛ"; if (icon) { icon.style.color = "#ef4444"; icon.classList.add('animate-pulse'); } return; }
+            if (icon) icon.classList.remove('animate-pulse');
             if (!headers) return;
-            const rem = headers.get('x-ratelimit-remaining');
-            const lim = headers.get('x-ratelimit-limit');
-            
-            if (rem !== null && lim !== null) {
-                if (span) span.textContent = `Лимит: ${rem} / ${lim}`;
+            const rem = headers.get('x-ratelimit-remaining'); const lim = headers.get('x-ratelimit-limit');
+            if (rem !== null) {
+                span.textContent = `Лимит: ${rem} / ${lim}`;
                 const p = (parseInt(rem) / parseInt(lim)) * 100;
-                let color = "#22c55e"; // green-500
-                if (p < 20) color = "#ef4444"; // red-500
-                else if (p < 50) color = "#eab308"; // yellow-500
+                let color = "#22c55e"; if (p < 20) color = "#ef4444"; else if (p < 50) color = "#eab308";
                 if (icon) icon.style.color = color;
                 if (parseInt(rem) === 0) showLimitError();
             }
@@ -679,8 +516,10 @@
 
         function showLimitError() {
             currentError = 'limit';
-            explorerContent.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-400 p-8 text-center"><i data-lucide="shield-alert" class="w-16 h-16 mb-4"></i><h3 class="text-xl font-bold mb-2">Лимит API исчерпан</h3><button onclick="window.switchRibbonTab('tab-settings', document.querySelector('[data-tab=tab-settings]'))" class="px-6 py-2 bg-blue-600 text-white rounded-full mt-4">Ввести токен в настройках</button></div>`;
+            explorerContent.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-400 p-8 text-center bg-black/40 z-[50]"><i data-lucide="shield-alert" class="w-16 h-16 mb-4"></i><h3 class="text-xl font-bold mb-2">Лимит API исчерпан!</h3><button id="error-settings-btn" class="px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 font-bold active:scale-95 pointer-events-auto relative z-[100]">Открыть настройки</button></div>`;
             lucide.createIcons();
+            const btn = document.getElementById('error-settings-btn');
+            if (btn) btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); window.openSettings(); };
             showErrorNotification("Превышен лимит запросов GitHub API");
         }
 
@@ -689,745 +528,237 @@
             const toast = document.createElement('div');
             toast.className = 'toast-error text-white px-6 py-3 rounded shadow-2xl pointer-events-auto flex items-center space-x-3';
             toast.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5"></i><span>${msg}</span>`;
-            container.appendChild(toast);
-            lucide.createIcons();
-            setTimeout(() => toast.remove(), 5000);
+            container.appendChild(toast); lucide.createIcons();
+            setTimeout(() => toast.remove(), 6000);
+        }
+
+        function forceReloadAll() {
+            apiCache.clear();
+            navigateTo(currentPath, false, true);
+            updateSidebar();
+            alert('Данные обновлены с GitHub (кеш очищен)');
         }
 
         async function navigateTo(path, addHistory = true, force = false) {
             if (typeof path !== 'string') path = '';
             path = path.replace(/^\/+|\/+$/g, '');
-            
-            const prevPath = currentPath;
-            currentError = null; 
-            selectedFiles.clear(); 
-            updateStatus();
-            
+            const prevPath = currentPath; currentError = null; selectedFiles.clear(); updateStatus();
             explorerContent.innerHTML = `<div class="flex items-center justify-center h-full"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-blue-500"></i></div>`;
             lucide.createIcons();
-            
             const data = await fetchRepoContents(currentRepo, path, force);
-            
             if (!data || data.error) {
-                if (data.error === 'limit' || currentError === 'limit') return;
-
-                // Специфическое сообщение об ошибке как просил пользователь
-                showErrorNotification(`ПУТЬ БЫЛ УКАЗАН НЕВЕРНО, ТАКОЙ ПУТЬ НЕ НАЙДЕН: ${path}`);
-                
-                // Возврат к прошлому успешному пути
+                if (currentError === 'limit') return;
+                showErrorNotification(`Путь был указан неверно, такой путь не найден: ${path}`);
                 currentPath = prevPath;
-                if (historyIndex >= 0) {
-                    // Просто перерисовываем текущее состояние из кеша или истории
-                    navigateTo(history[historyIndex], false);
-                } else {
-                    navigateTo('', false);
-                }
+                const oldData = await fetchRepoContents(currentRepo, currentPath);
+                if (oldData && !oldData.error) { if (!Array.isArray(oldData)) showPreviewInline(oldData); else { files = oldData; applySorting(); renderFiles(); updateBreadcrumbs(); } }
+                else navigateTo('', false);
                 return;
             }
-
-            // ПРОВЕРКА: Файл или Папка?
             if (!Array.isArray(data)) {
-                // Если в ответ пришел объект файла, открываем предпросмотр
-                currentPath = path; // Обновляем путь даже для файла
-                showPreviewInline(data);
-                if (addHistory && (historyIndex === -1 || history[historyIndex] !== path)) {
-                    if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
-                    history.push(path); historyIndex++;
-                }
-                updateNavBtns();
-                return;
+                currentPath = path; showPreviewInline(data);
+                if (addHistory && (historyIndex === -1 || history[historyIndex] !== path)) { if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1); history.push(path); historyIndex++; }
+                updateNavBtns(); return;
             }
-
-            files = data;
-            currentPath = path;
-            if (addHistory) {
-                if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
-                history.push(path); historyIndex++;
-            }
-            applySorting();
-            renderFiles();
-            updateBreadcrumbs();
-            updateNavBtns();
-            
-            const token = localStorage.getItem('github_token') || '';
-            apiCache.set(`path_visited_${path}_${token}`, true);
-            updateCacheDots();
+            files = data; currentPath = path;
+            if (addHistory) { if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1); history.push(path); historyIndex++; }
+            applySorting(); renderFiles(); updateBreadcrumbs(); updateNavBtns();
         }
 
-        function renderFiles() {
-            if (currentError) return;
-            
-            const zoom = document.getElementById('zoom-slider')?.value || 1;
-            explorerContent.innerHTML = `<div id="zoom-container" style="transform: scale(${zoom}); transform-origin: top left; width: ${100/zoom}%; min-height: 100%;"></div>`;
-            const container = document.getElementById('zoom-container');
+        function renderFiles() { if (currentError) return; if (viewMode === 'grid') renderGrid(); else renderList(); statusLeft.textContent = `${filteredFiles.length} элементов`; updateCacheIndicators(); }
 
-            if (viewMode === 'grid') renderGrid(container); else renderList(container);
-            
-            statusLeft.textContent = `${filteredFiles.length} элементов`;
-            updateCacheDots();
-            updateSortUI();
-        }
-
-        function renderGrid(parent) {
-            parent.innerHTML = `<div class="explorer-grid p-4" id="file-grid"></div>`;
+        function renderGrid() {
+            explorerContent.innerHTML = `<div id="zoom-container" style="transform: scale(${document.getElementById('zoom-slider')?.value || 1}); transform-origin: top left; width: ${100/(document.getElementById('zoom-slider')?.value || 1)}%; min-height: 100%;"><div class="explorer-grid p-4" id="file-grid"></div></div>`;
             const container = document.getElementById('file-grid');
-            
             filteredFiles.forEach((f, i) => {
-                const isDir = f.type === 'dir';
-                const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
+                const isDir = f.type === 'dir'; const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
                 const item = document.createElement('div');
                 item.className = `file-item flex flex-col items-center p-2 rounded cursor-pointer relative ${selectedFiles.has(i) ? 'selected' : ''}`;
-                item.dataset.index = i;
-                
+                item.dataset.index = i; item.dataset.path = f.path;
                 const dataExt = isDir ? 'folder' : ext;
-                
-                item.innerHTML = `
-                    <div class="relative mb-1 w-12 h-12 flex items-center justify-center pointer-events-none icon-container" data-ext="${dataExt}" data-path="${f.path}">
-                        <div class="w-10 h-10 flex items-center justify-center text-gray-600">
-                             ${FALLBACK_ICON.svg}
-                        </div>
-                        <div class="cached-indicator" style="display:none"></div>
-                    </div>
-                    <span class="text-[11px] text-center break-all line-clamp-2 w-full text-gray-200 pointer-events-none">${f.name}</span>
-                `;
+                item.innerHTML = `<div class="relative mb-1 w-12 h-12 flex items-center justify-center pointer-events-none icon-container" data-ext="${dataExt}" data-path="${f.path}"><div class="w-10 h-10 flex items-center justify-center text-gray-600">${FALLBACK_ICON.svg}</div><div class="cached-indicator" style="display:none"></div></div><span class="text-[11px] text-center break-all line-clamp-2 w-full text-gray-200 pointer-events-none">${f.name}</span>`;
                 item.onclick = (e) => handleFileClick(e, i);
                 item.ondblclick = (e) => { e.stopPropagation(); handleFileOpen(f); };
-                container.appendChild(item);
-                
-                requestIcon(f.name, isDir);
+                container.appendChild(item); requestIcon(f.name, isDir);
             });
-            updateCacheDots();
+            lucide.createIcons(); updateCacheIndicators();
         }
 
-        function renderList(parent) {
-            parent.innerHTML = `<div class="list-header"><span>Имя</span><span>Тип</span><span>Размер</span></div><div class="explorer-list" id="file-list"></div>`;
+        function renderList() {
+            explorerContent.innerHTML = `<div id="zoom-container" style="transform: scale(${document.getElementById('zoom-slider')?.value || 1}); transform-origin: top left; width: ${100/(document.getElementById('zoom-slider')?.value || 1)}%; min-height: 100%;"><div class="list-header"><span>Имя</span><span>Тип</span><span>Размер</span></div><div class="explorer-list" id="file-list"></div></div>`;
             const container = document.getElementById('file-list');
-
             filteredFiles.forEach((f, i) => {
-                const isDir = f.type === 'dir';
-                const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
+                const isDir = f.type === 'dir'; const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
                 const item = document.createElement('div');
                 item.className = `file-item-list cursor-pointer relative ${selectedFiles.has(i) ? 'selected' : ''}`;
-                item.dataset.index = i;
+                item.dataset.index = i; item.dataset.path = f.path;
                 const size = f.size ? (f.size / 1024).toFixed(1) + ' КБ' : '--';
                 const dataExt = isDir ? 'folder' : ext;
-
-                item.innerHTML = `
-                    <div class="flex items-center pointer-events-none relative">
-                        <div class="relative flex items-center justify-center mr-2 w-5 h-5 icon-container" data-ext="${dataExt}" data-path="${f.path}">
-                            <div class="w-4 h-4 flex items-center justify-center text-gray-600">
-                                ${FALLBACK_ICON.svg}
-                            </div>
-                            <div class="list-indicator" style="display:none"></div>
-                        </div>
-                        <span class="truncate text-gray-200">${f.name}</span>
-                    </div>
-                    <span class="text-[11px] text-gray-500 pointer-events-none">${f.type === 'dir' ? 'Папка' : 'Файл'}</span>
-                    <span class="text-[11px] text-gray-500 text-right pr-4 pointer-events-none">${size}</span>
-                `;
+                item.innerHTML = `<div class="flex items-center pointer-events-none relative"><div class="relative flex items-center justify-center mr-2 w-5 h-5 icon-container" data-ext="${dataExt}" data-path="${f.path}"><div class="w-4 h-4 flex items-center justify-center text-gray-600">${FALLBACK_ICON.svg}</div><div class="list-indicator" style="display:none"></div></div><span class="truncate text-gray-200">${f.name}</span></div><span class="text-[11px] text-gray-500 pointer-events-none">${isDir ? 'Папка' : 'Файл'}</span><span class="text-[11px] text-gray-500 text-right pr-4 pointer-events-none">${size}</span>`;
                 item.onclick = (e) => handleFileClick(e, i);
                 item.ondblclick = (e) => { e.stopPropagation(); handleFileOpen(f); };
-                container.appendChild(item);
-                
-                requestIcon(f.name, isDir);
+                container.appendChild(item); requestIcon(f.name, isDir);
             });
-            updateCacheDots();
-        }
-
-        function updateCacheDots() {
-            const token = localStorage.getItem('github_token') || '';
-            const allItems = document.querySelectorAll('[data-path]');
-            allItems.forEach(el => {
-                const path = el.getAttribute('data-path') || '';
-                const url = `https://api.github.com/repos/${currentRepo}/contents/${path}`;
-                const cachedEntry = apiCache.get(`${url}_${token}`);
-                
-                // Рисуем точку только если это папка (массив файлов в кеше).
-                // Файлы открываются через Raw URL и не тратят лимиты API REST, 
-                // поэтому их не помечаем как закешированные (сэкономившие токены).
-                const isCachedFolder = cachedEntry && Array.isArray(cachedEntry.data);
-                
-                const dot = el.querySelector('.cached-indicator, .list-indicator, .tree-indicator');
-                if (dot) {
-                    if (isCachedFolder) {
-                        dot.style.setProperty('display', 'inline-block', 'important');
-                        dot.classList.remove('hidden');
-                    } else {
-                        dot.style.setProperty('display', 'none', 'important');
-                    }
-                }
-            });
-        }
-
-        function getIconName(f) {
-            if (f.type === 'dir') return 'folder';
-            const ext = f.name.split('.').pop().toLowerCase();
-            const map = {
-                // Programming
-                'js': 'file-code-2',
-                'ts': 'file-code-2',
-                'html': 'file-code',
-                'css': 'file-code',
-                'py': 'file-code-2',
-                'java': 'file-code-2',
-                'c': 'file-code-2',
-                'cpp': 'file-code-2',
-                'h': 'file-code-2',
-                'hpp': 'file-code-2',
-                'go': 'file-code-2',
-                'php': 'file-code-2',
-                'rb': 'file-code-2',
-                'rs': 'file-code-2',
-                'sh': 'terminal',
-                'sql': 'database',
-                'swift': 'file-code-2',
-                'kt': 'file-code-2',
-                'lua': 'file-code-2',
-                'dart': 'file-code-2',
-                // Data / Config
-                'json': 'file-json-2',
-                'xml': 'file-type',
-                'yaml': 'settings-2',
-                'yml': 'settings-2',
-                'csv': 'file-spreadsheet',
-                'env': 'key',
-                'ini': 'settings-2',
-                'conf': 'settings-2',
-                // Documents
-                'md': 'file-text',
-                'txt': 'file-text',
-                'pdf': 'file-text',
-                'doc': 'file-text',
-                'docx': 'file-text',
-                'xls': 'file-spreadsheet',
-                'xlsx': 'file-spreadsheet',
-                // Images
-                'jpg': 'image',
-                'jpeg': 'image',
-                'png': 'image',
-                'gif': 'image',
-                'svg': 'image',
-                'webp': 'image',
-                'ico': 'image',
-                // Media
-                'mp4': 'video',
-                'webm': 'video',
-                'mkv': 'video',
-                'mov': 'video',
-                'mp3': 'music',
-                'wav': 'music',
-                'flac': 'music',
-                // Archives
-                'zip': 'archive',
-                'rar': 'archive',
-                '7z': 'archive',
-                'tar': 'archive',
-                'gz': 'archive',
-                // System / Binary
-                'exe': 'box',
-                'dll': 'cpu',
-                'bin': 'binary'
-            };
-            return map[ext] || 'file';
-        }
-
-        function getIconColor(f) {
-            if (f.type === 'dir') return '#eab308'; // folder yellow
-            const ext = f.name.split('.').pop().toLowerCase();
-            
-            // Language specific colors
-            const colors = {
-                'js': '#f7df1e', 'ts': '#3178c6', 'py': '#3776ab',
-                'html': '#e34f26', 'css': '#1572b6', 'php': '#777bb4',
-                'go': '#00add8', 'java': '#b07219', 'cpp': '#f34b7d',
-                'c': '#a8b9cc', 'rb': '#701516', 'rs': '#dea584',
-                'json': '#cbcb41', 'md': '#0081ff', 'sql': '#e38c00',
-                'sh': '#4e9a06', 'kt': '#a97bff', 'lua': '#000080',
-                'pdf': '#ff0000', 'zip': '#eab308', 'rar': '#eab308',
-                'mp3': '#1db954', 'mp4': '#ff0000', 'svg': '#ffb13b',
-                'jpg': '#a855f7', 'png': '#a855f7', 'jpeg': '#a855f7'
-            };
-            
-            return colors[ext] || '#9ca3af'; // default gray
+            lucide.createIcons(); updateCacheIndicators();
         }
 
         function handleFileClick(e, i) {
-            e.stopPropagation();
-            if (currentError) return;
-
+            e.stopPropagation(); if (currentError) return;
             if (e.shiftKey && lastSelectedIndex !== null) {
-                const start = Math.min(lastSelectedIndex, i);
-                const end = Math.max(lastSelectedIndex, i);
-                if (!e.ctrlKey) selectedFiles.clear();
-                for (let j = start; j <= end; j++) selectedFiles.add(j);
-            } else if (e.ctrlKey) {
-                if (selectedFiles.has(i)) selectedFiles.delete(i); else selectedFiles.add(i);
-                lastSelectedIndex = i;
-            } else {
-                selectedFiles.clear(); 
-                selectedFiles.add(i);
-                lastSelectedIndex = i;
-            }
-            
-            // Обновляем визуальное выделение
-            const container = viewMode === 'grid' ? document.getElementById('file-grid') : document.getElementById('file-list');
-            if (container) {
-                const items = container.querySelectorAll('.file-item, .file-item-list');
-                items.forEach(item => {
-                    const idx = parseInt(item.dataset.index);
-                    if (selectedFiles.has(idx)) item.classList.add('selected');
-                    else item.classList.remove('selected');
-                });
-            }
+                const s = Math.min(lastSelectedIndex, i); const end = Math.max(lastSelectedIndex, i);
+                if (!e.ctrlKey) selectedFiles.clear(); for (let j = s; j <= end; j++) selectedFiles.add(j);
+            } else if (e.ctrlKey) { if (selectedFiles.has(i)) selectedFiles.delete(i); else selectedFiles.add(i); lastSelectedIndex = i; }
+            else { selectedFiles.clear(); selectedFiles.add(i); lastSelectedIndex = i; }
+            const c = viewMode === 'grid' ? document.getElementById('file-grid') : document.getElementById('file-list');
+            if (c) c.querySelectorAll('.file-item, .file-item-list').forEach(item => { const idx = parseInt(item.dataset.index); if (selectedFiles.has(idx)) item.classList.add('selected'); else item.classList.remove('selected'); });
             updateStatus();
         }
 
-        function handleFileOpen(f) {
-            const isDir = f.type === 'dir' || f.type === 'tree';
-            if (isDir) {
-                navigateTo(f.path);
-            } else {
-                showPreviewInline(f);
-            }
-        }
+        function handleFileOpen(f) { if (f.type === 'dir' || f.type === 'tree') navigateTo(f.path); else showPreviewInline(f); }
 
         async function showPreviewInline(file) {
-            updateBreadcrumbs(file.path, true);
-            
-            // Очищаем информацию о выделении в статус-баре
-            if (statusSelection) statusSelection.textContent = '';
-            
-            const template = document.getElementById('preview-template');
-            const clone = template.content.cloneNode(true);
-            const body = clone.getElementById('preview-body');
-            
-            explorerContent.innerHTML = '';
-            explorerContent.appendChild(clone);
-            
+            updateBreadcrumbs(file.path, true); if (statusSelection) statusSelection.textContent = '';
+            explorerContent.innerHTML = `<div class="flex-1 flex flex-col h-full bg-[#0d0d0d]"><div id="preview-body" class="flex-1 overflow-hidden relative bg-[#0d0d0d]"></div></div>`;
             const rawUrl = file.download_url || `https://raw.githubusercontent.com/${currentRepo}/main/${file.path}`;
-            
-            // Определяем путь к вьюеру в зависимости от окружения
-            let viewerUrl = `https://woowz11.github.io/woowzsite/ai/viewer#${rawUrl}`;
-            
-            // Если сайт запущен локально по протоколу file:
-            if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
-                // Если мы находимся в той же папке W:\Other\woowzsite\ai\
-                viewerUrl = `viewer.html#${rawUrl}`;
-                console.log('Local environment detected, using local viewer.html');
-            }
-            
-            body.innerHTML = `<iframe src="${viewerUrl}" class="w-full h-full border-none bg-white"></iframe>`;
-            
+            const viewerBase = (window.location.protocol === 'file:' || window.location.hostname === 'localhost') ? 'viewer.html' : 'https://woowz11.github.io/woowzsite/ai/viewer';
+            document.getElementById('preview-body').innerHTML = `<iframe src="${viewerBase}#${rawUrl}" class="w-full h-full border-none bg-white"></iframe>`;
             lucide.createIcons();
-            
-            const token = localStorage.getItem('github_token') || '';
-            apiCache.set(`path_visited_${file.path}_${token}`, true);
-            updateCacheDots();
+            const token = localStorage.getItem('github_token') || ''; apiCache.set(`path_visited_${file.path}_${token}`, true); updateCacheIndicators();
         }
-
-        async function fetchText(url) {
-            const token = localStorage.getItem('github_token') || '';
-            const key = `${url}_text_${token}`;
-            if (apiCache.has(key)) return apiCache.get(key).data;
-            const res = await fetch(url, { headers: token ? {'Authorization': `token ${token}`} : {} });
-            const text = await res.text();
-            apiCache.set(key, { data: text, ts: Date.now() });
-            return text;
-        }
-
-        function closePreview() { navigateTo(currentPath); }
-
-        addressBar.onclick = () => { 
-            addressBar.classList.add('editing'); 
-            // Подставляем только путь для редактирования
-            addressInput.value = currentPath;
-            addressInput.focus(); 
-            addressInput.select(); 
-        };
-        addressInput.onblur = () => {
-            setTimeout(() => addressBar.classList.remove('editing'), 200);
-        };
-        addressInput.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                const newPath = addressInput.value.trim();
-                navigateTo(newPath);
-                addressInput.blur();
-            } else if (e.key === 'Escape') {
-                addressInput.blur();
-            }
-        };
 
         function updateBreadcrumbs(displayPath = currentPath, isFile = false) {
-            // Обновляем текстовую метку репозитория
-            const repoLabel = document.getElementById('address-repo-label');
-            if (repoLabel) repoLabel.textContent = currentRepo;
-
-            breadcrumbContainer.innerHTML = '';
-            const parts = displayPath.split('/').filter(p => p);
-            
-            // Больше не добавляем корень в хлебные крошки, так как он вынесен в стабильный текст
-            parts.forEach((p, i) => {
-                const sep = document.createElement('i'); sep.dataset.lucide = 'chevron-right'; sep.className = 'w-3 h-3 text-gray-600 mx-1';
-                breadcrumbContainer.appendChild(sep);
-                const item = document.createElement('div');
-                item.className = 'breadcrumb-item px-1.5 py-0.5 rounded cursor-pointer';
-                item.textContent = p;
-                if (i === parts.length - 1 && isFile) item.classList.add('text-blue-400', 'font-bold');
-                else item.onclick = () => navigateTo(parts.slice(0, i + 1).join('/'));
+            document.getElementById('address-repo-label').textContent = currentRepo;
+            breadcrumbContainer.innerHTML = ''; const parts = displayPath.split('/').filter(p => p);
+            parts.forEach((p, i, arr) => {
+                const sep = document.createElement('i'); sep.dataset.lucide = 'chevron-right'; sep.className = 'w-3 h-3 text-gray-600 mx-1'; breadcrumbContainer.appendChild(sep);
+                const item = document.createElement('div'); item.className = 'breadcrumb-item px-1.5 py-0.5 rounded cursor-pointer'; item.textContent = p;
+                if (i === arr.length - 1 && isFile) item.classList.add('text-blue-400', 'font-bold'); else item.onclick = () => navigateTo(arr.slice(0, i + 1).join('/'));
                 breadcrumbContainer.appendChild(item);
             });
-            lucide.createIcons();
-            // В адресную строку при наведении подставляем только путь
-            addressInput.value = displayPath;
+            lucide.createIcons(); addressInput.value = displayPath;
         }
 
+        addressBar.onclick = () => { addressBar.classList.add('editing'); addressInput.value = currentPath; addressInput.focus(); addressInput.select(); };
+        addressInput.onblur = () => setTimeout(() => addressBar.classList.remove('editing'), 200);
+        addressInput.onkeydown = (e) => { if (e.key === 'Enter') { navigateTo(addressInput.value.trim()); addressInput.blur(); } else if (e.key === 'Escape') addressInput.blur(); };
+
         async function updateSidebar() {
-            sidebarTree.innerHTML = '';
-            if (!currentRepo) return;
-            const data = await fetchRepoContents(currentRepo, '');
-            if (data && !data.error) renderTree(data, sidebarTree, 0);
+            sidebarTree.innerHTML = ''; if (!currentRepo) return;
+            const data = await fetchRepoContents(currentRepo, ''); if (data && !data.error) renderTree(data, sidebarTree, 0);
         }
 
         function renderTree(data, container, depth) {
-            container.innerHTML = '';
-            data.sort((a, b) => (a.type === b.type) ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1));
+            container.innerHTML = ''; data.sort((a, b) => (a.type === b.type) ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1));
             data.forEach(f => {
-                const isDir = f.type === 'dir';
-                const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
-                const node = document.createElement('div');
-                node.className = 'tree-node';
-                node.dataset.path = f.path;
-                const item = document.createElement('div');
-                item.className = `sidebar-item p-1 flex items-center text-xs text-gray-300 hover:bg-white/5 cursor-pointer ${f.path === currentPath ? 'active' : ''}`;
+                const isDir = f.type === 'dir'; const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : f.name.toLowerCase();
+                const node = document.createElement('div'); node.className = 'tree-node'; node.dataset.path = f.path;
+                const item = document.createElement('div'); item.className = `sidebar-item p-1 flex items-center text-xs text-gray-300 hover:bg-white/5 cursor-pointer ${f.path === currentPath ? 'active' : ''}`;
                 item.style.paddingLeft = `${depth * 12 + 8}px`;
-                
                 const dataExt = isDir ? 'folder' : ext;
-                
-                item.innerHTML = `
-                    <div class="flex items-center shrink-0 w-4 justify-center">
-                        ${isDir ? '<i data-lucide="chevron-right" class="w-3 h-3 transition-transform"></i>' : ''}
-                    </div>
-                    <div class="relative flex items-center justify-center mx-1 w-4 h-4 shrink-0 icon-container" data-ext="${dataExt}" data-path="${f.path}">
-                        <div class="w-3.5 h-3.5 flex items-center justify-center text-gray-600">
-                             ${FALLBACK_ICON.svg}
-                        </div>
-                        <div class="tree-indicator" style="display:none"></div>
-                    </div>
-                    <span class="truncate min-w-0 flex-1">${f.name}</span>
-                `;
-                requestIcon(f.name, isDir);
-                
-                const children = document.createElement('div');
-                children.className = 'tree-node-children';
-                
+                item.innerHTML = `<div class="flex items-center shrink-0 w-4 justify-center">${isDir ? '<i data-lucide="chevron-right" class="w-3 h-3 transition-transform"></i>' : ''}</div><div class="relative flex items-center justify-center mx-1 w-4 h-4 shrink-0 icon-container" data-ext="${dataExt}" data-path="${f.path}"><div class="w-3.5 h-3.5 flex items-center justify-center text-gray-600">${FALLBACK_ICON.svg}</div><div class="tree-indicator" style="display:none"></div></div><span class="truncate min-w-0 flex-1">${f.name}</span>`;
+                const children = document.createElement('div'); children.className = 'tree-node-children';
                 item.onclick = async (e) => {
-                    e.stopPropagation();
-                    if (!isDir) { 
-                        handleFileOpen(f); 
-                        return; 
-                    }
+                    e.stopPropagation(); if (!isDir) { handleFileOpen(f); return; }
                     if (children.innerHTML === '') {
-                        const loader = document.createElement('div'); 
-                        loader.className = 'pl-10 text-[10px] text-blue-400 py-1'; 
-                        loader.textContent = 'Загрузка...';
-                        children.appendChild(loader);
+                        const loader = document.createElement('div'); loader.className = 'pl-10 text-[10px] text-blue-400 py-1'; loader.textContent = '...'; children.appendChild(loader);
                         const subData = await fetchRepoContents(currentRepo, f.path);
-                        if (subData && !subData.error) {
-                            loader.remove();
-                            renderTree(subData, children, depth + 1);
-                        } else loader.remove();
+                        if (subData && !subData.error) { loader.remove(); renderTree(subData, children, depth + 1); } else loader.remove();
                     }
                     const isOpen = children.classList.toggle('open');
-                    const chevron = item.querySelector('[data-lucide="chevron-right"]');
-                    if (chevron) chevron.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+                    const chevron = item.querySelector('[data-lucide="chevron-right"]'); if (chevron) chevron.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+                    updateCacheIndicators();
                 };
                 item.ondblclick = () => { if (isDir) navigateTo(f.path); };
-                node.appendChild(item); node.appendChild(children); container.appendChild(node);
+                node.appendChild(item); node.appendChild(children); container.appendChild(node); requestIcon(f.name, isDir);
             });
-            lucide.createIcons();
-            updateCacheDots();
+            lucide.createIcons(); updateCacheIndicators();
         }
 
-        // Utils
         function setViewMode(m) { viewMode = m; renderFiles(); }
         function setSort(f) { sortField = f; applySorting(); renderFiles(); }
         function toggleSortOrder() { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; applySorting(); renderFiles(); }
-        
         function updateSortUI() {
-            // Подсветка кнопок сортировки
-            document.querySelectorAll('[onclick^="setSort"]').forEach(btn => {
-                const field = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
-                if (field === sortField) {
-                    btn.classList.add('bg-blue-600/40', 'text-blue-300', 'border', 'border-blue-500/50');
-                } else {
-                    btn.classList.remove('bg-blue-600/40', 'text-blue-300', 'border', 'border-blue-500/50');
-                }
-            });
-
-            // Визуализация порядка (инверсии)
-            const invBtn = document.querySelector('[onclick="toggleSortOrder()"]');
-            if (invBtn) {
-                const icon = invBtn.querySelector('i, svg');
-                if (sortOrder === 'desc') {
-                    invBtn.classList.add('bg-orange-600/20', 'border', 'border-orange-500/50');
-                    if (icon) icon.style.transform = 'rotate(180deg)';
-                } else {
-                    invBtn.classList.remove('bg-orange-600/20', 'border', 'border-orange-500/50');
-                    if (icon) icon.style.transform = 'rotate(0deg)';
-                }
-            }
+            document.querySelectorAll('[onclick^="setSort"]').forEach(btn => { const field = btn.getAttribute('onclick').match(/'([^']+)'/)[1]; if (field === sortField) btn.classList.add('bg-blue-600/40', 'text-blue-300', 'border', 'border-blue-500/50'); else btn.classList.remove('bg-blue-600/40', 'text-blue-300', 'border', 'border-blue-500/50'); });
+            const invBtn = document.querySelector('[onclick="toggleSortOrder()"]'); if (invBtn) { if (sortOrder === 'desc') { invBtn.classList.add('bg-orange-600/20', 'border', 'border-orange-500/50'); invBtn.querySelector('i, svg').style.transform = 'rotate(180deg)'; } else { invBtn.classList.remove('bg-orange-600/20', 'border', 'border-orange-500/50'); invBtn.querySelector('i, svg').style.transform = 'rotate(0deg)'; } }
         }
-
         function applySorting() {
-            // 1. Sort base files
-            files.sort((a, b) => {
-                // Directories always first
-                if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
-                
-                let r = 0;
-                if (sortField === 'random') {
-                    r = Math.random() - 0.5;
-                } else if (sortField === 'size') {
-                    r = (a.size || 0) - (b.size || 0);
-                } else if (sortField === 'type') {
-                    const extA = a.name.split('.').pop();
-                    const extB = b.name.split('.').pop();
-                    r = extA.localeCompare(extB);
-                } else {
-                    r = a.name.localeCompare(b.name);
-                }
-                return sortOrder === 'asc' ? r : -r;
-            });
-
-            // 2. Apply filtering with tags
-            let query = searchInput.value.trim().toLowerCase();
-            if (!query) {
-                filteredFiles = [...files];
-                return;
-            }
-
-            const parts = query.split(/\s+/);
-            const tags = { type: null, ext: null, text: [] };
-
-            parts.forEach(p => {
-                if (p.startsWith('t:') || p.startsWith('type:')) {
-                    tags.type = p.split(':')[1];
-                } else if (p.startsWith('e:') || p.startsWith('ext:')) {
-                    tags.ext = p.split(':')[1];
-                } else {
-                    tags.text.push(p);
-                }
-            });
-
-            filteredFiles = files.filter(f => {
-                // Filter by type tag
-                if (tags.type) {
-                    const isDir = f.type === 'dir' || f.type === 'tree';
-                    if (tags.type === 'dir' || tags.type === 'folder') {
-                        if (!isDir) return false;
-                    } else if (tags.type === 'file' || tags.type === 'blob') {
-                        if (isDir) return false;
-                    }
-                }
-
-                // Filter by extension tag
-                if (tags.ext) {
-                    const fileExt = f.name.split('.').pop().toLowerCase();
-                    if (fileExt !== tags.ext) return false;
-                }
-
-                // Filter by text
-                if (tags.text.length > 0) {
-                    const fileName = f.name.toLowerCase();
-                    return tags.text.every(t => fileName.includes(t));
-                }
-
-                return true;
-            });
+            files.sort((a, b) => { if (a.type !== b.type) return a.type === 'dir' ? -1 : 1; let r = sortField === 'random' ? Math.random() - 0.5 : sortField === 'size' ? (a.size - b.size) : a.name.localeCompare(b.name); return sortOrder === 'asc' ? r : -r; });
+            let q = searchInput.value.trim().toLowerCase(); if (!q) { filteredFiles = [...files]; return; }
+            const parts = q.split(/\s+/); const tags = { type: null, ext: null, text: [] };
+            parts.forEach(p => { if (p.startsWith('t:')) tags.type = p.split(':')[1]; else if (p.startsWith('e:')) tags.ext = p.split(':')[1]; else tags.text.push(p); });
+            filteredFiles = files.filter(f => { if (tags.type) { const isDir = f.type === 'dir'; if (tags.type === 'dir' && !isDir) return false; if (tags.type === 'file' && isDir) return false; } if (tags.ext && f.name.split('.').pop().toLowerCase() !== tags.ext) return false; if (tags.text.length > 0) return tags.text.every(t => f.name.toLowerCase().includes(t)); return true; });
         }
-        function selectAll() { files.forEach((_, i) => selectedFiles.add(i)); renderFiles(); updateStatus(); }
-        function invertSelection() { const n = new Set(); files.forEach((_, i) => { if (!selectedFiles.has(i)) n.add(i); }); selectedFiles = n; renderFiles(); updateStatus(); }
+        function selectAll() { filteredFiles.forEach((_, i) => selectedFiles.add(i)); renderFiles(); updateStatus(); }
+        function invertSelection() { const n = new Set(); filteredFiles.forEach((_, i) => { if (!selectedFiles.has(i)) n.add(i); }); selectedFiles = n; renderFiles(); updateStatus(); }
         function clearSelection() { selectedFiles.clear(); renderFiles(); updateStatus(); }
-        function updateStatus() { 
-            // Если мы в режиме предпросмотра, не показываем статус выделения
-            if (document.getElementById('preview-body')) {
-                statusSelection.textContent = '';
-                return;
-            }
-            statusSelection.textContent = selectedFiles.size ? `Выбрано: ${selectedFiles.size}` : ''; 
-        }
+        function updateStatus() { if (document.getElementById('preview-body')) { statusSelection.textContent = ''; return; } statusSelection.textContent = selectedFiles.size ? `Выбрано: ${selectedFiles.size}` : ''; }
         function saveToken() { const t = document.getElementById('settings-token').value; if(t) localStorage.setItem('github_token', t); alert('Сохранено'); navigateTo(currentPath, false, true); }
-        function toggleMockLimit(v) { 
-            mockApiLimit = v; 
-            updateApiLimits(null); // Обновляем индикатор внизу
-            if(v) showLimitError(); 
-            else { 
-                currentError = null; 
-                navigateTo(currentPath, false, true); 
-            } 
-        }
-        function updateNavBtns() {
-            document.getElementById('btn-back').disabled = historyIndex <= 0;
-            document.getElementById('btn-forward').disabled = historyIndex >= history.length - 1;
-            document.getElementById('btn-up').disabled = !currentPath;
-        }
+        function saveTokenFromOverlay() { const t = document.getElementById('overlay-token').value; if(t) localStorage.setItem('github_token', t); alert('Сохранено'); }
+        function toggleMockLimit(v) { mockApiLimit = v; updateApiLimits(null); if(v) showLimitError(); else { currentError = null; navigateTo(currentPath, false, true); } }
+        function updateNavBtns() { document.getElementById('btn-back').disabled = historyIndex <= 0; document.getElementById('btn-forward').disabled = historyIndex >= history.length - 1; document.getElementById('btn-up').disabled = !currentPath; }
         function goBack() { if (historyIndex > 0) navigateTo(history[--historyIndex], false); }
         function goForward() { if (historyIndex < history.length - 1) navigateTo(history[++historyIndex], false); }
-        function goUp() { const p = currentPath.split('/').slice(0, -1).join('/'); navigateTo(p); }
+        function goUp() { navigateTo(currentPath.split('/').slice(0, -1).join('/')); }
 
-        let FALLBACK_ICON = {
-            svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-            color: '#666666'
-        };
+        async function downloadAsZip(mode) {
+            if (!currentRepo) return; const zip = new JSZip(); const token = localStorage.getItem('github_token') || ''; const headers = token ? { 'Authorization': `token ${token}` } : {};
+            let filesToDownload = []; let zipName = 'download.zip';
+            const status = document.createElement('div'); status.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white p-6 rounded-lg z-[3000] shadow-2xl text-center min-w-[300px] border border-blue-400';
+            status.innerHTML = '<i data-lucide="refresh-cw" class="w-8 h-8 animate-spin mx-auto mb-3"></i><p class="font-bold">Подготовка...</p>'; document.body.appendChild(status); lucide.createIcons();
+            try {
+                if (mode === 'repo') { const rRes = await fetch(`https://api.github.com/repos/${currentRepo}`, { headers }); const rInfo = await rRes.json(); const branch = rInfo.default_branch || 'main'; const tRes = await fetch(`https://api.github.com/repos/${currentRepo}/git/trees/${branch}?recursive=1`, { headers }); const tData = await tRes.json(); filesToDownload = tData.tree.filter(i => i.type === 'blob').map(i => ({ path: i.path, url: i.url })); zipName = `${currentRepo.replace(/\//g, '_')}_full.zip`; }
+                else if (mode === 'folder') { filesToDownload = files.filter(f => f.type === 'file').map(f => ({ path: f.name, url: f.download_url })); zipName = `${(currentPath || 'root').replace(/\//g, '_')}.zip`; }
+                else if (mode === 'selection') { filesToDownload = Array.from(selectedFiles).map(idx => filteredFiles[idx]).filter(f => f.type === 'file').map(f => ({ path: f.name, url: f.download_url })); zipName = 'selection.zip'; }
+                if (filesToDownload.length === 0) throw new Error('Нет файлов');
+                for (let i = 0; i < filesToDownload.length; i++) {
+                    const f = filesToDownload[i]; status.querySelector('p').innerHTML = `Скачивание (${i + 1}/${filesToDownload.length})`;
+                    const fileRes = await fetch(f.url, { headers }); if (!fileRes.ok) continue;
+                    let b; if (f.url.includes('/git/blobs/')) { const j = await fileRes.json(); const s = atob(j.content.replace(/\s/g, '')); const bytes = new Uint8Array(s.length); for (let k = 0; j < s.length; k++) bytes[k] = s.charCodeAt(k); b = bytes; } else b = await fileRes.blob();
+                    zip.file(f.path, b);
+                }
+                const content = await zip.generateAsync({ type: 'blob' }); saveAs(content, zipName);
+            } catch (err) { alert(err.message); } finally { document.body.removeChild(status); }
+        }
 
         function initIconService() {
-            const viewerBase = (window.location.protocol === 'file:' || window.location.hostname === 'localhost') 
-                             ? 'viewer.html' 
-                             : 'https://woowz11.github.io/woowzsite/ai/viewer';
-            
-            console.log('Initializing icon service using:', viewerBase);
+            const viewerBase = (window.location.protocol === 'file:' || window.location.hostname === 'localhost') ? 'viewer.html' : 'https://woowz11.github.io/woowzsite/ai/viewer';
             const serviceIframe = document.getElementById('icon-service-worker');
-            
-            iconCache.clear();
-
-            const connectionWatchdog = setTimeout(() => {
-                if (!isIconServiceReady) {
-                    showErrorNotification("СЕРВИС ИКОНОК: Вьюер не отвечает.");
-                }
-            }, 6000);
-
             window.addEventListener('message', (event) => {
-                const data = event.data;
-                if (!data || !data.type) return;
-                
-                if (data.type === 'VIEWER_READY') {
-                    isIconServiceReady = true;
-                    clearTimeout(connectionWatchdog);
-                    serviceIframe.contentWindow.postMessage({ type: 'GET_ALL_ICONS_REQUEST' }, '*');
+                const data = event.data; if (!data || !data.type) return;
+                if (data.type === 'VIEWER_READY') { isIconServiceReady = true; serviceIframe.contentWindow.postMessage({ type: 'GET_ALL_ICONS_REQUEST' }, '*'); }
+                if (data.type === 'GET_ALL_ICONS_RESPONSE' && data.icons) {
+                    for (const key in data.icons) { const icon = data.icons[key]; if (icon.svg && icon.svg.includes('<svg')) iconCache.set(key.toLowerCase(), { svg: icon.svg, color: icon.color }); }
+                    if (data.icons["unknown"]) FALLBACK_ICON = { svg: data.icons["unknown"].svg, color: data.icons["unknown"].color };
+                    applyIconsToAll();
                 }
-
-                if (data.type === 'GET_ALL_ICONS_RESPONSE') {
-                    const icons = data.icons;
-                    if (icons) {
-                        // Обработка объекта иконок (Map format)
-                        for (const key in icons) {
-                            const icon = icons[key];
-                            if (icon.svg && icon.svg.includes('<svg')) {
-                                iconCache.set(key.toLowerCase(), {
-                                    svg: icon.svg,
-                                    color: icon.color
-                                });
-                            }
-                        }
-                        
-                        // Если есть специальная иконка для неизвестных типов
-                        if (icons["unknown"]) {
-                            FALLBACK_ICON = {
-                                svg: icons["unknown"].svg,
-                                color: icons["unknown"].color
-                            };
-                        }
-                        
-                        applyIconsToAll();
-                    }
-                }
-
                 if (data.type === 'FILE_INFO_RESPONSE') {
-                    const ext = (data.analysis && data.analysis.ext) ? data.analysis.ext.toLowerCase() : 
-                               (data.fileName === 'folder' ? 'folder' : (data.fileName.includes('.') ? data.fileName.split('.').pop().toLowerCase() : data.fileName.toLowerCase()));
-                    
-                    if (data.icon && data.icon.svg && data.icon.svg.includes('<svg')) {
-                        iconCache.set(ext, { svg: data.icon.svg, color: data.icon.color });
-                    } else {
-                        // Если вьюер не вернул иконку, используем текущий fallback (знак вопроса)
-                        iconCache.set(ext, FALLBACK_ICON);
-                    }
+                    const ext = (data.analysis && data.analysis.ext) ? data.analysis.ext.toLowerCase() : (data.fileName === 'folder' ? 'folder' : (data.fileName.includes('.') ? data.fileName.split('.').pop().toLowerCase() : data.fileName.toLowerCase()));
+                    if (data.icon && data.icon.svg && data.icon.svg.includes('<svg')) iconCache.set(ext, { svg: data.icon.svg, color: data.icon.color }); else iconCache.set(ext, FALLBACK_ICON);
                     updateIconsInDOM(ext);
                 }
             });
-
             serviceIframe.src = viewerBase;
-        }
-
-        function applyIconsToAll() {
-            document.querySelectorAll('.icon-container').forEach(container => {
-                const ext = container.getAttribute('data-ext');
-                if (ext && iconCache.has(ext)) {
-                    updateIconsInDOM(ext);
-                }
-            });
-        }
-
-        function updateIconsInDOM(ext) {
-            const data = iconCache.get(ext);
-            if (!data || !data.svg) return;
-
-            document.querySelectorAll(`[data-ext="${ext}"]`).forEach(container => {
-                // Сохраняем индикатор кеша (красную точку)
-                const indicator = container.querySelector('.cached-indicator, .list-indicator, .tree-indicator');
-                const isCached = indicator ? (indicator.style.display !== 'none') : false;
-                const indicatorClass = indicator ? indicator.className : '';
-
-                // Заменяем иконку
-                container.innerHTML = data.svg;
-                const svg = container.querySelector('svg');
-                if (svg) {
-                    svg.style.color = data.color || FALLBACK_ICON.color;
-                    svg.style.width = '100%';
-                    svg.style.height = '100%';
-                }
-
-                // Возвращаем индикатор
-                if (isCached) {
-                    const newDot = document.createElement('div');
-                    newDot.className = indicatorClass;
-                    newDot.style.display = 'inline-block';
-                    container.appendChild(newDot);
-                }
-            });
         }
 
         function requestIcon(fileName, isDir = false) {
             const ext = isDir ? 'folder' : (fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : fileName.toLowerCase());
-            
-            if (iconCache.has(ext)) {
-                updateIconsInDOM(ext);
-                return;
-            }
-
-            if (!isIconServiceReady) {
-                setTimeout(() => requestIcon(fileName, isDir), 500);
-                return;
-            }
-
-            const serviceIframe = document.getElementById('icon-service-worker');
-            if (serviceIframe && serviceIframe.contentWindow) {
-                serviceIframe.contentWindow.postMessage({
-                    type: 'FILE_INFO_REQUEST',
-                    fileName: isDir ? 'folder' : fileName
-                }, '*');
-            }
-
-            setTimeout(() => {
-                if (!iconCache.has(ext)) {
-                    iconCache.set(ext, FALLBACK_ICON);
-                    updateIconsInDOM(ext);
-                }
-            }, 4000);
+            if (iconCache.has(ext)) { updateIconsInDOM(ext); return; }
+            if (!isIconServiceReady) { setTimeout(() => requestIcon(fileName, isDir), 500); return; }
+            iconServiceIframe.contentWindow.postMessage({ type: 'FILE_INFO_REQUEST', fileName: isDir ? 'folder' : fileName }, '*');
+            setTimeout(() => { if (!iconCache.has(ext)) { iconCache.set(ext, FALLBACK_ICON); updateIconsInDOM(ext); } }, 5000);
         }
 
         function updateIconsInDOM(ext) {
             const data = iconCache.get(ext) || FALLBACK_ICON;
-
+            const token = localStorage.getItem('github_token') || '';
+            
             document.querySelectorAll(`[data-ext="${ext}"]`).forEach(container => {
-                // Пытаемся найти индикатор перед тем как стереть innerHTML
-                const oldIndicator = container.querySelector('.cached-indicator, .list-indicator, .tree-indicator');
-                // Если индикатора нет внутри, возможно он скрыт или мы в режиме списка где он рядом
-                const isCached = oldIndicator ? (oldIndicator.style.display !== 'none') : false;
+                const path = container.getAttribute('data-path') || container.closest('[data-path]')?.getAttribute('data-path');
+                const url = `https://api.github.com/repos/${currentRepo}/contents/${path}`;
+                const isCachedFolder = Array.isArray(apiCache.get(`${url}_${token}`)?.data);
 
                 // Заменяем иконку
                 container.innerHTML = (data.svg && data.svg.includes('<svg')) ? data.svg : FALLBACK_ICON.svg;
-                
                 const svg = container.querySelector('svg');
                 if (svg) {
                     svg.style.color = data.color || FALLBACK_ICON.color;
@@ -1435,88 +766,179 @@
                     svg.style.height = '100%';
                 }
 
-                // Восстанавливаем индикатор если он должен быть (красный кружок)
-                if (isCached) {
-                    const newIndicator = document.createElement('div');
-                    newIndicator.className = oldIndicator.className;
-                    newIndicator.style.display = 'inline-block';
-                    container.appendChild(newIndicator);
+                // Перерисовываем индикатор кеша сразу после замены иконки
+                if (isCachedFolder) {
+                    const dot = document.createElement('div');
+                    // Сетка (Grid) имеет класс w-12. Иерархия имеет mx-1. Список - остальное.
+                    if (container.classList.contains('w-12')) {
+                        dot.className = 'cached-indicator';
+                    } else if (container.classList.contains('mx-1')) {
+                        dot.className = 'tree-indicator';
+                    } else {
+                        dot.className = 'list-indicator';
+                    }
+                    dot.style.display = 'inline-block';
+                    container.appendChild(dot);
                 }
             });
         }
 
-        // Start
+        window.closeProperties = function() {
+            document.getElementById('properties-modal').classList.add('hidden');
+        };
+
+        document.getElementById('cm-properties').onclick = () => {
+            if (rightClickedFile) {
+                const modal = document.getElementById('properties-modal');
+                const content = document.getElementById('properties-content');
+                const f = rightClickedFile;
+                
+                const isDir = f.type === 'dir' || f.type === 'tree';
+                const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : (isDir ? 'folder' : 'unknown');
+                const iconData = iconCache.get(ext) || FALLBACK_ICON;
+                
+                const sizeFull = f.size ? `${f.size.toLocaleString()} байт` : '0 байт';
+                const sizeKb = f.size ? `(${(f.size/1024).toFixed(2)} КБ)` : '';
+
+                content.innerHTML = `
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-12 h-12 flex items-center justify-center bg-black/20 rounded relative">
+                            <div class="w-10 h-10 flex items-center justify-center">${iconData.svg}</div>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="font-bold text-white truncate text-lg">${f.name}</div>
+                            <div class="text-xs text-gray-500">${isDir ? 'Папка с файлами' : 'Файл ' + ext.toUpperCase()}</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3 border-t border-[#454545] pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Тип:</span> 
+                            <span class="text-gray-200">${isDir ? 'Папка' : ext.toUpperCase() + ' файл'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 text-nowrap">Путь:</span> 
+                            <span class="text-gray-200 truncate ml-8 text-right select-text" title="${f.path}">${f.path || '/'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Размер:</span> 
+                            <span class="text-gray-200">${sizeFull} ${sizeKb}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2 border-t border-[#454545] pt-4">
+                        <div class="text-gray-500 mb-1 uppercase font-bold text-[10px] tracking-wider">GitHub Metadata</div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 text-[10px]">SHA:</span>
+                            <code class="text-blue-400 break-all select-text bg-black/20 p-1.5 rounded text-[10px] font-mono border border-white/5">${f.sha || 'N/A'}</code>
+                        </div>
+                        <div class="flex justify-end mt-2">
+                            <a href="${f.html_url}" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors text-[11px] flex items-center">
+                                <i data-lucide="external-link" class="w-3 h-3 mr-1"></i> Посмотреть на GitHub
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                const svg = content.querySelector('svg');
+                if (svg) { 
+                    svg.style.color = iconData.color || FALLBACK_ICON.color; 
+                    svg.style.width = '100%'; 
+                    svg.style.height = '100%'; 
+                }
+                
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             initIconService();
-
-            document.querySelectorAll('.ribbon-tab').forEach(tab => {
-                tab.onclick = () => switchRibbonTab(tab.dataset.tab, tab);
-            });
             
+            document.querySelectorAll('.ribbon-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchRibbonTab(tab.dataset.tab, tab));
+            });
+
             showOpenOverlay();
             setViewMode('grid');
-            
+
             const gridBtn = document.getElementById('btn-status-grid');
             const listBtn = document.getElementById('btn-status-list');
-            if (gridBtn) gridBtn.onclick = () => setViewMode('grid');
-            if (listBtn) listBtn.onclick = () => setViewMode('list');
+            if (gridBtn) gridBtn.addEventListener('click', () => setViewMode('grid'));
+            if (listBtn) listBtn.addEventListener('click', () => setViewMode('list'));
 
             const zoomSlider = document.getElementById('zoom-slider');
-            if (zoomSlider) zoomSlider.oninput = () => renderFiles();
+            if (zoomSlider) zoomSlider.addEventListener('input', () => renderFiles());
 
             initSidebarResizer();
 
-            // Selection area logic
             let sX, sY, drag = false;
-            explorerContent.onmousedown = (e) => {
+            explorerContent.addEventListener('mousedown', (e) => {
                 if (e.button !== 0 || e.target.closest('button, input, .file-item, .file-item-list') || currentError) return;
-                drag = true; sX = e.clientX; sY = e.clientY;
-                selectionBox.style.left = sX + 'px'; selectionBox.style.top = sY + 'px'; selectionBox.style.width = '0'; selectionBox.style.height = '0';
-            };
-            window.onmousemove = (e) => {
+                drag = true; 
+                document.body.classList.add('is-selecting');
+                sX = e.clientX; sY = e.clientY;
+                selectionBox.style.left = sX + 'px';
+                selectionBox.style.top = sY + 'px';
+                selectionBox.style.width = '0';
+                selectionBox.style.height = '0';
+            });
+
+            window.addEventListener('mousemove', (e) => {
                 if (!drag) return;
                 selectionBox.style.display = 'block';
-                const x = Math.min(e.clientX, sX); const y = Math.min(e.clientY, sY);
-                const w = Math.abs(e.clientX - sX); const h = Math.abs(e.clientY - sY);
-                selectionBox.style.left = x + 'px'; selectionBox.style.top = y + 'px'; selectionBox.style.width = w + 'px'; selectionBox.style.height = h + 'px';
+                const left = Math.min(sX, e.clientX);
+                const top = Math.min(sY, e.clientY);
+                selectionBox.style.left = left + 'px';
+                selectionBox.style.top = top + 'px';
+                selectionBox.style.width = Math.abs(e.clientX - sX) + 'px';
+                selectionBox.style.height = Math.abs(e.clientY - sY) + 'px';
+
                 const rect = selectionBox.getBoundingClientRect();
                 explorerContent.querySelectorAll('.file-item, .file-item-list').forEach(item => {
                     const r = item.getBoundingClientRect();
                     const inter = !(r.right < rect.left || r.left > rect.right || r.bottom < rect.top || r.top > rect.bottom);
                     const idx = parseInt(item.dataset.index);
-                    if (inter) selectedFiles.add(idx); else if (!e.ctrlKey) selectedFiles.delete(idx);
+                    if (inter) selectedFiles.add(idx);
+                    else if (!e.ctrlKey) selectedFiles.delete(idx);
                 });
-                renderFiles(); updateStatus();
-            };
-            window.onmouseup = () => { drag = false; selectionBox.style.display = 'none'; };
-        });
-
-        function initSidebarResizer() {
-            const sidebar = document.getElementById('sidebar');
-            const resizer = document.getElementById('sidebar-resizer');
-            let isResizing = false;
-
-            resizer.onmousedown = (e) => {
-                isResizing = true;
-                resizer.classList.add('resizing');
-                document.body.style.cursor = 'col-resize';
-                document.body.style.userSelect = 'none';
-            };
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-                let newWidth = e.clientX;
-                if (newWidth < 150) newWidth = 150;
-                if (newWidth > 600) newWidth = 600;
-                sidebar.style.width = `${newWidth}px`;
+                renderFiles();
+                updateStatus();
             });
 
             window.addEventListener('mouseup', () => {
-                if (!isResizing) return;
-                isResizing = false;
-                resizer.classList.remove('resizing');
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
+                drag = false;
+                document.body.classList.remove('is-selecting');
+                selectionBox.style.display = 'none';
+            });
+        });
+
+        function initSidebarResizer() {
+            const sidebar = document.getElementById('sidebar'); 
+            const resizer = document.getElementById('sidebar-resizer'); 
+            let isResizing = false;
+            
+            resizer.onmousedown = () => { 
+                isResizing = true; 
+                resizer.classList.add('resizing'); 
+                document.body.classList.add('is-resizing');
+                document.body.style.cursor = 'col-resize'; 
+                document.body.style.userSelect = 'none'; 
+            };
+            
+            window.addEventListener('mousemove', (e) => { 
+                if (!isResizing) return; 
+                let nw = e.clientX; 
+                if (nw < 150) nw = 150; 
+                if (nw > 600) nw = 600; 
+                sidebar.style.width = `${nw}px`; 
+            });
+            
+            window.addEventListener('mouseup', () => { 
+                if (!isResizing) return; 
+                isResizing = false; 
+                resizer.classList.remove('resizing'); 
+                document.body.classList.remove('is-resizing');
+                document.body.style.cursor = ''; 
+                document.body.style.userSelect = ''; 
             });
         }
     </script>
