@@ -1,7 +1,7 @@
 const GW2 = {
     Info: {
         Name   : "GOLU World 2",
-        Version: "0.0.1"
+        Version: "0.0.2"
     },
 
     Render: {
@@ -42,13 +42,44 @@ const GW2 = {
         },
 
         /** @type {function} */
-        Resize: null
+        Resize: null,
+
+        Rect: {
+            L: {
+                V : 0,
+                WV: 0,
+                TV: 0
+            },
+            R: {
+                V : 0,
+                WV: 0,
+                TV: 0
+            },
+            U: {
+                V : 0,
+                WV: 0,
+                TV: 0
+            },
+            B: {
+                V : 0,
+                WV: 0,
+                TV: 0
+            }
+        }
     },
 
     Input: {
         Mouse: {
             X: -1,
-            Y: -1
+            Y: -1,
+
+            /** Мировые координаты мыши по X */
+            WX: 0,
+            /** Мировые координаты мыши по Y */
+            WY: 0,
+
+            TX: 0,
+            TY: 0
         },
 
         Keyboard: {
@@ -70,6 +101,7 @@ const GW2 = {
         /** Текущая сцена */
         Scene: -1,
 
+        /** @returns {[number, number]} */
         LocalToWorld: function(X, Y){
             return [
                 X + (GW2.Game.Player.Camera.X - GW2.Render.W / 2),
@@ -77,10 +109,19 @@ const GW2 = {
             ]
         },
 
+        /** @returns {[number, number]} */
         WorldToLocal: function(X, Y){
             return [
                 X - (GW2.Game.Player.Camera.X - GW2.Render.W / 2),
                 Y - (GW2.Game.Player.Camera.Y - GW2.Render.H / 2)
+            ]
+        },
+
+        /** @returns {[number, number]} */
+        WorldToTile: function(X, Y){
+            return [
+                Math.floor(X / GW2.Game.World.Map.TileSize) * GW2.Game.World.Map.TileSize,
+                Math.floor(Y / GW2.Game.World.Map.TileSize) * GW2.Game.World.Map.TileSize
             ]
         },
 
@@ -89,7 +130,15 @@ const GW2 = {
 
     Resource: {
 
+    },
+
+    Register: {
+
     }
+}
+
+Math.lerp = function(V1, V2, T){
+    return V1 + (V2 - V1) * T
 }
 
 const Bootstrap = function(){

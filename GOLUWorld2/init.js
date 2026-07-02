@@ -12,6 +12,8 @@ const Init = async function(){
         BootstrapPlayer()
         BootstrapWorld ()
 
+        RegisterAll()
+
         const StartGame = BootstrapGame(UpdateDebug, GlobalRender)
 
     console.groupEnd()

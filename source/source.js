@@ -48,6 +48,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("GICON.png", "GOLU ICON", __A_WOOWZ)
 ADD("source/specialforrandomsite/hackman.png", "HACKAMN", __A_WOOWZ, undefined, true)
 ADD("source/specialforrandomsite/glitc.png", "GLITCH", __A_PAVEL + __A_IDK, undefined, true)
 ADD("source/specialforrandomsite/wwwwwe.png", "-=-=-=-=-=-=-", __A_ANONIM, undefined, true)

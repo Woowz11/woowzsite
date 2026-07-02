@@ -235,7 +235,7 @@ const BootstrapRender = function(){
      * @param {number} H Высота
      * @param {number} Color Цвет
      */
-    Render.Rect = function(X, Y, W, H, Color){
+    Render.Square = function(X, Y, W, H, Color){
         const X1 = Math.max(0, X | 0)
         const Y1 = Math.max(0, Y | 0)
         const X2 = Math.min(Render.W, (X + W) | 0)
@@ -338,23 +338,80 @@ const BootstrapRender = function(){
 
     // ----------------------------------------------------------------------
 
+    const RenderFloor = function(){
+        /*const TileSize = 16
+
+        const OffsetX = GW2.Game.Player.Camera.X
+        const OffsetY = GW2.Game.Player.Camera.Y
+
+        const W = Render.W
+        const H = Render.H
+
+        const Color = Render.ToHEX(64, 0, 0)
+
+        for(let Y = 0; Y < H; Y++){
+            const WY = (Y + OffsetY) / TileSize
+            const RI = Math.floor(WY)
+
+            const RO = Y * W
+
+            for(let X = 0; X < W; X++){
+                const WX = (X + OffsetX) / TileSize
+                const CI = Math.floor(WX)
+
+                const IsEven = (RI + CI) % 2 === 0
+
+                if(IsEven){
+                    Render.SetRawPixel(RO + X, Color)
+                }
+            }
+        }*/
+
+        for(let Y = GW2.Render.Rect.U.TV - GW2.Game.World.Map.TileSize; Y < GW2.Render.Rect.B.TV + GW2.Game.World.Map.TileSize * 2; Y += GW2.Game.World.Map.TileSize){
+            for(let X = GW2.Render.Rect.L.TV - GW2.Game.World.Map.TileSize; X < GW2.Render.Rect.R.TV + GW2.Game.World.Map.TileSize * 2; X += GW2.Game.World.Map.TileSize){
+                if(GW2.Game.World.Map.GetFloor(X, Y, true) === GW2_Floor.Concrete){
+                    let Position = GW2.Game.WorldToLocal(X, Y)
+
+                    Render.Texture(Position[0], Position[1], GW2_Texture.ConcreteFloor)
+                }
+            }
+        }
+    }
+
+    const RenderTiles = function(){
+        for(let Y = GW2.Render.Rect.U.TV - GW2.Game.World.Map.TileSize; Y < GW2.Render.Rect.B.TV + GW2.Game.World.Map.TileSize * 2; Y += GW2.Game.World.Map.TileSize){
+            for(let X = GW2.Render.Rect.L.TV - GW2.Game.World.Map.TileSize; X < GW2.Render.Rect.R.TV + GW2.Game.World.Map.TileSize * 2; X += GW2.Game.World.Map.TileSize){
+                if(GW2.Game.World.Map.GetTile(X, Y, true) === GW2_Tile.Concrete){
+                    let Position = GW2.Game.WorldToLocal(X, Y)
+
+                    Render.Texture(Position[0], Position[1], GW2_Texture.ConcreteTile)
+                }
+            }
+        }
+    }
+
     const RenderPlayer = function(){
         let ZeroPosition = GW2.Game.WorldToLocal(0, 0)
 
         let PlayerPosition = GW2.Game.WorldToLocal(GW2.Game.Player.X, GW2.Game.Player.Y)
 
-        Render.Line(PlayerPosition[0], PlayerPosition[1], ZeroPosition[0], ZeroPosition[1], 0x000000)
-
-        Render.Line(ZeroPosition[0], ZeroPosition[1], 0, 0, 0xFF0000)
-        Render.Line(ZeroPosition[0], ZeroPosition[1], 0, GW2.Render.H, 0x00FF00)
-        Render.Line(ZeroPosition[0], ZeroPosition[1], GW2.Render.W, 0, 0x0000FF)
-        Render.Line(ZeroPosition[0], ZeroPosition[1], GW2.Render.W, GW2.Render.H, 0xFFFF00)
+        Render.Line(PlayerPosition[0], PlayerPosition[1], ZeroPosition[0], ZeroPosition[1], 0xFFFF00)
 
         Render.Texture(ZeroPosition[0] + 50, ZeroPosition[1] + 50, GW2_Texture.Player)
 
-        Render.Line(PlayerPosition[0], PlayerPosition[1], GW2.Input.Mouse.X, GW2.Input.Mouse.Y, 0xFFFFFF)
-
         Render.Texture(PlayerPosition[0] - 16/2, PlayerPosition[1] - 16/2, GW2_Texture.Player)
+    }
+
+    const RenderEntities = function(){
+        RenderPlayer()
+    }
+
+    const RenderMap = function(){
+        RenderFloor()
+
+        RenderTiles()
+
+        RenderEntities()
     }
 
     const RenderCurrentScene = function(){
@@ -369,7 +426,7 @@ const BootstrapRender = function(){
                 BackgroundColor = Render.ToHEX(255/8, 0, 0)
                 Render.Fill(BackgroundColor)
 
-                RenderPlayer()
+                RenderMap()
 
                 break
             }
@@ -393,7 +450,7 @@ const BootstrapRender = function(){
                 Render.Line(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, PC1[0], PC2[1], Render.RandomColor())
                 Render.Line(GW2.Input.Mouse.X, GW2.Input.Mouse.Y, PC2[0], PC1[1], Render.RandomColor())
 
-                Render.Rect(Math.random() * (GW2.Render.W + 30) - 30, Math.random() * (GW2.Render.H + 30) - 30, Math.random() * GW2.Render.W / 10, Math.random() * GW2.Render.H / 10, 0x000000)
+                Render.Square(Math.random() * (GW2.Render.W + 30) - 30, Math.random() * (GW2.Render.H + 30) - 30, Math.random() * GW2.Render.W / 10, Math.random() * GW2.Render.H / 10, 0x000000)
             }
         }
     }

@@ -135,12 +135,20 @@
             border-left: 4px solid var(--accent);
             padding-left: 10px;
         }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn { flex: 1; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>GW2 TEXTURE STUDIO <small style="opacity: 0.5;">v2.2 FIX</small></h1>
+    <h1>GW2 TEXTURE STUDIO <small style="opacity: 0.5;">v2.3 FIX</small></h1>
 </header>
 
 <main>
@@ -168,7 +176,10 @@
     <section>
         <div class="column-title">Декодирование (String → Preview)</div>
         <textarea id="in_str" placeholder="Вставьте строку..."></textarea>
-        <button class="btn" onclick="decompress()">ДЕКОДИРОВАТЬ</button>
+        <div class="btn-group">
+            <button class="btn" onclick="decompress()">ДЕКОДИРОВАТЬ</button>
+            <button class="btn btn-alt" onclick="copyImage()">📋 КОПИРОВАТЬ ИЗОБРАЖЕНИЕ</button>
+        </div>
 
         <div class="canvas-container" id="container_down">
             <canvas id="can_down"></canvas>
@@ -185,6 +196,7 @@
 <script>
     const GW2_Alpha = { 0: "None", 1: "Cutout", 2: "Transparent" };
 
+    // ----  Сжатие / распаковка (без изменений) ----
     async function compress(data) {
         const stream = new Blob([data]).stream();
         const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
@@ -204,6 +216,7 @@
         return new Uint8Array(buffer);
     }
 
+    // ----  Кодирование (PNG → строка) ----
     async function handleImage(file) {
         if (!file || !file.type.startsWith('image/')) return;
         const reader = new FileReader();
@@ -256,6 +269,10 @@
         reader.readAsDataURL(file);
     }
 
+    // ----  Декодирование (строка → изображение) ----
+    // Сохраняем последние декодированные данные для копирования
+    let lastDecodedImageData = null;
+
     async function decompress() {
         try {
             const str = document.getElementById('in_str').value.trim();
@@ -277,7 +294,6 @@
             let srcOff = 5;
             let dstOff = 0;
 
-            // КОРРЕКТНОЕ ЧТЕНИЕ: RGB -> RGBA или RGBA -> RGBA
             for (let i = 0; i < w * h; i++) {
                 dst[dstOff++] = bytes[srcOff++]; // R
                 dst[dstOff++] = bytes[srcOff++]; // G
@@ -285,7 +301,7 @@
                 if (isRGBA) {
                     dst[dstOff++] = bytes[srcOff++]; // A
                 } else {
-                    dst[dstOff++] = 255; // Заполняем альфу 255, если в исходнике её нет
+                    dst[dstOff++] = 255;
                 }
             }
 
@@ -295,10 +311,55 @@
                 <span>Alpha: <b>${GW2_Alpha[alpha]}</b></span>
                 <span>Формат: <b>${isRGBA ? 'RGBA' : 'RGB'}</b></span>
             `;
-        } catch (e) { alert("Ошибка данных"); }
+
+            // Сохраняем canvas для копирования
+            lastDecodedImageData = { canvas: cvs, width: w, height: h };
+        } catch (e) {
+            alert("Ошибка данных или неверный формат строки");
+            console.error(e);
+        }
     }
 
-    window.addEventListener('paste', e => handleImage(e.clipboardData.files[0]));
+    // ----  КОПИРОВАТЬ ИЗОБРАЖЕНИЕ (новое) ----
+    function copyImage() {
+        if (!lastDecodedImageData) {
+            alert("Сначала декодируйте изображение!");
+            return;
+        }
+
+        const canvas = lastDecodedImageData.canvas;
+        // Пытаемся скопировать изображение в буфер обмена как PNG
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                alert("Не удалось создать изображение");
+                return;
+            }
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                alert("✅ Изображение скопировано в буфер обмена!");
+            } catch (err) {
+                // fallback: если Clipboard API не поддерживается, предлагаем скачать
+                console.warn("Clipboard API error, fallback to download", err);
+                const link = document.createElement('a');
+                link.download = `decoded_image_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                alert("⚠️ Копирование не поддерживается, изображение скачано как PNG");
+            }
+        }, 'image/png');
+    }
+
+    // ----  События ----
+    window.addEventListener('paste', e => {
+        if (e.clipboardData && e.clipboardData.files.length > 0) {
+            handleImage(e.clipboardData.files[0]);
+        }
+    });
+
     document.getElementById('up').onchange = e => handleImage(e.target.files[0]);
 
     function copy() {
@@ -306,6 +367,13 @@
         area.select();
         document.execCommand('copy');
     }
+
+    // Инициализация: сброс lastDecodedImageData при изменении строки (опционально)
+    document.getElementById('in_str').addEventListener('input', () => {
+        // Можно сбросить lastDecodedImageData, чтобы не было путаницы
+        // Но не будем, чтобы пользователь мог скопировать последнее декодированное.
+        // При повторном декодировании обновится.
+    });
 </script>
 </body>
 </html>
