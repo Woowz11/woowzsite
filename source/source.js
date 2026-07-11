@@ -48,6 +48,11 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("poster_pissrooms.png", "PISSROOMS", __A_SKREP, "2026.07.11")
+ADD("poster_onlykill.png", "Тут уже сам", __A_SKREP, "2026.07.10")
+ADD("poster_jeb.png", "KOSHER FOOD ✡", __A_SKREP, "2026.07.10")
+ADD("poster_hmad.png", "МАГАЗИН «КРУТОЙ» фильм в 3д", __A_SKREP, "2026.07.10")
+ADD("poster_company.png", "jEw", __A_SKREP, "2026.07.10")
 ADD("GICON.png", "GOLU ICON", __A_WOOWZ)
 ADD("source/specialforrandomsite/hackman.png", "HACKAMN", __A_WOOWZ, undefined, true)
 ADD("source/specialforrandomsite/glitc.png", "GLITCH", __A_PAVEL + __A_IDK, undefined, true)
