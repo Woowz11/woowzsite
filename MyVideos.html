@@ -101,7 +101,7 @@ body{
 
 .VideoPanel{
 	width: 100%;
-	border: 2px solid rgba(255, 255, 255, 1);
+	border: 2px solid white;
 	border-radius: 8px;
 	padding: 10px;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -109,6 +109,18 @@ body{
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
+}
+
+.WIP{
+	/*border: 2px solid transparent;*/
+	border-image: repeating-linear-gradient(
+		-45deg,
+		 gray 0px,
+		 gray 2px,
+		 orange 2px,
+		 orange 4px
+	);
+	border-image-slice: 1;
 }
 
 .ContentURL, .ContentURL *{
@@ -136,7 +148,7 @@ body{
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
 }
 
-.VideoPanel a:not(.URL):not(.ContentURL):active {
+.VideoPanel a:not(.URL):not(.ContentURL):active{
 	background-color: rgba(0, 90, 200, 1);
 	transform: scale(0.98);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -204,7 +216,7 @@ body{
 	color: #E60000;
 }
 
-.Button {
+.Button{
 	display: inline-block;
 	padding: 8px 16px;
 	background-color: rgba(0, 123, 255, 1);
@@ -220,16 +232,43 @@ body{
 	user-select: none;
 }
 
-.Button:hover {
+.Button:hover{
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
 }
 
-.Button:active {
+.Button:active{
 	background-color: rgba(0, 90, 200, 1);
 	transform: scale(0.98);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
+
+
+
+.circle{
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	background: #ff0000;
+	animation: breathe 2s ease-in-out infinite;
+	box-shadow: 0 0 50px #ff0000;
+}
+
+@keyframes breathe{
+	0%, 100% {
+		transform: scale(1);
+		background: #ff0000;
+		box-shadow: 0 0 50px #ff0000;
+	}
+	50% {
+		transform: scale(1.2);
+		background: #ff3333;
+		box-shadow: 0 0 80px #ff3333, 0 0 120px rgba(255, 0, 0, 0.5);
+	}
+}
+
+
+
 </style>
 
 <body>
@@ -282,6 +321,7 @@ sort:random:0 - Случайная сортировка, с учётом сид�
 sort:tags - Сортировка по кол-ву тегов<br>
 *:reverse - Реверсирует результат
 '>
+	<div class="circle" id="circle" tooltip="Доступны полные полномочия"></div>
 	<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
 </div>
 <div class="ContentWrapper"><div id="Content"></div></div>
@@ -308,14 +348,49 @@ sort:tags - Сортировка по кол-ву тегов<br>
 <script src="Libs/chart.js"></script>
 <script>
 
+// Детект вувза
+
+const __WoowzInfo = [
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0",
+	"ru-RU",
+	"Win32",
+	16,
+	"Europe/Moscow",
+	24,
+	24
+]
+
+const __UserInfo = [
+	navigator.userAgent,
+	navigator.language,
+	navigator.platform,
+	navigator.hardwareConcurrency,
+	Intl.DateTimeFormat().resolvedOptions().timeZone,
+	screen.colorDepth,
+	screen.pixelDepth
+]
+
+console.log(__UserInfo)
+console.log(__WoowzInfo)
+console.log(JSON.stringify(__UserInfo) === JSON.stringify(__WoowzInfo))
+
+const UserWoowz = JSON.stringify(__UserInfo) === JSON.stringify(__WoowzInfo)
+
+if(!UserWoowz){
+	document.getElementById("circle").remove()
+}
+
+// ----------------------------------------------------------------------
+
+
 if(Ignore_Errors){ document.title += " (IGNORE)" }
 
-var Content = document.getElementById("Content");
+const Content = document.getElementById("Content");
 
 function ShowErrorNotification(Message, Color = "red"){
 	const Div = document.getElementById("ErrorNotification");
 
-	var Text;
+	let Text;
 
 	if(Message instanceof Error){
 		console.error(Message);
@@ -340,24 +415,24 @@ window.onerror = function(message, source, lineno, colno, error){
 }
 
 window.onunhandledrejection = function(event){
-	var Message = `Unhandled Promise Rejection: ${event.reason}`;
+	let Message = `Unhandled Promise Rejection: ${event.reason}`;
 	console.error(Message);
 	ShowErrorNotification(Message);
 }
 
-var CurrentURL = window.location.href.split("#")[0];
+const CurrentURL = window.location.href.split("#")[0];
 
 function RandomColor(Seed, Whiteness){
-	var Hash = 2166136261;
+	let Hash = 2166136261;
 
-	for(var i = 0; i < Seed.length; i++){
+	for(let i = 0; i < Seed.length; i++){
 		Hash ^= Seed.charCodeAt(i);
 		Hash += (Hash << 1) + (Hash << 4) + (Hash << 7) + (Hash << 8) + (Hash << 24);
 	}
 
-	var R = (Hash >> 16) & 0xFF;
-	var G = (Hash >> 8)  & 0xFF;
-	var B =  Hash        & 0xFF;
+	let R = (Hash >> 16) & 0xFF;
+	let G = (Hash >> 8)  & 0xFF;
+	let B =  Hash        & 0xFF;
 
 	if(Whiteness == null){ Whiteness = 0; }
 
@@ -402,9 +477,9 @@ function UpdateContent(VideosList){
 
 	Content.innerHTML = "";
 	
-	var TotalDuration    = 0;
-	var TotalVisible     = 0;
-	var TotalDurationAll = [];
+	let TotalDuration    = 0;
+	let TotalVisible     = 0;
+	let TotalDurationAll = [];
 	
 	function DurationToSeconds(D){
 		if(typeof D === "number" && !isNaN(D)){
@@ -426,29 +501,29 @@ function UpdateContent(VideosList){
 		}
 	}
 	
-	for(var i = 0; i < VideosList.length; i++){
+	for(let i = 0; i < VideosList.length; i++){
 		try{
-			var Video = VideosList[i];
+			let Video = VideosList[i];
 
-			var ID           = Video[0];
-			var Name         = Video[1];
-			var CreationDate = Video[2];
-			var YoutubeID    = Video[3];
-			var PublishDate  = Video[4];
-			var Duration     = Video[5];
-			var Visibility   = Video[6];
-			var Tags         = Video[7];
-			var Description  = Video[8];
+			let ID           = Video[0];
+			let Name         = Video[1];
+			let CreationDate = Video[2];
+			let YoutubeID    = Video[3];
+			let PublishDate  = Video[4];
+			let Duration     = Video[5];
+			let Visibility   = Video[6];
+			let Tags         = Video[7];
+			let Description  = Video[8];
 
-			var LostMedia = PublishDate === LOSTMEDIA;
+			let LostMedia = PublishDate === LOSTMEDIA;
 
 			if(!Ignore_Errors){
 				try{
-					if(ID           == DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
-					if(CreationDate == DEFAULT_Creation ){ throw new Error("CreationDate пуст!"); }
-					if(YoutubeID    == DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
-					if(PublishDate  == DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
-					if(Duration     == DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
+					if(ID           === DEFAULT_ID       ){ throw new Error("ID пуст!"          ); }
+					if(CreationDate === DEFAULT_Creation ){ throw new Error("CreationDate пуст!"); }
+					if(YoutubeID    === DEFAULT_YoutubeID){ throw new Error("YoutubeID пуст!"   ); }
+					if(PublishDate  === DEFAULT_Publish  ){ throw new Error("PublishDate пуст !"); }
+					if(Duration     === DEFAULT_Duration ){ throw new Error("Duration пуст!"    ); }
 					
 					if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
 				}catch(e){
@@ -456,14 +531,14 @@ function UpdateContent(VideosList){
 				}
 			}
 			
-			var UnknownDuration = Duration  === UNKNOWN_Duration;
-			var UnknownLink     = YoutubeID === UNKNOWN_Link;
+			let UnknownDuration = Duration  === UNKNOWN_Duration;
+			let UnknownLink     = YoutubeID === UNKNOWN_Link;
 
-			var OriginalDuration = Duration
+			let OriginalDuration = Duration
 			if(Duration === REALZERO_Duration){ Duration = "00:00" }
 
 			AddedIDs.add(ID);
-			var Seconds = DurationToSeconds(Duration);
+			let Seconds = DurationToSeconds(Duration);
 			if(!isNaN(Seconds) && isFinite(Seconds)){
 				TotalDuration += Seconds;
 				TotalDurationAll.push(Seconds);
@@ -471,20 +546,27 @@ function UpdateContent(VideosList){
 				TotalDurationAll.push(0);
 			}
 			
-			if(Visibility == P_Link || Visibility == P_Public){ TotalVisible += 1; }
+			if(Visibility === P_Link || Visibility === P_Public){ TotalVisible += 1; }
 
-			var WatchURL = "https://youtu.be/" + YoutubeID;
-			var EditURL  = "https://studio.youtube.com/video/" + YoutubeID + "/edit";
+			let WatchURL = "https://youtu.be/" + YoutubeID;
+			let EditURL  = "https://studio.youtube.com/video/" + YoutubeID + "/edit";
 
 			const Height = "28px";
 
-			var TagsHTML = "";
-			for(var j = 0; j < Tags.length; j++){
-				var TagID          = Tags[j];
-				var Tag            = TAGS[TagID];
-				var TagName        = Tag[0];
-				var TagIcon        = Tag[1];
-				var TagDescription = Tag[2];
+			let Archive = false
+			let WIP = false
+
+			let TagsHTML = "";
+			for(let j = 0; j < Tags.length; j++){
+				let TagID          = Tags[j];
+				let Tag            = TAGS[TagID];
+				let TagName        = Tag[0];
+				let TagIcon        = Tag[1];
+				let TagDescription = Tag[2];
+
+				if(TagID === T_Archive){ Archive = true }
+				if(TagID === T_WIP    ){ WIP     = true }
+
 				TagsHTML += `<a
 					class="ContentURL"
 					href="${CurrentURL}#tag%3A${TagID}"
@@ -500,8 +582,10 @@ function UpdateContent(VideosList){
 					alt="${Tag[0]}"
 				></a>`;
 			}
-			
-			var VisibilityText = (Visibility == P_Hide ? "🔒 Скрыто" : (Visibility == P_Link ? "🔗 Ссылка" : (Visibility == P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")));
+
+			let Hide = !UserWoowz && Archive
+
+			const VisibilityText = (Visibility === P_Hide ? "🔒 Скрыто" : (Visibility === P_Link ? "🔗 Ссылка" : (Visibility === P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")));
 
 			function FormatDateTime(Input){
 				if(Input === UNKNOWN_Date){ return "??.??.????"; }
@@ -515,7 +599,7 @@ function UpdateContent(VideosList){
 				function Pad2(N){ return String(N).padStart(2, "0"); }
 
 				if(TimePart){
-					var [H, m, S] = TimePart.split(":");
+					let [H, m, S] = TimePart.split(":");
 					H = parseInt(H, 10);
 					m = parseInt(m, 10);
 					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`;
@@ -524,17 +608,17 @@ function UpdateContent(VideosList){
 				}
 			}
 
-			var CreationDateText = FormatDateTime(CreationDate);
-			var PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate);
+			let CreationDateText = FormatDateTime(CreationDate);
+			let PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate);
 			
-			var DurationText    = UnknownDuration ? "??:??" : Duration;
-			var DurationTooltip = UnknownDuration ? "Неизвестная длительность видео" : `Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)`;
+			let DurationText    = UnknownDuration ? "??:??" : Duration;
+			let DurationTooltip = UnknownDuration ? "Неизвестная длительность видео" : `Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)`;
 			
 			function FormatDescription(Input){
 				function FormatURL(Input){
 					const Pattern = /(https?:\/\/[^\s]+)/g;
 					return Input.replace(Pattern, (URL) => {
-						var EndChar = "";
+						let EndChar = "";
 						if(/[)\]\},.?]/.test(URL.slice(-1))){
 							EndChar = URL.slice(-1);
 							URL = URL.slice(0, -1);
@@ -544,18 +628,18 @@ function UpdateContent(VideosList){
 				}
 				
 				function FormatTimeCode(Input){
-					    const TimeCodePattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
-						const QuestionPattern = /\[\?\]/g;
+					const TimeCodePattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
+					const QuestionPattern = /\[\?\]/g;
 
-						var Result = Input.replace(QuestionPattern, () => {
-							return `<span class="Error" tooltip="Не указано видео! Возможно в будущем будет указано">[?]</span>`;
-						});
+					let Result = Input.replace(QuestionPattern, () => {
+						return `<span class="Error" tooltip="Не указано видео! Возможно в будущем будет указано">[?]</span>`;
+					});
 
-						Result = Result.replace(TimeCodePattern, (TimeCode) => {
-							return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`;
-						});
+					Result = Result.replace(TimeCodePattern, (TimeCode) => {
+						return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`;
+					});
 
-						return Result;
+					return Result;
 				}
 				
 				function FormatIDLink(Input){
@@ -570,14 +654,14 @@ function UpdateContent(VideosList){
 				
 				return FormatIDLink(FormatTimeCode(FormatURL(Input)));
 			}
-			
-			var DescriptionText = FormatDescription(Description);
-			var NameText        = FormatDescription(Name);
 
-			var YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
-				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "✏️"}</a>`;
+			const NameText        = Hide ? "<i tooltip='У вас нет доступа к названию'>???</i>" : FormatDescription(Name);
+			const DescriptionText = Hide ? "<i tooltip='У вас нет доступа к описанию'>???</i>" : FormatDescription(Description);
 
-			var VideoContent = `<div style="display: flex; gap: 5px;">
+			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
+				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>`;
+
+			const VideoContent = `<div style="display: flex; gap: 5px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
@@ -589,10 +673,10 @@ function UpdateContent(VideosList){
 			</div>
 	<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`;
 			
-			var Panel = document.createElement("div");
-			Panel.className = "VideoPanel";
+			const Panel = document.createElement("div");
+			Panel.className = "VideoPanel" + (WIP ? " WIP" :  "");
 			Panel.innerHTML = VideoContent;
-			Panel.style.background = PublishDate == DEFAULT_Publish
+			Panel.style.background = PublishDate === DEFAULT_Publish
     ? "linear-gradient(90deg, rgb(30, 30, 30), rgb(60, 20, 20), rgb(30, 30, 30))"
     : `linear-gradient(90deg, ${RandomColor(PublishDateText, 0.5)}, ${RandomColor(PublishDateText + "_2", 0.5)}, ${RandomColor(PublishDateText + "_3", 0.5)})`;
 
@@ -618,7 +702,7 @@ function UpdateContent(VideosList){
 
 			const Pad2 = N => String(N).padStart(2, "0");
 
-			var Result = "";
+			let Result = "";
 
 			if(         D > 0){ Result += D + ":"; }
 			if(H > 0 || D > 0){ Result += Pad2(H) + ":"; }
@@ -695,7 +779,7 @@ function UpdateContent(VideosList){
 				},
 				onClick: (event, activeElements, chart) => {
 					if(activeElements.length === 0){ return; }
-					var Raw = activeElements[0].element["$context"].raw;
+					let Raw = activeElements[0].element["$context"].raw;
 					const Href = `${CurrentURL}#id%3A${Raw.id}`
 					
 					window.open(Href, "_blank", "noopener,noreferrer")
@@ -817,7 +901,7 @@ function UpdateContent(VideosList){
 				},
 				onClick: (event, activeElements, chart) => {
 					if(activeElements.length === 0){ return; }
-					var Raw = activeElements[0].element["$context"].raw;
+					let Raw = activeElements[0].element["$context"].raw;
 					const Href = `${CurrentURL}#id%3A${Raw.id}`
 					
 					window.open(Href, "_blank", "noopener,noreferrer")
@@ -831,12 +915,12 @@ function UpdateContent(VideosList){
 	Tooltip.style.display = "none";
 }
 
-var Tooltip = document.createElement("div");
+let Tooltip = document.createElement("div");
 Tooltip.id = "Tooltip";
 document.body.appendChild(Tooltip);
 
 document.addEventListener("mouseover", function(e) {
-	var Target = e.target.closest("[tooltip]");
+	let Target = e.target.closest("[tooltip]");
 	if(Target){
 		Tooltip.innerHTML = Target.getAttribute("tooltip");
 		Tooltip.style.display = "block";
@@ -851,14 +935,14 @@ document.addEventListener("mousemove", function(e){
 });
 
 document.addEventListener("mouseout", function(e){
-	var Target = e.target.closest("[tooltip]");
+	let Target = e.target.closest("[tooltip]");
 	if(Target){
 		Tooltip.style.display = "none";
 	}
 });
 
 function RandomWithSeedGenerator(Seed){
-	var V = (Seed + 61266) >>> 0;
+	let V = (Seed + 61266) >>> 0;
 	
 	return function(){
 		V ^= V << 13;
@@ -870,7 +954,7 @@ function RandomWithSeedGenerator(Seed){
 
 function ShuffleArrayWithSeed(Array, Seed){
 	const Random = RandomWithSeedGenerator(Seed);
-	for(var i = Array.length - 1; i > 0; i--){
+	for(let i = Array.length - 1; i > 0; i--){
 		const j = Math.floor(Random() * (i + 1));
 		
 		const Temp = Array[i];
@@ -880,12 +964,12 @@ function ShuffleArrayWithSeed(Array, Seed){
 	return Array;
 }
 
-var SearchInput = document.getElementById("Search");
+let SearchInput = document.getElementById("Search");
 
-var CurrentRawText = "~~~";
+let CurrentRawText = "~~~";
 function Search(){
-	var RawText = SearchInput.value.trim();
-	if(CurrentRawText == RawText){ return } CurrentRawText = RawText;
+	let RawText = SearchInput.value.trim();
+	if(CurrentRawText === RawText){ return } CurrentRawText = RawText;
 	
 	if(RawText){
 		window.location.hash = encodeURIComponent(RawText);
@@ -894,17 +978,17 @@ function Search(){
 	}
 	
 	const Parts = RawText.match(/-?(\w+:"[^"]+"|\S+)/g) || [];
-	var SearchConditions = [];
-	var SortMethod       = null;
-	var SortReverse      = false;
-	var SortSeed         = 0;
+	let SearchConditions = [];
+	let SortMethod       = null;
+	let SortReverse      = false;
+	let SortSeed         = 0;
 	
 	for(const Part of Parts){
-		var Lower = Part.toLowerCase();
+		let Lower = Part.toLowerCase();
 		if(Lower.startsWith("sort:")){
 			const SortParts = Lower.split(":");
 			
-			var Method = SortParts[1];
+			let Method = SortParts[1];
 			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags"){ SortMethod = Method; }
 			
 			if(Method === "random"){
@@ -919,10 +1003,10 @@ function Search(){
 			continue
 		}
 		
-		var Exclude = false;
-		var OR      = false;
-		var Field   = "any";
-		var Value   = Part;
+		let Exclude = false;
+		let OR      = false;
+		let Field   = "any";
+		let Value   = Part;
 		
 		if(Part.startsWith("-")){
 			Exclude = true;
@@ -964,16 +1048,16 @@ function Search(){
 		SearchConditions.push({Field: Field, Value: Value.toLowerCase(), Exclude: Exclude, OR: OR});
 	}
 	
-	var FilteredVideos = (SearchConditions.length == 0 ? [...VIDEOS] : VIDEOS.filter(Video => {
+	let FilteredVideos = (SearchConditions.length === 0 ? [...VIDEOS] : VIDEOS.filter(Video => {
 		const [ID, Name, CreationDate, YoutubeID, PublishDate, Duration, Visibility, Tags, Description] = Video;
 		
 		function Filter(Condution){
-			var M = false;
-			if(Condution.Field == "name"){
+			let M = false;
+			if(Condution.Field === "name"){
 				M = Name.toLowerCase().includes(Condution.Value);
-			}else if(Condution.Field == "description"){
+			}else if(Condution.Field === "description"){
 				M = Description.toLowerCase().includes(Condution.Value);
-			}else if(Condution.Field == "id"){
+			}else if(Condution.Field === "id"){
 				M = ID === parseInt(Condution.Value, 10);
 			}else if(Condution.Field === "tag"){
 				const TagValue = Condution.Value.toLowerCase();
@@ -987,7 +1071,7 @@ function Search(){
 						return TagName.includes(TagValue);
 					});
 				}
-			}else if(Condution.Field == "visible"){
+			}else if(Condution.Field === "visible"){
 				M = Visibility === parseInt(Condution.Value, 10);
 			}else if(Condution.Field === "before"){
 				const VideoTime = ParseDate(CreationDate);
@@ -1011,8 +1095,8 @@ function Search(){
 			return M;
 		}
 		
-		var ORGroup  = SearchConditions.filter(C =>  C.OR);
-		var AndGroup = SearchConditions.filter(C => !C.OR);
+		let ORGroup  = SearchConditions.filter(C =>  C.OR);
+		let AndGroup = SearchConditions.filter(C => !C.OR);
 		
 		if(!AndGroup.every(C => Filter(C))){ return false; }
 		if(ORGroup.length > 0 && !ORGroup.some(C => Filter(C))){ return false; }
@@ -1021,7 +1105,7 @@ function Search(){
 	}))
 	
 	if(SortMethod){
-		if(SortMethod == "random"){
+		if(SortMethod === "random"){
 			ShuffleArrayWithSeed(FilteredVideos, SortSeed || 0);
 		}else{
 			FilteredVideos.sort((A, B) => {
@@ -1097,7 +1181,7 @@ function CheckForDuplicates(){
 	}
 	
 	if(Duplicates.length > 0){
-		var Filter = "";
+		let Filter = "";
 		function AddToFilter(ID){
 			if(Filter){ Filter += " "; }
 			
@@ -1105,13 +1189,13 @@ function CheckForDuplicates(){
 		}
 	
 		for(const Pair of Duplicates){
-			const Original = Pair[0];
-			const Duplicat = Pair[1];
+			const Original  = Pair[0];
+			const Duplicate = Pair[1];
 			
-			console.log("Дубликат: " + Original[0] + " == " + Duplicat[0] + " | " + Pair[2])
+			console.log("Дубликат: " + Original[0] + " == " + Duplicate[0] + " | " + Pair[2])
 			
-			AddToFilter(Original[0]);
-			AddToFilter(Duplicat[0]);
+			AddToFilter(Original [0]);
+			AddToFilter(Duplicate[0]);
 		}
 		
 		window.location.href = CurrentURL + "#" + Filter + " sort%3Acreation";
@@ -1138,7 +1222,7 @@ function CheckForMissingID(){
 
 	const IDSet = new Set(IDs);
 
-	for(var i = Min; i <= Max; i++){
+	for(let i = Min; i <= Max; i++){
 		if(!IDSet.has(i)){
 			Missing.push(i);
 		}
@@ -1147,7 +1231,7 @@ function CheckForMissingID(){
 	if(Missing.length > 0){
 		console.warn("Пропущенные ID:", Missing);
 
-		var Filter = "";
+		let Filter = "";
 		for(const id of Missing){
 			if(Filter) Filter += " ";
 			Filter += "%2Bid%3A" + id;
