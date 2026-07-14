@@ -112,7 +112,6 @@ body{
 }
 
 .WIP{
-	/*border: 2px solid transparent;*/
 	border-image: repeating-linear-gradient(
 		-45deg,
 		 gray 0px,
@@ -249,18 +248,18 @@ body{
 	width: 15px;
 	height: 15px;
 	border-radius: 50%;
-	background: #ff0000;
+	background: red;
 	animation: breathe 2s ease-in-out infinite;
-	box-shadow: 0 0 50px #ff0000;
+	box-shadow: 0 0 50px red;
 }
 
 @keyframes breathe{
-	0%, 100% {
+	0%, 100%{
 		transform: scale(1);
-		background: #ff0000;
-		box-shadow: 0 0 50px #ff0000;
+		background: red;
+		box-shadow: 0 0 50px red;
 	}
-	50% {
+	50%{
 		transform: scale(1.2);
 		background: #ff3333;
 		box-shadow: 0 0 80px #ff3333, 0 0 120px rgba(255, 0, 0, 0.5);
@@ -331,6 +330,8 @@ sort:tags - Сортировка по кол-ву тегов<br>
 		<div class="SmallPanel" id="Info_TotalVideo"></div>
 		<div class="SmallPanel" id="Info_TotalDuration"></div>
 		<div class="SmallPanel" id="Info_Visible"></div>
+		<div class="SmallPanel" id="Info_WIP"></div>
+		<div class="SmallPanel" id="Info_Shorts"></div>
 		<div style="width: 100%;">
 			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
 			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
@@ -347,41 +348,6 @@ sort:tags - Сортировка по кол-ву тегов<br>
 <script src="source/Videos.js"></script>
 <script src="Libs/chart.js"></script>
 <script>
-
-// Детект вувза
-
-const __WoowzInfo = [
-	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0",
-	"ru-RU",
-	"Win32",
-	16,
-	"Europe/Moscow",
-	24,
-	24
-]
-
-const __UserInfo = [
-	navigator.userAgent,
-	navigator.language,
-	navigator.platform,
-	navigator.hardwareConcurrency,
-	Intl.DateTimeFormat().resolvedOptions().timeZone,
-	screen.colorDepth,
-	screen.pixelDepth
-]
-
-console.log(__UserInfo)
-console.log(__WoowzInfo)
-console.log(JSON.stringify(__UserInfo) === JSON.stringify(__WoowzInfo))
-
-const UserWoowz = JSON.stringify(__UserInfo) === JSON.stringify(__WoowzInfo)
-
-if(!UserWoowz){
-	document.getElementById("circle").remove()
-}
-
-// ----------------------------------------------------------------------
-
 
 if(Ignore_Errors){ document.title += " (IGNORE)" }
 
@@ -473,47 +439,49 @@ function ParseDate(Input){
 }
 
 function UpdateContent(VideosList){
-	const AddedIDs = new Set();
+	const AddedIDs = new Set()
 
-	Content.innerHTML = "";
+	Content.innerHTML = ""
 	
-	let TotalDuration    = 0;
-	let TotalVisible     = 0;
-	let TotalDurationAll = [];
+	let TotalDuration = 0
+	let TotalVisible  = 0
+	let TotalWIP      = 0
+	let TotalShorts   = 0
+
+	let TotalDurationAll = []
 	
 	function DurationToSeconds(D){
-		if(typeof D === "number" && !isNaN(D)){
-			return D;
-		}
+		if(typeof D === "number" && !isNaN(D)){ return D }
 		
 		if(typeof D === "string"){
-			const Parts = D.split(":").map(Number);
+			const Parts = D.split(":").map(Number)
 
 			if(Parts.some(isNaN)){
-				return NaN;
+				return NaN
 			}
 
 			if(Parts.length === 2){
-				return Parts[0] * 60 + Parts[1];
+				return Parts[0] * 60 + Parts[1]
 			}else if(Parts.length === 3){
-				return Parts[0] * 3600 + Parts[1] * 60 + Parts[2];
+				return Parts[0] * 3600 + Parts[1] * 60 + Parts[2]
 			}
 		}
 	}
 	
 	for(let i = 0; i < VideosList.length; i++){
 		try{
-			let Video = VideosList[i];
+			let Video = VideosList[i]
 
-			let ID           = Video[0];
-			let Name         = Video[1];
-			let CreationDate = Video[2];
-			let YoutubeID    = Video[3];
-			let PublishDate  = Video[4];
-			let Duration     = Video[5];
-			let Visibility   = Video[6];
-			let Tags         = Video[7];
-			let Description  = Video[8];
+			const ID           = Video[0]
+			const Name         = Video[1]
+			const CreationDate = Video[2]
+			const YoutubeID    = Video[3]
+			const PublishDate  = Video[4]
+			let   Duration     = Video[5]
+			const Visibility   = Video[6]
+			const Tags         = Video[7]
+			const Description  = Video[8]
+			const Extra        = Video[9]
 
 			let LostMedia = PublishDate === LOSTMEDIA;
 
@@ -537,35 +505,33 @@ function UpdateContent(VideosList){
 			let OriginalDuration = Duration
 			if(Duration === REALZERO_Duration){ Duration = "00:00" }
 
-			AddedIDs.add(ID);
-			let Seconds = DurationToSeconds(Duration);
+			AddedIDs.add(ID)
+			let Seconds = DurationToSeconds(Duration)
 			if(!isNaN(Seconds) && isFinite(Seconds)){
-				TotalDuration += Seconds;
-				TotalDurationAll.push(Seconds);
+				TotalDuration += Seconds
+				TotalDurationAll.push(Seconds)
 			}else{
-				TotalDurationAll.push(0);
+				TotalDurationAll.push(0)
 			}
 			
-			if(Visibility === P_Link || Visibility === P_Public){ TotalVisible += 1; }
+			if(Visibility === P_Link || Visibility === P_Public){ TotalVisible++ }
 
-			let WatchURL = "https://youtu.be/" + YoutubeID;
-			let EditURL  = "https://studio.youtube.com/video/" + YoutubeID + "/edit";
+			const WatchURL = `https://youtu.be/${YoutubeID}`
+			const EditURL  = `https://studio.youtube.com/video/${YoutubeID}/edit`
 
-			const Height = "28px";
+			const Height = "28px"
 
-			let Archive = false
-			let WIP = false
+			let Archive = Extra[0]
+			let WIP     = Extra[1]
+			let Short   = Extra[2]
 
-			let TagsHTML = "";
+			let TagsHTML = ""
 			for(let j = 0; j < Tags.length; j++){
-				let TagID          = Tags[j];
-				let Tag            = TAGS[TagID];
-				let TagName        = Tag[0];
-				let TagIcon        = Tag[1];
-				let TagDescription = Tag[2];
-
-				if(TagID === T_Archive){ Archive = true }
-				if(TagID === T_WIP    ){ WIP     = true }
+				let TagID          = Tags[j]
+				let Tag            = TAGS[TagID]
+				let TagName        = Tag[0]
+				let TagIcon        = Tag[1]
+				let TagDescription = Tag[2]
 
 				TagsHTML += `<a
 					class="ContentURL"
@@ -580,38 +546,39 @@ function UpdateContent(VideosList){
 					"
 					src="${Tag[1]}"
 					alt="${Tag[0]}"
-				></a>`;
+				></a>`
 			}
 
-			let Hide = !UserWoowz && Archive
+			if(WIP  ){ TotalWIP++    }
+			if(Short){ TotalShorts++ }
 
-			const VisibilityText = (Visibility === P_Hide ? "🔒 Скрыто" : (Visibility === P_Link ? "🔗 Ссылка" : (Visibility === P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")));
+			const VisibilityText = (Visibility === P_Hide ? "🔒 Скрыто" : (Visibility === P_Link ? "🔗 Ссылка" : (Visibility === P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")))
 
 			function FormatDateTime(Input){
-				if(Input === UNKNOWN_Date){ return "??.??.????"; }
+				if(Input === UNKNOWN_Date){ return "??.??.????" }
 			
-				const Parts    = Input.split(" ");
-				const DatePart = Parts[0];
-				const TimePart = Parts[1];
+				const Parts    = Input.split(" ")
+				const DatePart = Parts[0]
+				const TimePart = Parts[1]
 
-				const [Y, M, D] = DatePart.split(".");
+				const [Y, M, D] = DatePart.split(".")
 
-				function Pad2(N){ return String(N).padStart(2, "0"); }
+				function Pad2(N){ return String(N).padStart(2, "0") }
 
 				if(TimePart){
-					let [H, m, S] = TimePart.split(":");
-					H = parseInt(H, 10);
-					m = parseInt(m, 10);
-					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`;
+					let [H, m, S] = TimePart.split(":")
+					H = parseInt(H, 10)
+					m = parseInt(m, 10)
+					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`
 				}else{
-					return `${Pad2(D)}.${Pad2(M)}.${Y}`;
+					return `${Pad2(D)}.${Pad2(M)}.${Y}`
 				}
 			}
 
-			let CreationDateText = FormatDateTime(CreationDate);
-			let PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate);
+			let CreationDateText = FormatDateTime(CreationDate)
+			let PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate)
 			
-			let DurationText    = UnknownDuration ? "??:??" : Duration;
+			let DurationText    = UnknownDuration ? "??:??" : Duration
 			let DurationTooltip = UnknownDuration ? "Неизвестная длительность видео" : `Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)`;
 			
 			function FormatDescription(Input){
@@ -620,10 +587,10 @@ function UpdateContent(VideosList){
 					return Input.replace(Pattern, (URL) => {
 						let EndChar = "";
 						if(/[)\]\},.?]/.test(URL.slice(-1))){
-							EndChar = URL.slice(-1);
-							URL = URL.slice(0, -1);
+							EndChar = URL.slice(-1)
+							URL = URL.slice(0, -1)
 						}
-						return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`;
+						return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`
 					})
 				}
 				
@@ -646,7 +613,7 @@ function UpdateContent(VideosList){
 					return Input.replace(/\[(\d+)\]/g, (M, ID) => {
 						const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10));
 						if(Video){
-							return `<a class="URL" href="${CurrentURL}#id%3A${ID}">${M}</a>`;
+							return `<a class="URL" href="${CurrentURL}#id%3A${ID}">[${Video[0]}] ${Video[1]}</a>`;
 						}
 						return M;
 					})
@@ -655,8 +622,8 @@ function UpdateContent(VideosList){
 				return FormatIDLink(FormatTimeCode(FormatURL(Input)));
 			}
 
-			const NameText        = Hide ? "<i tooltip='У вас нет доступа к названию'>???</i>" : FormatDescription(Name);
-			const DescriptionText = Hide ? "<i tooltip='У вас нет доступа к описанию'>???</i>" : FormatDescription(Description);
+			const NameText        = FormatDescription(Name       );
+			const DescriptionText = FormatDescription(Description);
 
 			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
 				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>`;
@@ -687,44 +654,48 @@ function UpdateContent(VideosList){
 	}
 	
 	function UpdateInfo(){
-		document.getElementById("Info_TotalVideo").innerHTML = "Видео: "     + VideosList.length;
-		document.getElementById("Info_Visible"   ).innerHTML = "Публичных: " + TotalVisible + " (" + Math.floor(TotalVisible / VideosList.length * 100) + "%)";
-		
+		document.getElementById("Info_TotalVideo").innerHTML = `Видео: ${VideosList.length}`
+		document.getElementById("Info_Visible"   ).innerHTML = `Публичных: ${TotalVisible} (${Math.floor(TotalVisible / VideosList.length * 100)}%)`
+		document.getElementById("Info_WIP"       ).innerHTML = `В разработке: ${TotalWIP} (${Math.floor(TotalWIP / VideosList.length * 100)}%)`
+		document.getElementById("Info_Shorts"    ).innerHTML = `Shorts: ${TotalShorts} (${Math.floor(TotalShorts / VideosList.length * 100)}%)`
+
 		function SecondsToDuration(S){
 			if(isNaN(S) || !isFinite(S) || S < 0){
 				return "??:??:??"
 			}
 		
-			const D   = Math.floor( S / 86400        );
-			const H   = Math.floor((S % 86400) / 3600);
-			const M   = Math.floor((S % 3600 ) / 60  );
+			const D   = Math.floor( S / 86400        )
+			const H   = Math.floor((S % 86400) / 3600)
+			const M   = Math.floor((S % 3600 ) / 60  )
 			const Sec = S % 60
 
-			const Pad2 = N => String(N).padStart(2, "0");
+			const Pad2 = N => String(N).padStart(2, "0")
 
-			let Result = "";
+			let Result = ""
 
-			if(         D > 0){ Result += D + ":"; }
-			if(H > 0 || D > 0){ Result += Pad2(H) + ":"; }
+			if(         D > 0){ Result +=      D  + ":" }
+			if(H > 0 || D > 0){ Result += Pad2(H) + ":" }
 
-			Result += Pad2(M) + ":" + Pad2(Sec);
+			Result += Pad2(M) + ":" + Pad2(Sec)
 
-			return Result;
+			return Result
 		}
 		
 		function MedianDuration(){
-			if(TotalDurationAll.length === 0){ return 0; }
+			if(TotalDurationAll.length === 0){ return 0 }
 			
-			const Sorted = TotalDurationAll.slice().sort((A, B) => A - B);
-			const Median = Math.floor(Sorted.length / 2);
+			const Sorted = TotalDurationAll.slice().sort((A, B) => A - B)
+			const Median = Math.floor(Sorted.length / 2)
 			
 			if(Sorted.length % 2 === 1){
-				return Sorted[Median];
+				return Sorted[Median]
 			}else{
-				return (Sorted[Median - 1] + Sorted[Median]) / 2;
+				return (Sorted[Median - 1] + Sorted[Median]) / 2
 			}
 		}
-		
+
+		function RemoveHTML(HTMLString){ return HTMLString.replace(/<[^>]*>/g, "") }
+
 		document.getElementById("Info_TotalDuration").innerHTML = "Время: " + SecondsToDuration(TotalDuration) + " (В среднем: " + SecondsToDuration(Math.floor(MedianDuration())) + ")";
 	
 		const Chart_Duration = document.getElementById("Info_Chart_Duration").getContext("2d");
@@ -747,7 +718,7 @@ function UpdateContent(VideosList){
 							y    : item.sec,
 							video: item.video,
 							id   : item.video[0],
-							label: item.video[1]
+							label: RemoveHTML(item.video[1])
 						})),
 						tension: 0.3,
 						fill: false,
@@ -830,7 +801,7 @@ function UpdateContent(VideosList){
 				return {
 					x: xTimestamp,
 					y: monthTimestamp,
-					label: video[1],
+					label: RemoveHTML(video[1]),
 					id: video[0]
 				};
 			}).sort((a,b)=>a.x - b.x);
@@ -1247,7 +1218,13 @@ function CheckForMissingID(){
 }
 
 window.addEventListener("load", () => {
-	PreUpdateVideos();
+	const UserWoowz = PreUpdateVideos();
+
+	if(!UserWoowz){
+		document.getElementById("circle").remove()
+
+		TAGS[T_Archive][2] = "???"
+	}
 
 	if(window.location.hash){
 		SearchInput.value = decodeURIComponent(window.location.hash.substring(1));
