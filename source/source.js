@@ -103,7 +103,7 @@ ADD("source/specialforrandomsite/37171e31-de56-4637-a31c-8c0b1c0bd4db.png", "2AI
 ADD("source/specialforrandomsite/drachyn.png", "Драчун", __A_WYLDI, undefined, true)
 ADD("source/specialforrandomsite/download_cpy.gif", "ЧПУ токарный станок", __A_WOOWZ, undefined, true)
 ADD("source/specialforrandomsite/error00000.png", "exception 0x000000", __A_WOOWZ, undefined, true)
-ADD("source/specialforrandomsite/die.png", "⚰", __A_PAVEL + __A_IDK, undefined, true)
+ADD("source/specialforrandomsite/die.png", "⚰", __A_PAVEL, undefined, true)
 ADD("source/specialforrandomsite/cupi.png", "☕", __A_PAVEL, undefined, true)
 ADD("source/specialforrandomsite/comic.png", "COMIC.ai", __A_WOOWZ, undefined, true)
 ADD("source/specialforrandomsite/cold.png", "❄", __A_PAVEL, undefined, true)

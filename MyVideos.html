@@ -625,8 +625,8 @@ function UpdateContent(VideosList){
 			const NameText        = FormatDescription(Name       );
 			const DescriptionText = FormatDescription(Description);
 
-			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>
-				<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>`;
+			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
+			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : "");
 
 			const VideoContent = `<div style="display: flex; gap: 5px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
@@ -1217,8 +1217,9 @@ function CheckForMissingID(){
 	}
 }
 
+var UserWoowz
 window.addEventListener("load", () => {
-	const UserWoowz = PreUpdateVideos();
+	UserWoowz = PreUpdateVideos();
 
 	if(!UserWoowz){
 		document.getElementById("circle").remove()
