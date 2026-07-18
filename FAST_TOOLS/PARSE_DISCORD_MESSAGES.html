@@ -2,29 +2,81 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="referrer" content="no-referrer"> <!-- Важно для Discord CDN -->
+<meta name="referrer" content="no-referrer">
 <title>JSON → HTML Generator (Video/Audio Fix)</title>
 
 <style>
-
 body{
     font-family:Arial;
     background:#111;
     color:#eee;
     padding:30px;
 }
-
 progress{
     width:100%;
     height:28px;
 }
-
+.download-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+    display: none;
+}
+.download-section.active {
+    display: block;
+}
+.download-btn {
+    background: #2a6a9f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    transition: all 0.2s;
+}
+.download-btn:hover {
+    background: #3a7abf;
+    transform: scale(1.02);
+}
+.download-btn:active {
+    transform: scale(0.98);
+}
+.download-btn.green {
+    background: #2a7a3f;
+}
+.download-btn.green:hover {
+    background: #3a8a4f;
+}
+.download-btn.orange {
+    background: #a06a2a;
+}
+.download-btn.orange:hover {
+    background: #b07a3a;
+}
+.download-btn.purple {
+    background: #6a2a8a;
+}
+.download-btn.purple:hover {
+    background: #7a3a9a;
+}
+.file-info {
+    color: #aaa;
+    font-size: 13px;
+    margin: 10px 0;
+    padding: 10px;
+    background: #111;
+    border-radius: 4px;
+}
 </style>
 
 </head>
 <body>
 
-<h2>JSON → HTML генератор (v2.1 - Discord CDN Fix)</h2>
+<h2>JSON → HTML генератор (v3.5 - Download Button)</h2>
 
 <input type="file" id="FileInput">
 
@@ -34,24 +86,148 @@ progress{
 
 <div id="Status"></div>
 
+<div id="DownloadSection" class="download-section">
+    <h3>📥 Скачать файлы</h3>
+    <div class="file-info" id="FileInfo">Файлы готовы к скачиванию</div>
+    <div>
+        <button class="download-btn" data-file="messages">📄 Messages</button>
+        <button class="download-btn green" data-file="photos">🖼️ Photos</button>
+        <button class="download-btn orange" data-file="links">🔗 Links</button>
+        <button class="download-btn purple" data-file="media">🎬 Media</button>
+    </div>
+    <div style="margin-top: 10px;">
+        <button class="download-btn" id="DownloadAll" style="background: #3a3a3a; padding: 12px 30px;">📦 Скачать все</button>
+    </div>
+</div>
+
 <script>
 
 window.onerror = function(Message,Source,Line,Column,Error){
-
     alert(
         "Произошла ошибка\n\n" +
         Message + "\n" +
         "Файл: " + Source + "\n" +
         "Строка: " + Line
     );
-
     console.error(Error);
-
 };
 
 const FileInput = document.getElementById("FileInput");
 const Progress = document.getElementById("Progress");
 const Status = document.getElementById("Status");
+const DownloadSection = document.getElementById("DownloadSection");
+const FileInfo = document.getElementById("FileInfo");
+
+// Хранилище сгенерированных файлов
+const GeneratedFiles = {};
+
+// Генератор случайных чисел на основе seed
+class SeededRandom {
+    constructor(seed) {
+        this.seed = seed;
+    }
+    
+    next() {
+        this.seed = (this.seed * 9301 + 49297) % 233280;
+        return this.seed / 233280;
+    }
+    
+    nextRange(min, max) {
+        return min + this.next() * (max - min);
+    }
+}
+
+// Функция для преобразования значения в число (seed)
+function ValueToSeed(value) {
+    if (typeof value === 'number') {
+        return Math.abs(value);
+    }
+    
+    if (typeof value === 'string') {
+        let seed = 0;
+        for (let i = 0; i < value.length; i++) {
+            seed = ((seed << 5) - seed) + value.charCodeAt(i);
+            seed = seed & seed;
+            seed = seed ^ (seed >>> 16);
+            seed = (seed * 0x45d9f3b) & 0xFFFFFFFF;
+            seed = seed ^ (seed >>> 13);
+            seed = (seed * 0x21f0aaad) & 0xFFFFFFFF;
+            seed = seed ^ (seed >>> 16);
+        }
+        return Math.abs(seed);
+    }
+    
+    return ValueToSeed(String(value));
+}
+
+// Функция для генерации уникального цвета на основе ID автора (ОЧЕНЬ ТЁМНЫЙ)
+function GenerateColor(authorId) {
+    if (!authorId && authorId !== 0) return '#0a0a0a';
+    
+    const seed = ValueToSeed(authorId);
+    const rng = new SeededRandom(seed);
+    
+    const goldenRatio = 0.618033988749895;
+    const hue = (rng.next() * 360 + rng.next() * goldenRatio * 360) % 360;
+    const saturation = 30 + rng.next() * 30;
+    const lightness = 5 + rng.next() * 10;
+    
+    const hue2 = (hue + rng.next() * 20) % 360;
+    const finalHue = (hue + hue2) / 2;
+    
+    return `hsl(${finalHue}, ${saturation}%, ${lightness}%)`;
+}
+
+// Функция для получения контрастного цвета текста
+function GetTextColor(bgColor) {
+    const hslMatch = bgColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+    if (hslMatch) {
+        const lightness = parseInt(hslMatch[3]);
+        return lightness < 30 ? '#ffffff' : '#000000';
+    }
+    return '#ffffff';
+}
+
+// Кэш цветов для авторов
+const AuthorColorCache = new Map();
+
+function GetAuthorColor(author) {
+    if (!author && author !== 0) return '#0a0a0a';
+    if (!AuthorColorCache.has(author)) {
+        const color = GenerateColor(author);
+        AuthorColorCache.set(author, color);
+    }
+    return AuthorColorCache.get(author);
+}
+
+// Функция для получения информации о ссылке
+function GetLinkInfo(url) {
+    let domain = "";
+    let ext = "~";
+    let short = "";
+    try {
+        const U = new URL(url);
+        domain = U.hostname;
+        const pathParts = U.pathname.split("/").filter(p => p.length > 0);
+        short = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "/";
+        const match = U.pathname.match(/\.([a-z0-9]+)$/i);
+        if (match) ext = match[1].toLowerCase();
+    } catch {}
+    return { domain, ext, short };
+}
+
+// Функция скачивания файла
+function DownloadFile(content, name) {
+    const BlobFile = new Blob([content], {type:"text/html;charset=utf-8"});
+    const url = URL.createObjectURL(BlobFile);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+}
 
 FileInput.addEventListener("change", async function() {
     try {
@@ -77,21 +253,70 @@ FileInput.addEventListener("change", async function() {
 
         Progress.value = 0;
 
+        AuthorColorCache.clear();
+        
+        const authors = new Set();
+        for (const Msg of Data) {
+            if (Msg.Author) {
+                authors.add(Msg.Author);
+            }
+        }
+        
+        for (const author of authors) {
+            GetAuthorColor(author);
+        }
+
+        // Собираем ссылки для таблицы
+        const linkData = [];
+        const processedUrls = new Set();
+
         for (let i = Total - 1; i >= 0; i--) {
             const Msg = Data[i];
             const ID = Msg.ID || "";
             const Time = Msg.Timestamp || "";
+            const Author = Msg.Author || "";
+            
+            const bgColor = GetAuthorColor(Author);
+            const textColor = GetTextColor(bgColor);
+            
+            const styleAttr = `background: ${bgColor}; color: ${textColor}; border-color: ${bgColor};`;
 
-            let Html = `<div class="m" title="ID: ${ID} | Time: ${Time}">`;
-            Html += `<div class="t">${Time}</div>`;
+            let Html = `<div class="m" style="${styleAttr}" title="ID: ${ID} | Time: ${Time}">`;
+            Html += `<div class="header">`;
+            Html += `<span class="t" style="color: ${textColor};">${Time}</span>`;
+            Html += `<span class="id" style="color: ${textColor};">ID: ${ID}</span>`;
+            Html += `</div>`;
+            
+            if (Author) {
+                Html += `<div class="author" style="color: ${textColor};">👤 ${EscapeHTML(String(Author))}</div>`;
+            }
 
             if (Msg.Contents) {
                 const SafeText = EscapeHTML(Msg.Contents);
-                const WithLinks = Linkify(SafeText, ID, Time);
+                const WithLinks = Linkify(SafeText, ID, Time, textColor);
                 Html += `<div class="c">${WithLinks}</div>`;
 
-                const TextLinks = ExtractLinks(Msg.Contents, ID, Time);
-                AllLinks += TextLinks;
+                // Извлекаем ссылки для таблицы
+                const matches = Msg.Contents.match(/https?:\/\/[^\s]+/g);
+                if (matches) {
+                    for (const url of matches) {
+                        if (IsImage(url) || IsVideo(url) || IsAudio(url)) continue;
+                        if (processedUrls.has(url)) continue;
+                        processedUrls.add(url);
+                        const info = GetLinkInfo(url);
+                        linkData.push({
+                            url: url,
+                            ext: info.ext,
+                            domain: info.domain,
+                            short: info.short,
+                            time: Time,
+                            author: Author,
+                            bgColor: bgColor,
+                            textColor: textColor,
+                            id: ID
+                        });
+                    }
+                }
             }
 
             if (Msg.Attachments) {
@@ -99,74 +324,91 @@ FileInput.addEventListener("change", async function() {
                 for (const Url of UrlList) {
                     if (!Url.startsWith("http")) continue;
 
-                    // Очищаем URL от лишних пробелов
                     const CleanUrl = Url.trim();
 
                     if (IsImage(CleanUrl)) {
-                        Html += `<img loading="lazy" src="${CleanUrl}" title="Message ID: ${ID} | ${Time}" crossorigin="anonymous">`;
+                        Html += `<img loading="lazy" src="${CleanUrl}" title="Message ID: ${ID} | ${Time} | Author: ${Author || 'N/A'}" crossorigin="anonymous">`;
                         PhotosHTML += `
-<div class="img">
-<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time}">
+<div class="img" style="background: ${bgColor}; border-color: ${bgColor};">
+<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time} | Author: ${Author || 'N/A'}">
 <img src="${CleanUrl}" loading="lazy" crossorigin="anonymous">
 </a>
+${Author ? `<div class="author-label" style="color: ${textColor};">👤 ${EscapeHTML(String(Author))}</div>` : ''}
 </div>`;
                     } else if (IsVideo(CleanUrl)) {
                         Html += `
                         <div class="media-attachment">
-                            <video controls preload="metadata" crossorigin="anonymous" style="max-width:100%; max-height:300px; margin-top:5px;" title="Message ID: ${ID} | ${Time}">
+                            <video controls preload="metadata" crossorigin="anonymous" style="max-width:100%; max-height:300px; margin-top:5px;" title="Message ID: ${ID} | ${Time} | Author: ${Author || 'N/A'}">
                                 <source src="${CleanUrl}" type="video/mp4">
                                 <p>Ваш браузер не поддерживает видео. <a href="${CleanUrl}" target="_blank">Скачать видео</a></p>
                             </video>
                             <div style="font-size:11px; margin-top:3px;">
-                                <a href="${CleanUrl}" target="_blank" download>💾 Скачать если не грузится</a>
+                                <a href="${CleanUrl}" target="_blank" download style="color: ${textColor};">💾 Скачать если не грузится</a>
                             </div>
                         </div>`;
                         
                         VideosHTML += `
-                        <div class="media-item">
+                        <div class="media-item" style="background: ${bgColor}; border-color: ${bgColor};">
                             <video controls preload="metadata" crossorigin="anonymous" style="width:100%; max-height:300px;">
                                 <source src="${CleanUrl}" type="video/mp4">
                                 <p>Видео не загружается. <a href="${CleanUrl}" target="_blank">Открыть напрямую</a></p>
                             </video>
-                            <div class="media-info">
+                            <div class="media-info" style="color: ${textColor};">
                                 <div>ID: ${ID}</div>
                                 <div>${Time}</div>
+                                ${Author ? `<div style="color: ${textColor};">👤 ${EscapeHTML(String(Author))}</div>` : ''}
                                 <div>
-                                    <a href="${CleanUrl}" target="_blank">🔗 Открыть</a>
-                                    <a href="${CleanUrl}" download style="margin-left:8px;">⬇️ Скачать</a>
+                                    <a href="${CleanUrl}" target="_blank" style="color: ${textColor};">🔗 Открыть</a>
+                                    <a href="${CleanUrl}" download style="margin-left:8px; color: ${textColor};">⬇️ Скачать</a>
                                 </div>
                             </div>
                         </div>`;
                     } else if (IsAudio(CleanUrl)) {
                         Html += `
                         <div class="media-attachment">
-                            <audio controls preload="metadata" crossorigin="anonymous" style="margin-top:5px; width:100%;" title="Message ID: ${ID} | ${Time}">
+                            <audio controls preload="metadata" crossorigin="anonymous" style="margin-top:5px; width:100%;" title="Message ID: ${ID} | ${Time} | Author: ${Author || 'N/A'}">
                                 <source src="${CleanUrl}">
                                 <p>Аудио не загружается. <a href="${CleanUrl}" target="_blank">Скачать аудио</a></p>
                             </audio>
                             <div style="font-size:11px; margin-top:3px;">
-                                <a href="${CleanUrl}" target="_blank" download>💾 Скачать если не грузится</a>
+                                <a href="${CleanUrl}" target="_blank" download style="color: ${textColor};">💾 Скачать если не грузится</a>
                             </div>
                         </div>`;
                         
                         AudiosHTML += `
-                        <div class="media-item">
+                        <div class="media-item" style="background: ${bgColor}; border-color: ${bgColor};">
                             <audio controls preload="metadata" crossorigin="anonymous" style="width:100%;">
                                 <source src="${CleanUrl}">
                                 <p>Аудио не загружается. <a href="${CleanUrl}" target="_blank">Открыть напрямую</a></p>
                             </audio>
-                            <div class="media-info">
+                            <div class="media-info" style="color: ${textColor};">
                                 <div>ID: ${ID}</div>
                                 <div>${Time}</div>
+                                ${Author ? `<div style="color: ${textColor};">👤 ${EscapeHTML(String(Author))}</div>` : ''}
                                 <div>
-                                    <a href="${CleanUrl}" target="_blank">🔗 Открыть</a>
-                                    <a href="${CleanUrl}" download style="margin-left:8px;">⬇️ Скачать</a>
+                                    <a href="${CleanUrl}" target="_blank" style="color: ${textColor};">🔗 Открыть</a>
+                                    <a href="${CleanUrl}" download style="margin-left:8px; color: ${textColor};">⬇️ Скачать</a>
                                 </div>
                             </div>
                         </div>`;
                     } else {
-                        Html += `<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time}">${CleanUrl}</a>`;
-                        AllLinks += `<div><a href="${CleanUrl}" title="Message ID: ${ID} | ${Time}" target="_blank">${CleanUrl}</a></div>`;
+                        // Это обычная ссылка, добавляем в таблицу
+                        if (!processedUrls.has(CleanUrl)) {
+                            processedUrls.add(CleanUrl);
+                            const info = GetLinkInfo(CleanUrl);
+                            linkData.push({
+                                url: CleanUrl,
+                                ext: info.ext,
+                                domain: info.domain,
+                                short: info.short,
+                                time: Time,
+                                author: Author,
+                                bgColor: bgColor,
+                                textColor: textColor,
+                                id: ID
+                            });
+                        }
+                        Html += `<a href="${CleanUrl}" target="_blank" title="Message ID: ${ID} | ${Time} | Author: ${Author || 'N/A'}" style="color: ${textColor};">${CleanUrl}</a>`;
                     }
                 }
             }
@@ -182,39 +424,75 @@ FileInput.addEventListener("change", async function() {
             }
         }
 
+        // Создаем HTML для таблицы ссылок
+        let LinksTableHTML = "";
+        for (const item of linkData) {
+            LinksTableHTML += `
+<tr style="background: ${item.bgColor};">
+    <td class="type" style="color: ${item.textColor};">${item.ext}</td>
+    <td class="domain" style="color: ${item.textColor};">${item.domain}</td>
+    <td class="short" style="color: ${item.textColor};" title="${item.url}">${item.short}</td>
+    <td class="time" style="color: ${item.textColor};">${item.time}</td>
+    <td class="author-cell" style="color: ${item.textColor};">${item.author ? EscapeHTML(String(item.author)) : '-'}</td>
+    <td><a href="${item.url}" target="_blank" style="color: ${item.textColor};">open</a></td>
+</tr>`;
+        }
+
         Progress.value = 100;
-        Status.textContent = "Генерация HTML...";
+        Status.textContent = `Готово! Найдено ${linkData.length} уникальных ссылок.`;
 
-        DownloadFile(BuildMessagesHTML(MessagesHTML), "messages.html");
-        DownloadFile(BuildPhotosHTML(PhotosHTML), "photos.html");
-        DownloadFile(BuildLinksHTML(AllLinks), "links.html");
-        DownloadFile(BuildMediaHTML(VideosHTML, AudiosHTML), "media.html");
-
-        Status.textContent = "Готово. Скачано 4 HTML файла.";
+        // Сохраняем сгенерированные файлы
+        GeneratedFiles.messages = BuildMessagesHTML(MessagesHTML);
+        GeneratedFiles.photos = BuildPhotosHTML(PhotosHTML);
+        GeneratedFiles.links = BuildLinksHTML(LinksTableHTML);
+        GeneratedFiles.media = BuildMediaHTML(VideosHTML, AudiosHTML);
+        
+        // Показываем секцию скачивания
+        DownloadSection.classList.add('active');
+        FileInfo.textContent = `📊 Всего сообщений: ${Total} | Уникальных авторов: ${authors.size} | Уникальных ссылок: ${linkData.length}`;
 
     } catch(Error) {
         alert("Ошибка обработки архива");
         console.error(Error);
+        Status.textContent = "❌ Ошибка: " + Error.message;
     }
 });
 
+// Обработчики кнопок скачивания
+document.querySelectorAll('.download-btn[data-file]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const fileName = this.dataset.file;
+        const content = GeneratedFiles[fileName];
+        if (content) {
+            DownloadFile(content, fileName + '.html');
+        } else {
+            alert('Файл не найден. Сначала обработайте JSON.');
+        }
+    });
+});
 
-function Linkify(text,ID,Time){
+document.getElementById('DownloadAll').addEventListener('click', function() {
+    const files = ['messages', 'photos', 'links', 'media'];
+    let downloaded = 0;
+    for (const name of files) {
+        if (GeneratedFiles[name]) {
+            DownloadFile(GeneratedFiles[name], name + '.html');
+            downloaded++;
+        }
+    }
+    if (downloaded === 0) {
+        alert('Нет файлов для скачивания. Сначала обработайте JSON.');
+    } else {
+        Status.textContent = `✅ Скачано ${downloaded} файлов`;
+    }
+});
+
+function Linkify(text,ID,Time,textColor){
+    const linkColor = textColor === '#ffffff' ? '#6aa9ff' : '#0055aa';
     return text.replace(
         /(https?:\/\/[^\s]+)/g,
-        `<a href="$1" target="_blank" title="Message ID: ${ID} | ${Time}">$1</a>`
+        `<a href="$1" target="_blank" title="Message ID: ${ID} | ${Time}" style="color: ${linkColor};">$1</a>`
     );
-}
-
-function ExtractLinks(text,ID,Time){
-    const Matches = text.match(/https?:\/\/[^\s]+/g);
-    if(!Matches) return "";
-    let Result = "";
-    for(const Url of Matches){
-        if(IsImage(Url) || IsVideo(Url) || IsAudio(Url)) continue;
-        Result += `<div><a href="${Url}" target="_blank" title="Message ID: ${ID} | ${Time}">${Url}</a></div>`;
-    }
-    return Result;
 }
 
 function BuildMessagesHTML(Content){
@@ -226,11 +504,14 @@ return `<!DOCTYPE html>
 <title>Messages</title>
 <style>
 body{font-family:Arial;background:#111;color:#eee;padding:10px;}
-.m{border-bottom:1px solid #222;padding:4px;font-size:13px;}
-.t{color:#777;font-size:11px;}
-.c{margin-top:2px;white-space:pre-wrap;}
-img{max-width:240px;margin-top:4px;}
-a{color:#6aa9ff;word-break:break-all;}
+.m{border:2px solid #444;padding:8px 10px;font-size:13px;border-radius:4px;margin-bottom:4px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+.t{font-size:11px;opacity:0.8;}
+.id{font-size:10px;font-family:monospace;opacity:0.7;}
+.author{font-size:12px;font-weight:bold;margin-top:2px;}
+.c{margin-top:4px;white-space:pre-wrap;}
+img{max-width:240px;margin-top:4px;border-radius:4px;}
+a{word-break:break-all;}
 .media-attachment{margin-top:5px;}
 video, audio{background:#000;border-radius:6px;}
 </style>
@@ -250,10 +531,11 @@ return `<!DOCTYPE html>
 <title>Photos</title>
 <style>
 body{background:#111;color:#eee;font-family:Arial;padding:20px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:8px;}
-.img{position:relative;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:80px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:10px;}
+.img{position:relative;border:3px solid #333;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;min-height:100px;padding:10px;}
 .img img{max-width:100%;max-height:100%;height:auto;width:auto;display:block;}
 .img span{position:absolute;color:#666;font-size:12px;pointer-events:none;}
+.author-label{font-size:11px;margin-top:5px;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -303,16 +585,14 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
         gap: 20px;
     }
     .media-item {
-        background: #151515;
+        border: 3px solid #333;
         border-radius: 8px;
         overflow: hidden;
         padding: 15px;
-        border: 1px solid #2a2a2a;
         transition: transform 0.1s ease;
     }
     .media-item:hover {
-        border-color: #444;
-        background: #1a1a1a;
+        transform: scale(1.01);
     }
     video {
         width: 100%;
@@ -332,7 +612,6 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
     }
     .media-info {
         font-size: 12px;
-        color: #aaa;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -340,18 +619,17 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
         gap: 8px;
     }
     .media-info a {
-        color: #6aa9ff;
         text-decoration: none;
-        border: 1px solid #333;
+        border: 1px solid rgba(255,255,255,0.2);
         padding: 4px 10px;
         border-radius: 4px;
         font-size: 11px;
-        background: #1e1e1e;
+        background: rgba(0,0,0,0.3);
         transition: all 0.2s;
     }
     .media-info a:hover {
-        background: #2a3a5a;
-        border-color: #6aa9ff;
+        background: rgba(255,255,255,0.1);
+        border-color: #666;
     }
     .empty-message {
         color: #666;
@@ -391,7 +669,6 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
 </div>
 
 <script>
-    // Обработка ошибок загрузки медиа
     document.querySelectorAll('video, audio').forEach(media => {
         media.addEventListener('error', (e) => {
             console.log('Media load error:', media.src);
@@ -404,13 +681,11 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
             }
         });
         
-        // Пытаемся перезагрузить если не грузится
         media.addEventListener('loadedmetadata', () => {
             console.log('Loaded:', media.src);
         });
     });
     
-    // Добавляем обработку для source элементов
     document.querySelectorAll('source').forEach(source => {
         source.addEventListener('error', (e) => {
             console.log('Source error:', source.src);
@@ -422,7 +697,7 @@ function BuildMediaHTML(VideosContent, AudiosContent) {
 </html>`;
 }
 
-function BuildLinksHTML(Content) {
+function BuildLinksHTML(TableContent) {
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -436,13 +711,14 @@ table{width:100%;border-collapse:collapse;font-size:13px;}
 thead{background:#1b1b1b;cursor:pointer;}
 th{text-align:left;padding:8px;border-bottom:2px solid #333;}
 td{padding:6px;border-bottom:1px solid #222;}
-tr:hover{background:#1a1a1a;}
+tr:hover{opacity:0.8;}
 a{color:#6aa9ff;text-decoration:none;}
 a:hover{text-decoration:underline;}
-.type{font-weight:bold;color:#aaa;}
-.domain{color:#888;font-size:12px;}
+.type{font-weight:bold;}
+.domain{font-size:12px;}
 .short{font-family:monospace;}
-.time{color:#ccc;font-size:12px;}
+.time{font-size:12px;}
+.author-cell{font-size:12px;}
 </style>
 </head>
 <body>
@@ -454,40 +730,15 @@ a:hover{text-decoration:underline;}
 <th onclick="sortTable(1)">Domain</th>
 <th onclick="sortTable(2)">Short URL</th>
 <th onclick="sortTable(3)">Time</th>
+<th onclick="sortTable(4)">Author</th>
 <th>Open</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody>
+${TableContent || '<tr><td colspan="6" style="text-align:center;color:#666;padding:20px;">Ссылки не найдены</td></tr>'}
+</tbody>
 </table>
 <script>
-const Parser = new DOMParser();
-const Doc = Parser.parseFromString(${JSON.stringify(Content)}, "text/html");
-const Links = [...Doc.querySelectorAll("a")];
-const TableBody = document.querySelector("#LinksTable tbody");
-for (const A of Links) {
-    const Url = A.href;
-    let Domain = "";
-    let Ext = "~";
-    let Short = "";
-    let Time = A.getAttribute("title") || "";
-    try {
-        const U = new URL(Url);
-        Domain = U.hostname;
-        const PathParts = U.pathname.split("/").filter(p => p.length > 0);
-        Short = PathParts.length > 0 ? PathParts[PathParts.length - 1] : "/";
-        const match = U.pathname.match(/\\.([a-z0-9]+)$/i);
-        if (match) Ext = match[1].toLowerCase();
-    } catch {}
-    const Row = document.createElement("tr");
-    Row.innerHTML = \`
-<td class="type">\${Ext}</td>
-<td class="domain">\${Domain}</td>
-<td class="short" title="\${Url}">\${Short}</td>
-<td class="time">\${Time}</td>
-<td><a href="\${Url}" target="_blank" title="\${Url}">open</a></td>
-\`;
-    TableBody.appendChild(Row);
-}
 function sortTable(colIndex) {
     const tbody = document.querySelector("#LinksTable tbody");
     const rows = Array.from(tbody.querySelectorAll("tr"));
@@ -511,16 +762,6 @@ function sortTable(colIndex) {
 </${"script"}>
 </body>
 </html>`;
-}
-
-function DownloadFile(content, name){
-    const BlobFile = new Blob([content], {type:"text/html"});
-    const url = URL.createObjectURL(BlobFile);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 function IsImage(url){ return /\.(png|jpg|jpeg|gif|webp|bmp|svg)/i.test(url); }

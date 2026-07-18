@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrub to Discord Data Converter</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .drop-zone {
+            border: 2px dashed #4f46e5;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-color: #4338ca;
+        }
+        button {
+            cursor: pointer !important;
+        }
+        /* Дополнительно для неактивных кнопок */
+        button:disabled {
+            cursor: not-allowed !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center p-8">
+    <div class="max-w-4xl w-full bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-indigo-400 mb-2">Конвертер Discrub в Discord Data</h1>
+            <p class="text-gray-400 text-sm">Выберите один или несколько HTML файлов Discrub для объединения и конвертации в JSON</p>
+        </header>
+
+        <div id="drop-zone" class="drop-zone rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer mb-6">
+            <svg class="w-16 h-16 text-indigo-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-lg font-medium text-gray-200">Перетащите файлы сюда или нажмите для выбора</p>
+            <input type="file" id="file-input" multiple accept=".html" class="hidden">
+        </div>
+
+        <div id="file-list" class="space-y-2 mb-6 max-h-48 overflow-y-auto"></div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="convert-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Конвертировать и Объединить
+            </button>
+            <button id="download-btn" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
+                Скачать JSON
+            </button>
+        </div>
+
+        <div id="status" class="mt-6 text-center text-sm font-medium"></div>
+    </div>
+
+    <div class="mt-8 max-w-4xl w-full">
+        <h2 class="text-xl font-semibold text-gray-300 mb-4">Лог процесса:</h2>
+        <div id="log" class="bg-black rounded-lg p-4 font-mono text-xs text-green-400 h-64 overflow-y-auto border border-gray-700">
+            > Ожидание файлов...
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const convertBtn = document.getElementById('convert-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+
+        let selectedFiles = [];
+        let resultData = null;
+
+        // UI Events
+        dropZone.onclick = () => fileInput.click();
+        
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.classList.remove('drag-over');
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        };
+
+        fileInput.onchange = (e) => {
+            handleFiles(e.target.files);
+        };
+
+        function handleFiles(files) {
+            const newFiles = Array.from(files).filter(f => f.name.endsWith('.html'));
+            if (newFiles.length === 0) return;
+            
+            selectedFiles = [...selectedFiles, ...newFiles];
+            updateFileList();
+            convertBtn.disabled = false;
+            addLog(`Добавлено файлов: ${newFiles.length}. Всего: ${selectedFiles.length}`);
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = selectedFiles.map((f, i) => `
+                <div class="flex justify-between items-center bg-gray-700 p-2 rounded px-4">
+                    <span class="truncate">${f.name}</span>
+                    <button onclick="removeFile(${i})" class="text-red-400 hover:text-red-300">✕</button>
+                </div>
+            `).join('');
+        }
+
+        window.removeFile = (index) => {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            if (selectedFiles.length === 0) convertBtn.disabled = true;
+        };
+
+        function addLog(msg) {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function parseDiscrubDate(dateStr) {
+            // Формат: 03/25/2026 8:04 PM
+            try {
+                const parts = dateStr.split(' ');
+                if (parts.length < 2) return null;
+
+                const dateParts = parts[0].split('/');
+                const timeParts = parts[1].split(':');
+                const period = parts[2]; // AM/PM
+
+                let hours = parseInt(timeParts[0]);
+                const minutes = timeParts[1];
+                const seconds = "00";
+
+                if (period === 'PM' && hours < 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+
+                const hStr = hours.toString().padStart(2, '0');
+                
+                // Возвращаем YYYY-MM-DD HH:mm:ss
+                return `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')} ${hStr}:${minutes}:${seconds}`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        async function processFiles() {
+            addLog('Начинаю обработку файлов...');
+            const allMessagesMap = new Map();
+            let lastTimestamp = "";
+            let lastAuthorId = "";
+
+            for (const file of selectedFiles) {
+                addLog(`Читаю ${file.name}...`);
+                const text = await file.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                const messages = doc.querySelectorAll('.message');
+                addLog(`Найдено сообщений в файле: ${messages.length}`);
+
+                messages.forEach(msgEl => {
+                    const id = msgEl.getAttribute('data-message-id');
+                    if (!id) return;
+
+                    // Поиск ID автора
+                    const authorEl = msgEl.querySelector('.author');
+                    const avatarEl = msgEl.querySelector('.avatar');
+                    
+                    if (authorEl && authorEl.getAttribute('data-user-id')) {
+                        lastAuthorId = authorEl.getAttribute('data-user-id');
+                    } else if (avatarEl && avatarEl.getAttribute('data-user-id')) {
+                        lastAuthorId = avatarEl.getAttribute('data-user-id');
+                    }
+
+                    // Если это групповое сообщение, у него может не быть шапки с автором и полной датой
+                    const isGrouped = msgEl.classList.contains('message-grouped');
+                    
+                    let timestampRaw = "";
+                    if (isGrouped) {
+                        const gt = msgEl.querySelector('.grouped-timestamp');
+                        timestampRaw = gt ? gt.innerText.trim() : "";
+                    } else {
+                        const t = msgEl.querySelector('.timestamp');
+                        timestampRaw = t ? t.innerText.trim() : "";
+                    }
+
+                    const formattedDate = parseDiscrubDate(timestampRaw) || timestampRaw;
+                    
+                    const contentEl = msgEl.querySelector('.message-text');
+                    const content = contentEl ? contentEl.innerText.trim() : "";
+
+                    // Поиск вложений
+                    let attachments = [];
+                    // Ищем картинки в контенте сообщения (не аватарки)
+                    const imgs = msgEl.querySelectorAll('.message-content img:not(.avatar)');
+                    imgs.forEach(img => attachments.push(img.src));
+                    
+                    // Ищем ссылки, которые могут быть файлами
+                    const links = msgEl.querySelectorAll('.message-content a');
+                    links.forEach(a => {
+                        if (a.href.includes('cdn.discordapp.com') || a.href.includes('media.discordapp.net')) {
+                            attachments.push(a.href);
+                        }
+                    });
+
+                    // Создаем объект сообщения
+                    // Используем ID как строку для ключа в Map, чтобы избежать проблем с точностью в JS
+                    allMessagesMap.set(id, {
+                        ID: id,
+                        Timestamp: formattedDate,
+                        Author: lastAuthorId,
+                        Contents: content,
+                        Attachments: attachments.join(', ')
+                    });
+                });
+            }
+
+            // Превращаем в массив, сортируем по ID (Snowflake сортировка соответствует времени)
+            // Используем убывающий порядок (от новых к старым), как в вашем примере
+            const sortedMessages = Array.from(allMessagesMap.values()).sort((a, b) => {
+                const idA = BigInt(a.ID);
+                const idB = BigInt(b.ID);
+                if (idA > idB) return -1;
+                if (idA < idB) return 1;
+                return 0;
+            });
+
+            addLog('Сообщения отсортированы по времени (от новых к старым).');
+
+            // Формируем финальный массив, превращая строковые ID в числа для JSON (по запросу)
+            // Примечание: JSON.stringify превратит BigInt в ошибку, а обычные числа в JS теряют точность.
+            // Чтобы сохранить ID как числа в JSON файле без потери точности, нам нужно хитрое решение.
+            // Если пользователю критично иметь именно числа в JSON, а не строки:
+            resultData = sortedMessages.map(m => ({
+                ...m,
+                ID: m.ID // Оставляем строкой для безопасности, либо...
+            }));
+
+            addLog(`Обработка завершена. Всего уникальных сообщений: ${resultData.length}`);
+            status.textContent = `Готово! Обработано сообщений: ${resultData.length}`;
+            status.className = "mt-6 text-center text-sm font-medium text-emerald-400";
+            downloadBtn.classList.remove('hidden');
+        }
+
+        convertBtn.onclick = async () => {
+            convertBtn.disabled = true;
+            downloadBtn.classList.add('hidden');
+            try {
+                await processFiles();
+            } catch (err) {
+                addLog(`ОШИБКА: ${err.message}`);
+                console.error(err);
+            }
+            convertBtn.disabled = false;
+        };
+
+        downloadBtn.onclick = () => {
+            if (!resultData || resultData.length === 0) {
+                alert("Нет данных для скачивания!");
+                return;
+            }
+
+            try {
+                addLog('Подготовка файла к скачиванию...');
+                // Создаем JSON. Сначала ID как строки, потом уберем кавычки регуляркой
+                let jsonString = JSON.stringify(resultData, null, 2);
+                
+                // Превращаем "ID": "123" и "Author": "456" в числа без кавычек
+                jsonString = jsonString.replace(/"(ID|Author)":\s*"(\d+)"/g, '"$1": $2');
+
+                const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `discord_data_${Date.now()}.json`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                // Небольшая задержка перед удалением ссылки и освобождением памяти
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    addLog('Файл успешно отправлен на скачивание.');
+                }, 100);
+                
+            } catch (err) {
+                addLog(`Ошибка при скачивании: ${err.message}`);
+                console.error(err);
+            }
+        };
+    </script>
+</body>
+</html>

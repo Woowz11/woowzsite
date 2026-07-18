@@ -112,14 +112,28 @@ body{
 }
 
 .WIP{
-	border-image: repeating-linear-gradient(
+	position: relative;
+}
+
+.WIP::before{
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: repeating-linear-gradient(
 		-45deg,
-		 gray 0px,
-		 gray 2px,
-		 orange 2px,
-		 orange 4px
+		transparent 0px,
+		transparent 20px,
+		rgba(0, 0, 0, 0.075) 20px,
+		rgba(0, 0, 0, 0.075) 40px
 	);
-	border-image-slice: 1;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.WIP > *{
+	position: relative;
+	z-index: 2;
 }
 
 .ContentURL, .ContentURL *{
@@ -242,23 +256,22 @@ body{
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-
-
-.circle{
+.Circle{
 	width: 15px;
 	height: 15px;
 	border-radius: 50%;
 	background: red;
-	animation: breathe 2s ease-in-out infinite;
+	animation: CirclePulse 2s ease-in-out infinite;
 	box-shadow: 0 0 50px red;
 }
 
-@keyframes breathe{
+@keyframes CirclePulse{
 	0%, 100%{
 		transform: scale(1);
 		background: red;
 		box-shadow: 0 0 50px red;
 	}
+
 	50%{
 		transform: scale(1.2);
 		background: #ff3333;
@@ -266,82 +279,112 @@ body{
 	}
 }
 
+#TagsPanel{
+	position: absolute;
+	left: 10px;
+	top: 40px;
+	width: calc((100vw - 1200px) / 2 - 50px);
+	max-height: calc(100vh - 80px);
+	overflow-y: hidden;
+	background: rgba(240, 240, 240, 0.95);
+	backdrop-filter: blur(8px);
+	border: 2px solid white;
+	border-radius: 8px;
+	padding: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+	z-index: 1000;
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+	align-content: flex-start;
+}
+
+@media screen and (max-width: 1600px){
+	#TagsPanel{
+		display: none !important;
+	}
+}
 
 
 </style>
 
 <body>
 
-<div class="PageWrapper">
+	<div class="PageWrapper">
 
-<div id="ErrorNotification" style="
-	position: fixed;
-	bottom: 20px;
-	right: 20px;
-	background-color: rgba(255,0,0,0.8);
-	backdrop-filter: blur(6px);
-	color: white;
-	padding: 10px 15px;
-	border-radius: 6px;
-	font-family: Arial, sans-serif;
-	font-size: 14px;
-	display: none;
-	z-index: 99999;
-	max-width: 300px;
-	word-break: break-word;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-"></div>
+		<div id="ErrorNotification" style="
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background-color: rgba(255,0,0,0.8);
+			backdrop-filter: blur(6px);
+			color: white;
+			padding: 10px 15px;
+			border-radius: 6px;
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+			display: none;
+			z-index: 99999;
+			max-width: 300px;
+			word-break: break-word;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+		"></div>
 
-<div class="FullscreenGradient"></div>
-<div class="Header" tooltip='
-Подсказка по поиску
-<hr>
-"-" в начале, это исключение<br>
-"+" в начале, это ИЛИ
-<hr>
-name:"" - Поиск по имени<br>
-description:"" - Поиск по описанию<br>
-id:0 - Поиск по ID<br>
-tag:"" - Поиск по названию тега<br>
-tag:0 - Поиск по ID тега<br>
-visible:0 - Поиск по публичности видео (0 - Скрыто, 1 - Ссылка, 2 - Публичное, 3 - Заблокированное)
-<hr>
-before:дата - Создано до (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
-after:дата - Создано после (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
-publish_before:дата - Опубликовано до (DD.MM.YYYY || YYYY.MM.DD)<br>
-publish_after:дата - Опубликовано после (DD.MM.YYYY || YYYY.MM.DD)<br>
-<hr>
-sort:id - Сортировка по ID<br>
-sort:name - Сортировка по имени<br>
-sort:creation - Сортировка по времени создания<br>
-sort:publish - Сортировка по времени публикации<br>
-sort:duration - Сортировка по времени видео<br>
-sort:random:0 - Случайная сортировка, с учётом сида (если сид не указывать, каждый раз будет случайное)<br>
-sort:tags - Сортировка по кол-ву тегов<br>
-*:reverse - Реверсирует результат
-'>
-	<div class="circle" id="circle" tooltip="Доступны полные полномочия"></div>
-	<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
-</div>
-<div class="ContentWrapper"><div id="Content"></div></div>
+		<div class="FullscreenGradient"></div>
 
-<div class="Footer">
-	<div class="FooterPanel">
-		<div class="SmallPanel" id="Info_TotalVideo"></div>
-		<div class="SmallPanel" id="Info_TotalDuration"></div>
-		<div class="SmallPanel" id="Info_Visible"></div>
-		<div class="SmallPanel" id="Info_WIP"></div>
-		<div class="SmallPanel" id="Info_Shorts"></div>
-		<div style="width: 100%;">
-			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
-			<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
+		<div class="Header" tooltip='
+		Подсказка по поиску
+		<hr>
+		"-" в начале, это исключение<br>
+		"+" в начале, это ИЛИ
+		<hr>
+		name:"" - Поиск по имени<br>
+		description:"" - Поиск по описанию<br>
+		id:0 - Поиск по ID<br>
+		tag:"" - Поиск по названию тега<br>
+		tag:0 - Поиск по ID тега<br>
+		visible:0 - Поиск по публичности видео (0 - Скрыто, 1 - Ссылка, 2 - Публичное, 3 - Заблокированное)
+		<hr>
+		before:дата - Создано до (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
+		after:дата - Создано после (включительно) (DD.MM.YYYY || YYYY.MM.DD)<br>
+		publish_before:дата - Опубликовано до (DD.MM.YYYY || YYYY.MM.DD)<br>
+		publish_after:дата - Опубликовано после (DD.MM.YYYY || YYYY.MM.DD)<br>
+		<hr>
+		sort:id - Сортировка по ID<br>
+		sort:name - Сортировка по имени<br>
+		sort:creation - Сортировка по времени создания<br>
+		sort:publish - Сортировка по времени публикации<br>
+		sort:duration - Сортировка по времени видео<br>
+		sort:random:0 - Случайная сортировка, с учётом сида (если сид не указывать, каждый раз будет случайное)<br>
+		sort:tags - Сортировка по кол-ву тегов<br>
+		*:reverse - Реверсирует результат
+		'>
+			<div class="Circle" id="circle" tooltip="Доступны полные полномочия"></div>
+			<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
 		</div>
-		<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
-		<button class="Button" onclick="CheckForMissingID();">Проверить пропуски ID</button>
-	</div>
-</div>
 
-</div>
+		<div class="ContentWrapper"><div id="Content"></div></div>
+
+		<div class="Footer">
+			<div class="FooterPanel">
+				<div class="SmallPanel" id="Info_TotalVideo"></div>
+				<div class="SmallPanel" id="Info_TotalDuration"></div>
+				<div class="SmallPanel" id="Info_Visible"></div>
+				<div class="SmallPanel" id="Info_WIP"></div>
+				<div class="SmallPanel" id="Info_Shorts"></div>
+				<div style="width: 100%;">
+					<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
+					<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
+				</div>
+				<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
+				<button class="Button" onclick="CheckForMissingID();">Проверить пропуски ID</button>
+			</div>
+		</div>
+
+		<div id="TagsPanel"></div>
+
+	</div>
 
 </body>
 
@@ -438,6 +481,30 @@ function ParseDate(Input){
 	return new Date(Y, M - 1, D).getTime();
 }
 
+const Height = "28px"
+
+function CreateTag(TagID, Count = undefined){
+	let Tag            = TAGS[TagID]
+	let TagName        = Tag[0]
+	let TagIcon        = Tag[1]
+	let TagDescription = Tag[2]
+
+	return `<a
+				class="ContentURL"
+				href="${CurrentURL}#tag%3A${TagID}"
+				tooltip="<text style='font-size: 1.25em;'>[${TagID}] ${TagName}</text><br>${TagDescription}${Count === undefined ? "" : `<br>Кол-во: ${Count}`}"
+			><img
+				style="
+					width:${Height};
+					height:${Height};
+					border-radius: 5px;
+					aspect-ratio: 1 / 1;
+				"
+				src="${TagIcon}"
+				alt="${TagName}"
+			></a>`
+}
+
 function UpdateContent(VideosList){
 	const AddedIDs = new Set()
 
@@ -519,34 +586,13 @@ function UpdateContent(VideosList){
 			const WatchURL = `https://youtu.be/${YoutubeID}`
 			const EditURL  = `https://studio.youtube.com/video/${YoutubeID}/edit`
 
-			const Height = "28px"
-
 			let Archive = Extra[0]
 			let WIP     = Extra[1]
 			let Short   = Extra[2]
 
 			let TagsHTML = ""
 			for(let j = 0; j < Tags.length; j++){
-				let TagID          = Tags[j]
-				let Tag            = TAGS[TagID]
-				let TagName        = Tag[0]
-				let TagIcon        = Tag[1]
-				let TagDescription = Tag[2]
-
-				TagsHTML += `<a
-					class="ContentURL"
-					href="${CurrentURL}#tag%3A${TagID}"
-					tooltip="<b>[${TagID}] ${TagName}</b><br>${TagDescription}"
-				><img 
-					style="
-						width:${Height};
-						height:${Height};
-						border-radius: 5px;
-						aspect-ratio: 1 / 1;
-					"
-					src="${Tag[1]}"
-					alt="${Tag[0]}"
-				></a>`
+				TagsHTML += CreateTag(Tags[j])
 			}
 
 			if(WIP  ){ TotalWIP++    }
@@ -696,11 +742,11 @@ function UpdateContent(VideosList){
 
 		function RemoveHTML(HTMLString){ return HTMLString.replace(/<[^>]*>/g, "") }
 
-		document.getElementById("Info_TotalDuration").innerHTML = "Время: " + SecondsToDuration(TotalDuration) + " (В среднем: " + SecondsToDuration(Math.floor(MedianDuration())) + ")";
+		document.getElementById("Info_TotalDuration").innerHTML = `Время: ${SecondsToDuration(TotalDuration)} (В среднем: ${SecondsToDuration(Math.floor(MedianDuration()))}})`
 	
-		const Chart_Duration = document.getElementById("Info_Chart_Duration").getContext("2d");
+		const Chart_Duration = document.getElementById("Info_Chart_Duration").getContext("2d")
 
-		if(Chart_Duration.chart){ Chart_Duration.chart.destroy(); }
+		if(Chart_Duration.chart){ Chart_Duration.chart.destroy() }
 
 		Chart_Duration.chart = new Chart(Chart_Duration, {
 			type: "line",
@@ -883,43 +929,65 @@ function UpdateContent(VideosList){
 	}
 	UpdateInfo();
 	
-	Tooltip.style.display = "none";
+	Tooltip.style.display = "none"
 }
 
-let Tooltip = document.createElement("div");
-Tooltip.id = "Tooltip";
-document.body.appendChild(Tooltip);
+function UpdateTags(){
+	const Panel = document.getElementById("TagsPanel")
+
+	const TagCounts = {}
+	for(const Video of VIDEOS){
+		const Tags = Video[7] || []
+		for(const TagID of Tags){
+			TagCounts[TagID] = (TagCounts[TagID] || 0) + 1
+		}
+	}
+
+	const TagList = []
+	for(const TagID in TAGS){
+		TagList.push([TagID, TagCounts[TagID] || 0])
+	}
+
+	TagList.sort((a, b) => b[1] - a[1])
+
+	Panel.innerHTML = ""
+	for(const [TagID, Count] of TagList){
+		Panel.innerHTML += CreateTag(TagID, Count)
+	}
+}
+
+let Tooltip = document.createElement("div")
+Tooltip.id = "Tooltip"
+document.body.appendChild(Tooltip)
 
 document.addEventListener("mouseover", function(e) {
-	let Target = e.target.closest("[tooltip]");
+	let Target = e.target.closest("[tooltip]")
 	if(Target){
-		Tooltip.innerHTML = Target.getAttribute("tooltip");
-		Tooltip.style.display = "block";
+		Tooltip.innerHTML = Target.getAttribute("tooltip")
+		Tooltip.style.display = "block"
 	}
-});
+})
 
 document.addEventListener("mousemove", function(e){
 	if(Tooltip.style.display === "block"){
-		Tooltip.style.left = (e.clientX + 25) + "px";
-		Tooltip.style.top = (e.clientY) + "px";
+		Tooltip.style.left = (e.clientX + 25) + "px"
+		Tooltip.style.top = (e.clientY) + "px"
 	}
-});
+})
 
 document.addEventListener("mouseout", function(e){
-	let Target = e.target.closest("[tooltip]");
-	if(Target){
-		Tooltip.style.display = "none";
-	}
-});
+	let Target = e.target.closest("[tooltip]")
+	if(Target){ Tooltip.style.display = "none" }
+})
 
 function RandomWithSeedGenerator(Seed){
-	let V = (Seed + 61266) >>> 0;
+	let V = (Seed + 61266) >>> 0
 	
 	return function(){
-		V ^= V << 13;
-		V ^= V >> 17;
-		V ^= V << 5;
-		return (V >>> 0) / 4294967296;
+		V ^= V << 13
+		V ^= V >> 17
+		V ^= V << 5
+		return (V >>> 0) / 4294967296
 	}
 }
 
@@ -1217,7 +1285,7 @@ function CheckForMissingID(){
 	}
 }
 
-var UserWoowz
+let UserWoowz
 window.addEventListener("load", () => {
 	UserWoowz = PreUpdateVideos();
 
@@ -1226,6 +1294,8 @@ window.addEventListener("load", () => {
 
 		TAGS[T_Archive][2] = "???"
 	}
+
+	UpdateTags()
 
 	if(window.location.hash){
 		SearchInput.value = decodeURIComponent(window.location.hash.substring(1));
