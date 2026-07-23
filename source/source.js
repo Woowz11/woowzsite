@@ -48,6 +48,8 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("burg.png", "Burg, сделано сегодня", __A_SKREP, "2026.07.21")
+ADD("euthanasia.png", "Euthanasia", __A_SKREP, "2026.07.20")
 ADD("desk.png", "🖥", __A_WOOWZ, "2026.07.16")
 ADD("combposter3.png", "toiletcombineposter3", __A_SKREP, "2026.07.16")
 ADD("combposter2.png", "toiletcombineposter2", __A_SKREP, "2026.07.16")

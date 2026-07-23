@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source Engine Portal Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; background-color: #111827; color: white; font-family: sans-serif; overflow: hidden; }
+        canvas { display: block; }
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+            max-width: 320px;
+        }
+        .drop-zone {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px dashed #4b5563;
+            padding: 40px;
+            text-align: center;
+            border-radius: 20px;
+            transition: all 0.3s;
+            background: rgba(31, 41, 55, 0.5);
+            cursor: pointer;
+        }
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        #loading {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p class="text-xl">Parsing Portals...</p>
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <h2 class="text-2xl font-bold mb-2">Drop your .prt file here</h2>
+        <p class="text-gray-400">or click to select from your computer</p>
+        <input type="file" id="file-input" class="hidden" accept=".prt">
+    </div>
+
+    <div id="ui-overlay" class="hidden">
+        <div class="stats-panel overflow-y-auto max-h-[90vh]">
+            <h1 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-blue-400">Map Statistics</h1>
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Portals:</span>
+                    <span id="stat-portals" class="font-mono font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Leaves:</span>
+                    <span id="stat-leaves" class="font-mono font-bold">0</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-xs block uppercase">Surface Area (u²)</span>
+                    <span id="stat-area" class="text-xl font-mono">0</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-xs block uppercase">Volume (u³)</span>
+                    <span id="stat-volume" class="text-xl font-mono text-green-400">0</span>
+                </div>
+            </div>
+
+            <h1 class="text-lg font-bold mb-3 border-b border-gray-700 pb-1 text-blue-400">Render Settings</h1>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm">Portals (2D)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="color-portals" value="#4488ff" class="w-6 h-6 border-none bg-transparent">
+                            <input type="checkbox" id="toggle-portals" checked class="w-4 h-4">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm">Leaf Boxes (3D)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="color-leaves" value="#00ff88" class="w-6 h-6 border-none bg-transparent">
+                            <input type="checkbox" id="toggle-leaves" checked class="w-4 h-4">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">Material Type</label>
+                    <select id="material-type" class="w-full bg-gray-800 text-xs p-2 rounded border border-gray-600">
+                        <option value="shaded">Shaded (Phong)</option>
+                        <option value="flat">Flat (Basic)</option>
+                        <option value="wireframe">Wireframe Only</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">Master Opacity</label>
+                    <input type="range" id="opacity-slider" min="0" max="1" step="0.05" value="0.4" class="w-full">
+                </div>
+
+                <div class="pt-2 border-t border-gray-700">
+                    <label class="text-xs text-gray-400 block mb-1">Export Mode</label>
+                    <select id="export-mode" class="w-full bg-gray-800 text-xs p-2 rounded border border-gray-600 mb-2">
+                        <option value="portals">Export Portals (Planes)</option>
+                        <option value="leaves">Export Leaves (Boxes)</option>
+                    </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="reset-view" class="bg-gray-700 hover:bg-gray-600 text-xs py-2 rounded transition">
+                            Reset View
+                        </button>
+                        <button id="download-obj" class="bg-blue-600 hover:bg-blue-500 text-xs py-2 rounded transition font-bold">
+                            Export OBJ
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-[10px] text-gray-500 uppercase tracking-widest border-t border-gray-800 pt-4">
+                Navigation: L-Click (Rot) | R-Click (Pan) | Wheel (Zoom)
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, controls, portalGroup, leafGroup;
+        let currentData = null;
+        
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const loading = document.getElementById('loading');
+        const uiOverlay = document.getElementById('ui-overlay');
+
+        // Materials
+        let portalMaterial = new THREE.MeshPhongMaterial({ color: 0x4488ff, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+        let leafMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff88, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+        let wireMaterial = new THREE.LineBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.3 });
+
+        let leafBoundingBoxes = []; // To store for export
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0c);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000000);
+            camera.position.set(5000, 5000, 5000);
+            camera.up.set(0, 0, 1);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 2);
+            scene.add(directionalLight);
+
+            window.addEventListener('resize', onWindowResize);
+            setupUIListeners();
+            animate();
+        }
+
+        function updateMaterialTypes() {
+            const type = document.getElementById('material-type').value;
+            const opacity = parseFloat(document.getElementById('opacity-slider').value);
+            
+            scene.traverse((child) => {
+                if (child.isMesh) {
+                    const isPortal = portalGroup && portalGroup.children.includes(child);
+                    const color = isPortal ? document.getElementById('color-portals').value : document.getElementById('color-leaves').value;
+                    
+                    let newMat;
+                    if (type === 'wireframe') {
+                        child.visible = false;
+                        return;
+                    } else {
+                        child.visible = true;
+                        if (type === 'flat') {
+                            newMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: isPortal ? opacity : opacity * 0.5, side: THREE.DoubleSide });
+                        } else {
+                            newMat = new THREE.MeshPhongMaterial({ color, transparent: true, opacity: isPortal ? opacity : opacity * 0.5, side: THREE.DoubleSide });
+                        }
+                    }
+                    child.material = newMat;
+                }
+                if (child.isLine) {
+                    child.visible = true; // Always show wireframes
+                    child.material.opacity = opacity * 0.7;
+                }
+            });
+        }
+
+        function setupUIListeners() {
+            document.getElementById('toggle-portals').addEventListener('change', (e) => {
+                if (portalGroup) portalGroup.visible = e.target.checked;
+            });
+            document.getElementById('toggle-leaves').addEventListener('change', (e) => {
+                if (leafGroup) leafGroup.visible = e.target.checked;
+            });
+            document.getElementById('opacity-slider').addEventListener('input', updateMaterialTypes);
+            document.getElementById('color-portals').addEventListener('input', updateMaterialTypes);
+            document.getElementById('color-leaves').addEventListener('input', updateMaterialTypes);
+            document.getElementById('material-type').addEventListener('change', updateMaterialTypes);
+            
+            document.getElementById('download-obj').addEventListener('click', exportToOBJ);
+        }
+
+        function exportToOBJ() {
+            if (!currentData) return;
+            const mode = document.getElementById('export-mode').value;
+            let obj = `# Source Export - Mode: ${mode}\n`;
+            let vCount = 1;
+
+            if (mode === 'portals') {
+                currentData.portals.forEach((p, i) => {
+                    obj += `o Portal_${i}\n`;
+                    p.vertices.forEach(v => {
+                        obj += `v ${v.x} ${v.y} ${v.z}\n`;
+                    });
+                    obj += "f";
+                    for (let j = 0; j < p.vertices.length; j++) {
+                        obj += ` ${vCount + j}`;
+                    }
+                    obj += "\n";
+                    vCount += p.vertices.length;
+                });
+            } else {
+                leafBoundingBoxes.forEach((box, i) => {
+                    obj += `o Leaf_${i}\n`;
+                    const min = box.min;
+                    const max = box.max;
+                    // 8 vertices of a box
+                    const verts = [
+                        [min.x, min.y, min.z], [max.x, min.y, min.z], [max.x, max.y, min.z], [min.x, max.y, min.z],
+                        [min.x, min.y, max.z], [max.x, min.y, max.z], [max.x, max.y, max.z], [min.x, max.y, max.z]
+                    ];
+                    verts.forEach(v => obj += `v ${v[0]} ${v[1]} ${v[2]}\n`);
+                    // 6 faces
+                    obj += `f ${vCount} ${vCount+1} ${vCount+2} ${vCount+3}\n`;
+                    obj += `f ${vCount+4} ${vCount+5} ${vCount+6} ${vCount+7}\n`;
+                    obj += `f ${vCount} ${vCount+1} ${vCount+5} ${vCount+4}\n`;
+                    obj += `f ${vCount+1} ${vCount+2} ${vCount+6} ${vCount+5}\n`;
+                    obj += `f ${vCount+2} ${vCount+3} ${vCount+7} ${vCount+6}\n`;
+                    obj += `f ${vCount+3} ${vCount} ${vCount+4} ${vCount+7}\n`;
+                    vCount += 8;
+                });
+            }
+
+            const blob = new Blob([obj], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = mode === 'portals' ? "portals.obj" : "leaves.obj";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Portal Parsing Logic ---
+
+        function parsePRT(content) {
+            const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines[0] !== 'PRT1') {
+                alert('Invalid PRT file format. Header must be PRT1.');
+                return null;
+            }
+
+            const numLeaves = parseInt(lines[1]);
+            const numPortals = parseInt(lines[2]);
+            const portals = [];
+
+            // Regex to match (x y z)
+            const coordRegex = /\(\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*\)/g;
+
+            for (let i = 3; i < lines.length; i++) {
+                const line = lines[i];
+                const parts = line.split(' ');
+                if (parts.length < 4) continue;
+
+                const numVertices = parseInt(parts[0]);
+                const leaf1 = parseInt(parts[1]);
+                const leaf2 = parseInt(parts[2]);
+
+                const vertices = [];
+                let match;
+                while ((match = coordRegex.exec(line)) !== null) {
+                    vertices.push({
+                        x: parseFloat(match[1]),
+                        y: parseFloat(match[2]),
+                        z: parseFloat(match[3])
+                    });
+                }
+
+                if (vertices.length > 0) {
+                    portals.push({
+                        leaf1,
+                        leaf2,
+                        vertices
+                    });
+                }
+            }
+
+            return { numLeaves, numPortals, portals };
+        }
+
+        function calculatePortalArea(vertices) {
+            if (vertices.length < 3) return 0;
+            
+            let totalArea = 0;
+            // Split polygon into triangles from vertex 0
+            const v0 = vertices[0];
+            for (let i = 1; i < vertices.length - 1; i++) {
+                const v1 = vertices[i];
+                const v2 = vertices[i + 1];
+                
+                // Vector v0->v1 and v0->v2
+                const ax = v1.x - v0.x;
+                const ay = v1.y - v0.y;
+                const az = v1.z - v0.z;
+                
+                const bx = v2.x - v0.x;
+                const by = v2.y - v0.y;
+                const bz = v2.z - v0.z;
+                
+                // Cross product
+                const cx = ay * bz - az * by;
+                const cy = az * bx - ax * bz;
+                const cz = ax * by - ay * bx;
+                
+                const area = 0.5 * Math.sqrt(cx*cx + cy*cy + cz*cz);
+                totalArea += area;
+            }
+            return totalArea;
+        }
+
+        function renderPortals(data) {
+            currentData = data;
+            if (portalGroup) scene.remove(portalGroup);
+            if (leafGroup) scene.remove(leafGroup);
+            
+            portalGroup = new THREE.Group();
+            leafGroup = new THREE.Group();
+
+            const leafVertices = {};
+            let totalSurfaceArea = 0;
+            const mapBounds = new THREE.Box3();
+
+            data.portals.forEach(portal => {
+                const area = calculatePortalArea(portal.vertices);
+                totalSurfaceArea += area;
+
+                // Create Portal Mesh (2D Plane)
+                const geom = new THREE.BufferGeometry();
+                const verts = [];
+                const indices = [];
+                portal.vertices.forEach(v => {
+                    verts.push(v.x, v.y, v.z);
+                    mapBounds.expandByPoint(new THREE.Vector3(v.x, v.y, v.z));
+                });
+                
+                for (let i = 1; i < portal.vertices.length - 1; i++) {
+                    indices.push(0, i, i + 1);
+                }
+                
+                geom.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+                geom.setIndex(indices);
+                geom.computeVertexNormals();
+
+                const mesh = new THREE.Mesh(geom, portalMaterial);
+                portalGroup.add(mesh);
+
+                // Store for Leaf reconstruction
+                [portal.leaf1, portal.leaf2].forEach(leafId => {
+                    if (!leafVertices[leafId]) leafVertices[leafId] = [];
+                    portal.vertices.forEach(v => {
+                        leafVertices[leafId].push(new THREE.Vector3(v.x, v.y, v.z));
+                    });
+                });
+            });
+
+            // Reconstruct Leaves (3D Boxes)
+            let totalVolume = 0;
+            leafBoundingBoxes = []; // Reset global list for export
+            
+            Object.keys(leafVertices).forEach(leafId => {
+                const points = leafVertices[leafId];
+                if (points.length === 0) return;
+
+                const leafBox = new THREE.Box3().setFromPoints(points);
+                const size = new THREE.Vector3();
+                leafBox.getSize(size);
+                
+                const vol = size.x * size.y * size.z;
+                if (vol > 0.001) {
+                    totalVolume += vol;
+                    leafBoundingBoxes.push(leafBox); // Store for OBJ export
+                    
+                    const boxGeom = new THREE.BoxGeometry(size.x, size.y, size.z);
+                    const boxMesh = new THREE.Mesh(boxGeom, leafMaterial);
+                    
+                    const center = new THREE.Vector3();
+                    leafBox.getCenter(center);
+                    boxMesh.position.copy(center);
+                    
+                    const edges = new THREE.EdgesGeometry(boxGeom);
+                    const wire = new THREE.LineSegments(edges, wireMaterial);
+                    wire.position.copy(center);
+
+                    leafGroup.add(boxMesh);
+                    leafGroup.add(wire);
+                }
+            });
+
+            scene.add(portalGroup);
+            scene.add(leafGroup);
+
+            // Visibility initial state
+            portalGroup.visible = document.getElementById('toggle-portals').checked;
+            leafGroup.visible = document.getElementById('toggle-leaves').checked;
+
+            // Update Stats
+            document.getElementById('stat-portals').textContent = data.portals.length.toLocaleString();
+            document.getElementById('stat-leaves').textContent = Object.keys(leafVertices).length.toLocaleString();
+            document.getElementById('stat-area').textContent = Math.round(totalSurfaceArea).toLocaleString();
+            document.getElementById('stat-volume').textContent = Math.round(totalVolume).toLocaleString();
+
+            // Adjust Camera
+            const center = new THREE.Vector3();
+            mapBounds.getCenter(center);
+            const size = new THREE.Vector3();
+            mapBounds.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+
+            controls.target.copy(center);
+            camera.position.set(center.x + maxDim, center.y + maxDim, center.z + maxDim);
+            camera.near = 0.1;
+            camera.far = 1000000; // Extremely far to ensure nothing is clipped
+            camera.updateProjectionMatrix();
+            
+            // Add grid centered on map bounds
+            if (window.currentGrid) scene.remove(window.currentGrid);
+            window.currentGrid = new THREE.GridHelper(maxDim * 4, 50, 0x333333, 0x222222);
+            window.currentGrid.rotation.x = Math.PI / 2;
+            window.currentGrid.position.copy(center);
+            window.currentGrid.position.z = mapBounds.min.z - 10; // Slightly below the map
+            scene.add(window.currentGrid);
+
+            controls.update();
+        }
+
+        // --- UI Interactions ---
+
+        function handleFile(file) {
+            if (!file) return;
+            loading.style.display = 'flex';
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const data = parsePRT(content);
+                
+                if (data) {
+                    renderPortals(data);
+                    dropZone.classList.add('hidden');
+                    uiOverlay.classList.remove('hidden');
+                }
+                loading.style.display = 'none';
+            };
+            reader.readAsText(file);
+        }
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        document.getElementById('reset-view').addEventListener('click', () => {
+            if (portalGroup) {
+                const box = new THREE.Box3().setFromObject(portalGroup);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                
+                camera.position.set(center.x + maxDim, center.y + maxDim, center.z + maxDim);
+                controls.target.copy(center);
+                controls.update();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

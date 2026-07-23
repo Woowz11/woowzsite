@@ -1099,7 +1099,7 @@ const VIDEOS = [
 	""],
 	
 	[440, "ШАРЛАТАН НЕ ОТВЕЧАЕТ!!!", "2019.06.07 15:03:22", "ApQrcdwXsgY", "2019.06.07", "12:42", P_Link,
-	[T_Woowz11, T_WIP, T_Minecraft],
+	[T_Woowz11, T_WIP, T_Minecraft, T_Kemrouz],
 	""],
 	
 	[439, "Minecraft в космическом пространстве.", "2019.05.10", "e3vK2cLCBmI", "2019.05.10", "01:18", P_Link,
