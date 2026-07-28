@@ -48,6 +48,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("indus.png", "ICON OF HIA-VGSL&VCEL-LCAOMSL-AND-LB10DS-WIP:NQLS©™", __A_SKREP, "2026.07.28")
 ADD("burg.png", "Burg, сделано сегодня", __A_SKREP, "2026.07.21")
 ADD("euthanasia.png", "Euthanasia", __A_SKREP, "2026.07.20")
 ADD("desk.png", "🖥", __A_WOOWZ, "2026.07.16")
@@ -362,7 +363,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2","gradient",
 	"GarrysMod", "emoji", "Backrooms", "Babina", "Glitch", "Coding", "YOUTUBE", "HalfSword", "History", "Music", "Blocked", "Roblox", "SFD", "HappyWheels", "Communication", "Minecraft",
 	"WorldBox", "Single", "Teardown", "Star", "WoowzCore", "AI", "TBOI", "Deanon", "BrickRigs", "BeamNGDrive", "PtTR", "noi", "wip", "stream", "short", "Calendar", "Alarm", "goluworld",
-	"mew", "real", "lost", "archive", "lc"
+	"mew", "real", "lost", "archive", "lc", "ppg", "up", "para", "picsis"
 ],"source/",".png")
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
