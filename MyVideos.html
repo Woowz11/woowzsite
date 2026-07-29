@@ -57,6 +57,10 @@ body{
 	cursor: text;
 }
 
+.Header input.Changed{
+	background: rgba(255, 128, 128, 1);
+}
+
 .Footer{
 	height: auto;
 	padding-block: 15px;
@@ -92,7 +96,7 @@ body{
 }
 
 #Content{
-	width: 1200px;
+	width: 1250px;
 	display: flex;
 	flex-direction: column;
 	gap: 3px;
@@ -140,7 +144,7 @@ body{
 	cursor: pointer;
 }
 
-.VideoPanel a:not(.URL):not(.ContentURL){
+.VideoPanel a:not(.URL):not(.URLYellow):not(.ContentURL){
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -156,12 +160,12 @@ body{
 	border: 1px solid rgba(255, 255, 255, 1);
 }
 
-.VideoPanel a:not(.URL):not(.ContentURL):hover{
+.VideoPanel a:not(.URL):not(.URLYellow):not(.ContentURL):hover{
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(200, 200, 255, 1);
 }
 
-.VideoPanel a:not(.URL):not(.ContentURL):active{
+.VideoPanel a:not(.URL):not(.URLYellow):not(.ContentURL):active{
 	background-color: rgba(0, 90, 200, 1);
 	transform: scale(0.98);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -218,6 +222,24 @@ body{
 	color: #0066CC;
 }
 
+.URLYellow{
+	color: #FFBB00;
+	text-decoration: none;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	text-shadow: 0 1px 1px #9C7300;
+}
+
+.URLYellow:hover{
+	color: yellow;
+	text-decoration: underline;
+}
+
+.URLYellow:active{
+	color: #604700;
+}
+
 .Error{
 	color: #FF4D4D;
 	text-decoration: none;
@@ -254,6 +276,20 @@ body{
 	background-color: rgba(0, 90, 200, 1);
 	transform: scale(0.98);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+#ReloadSearch{
+	border-radius: 4px;
+	border: 1px solid rgba(0,0,0,0.2);
+	outline: none;
+	cursor: pointer;
+	background: white;
+	height: 22px;
+	transition: all 0.2s ease;
+}
+
+#ReloadSearch:hover{
+	background: lightgray;
 }
 
 .Circle{
@@ -306,6 +342,13 @@ body{
 	}
 }
 
+.Tag{
+	transition: all 0.2s ease;
+}
+
+.Tag:hover{
+	transform: scale(1.25);
+}
 
 </style>
 
@@ -358,10 +401,14 @@ body{
 		sort:duration - Сортировка по времени видео<br>
 		sort:random:0 - Случайная сортировка, с учётом сида (если сид не указывать, каждый раз будет случайное)<br>
 		sort:tags - Сортировка по кол-ву тегов<br>
+		sort:references_in - Сортировка по кол-ву отсылок на это видео<br>
+		sort:references_out - Сортировка по кол-ву отсылок на другие видео<br>
+		sort:references - Сортировка по кол-во отсылок на это видео и на другие<br>
 		*:reverse - Реверсирует результат
 		'>
 			<div class="Circle" id="circle" tooltip="Доступны полные полномочия"></div>
-			<input oninput="Search()" placeholder="Поиск..." id="Search" type="text">
+			<input oninput="SearchInputUpdated()" onkeydown="if(event.key === 'Enter'){ Search(); }" placeholder="Поиск..." id="Search" type="text">
+			<button id="ReloadSearch" onclick="Search()" tooltip="Применить параметры поиска">⟳</button>
 		</div>
 
 		<div class="ContentWrapper"><div id="Content"></div></div>
@@ -490,7 +537,7 @@ function CreateTag(TagID, Count = undefined){
 	let TagDescription = Tag[2]
 
 	return `<a
-				class="ContentURL"
+				class="ContentURL Tag"
 				href="${CurrentURL}#tag%3A${TagID}"
 				tooltip="<text style='font-size: 1.25em;'>[${TagID}] ${TagName}</text><br>${TagDescription}${Count === undefined ? "" : `<br>Кол-во: ${Count}`}"
 			><img
@@ -503,6 +550,28 @@ function CreateTag(TagID, Count = undefined){
 				src="${TagIcon}"
 				alt="${TagName}"
 			></a>`
+}
+
+function GetVideo(ID){
+	return VIDEOS.find(V => V[0] === ID);
+}
+
+function CreateVideoReference(ID){
+	let Video = GetVideo(ID);
+	
+	return `<a class="URLYellow" href="${CurrentURL}#id%3A${ID}" tooltip="<text style='font-size: 1.25em;'>${Video[1]}</text><br>${Video[8]}" style="cursor: pointer;">[${ID}]</a>`
+}
+
+function GetCompiledVideoData(ID){
+	let Video = GetVideo(ID);
+
+	if(!Video){
+		ShowErrorNotification(`Видео [${ID}] не найдено!`);
+		return;
+	}
+	
+	console.log(Video);
+	ShowErrorNotification(`Скомпилированная информация об видео [${ID}] в консоли! F12`, "blue");
 }
 
 function UpdateContent(VideosList){
@@ -562,69 +631,75 @@ function UpdateContent(VideosList){
 					
 					if(AddedIDs.has(ID)){ throw new Error("Видео с таким ID уже есть!"); }
 				}catch(e){
-					throw new Error("Произошла ошибка при загрузке видео [" + Video + "]! " + e);
+					throw new Error(`Произошла ошибка при загрузке видео [${Video}]! ${e}`);
 				}
 			}
 			
 			let UnknownDuration = Duration  === UNKNOWN_Duration;
 			let UnknownLink     = YoutubeID === UNKNOWN_Link;
 
-			let OriginalDuration = Duration
-			if(Duration === REALZERO_Duration){ Duration = "00:00" }
+			let OriginalDuration = Duration;
+			if(Duration === REALZERO_Duration){ Duration = "00:00"; }
 
-			AddedIDs.add(ID)
-			let Seconds = DurationToSeconds(Duration)
+			AddedIDs.add(ID);
+			let Seconds = DurationToSeconds(Duration);
 			if(!isNaN(Seconds) && isFinite(Seconds)){
-				TotalDuration += Seconds
-				TotalDurationAll.push(Seconds)
+				TotalDuration += Seconds;
+				TotalDurationAll.push(Seconds);
 			}else{
-				TotalDurationAll.push(0)
+				TotalDurationAll.push(0);
 			}
 			
 			if(Visibility === P_Link || Visibility === P_Public){ TotalVisible++ }
 
-			const WatchURL = `https://youtu.be/${YoutubeID}`
-			const EditURL  = `https://studio.youtube.com/video/${YoutubeID}/edit`
+			const WatchURL = `https://youtu.be/${YoutubeID}`;
+			const EditURL  = `https://studio.youtube.com/video/${YoutubeID}/edit`;
 
-			let Archive = Extra[0]
-			let WIP     = Extra[1]
-			let Short   = Extra[2]
+			let Archive    = Extra[0];
+			let WIP        = Extra[1];
+			let Short      = Extra[2];
+			let References = Extra[4];
 
-			let TagsHTML = ""
-			for(let j = 0; j < Tags.length; j++){
-				TagsHTML += CreateTag(Tags[j])
+			let ReferencesHTML = "";
+			for(let j = 0; j < References.length; j++){
+				ReferencesHTML += CreateVideoReference(References[j]) + " ";
 			}
 
-			if(WIP  ){ TotalWIP++    }
-			if(Short){ TotalShorts++ }
+			let TagsHTML = "";
+			for(let j = 0; j < Tags.length; j++){
+				TagsHTML += CreateTag(Tags[j]);
+			}
 
-			const VisibilityText = (Visibility === P_Hide ? "🔒 Скрыто" : (Visibility === P_Link ? "🔗 Ссылка" : (Visibility === P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")))
+			if(WIP  ){ TotalWIP++   ; }
+			if(Short){ TotalShorts++; }
+
+			const VisibilityText = (Visibility === P_Hide ? "🔒 Скрыто" : (Visibility === P_Link ? "🔗 Ссылка" : (Visibility === P_Blocked ? "🚫 Заблокировано" : "🌐 Публичное")));
 
 			function FormatDateTime(Input){
-				if(Input === UNKNOWN_Date){ return "??.??.????" }
+				if(Input === UNKNOWN_Date){ return "??.??.????"; }
 			
-				const Parts    = Input.split(" ")
-				const DatePart = Parts[0]
-				const TimePart = Parts[1]
+				const Parts    = Input.split(" ");
+				const DatePart = Parts[0];
+				const TimePart = Parts[1];
 
-				const [Y, M, D] = DatePart.split(".")
+				const [Y, M, D] = DatePart.split(".");
 
-				function Pad2(N){ return String(N).padStart(2, "0") }
+				function Pad2(N){ return String(N).padStart(2, "0"); }
 
 				if(TimePart){
-					let [H, m, S] = TimePart.split(":")
-					H = parseInt(H, 10)
-					m = parseInt(m, 10)
-					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`
+					let [H, m, S] = TimePart.split(":");
+					H = parseInt(H, 10);
+					m = parseInt(m, 10);
+					return `${Pad2(H)}:${Pad2(m)} | ${Pad2(D)}.${Pad2(M)}.${Y}`;
 				}else{
-					return `${Pad2(D)}.${Pad2(M)}.${Y}`
+					return `${Pad2(D)}.${Pad2(M)}.${Y}`;
 				}
 			}
 
-			let CreationDateText = FormatDateTime(CreationDate)
-			let PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate)
+			let CreationDateText = FormatDateTime(CreationDate);
+			let PublishDateText  = LostMedia ? "Потеряно" : FormatDateTime(PublishDate);
 			
-			let DurationText    = UnknownDuration ? "??:??" : Duration
+			let DurationText    = UnknownDuration ? "??:??" : Duration;
 			let DurationTooltip = UnknownDuration ? "Неизвестная длительность видео" : `Длительность видео: ${Seconds} секунд (${(Seconds / 60).toFixed(2)} минут) (${(Seconds / 60 / 60).toFixed(2)} часов) (${(Seconds / 60 / 60 / 24).toFixed(2)} дней)`;
 			
 			function FormatDescription(Input){
@@ -633,33 +708,31 @@ function UpdateContent(VideosList){
 					return Input.replace(Pattern, (URL) => {
 						let EndChar = "";
 						if(/[)\]\},.?]/.test(URL.slice(-1))){
-							EndChar = URL.slice(-1)
-							URL = URL.slice(0, -1)
+							EndChar = URL.slice(-1);
+							URL = URL.slice(0, -1);
 						}
-						return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`
+						return `<a class="URL" href="${URL}"">${URL}</a>${EndChar}`;
 					})
 				}
 				
 				function FormatTimeCode(Input){
-					const TimeCodePattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
-					const QuestionPattern = /\[\?\]/g;
-
-					let Result = Input.replace(QuestionPattern, () => {
-						return `<span class="Error" tooltip="Не указано видео! Возможно в будущем будет указано">[?]</span>`;
+					return Input.replace(/(\/?)\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g, (Match, Slash, TimeCode) => {
+						if(Slash){ return TimeCode; }
+					
+						let SecondsTimeCode = DurationToSeconds(TimeCode);
+						return `<a class="URL" style="cursor: pointer;" tooltip="${SecondsTimeCode} секунд, ${Math.floor(SecondsTimeCode / Seconds * 100)}% от видео" href="${WatchURL}&t=${SecondsTimeCode}">${TimeCode}</a>`;
 					});
-
-					Result = Result.replace(TimeCodePattern, (TimeCode) => {
-						return `<a class="URL" href="${WatchURL}&t=${DurationToSeconds(TimeCode)}">${TimeCode}</a>`;
-					});
-
-					return Result;
 				}
 				
 				function FormatIDLink(Input){
+					Input = Input.replace(/\[\?\]/g, () => {
+						return `<span class="Error" tooltip="Не указано видео! Возможно в будущем будет указано">[?]</span>`;
+					});
+				
 					return Input.replace(/\[(\d+)\]/g, (M, ID) => {
-						const Video = VIDEOS.find(V => V[0] === parseInt(ID, 10));
+						const Video = GetVideo(parseInt(ID, 10));
 						if(Video){
-							return `<a class="URL" href="${CurrentURL}#id%3A${ID}">[${Video[0]}] ${Video[1]}</a>`;
+							return `<a class="URL" style="cursor: pointer;" ${Video[8] ? "tooltip='" + Video[8] + "'" : ""} href="${CurrentURL}#id%3A${ID}">[${Video[0]}] ${Video[1]}</a>`;
 						}
 						return M;
 					})
@@ -672,9 +745,9 @@ function UpdateContent(VideosList){
 			const DescriptionText = FormatDescription(Description);
 
 			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
-			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : "");
+			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a><a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>` : "");
 
-			const VideoContent = `<div style="display: flex; gap: 5px;">
+			const VideoContent = `<div style="display: flex; gap: 3px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
 				<div style="flex-grow: 1;">${NameText}</div>
 				<div style="display: flex; flex; gap: 2px;">${TagsHTML}</div>
@@ -684,7 +757,10 @@ function UpdateContent(VideosList){
 				<a class="ContentURL" tooltip="Установить в поиск только видео подобного типа" href="${CurrentURL}#visible%3A${Visibility}"><div class="SmallPanel" style="height:${Height};">${VisibilityText}</div></a>
 				${UnknownLink ? '' : YoutubeButtons}
 			</div>
-	<div style="color: rgba(0, 0, 0, 0.5);">${DescriptionText}</div>`;
+			<div style="display: flex; gap: 10px;">
+				<div style="color: rgba(0, 0, 0, 0.5); flex: 1; min-width: 0;">${DescriptionText}</div>
+				<div style="max-width: 6em; overflow: hidden;">${ReferencesHTML}</div>
+			</div>`;
 			
 			const Panel = document.createElement("div");
 			Panel.className = "VideoPanel" + (WIP ? " WIP" :  "");
@@ -1004,11 +1080,17 @@ function ShuffleArrayWithSeed(Array, Seed){
 }
 
 let SearchInput = document.getElementById("Search");
-
 let CurrentRawText = "~~~";
+
+function SearchInputUpdated(){
+	let Changed = SearchInput.value.trim() !== CurrentRawText;
+	
+	SearchInput.classList.toggle("Changed", Changed);
+}
+
 function Search(){
 	let RawText = SearchInput.value.trim();
-	if(CurrentRawText === RawText){ return } CurrentRawText = RawText;
+	if(CurrentRawText === RawText){ return } CurrentRawText = RawText; SearchInputUpdated();
 	
 	if(RawText){
 		window.location.hash = encodeURIComponent(RawText);
@@ -1028,7 +1110,7 @@ function Search(){
 			const SortParts = Lower.split(":");
 			
 			let Method = SortParts[1];
-			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags"){ SortMethod = Method; }
+			if(Method === "name" || Method === "creation" || Method === "publish" || Method === "duration" || Method === "id" || Method === "random" || Method === "tags" || Method === "references" || Method === "references_in" || Method === "references_out"){ SortMethod = Method; }
 			
 			if(Method === "random"){
 				if(SortParts[2] && /^\d+$/.test(SortParts[2])){
@@ -1172,6 +1254,12 @@ function Search(){
 					return A[0] - B[0];
 				}else if(SortMethod === "tags"){
 					return A[7].length - B[7].length;
+				}else if(SortMethod === "references"){
+					return (A[9][3].length + A[9][4].length) - (B[9][3].length + B[9][4].length);
+				}else if(SortMethod === "references_in"){
+					return A[9][4].length - B[9][4].length;
+				}else if(SortMethod === "references_out"){
+					return A[9][3].length - B[9][3].length;
 				}
 				return 0;
 			})
@@ -1312,5 +1400,11 @@ window.addEventListener("hashchange", () => {
 		Search();
 	}
 });
+
+let TagsPanel = document.getElementById("TagsPanel")
+window.addEventListener("scroll", function(){
+	let ScrollY = window.scrollY;
+	TagsPanel.style.top = (ScrollY <= 30 ? (40 - ScrollY) : 10) + "px";
+})
 
 </script>

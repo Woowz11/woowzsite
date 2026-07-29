@@ -3,7 +3,7 @@ const T_Wyldi            = 1
 const T_GarrysMod        = 2
 const T_Lithuism         = 3
 const T_Backrooms        = 4
-const T_Source           = 5
+const T_OperationTango   = 5
 const T_Glitch           = 6
 const T_Coding           = 7
 const T_Video            = 8
@@ -61,6 +61,8 @@ const T_Red              = 59
 const T_Hiking           = 60
 const T_Bombom           = 61
 const T_Ivan             = 62
+const T_Dexon            = 63
+const T_TableTop         = 64
 
 const TAGS = {
 	[T_Woowz11         ]: ["Woowz11", "source/discordavatars/woowz11.png", "В этом видео есть Woowz11 (Вувз)"],
@@ -68,7 +70,6 @@ const TAGS = {
 	[T_GarrysMod       ]: ["Garry's Mod", "source/GarrysMod.png", "В этом видео играли в Garry's Mod"],
 	[T_Lithuism        ]: ["Литуизм", "alchemy/религия.png", "В этом видео есть литуизм"],
 	[T_Backrooms       ]: ["Backrooms", "source/Backrooms.png", "В видео есть Backrooms"],
-	[T_Source          ]: ["Футаж", "source/Babina.png", "Видео использовалось для другого видео"],
 	[T_Glitch          ]: ["Глитч", "source/Glitch.png", "В видео есть глитчи, эффекты, баги"],
 	[T_Coding          ]: ["Кодинг", "source/Coding.png", "В видео есть кодинг"],
 	[T_Video           ]: ["Другие видео", "source/YOUTUBE.png", "В видео смотрели другие видео"],
@@ -125,7 +126,10 @@ const TAGS = {
 	[T_Red             ]: ["cyberpaul red.", "source/discordavatars/cyberpaul_red..png", "В этом видео есть cyberpaul red. (Ред)"],
 	[T_Hiking          ]: ["Hiking", "source/discordavatars/hiking702.png", "В этом видео есть Hiking (Хикинг)"],
 	[T_Bombom          ]: ["Bombom", "source/discordavatars/bombom228.png", "В этом видео есть Bombom (Бомбом)"],
-	[T_Ivan            ]: ["Ваня", "source/discordavatars/idk/baka341982.png", "В этом видео есть Ваня"]
+	[T_Ivan            ]: ["Ваня", "source/discordavatars/idk/baka341982.png", "В этом видео есть Ваня"],
+	[T_OperationTango  ]: ["Operation: Tango", "source/tango.png", "В этом видео играли в Operation: Tango"],
+	[T_Dexon           ]: ["Dexon", "source/discordavatars/dexony.png", "В этом видео есть Dexon (Дексон)"],
+	[T_TableTop        ]: ["Tabletop Simulator", "source/tabletop.png", "В этом видео играли в Tabletop Simulator"]
 }
 
 const P_Hide    = 0
@@ -203,7 +207,7 @@ const VIDEOS = [
 	"Делал опять какое-то упоротое видео используя видео из канала шизоидочка, поскольку не зарендерилось я снимал"],
 
 	[679, "🔺 | Подборка моих нейро-видео из Sora | 🔻", "2026.04.27 20:43", "v7Qth5dDKuc", "2026.04.27", "1:32:12", P_Link,
-	[T_Woowz11, T_AI, T_Lithuism, T_Glitch, T_Source, T_Wyldi],
+	[T_Woowz11, T_AI, T_Lithuism, T_Glitch, T_Wyldi],
 	"Подборка моих и вулди нейро видео сделанных с разных аккаунтов в sora ai (нейро видео делались с 19.10.2025), видео выстроены в какой-то сюжет, ветка с golu: 42:22, ветка с woowzcore: 1:05:59, ветка с туалетами: 1:22:21, ветка с котом чучелом: 16:26, ветка с павлом: 13:29, ветка с манюткой и павлом: 51:51, ветка с minecraft: 38:18, ветка с roblox: 32:28, ветка с паркуром: 19:19, ветка с захватом мира golu: 54:45, коты mewgenics на фоне из видео: [579]"],
 	
 	[678, "КУДА ПРОПАЛ PISECHNIK TV? - Обладатель литиевой кнопки, и причём тут религия... 😁", "2025.05.01", "C0iF46RfKKk", "2026.06.12", "22:57", P_Link,
@@ -219,7 +223,7 @@ const VIDEOS = [
 	""],
 	
 	[675, "Старый текст старого Extra Backrooms", "2022.10.26 17:24", "XsFKFBp6aaY", "2026.06.12", "1:23:26", P_Link,
-	[T_Woowz11, T_Pavel, T_INotAuthor, T_Backrooms, T_Minecraft, T_Zvshka, T_UnknownPeople, T_Unity, T_Source],
+	[T_Woowz11, T_Pavel, T_INotAuthor, T_Backrooms, T_Minecraft, T_Zvshka, T_UnknownPeople, T_Unity],
 	"Павел снимал как мы играли в старый экстра бекрумс, это был тест играло ещё несколько людей со стороны павла, 17:56 я спавню вилли, видео использовалось в [616]"],
 	
 	[674, "🧅", "2025.06.18", "33n1CONlp70", "2026.06.12", "36:42", P_Link,
@@ -315,8 +319,8 @@ const VIDEOS = [
 	""],
 	
 	[639, "#minecraft #roblox #backrooms #gaming #games #horror #garrysmod #майнкрафт #gmod #майнкрафт", "2025.02.19", "Pppt4nm_10Q", "2025.02.19", "00:05", P_Link,
-	[T_Woowz11, T_WIP, T_Shorts],
-	""],
+	[T_Woowz11, T_Prikol, T_Shorts],
+	"Мой первый шортс на канале, помню монтаж его я сделал на каком-то сайте, в видео голубь летит и говорит \"я создал этот видео ролик, что-бы вы могли радоваться жизни\""],
 	
 	[638, "~", "2026.03.07 15:36:12", "dTpgXWFYylE", "2026.03.09", "27:56", P_Hide,
 	[T_Woowz11, T_WIP, T_Mewgenics],
@@ -423,7 +427,7 @@ const VIDEOS = [
 	""],
 	
 	[603, "~", "2025.04.29 17:36:29", "y1h-xKWenpw", "2026.03.02", "2:16:51", P_Hide,
-	[T_Woowz11, T_WIP, T_Source],
+	[T_Woowz11, T_WIP],
 	"Windows 7 (MALWARE)"],
 	
 	[602, "~", "2025.04.30 20:51:06", "VQoBtZGkm6Q", "2026.03.02", "1:05:21", P_Hide,
@@ -567,7 +571,7 @@ const VIDEOS = [
 	""],
 	
 	[579, "Скриншотил котов в mewgenics...", "2026.03.26 14:44:35", "zvdDupSz1ts", "2026.03.29", "03:28", P_Hide,
-	[T_Woowz11, T_Mewgenics, T_Music, T_Source],
+	[T_Woowz11, T_Mewgenics, T_Music],
 	"Записал как запустил mewgenics для видео [679], на фоне делал монтаж видео"],
 	
 	[578, "~", "2025.05.17 22:48:04", "ZpU8dGhTLio", "2026.03.10", "52:51", P_Hide,
@@ -586,33 +590,33 @@ const VIDEOS = [
 	[T_Woowz11, T_LethalCompany, T_HaveANiceDay, T_Troll, T_Beryx, T_Ne1ro],
 	"Играли в летал компани 🙄"],
 	
-	[574, "~", "2023.12.26 19:59:14", "DsMTS_mM5x0", "2024.12.13", "56:05", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[574, "Учим дея Lethal Company", "2023.12.26 19:59:14", "DsMTS_mM5x0", "2024.12.13", "56:05", P_Hide,
+	[T_Woowz11, T_Beryx, T_LethalCompany, T_Troll, T_HaveANiceDay],
+	"Странно, почему-то перестал играть с гудеролом, учим дея играть, в конце смотрели мод на одёжку"],
 	
-	[573, "~", "2023.12.10 16:46:40", "zlbg_iMK91s", "2024.12.13", "2:19:49", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[573, "ProstoChelik", "2023.12.10 16:46:40", "zlbg_iMK91s", "2024.12.13", "2:19:49", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Gooderol, T_UnknownPeople],
+	"Палю рабочий стол в начале, играли походу после обновления игры"],
 	
-	[572, "~", "2023.12.08 20:12:03", "hVuER4436a4", "2024.12.13", "48:21", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[572, "[Error : Unity Log] \"CalculatePolygonPath\" can only be called on an active agent that has been placed on a NavMesh.", "2023.12.08 20:12:03", "hVuER4436a4", "2024.12.13", "48:21", P_Hide,
+	[T_Woowz11, T_Gooderol, T_LethalCompany, T_UnknownPeople],
+	"Не надо молчать...., 16:02 чувак бегает с таджитской музыкой, в конце палю рабочий стол"],
 	
-	[571, "~", "2023.12.08 18:48:32", "Nt7Wt6s8EJY", "2024.12.13", "1:22:16", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[571, "Опятьььььь играли с нн......", "2023.12.08 18:48:32", "Nt7Wt6s8EJY", "2024.12.13", "1:22:16", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_UnknownPeople, T_Gooderol],
+	"BepInEx 5.4.22.0 - Lethal Company"],
 	
-	[570, "~", "2023.12.07 17:40:42", "HwG5NwE4aQw", "2024.12.13", "2:09:57", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[570, "КРЯХТЕЛКА", "2023.12.07 17:40:42", "HwG5NwE4aQw", "2024.12.13", "2:09:57", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_UnknownPeople, T_Gooderol],
+	"В очередной раз не вдупляю что вообще тут происходит, что-то палю 1:00:08, ржачно что в то время я очень много кряхтел"],
 	
-	[569, "~", "2023.12.07 15:46:29", "ZpbbmcrndpE", "2024.12.13", "1:53:44", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[569, "1:51:51 pizzatower музыка...", "2023.12.07 15:46:29", "ZpbbmcrndpE", "2024.12.13", "1:53:44", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Gooderol, T_Red, T_UnknownPeople],
+	"Палю в начале всё палю в начале explorer, зачем-то поставил решейд на летал компани, к нам добавился ред (не надолго походу)"],
 	
-	[568, "~", "2023.12.06 21:17:47", "e4RTOGiz5EA", "2024.12.13", "1:39:33", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[568, "L etal C ompany G ame P lay", "2023.12.06 21:17:47", "e4RTOGiz5EA", "2024.12.13", "1:39:33", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Gooderol, T_UnknownPeople],
+	"Что ты там лезишь в компьютере своём?"],
 	
 	[567, "Lethal Company...", "2023.12.06 18:15:28", "fae7P4wGWrU", "2024.12.13", "1:34:31", P_Hide,
 	[T_Woowz11, T_LethalCompany, T_UnknownPeople, T_Gooderol],
@@ -622,9 +626,9 @@ const VIDEOS = [
 	[T_Woowz11, T_LethalCompany, T_UnknownPeople, T_Gooderol],
 	"Играл в летал компани с неизвестными людьми какими-то"],
 	
-	[565, "~", "2023.11.20 20:25:47", "pEqbRmb_ut8", "2024.12.11", "1:49:05", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[565, "Павел тугодум", "2023.11.20 20:25:47", "pEqbRmb_ut8", "2024.12.11", "1:49:05", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Ne1ro, T_Beryx, T_Dexon, T_UnknownPeople, T_Troll, T_Pavel],
+	"СКОЛЬКО БЛЯТЬ ЛЮДЕЙ В НАЧАЛЕ (+ сухарик, БухойБатя), троль есть ушёл... не садись срать пока не узнаешь какие есть типы данных в пайтон, я пытался опять читерить, 37:10 кто начитерил себе супер прыжок?"],
 	
 	[564, "Жизнь вулди в бане (БУКВАЛЬНО)", "2024.07.18 00:58:02", "K2Xsu3upaXQ", "2024.12.12", "52:38", P_Hide,
 	[T_Woowz11, T_Wyldi, T_RealLife, T_Archive, T_Communication],
@@ -658,9 +662,9 @@ const VIDEOS = [
 	[T_Woowz11, T_Communication, T_Brigadir, T_Roblox],
 	"С бригадиром играли в смертельную рулетку в роблоксе"],
 	
-	[556, "~", "2024.09.04 14:10:10", "YvrFAUcAIGg", "2024.12.14", "1:08:43", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[556, "govno_block", "2024.09.04 14:10:10", "YvrFAUcAIGg", "2024.12.14", "1:08:43", P_Hide,
+	[T_Woowz11, T_Troll, T_Roblox, T_Coding, T_Minecraft],
+	"Играл с тролем в роблокс начиная с плейса где типо мы смотрели размеры предметов, потом играли в странный плейс про гитару, потом я пошёл кодить 46:57 мод для майнкрата govno_block (первый раз это делал)"],
 	
 	[555, "🟩🟧🟪🟫🟦🟥🟨", "2024.08.18 18:04:28", "fz1TPuYaui8", "2024.12.15", "2:29:48", P_Hide,
 	[T_Woowz11, T_Roblox, T_Wyldi, T_Music],
@@ -671,12 +675,12 @@ const VIDEOS = [
 	"НН показывали новый экстра бекрумс в майнкрафте, общался с электриком из великобритании 44:03, потом бригадир показывал как он играл в игру про чувака в казане 1:24:07"],
 	
 	[553, "Operation: TANGO", "2024.08.30 12:24:16", "RAPQMOGGa20", "2024.12.15", "2:25:32", P_Hide,
-	[T_Woowz11, T_Roblox, T_Brigadir, T_Pavel],
+	[T_Woowz11, T_Roblox, T_Brigadir, T_Pavel, T_OperationTango],
 	"Играли в плейс где куча миниигр на острове, потом играли в смертельную рулетку (С ПАВЛОМ), потом играл в какой-то плейс с бесконечной алхимией 1:33:05, потом играли в Operation: TANGO 1:45:43"],
 	
-	[552, "~", "2024.09.02 20:40:16", "hxgKI927hb8", "2024.12.15", "1:26:47", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[552, "Local Russain & WoowzSite", "2024.09.02 20:40:16", "hxgKI927hb8", "2024.12.15", "1:26:47", P_Hide,
+	[T_Woowz11, T_Roblox, T_Brigadir, T_UnknownPeople, T_LocalRussian],
+	"Играл с бригадиром и каким-то нн в плейс с минииграми, в конце добавился локальный русский, потом локальный русский смотрел вувзсайты 1:14:07"],
 	
 	[551, "~", "2024.09.11 16:50:48", "EIYIuEeMVa0", "2024.12.15", "1:52:16", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -706,17 +710,17 @@ const VIDEOS = [
 	[T_Woowz11, T_Roblox, T_LocalRussian, T_Wyldi, T_Brigadir, T_UnknownPeople],
 	"Тот самый плейс где растреливали котов и графика типо PS1 (ПОТОМ локальный русский обиделся и мы одни играли), потом проходили обби 1:03:18, плейс с секретами 1:36:21, играли в тайкон 2:04:18 (какого-то нн вроде тролили), потом пришёл бригадир, и позвал в плейс смертельной рулетки, потом играли в какие-то умные игры 5:37:59, потом меня бросили я один играл во что-то 6:41:30 7:39:58"],
 	
-	[544, "~", "2024.09.03 16:12:23", "VXx7Ib12H9g", "2024.12.17", "2:41:44", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[544, "Попытка выжить с съезда с горы", "2024.09.03 16:12:23", "VXx7Ib12H9g", "2024.12.17", "2:41:44", P_Hide,
+	[T_Woowz11, T_BeamNGDrive, T_Wyldi],
+	"Вулди смотрел как я катаюсь в бмг, с горы скатывался окуратно не разбивая машину (типо выжил я или не выжил), тот самый момент с горой 27:30, потом была погоня от психов 2:05:59, в конце палю дискорд"],
 	
-	[543, "~", "2024.09.06 18:34:32", "KQpLieEfao4", "2024.12.17", "5:23:15", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[543, "Легенда о Tabletop Simulator", "2024.09.06 18:34:32", "KQpLieEfao4", "2024.12.17", "5:23:15", P_Hide,
+	[T_Woowz11, T_Wyldi, T_Brigadir, T_TableTop, T_UnknownPeople, T_SFD, T_LocalRussian, T_Star],
+	"Играли в tabletop simulator, мешали бригадиру играть с его другом, потом с вулди играли в свою пародию манчкина 51:01, потом ломали игру 1:57:46, и играли в сфд 2:19:47 ещё с нами общался локальный русский, палю дискорд 3:11:42"],
 	
-	[542, "~", "2024.09.08 19:19:21", "uwn4957IvqQ", "2024.12.17", "5:07:28", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[542, "PicMiX", "2024.09.08 19:19:21", "uwn4957IvqQ", "2024.12.17", "5:07:28", P_Hide,
+	[T_Woowz11, T_Wyldi, T_SFD, T_LocalRussian, T_Communication, T_Glitch],
+	"В начале обсуждал с вулди в какие вормс играли, потом играли с локальным русским и вулди в сфд, палю дс: 2:45:55, потом качал картинки с picmix, потом развлекался с woowzsite, (где это видео? 4:41:58 [?]), вулди показывал файлс с своего компьютера 4:47:20, в конце глюки"],
 	
 	[541, "otkroi-glazki.mp3", "2024.12.18", "NYeDivJvq9Q", "2024.12.18", "01:57", P_Link,
 	[T_INotAuthor, T_WIP],
@@ -726,9 +730,9 @@ const VIDEOS = [
 	[T_INotAuthor, T_WIP],
 	""],
 	
-	[539, "~", "2024.09.09 19:30:15", "uIwafRggd9w", "2024.12.18", "2:30:25", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[539, "SFD GAMEPLAY", "2024.09.09 19:30:15", "uIwafRggd9w", "2024.12.18", "2:30:25", P_Hide,
+	[T_Woowz11, T_Wyldi, T_SFD, T_Mannytko],
+	"Палю рабочий стол в начале, всё видео играли в сфд, в конце манютка добавился"],
 	
 	[538, "~", "2024.09.10 19:11:43", "O9mOeI_h-ds", "2024.12.18", "3:21:00", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -887,24 +891,24 @@ const VIDEOS = [
 	"Репортаж новостей которое снимал с кемроузом"],
 	
 	[499, "Скрепка выживает от МЕНЯ в Extra Backrooms", "2023.08.29 15:23:00", "342S3VSUYs0", "2025.02.19", "10:31", P_Hide,
-	[T_INotAuthor, T_Woowz11, T_Skrepka, T_Roblox, T_Backrooms, T_Source],
+	[T_INotAuthor, T_Woowz11, T_Skrepka, T_Roblox, T_Backrooms],
 	"Основа для видео: [454], скрепка показывал как выживать на плейсе Extra Backrooms: https://www.roblox.com/games/96208362205095/ExtraBackrooms , оригинал: https://www.roblox.com/games/14492839796/Extra-Backrooms"],
 	
 	[498, "~", "2025.05.09 21:28:12", "wwrM_IPZhoQ", "2026.02.23", "27:55", P_Hide,
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[497, "~", "2013.11.03", "SgjoEHt1Nok", "2026.02.25", "03:40", P_Hide,
-	[T_Woowz11, T_WIP, T_Archive],
-	""],
+	[497, "minecraft 2013 11 03 - часть 1", "2013.11.03", "SgjoEHt1Nok", "2026.02.25", "03:40", P_Hide,
+	[T_Woowz11, T_Minecraft, T_Archive],
+	"Всё видео я просто добывал дуб, след: [495]"],
 	
-	[496, "~", "2013.11.03", "c2hyupppznA", "2026.02.25", "05:43", P_Hide,
-	[T_Woowz11, T_WIP, T_Archive],
-	""],
+	[496, "minecraft 2013 11 03 - часть 3", "2013.11.03", "c2hyupppznA", "2026.02.25", "05:43", P_Hide,
+	[T_Woowz11, T_Minecraft, T_Archive],
+	"Пошёл добывать ещё дуб и дальше строил дом, пред: [495], след: [33]"],
 	
-	[495, "~", "2013.11.03", "dytbRM6dk-E", "2026.02.25", "03:35", P_Hide,
-	[T_Woowz11, T_WIP, T_Archive],
-	""],
+	[495, "minecraft 2013 11 03 - часть 2", "2013.11.03", "dytbRM6dk-E", "2026.02.25", "03:35", P_Hide,
+	[T_Woowz11, T_Minecraft, T_Archive],
+	"Начал строить дом, пред: [497], след: [496]"],
 	
 	[494, "~", "2025.12.07 13:54:18", "dfNyUJdeGbM", "2026.03.15", "1:50:02", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -942,41 +946,41 @@ const VIDEOS = [
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[485, "~", "2025.05.06 19:57:42", "UfnqsyTDHW8", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[485, "Живые... Чёрные... Кубы...", "2025.05.06 19:57:42", "UfnqsyTDHW8", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox, T_Wyldi],
+	"Случайно записал как играли в плейс где на нас нападали чёрные кубы живые"],
 	
-	[484, "~", "2025.05.19 23:14:24", "_aKjMYe6YcA", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[484, "🧊", "2025.05.19 23:14:24", "_aKjMYe6YcA", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Wyldi, T_Roblox],
+	"Случайно записал как я с вулди лазали по узким ледяным пещерам"],
 	
-	[483, "~", "2025.10.10 11:18:31", "dE8Z3VzVPrA", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[483, "OBBY 🐕 OBBY", "2025.10.10 11:18:31", "dE8Z3VzVPrA", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox],
+	"Случайно записал как играл на плейсе где 10к обби, я тут на 1020 уровне, стою рядом с собаками"],
 	
-	[482, "~", "2025.09.06 10:36:19", "h4xPmQIHyts", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[482, "Стена разделившая Россию", "2025.09.06 10:36:19", "h4xPmQIHyts", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Wyldi, T_Roblox],
+	"Случайно записал как играли в плейс где типо захват стран но надо рисовать, построили гиганскую стену на россии, и с какой-то из сторон нарисовали гулу"],
 	
-	[481, "~", "2025.09.06 11:15:37", "2P7I0A0Yd9c", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[481, "Insufficient funds.", "2025.09.06 11:15:37", "2P7I0A0Yd9c", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox],
+	"Случайно записал как играл в плейс где надо искать секреты"],
 	
-	[480, "~", "2026.01.18 19:24:45", "6XPtasmGEYw", "2026.03.17", "00:07", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[480, "Случайная запись Isle", "2026.01.18 19:24:45", "6XPtasmGEYw", "2026.03.17", "00:07", P_Hide,
+	[T_Woowz11, T_Roblox],
+	"Походу случайно сделал запись роблокса, я тут играю в isle, скорее всего с кем-то не один, в начале страшный звук трещание"],
 	
-	[479, "~", "2025.11.29 16:21:09", "ofloVyGATTc", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[479, "Глюки рендера в Roblox", "2025.11.29 16:21:09", "ofloVyGATTc", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox, T_Glitch],
+	"Случайно записал как играл на плейсе где ты далеко улетаешь и начинаются глюки с рендером"],
 	
-	[478, "~", "2025.11.27 18:28:03", "bR7Ehb2oCYg", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[478, "WRF бункерная дверь", "2025.11.27 18:28:03", "bR7Ehb2oCYg", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox],
+	"Случайно записал роблокс, я стою у дверей в WRF плейсе"],
 	
-	[477, "~", "2025.10.30 16:53:09", "CZelV1Mxd_A", "2026.03.17", REALZERO_Duration, P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[477, "⬛", "2025.10.30 16:53:09", "CZelV1Mxd_A", "2026.03.17", REALZERO_Duration, P_Hide,
+	[T_Woowz11, T_Roblox],
+	"Случайно записал роблокс, но там всё видео сплошной чёрный цвет"],
 	
 	[476, "Roblox Shortcut", "2026.01.25 17:53:22", "5SYkB_Nah_s", "2026.03.17", "00:01", P_Hide,
 	[T_Woowz11, T_Roblox, T_Wyldi],
@@ -988,51 +992,51 @@ const VIDEOS = [
 	
 	[474, "Lethal Company", "2023.12.06 19:50:35", "d-4fYfovi4c", "2024.12.12", "15:31", P_Hide,
 	[T_Woowz11, T_LethalCompany, T_Gooderol, T_UnknownPeople],
-	"Lethal Company ".repeat(50)],
+	"Lethal Company ".repeat(30)],
 	
-	[473, "~", "2023.12.05 21:26:55", "fwJEyWyWsIs", "2024.12.12", "1:02:38", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[473, "unknown was kicked.", "2023.12.05 21:26:55", "fwJEyWyWsIs", "2024.12.12", "1:02:38", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Gooderol, T_UnknownPeople],
+	"🚽"],
 	
-	[472, "~", "2023.12.03 19:22:09", "LqzGBwxXJxk", "2024.12.12", "29:25", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[472, "И Г Р А Л И &ensp; В &ensp; L E T H A L &ensp; C O M P A N Y", "2023.12.03 19:22:09", "LqzGBwxXJxk", "2024.12.12", "29:25", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_UnknownPeople, T_Gooderol],
+	"Они ведь даже наверное были не в курсе что я их записывал... а потом на этот сайт добавил..."],
 	
-	[471, "~", "2023.12.03 18:15:24", "B71ZPIJA7cM", "2024.12.12", "1:04:13", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[471, "🙂", "2023.12.03 18:15:24", "B71ZPIJA7cM", "2024.12.12", "1:04:13", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Gooderol, T_UnknownPeople],
+	"Палю OBS, палю explorer 0:00, играл с гудеролом и его девушкой"],
 	
-	[470, "~", "2023.12.03 12:58:18", "_R1er1yzd4E", "2024.12.12", "1:11:24", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[470, "Gooderol начало", "2023.12.03 12:58:18", "_R1er1yzd4E", "2024.12.12", "1:11:24", P_Hide,
+	[T_Woowz11, T_Gooderol, T_LethalCompany, T_UnknownPeople],
+	"Палю рабочий стол и походу первое видео с gooderol"],
 	
-	[469, "~", "2023.12.02 19:00:55", "jHgOFrdu1Ro", "2024.12.12", "1:51:12", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[469, "Играл с НН", "2023.12.02 19:00:55", "jHgOFrdu1Ro", "2024.12.12", "1:51:12", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_UnknownPeople],
+	"Посрался с прошлой компашкой походу и создавал группы типо \"ищу друзей\", короче играл с нн"],
 	
-	[468, "~", "2023.11.28 21:24:57", "Tp4sY4VZNMY", "2024.12.12", "11:15", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[468, "Кто эти люди бля?", "2023.11.28 21:24:57", "Tp4sY4VZNMY", "2024.12.12", "11:15", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Beryx, T_Dexon, T_UnknownPeople, T_Ne1ro],
+	"Опять какой-то сухарик и бухойбатя"],
 	
-	[467, "~", "2023.11.28 19:52:26", "2BxG5oAzvYw", "2024.12.12", "1:32:28", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[467, "Нейро меня на куски разорвёт", "2023.11.28 19:52:26", "2BxG5oAzvYw", "2024.12.12", "1:32:28", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Ne1ro, T_Beryx, T_Dexon, T_UnknownPeople],
+	"Опять этот сухарик и бухойбатя и опять в начале куча людей, палю explorer 3:19, долго разбирались с модами, 1:22:49 собака смешно мимо пробежала)))"],
 	
-	[466, "~", "2023.11.25 22:39:34", "o_x9xscMXoo", "2024.12.12", "1:54:50", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[466, "С нейрой играл с нн", "2023.11.25 22:39:34", "o_x9xscMXoo", "2024.12.12", "1:54:50", P_Hide,
+	[T_Woowz11, T_Ne1ro, T_LethalCompany, T_UnknownPeople],
+	"Я с нейрой заходили к нн???, 38:14 ЧАЙНИК ЕБУЧИЙ, в конец опять этот игрок \"БухойБатя\""],
 	
-	[465, "~", "2023.11.24 23:04:57", "xKxz5yTm7AM", "2024.12.12", "31:36", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[465, "Опять играл с тролем", "2023.11.24 23:04:57", "xKxz5yTm7AM", "2024.12.12", "31:36", P_Hide,
+	[T_Woowz11, T_Troll, T_LethalCompany],
+	"Ну просто не читери... Хостил троль"],
 	
-	[464, "~", "2023.11.20 23:16:40", "fTCKBquBqmY", "2024.12.12", "53:17", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[464, "И ВСЁЁЁ... я играл с летал компани с тролем", "2023.11.20 23:16:40", "fTCKBquBqmY", "2024.12.12", "53:17", P_Hide,
+	[T_Woowz11, T_Troll, T_LethalCompany],
+	"Играл с тролем в летал компани"],
 	
-	[463, "~", "2023.11.20 19:16:50", "NP38fpAcR04", "2024.12.12", "1:08:53", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[463, "Сухарик", "2023.11.20 19:16:50", "NP38fpAcR04", "2024.12.12", "1:08:53", P_Hide,
+	[T_Woowz11, T_LethalCompany, T_Dexon, T_Beryx, T_UnknownPeople, T_Pavel],
+	"Берукс, расскажи как я смешно читами пользовался, играли просто в летал компани (3:22, \"ЧТО Я ТОЛЬКО-ЧТО УСЛЫШАЛ?!!!\"), с нами играл какой-то сухарик, в конце общался с павлом в войсе через steam"],
 	
 	[462, "LETHAT COMPANY BULK BULK EDITION 🫧", "2023.11.20 16:35:03", "rHziM9bwhGQ", "2024.12.12", "56:46", P_Hide,
 	[T_Woowz11, T_LethalCompany, T_Ne1ro, T_Red, T_Beryx],
@@ -1114,9 +1118,9 @@ const VIDEOS = [
 	[T_Woowz11, T_Glitch],
 	"Типо проклятое видео типо взломали Я НАЕБАЛ ВСЕХ!!! если что это ревёрснутая музыка, бумб так звали крипера из моего ресурс пака про будущее, он выглядил как робот на ножках"],
 	
-	[442, "SPOILER", UNKNOWN_Date, "rE9K1EwkLZ4", "2019.07.03", "01:01", P_Link,
+	[442, "SPOILER", "2019.06.13", "rE9K1EwkLZ4", "2019.07.03", "01:01", P_Link,
 	[T_INotAuthor, T_Minecraft, T_Prikol],
-	"Видео которое я нашёл не помню, в дискорде или в скайпе, и по приколу добавил на ютуб, потому-что оно было большое и я не мог его отправлять, тут что-то про арабов и ислам 🐷"],
+	"Видео которое я нашёл не помню, в дискорде или в скайпе, и по приколу добавил на ютуб, потому-что оно было большое и я не мог его отправлять, тут что-то про арабов и ислам 🐷, оригинал: https://www.youtube.com/watch?v=IMWw5U1ILOM"],
 	
 	[441, "ВЫЖЫВАНЫЭ В МИРЭ ЗОМБИ ЛАБУТЭНОВ ЧАСТ 1 И ПОСЛЕДНАЯ НЕ ПОСЛЕДНАЯ!!! СНИМАЛ ВУВЗ!", "2019.06.26 22:59:32", "ZOhOJGWp4qc", "2019.06.26", "14:22", P_Link,
 	[T_Woowz11, T_Kemrouz, T_Minecraft],
@@ -1135,40 +1139,40 @@ const VIDEOS = [
 	"Первую сцену снимал кемроуз, ещё какой-то чел помогал: GrifFeed, пред: [434]"],
 	
 	[437, "Прохождение Paint the town red! №4 (map) The L.A.B", "2018.11.24 20:58:25", "F11gZitBcIc", "2018.11.24", "11:02", P_Link,
-	[T_Woowz11, T_WIP, T_PtTR],
-	""],
+	[T_Woowz11, T_PtTR],
+	"пред: [436], карта: https://steamcommunity.com/sharedfiles/filedetails/?id=834716158"],
 	
 	[436, "Прохождение Paint the town red! №3 (map) Skyrim: Dragonsreach", "2018.11.19 22:37:57", "Q7N97YPbeMc", "2018.11.19", "09:35", P_Link,
-	[T_Woowz11, T_WIP, T_PtTR],
-	""],
+	[T_Woowz11, T_PtTR],
+	"пред: [435], след: [437], карта: https://steamcommunity.com/sharedfiles/filedetails/?id=860024198"],
 	
 	[435, "Прохождение Paint the town red! №2 (map) Beat Bar Woowz11", "2018.11.19 22:04:25", "PwzxnR4ngAo", "2018.11.19", "06:49", P_Link,
-	[T_Woowz11, T_WIP, T_PtTR],
-	""],
+	[T_Woowz11, T_PtTR],
+	"пред: [433], след: [436], карта: https://steamcommunity.com/sharedfiles/filedetails/?id=1543369582"],
 	
 	[434, "Приколы в Майнкрафт|Машинима в майнкрафт", "2018.11.18", "Rjq6MUQo0IU", "2018.11.18", "02:07", P_Link,
 	[T_Woowz11, T_Minecraft, T_Kemrouz, T_Prikol],
 	"Снимали по приколу машинимы в майнкрафте (монтаж делал не я), след: [438]"],
 	
 	[433, "Прохождение Paint the town red! №1 (map) Prision raid (update) !!", "2018.11.18 12:28:38", "Rd_ERon1lQs", "2018.11.18", "07:58", P_Link,
-	[T_Woowz11, T_WIP, T_PtTR],
-	""],
+	[T_Woowz11, T_PtTR],
+	"Проходил разные карты в Paint the Town Red, компьютер слабенький был не тянуло, след: [435], карта: https://steamcommunity.com/sharedfiles/filedetails/?id=907923474"],
 	
 	[432, "Физика (Новый формат) 4", "2017.12.06 18:17:38", "YrC_DE8cZPU", "2017.12.06", "06:06", P_Link,
-	[T_Woowz11, T_WIP, T_Minecraft],
-	""],
+	[T_Woowz11, T_Minecraft],
+	"Поставил несколько новых модов, кроме мода на физику жидкостей, добавил моды на физику блоков и на прикольное разрушение, пред: [431]"],
 	
 	[431, "Вода и физика 3", "2017.12.04 14:49:37", "q-taZl4rss4", "2017.12.04", "02:51", P_Link,
-	[T_Woowz11, T_WIP, T_Minecraft],
-	""],
+	[T_Woowz11, T_Minecraft],
+	"Всё ещё развлекаюсь с водой... пред: [430], след: [432]"],
 	
 	[430, "Вода и физика 2", "2017.12.03 23:40:54", "0D0BD2YvXGM", "2017.12.03", "02:42", P_Link,
-	[T_Woowz11, T_WIP, T_Minecraft],
-	""],
+	[T_Woowz11, T_Minecraft],
+	"Играл с модом на физичные жидкости (уже продумал и убрал спавн мобов) пред: [429], след: [431]"],
 	
 	[429, "Вода и физика в Minecraft 1№", "2017.12.03 23:21:44", "4vCzRH_KKXU", "2017.12.03", "02:37", P_Link,
-	[T_Woowz11, T_WIP, T_Minecraft],
-	""],
+	[T_Woowz11, T_Minecraft],
+	"Играл с модами на различную физику (тут пока-что только мод на физику воды) (тупанул забыл выключить спавн мобов но уже было поздно), след: [430]"],
 	
 	[428, "Моя первая анимация про майнкрафт", "2017.03.01", "scTmPfLr2bU", "2017.03.01", "00:04", P_Link,
 	[T_Woowz11, T_Minecraft],
@@ -1758,17 +1762,17 @@ const VIDEOS = [
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[280, "~", "2025.05.18 16:19:37", "ZhHjyCiFv50", "2025.05.31", "00:07", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[280, "Что ты не мониторил, ты офигел?", "2025.05.18 16:19:37", "ZhHjyCiFv50", "2025.05.31", "00:07", P_Hide,
+	[T_Woowz11, T_Wyldi, T_Video],
+	"Пытался разобраться как записывать через geforce experience, накликал кучу кнопак, вулди что-то на фоне орёт, а на фоне видео от форы (#8 ЗАПУСТИЛИСЬ АЛО (Serious Sam's Bogus Detour co-op))"],
 	
-	[279, "~", "2025.03.23 01:49:27", "KXOqIzEDW1w", "2025.05.31", "00:18", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[279, "WoowzCore Prikol", "2025.03.23 01:49:27", "KXOqIzEDW1w", "2025.05.31", "00:18", P_Hide,
+	[T_Woowz11, T_Coding, T_WoowzCore],
+	"Показал прикол в java WoowzCore, запись делал через geforce experience"],
 	
-	[278, "~", "2025.05.03 12:34:23", "4uFGPATRRRs", "2025.05.31", "00:24", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[278, "А зачем?", "2025.05.03 12:34:23", "4uFGPATRRRs", "2025.05.31", "00:24", P_Hide,
+	[T_Woowz11, T_Video],
+	"Смотрю видео [678] (смотрю видео с /11:40), и оооооочень громко говорю что не понятно чего, запись делал через geforce experience"],
 	
 	[277, "~", "2025.05.28 21:18:23", "EXysNhaUrBw", "2025.05.31", "00:51", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -1990,9 +1994,9 @@ const VIDEOS = [
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[221, "~", "2025.07.06 12:03:17", "D_5Vl08iPfw", "2025.07.07", "00:07", P_Hide,
-	[T_Woowz11, T_WIP],
-	""],
+	[221, "Тест микрофона OBS? (обманул)", "2025.07.06 12:03:17", "D_5Vl08iPfw", "2025.07.07", "00:07", P_Hide,
+	[T_Woowz11],
+	"Тестовая запись OBS, судя по видио меня должно было быть слышно но на видео меня не слышно (СЛЫШНО всё, просто я молчал ничего не говорил)"],
 	
 	[220, "~", "2025.07.06 12:08:50", "ZaEjtbaK3Fc", "2025.07.07", "25:23", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -2063,7 +2067,7 @@ const VIDEOS = [
 	""],
 	
 	[203, "Пиши, запиши. Привет я тестовая запись и сегодня мы будем играть в майнкрафт... 😨", "2025.06.25 11:10:28", "tfrU-3moW6w", "2025.08.10", "00:03", P_Hide,
-	[T_Woowz11, T_Source, T_Wyldi],
+	[T_Woowz11, T_Wyldi],
 	"Звук использовался в [666], пред: [202]"],
 	
 	[202, "🪨💥🪨 Я ба ба ба ба ба", "2025.06.28 20:20:56", "sao7Wykx_nc", "2025.08.10", "00:03", P_Hide,
@@ -2075,7 +2079,7 @@ const VIDEOS = [
 	"Тестил физику в WoowzCore, сломанная трансформация"],
 	
 	[200, "WoowzCore пульсирующие кубики", "2025.07.13 18:15:45", "vrhs0npEABM", "2025.08.10", "00:43", P_Link,
-	[T_Woowz11, T_Source, T_WoowzCore, T_Music, T_Glitch, T_Lithuism],
+	[T_Woowz11, T_WoowzCore, T_Music, T_Glitch, T_Lithuism],
 	"Я летаю на сцене WoowzCore Java, и просто снимаю пульсирующие кубики, использовалось в видео [666]"],
 	
 	[199, "Тестил обрезку камерой в WoowzCore", "2025.07.13 22:29:31", "amgJ3Rt1S9Q", "2025.08.10", "00:59", P_Hide,
@@ -2311,7 +2315,7 @@ const VIDEOS = [
 	"Я там ещё показываю что у меня места нету на компьютере))), там этот чел хомяк делает на фоне хуйню какую-то, очень сруться"],
 
 	[140, "PROJECT: GOLU WORLD", "2026.03.04 06:11:43", "mf9pJJV3-MI", "2026.03.04", "11:56", P_Link,
-	[T_Woowz11, T_Source, T_Lithuism, T_GOLUWorld],
+	[T_Woowz11, T_Lithuism, T_GOLUWorld],
 	"Видео где я должен был рассказывать про GOLU WORLD, а в итоге какой-то манускрипт"],
 
 	[139, "Опять эти башни", "2025.04.20 01:10:28", "GBAWXwNqoag", "2026.2.23", "33:54", P_Hide,
@@ -2331,7 +2335,7 @@ const VIDEOS = [
 	"Пытался на виртуалке запустить телеграм и скачивал bluestacks, палю свой старый тг акк"],
 
 	[135, "Контент для шортса", "2025.08.08 21:50:50", "nDTqktL4wCI", "2025.10.24", "04:34", P_Hide,
-	[T_Woowz11, T_WoowzCore, T_Source, T_Lithuism],
+	[T_Woowz11, T_WoowzCore, T_Lithuism],
 	"[662]"],
 
 	[134, "Дей смотрел монтаж башень", "2025.04.06 20:27:06", "CQr7cmbJtbQ", "2025.10.24", "16:10", P_Hide,
@@ -2343,7 +2347,7 @@ const VIDEOS = [
 	"Качал windows 10 iso, и всё"],
 
 	[132, "Контент для шортса", "2025.07.24 13:14:05", "8yTLB4WE7Ug", "2025.10.24", "04:02", P_Hide,
-	[T_Woowz11, T_WoowzCore, T_Lithuism, T_Source, T_Star],
+	[T_Woowz11, T_WoowzCore, T_Lithuism, T_Star],
 	"[663]"],
 
 	[131, "Смотрели видео [?]", "2025.05.18 14:41:11", "nN4hvNan9sg", "2025.10.24", "12:59", P_Hide,
@@ -2359,7 +2363,7 @@ const VIDEOS = [
 	"Монтаж видео про башни близнецы [678] (со сломанным звуком), пытались пофиксить, чек [123]"],
 
 	[128, "WhiteSponge x2", "2025.06.24 11:55:37", "xhsd1iDdoAM", "2025.10.24", "03:24", P_Hide,
-	[T_Woowz11, T_Music, T_Source, T_Coding, T_Minecraft],
+	[T_Woowz11, T_Music, T_Coding, T_Minecraft],
 	"Показывал WhiteSponge, след [124], для шортса [642]"],
 
 	[127, "Писали на NASM в QEMU", "2025.05.11 02:02:32", "hoaJEgSxz4E", "2025.10.24", "52:30", P_Hide,
@@ -2375,7 +2379,7 @@ const VIDEOS = [
 	""],
 
 	[124, "WhiteSponge", "2025.06.25 22:28:24", "Jm8HQb0iYd8", "2025.10.24", "02:02", P_Hide,
-	[T_Woowz11, T_Music, T_Coding, T_Minecraft, T_Source],
+	[T_Woowz11, T_Music, T_Coding, T_Minecraft],
 	"То самое видео для whitesponge, пред [128], для шортса [643]"],
 
 	[123, "Заглючил звук на башнях близнецах", "2025.10.24 01:33:17", "g92zjptoXpc", "2025.10.24", "01:44", P_Hide,
@@ -2439,7 +2443,7 @@ const VIDEOS = [
 	"Стрельба в пттр, где меня все пытались застрелить а я пытался выжить((("],
 
 	[108, "Живые кубики GOLU", "2025.09.01 16:48:51", "u1CQ3FaUkDQ", "2025.10.29", "12:58", P_Link,
-	[T_Woowz11, T_Star, T_Source, T_WoowzCore, T_Coding, T_Music],
+	[T_Woowz11, T_Star, T_WoowzCore, T_Coding, T_Music],
 	"То самое, прыгающие кубики в вувзкоре java!!! с лицами гулу (для видео: [660])"],
 
 	[107, "Менял звук через OBS x2", "2025.09.05 20:36:14", "Gij4qSCSoPU", "2025.11.28", "00:06", P_Hide,
@@ -2467,7 +2471,7 @@ const VIDEOS = [
 	"Назар играет в старую версию нового вувзкора на юнити, в конце назар киданул)))"],
 
 	[101, "Реакция вувза на видео башни близнецы не первая...", "2025.08.15 17:21:49", "LtDeRrOrdmI", "2025.11.28", "31:09", P_Hide,
-	[T_Woowz11, T_Source, T_Wyldi, T_Lithuism, T_Glitch],
+	[T_Woowz11, T_Wyldi, T_Lithuism, T_Glitch],
 	"Использовалось для видео [159], а так в этом видео я смотрел видео про башни близнецы [678], потом начал искажать с помощью OBS"],
 
 	[100, "Назар запустил все вувзкоры!!!", "2025.08.23 00:11:56", "_oRzofjTCWE", "2025.11.28", "1:00:19", P_Hide,
@@ -2740,11 +2744,11 @@ const VIDEOS = [
 
 	[33, "minecraft 2013 11 03 - часть 4", "2013.11.03", "GRCoYE5iFSI", "2021.09.08", "8:57", P_Link,
 	[T_Woowz11, T_Minecraft, T_Archive],
-	"Очень старое видео, которое я ещё снимал на папином компьютере, взято с моего старого заброшеного канала"],
+	"Очень старое видео, которое я ещё снимал на папином компьютере, взято с моего старого заброшеного канала, дом не достроил и пошёл смотреть мир, утопил свинью в нефти, пред: [496]"],
 
 	[32, "обзор мода CraftGuide на 1.7.10", "2016.07.22 13:38:20", "Qzh9aaqlCnE", "2016.07.22", "1:05", P_Link,
 	[T_Woowz11, T_Minecraft],
-	"Первое публичное видео на канале (не считая удалённых)"],
+	"Первое публичное видео на канале (не считая удалённых (я помню у меня раньше было ещё несколько видео обзоры на другие моды))"],
 
 	[31, "Первое архивное видео", "2024.07.16 20:58:53", "7MyBb60U0is", "2024.11.11", "21:04", P_Link,
 	[T_Woowz11, T_HaveANiceDay, T_GarrysMod, T_Star],
@@ -2755,7 +2759,7 @@ const VIDEOS = [
 	"Бегаем по верт порталу и стреляемся, потом пришёл назар, потом рп в бекрумсе (выживание) (2:49:29), потом я делал им сюжет (где-то в видео троль палит лицо (не знаю, не нашёл))"],
 
 	[29, "Как активировать JetBrains продукты | 2025 | Marmok feet.org", "2025.11.03 21:50:58", "UAvbPFVVd5o", "2025.11.04", "42:03", P_Link,
-	[T_Woowz11, T_Source, T_Lithuism],
+	[T_Woowz11, T_Lithuism],
 	""],
 
 	[28, "Генерация постеров про павла писечника тв павлом", "2025.03.30 14:50:07", "z4_mLVTmgtE", "2026.01.15", "2:31:05", P_Hide,
@@ -2796,7 +2800,7 @@ const VIDEOS = [
 
 	[19, "Ломали звук в реальном времени", "2026.01.19 04:09:21", "Wmo45UEmv84", "2026.01.22", "1:54:01", P_Hide,
 	[T_Woowz11, T_Wyldi, T_Glitch, T_SFD, T_Music],
-	"Играли в сфд со сломанным звуков и вулди орал сломанным звуков (23:41), предыдущая часть [20]"],
+	"Играли в сфд со сломанным звуком и вулди орал сломанным звуков (23:41), предыдущая часть [20]"],
 
 	[18, "Пытался сделать VST, сделал своё", "2026.01.20 22:18:23", "beSnWH1arX0", "2026.01.22", "3:01:51", P_Hide,
 	[T_Woowz11, T_Roblox, T_Glitch, T_Music, T_Coding],
@@ -2871,7 +2875,7 @@ const VIDEOS = [
 	"В видео я УЖЕ ПРОСНУВШЕМУСЯ (см. [3]) вулди показывал свой exe (https://github.com/Woowz11/rofl-games/tree/main/WoowzVST) который глючит звук, делает задержки и т.д, + тестили на видео на ютубе, там был американский папаша..."],
 
 	[0, "Записывали контент для шортса", "2026.01.22 01:15:35", "gSTQ9gZJvl8", "2026.01.24", "3:08:18", P_Hide,
-	[T_Woowz11, T_Wyldi, T_GarrysMod, T_Lithuism, T_Backrooms, T_Source, T_Glitch, T_Star],
+	[T_Woowz11, T_Wyldi, T_GarrysMod, T_Lithuism, T_Backrooms, T_Glitch, T_Star],
 	"В видео играли в гаррис мод с модами, в стиле литуизма, бекурмс, использовался для шортса [655], так же глючили звук"]
 ]
 
@@ -2904,10 +2908,25 @@ function PreUpdateVideos(){
 
 	// Если ты умный типо зашёл посмотреть описания T_Archive видео, то знай что я и так вкурсе что можно тут их посмотреть
 
+	const AllLinks = [];
+
 	for(let i = 0; i < VIDEOS.length; i++){
 		const Video = VIDEOS[i]
 
 		if(Video[4] === LOSTMEDIA){ Video[7].push(__T_LostMedia) }
+
+		// ----------------------------------------------------------------------
+		
+		const ID          = Video[0];
+		const Name        = Video[1];
+		const Description = Video[8];
+		const Name_Description = `${Name} ${Description}`;
+		
+		const OtherVideoLinks = Name_Description.match(/\[(\d+)\]/g)?.map(M => parseInt(M.match(/\d+/)[0])) || [];
+		
+		AllLinks.push([ID, OtherVideoLinks]);
+		
+		// ----------------------------------------------------------------------
 
 		let Archive = false
 		let WIP     = false
@@ -2924,7 +2943,11 @@ function PreUpdateVideos(){
 		Video[9] = [
 			Archive,
 			WIP,
-			Shorts
+			Shorts,
+			OtherVideoLinks,
+			[],
+			0,
+			0
 		]
 
 		if(Archive && !UserWoowz){
@@ -2933,6 +2956,29 @@ function PreUpdateVideos(){
 		}
 
 		VIDEOS[i] = Video
+	}
+	
+	let VideoReferences = {};
+	
+	for(const Entry of AllLinks){
+		const ID              = Entry[0];
+		const OtherVideoLinks = Entry[1];
+		
+		for(const ReferenceID of OtherVideoLinks){
+			if(!VideoReferences[ReferenceID]){
+				VideoReferences[ReferenceID] = [];
+			}
+			if(!VideoReferences[ReferenceID].includes(ID)){
+				VideoReferences[ReferenceID].push(ID);
+			}
+		}
+	}
+	
+	for(let i = 0; i < VIDEOS.length; i++){
+		const Video = VIDEOS[i];
+		const ID = Video[0];
+		Video[9][4] = VideoReferences[ID] || [];
+		VIDEOS[i] = Video;
 	}
 
 	return UserWoowz
