@@ -424,8 +424,11 @@ body{
 					<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block; margin-bottom: 10px;"><canvas id="Info_Chart_Duration"></canvas></div>
 					<div class="SmallPanel" style="background-color: white; width: 100%; height: 240px; display: block;"><canvas id="Info_Chart_Creation"></canvas></div>
 				</div>
-				<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
-				<button class="Button" onclick="CheckForMissingID();">Проверить пропуски ID</button>
+				<div id="DebugButtons">
+					<button class="Button" onclick="CheckForDuplicates();">Проверить на дубликаты</button>
+					<button class="Button" onclick="CheckForMissingID();">Проверить пропуски ID</button>
+					<button class="Button" onclick="GetAllCompiledInfo();">Получить всю скомпилированную информацию</button>
+				</div>
 			</div>
 		</div>
 
@@ -505,29 +508,6 @@ function RainbowColor(T, Alpha){
 	return `hsl(${T * 300}, 100%, 50%, ${Alpha})`;
 }
 
-function ParseDate(Input){
-	if(!Input || Input === UNKNOWN_Date){ return null; }
-
-	const Parts = Input.split(" ");
-	const DatePart = Parts[0];
-
-	let Y, M, D;
-
-	if(DatePart.includes(".")){
-		const nums = DatePart.split(".");
-		
-		if(nums[0].length === 4){
-			// YYYY.MM.DD
-			[Y, M, D] = nums.map(n => parseInt(n, 10));
-		}else{
-			// DD.MM.YYYY
-			[D, M, Y] = nums.map(n => parseInt(n, 10));
-		}
-	}
-
-	return new Date(Y, M - 1, D).getTime();
-}
-
 const Height = "28px"
 
 function CreateTag(TagID, Count = undefined){
@@ -550,10 +530,6 @@ function CreateTag(TagID, Count = undefined){
 				src="${TagIcon}"
 				alt="${TagName}"
 			></a>`
-}
-
-function GetVideo(ID){
-	return VIDEOS.find(V => V[0] === ID);
 }
 
 function CreateVideoReference(ID){
@@ -704,8 +680,9 @@ function UpdateContent(VideosList){
 			
 			function FormatDescription(Input){
 				function FormatURL(Input){
-					const Pattern = /(https?:\/\/[^\s]+)/g;
-					return Input.replace(Pattern, (URL) => {
+					return Input.replace(/(\/?)(https?:\/\/[^\s]+)/g, (Match, Slash, URL) => {
+						if(Slash){ return URL; }
+					
 						let EndChar = "";
 						if(/[)\]\},.?]/.test(URL.slice(-1))){
 							EndChar = URL.slice(-1);
@@ -1373,14 +1350,20 @@ function CheckForMissingID(){
 	}
 }
 
+function GetAllCompiledInfo(){
+	console.log(VIDEOS);
+	ShowErrorNotification("Получена вся скомпилированная информация об всех видео! F12", "blue");
+}
+
 let UserWoowz
 window.addEventListener("load", () => {
 	UserWoowz = PreUpdateVideos();
 
 	if(!UserWoowz){
-		document.getElementById("circle").remove()
+		document.getElementById("circle").remove();
+		document.getElementById("DebugButtons").remove();
 
-		TAGS[T_Archive][2] = "???"
+		TAGS[T_Archive][2] = "???";
 	}
 
 	UpdateTags()

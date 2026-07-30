@@ -290,7 +290,7 @@ ADD("eye2.png", "teToHell -> GateToHell", __A_WYLDI)
 ADD("OPTIONS.png", "Options", __A_WYLDI)
 ADD("sup.png", "MR WOOWZ ПОГИБ ИЗ ЗА СУПА 😭 ОТКЛЮЧЕНИЕ СВЕТА ЧЕРЕЗ 5 МИНУТ", __A_WYLDI)
 ADD("tunel.png", "X-RAY GREN TUNEL", __A_WYLDI + __A_IDK)
-ADD("horrorgame.png", "*CHANGED* Horror Game Preview", __A_WOOWZ)
+ADD("horrorgame.png", "*CHANGED* Horror Game Preview", __A_WOOWZ, "2025.03.23") // Создаю в видео [266]
 ADD("BISNES.png", "Business", __A_WYLDI)
 ADD("goblin.png", "G 0 B L I N", __A_WYLDI)
 ADD("winland.png", "WIN7LAND", __A_WYLDI + __A_IDK)
@@ -363,7 +363,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2","gradient",
 	"GarrysMod", "emoji", "Backrooms", "Babina", "Glitch", "Coding", "YOUTUBE", "HalfSword", "History", "Music", "Blocked", "Roblox", "SFD", "HappyWheels", "Communication", "Minecraft",
 	"WorldBox", "Single", "Teardown", "Star", "WoowzCore", "AI", "TBOI", "Deanon", "BrickRigs", "BeamNGDrive", "PtTR", "noi", "wip", "stream", "short", "Calendar", "Alarm", "goluworld",
-	"mew", "real", "lost", "archive", "lc", "ppg", "up", "para", "picsis", "tango", "tabletop"
+	"mew", "real", "lost", "archive", "lc", "ppg", "up", "para", "picsis", "tango", "tabletop", "lu"
 ],"source/",".png")
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
