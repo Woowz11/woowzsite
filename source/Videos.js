@@ -64,6 +64,7 @@ const T_Ivan             = 62
 const T_Dexon            = 63
 const T_TableTop         = 64
 const T_LithiumUinverse  = 65
+const T_Ilya             = 66
 
 const TAGS = {
 	[T_Woowz11         ]: ["Woowz11", "source/discordavatars/woowz11.png", "В этом видео есть Woowz11 (Вувз)"],
@@ -131,7 +132,8 @@ const TAGS = {
 	[T_OperationTango  ]: ["Operation: Tango", "source/tango.png", "В этом видео играли в Operation: Tango"],
 	[T_Dexon           ]: ["Dexon", "source/discordavatars/dexony.png", "В этом видео есть Dexon (Дексон)"],
 	[T_TableTop        ]: ["Tabletop Simulator", "source/tabletop.png", "В этом видео играли в Tabletop Simulator"],
-	[T_LithiumUinverse ]: ["LithiumUniverse", "source/lu.png", "В этом видео играли в LithiumUniverse"]
+	[T_LithiumUinverse ]: ["LithiumUniverse", "source/lu.png", "В этом видео играли в LithiumUniverse"],
+	[T_Ilya            ]: ["Илья", "source/discordavatars/ilya_nextbot.png", "В этом видео есть Илья"]
 }
 
 const P_Hide    = 0
@@ -301,7 +303,7 @@ const VIDEOS = [
 	""],
 	
 	[644, "GMOD-EXSTAS | #gmod #whitesponge #woowz", "2025.06.29", "x_wvJEF-KFU", "2025.06.29", "02:59", P_Link,
-	[T_Woowz11, T_Glitch, T_Shorts, T_GarrysMod, T_Bombom, T_UnknownPeople, T_Wyldi, T_Music, T_Prikol],
+	[T_Woowz11, T_Glitch, T_Shorts, T_GarrysMod, T_Bombom, T_UnknownPeople, T_Wyldi, T_Music, T_Prikol, T_HaveANiceDay, T_Ilya],
 	"В начале реверсированный шортс: [643], потом показываю геймплей меня и дея и т.д в гаррис моде, в конце расстрел, видео на фоне: [?]"],
 	
 	[643, "WhiteSponge №2 - МОЁ ЯДРО LUA МОДЫ 🥶 #программирование #java #майнкрафт @Microsoft", "2025.06.26", "ogiEAiDcGDs", "2025.06.26", "02:34", P_Link,
@@ -1740,7 +1742,7 @@ const VIDEOS = [
 	[T_Woowz11, T_WIP],
 	""],
 	
-	[286, "Сурс контент башен близнец парто 1", "2025.03.27 16:11:35", "5mRLwJVwfCo", "2025.03.27", "09:38", P_Hide,
+	[286, "Сурс контент башен близнец парто 1", "2025.03.27 16:11:35", "5mRLwJVwfCo", "2025.03.27", "09:38", P_Link,
 	[T_Woowz11, T_Lithuism, T_Minecraft, T_Wyldi],
 	"Первая часть видео [678], след: [285], в начале 0:18 показал видео [?]"],
 	
@@ -2609,7 +2611,7 @@ const VIDEOS = [
 	"В начале искал ВПН, потом пошёл проходить сюжетку тд, потом запустил зачем-то виртуалку и вулди пришёл 47:24, потом видео того самого австралийца смотрели 1:57:20))), потом играли на упоротых плейсах в роблоксе 2:21:34, и был водителем автобуса на слокан 2:37:49, и ползали по узким пещерам 2:54:30 (СМЕШНО), поиграли в пародию криминалити 3:18:49, и опять этот плейс как его 3:21:54, потом меня киданули я один играл в какие-то странные плейсы"],
 
 	[66, "Где упоротый глючный роблокс...", "2025.11.27 20:26:20", "6MzCxFefE8A", "2025.12.07", "1:19:36", P_Link,
-	[T_Woowz11, T_Wyldi, T_Roblox, T_Glitch, T_Lithuism, T_Star],
+	[T_Woowz11, T_Wyldi, T_Roblox, T_Glitch, T_Lithuism, T_Star, T_RealLife],
 	"То самое!!! где я делал смешные эффекты и звук для роблокса... а вулди этого всего не видел не слышал, потом он в конце киданул и я один играл в врф WRF"],
 
 	[65, "Начал играть в айзека", "2025.12.04 21:59:46", "hR-YSZacJ7I", "2025.12.07", "5:04:17", P_Hide,
