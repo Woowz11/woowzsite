@@ -151,7 +151,7 @@ const UNKNOWN_Link      = "unknown";
 const LOSTMEDIA = "lost"
 
 // Игнорировать ошибки загрузки видео
-const Ignore_Errors = false
+Ignore_Errors = false
 
 /*
 	
@@ -164,7 +164,159 @@ const Ignore_Errors = false
 const VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 
-	// FREE -> 669, 364
+	// FREE -> 
+	
+	[715, "Опозорено", "2026.08.04 23:35", "TqsiuZHHhMY", "2026.08.04", "0:10", P_Link,
+	[T_WIP, T_Woowz11],
+	""],
+	
+	[714, "ухты", "2024.08.25", "_95HSQER2To", "2026.08.04", "0:14", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	""],
+	
+	[713, "part1", "2025.06.03", "xJ3HeaI9GW8", "2026.08.04", "6:27", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Minecraft],
+	""],
+	
+	[712, "part2", "2025.06.03", "sHlmEns1hrs", "2026.08.04", "9:05", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Minecraft],
+	""],
+	
+	[711, "2025 01 30 16 08 15 @Woowz11 Discord", "2025.01.30 16:08:15", "nbdF9PCyV34", "2026.08.04", "2:04", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	""],
+	
+	[710, "2025 02 18 16 13 41 @𐌸𐍈𐍈𐌸𐌶𐌹𐌹 Discord", "2025.02.18 16:13:41", "uzzmLRx4rdY", "2026.08.04", "7:29", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	""],
+	
+	[709, "2025 02 18 16 08 14 @𐌸𐍈𐍈𐌸𐌶𐌹𐌹 Discord", "2025.02.18 16:08:14", "o5gWaDep4to", "2026.08.04", "4:06", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	""],
+	
+	[708, "LOST #8", "2025.03.02", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	"Видео деанон вувза"],
+	
+	[707, "LOST #7", "2025.02.01", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	"Видео деанон вувза"],
+	
+	[706, "LOST #6", "2025.02.18", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
+	"Видео деанон вувза"],
+	
+	[705, "В ЗДОХ ПkаЭbЮдcзUsy", "2024.01.29", "xitwuuwmQVs", "2026.08.04", "2:06", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi],
+	""],
+	
+	[704, "Он меня заскамил ребяу, я ему звоню у тебя дома так же", "2024.05.03", "L2Yej1iKjIA", "2026.08.04", "1:51", P_Hide,
+	[T_WIP, T_INotAuthor, T_Wyldi, T_UnknownPeople],
+	""],
+	
+	[703, "3гигабайтавидеовесит ребята зига у вас дома взорвался балон с газом умрите#minecraft", "2024.06.18", "VbNuk7W4k28", "2026.08.04", "1:03:27", P_Hide,
+	[T_Woowz11, T_WIP, T_Minecraft, T_INotAuthor, T_Wyldi],
+	""],
+	
+	[702, "LOST #2", UNKNOWN_Date, UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_Woowz11, T_WIP, T_Minecraft, T_Stream, T_Wyldi],
+	"Стрим как играли в HBM"],
+	
+	[701, "LOST #1", UNKNOWN_Date, UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
+	[T_INotAuthor, T_WIP, T_Shorts, T_Wyldi],
+	"Шортс сделанный вулди где он использовал ИИ"],
+	
+	[700, "~", "2026.04.18 20:05:41", "3ecgPgjeV1U", "2026.05.10", "1:36:39", P_Hide,
+	[T_Woowz11, T_WIP, T_Troll],
+	""],
+	
+	[699, "~", "2026.04.19 23:31:16", "xE_JKaLhQwE", "2026.05.10", "41:40", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[698, "~", "2026.04.27 00:55:31", "BIdnH2vStC0", "2026.05.10", "2:05:02", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[697, "~", "2026.05.02 22:51:01", "0wANNHKr4t8", "2026.05.03", "01:01", P_Hide,
+	[T_Woowz11, T_WIP, T_Troll],
+	""],
+	
+	[696, "~", "2026.04.05 01:56:44", "jwjJRzkovyc", "2026.05.03", "08:14", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi],
+	""],
+	
+	[695, "~", "2026.04.30 20:31:33", "XZE1bL3Cyk4", "2026.05.02", "5:59:44", P_Hide,
+	[T_Woowz11, T_WIP, T_Minecraft, T_Troll],
+	""],
+	
+	[694, "~", "2026.05.01 12:14:10", "X5IjJNlUgXw", "2026.05.02", "5:02:31", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[693, "~", "2026.05.01 17:49:07", "f59UPLXJec0", "2026.05.02", "9:00:04", P_Hide,
+	[T_Woowz11, T_WIP, T_Troll, T_Minecraft],
+	""],
+	
+	[692, "~", "2026.05.02 02:49:10", "9twBju70Uzs", "2026.05.02", "14:20", P_Hide,
+	[T_Woowz11, T_WIP, T_Troll, T_Minecraft],
+	""],
+	
+	[691, "~", "2026.04.02 22:02:17", "CatO5ryhGhU", "2026.04.29", "3:11:08", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi],
+	""],
+	
+	[690, "~", "2026.05.02 03:33:42", "idcbiB3BgHQ", "2026.05.02", "14:05", P_Hide,
+	[T_Woowz11, T_WIP, T_Minecraft, T_Troll],
+	""],
+	
+	[689, "~", "2026.04.03 01:13:30", "FQj99h63FuI", "2026.04.29", "1:43:34", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[688, "~", "2026.04.03 18:44:41", "sp5gwtVAEd8", "2026.04.29", "7:42:37", P_Hide,
+	[T_Woowz11, T_WIP, T_Mewgenics],
+	""],
+	
+	[687, "~", "2026.04.04 20:27:13", "dD0m915g_EI", "2026.04.29", "20:33", P_Hide,
+	[T_Woowz11, T_WIP, T_GarrysMod, T_Lithuism],
+	""],
+	
+	[686, "~", "2026.04.08 22:38:24", "FmbpbrxwCE4", "2026.04.29", "03:59", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[685, "~", "2026.04.09 00:16:54", "thfuJhG-1Ho", "2026.04.29", "08:50", P_Hide,
+	[T_Woowz11, T_WIP, T_Video, T_Backrooms, T_Minecraft],
+	""],
+	
+	[684, "~", "2026.04.09 00:40:46", "ksGBf1IMi28", "2026.04.29", "24:50", P_Hide,
+	[T_Woowz11, T_WIP, T_Video, T_Backrooms, T_Minecraft],
+	""],
+	
+	[683, "~", "2026.04.09 02:01:40", "8mr5sJS7qWI", "2026.04.29", "12:50", P_Hide,
+	[T_Woowz11, T_WIP, T_Video, T_Backrooms, T_Roblox],
+	""],
+	
+	[682, "~", "2026.04.09 03:11:22", "xS0h8dNnMbw", "2026.04.29", "06:04", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[681, "~", "2026.04.09 13:45:26", "ybMfLqf_qHE", "2026.04.29", "1:04:03", P_Hide,
+	[T_Woowz11, T_WIP, T_Video, T_Backrooms, T_Minecraft],
+	""],
+	
+	[680, "~", "2026.04.10 12:11:12", "UIjSRHA0A7A", "2026.04.29", "00:32", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[364, "~", "2026.04.13 19:19:23", "joa2vY3wmdc", "2026.04.29", "33:01", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[669, "~", "2026.01.11 23:22:04", "4uC7erlOcTY", "2026.04.29", "1:57:05", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
 
 	[668, "Трейлер плейса Blood Eye", "2022.01.09", "MsLDXf8HPk0", "2026.07.18", "02:10", P_Link,
 	[T_INotAuthor, T_Roblox, T_Sleep, T_Ne1ro],
@@ -192,7 +344,7 @@ const VIDEOS = [
 
 	[662, "Мания величия #GOLU #FUNNY #FURRY #FUNNY #funny Professional skils, Я добавил новую обнову в WE! 🤑🤑Ю", "2025.08.08", "z6Q_EuW_Vxk", "2025.08.08", "01:28", P_Link,
 	[T_Woowz11, T_Shorts, T_Glitch, T_Lithuism],
-	"Там на фоне было использовано забытое шортс видео вулди [?], шортс где надпись \"Я легенда\", и ещё на фоне шортс [663], там потом лицо павла появляется, 0:46 смерть от манютки (barak scam), YOU LOST! CONTINUE?, потом там мышь крутится, в конце сквидвард делает сальтуху"],
+	"Там на фоне было использовано забытое шортс видео вулди [701], шортс где надпись \"Я легенда\", и ещё на фоне шортс [663], там потом лицо павла появляется, 0:46 смерть от манютки (barak scam), YOU LOST! CONTINUE?, потом там мышь крутится, в конце сквидвард делает сальтуху"],
 
 	[661, "WoowzCore.DMP | Хочешь ещё шуток? Про Unity, Unreal, или может, про NaN и inf?", "2025.08.14", "92dkWQaVRT0", "2025.08.14", "02:49", P_Link,
 	[T_Woowz11, T_Shorts, T_Glitch, T_Lithuism],
@@ -300,7 +452,7 @@ const VIDEOS = [
 	
 	[645, "~", "2026.04.04 13:46:02", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
 	[T_Woowz11, T_WIP],
-	""],
+	"Я СЛУЧАЙНО ЕГО УДАЛИЛ!!! ПЫТАЛСЯ ВОСТАНОВИТЬ НЕ ПОЛУЧИЛОСЬ!!! Я ХЗ ЧТО В НЁМ БЫЛО!"],
 	
 	[644, "GMOD-EXSTAS | #gmod #whitesponge #woowz", "2025.06.29", "x_wvJEF-KFU", "2025.06.29", "02:59", P_Link,
 	[T_Woowz11, T_Glitch, T_Shorts, T_GarrysMod, T_Bombom, T_UnknownPeople, T_Wyldi, T_Music, T_Prikol, T_HaveANiceDay, T_Ilya],
@@ -3019,6 +3171,8 @@ function PreUpdateVideos(){
 		Video[9][4] = References;
 		VIDEOS[i] = Video;
 	}
+
+	if(!UserWoowz){ Ignore_Errors = false; }
 
 	return UserWoowz
 }

@@ -350,29 +350,43 @@ body{
 	transform: scale(1.25);
 }
 
+#ErrorNotification{
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	background-color: rgba(255,0,0,0.8);
+	backdrop-filter: blur(6px);
+	color: white;
+	padding: 10px 15px;
+	border-radius: 6px;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+	z-index: 99999;
+	max-width: 300px;
+	word-break: break-word;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+	
+	opacity: 0;
+	transform: translateY(20px);
+	transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+#ErrorNotification.Visible{
+	opacity: 1;
+	transform: translateY(0);
+	visibility: visible;
+	pointer-events: auto;
+}
+
 </style>
 
 <body>
 
 	<div class="PageWrapper">
 
-		<div id="ErrorNotification" style="
-			position: fixed;
-			bottom: 20px;
-			right: 20px;
-			background-color: rgba(255,0,0,0.8);
-			backdrop-filter: blur(6px);
-			color: white;
-			padding: 10px 15px;
-			border-radius: 6px;
-			font-family: Arial, sans-serif;
-			font-size: 14px;
-			display: none;
-			z-index: 99999;
-			max-width: 300px;
-			word-break: break-word;
-			box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-		"></div>
+		<div id="ErrorNotification"></div>
 
 		<div class="FullscreenGradient"></div>
 
@@ -384,6 +398,7 @@ body{
 		<hr>
 		name:"" - Поиск по имени<br>
 		description:"" - Поиск по описанию<br>
+		text:"" - Поиск по имени и по описанию<br>
 		id:0 - Поиск по ID<br>
 		tag:"" - Поиск по названию тега<br>
 		tag:0 - Поиск по ID тега<br>
@@ -455,16 +470,18 @@ function ShowErrorNotification(Message, Color = "red"){
 		console.error(Message);
 		Text = Message.name + ": " + Message.message + (Message.stack ? "\n" + Message.stack : "");
 	}else{
+		console.log(`Notification: ${Message}`);
 		Text = String(Message);
 	}
 
 	Div.textContent = Text;
-	Div.style.display = "block";
 	Div.style.backgroundColor = Color;
 
-	clearTimeout(Div.timeout)
-	Div.timeout = setTimeout(() => {
-		Div.style.display = "none";
+	Div.classList.add("Visible");
+
+	clearTimeout(Div.__HideTimeout)
+	Div.__HideTimeout = setTimeout(() => {
+		Div.classList.remove("Visible");
 	}, 6000);
 }
 
@@ -710,6 +727,9 @@ function UpdateContent(VideosList){
 						const Video = GetVideo(parseInt(ID, 10));
 						if(Video){
 							return `<a class="URL" style="cursor: pointer;" ${Video[8] ? "tooltip='" + Video[8] + "'" : ""} href="${CurrentURL}#id%3A${ID}">[${Video[0]}] ${Video[1]}</a>`;
+						}else{
+							ShowErrorNotification(`Не найден тег с указанным ID видео [${ID}]!`);
+							return `<span class="Error" tooltip="Не найдено указанное видео!">[? (${ID})]</span>`;
 						}
 						return M;
 					})
@@ -721,8 +741,8 @@ function UpdateContent(VideosList){
 			const NameText        = FormatDescription(Name       );
 			const DescriptionText = FormatDescription(Description);
 
-			const YoutubeButtons = `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
-			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a><a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>` : "");
+			const YoutubeButtons = (UnknownLink ? "" : (`<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
+			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : ""))) + `<a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>`;
 
 			const VideoContent = `<div style="display: flex; gap: 3px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>
@@ -732,7 +752,7 @@ function UpdateContent(VideosList){
 				<div class="SmallPanel" tooltip="Дата создания: ${CreationDate === UNKNOWN_Date ? '????.??.??' : CreationDate}" style="height:${Height};">${CreationDateText}</div>
 				<div class="SmallPanel" tooltip="${LostMedia ? 'Видео было потеряно, или удалено, или известно о его существовании, но оно не найдено' : 'Дата публикации: ' + PublishDate}" style="height:${Height};">${PublishDateText}</div>
 				<a class="ContentURL" tooltip="Установить в поиск только видео подобного типа" href="${CurrentURL}#visible%3A${Visibility}"><div class="SmallPanel" style="height:${Height};">${VisibilityText}</div></a>
-				${UnknownLink ? '' : YoutubeButtons}
+				${YoutubeButtons}
 			</div>
 			<div style="display: flex; gap: 10px;">
 				<div style="color: rgba(0, 0, 0, 0.5); flex: 1; min-width: 0;">${DescriptionText}</div>
@@ -742,9 +762,9 @@ function UpdateContent(VideosList){
 			const Panel = document.createElement("div");
 			Panel.className = "VideoPanel" + (WIP ? " WIP" :  "");
 			Panel.innerHTML = VideoContent;
-			Panel.style.background = PublishDate === DEFAULT_Publish
+			Panel.style.background = UnknownLink ? "linear-gradient(90deg, rgb(60, 30, 30), rgb(255, 20, 20), rgb(60, 30, 30))" : (PublishDate === DEFAULT_Publish
     ? "linear-gradient(90deg, rgb(30, 30, 30), rgb(60, 20, 20), rgb(30, 30, 30))"
-    : `linear-gradient(90deg, ${RandomColor(PublishDateText, 0.5)}, ${RandomColor(PublishDateText + "_2", 0.5)}, ${RandomColor(PublishDateText + "_3", 0.5)})`;
+    : `linear-gradient(90deg, ${RandomColor(PublishDateText, 0.5)}, ${RandomColor(PublishDateText + "_2", 0.5)}, ${RandomColor(PublishDateText + "_3", 0.5)})`);
 
 			Content.appendChild(Panel);
 		}catch(e){
@@ -1141,6 +1161,9 @@ function Search(){
 		}else if(Value.startsWith("publish_after:")){
 			Field = "publish_after";
 			Value = Value.slice(14);
+		}else if(Value.startsWith("text:")){
+			Field = "text";
+			Value = Value.slice(5);
 		}
 		
 		SearchConditions.push({Field: Field, Value: Value.toLowerCase(), Exclude: Exclude, OR: OR});
@@ -1155,6 +1178,8 @@ function Search(){
 				M = Name.toLowerCase().includes(Condution.Value);
 			}else if(Condution.Field === "description"){
 				M = Description.toLowerCase().includes(Condution.Value);
+			}else if(Condution.Field === "text"){
+				M = Name.toLowerCase().includes(Condution.Value) || Description.toLowerCase().includes(Condution.Value);
 			}else if(Condution.Field === "id"){
 				M = ID === parseInt(Condution.Value, 10);
 			}else if(Condution.Field === "tag"){
@@ -1242,7 +1267,7 @@ function Search(){
 			})
 		}
 
-		if(SortReverse){ FilteredVideos.reverse(); }
+		if(!SortReverse){ FilteredVideos.reverse(); }
 	}
 	
 	UpdateContent(FilteredVideos);
