@@ -1,0 +1,528 @@
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Github Repo. Parser</title>
+<link rel="icon" type="image/x-icon" href="source/lost.png">
+
+<style>
+
+html{
+    background-image: url("source/background_.png");
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+*{
+    font-family: "Roboto", "Arial", sans-serif;
+    font-weight: 400;
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+textarea{
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    font-family: monospace;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin: 10px 0;
+    resize: none;
+}
+
+button{
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 5px;
+}
+
+input[type="file"]{
+    display: none;
+}
+
+.FullscreenGradient{
+    width: 100vw;
+    height: 100vh;
+    min-width: 1200px;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    background-image: url('source/gradient.png');
+    background-size: contain;
+    background-position: center;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+center{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+}
+
+</style>
+
+<html lang="ru"><body>
+
+<div class="FullscreenGradient"></div>
+
+<center>
+    <div id="SelectContent">
+        <h1>>> Repository Parser <<</h1>
+
+        <button onclick="document.getElementById('FileInput').click();">Загрузите файл</button>
+        <input type="file" id="FileInput">
+        <div>ИЛИ</div>
+        <textarea id="TextInput" placeholder="Впишите текст сами"></textarea>
+
+        <button id="Button" style="margin-top: 50px;">Запуск</button>
+    </div>
+
+    <div id="ResultContent" style="display: none;"></div>
+</center>
+
+</body></html>
+
+<script>
+const __SelectContent = document.getElementById("SelectContent");
+const __ResultContent = document.getElementById("ResultContent");
+
+const __TextInput = document.getElementById("TextInput");
+__TextInput.value = "";
+
+const __FileInput = document.getElementById("FileInput");
+
+const __Button = document.getElementById("Button");
+__Button.onclick = function(e){
+    if(InParsing){
+        Stop();
+    }else{
+        StartParse();
+    }
+}
+
+__FileInput.addEventListener("change", function(e){
+    const File = this.files[0];
+    if(!File){
+        return;
+    }
+
+    const Reader = new FileReader();
+    Reader.onload = function(Event){
+        __TextInput.value = Event.target.result;
+    };
+    Reader.readAsText(File, "UTF-8");
+});
+
+// ----------------------------------------------------------------------
+
+let InParsing = false;
+let HasError = false;
+let StopRequested = false;
+
+window.onbeforeunload = function(e){
+    if(InParsing && !HasError && !StopRequested){
+        e.preventDefault();
+        return "Идёт парсинг";
+    }
+}
+
+function Sleep(MS){ return new Promise(R => setTimeout(R, MS)); }
+
+function Stop(){
+    if(StopRequested){ return; }
+    StopRequested = true;
+    console.log("%cОстановка по запросу...", "color: orange;");
+}
+
+function StartParse(){
+    console.group("Система парсинга");
+
+    if(HasError){ console.log("%cИз-за ошибки нельзя запустить повторно!\nПерезапустите сайт!", "color: orange;"); return; }
+
+    const Content = __TextInput.value;
+    if(!Content || Content.trim() === ""){
+        console.log("%cКонтент пуст!", "color: red;");
+        return;
+    }
+
+    Parse(Content);
+    console.groupEnd();
+}
+
+async function Parse(Content){
+    try{
+        console.log("Запуск парсинга...");
+        InParsing = true;
+
+        __Button.innerHTML = "Остановить";
+
+        console.group("Parse");
+
+        let RepoName = "Unknown";
+        let Date = "??.??.????";
+        let Status = "Unknown";
+        let Files = [];
+        let Folders = [];
+
+        const Lines = Content.split("\n");
+        console.log("Содержимое разделено на строки");
+
+        for(let i = 0; i < Math.min(Lines.length, 10); i++){
+            const Line = Lines[i].trim();
+
+            if(Line.startsWith("Репозиторий:")){
+                RepoName = Line.replace("Репозиторий:", "").trim();
+                console.log(`Название репозитория: ${RepoName}`);
+            }else if(Line.startsWith("Дата:")){
+                Date = Line.replace("Дата:", "").trim();
+                console.log(`Дата: ${Date}`);
+            }else if(Line.startsWith("Статус:")){
+                Status = Line.replace("Статус:", "").trim();
+                console.log(`Статус: ${Status}`);
+            }else if(Line === "-------------------------------------------"){
+                for(let j = i + 1; j < Lines.length; j++){
+                    console.log(`Строка: ${j+1} / ${Lines.length}`);
+
+                    const Path = Lines[j].trim();
+                    if(!Path){ continue; }
+
+                    if(Path.endsWith('/')){
+                        const Folder = Path.slice(0, -1);
+                        Folders.push(Folder);
+                        console.log(`%c📁: "${Folder}"`, "color: yellow;");
+                    }else{
+                        const File = Path;
+                        Files.push(File);
+                        console.log(`%c📄: "${File}"`, "color: white;");
+                    }
+
+                    if(StopRequested){ break; }
+
+                    if(j % 50 === 0){
+                        await Sleep(5);
+                    }
+                }
+                break;
+            }
+        }
+
+        console.groupEnd();
+
+        if(StopRequested){ return; }
+
+        await SmartParse(RepoName, Date, Status, Files, Folders);
+    }catch(e){
+        console.error("Ошибка в Parse");
+        console.error(e);
+        HasError = true;
+    }
+}
+
+async function SmartParse(RepoName, Date, Status, Files, Folders){
+    try{
+        console.log("Запуск умного парсинга...")
+
+        console.group("SmartParse");
+
+        const Index = {
+            ByFolder: new Map(),
+            ByExtension: new Map()
+        };
+
+        for(const Path of Files){
+            console.log(`%cОбработка пути: ${Path}`, "color: lime;");
+
+            const Parts = Path.split("/");
+            const File = Parts[Parts.length - 1];
+            const Folder = Parts.slice(0, -1).join("/") || "";
+            const Extension = File.split(".").pop().toLowerCase();
+
+            if(!Index.ByFolder.has(Folder)){
+                Index.ByFolder.set(Folder, []);
+            }
+            Index.ByFolder.get(Folder).push(Path);
+
+            if(!Index.ByExtension.has(Extension)){
+                Index.ByExtension.set(Extension, []);
+            }
+            Index.ByExtension.get(Extension).push(Path);
+
+            if(StopRequested){ break; }
+        }
+        if(StopRequested){ return; }
+
+        const __Extensions_Images = ["png", "jpg", "jpeg", "bmp", "tif", "tiff", "webp", "avif", "heic", "heif", "jfif", "pjpeg", "pjp", "pcx", "tga", "psd", "xcf", "gimp", "kra", "ora", "jp2", "j2k", "jpf", "jpx", "jpm", "mj2", "wdp", "hdp", "jxr", "wmp"];
+        const __Extensions_Animated = ["gif", "apng", "webp", "avif", "fli", "flc", "anim", "mng"];
+        const __Extensions_Vectors = ["svg", "eps", "ai", "cdr", "wmf", "emf", "pdf", "ps", "odg", "dxf", "dwg", "plt", "hpgl"];
+        const __Extensions_ImageProjects = ["pdn", "psd", "psb", "xcf", "kra", "ora", "tga", "cr2", "nef", "arw", "rw2", "dng", "raw", "crw", "cr3", "nrw", "arw", "srf", "sr2", "orf", "raf", "x3f", "pef", "ptx", "mrw", "mdc", "dcr", "kdc", "mos", "iiq", "3fr", "fff", "dng", "rwl", "rwz", "bay", "dds", "ktx", "pvr", "astc", "bc", "tga", "sgi", "hdr", "exr", "pic", "rgbe", "xyz"];
+        const __Extensions_ImageData = ["ico", "icns", "cur", "ani", "rle", "bmp", "dib"]
+        const __Extensions_Visual = [...new Set([...__Extensions_Images, ...__Extensions_Animated, ...__Extensions_Vectors, ...__Extensions_ImageProjects, ...__Extensions_ImageData])];
+        const __Extensions_VisualWeb = ["png", "jpg", "jpeg", "gif", "svg", "webp", "avif", "ico"];
+
+        const __Extensions_Video = [
+            "mp4", "m4v", "m4p", "m4b", "m4r",
+            "mov", "qt", "avi", "wmv", "asf",
+            "mkv", "mk3d", "mka", "mks",
+            "webm", "flv", "f4v", "f4p", "f4a", "f4b",
+            "mpg", "mpeg", "mpe", "m2v", "m2ts", "mts", "ts",
+            "vob", "evo", "ogv", "ogm", "rm", "rmvb",
+            "3gp", "3g2", "3gpp", "3gpp2",
+            "divx", "xvid", "amv", "drc", "gvi", "yuv"
+        ];
+
+        const __Extensions_Audio = [
+            "mp3", "aac", "m4a", "m4b", "m4p", "m4r",
+            "ogg", "oga", "opus", "wma", "wav", "flac",
+            "alac", "ape", "tta", "tak", "wv", "aiff", "aif",
+            "ra", "rm", "ram", "mid", "midi", "kar",
+            "dts", "ac3", "eac3", "mlp", "truehd"
+        ];
+
+        const __Extensions_Archives = [
+            "zip", "rar", "7z", "gz", "gzip", "tar", "bz2", "xz",
+            "zst", "lz", "lzma", "lz4", "sz", "z", "tgz", "tbz", "txz",
+            "arj", "lha", "lzh", "cab", "iso", "udf", "dmg", "hfs",
+            "squashfs", "cramfs", "cpio", "shar", "wim", "esd",
+            "pkg", "deb", "rpm", "msi", "pak", "zipx"
+        ];
+
+        const Data = {
+            Extensions: {
+                Images: [],
+                Animated: [],
+                Vectors: [],
+                ImageProjects: [],
+                Visual: [],
+                VisualWeb: [],
+                Video: [],
+                Audio: [],
+                Archives: []
+            }
+        };
+
+        function SearchExtensions(Extensions, Data){
+            for(const Extension of Extensions){
+                if(Index.ByExtension.has(Extension)){
+                    Data.push(...Index.ByExtension.get(Extension));
+                }
+            }
+        }
+
+        SearchExtensions(__Extensions_Images, Data.Extensions.Images);
+        SearchExtensions(__Extensions_Animated, Data.Extensions.Animated);
+        SearchExtensions(__Extensions_Vectors, Data.Extensions.Vectors);
+        SearchExtensions(__Extensions_ImageProjects, Data.Extensions.ImageProjects);
+        SearchExtensions(__Extensions_Visual, Data.Extensions.Visual);
+        SearchExtensions(__Extensions_VisualWeb, Data.Extensions.VisualWeb);
+        SearchExtensions(__Extensions_Video, Data.Extensions.Video);
+        SearchExtensions(__Extensions_Audio, Data.Extensions.Audio);
+        SearchExtensions(__Extensions_Archives, Data.Extensions.Archives);
+
+        console.groupEnd();
+
+        if(StopRequested){ return; }
+
+        InParsing = false;
+        Final(RepoName, Date, Status, Files, Folders, Data, Index);
+    }catch(e){
+        console.error("Ошибка в SmartParse");
+        console.error(e);
+        HasError = true;
+    }
+}
+
+function Final(RepoName, Date, Status, Files, Folders, Data, Index){
+    console.log("Конец! Вывод рендера...")
+    console.group("Final");
+
+    console.log(Data );
+    console.log(Index);
+
+    __SelectContent.style.display = "none";
+
+    __ResultContent.innerHTML = "";
+    __ResultContent.style.display = "unset";
+
+    document.head.appendChild(__CreateElement("style", {}, `center{
+        max-width: 90%;
+    }`));
+
+    let Parent = __ResultContent;
+    let GroupStack = [];
+    let CurrentLevel = 0;
+
+    function __CreateElement(Tag, Styles = {}, Text = ""){
+        const Element = document.createElement(Tag);
+        for(const [K, V] of Object.entries(Styles)){
+            Element.style[K] = V;
+        }
+        if(Text){ Element.textContent = Text; }
+        return Element;
+    }
+
+    function __AppendToParent(Element){
+        if(GroupStack.length > 0){
+            GroupStack[GroupStack.length - 1].appendChild(Element);
+        }else{
+            Parent.appendChild(Element);
+        }
+
+        return Element;
+    }
+
+    function PushGroup(Group){
+        CurrentLevel++;
+        GroupStack.push(Group);
+    }
+
+    function CreateGroup(RowCount = 1){
+        const Group = __CreateElement("div", {
+            marginBottom: "10px",
+            padding: "10px"
+        });
+
+        if(RowCount > 1){
+            Group.style.display = "grid";
+            Group.style.gridTemplateColumns = `repeat(${RowCount}, 1fr)`;
+            Group.style.gap = "10px";
+        }
+
+        __AppendToParent(Group);
+
+        PushGroup(Group);
+    }
+
+    function EndGroup(){
+        if(GroupStack.length > 0){
+            CurrentLevel--;
+            return GroupStack.pop();
+        }
+        return __ResultContent;
+    }
+
+    function PutLine(){
+        __AppendToParent(__CreateElement("div", { borderTop: "1px solid #333", margin: "10px 0", padding: "0" }));
+    }
+
+    function PutText(Text, Icon = ""){
+        const DIV = __CreateElement("div", {
+            fontSize: "2em",
+            margin: "8px 0 4px 0",
+            padding: "4px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+        });
+
+        if(Icon){
+            const Icon__ = document.createElement("span");
+            Icon__.textContent = Icon;
+            DIV.appendChild(Icon__);
+        }
+
+        const Text__ = document.createElement("span");
+        Text__.textContent = Text;
+        DIV.appendChild(Text__);
+
+        return __AppendToParent(DIV);
+    }
+
+    function __PathElement(Path){
+        return __CreateElement("div", {
+            backgroundColor: "rgba(0, 0, 0, 0.25)",
+            textAlign: "left",
+            fontFamily: "monospace",
+            fontSize: "13px",
+            padding: "2px 8px"
+        }, Path)
+    }
+
+    function PutFiles(Files){
+        if(Files instanceof Map){
+            const DIV = __CreateElement("div");
+
+            if(!Files || Files.size === 0){
+                DIV.appendChild(__CreateElement("div", {
+                    textAlign: "center"
+                }, "(Нет файлов)"))
+            }else{
+                for(const [K, V] of Files){
+                    DIV.appendChild(PutTextFiles(K, "", V));
+                }
+            }
+
+            return __AppendToParent(DIV);
+        }else{
+            const DIV = __CreateElement("div", {
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                padding: "5px",
+                color: "white",
+                backgroundColor: "rgb(100, 100, 100)"
+            });
+
+            if(!Files || Files.length === 0){
+                DIV.appendChild(__CreateElement("div", {
+                    textAlign: "center"
+                }, "(Нет файлов)"))
+            }else{
+                for(const Path of Files){
+                    DIV.appendChild(__PathElement(Path));
+                }
+            }
+
+            return __AppendToParent(DIV);
+        }
+    }
+
+    function PutTextFiles(Text, Icon = "", Files){
+        CreateGroup();
+        PutText(Text, Icon);
+        PutFiles(Files);
+        return EndGroup();
+    }
+
+    // ----------------------------------------------------------------------
+
+    PutText("Результат");
+
+    PutLine();
+
+    PutText("По типу-расширениям");
+
+    CreateGroup(2);
+
+        PutTextFiles("Картинки", "🖼", Data.Extensions.Images);
+
+        PutTextFiles("Звуки", "🎵", Data.Extensions.Audio);
+
+        PutTextFiles("Видео", "📼", Data.Extensions.Video);
+
+        PutTextFiles("Архивы", "📦", Data.Extensions.Audio);
+
+    EndGroup();
+
+    PutLine();
+
+    PutTextFiles("По расширениям", "", Index.ByExtension);
+
+    PutTextFiles("Все файлы", "📄", Files);
+
+    console.groupEnd();
+}
+</script>
