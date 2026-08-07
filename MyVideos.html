@@ -742,7 +742,7 @@ function UpdateContent(VideosList){
 			const DescriptionText = FormatDescription(Description);
 
 			const YoutubeButtons = (UnknownLink ? "" : (`<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
-			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : ""))) + `<a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>`;
+			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : ""))) + (UserWoowz ? `<a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>` : "");
 
 			const VideoContent = `<div style="display: flex; gap: 3px;">
 				<a class="ContentURL" tooltip="Установить в поиск только это видео" href="${CurrentURL}#id%3A${ID}"><div class="SmallPanel" style="height:${Height};">${ID}</div></a>

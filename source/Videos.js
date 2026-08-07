@@ -265,7 +265,7 @@ https://www.youtube.com/watch?v=ljjquytSLEk&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bT
 const VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 
-	// FREE -> 
+	// FREE -> 702
 	
 	[756, "Делаю карту в хаммере", "2026.08.06 21:28:45", "83_M6zi-hoM", "2026.08.07", "2:07:45", P_Hide,
 	[T_Woowz11, T_Music, T_GarrysMod],
@@ -279,19 +279,19 @@ const VIDEOS = [
 	[T_Woowz11, T_Archive, T_Minecraft, T_RealLife],
 	"Я играю в майнкрафт с ресурс паком (Last Days https://www.curseforge.com/minecraft/texture-packs/last-days), и ем пиццу 🍕..., след: [755]"],
 	
-	[753, "Стрим \ Alpha 1.2.3_03 Remaster", "2025.09.16", "qVHwOlSPudk", "2026.08.06", "2:08:59", P_Hide,
+	[753, "Стрим \ Alpha 1.2.3_03 Remaster", "2025.09.16", "qVHwOlSPudk", "2026.08.06", "2:08:59", P_Link,
 	[T_Woowz11, T_Wyldi, T_INotAuthor, T_Stream, T_WIP, T_Minecraft],
 	""],
 	
-	[752, "Z NE IGRAUY 9/11 PREKTA Уретра.🧽 Ну и дыра🕳 ​✅✅✅only russian ​only russian ✡", "2025.10.04", "DUzcdiWZb9o ", "2026.08.06", "1:05:06", P_Hide,
+	[752, "Z NE IGRAUY 9/11 PREKTA Уретра.🧽 Ну и дыра🕳 ​✅✅✅only russian ​only russian ✡", "2025.10.04", "DUzcdiWZb9o", "2026.08.06", "1:05:06", P_Link,
 	[T_Woowz11, T_Wyldi, T_INotAuthor, T_Stream, T_WIP],
 	""],
 	
-	[751, "✡ only russian ​only russian ✡", "2025.10.10", "BtoRpsZAtJw", "2026.08.06", "35:46", P_Hide,
+	[751, "✡ only russian ​only russian ✡", "2025.10.10 16:33", "BtoRpsZAtJw", "2026.08.06", "35:46", P_Link,
 	[T_Woowz11, T_Wyldi, T_INotAuthor, T_Stream, T_WIP, T_Minecraft],
 	""],
 	
-	[750, "НА ЭТОМ 💩💩СТРИМЕ ВУВЗ ОБО 💩💩СРАЛСЯ 💩ПОСЛЕДНЕЕ ЧТОБЫ БЫЛО ЭТО ВЗРЫВ АНУСА ИЗ ЖОПЫ ГОВНО ТЕЧЕТ 💩💩💩", "2025.10.10", "dpFMKrDxobc ", "2026.08.06", "12:13", P_Hide,
+	[750, "НА ЭТОМ 💩💩СТРИМЕ ВУВЗ ОБО 💩💩СРАЛСЯ 💩ПОСЛЕДНЕЕ ЧТОБЫ БЫЛО ЭТО ВЗРЫВ АНУСА ИЗ ЖОПЫ ГОВНО ТЕЧЕТ 💩💩💩", "2025.10.10 19:45", "dpFMKrDxobc", "2026.08.06", "12:13", P_Link,
 	[T_Woowz11, T_Wyldi, T_INotAuthor, T_Stream, T_WIP, T_Minecraft],
 	""],
 	
@@ -331,7 +331,7 @@ const VIDEOS = [
 	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotFriendAuthor, T_Woowz11],
 	"сантинел стрим"],
 	
-	[740, "~", "2024.08.05", "R-zzlcnV_ss", "2026.06.23", "42:14", P_Hide,
+	[740, "~", "2024.08.05", "R-zzlcnV_ss", "2026.06.23", "42:14", P_Link,
 	[T_Pavel, T_INotAuthor, T_GarrysMod, T_Woowz11, T_Wyldi, T_WIP, T_Stream, T_Troll],
 	""],
 	
@@ -343,7 +343,7 @@ const VIDEOS = [
 	[T_WIP, T_Archive, T_RealLife],
 	""],
 	
-	[737, "funniest video", "2024.07.27", "iCAbhtZhUyg", "2026.07.28", "01:02", P_Hide,
+	[737, "funniest video", "2024.07.27", "iCAbhtZhUyg", "2026.07.28", "01:02", P_Link,
 	[T_Woowz11, T_WIP, T_HaveANiceDay, T_INotAuthor, T_GarrysMod],
 	""],
 	
@@ -439,11 +439,11 @@ const VIDEOS = [
 	[T_INotAuthor, T_Wyldi, T_Woowz11, T_Music],
 	"Вулди записал под музыку как я сижу в mcreator extrabackrooms"],
 	
-	[713, "part1", "2025.06.03", "xJ3HeaI9GW8", "2026.08.04", "6:27", P_Hide,
+	[713, "part1", "2025.06.03", "xJ3HeaI9GW8", "2026.08.04", "6:27", P_Link,
 	[T_WIP, T_INotAuthor, T_Wyldi, T_Minecraft],
 	""],
 	
-	[712, "part2", "2025.06.03", "sHlmEns1hrs", "2026.08.04", "9:05", P_Hide,
+	[712, "part2", "2025.06.03", "sHlmEns1hrs", "2026.08.04", "9:05", P_Link,
 	[T_WIP, T_INotAuthor, T_Wyldi, T_Minecraft],
 	""],
 	
@@ -471,25 +471,21 @@ const VIDEOS = [
 	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
 	"Видео деанон вувза"],
 	
-	[705, "В ЗДОХ ПkаЭbЮдcзUsy", "2024.01.29", "xitwuuwmQVs", "2026.08.04", "2:06", P_Hide,
+	[705, "В ЗДОХ ПkаЭbЮдcзUsy", "2024.01.29", "xitwuuwmQVs", "2026.08.04", "2:06", P_Link,
 	[T_WIP, T_INotAuthor, T_Wyldi],
 	""],
 	
-	[704, "Он меня заскамил ребяу, я ему звоню у тебя дома так же", "2024.05.03", "L2Yej1iKjIA", "2026.08.04", "1:51", P_Hide,
+	[704, "Он меня заскамил ребяу, я ему звоню у тебя дома так же", "2024.05.03", "L2Yej1iKjIA", "2026.08.04", "1:51", P_Link,
 	[T_WIP, T_INotAuthor, T_Wyldi, T_UnknownPeople],
 	""],
 	
-	[703, "3гигабайтавидеовесит ребята зига у вас дома взорвался балон с газом умрите#minecraft", "2024.06.18", "VbNuk7W4k28", "2026.08.04", "1:03:27", P_Hide,
+	[703, "3гигабайтавидеовесит ребята зига у вас дома взорвался балон с газом умрите#minecraft", "2024.06.18", "VbNuk7W4k28", "2026.08.04", "1:03:27", P_Link,
 	[T_Woowz11, T_WIP, T_Minecraft, T_INotAuthor, T_Wyldi],
 	""],
 	
-	[702, "LOST #2", UNKNOWN_Date, UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
-	[T_Woowz11, T_WIP, T_Minecraft, T_Stream, T_Wyldi],
-	"Стрим как играли в HBM"],
-	
-	[701, "LOST #1", UNKNOWN_Date, UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
-	[T_INotAuthor, T_WIP, T_Shorts, T_Wyldi],
-	"Шортс сделанный вулди где он использовал ИИ"],
+	[701, "Скам вувзом папы дея, что придумала мама - Отец египта 1488 #memes #funny #майнкрафт #colonelkkjϟ", "2025.08.08", "v9A2Edhxick", "2026.08.07", "01:13", P_Link,
+	[T_INotAuthor, T_WIP, T_Shorts, T_Wyldi, T_AI],
+	"Шортс сделанный вулди где он использовал ИИ, использовался: [649]"],
 	
 	[700, "~", "2026.04.18 20:05:41", "3ecgPgjeV1U", "2026.05.10", "1:36:39", P_Hide,
 	[T_Woowz11, T_WIP, T_Troll],
@@ -637,7 +633,7 @@ const VIDEOS = [
 	
 	[677, "[HD] Tutorial: How to make minecraft mods on assembly 🤔", "2025.06.04", "NIoKvekAW0c", "2026.06.12", "17:46", P_Link,
 	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Lithuism, T_WIP],
-	""],
+	"Использовались: [713] [712]"],
 	
 	[676, "| ☣ | G01U Gylaet po prospekty DYBAISK and killing PIS.TV | ☣ | #2025 #golu #glitchcore #lithuism ", "2026.01.01", "51ObxJ4DEfg", "2026.06.12", "15:47", P_Link,
 	[T_INotAuthor, T_Woowz11, T_Wyldi, T_Lithuism, T_WIP],
