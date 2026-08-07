@@ -391,7 +391,7 @@ const VIDEOS = [
 	[T_Woowz11, T_WIP, T_Minecraft, T_Troll],
 	""],
 	
-	[725, "~", "2026.05.13", "C3R57TN9Mlw", "2026.08.05", "00:05", P_Link,
+	[725, "Что это за штутша", "2026.05.13", "C3R57TN9Mlw", "2026.08.05", "00:05", P_Link,
 	[T_Woowz11, T_WIP, T_AI, T_Lithuism, T_Minecraft],
 	"KlingAI 3.0 Omni"],
 	
