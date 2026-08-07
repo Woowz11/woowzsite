@@ -364,7 +364,7 @@ WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"transparent-red","transparent-green","transparent-blue","transparent-yellow","invisible","white","black","onerror","unknown","empty","watermelon","grid","wall","face","god","center","grid2","gradient",
 	"GarrysMod", "emoji", "Backrooms", "Babina", "Glitch", "Coding", "YOUTUBE", "HalfSword", "History", "Music", "Blocked", "Roblox", "SFD", "HappyWheels", "Communication", "Minecraft",
 	"WorldBox", "Single", "Teardown", "Star", "WoowzCore", "AI", "TBOI", "Deanon", "BrickRigs", "BeamNGDrive", "PtTR", "noi", "wip", "stream", "short", "Calendar", "Alarm", "goluworld",
-	"mew", "real", "lost", "archive", "lc", "ppg", "up", "para", "picsis", "tango", "tabletop", "lu", "nfa"
+	"mew", "real", "lost", "archive", "lc", "ppg", "up", "para", "picsis", "tango", "tabletop", "lu", "nfa", "bar"
 ],"source/",".png")
 
 WoowzsiteSourceRandomSite = AddTableToTable(AddTableToTable(AddFullnessToTable([
