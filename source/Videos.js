@@ -159,7 +159,7 @@ const UNKNOWN_Link      = "unknown";
 const LOSTMEDIA = "lost"
 
 // Игнорировать ошибки загрузки видео
-Ignore_Errors = true
+Ignore_Errors = false
 
 // СКАЧАЙ И ОПУБЛИКУЙ.....
 /*
@@ -265,7 +265,55 @@ https://www.youtube.com/watch?v=ljjquytSLEk&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bT
 const VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 
-	// FREE -> 702
+	// FREE -> 
+	
+	[767, "~", "2026.07.08 20:07:29", "6YX8_UyxufI", "2026.07.29", "1:36:44", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[766, "~", "2026.07.08 22:18:06", "yct4CTkRmlA", "2026.07.29", "1:15:02", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[765, "~", "2026.06.03 21:24:06", "Key-9teP1Xc", "2026.07.30", "5:01:49", P_Hide,
+	[T_Woowz11, T_WIP, T_Minecraft],
+	""],
+	
+	[764, "~", "2026.06.04 12:06:22", "Y_kieobFNT8", "2026.07.30", "2:37:18", P_Blocked,
+	[T_Woowz11, T_WIP, T_Skrepka],
+	"BACKROOMS MOVIE"],
+	
+	[763, "~", "2026.06.04 14:49:45", "1JRnDsJnkLo", "2026.07.30", "28:42", P_Hide,
+	[T_Woowz11, T_WIP, T_Skrepka],
+	""],
+	
+	[762, "~", "2026.06.04 15:18:51", "-o-Lpnrc8so", "2026.07.30", "22:16", P_Hide,
+	[T_Woowz11, T_WIP, T_Skrepka],
+	""],
+	
+	[761, "~", "2026.06.04 20:50:39", "n_FHVnq7ss4", "2026.07.30", "3:53:32", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[760, "~", "2026.06.06 14:43:22", "JmFQ-nDivZ4", "2026.07.30", "1:55:58", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[759, "~", "2026.06.06 19:49:36", "6nVRSFADv_Y", "2026.07.30", "3:40:38", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[758, "~", "2026.06.07 09:54:44", "JUKLUKPlL9M", "2026.07.30", "6:40:08", P_Hide,
+	[T_Woowz11, T_WIP],
+	""],
+	
+	[757, "~", "2026.06.07 16:34:55", "f9rlHfXlycM", "2026.07.30", "6:11:17", P_Hide,
+	[T_Woowz11, T_WIP, T_Skrepka],
+	""],
+	
+	[702, "saddest video", "2024.07.15 18:27", "2KaQjfA4Qt0", "2026.08.08", "00:16", P_Link,
+	[T_Woowz11, T_INotAuthor, T_HaveANiceDay, T_GarrysMod, T_Prikol, T_Music, T_WIP],
+	""],
 	
 	[756, "Делаю карту в хаммере", "2026.08.06 21:28:45", "83_M6zi-hoM", "2026.08.07", "2:07:45", P_Hide,
 	[T_Woowz11, T_Music, T_GarrysMod],
