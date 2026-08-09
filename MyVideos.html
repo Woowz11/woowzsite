@@ -1237,7 +1237,14 @@ function Search(){
 				}else if(SortMethod === "creation"){
 					return new Date(A[2]) - new Date(B[2]);
 				}else if(SortMethod === "publish"){
-					return new Date(A[4]) - new Date(B[4]);
+					const DateA = A[4] === LOSTMEDIA ? null : new Date(A[4]);
+					const DateB = B[4] === LOSTMEDIA ? null : new Date(B[4]);
+				
+					if(DateA === null && DateB === null){ return 0; }
+					if(DateA === null){ return -1; }
+					if(DateB === null){ return  1; }
+				
+					return DateA - DateB;
 				}else if(SortMethod === "duration"){
 					const ToSeconds = T => {
 						if(T === UNKNOWN_Duration || T === DEFAULT_Duration){

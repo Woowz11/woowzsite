@@ -265,7 +265,23 @@ https://www.youtube.com/watch?v=ljjquytSLEk&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bT
 const VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 
-	// FREE -> 
+	// FREE -> 708, 707, 706
+	
+	[771, "приватный войс [2025.02.22] деанон история", "2025.02.22", "Rrz17L3YtUk", "2026.08.09", "10:39", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi, T_INotAuthor],
+	""],
+
+	[770, "щто за вувзо диан[2025 03 02]", "2025.03.02", "phvuNMRw9gk", "2026.08.09", "02:16", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi, T_INotAuthor],
+	""],
+
+	[769, "атём[2025 02 01]", "2025.02.01", "rZjyHV9rUY0", "2026.08.09", "00:10", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi, T_INotAuthor],
+	""],
+
+	[768, "𐌸𐍈𐍈𐌸𐌶𐌹𐌹 Discord [2025 02 18]", "2025.02.18", "tfsifk7yPNY", "2026.08.09", "11:23", P_Hide,
+	[T_Woowz11, T_WIP, T_Wyldi, T_INotAuthor],
+	""],
 	
 	[767, "~", "2026.07.08 20:07:29", "6YX8_UyxufI", "2026.07.29", "1:36:44", P_Hide,
 	[T_Woowz11, T_WIP],
@@ -506,18 +522,6 @@ const VIDEOS = [
 	[709, "2025 02 18 16 08 14 @𐌸𐍈𐍈𐌸𐌶𐌹𐌹 Discord", "2025.02.18 16:08:14", "o5gWaDep4to", "2026.08.04", "4:06", P_Hide,
 	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
 	""],
-	
-	[708, "LOST #8", "2025.03.02", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
-	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
-	"Видео деанон вувза"],
-	
-	[707, "LOST #7", "2025.02.01", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
-	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
-	"Видео деанон вувза"],
-	
-	[706, "LOST #6", "2025.02.18", UNKNOWN_Link, LOSTMEDIA, UNKNOWN_Duration, P_Hide,
-	[T_WIP, T_INotAuthor, T_Wyldi, T_Woowz11],
-	"Видео деанон вувза"],
 	
 	[705, "В ЗДОХ ПkаЭbЮдcзUsy", "2024.01.29", "xitwuuwmQVs", "2026.08.04", "2:06", P_Link,
 	[T_WIP, T_INotAuthor, T_Wyldi],
