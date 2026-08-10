@@ -65,10 +65,11 @@ const T_Dexon            = 63
 const T_TableTop         = 64
 const T_LithiumUinverse  = 65
 const T_Ilya             = 66
-const T_NotFriendAuthor  = 67
+const T_NotControlled    = 67
 const T_Nekit            = 68
 const T_AleksCherri      = 69
 const T_Baroutrama       = 70
+const T_BrinQ            = 71
 
 const TAGS = {
 	[T_Woowz11         ]: ["Woowz11", "source/discordavatars/woowz11.png", "В этом видео есть Woowz11 (Вувз)"],
@@ -138,10 +139,11 @@ const TAGS = {
 	[T_TableTop        ]: ["Tabletop Simulator", "source/tabletop.png", "В этом видео играли в Tabletop Simulator"],
 	[T_LithiumUinverse ]: ["LithiumUniverse", "source/lu.png", "В этом видео играли в LithiumUniverse"],
 	[T_Ilya            ]: ["Илья", "source/discordavatars/ilya_nextbot.png", "В этом видео есть Илья"],
-	[T_NotFriendAuthor ]: ["Не знакомый автор", "source/nfa.png", "Это видео взято с канала который не связан со мною, или я не знаю автора, но по какой-то причине связано с архивом"],
+	[T_NotControlled   ]: ["Я не контролировал видео", "source/nfa.png", "Я не контролировал автора этого видео (или я не знаком с автором, или вообще не связан)"],
 	[T_Nekit           ]: ["Nekit", "source/discordavatars/nekitplay155.png", "В этом видео есть Nekit (Некит)"],
 	[T_AleksCherri     ]: ["AleksCherri", "source/discordavatars/aleks_cherri.png", "В этом видео есть AleksCherri (Алекс Черри)"],
-	[T_Baroutrama      ]: ["Baroutrama", "source/bar.png", "В этом видео играли в Baroutrama"]
+	[T_Baroutrama      ]: ["Baroutrama", "source/bar.png", "В этом видео играли в Baroutrama"],
+	[T_BrinQ           ]: ["BrinQ", "source/discordavatars/brinq_.gif", "В этом видео есть BrinQ (Брин)"]
 }
 
 const P_Hide    = 0
@@ -165,7 +167,6 @@ Ignore_Errors = false
 /*
 
 // сантиннел
-https://www.youtube.com/watch?v=bD4fnX_2Ozk
 https://www.youtube.com/watch?v=6tQSetS_Axg
 https://www.youtube.com/watch?v=K1uQaZrupIE
 https://www.youtube.com/watch?v=5Tbpt6X_idQ
@@ -184,8 +185,6 @@ https://www.youtube.com/watch?v=T2eIcPdhFWI
 https://www.youtube.com/watch?v=nam4af9IiwQ
 https://www.youtube.com/watch?v=y4Wf1tyL1u8
 https://www.youtube.com/watch?v=i03rW-Fenyk
-
-https://www.youtube.com/watch?v=GFL2yclrwbs
 
 // justgaming
 https://www.youtube.com/watch?v=EvvNc0sHr-Q
@@ -237,21 +236,23 @@ https://www.youtube.com/watch?v=qi7fM1Su0kE
 https://www.youtube.com/watch?v=0e9lGSM-dUI
 https://www.youtube.com/watch?v=dM9YvK9f4LQ
 
+// zebra
+https://www.youtube.com/watch?v=S_nHIVM5by8
+
 // pttr
-https://www.youtube.com/watch?v=yFKJRKFfJaE&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w
-https://www.youtube.com/watch?v=VUKSN0UsDa4&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=2
-https://www.youtube.com/watch?v=crBr9RPFQXY&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=3
-https://www.youtube.com/watch?v=mSbPL4fpKd4&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=4
-https://www.youtube.com/watch?v=YCi3J9lejhY&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=5
-https://www.youtube.com/watch?v=RT_LJ92bEXA&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=6
-https://www.youtube.com/watch?v=Ls_puvSf8Sg&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=7
-https://www.youtube.com/watch?v=jxOBtozti34&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=8
-https://www.youtube.com/watch?v=LuS774jMrcw&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=9
-https://www.youtube.com/watch?v=y4WrsDIu8MU&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=10
-https://www.youtube.com/watch?v=0PLgyFGPpAE&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=11
-https://www.youtube.com/watch?v=1k9pEWj7B0U&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=12
-https://www.youtube.com/watch?v=nVKqdFjOcHo&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=13
-https://www.youtube.com/watch?v=ljjquytSLEk&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bTI_w&index=14
+https://www.youtube.com/watch?v=yFKJRKFfJaE
+https://www.youtube.com/watch?v=VUKSN0UsDa4
+https://www.youtube.com/watch?v=crBr9RPFQXY
+https://www.youtube.com/watch?v=mSbPL4fpKd4
+https://www.youtube.com/watch?v=YCi3J9lejhY
+https://www.youtube.com/watch?v=RT_LJ92bEXA
+https://www.youtube.com/watch?v=Ls_puvSf8Sg
+https://www.youtube.com/watch?v=jxOBtozti34
+https://www.youtube.com/watch?v=LuS774jMrcw
+https://www.youtube.com/watch?v=y4WrsDIu8MU
+https://www.youtube.com/watch?v=0PLgyFGPpAE
+https://www.youtube.com/watch?v=1k9pEWj7B0U
+https://www.youtube.com/watch?v=nVKqdFjOcHo
 */
 
 /*
@@ -265,7 +266,35 @@ https://www.youtube.com/watch?v=ljjquytSLEk&list=PLR-8nTOx9B_HVutWjr8bJzdx2Fq0bT
 const VIDEOS = [
 	/* ID, Название видео, Дата создания (дата, время), Ссылка, Дата публикации, Длительность видео, Публичность, Теги, Описание */
 
-	// FREE -> 708, 707, 706
+	// FREE ->
+	
+	[775, "Create your own world with the mod Blood Eye 3 (Mod Update) People Playground", "2020.07.25", "F-6zlQRYzfs", "2026.08.07", "08:17", P_Hide,
+	[T_INotAuthor, T_NotControlled, T_PeoplePlayground, T_WIP],
+	"https://www.youtube.com/watch?v=bD4fnX_2Ozk"],
+	
+	[774, "~", "2026.08.06 23:50:12", "RDYFk-ztGaA", "2026.08.07", "25:43", P_Hide,
+	[T_Woowz11, T_WIP, T_GarrysMod],
+	""],
+	
+	[773, "Типикал Вувз11 #twitch #vtuber #memes #твич #мем#stream #игры #minecraft #майнкрафт #твитч #shorts", "2024.10.20", "r9VQaL2hmWg", "2026.08.10", "00:30", P_Hide,
+	[T_Woowz11, T_INotAuthor, T_Shorts, T_BrinQ, T_NotControlled, T_WIP, T_Minecraft, T_UnknownPeople],
+	"https://www.youtube.com/shorts/3F4YSpLywh8"],
+	
+	[772, "СУЩЕСТВУЮТ ЛИ ИНОПЛАНЕТЯНЕ? ► Paint the Town Red ОБЗОР КАРТ", "2019.04.14", "TXR1iguB37g", "2026.08.10", "15:07", P_Hide,
+	[T_INotAuthor, T_NotControlled, T_PtTR],
+	"https://www.youtube.com/watch?v=ljjquytSLEk , текстуры зелёных инопланетян мои!!!! 11:44"],
+	
+	[706, "i wish you dead 2", UNKNOWN_Date, "QuzOVR9MkYE", "2026.08.10", "00:12", P_Link,
+	[T_Woowz11, T_INotAuthor, T_NotControlled, T_Shorts, T_PeoplePlayground],
+	"Zooi разработчик people playground, сделал обо мне видео... Это когда у меня бомбануло что он игру обновляет каждый раз ломая текстур паки, и наговорил куча всего, а он затролил троль троляка trolls (палится мой старый стим)"],
+	
+	[707, "People Playground Blood eye 2 (beta) version 1.5", "2020.04.18", "NmFoB3kbbCQ", "2026.08.10", "07:34", P_Hide,
+	[T_PeoplePlayground, T_INotAuthor, T_NotControlled, T_UnknownPeople, T_WIP],
+	"https://www.youtube.com/watch?v=GFL2yclrwbs"],
+	
+	[708, "Как видят ПЧЁЛУ в майнкрафт 100 разных игроков?", "2020.06.28", "qxdp9yZbqw8", "2026.08.10", "12:30", P_Hide,
+	[T_Woowz11, T_UnknownPeople, T_Minecraft, T_INotAuthor, T_NotControlled],
+	"https://www.youtube.com/watch?v=BWGL-04ssGU , я по приколу участвовал в видео айфайни, я построил пчелу в 9:29, они снимали сразу по 3 видео, на 2-м они сторили теплицу, им не понравилось как я её строил (она была типо в большом масштабе), и меня забанили нахуй)))) (моя пчела была по середине на превью)"],
 	
 	[771, "приватный войс [2025.02.22] деанон история", "2025.02.22", "Rrz17L3YtUk", "2026.08.09", "10:39", P_Hide,
 	[T_Woowz11, T_WIP, T_Wyldi, T_INotAuthor],
@@ -360,39 +389,39 @@ const VIDEOS = [
 	""],
 	
 	[749, "People Playground blood eye zombies", "2022.06.12", "TaZl26g7Teg ", "2026.08.05", "14:26", P_Hide,
-	[T_INotAuthor, T_NotFriendAuthor, T_PeoplePlayground, T_WIP],
+	[T_INotAuthor, T_NotControlled, T_PeoplePlayground, T_WIP],
 	"https://www.youtube.com/watch?v=SFe-GSgSGWI"],
 	
 	[748, "Blood Eye 3 Mod In People Playground", "2020.07.20", "4VWHlP0i46A ", "2026.08.05", "10:00", P_Hide,
-	[T_INotAuthor, T_NotFriendAuthor, T_PeoplePlayground, T_WIP],
+	[T_INotAuthor, T_NotControlled, T_PeoplePlayground, T_WIP],
 	"https://www.youtube.com/watch?v=0YEt7Tyq8Xk"],
 	
 	[747, "Blood Eye 4 Mod For People Playground", "2020.09.25", "SrP9zfw_w-c ", "2026.08.05", "10:31", P_Hide,
-	[T_INotAuthor, T_PeoplePlayground, T_NotFriendAuthor, T_WIP],
+	[T_INotAuthor, T_PeoplePlayground, T_NotControlled, T_WIP],
 	"https://www.youtube.com/watch?v=OAnxYURbmwU"],
 	
 	[746, "Mod for new textures / Blood eye 2 texture for People Playground (22)", "2020.04.17", "JmZuSLVkPpg ", "2026.08.05", "06:35", P_Hide,
-	[T_INotAuthor, T_PeoplePlayground, T_NotFriendAuthor, T_WIP],
+	[T_INotAuthor, T_PeoplePlayground, T_NotControlled, T_WIP],
 	"https://www.youtube.com/watch?v=ezFFO-CI6eM"],
 	
 	[745, "People Playground blood eye.", "2022.06.12", "RSdmAnZ8aqY", "2026.08.05", "17:33", P_Hide,
-	[T_INotAuthor, T_PeoplePlayground, T_WIP, T_NotFriendAuthor],
+	[T_INotAuthor, T_PeoplePlayground, T_WIP, T_NotControlled],
 	"https://www.youtube.com/watch?v=CFhDRNB9yGk"],
 	
 	[744, "Playing Minecraft With Subscribers / IP Address Of The Server In The Description", "2020.07.26", "ZlDFERVRU8E", "2026.06.23", "1:35:50", P_Hide,
-	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotFriendAuthor, T_Woowz11],
+	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotControlled, T_Woowz11],
 	"сантинел стрим"],
 	
 	[743, "Playing Minecraft With Subscribers / IP Address Of The Server In The Description", "2020.07.28", "YwFdWzNu6rM", "2026.06.23", "2:48:00", P_Hide,
-	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotFriendAuthor, T_Woowz11],
+	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotControlled, T_Woowz11],
 	"сантинел стрим"],
 	
 	[742, "Playing Minecraft With Subscribers / IP Address Of The Server In The Description", "2020.07.27", "Hgp7-4xZxns", "2026.06.23", "2:06:55", P_Hide,
-	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotFriendAuthor, T_Woowz11],
+	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotControlled, T_Woowz11],
 	"сантинел стрим"],
 	
 	[741, "Playing Minecraft With Subscribers / IP Address Of The Server In The Description", "2020.08.01", "X1_723ar5Lc", "2026.06.23", "1:50:55", P_Hide,
-	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotFriendAuthor, T_Woowz11],
+	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotControlled, T_Woowz11],
 	"сантинел стрим"],
 	
 	[740, "~", "2024.08.05", "R-zzlcnV_ss", "2026.06.23", "42:14", P_Link,
@@ -444,7 +473,7 @@ const VIDEOS = [
 	"Melobytes"],
 	
 	[728, "Видео Обзор на новую игру в стиле Sandbox (PICSIS SANDBOX)", "2021.01.10", "fvQDNCfOoak", "2026.08.05", "08:19", P_Hide,
-	[T_INotAuthor, T_UnknownPeople, T_Picsis, T_WIP, T_NotFriendAuthor],
+	[T_INotAuthor, T_UnknownPeople, T_Picsis, T_WIP, T_NotControlled],
 	"https://www.youtube.com/watch?v=g6dPN2XI7AU"],
 	
 	[727, "WRF Corruption's", "2023.10.11 00:10", "jhuYXf2c1vE", "2026.08.05", "00:10", P_Link,
@@ -1588,7 +1617,7 @@ const VIDEOS = [
 	"Типо проклятое видео типо взломали Я НАЕБАЛ ВСЕХ!!! если что это ревёрснутая музыка, бумб так звали крипера из моего ресурс пака про будущее, он выглядил как робот на ножках"],
 	
 	[442, "SPOILER", "2019.06.13", "rE9K1EwkLZ4", "2019.07.03", "01:01", P_Link,
-	[T_INotAuthor, T_Minecraft, T_Prikol, T_NotFriendAuthor],
+	[T_INotAuthor, T_Minecraft, T_Prikol, T_NotControlled],
 	"Видео которое я нашёл не помню, в дискорде или в скайпе, и по приколу добавил на ютуб, потому-что оно было большое и я не мог его отправлять, тут что-то про арабов и ислам 🐷, оригинал: https://www.youtube.com/watch?v=IMWw5U1ILOM"],
 	
 	[441, "ВЫЖЫВАНЫЭ В МИРЭ ЗОМБИ ЛАБУТЭНОВ ЧАСТ 1 И ПОСЛЕДНАЯ НЕ ПОСЛЕДНАЯ!!! СНИМАЛ ВУВЗ!", "2019.06.26 22:59:32", "ZOhOJGWp4qc", "2019.06.26", "14:22", P_Link,
@@ -3317,7 +3346,7 @@ const VIDEOS = [
 
 	[6, "Геймплей халф сворда", "2025.04.10 17:06:46", "AgbvZg-eX7s", "2026.01.24", "44:40", P_Hide,
 	[T_Woowz11, T_HalfSword],
-	"Простой скучный молчаливый геймплей в халф сворд, палю вувзкор файлы в 42:12"],
+	"Простой скучный молчаливый геймплей в халф сворд, палю вувзкор файлы в 42:12 (РЕАЛЬНО БЕЗ МУЗЫКИ!)"],
 
 	[5, "Геймплей халф сворда с деем на фоне x2", "2025.04.09 23:09:06", "iAjgHGxwKIQ", "2026.01.24", "16:39", P_Hide,
 	[T_Woowz11, T_Wyldi, T_HaveANiceDay, T_HalfSword],

@@ -598,19 +598,19 @@ function UpdateContent(VideosList){
 	}
 	
 	for(let i = 0; i < VideosList.length; i++){
+		let Video = VideosList[i];
+	
 		try{
-			let Video = VideosList[i]
-
-			const ID           = Video[0]
-			const Name         = Video[1]
-			const CreationDate = Video[2]
-			const YoutubeID    = Video[3]
-			const PublishDate  = Video[4]
-			let   Duration     = Video[5]
-			const Visibility   = Video[6]
-			const Tags         = Video[7]
-			const Description  = Video[8]
-			const Extra        = Video[9]
+			const ID           = Video[0];
+			const Name         = Video[1];
+			const CreationDate = Video[2];
+			const YoutubeID    = Video[3];
+			const PublishDate  = Video[4];
+			let   Duration     = Video[5];
+			const Visibility   = Video[6];
+			const Tags         = Video[7];
+			const Description  = Video[8];
+			const Extra        = Video[9];
 
 			let LostMedia = PublishDate === LOSTMEDIA;
 
@@ -741,7 +741,7 @@ function UpdateContent(VideosList){
 			const NameText        = FormatDescription(Name       );
 			const DescriptionText = FormatDescription(Description);
 
-			const YoutubeButtons = (UnknownLink ? "" : (`<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` + 
+			const YoutubeButtons = (UnknownLink ? "" : ((UserWoowz || Visibility === P_Link || Visibility === P_Public ? `<a tooltip="Посмотреть видео на YouTube" href="${WatchURL}" style="height:${Height};">${YoutubeID == DEFAULT_YoutubeID ? "❔" : "👁️"}</a>` : "") + 
 			(UserWoowz ? `<a tooltip="Редактировать видео в YouTube Studio" href="${EditURL}" style="height:${Height};">${YoutubeID === DEFAULT_YoutubeID ? "❔" : "✏️"}</a>` : ""))) + (UserWoowz ? `<a tooltip="Получить скомпилированную информацию об видео" style="height:${Height};" onclick="GetCompiledVideoData(${ID})">🔎</a>` : "");
 
 			const VideoContent = `<div style="display: flex; gap: 3px;">
@@ -768,6 +768,13 @@ function UpdateContent(VideosList){
 
 			Content.appendChild(Panel);
 		}catch(e){
+			const Panel = document.createElement("div");
+			Panel.className = "VideoPanel";
+			Panel.innerHTML = `<text style='color:white;'>ERROR [${Video[0] ? Video[0] : "?"}]</text>`;
+			Panel.style.background = "rgb(0, 0, 0)";
+
+			Content.appendChild(Panel);
+		
 			ShowErrorNotification(e);
 		}
 	}
