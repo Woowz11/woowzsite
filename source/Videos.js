@@ -268,6 +268,10 @@ const VIDEOS = [
 
 	// FREE ->
 	
+	[776, "~", UNKNOWN_Date, "aR4QpGh2m-M", "2026.08.11", "03:18", P_Hide,
+	[T_Woowz11, T_WIP, T_Archive, T_RealLife],
+	""],
+	
 	[775, "Create your own world with the mod Blood Eye 3 (Mod Update) People Playground", "2020.07.25", "F-6zlQRYzfs", "2026.08.07", "08:17", P_Hide,
 	[T_INotAuthor, T_NotControlled, T_PeoplePlayground, T_WIP],
 	"https://www.youtube.com/watch?v=bD4fnX_2Ozk"],
