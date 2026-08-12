@@ -22,16 +22,16 @@
     body{
         background-color: #2a2a2a;
         background-image:
-                linear-gradient(rgba(60, 60, 60, 0.8) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(60, 60, 60, 0.8) 1px, transparent 1px),
-                linear-gradient(rgba(100, 100, 100, 0.6) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(100, 100, 100, 0.6) 2px, transparent 2px);
+                linear-gradient(rgba(60, 60, 60, 0.6) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(60, 60, 60, 0.6) 1px, transparent 1px),
+                linear-gradient(rgba(100, 100, 100, 0.4) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(100, 100, 100, 0.4) 2px, transparent 2px);
     }
 
     body.Dragging{
         cursor: grabbing;
     }
-    
+
     #Scene{
         position: absolute;
         width: 100%;
@@ -63,6 +63,21 @@
         overflow: visible;
     }
 
+    .Text{
+        position: absolute;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        white-space: nowrap;
+    }
+
+    .Point.Action{
+        transition: transform 0.2s;
+    }
+
+    .Point.Action:hover{
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+
 </style>
 
 <body>
@@ -71,7 +86,50 @@
 
 <script>
     const MULTIVERSES = {
-
+        "name": "Основа",
+        "color": "lightblue",
+        "actions": [
+            {
+                "name": "УБИТЬ ПРИЗЕДЕНТА!!!",
+                "solution": [
+                    "не убивать",
+                    ["убить", {
+                        "name": "без призедента",
+                        "color": "red",
+                        "actions": [
+                            {
+                                "name": "СОЗДАТЬ НОВОГО ПРИЗЕДЕНТА!!!",
+                                "solution": [
+                                    "не, нахрен надо",
+                                    ["ОК, ЛЕТС ГОУ", {
+                                        "name": "УРАА!!! новый призедент!!!",
+                                        "color": "blue"
+                                    }]
+                                ]
+                            },
+                            {
+                                "name": "Я БУДУ НОВЫМ ПРИЗЕДЕНТОМ!!!",
+                                "solution": [
+                                    "ОТКАЗ",
+                                    ["ПРИНЯТИЕ", {
+                                        "name": "Woowz11 призедент",
+                                        "color": "magenta"
+                                    }]
+                                ]
+                            }
+                        ]
+                    }],
+                    ["пощадить", {
+                        "name": "призедент позор!!!",
+                        "color": "yellow"
+                    }],
+                    ["съесть", {
+                        "name": "призедент съеден!!!",
+                        "color": "lime"
+                    }]
+                ]
+            }
+        ]
     };
 
     // ----------------------------------------------------------------------
@@ -79,6 +137,30 @@
     const Scene = document.getElementById("Scene");
 
     const StepSize = 50;
+
+    let CurrentSelected = null;
+
+    // ----------------------------------------------------------------------
+
+    function RandomFromSeed(Seed){
+        let Hash = 0;
+        if(typeof Seed === "string"){
+            for(let i = 0; i < Seed.length; i++){
+                Hash = (Hash << 5) - Hash + Seed.charCodeAt(i);
+                Hash = Hash & Hash;
+            }
+        }else{
+            Hash = Seed || 0;
+        }
+
+        let State = Hash;
+        return function(){
+            State = State ^ (State << 13);
+            State = State ^ (State >> 17);
+            State = State ^ (State << 5 );
+            return (State >>> 0) / 4294967296;
+        }
+    }
 
     // ----------------------------------------------------------------------
 
@@ -90,6 +172,29 @@
 
     let __S_OffsetX, __S_OffsetY, __SO_OffsetX, __SO_OffsetY;
 
+    function UpdateLineThickness(){
+        const Points  = document.querySelectorAll(".Point");
+        const Lines   = document.querySelectorAll(".Line");
+        const Curves  = document.querySelectorAll(".Curve path");
+        const Texts   = document.querySelectorAll(".Text");
+
+        for(const Point of Points){
+            Point.style.padding = `${Point.W_Radius / __Scale}px`;
+        }
+
+        for(const Line of Lines){
+            Line.style.height = `${Line.W_Thickness / __Scale}px`;
+        }
+
+        for(const Path of Curves){
+            Path.setAttribute("stroke-width", Path.W_Thickness / __Scale);
+        }
+
+        for(const Text of Texts){
+            Text.style.fontSize = `${Text.W_Size / __Scale}em`;
+        }
+    }
+
     function UpdateSceneTransform(){
         Scene.style.transform = `translate(${__OffsetX}px, ${__OffsetY}px) scale(${__Scale})`;
 
@@ -100,6 +205,8 @@
         const GridY = __OffsetY;
         const GridSmall = StepSize * __Scale;
         document.body.style.backgroundPosition = `${GridX}px ${GridY}px, ${GridX}px ${GridY}px, ${GridX - GridSmall}px ${GridY - GridSmall}px, ${GridX - GridSmall}px ${GridY - GridSmall}px`;
+
+        UpdateLineThickness();
     }
 
     function ResetSceneTransform(){
@@ -108,7 +215,6 @@
         __OffsetY = window.innerHeight / 2;
         UpdateSceneTransform();
     }
-    ResetSceneTransform();
 
     document.addEventListener("mousedown", e => {
         if(e.button !== 0){ return; }
@@ -119,7 +225,7 @@
         __S_OffsetY  = e.clientY;
         __SO_OffsetX = __OffsetX;
         __SO_OffsetY = __OffsetY;
-        
+
         document.body.classList.add("Dragging");
     });
 
@@ -165,12 +271,22 @@
 
     // ----------------------------------------------------------------------
 
+    function Select(Object){
+        CurrentSelected = Object;
+
+        console.log(CurrentSelected);
+    }
+
+    // ----------------------------------------------------------------------
+
     function CreatePoint(X, Y, Radius, Color){
         Radius = Radius || 5;
         Color  = Color  || "white";
 
         const Element = document.createElement("div");
         Element.className = "Point";
+
+        Element.W_Radius = Radius;
 
         Element.style.cssText = `left: ${X}px; top: ${Y}px; padding: ${Radius}px; background: ${Color};`;
         Scene.appendChild(Element);
@@ -184,31 +300,29 @@
         const Element = document.createElement("div");
         Element.className = "Line";
 
+        Element.W_Thickness = Thickness;
+
         const DX = X2 - X1;
         const DY = Y2 - Y1;
         const L = Math.sqrt(DX*DX + DY*DY);
         const Angle = Math.atan2(DY, DX) * (180 / Math.PI);
 
-        const NX = DX / L;
-        const NY = DY / L;
-
-        const OffsetX = -(Thickness / 2) * -NY;
-        const OffsetY = -(Thickness / 2) *  NX;
-
-        Element.style.cssText = `left: ${X1 + OffsetX}px; top: ${Y1 + OffsetY}px; width: ${L}px; height: ${Thickness}px; transform: rotate(${Angle}deg); background: ${Color};`;
+        Element.style.cssText = `left: ${X1}px; top: ${Y1}px; width: ${L}px; height: ${Thickness}px; transform: rotate(${Angle}deg); background: ${Color};`;
         Scene.appendChild(Element);
         return Element;
     }
 
     function CreateCurve(X1, Y1, X2, Y2, Thickness, CurveHeight, Color){
         Thickness   = Thickness   || 2;
-        CurveHeight = CurveHeight || 50;
+        CurveHeight = CurveHeight || StepSize/2;
         Color       = Color       || "white";
 
         if(X1 === X2 || Y1 === Y2){
             CreateLine(X1, Y1, X2, Y2, Thickness);
             return;
         }
+
+        CurveHeight *= (Y1 > Y2 ? 1 : -1);
 
         const MX = (X1 + X2) / 2;
         const MY = (Y1 + Y2) / 2;
@@ -234,6 +348,8 @@
 
         const Path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
+        Path.W_Thickness = Thickness;
+
         const D = `M ${X1} ${Y1} C ${CX1} ${CY1}, ${CX2} ${CY2}, ${X2} ${Y2}`;
 
         Path.setAttribute("d", D);
@@ -248,20 +364,120 @@
         return SVG;
     }
 
+    function CreateText(X, Y, Text, Size, Color){
+        Text  = Text  || "Новый текст!";
+        Size  = Size  || 1;
+        Color = Color || "black";
+
+        const Element = document.createElement("div");
+        Element.className = "Text";
+
+        Element.W_Size = Size;
+
+        Element.textContent = Text;
+
+        Element.style.cssText = `left: ${X}px; top: ${Y}px; font-size: ${Size}em; color: ${Color};`;
+        Scene.appendChild(Element);
+        return Element;
+    }
+
+    // ----------------------------------------------------------------------
+
     function GenerateMultiverses(){
-        CreatePoint(0, 0);
-        CreatePoint(StepSize, 0);
-        CreatePoint(0, StepSize);
-        CreatePoint(StepSize, StepSize);
+        function GenerateSolutuion(Solution, X1, Y1, X2, Y2, D){
+            if(typeof Solution === "string"){
+                console.log(`Настоящее решение: ${Solution}`);
+                return;
+            }
 
-        CreateLine(0, 0, 0, StepSize);
-        CreateLine(StepSize, 0, 0, 0);
+            const Name       = Solution[0];
+            const Multiverse = Solution[1];
 
-        CreateCurve(0, 0, StepSize, -StepSize * 2);
+            console.group(`Решение: ${Name}`);
+
+            const Element = CreateCurve(X1, Y1, X2, Y2, 4, StepSize * D, Multiverse["color"] || "white");
+
+            Element.addEventListener("mouseenter", e => {
+                Select(Multiverse);
+            });
+
+            GenerateMultiverse(Multiverse, X2, Y2, D);
+
+            console.groupEnd();
+        }
+
+        function GenerateAction(Action, X, Y, D){
+            const Name = Action["name"] || "Без имени действие!";
+            const Solutions = Action["solution"] || [];
+
+            console.group(`Действие: ${Name}`);
+
+            const Element = CreatePoint(X, Y, 10);
+            Element.classList.add("Action");
+
+            Element.addEventListener("mouseenter", e => {
+                Select(Action);
+            });
+
+            CreateText(X, Y - StepSize, Name, undefined, "white");
+
+            const InvertEvent = RandomFromSeed(Name)() > 0.5;
+
+            let i = 0;
+            let Even = InvertEvent;
+
+            for(const Solution of Solutions){
+                GenerateSolutuion(Solution, X, Y, X + StepSize * D, Y + (i * StepSize) * (Even ? 1 : -1) * D, D / 2);
+                if(Even){
+                    if(InvertEvent){ i += 1; }
+                    Even = false;
+                }else{
+                    if(!InvertEvent){ i += 1; }
+                    Even = true;
+                }
+            }
+
+            console.groupEnd();
+        }
+
+        function GenerateMultiverse(Multiverse, X, Y, D){
+            const Name = Multiverse["name"] || "Без имени вселенная!";
+            const Color = Multiverse["color"] || "white";
+            const Actions = Multiverse["actions"] || [];
+            const Base = Multiverse === MULTIVERSES;
+
+            console.group(`Создание вселенной: ${Name}`)
+
+            const Element = CreateLine(X, Y, X + 100000, Y, 4, Color);
+            Element.addEventListener("mouseenter", e => {
+                Select(Multiverse);
+            });
+
+            if(Base){
+                const Element2 = CreateLine(X - 100000, Y, X, Y, 4, Color);
+                Element2.addEventListener("mouseenter", e => {
+                    Select(Multiverse);
+                });
+            }
+
+            let i = 0;
+            for(const Action of Actions){
+                i += 2;
+                GenerateAction(Action, X + (Base ? 0 : i) * StepSize * D, Y, D / (i / 2));
+            }
+
+            console.groupEnd();
+        }
+
+        console.log(MULTIVERSES);
+        GenerateMultiverse(MULTIVERSES, 0, 0, 10);
     }
     GenerateMultiverses();
 
     // ----------------------------------------------------------------------
+
+    ResetSceneTransform();
+    Select(null);
 </script>
 
 </html>
