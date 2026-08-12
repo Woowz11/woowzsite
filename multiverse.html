@@ -78,63 +78,164 @@
         transform: translate(-50%, -50%) scale(1.5);
     }
 
+    #Showcase{
+        position: absolute;
+        background: rgb(120, 120, 120);
+        border-radius: 25px;
+        right: 10px;
+        top: 10px;
+        width: 350px;
+        height: 500px;
+        display: none;
+        padding: 10px;
+    }
+
 </style>
 
 <body>
     <div id="Scene"></div>
+    <div id="Showcase"></div>
 </body>
 
 <script>
     const MULTIVERSES = {
-        "name": "Основа",
-        "color": "lightblue",
+        "name": "Реальный мир",
+        "color": "white",
         "actions": [
             {
-                "name": "УБИТЬ ПРИЗЕДЕНТА!!!",
+                "name": "Woowz11 начал изучать программирование",
                 "solution": [
-                    "не убивать",
-                    ["убить", {
-                        "name": "без призедента",
-                        "color": "red",
+                    "Начал изучать",
+                    ["Посчитал не нужным", {
+                        "name": "Woowz11 не знает программирования",
+                        "color": "yellow"
+                    }]
+                ]
+            },
+            {
+                "name": "Woowz11 познакомился с Wldoui",
+                "solution": [
+                    "Познакомился",
+                    ["Не пересекались", {
+                        "name": "Woowz11 не знает Wldoui",
+                        "color": "rgb(200, 255, 200)"
+                    }],
+                    ["Не понравились друг другу с первого взгляда", {
+                        "name": "Wldoui враг №1",
+                        "color": "rgb(0, 0, 255)"
+                    }]
+                ]
+            },
+            {
+                "name": "Создание GOLU",
+                "solution": [
+                    "Создать, но как вымышленного персонажа",
+                    ["Создать, как настоящего AI", {
+                        "name": "Реальный GOLU",
+                        "color": "rgb(255, 200, 200)",
                         "actions": [
                             {
-                                "name": "СОЗДАТЬ НОВОГО ПРИЗЕДЕНТА!!!",
+                                "name": "Разработка GOLU",
                                 "solution": [
-                                    "не, нахрен надо",
-                                    ["ОК, ЛЕТС ГОУ", {
-                                        "name": "УРАА!!! новый призедент!!!",
-                                        "color": "blue"
+                                    "GOLU ожил как искуственный интелект!",
+                                    ["GOLU был создан случайно, из-за бага", {
+                                        "name": "GOLU обрёл случайное сознание",
+                                        "color": "rgb(255, 150, 150)",
+                                        "actions": [
+                                            {
+                                                "name": "GOLU обрёл не контролируемое самосознание",
+                                                "solution": [
+                                                    "GOLU обрёл не контролируемое самосознание",
+                                                    ["GOLU не обрёл контролируемое созание", {
+                                                        "name": "GOLU остановился в развии",
+                                                        "color": "rgb(255, 150, 255)"
+                                                    }]
+                                                ]
+                                            }
+                                        ]
+                                    }],
+                                    ["GOLU был заброшен как проект", {
+                                        "name": "GOLU неудачный проект",
+                                        "color": "rgb(200, 200, 200)"
                                     }]
                                 ]
                             },
                             {
-                                "name": "Я БУДУ НОВЫМ ПРИЗЕДЕНТОМ!!!",
+                                "name": "Полностью помешаться на GOLU",
                                 "solution": [
-                                    "ОТКАЗ",
-                                    ["ПРИНЯТИЕ", {
-                                        "name": "Woowz11 призедент",
-                                        "color": "magenta"
+                                    "GOLU просто существует",
+                                    ["Woowz11 полностью помешался на развитии GOLU", {
+                                        "name": "Woowz11 помешан на создании GOLU",
+                                        "color": "rgb(255, 200, 150)"
                                     }]
                                 ]
                             }
                         ]
                     }],
-                    ["пощадить", {
-                        "name": "призедент позор!!!",
-                        "color": "yellow"
+                    ["Забыть как страшный сон", {
+                        "name": "GOLU запрещён",
+                        "color": "rgb(200, 200, 255)"
                     }],
-                    ["съесть", {
-                        "name": "призедент съеден!!!",
-                        "color": "lime"
+                    ["Посчитать это безумным", {
+                        "name": "GOLU для изгоев!",
+                        "color": "rgb(255, 255, 200)"
                     }]
                 ]
             }
         ]
     };
 
+    let MULTIVERSES_CACHED = {};
+
+    function ScanTree(Node, AddHere){
+        AddHere["name"] = Node["name"] || "UNKNOWN NAME";
+        AddHere["color"] = Node["color"] || "white";
+        AddHere["image"] = Node["image"] || null;
+
+        AddHere["actions"] = [];
+        if(AddHere["actions"]){
+            for(const Action of Node["actions"]){
+                let NewAction = {};
+
+                NewAction["parent"] = AddHere;
+                NewAction["name"] = Action["name"] || "UNKNOWN NAME";
+
+                NewAction["branch_top"] = RandomFromSeed(NewAction["name"])() > 0.5;
+                NewAction["indent"] = 1;
+
+                NewAction["solution"] = [];
+                if(Action["solution"]){
+                    for(const Solution of Action["solution"]) {
+                        let NewSolution = {};
+
+                        if(typeof Solution === "string"){
+                            NewSolution["name"] = Solution;
+                            NewSolution["action"] = NewAction;
+                        }else{
+                            NewSolution["name"] = Solution[0];
+                            NewSolution["multiverse"] = Solution[1];
+                            ScanTree(Solution[1], NewSolution["multiverse"]);
+                            NewSolution["multiverse"]["action"] = NewAction;
+
+                            NewSolution["action"] = NewAction;
+                        }
+
+                        NewAction["solution"].push(NewSolution);
+                    }
+                }
+
+                AddHere["actions"].push(NewAction);
+            }
+        }
+    }
+    ScanTree(MULTIVERSES, MULTIVERSES_CACHED);
+
+    console.log(MULTIVERSES_CACHED);
+
     // ----------------------------------------------------------------------
 
-    const Scene = document.getElementById("Scene");
+    const Scene    = document.getElementById("Scene");
+    const Showcase = document.getElementById("Showcase");
 
     const StepSize = 50;
 
@@ -219,6 +320,10 @@
     document.addEventListener("mousedown", e => {
         if(e.button !== 0){ return; }
 
+        if(e.target.closest("#Showcase")){
+            return;
+        }
+
         IsDragging = true;
 
         __S_OffsetX  = e.clientX;
@@ -255,7 +360,7 @@
         const WorldY = (MouseY - __OffsetY) / __Scale;
 
         const Factor = 1 + ((e.deltaY > 0 ? -1 : 1) * 0.08);
-        __Scale = Math.min(20, Math.max(0.1, __Scale * Factor));
+        __Scale = Math.min(30, Math.max(0.01, __Scale * Factor));
 
         __OffsetX = MouseX - WorldX * __Scale;
         __OffsetY = MouseY - WorldY * __Scale;
@@ -274,7 +379,42 @@
     function Select(Object){
         CurrentSelected = Object;
 
-        console.log(CurrentSelected);
+        if(Object === null){
+            Showcase.style.display = "none";
+        }else{
+            let Result = "";
+
+            if(CurrentSelected["solution"]){
+                const Name      = CurrentSelected["name"] || "GOVNO";
+                const Solutions = CurrentSelected["solution"] || [];
+
+                Result += `<h1>Действие: ${Name}</h1>`;
+
+                for(const Solution of Solutions){
+                    if(typeof Solution === "string"){
+                        Result += `<br><text style="color: black;">${Solution}</text>`;
+                    }else{
+                        const SName = Solution[0] || "GOVNO2";
+                        const Multiverse = Solution[1];
+
+                        const SColor = Multiverse["color"] || "white";
+
+                        Result += `<br><text style="color: ${SColor};">${SName}</text>`;
+                    }
+                }
+            }else{
+                const Name    = CurrentSelected["name"] || "GOVNO";
+                const Color   = CurrentSelected["color"] || "white";
+                const Image   = CurrentSelected["image"] || null;
+                const Actions = CurrentSelected["actions"] || [];
+
+                Result += `<h1 style="color: ${Color};">${Name}</h1>`;
+            }
+
+            Showcase.innerHTML = Result;
+
+            Showcase.style.display = "unset";
+        }
     }
 
     // ----------------------------------------------------------------------
@@ -463,14 +603,13 @@
             let i = 0;
             for(const Action of Actions){
                 i += 2;
-                GenerateAction(Action, X + (Base ? 0 : i) * StepSize * D, Y, D / (i / 2));
+                GenerateAction(Action, X + (Base ? i - 2 : i) * StepSize * D, Y, D / (i / 2));
             }
 
             console.groupEnd();
         }
 
-        console.log(MULTIVERSES);
-        GenerateMultiverse(MULTIVERSES, 0, 0, 10);
+        GenerateMultiverse(MULTIVERSES, 0, 0, 20);
     }
     GenerateMultiverses();
 
