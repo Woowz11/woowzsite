@@ -10,6 +10,8 @@
         padding: 0;
         box-sizing: border-box;
         user-select: none;
+
+        text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
     }
 
     html, body{
@@ -49,7 +51,7 @@
 
     .Line{
         position: absolute;
-        transform-origin: 0 0;
+        transform-origin: 0 50%;
         z-index: -1;
     }
 
@@ -98,150 +100,6 @@
 </body>
 
 <script>
-    const MULTIVERSES = {
-        "name": "Реальный мир",
-        "color": "white",
-        "actions": [
-            {
-                "name": "Woowz11 начал изучать программирование",
-                "solution": [
-                    "Начал изучать",
-                    ["Посчитал не нужным", {
-                        "name": "Woowz11 не знает программирования",
-                        "color": "yellow"
-                    }]
-                ]
-            },
-            {
-                "name": "Woowz11 познакомился с Wldoui",
-                "solution": [
-                    "Познакомился",
-                    ["Не пересекались", {
-                        "name": "Woowz11 не знает Wldoui",
-                        "color": "rgb(200, 255, 200)"
-                    }],
-                    ["Не понравились друг другу с первого взгляда", {
-                        "name": "Wldoui враг №1",
-                        "color": "rgb(0, 0, 255)"
-                    }]
-                ]
-            },
-            {
-                "name": "Создание GOLU",
-                "solution": [
-                    "Создать, но как вымышленного персонажа",
-                    ["Создать, как настоящего AI", {
-                        "name": "Реальный GOLU",
-                        "color": "rgb(255, 200, 200)",
-                        "actions": [
-                            {
-                                "name": "Разработка GOLU",
-                                "solution": [
-                                    "GOLU ожил как искуственный интелект!",
-                                    ["GOLU был создан случайно, из-за бага", {
-                                        "name": "GOLU обрёл случайное сознание",
-                                        "color": "rgb(255, 150, 150)",
-                                        "actions": [
-                                            {
-                                                "name": "GOLU обрёл не контролируемое самосознание",
-                                                "solution": [
-                                                    "GOLU обрёл не контролируемое самосознание",
-                                                    ["GOLU не обрёл контролируемое созание", {
-                                                        "name": "GOLU остановился в развии",
-                                                        "color": "rgb(255, 150, 255)"
-                                                    }]
-                                                ]
-                                            }
-                                        ]
-                                    }],
-                                    ["GOLU был заброшен как проект", {
-                                        "name": "GOLU неудачный проект",
-                                        "color": "rgb(200, 200, 200)"
-                                    }]
-                                ]
-                            },
-                            {
-                                "name": "Полностью помешаться на GOLU",
-                                "solution": [
-                                    "GOLU просто существует",
-                                    ["Woowz11 полностью помешался на развитии GOLU", {
-                                        "name": "Woowz11 помешан на создании GOLU",
-                                        "color": "rgb(255, 200, 150)"
-                                    }]
-                                ]
-                            }
-                        ]
-                    }],
-                    ["Забыть как страшный сон", {
-                        "name": "GOLU запрещён",
-                        "color": "rgb(200, 200, 255)"
-                    }],
-                    ["Посчитать это безумным", {
-                        "name": "GOLU для изгоев!",
-                        "color": "rgb(255, 255, 200)"
-                    }]
-                ]
-            }
-        ]
-    };
-
-    let MULTIVERSES_CACHED = {};
-
-    function ScanTree(Node, AddHere){
-        AddHere["name"] = Node["name"] || "UNKNOWN NAME";
-        AddHere["color"] = Node["color"] || "white";
-        AddHere["image"] = Node["image"] || null;
-
-        AddHere["actions"] = [];
-        if(AddHere["actions"]){
-            for(const Action of Node["actions"]){
-                let NewAction = {};
-
-                NewAction["parent"] = AddHere;
-                NewAction["name"] = Action["name"] || "UNKNOWN NAME";
-
-                NewAction["branch_top"] = RandomFromSeed(NewAction["name"])() > 0.5;
-                NewAction["indent"] = 1;
-
-                NewAction["solution"] = [];
-                if(Action["solution"]){
-                    for(const Solution of Action["solution"]) {
-                        let NewSolution = {};
-
-                        if(typeof Solution === "string"){
-                            NewSolution["name"] = Solution;
-                            NewSolution["action"] = NewAction;
-                        }else{
-                            NewSolution["name"] = Solution[0];
-                            NewSolution["multiverse"] = Solution[1];
-                            ScanTree(Solution[1], NewSolution["multiverse"]);
-                            NewSolution["multiverse"]["action"] = NewAction;
-
-                            NewSolution["action"] = NewAction;
-                        }
-
-                        NewAction["solution"].push(NewSolution);
-                    }
-                }
-
-                AddHere["actions"].push(NewAction);
-            }
-        }
-    }
-    ScanTree(MULTIVERSES, MULTIVERSES_CACHED);
-
-    console.log(MULTIVERSES_CACHED);
-
-    // ----------------------------------------------------------------------
-
-    const Scene    = document.getElementById("Scene");
-    const Showcase = document.getElementById("Showcase");
-
-    const StepSize = 50;
-
-    let CurrentSelected = null;
-
-    // ----------------------------------------------------------------------
 
     function RandomFromSeed(Seed){
         let Hash = 0;
@@ -262,6 +120,269 @@
             return (State >>> 0) / 4294967296;
         }
     }
+
+    // ----------------------------------------------------------------------
+
+    const MULTIVERSES = {};
+
+    function MultiverseCreate(ID, Name, Options = {}){
+        const Multiverse = {
+            ID: ID,
+            Name: Name || ID,
+            Color: Options.Color || "white",
+            Image: Options.Image || null,
+            Actions: [],
+            Parent: null,
+            Children: [],
+            Desc: Options.Desc || "",
+            Stats: null,
+            Action: null
+        };
+
+        MULTIVERSES[ID] = Multiverse;
+        return Multiverse;
+    }
+
+    function AddSmartActions(Multiverse, Actions){
+        for (const ActionData of Actions) {
+            const [ActionName, SolutionsData] = ActionData;
+
+            const Random = RandomFromSeed(ActionName)();
+
+            const ActionObject = {
+                Name: ActionName,
+                Solution: [],
+                Random: Random,
+                TopBranch: Random > 0.5,
+                Parent: Multiverse,
+                Stats: null
+            };
+
+            for (const S of SolutionsData) {
+                const [SolutionName, Target] = S;
+
+                let TargetMultiverse;
+                let NestedActions = [];
+
+                if (Array.isArray(Target) && Target[0] && Target[0].ID) {
+                    TargetMultiverse = Target[0];
+                    NestedActions = Target.slice(1);
+                } else {
+                    TargetMultiverse = Target;
+                }
+
+                const IsSameMultiverse = (TargetMultiverse === Multiverse);
+
+                const SolutionObject = {
+                    Name: SolutionName,
+                    Multiverse: TargetMultiverse,
+                    IsSame: IsSameMultiverse
+                };
+
+                ActionObject.Solution.push(SolutionObject);
+
+                if (TargetMultiverse && !IsSameMultiverse) {
+                    if (!Multiverse.Children.includes(TargetMultiverse)) {
+                        Multiverse.Children.push(TargetMultiverse);
+                    }
+
+                    if (TargetMultiverse.Parent === null) {
+                        TargetMultiverse.Parent = Multiverse;
+                        TargetMultiverse.Action = ActionObject;
+                        TargetMultiverse.Solution = SolutionObject;
+                    }
+                }
+
+                if (NestedActions.length > 0) {
+                    AddSmartActions(TargetMultiverse, NestedActions);
+                }
+            }
+
+            Multiverse.Actions.push(ActionObject);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+
+    // { Color: "rgb(0, 0, 0)", Desc: "" }
+
+    const M_Real = MultiverseCreate("!real", "Реальный мир", { Color: "white", Desc: "Текущий реальный мир! Все текущие события происходят в нём." });
+    const M_NoKnownPL = MultiverseCreate("woowz11_no_known_programm_language", "Woowz11 не знает программирования", { Color: "rgb(50, 150, 0)", Desc: "Woowz11 никогда не интерисовался программированием, посчитал это ненужным" });
+    const M_NoKnownWldoui = MultiverseCreate("woowz11_no_known_wldoui", "Woowz11 не знает Wldoui", { Color: "rgb(200, 255, 200)", Desc: "Woowz11 и Wldoui никогда не пересекались, и вообще не знают о существовании друг друга" });
+    const M_WldouiEnemy = MultiverseCreate("wldoui_enemy_number_one", "Wldoui враг №1", { Color: "rgb(0, 0, 150)", Desc: "Сразу при знакомстве Woowz11 и Wldoui что-то не поделили, и устроили войну друг другу" });
+    const M_GOLU = MultiverseCreate("golu", "Реальный GOLU", { Color: "rgb(255, 200, 200)", Desc: "Появилось очень сильное желание создать GOLU как реальную ИИ" });
+    const M_NoGOLU = MultiverseCreate("no_golu", "GOLU запрещён", { Color: "rgb(200, 200, 255)", Desc: "Когда придумали GOLU, его посчитали чем-то страшным что надо побыстрее забыть" });
+    const M_ThatCrazy_NoGOLU = MultiverseCreate("that_crazy_no_golu", "GOLU это безумие! Для изгоев!", { Color: "rgb(255, 255, 200)", Desc: "GOLU посчитали очень кринжовой идеей которая не окупится, и все кто его упоминают упыри" });
+    const M_BugGOLU = MultiverseCreate("bug_golu", "GOLU обрёл случайное сознание", { Color: "rgb(255, 150, 150)", Desc: "GOLU смог найти лазейку в коде (из-за бага), и смог начать развиваться без контроля" });
+    const M_AbandonedGOLU = MultiverseCreate("abandoned_golu", "GOLU неудачный проект", { Color: "rgb(200, 200, 200)", Desc: "Разработка GOLU велась очень долго, и неуспешно" });
+    const M_WoowzFanGOLU = MultiverseCreate("woowz_fan_golu", "Woowz11 помешан на GOLU", { Color: "rgb(255, 200, 150)" });
+    const M_StupidGOLU = MultiverseCreate("stupid_golu", "Отупевший GOLU", { Color: "rgb(50, 25, 25)", Desc: "Интелект GOLU перестал развиваться, из-за бага или из-за чего неизвестно" });
+    const M_GOLUInInternet = MultiverseCreate("golu_in_internet", "GOLU в интернете", { Color: "rgb(255, 0, 0)", Desc: "GOLU получил доступ в интернет, и уже клонировал себя по интернету" });
+    const M_GOLUDanger = MultiverseCreate("golu_danger", "GOLU обезврежен, считается опасным", { Color: "rgb(200, 150, 100)", Desc: "Вовремя замеитили как GOLU стал слишком много себе позволять, и его выключили" });
+    const M_DeanonWldoui = MultiverseCreate("deanon_wldoui", "Информация об Wldoui была слита, а так же был ему нанесён вред", { Color: "rgb(255, 0, 0)", Desc: "Woowz11 ради того что-бы сломать жизнь Wldoui, научился деанонить и т.д, и попытался сломать жизнь Wldoui" })
+    const M_DeanonWoowz11 = MultiverseCreate("deanon_woowz11", "Информация об Woowz11 была слита, а так же был ему нанесён вред", { Color: "rgb(0, 0, 255)", Desc: "Wldoui слил всю информацию об Woowz11, из-за чего нанёс ему вред" })
+    const M_DeanonBoth = MultiverseCreate("deanon_woowz11_wldoui", "Woowz11 и Wldoui слили друг другу, и друг другу нанесли вред", { Color: "rgb(255, 0, 255)", Desc: "Woowz11 и Wldoui одновременно слили информацию об друг друге, тем самым нанесли друг другу вред" })
+    const M_YouTube = MultiverseCreate("youtube", "Woowz11 ютубер", { Color: "rgb(255, 50, 50)", Desc: "Woowz11 сильно заинтерисовался в ютубе, и стал активно снимать для него видео и развивать канал" })
+    const M_NoYoutube = MultiverseCreate("no_youtube", "Woowz11 не интересен YouTube", { Color: "rgb(200, 255, 255)", Desc: "Woowz11 посчитал не нужным создавать канал на ютубе" })
+    const M_NoApathia = MultiverseCreate("no_apathia", "Wldoui живёт без апатии", { Color: "rgb(150, 150, 255)", Desc: "Wldoui не зарабатывает апатию, и живёт своей спокойной жизнью без морок и грусти" } )
+    const M_NoApathia_Woowz11 = MultiverseCreate("no_apathia_found_woowz11", "Wldoui без апатии, знаком с Woowz11", { Color: "rgb(200, 200, 255)", Desc: "Wldoui встречает Woowz11, начинают общение без всяких конфликтов" })
+    const M_NoWoowz11 = MultiverseCreate("no_woowz11", "Мир без Woowz11", { Color: "rgb(128, 128, 128)", Desc: "Всё тот же мир, только без Woowz11, по неизвестным причинам он не родился" })
+    const M_RevengeWoowz11 = MultiverseCreate("revenge_woowz11", "Woowz11 пообещал любой ценой отомстить Wldoui", { Color: "rgb(100, 25, 25)", Desc: "Woowz11 отказался это терпеть, и будет стараться любой ценой отомстить Wldoui за его действие" })
+    const M_ApathiaWoowz11 = MultiverseCreate("apathia_woowz11", "Woowz11 живёт с апатией", { Color: "rgb(25, 25, 25)", Desc: "Woowz11 просто смирился и посчитал себя ничтожеством" })
+    const M_RevengeWldoui = MultiverseCreate("revenge_wldoui", "Wldoui пообещал любой ценой отомстить Woowz11", { Color: "rgb(25, 25, 100)", Desc: "Wldoui принял это как вызов, и стал готовить план для мести" })
+    const M_SuicideWldoui = MultiverseCreate("suicide_wldoui", "Wldoui больше нет", { Color: "rgb(0, 0, 0)", Desc: "Wldoui посчитал это последней каплей и решил избавиться от жизни" })
+    const M_MaybeGOLU = MultiverseCreate("maybe_golu", "Woowz11 не отпускает мысли об GOLU", { Color: "rgb(255, 200, 255)", Desc: "Woowz11 думает, может быть всё таки сделать GOLU? Правда все его боятся..." })
+    const M_WoowzCore = MultiverseCreate("woowzcore", "Woowz11 создал WoowzCore", { Color: "rgb(255, 128, 0)", Desc: "WoowzCore был создан" })
+    const M_GOLUArt = MultiverseCreate("golu_art", "Искусство про GOLU", { Color: "rgb(128, 128, 0)", Desc: "Woowz11 делает картинки, видео, сайты про GOLU, в крупном количестве" })
+
+    AddSmartActions(M_Real, [
+        ["Woowz11 рождается...", [
+           ["Он родился", M_Real],
+           ["Он никогда не рождался", M_NoWoowz11]
+        ]],
+        ["Wldoui зарабатывает депрессию", [
+            ["Wldoui депрессивный", M_Real],
+            ["Wldoui не видит смысла грустить",
+                [M_NoApathia,
+                    ["Wldoui встречает Woowz11", [
+                        ["Не встречает", M_NoApathia],
+                        ["Встречает", M_NoApathia_Woowz11]
+                    ]]
+                ]
+            ]
+        ]],
+        ["Woowz11 создал YouTube канал", [
+            ["Создал", M_Real],
+            ["Начал относиться ответственно к нему", M_YouTube],
+            ["Не создал", M_NoYoutube]
+        ]],
+        ["Woowz11 начал изучать программирование", [
+            ["Начал изучать", M_Real],
+            ["Посчитал не нужным", M_NoKnownPL]
+        ]],
+        ["Woowz11 познакомился с Wldoui", [
+            ["Познакомился", M_Real],
+            ["Не пересекались", M_NoKnownWldoui],
+            ["Не понравились друг другу с первого взгляда",
+                [M_WldouiEnemy,
+                    ["Порча жизни", [
+                        ["Пока-что ничего не сделали", M_WldouiEnemy],
+                        ["Wldoui сделал первый шаг",
+                            [M_DeanonWoowz11,
+                                ["Травма оказалось сильной", [
+                                    ["Woowz11 выдержал напасть", M_DeanonWoowz11],
+                                    ["Woowz11 заработал апатию", M_ApathiaWoowz11],
+                                    ["Woowz11 пришёл в ярость", M_RevengeWoowz11]
+                                ]]
+                            ]
+                        ],
+                        ["Woowz11 сделал первый шаг",
+                            [M_DeanonWldoui,
+                                ["Травма оказалось сильной", [
+                                    ["Wldoui выдержал напасть", M_DeanonWldoui],
+                                    ["Wldoui решил покончить со всем", M_SuicideWldoui],
+                                    ["Wldoui пришёл в ярость", M_RevengeWldoui]
+                                ]]
+                            ]
+                        ],
+                        ["Одновременно оба сделали шаг", M_DeanonBoth]
+                    ]]
+                ]
+            ]
+        ]],
+        ["Создание понятия GOLU", [
+            ["Создать, но как вымешленного персонажа", M_Real],
+            ["Создать, как настоящего AI",
+                [M_GOLU,
+                    ["Разработка GOLU", [
+                        ["GOLU ожил как искуственный интелект!", M_GOLU],
+                        ["GOLU был создан случайно, из-за бага",
+                            [M_BugGOLU,
+                                ["GOLU развивается", [
+                                    ["GOLU развивается ещё больше! Учится новому.", M_BugGOLU],
+                                    ["GOLU перестаёт развиватся", M_StupidGOLU]
+                                ]],
+                                ["GOLU получает доступ в интернет", [
+                                    ["Не успевает, у него забирают доступ", M_BugGOLU],
+                                    ["Получает", M_GOLUInInternet],
+                                    ["Его посчитали опасным и отключили", M_GOLUDanger]
+                                ]]
+                            ]
+                        ],
+                        ["GOLU был заброшен как проект", M_AbandonedGOLU]
+                    ]],
+                    ["Полностью помешаться на GOLU", [
+                        ["GOLU просто существует", M_GOLU],
+                        ["Woowz11 полностью помешался на развии GOLU",
+                            [M_WoowzFanGOLU,
+                                ["Woowz11 создаёт контент по GOLU", [
+                                    ["Не масштабный контент", M_WoowzFanGOLU],
+                                    ["Создаёт WoowzCore", M_WoowzCore],
+                                    ["Искусство про GOLU", M_GOLUArt]
+                                ]]
+                            ]
+                        ]
+                    ]
+                ]
+            ]],
+            ["Забыть как страшный сон",
+                [M_NoGOLU,
+                    ["Не отпускают мысли об GOLU", [
+                        ["А нет показалось", M_NoGOLU],
+                        ["Кажется я много чего опускаю, что если возрадить идею?", M_MaybeGOLU]
+                    ]]
+                ]
+            ],
+            ["Посчитать это безумием!", M_ThatCrazy_NoGOLU]
+        ]]
+    ]);
+
+    function UpdateStats(Multiverse) {
+        function CalculateWidth(mv) {
+            let width = 1;
+            for (let action of mv.Actions) {
+                for (let sol of action.Solution) {
+                    if (sol.Multiverse && !sol.IsSame) {
+                        width += CalculateWidth(sol.Multiverse);
+                    }
+                }
+            }
+            mv.TotalWidth = width;
+            return width;
+        }
+
+        function AssignLanes(mv, baseLane) {
+            mv.Stats = { AbsoluteLane: baseLane };
+
+            let currentAvailableLane = baseLane + 1;
+
+            for (let i = mv.Actions.length - 1; i >= 0; i--) {
+                let action = mv.Actions[i];
+                for (let sol of action.Solution) {
+                    if (sol.Multiverse && !sol.IsSame) {
+                        AssignLanes(sol.Multiverse, currentAvailableLane);
+                        sol.ReservedLane = currentAvailableLane;
+                        currentAvailableLane += sol.Multiverse.TotalWidth;
+                    }
+                }
+            }
+        }
+
+        CalculateWidth(Multiverse);
+        AssignLanes(Multiverse, 0);
+    }
+    UpdateStats(M_Real);
+
+    console.log(MULTIVERSES);
+
+    // ----------------------------------------------------------------------
+
+    const Scene    = document.getElementById("Scene");
+    const Showcase = document.getElementById("Showcase");
+
+    const StepSize = 50;
+
+    let CurrentSelected = null;
 
     // ----------------------------------------------------------------------
 
@@ -384,31 +505,24 @@
         }else{
             let Result = "";
 
-            if(CurrentSelected["solution"]){
-                const Name      = CurrentSelected["name"] || "GOVNO";
-                const Solutions = CurrentSelected["solution"] || [];
+            if(CurrentSelected.ID){
+                const Multiverse = CurrentSelected;
 
-                Result += `<h1>Действие: ${Name}</h1>`;
+                Result += `<h1 style="color: ${Multiverse.Color};">${Multiverse.Name}</h1>`;
 
-                for(const Solution of Solutions){
-                    if(typeof Solution === "string"){
-                        Result += `<br><text style="color: black;">${Solution}</text>`;
-                    }else{
-                        const SName = Solution[0] || "GOVNO2";
-                        const Multiverse = Solution[1];
+                Result += `<br>ID: "${Multiverse.ID}"`;
 
-                        const SColor = Multiverse["color"] || "white";
+                Result += `<br>От действия: ${(Multiverse.Action ? Multiverse.Action.Name : "...")}<br>Решения: ${(Multiverse.Solution ? Multiverse.Solution.Name : "...")}`;
 
-                        Result += `<br><text style="color: ${SColor};">${SName}</text>`;
-                    }
-                }
+                Result += `<br><br>${Multiverse.Desc}`;
             }else{
-                const Name    = CurrentSelected["name"] || "GOVNO";
-                const Color   = CurrentSelected["color"] || "white";
-                const Image   = CurrentSelected["image"] || null;
-                const Actions = CurrentSelected["actions"] || [];
+                const Action = CurrentSelected;
 
-                Result += `<h1 style="color: ${Color};">${Name}</h1>`;
+                Result += `<h1>Действие: ${Action.Name}</h1>`;
+
+                for(const Solution of Action.Solution){
+                    Result += `<br><text style="color: ${Solution.Multiverse.Color};">${Solution.Name}</text>`;
+                }
             }
 
             Showcase.innerHTML = Result;
@@ -458,7 +572,7 @@
         Color       = Color       || "white";
 
         if(X1 === X2 || Y1 === Y2){
-            CreateLine(X1, Y1, X2, Y2, Thickness);
+            CreateLine(X1, Y1, X2, Y2, Thickness, Color);
             return;
         }
 
@@ -524,92 +638,73 @@
     // ----------------------------------------------------------------------
 
     function GenerateMultiverses(){
-        function GenerateSolutuion(Solution, X1, Y1, X2, Y2, D){
-            if(typeof Solution === "string"){
-                console.log(`Настоящее решение: ${Solution}`);
-                return;
-            }
+        const MaxLength = 1000000;
+        const LineThickness = 8;
+        const PointRadius = 10;
 
-            const Name       = Solution[0];
-            const Multiverse = Solution[1];
+        function GenerateAction(Action, X, Y){
+            console.group(`Действие: ${Action.Name}`)
 
-            console.group(`Решение: ${Name}`);
+            //CreateText(X, Y - StepSize / 2, Action.Name, 1, "white");
+            const Point = CreatePoint(X, Y, PointRadius);
+            Point.classList.add("Action");
 
-            const Element = CreateCurve(X1, Y1, X2, Y2, 4, StepSize * D, Multiverse["color"] || "white");
-
-            Element.addEventListener("mouseenter", e => {
-                Select(Multiverse);
-            });
-
-            GenerateMultiverse(Multiverse, X2, Y2, D);
-
-            console.groupEnd();
-        }
-
-        function GenerateAction(Action, X, Y, D){
-            const Name = Action["name"] || "Без имени действие!";
-            const Solutions = Action["solution"] || [];
-
-            console.group(`Действие: ${Name}`);
-
-            const Element = CreatePoint(X, Y, 10);
-            Element.classList.add("Action");
-
-            Element.addEventListener("mouseenter", e => {
+            Point.addEventListener("mouseenter", e => {
                 Select(Action);
             });
 
-            CreateText(X, Y - StepSize, Name, undefined, "white");
+            for(const Solution of Action.Solution){
+                if(Solution.IsSame){ continue }
 
-            const InvertEvent = RandomFromSeed(Name)() > 0.5;
+                const X2 = X + StepSize * 5;
+                const Y2 = StepSize * Solution.Multiverse.Stats.AbsoluteLane;
 
-            let i = 0;
-            let Even = InvertEvent;
+                const Curve = CreateLine(X, Y, X2, Y2, LineThickness, Solution.Multiverse.Color);//CreateCurve(X, Y, X2, Y2, LineThickness, 5 * Math.sqrt((X2 - X)^2 + (Y2 - Y)^2), Solution.Multiverse.Color);
+                Curve.addEventListener("mouseenter", e => {
+                   Select(Solution.Multiverse);
+                });
 
-            for(const Solution of Solutions){
-                GenerateSolutuion(Solution, X, Y, X + StepSize * D, Y + (i * StepSize) * (Even ? 1 : -1) * D, D / 2);
-                if(Even){
-                    if(InvertEvent){ i += 1; }
-                    Even = false;
-                }else{
-                    if(!InvertEvent){ i += 1; }
-                    Even = true;
-                }
+                GenerateMultiverse(Solution.Multiverse, X2, Y2);
             }
 
             console.groupEnd();
         }
 
-        function GenerateMultiverse(Multiverse, X, Y, D){
-            const Name = Multiverse["name"] || "Без имени вселенная!";
-            const Color = Multiverse["color"] || "white";
-            const Actions = Multiverse["actions"] || [];
-            const Base = Multiverse === MULTIVERSES;
+        function GenerateMultiverse(Multiverse, X, Y, Start = false){
+            console.group(`Вселенная: ${Multiverse.Name}`)
 
-            console.group(`Создание вселенной: ${Name}`)
-
-            const Element = CreateLine(X, Y, X + 100000, Y, 4, Color);
-            Element.addEventListener("mouseenter", e => {
-                Select(Multiverse);
-            });
-
-            if(Base){
-                const Element2 = CreateLine(X - 100000, Y, X, Y, 4, Color);
-                Element2.addEventListener("mouseenter", e => {
+            if(Start){
+                const Line = CreateLine(X - MaxLength, Y, X, Y, LineThickness, Multiverse.Color);
+                Line.addEventListener("mouseenter", e => {
                     Select(Multiverse);
                 });
             }
 
-            let i = 0;
-            for(const Action of Actions){
-                i += 2;
-                GenerateAction(Action, X + (Base ? i - 2 : i) * StepSize * D, Y, D / (i / 2));
+            function GenerateLine(X2, I){
+                const Action = Multiverse.Actions[I];
+                if(Action){
+                    const NextX = X2 + StepSize;
+
+                    GenerateAction(Action, NextX, Y);
+
+                    const Line = CreateLine(X2, Y, NextX, Y, LineThickness, Multiverse.Color);
+                    Line.addEventListener("mouseenter", e => {
+                        Select(Multiverse);
+                    });
+
+                    GenerateLine(NextX, I + 1);
+                }else{
+                    const Line = CreateLine(X2, Y, X2 + MaxLength, Y, LineThickness, Multiverse.Color);
+                    Line.addEventListener("mouseenter", e => {
+                        Select(Multiverse);
+                    });
+                }
             }
+            GenerateLine(X, 0);
 
             console.groupEnd();
         }
-
-        GenerateMultiverse(MULTIVERSES, 0, 0, 20);
+        GenerateMultiverse(M_Real, 0, 0, true);
     }
     GenerateMultiverses();
 
