@@ -1794,6 +1794,14 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
     letter-spacing: 1px;
 }
 
+.lituism-modal-size {
+    color: #ff8899;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
+    letter-spacing: 1px;
+}
+
 /* ===== СЧЁТЧИК ===== */
 .lituism-counter {
     text-align: center;
@@ -2161,6 +2169,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
             <span class="lituism-modal-title" id="lituismModalTitle">—</span>
             <span class="lituism-modal-author" id="lituismModalAuthor">—</span>
             <span class="lituism-modal-date" id="lituismModalDate">—</span>
+			<span class="lituism-modal-size" id="lituismModalSize">—</span>
         </div>
     </div>
 </div>
@@ -2404,6 +2413,12 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 							case 'author':
 								valA = a.AUTHOR.toLowerCase();
 								valB = b.AUTHOR.toLowerCase();
+								
+								if(valA == valB){
+									valA = a.NAME.toLowerCase();
+									valB = b.NAME.toLowerCase();
+								}
+								
 								break;
 							case 'date':
 							function parseDateWeight(str) {
@@ -2452,8 +2467,8 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 							default:
 								return 0;
 						}
-						if (valA < valB) return GALLERY_sortAsc ? -1 : 1;
-						if (valA > valB) return GALLERY_sortAsc ? 1 : -1;
+						if (valA < valB) return GALLERY_sortAsc ? -1 :  1;
+						if (valA > valB) return GALLERY_sortAsc ?  1 : -1;
 						return 0;
 					});
 				} else {
@@ -2469,6 +2484,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				}
 
 				let html = '';
+				const cardData = [];
 				for (const item of items) {
 					const rot = GALLERY_randomRange(-4, 4);
 					const scale = GALLERY_randomRange(0.95, 1.05);
@@ -2477,6 +2493,13 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 					const shuffledColors = GALLERY_shuffleArray([...colors]);
 					const gradient = `linear-gradient(135deg, ${shuffledColors.slice(0, 4).join(', ')})`;
 					const animDuration = Math.random() * 1;
+
+					cardData.push({
+						url: item.SOURCE,
+						title: item.NAME,
+						author: item.AUTHOR,
+						date: item.DATE
+					});
 
 					html += `
             <div class="lituism-card"
@@ -2496,13 +2519,49 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
                 <div class="lituism-card-info">
                     <div class="lituism-card-title">${item.NAME}</div>
                     <div class="lituism-card-author">✧ ${item.AUTHOR}</div>
-                    <div class="lituism-card-date">⏱ ${item.DATE}</div>
+                    <div class="lituism-card-date glitch2">⏱ ${item.DATE}&nbsp;|&nbsp; <span class="lituism-card-size">☣ L O A D I N G . . .</span></div>
                 </div>
             </div>
         `;
 				}
 
 				grid.innerHTML = html;
+
+				for (var i = 0; i < cardData.length; i++) {
+					(function(index) {
+						var data = cardData[index];
+						var tempImg = new Image();
+						tempImg.onload = function() {
+							var cards = document.getElementsByClassName('lituism-card');
+							for (var j = 0; j < cards.length; j++) {
+								if (cards[j].dataset.url === data.url) {
+									cards[j].dataset.width = this.naturalWidth;
+									cards[j].dataset.height = this.naturalHeight;
+									var sizeEl = cards[j].getElementsByClassName('lituism-card-size')[0];
+									if (sizeEl) {
+										sizeEl.textContent = '☣ ' + this.naturalWidth + '×' + this.naturalHeight;
+									}
+									break;
+								}
+							}
+						};
+						tempImg.onerror = function() {
+							var cards = document.getElementsByClassName('lituism-card');
+							for (var j = 0; j < cards.length; j++) {
+								if (cards[j].dataset.url === data.url) {
+									cards[j].dataset.width = '?';
+									cards[j].dataset.height = '?';
+									var sizeEl = cards[j].getElementsByClassName('lituism-card-size')[0];
+									if (sizeEl) {
+										sizeEl.textContent = '☣ ?×?';
+									}
+									break;
+								}
+							}
+						};
+						tempImg.src = data.url;
+					})(i);
+				}
 
 				const cards = grid.querySelectorAll('.lituism-card');
 				cards.forEach(card => {
@@ -2511,7 +2570,9 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 						const title = this.dataset.title;
 						const author = this.dataset.author;
 						const date = this.dataset.date;
-						GALLERY_openModal(url, title, author, date);
+						const width = this.dataset.width || '?';
+						const height = this.dataset.height || '?';
+						GALLERY_openModal(url, title, author, date, width, height);
 					};
 				});
 			}
@@ -2523,12 +2584,13 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 			// ===================================================================
 			//  МОДАЛЬНОЕ ОКНО
 			// ===================================================================
-			function GALLERY_openModal(url, title, author, date) {
+			function GALLERY_openModal(url, title, author, date, width, height) {
 				const modal = document.getElementById('lituismModal');
 				const img = document.getElementById('lituismModalImg');
 				const titleEl = document.getElementById('lituismModalTitle');
 				const authorEl = document.getElementById('lituismModalAuthor');
 				const dateEl = document.getElementById('lituismModalDate');
+				const sizeEl = document.getElementById('lituismModalSize');
 				const wrapper = document.getElementById('modalImgWrapper');
 
 				if (!modal || !img) return;
@@ -2538,6 +2600,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				titleEl.textContent = title || '—';
 				authorEl.textContent = author || '—';
 				dateEl.textContent = date || '—';
+				sizeEl.textContent = `☣ ${width || '?'} × ${height || '?'}`;
 
 				// Сбрасываем зум при открытии
 				if (wrapper) {

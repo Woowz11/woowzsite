@@ -1,0 +1,157 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Advanced Web Components</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        /* CSS переменная для легкой смены темы всей вики */
+        :root { --wiki-accent: #4a90e2; }
+    </style>
+</head>
+<body>
+
+    <h2>1. Рекурсивное дерево категорий</h2>
+    <!-- Компонент вызывает сам себя, если есть вложенные данные -->
+    <wiki-tree data='{
+        "Вселенная": {
+            "Галактика": {
+                "Солнечная система": "Земля"
+            },
+            "Черные дыры": "Сингулярность"
+        }
+    }'></wiki-tree>
+
+    <hr>
+
+    <h2>2. Интерактивный спойлер (Shadow DOM + Slot)</h2>
+    <wiki-spoiler title="Нажми, чтобы увидеть секрет">
+        <p>Этот контент спрятан внутри Shadow DOM и вставлен через слот!</p>
+        <w-image src="https://woowz11.github.io/woowzsite/source/specialforrandomsite/frog.gif" caption="Картинка внутри спойлера"></w-image>
+    </wiki-spoiler>
+
+    <hr>
+
+    <h2>3. Рекурсивный повторитель (Прикол с итерацией)</h2>
+    <!-- count - сколько раз продублировать контент -->
+    <wiki-repeat count="3">
+        <div style="padding: 5px; border: 1px dashed red; margin: 5px;">Я дублируюсь!</div>
+    </wiki-repeat>
+
+    <hr>
+
+    <h2>4. Живая карточка (Стили через атрибуты)</h2>
+    <wiki-card theme="dark" title="Dark Card">Контент темной карточки</wiki-card>
+    <wiki-card theme="light" title="Light Card">Контент светлой карточки</wiki-card>
+
+    <!-- Твои старые компоненты тоже будут работать -->
+    
+<script>
+    // --- 1. РЕКУРСИВНОЕ ДЕРЕВО ---
+    class WikiTree extends HTMLElement {
+        connectedCallback() {
+            const rawData = this.getAttribute('data');
+            const data = JSON.parse(rawData);
+            this.render(data, this);
+        }
+
+        render(obj, container) {
+            const ul = document.createElement('ul');
+            for (let key in obj) {
+                const li = document.createElement('li');
+                if (typeof obj[key] === 'object') {
+                    li.innerHTML = `<b>${key}</b>`;
+                    // РЕКУРСИЯ: Создаем новый wiki-tree или просто вызываем функцию
+                    this.render(obj[key], li); 
+                } else {
+                    li.textContent = `${key}: ${obj[key]}`;
+                }
+                ul.appendChild(li);
+            }
+            container.appendChild(ul);
+        }
+    }
+    customElements.define("wiki-tree", WikiTree);
+
+    // --- 2. СПОЙЛЕР С SHADOW DOM ---
+    class WikiSpoiler extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+            this.isOpen = false;
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+
+        toggle() {
+            this.isOpen = !this.isOpen;
+            this.render();
+        }
+
+        render() {
+            this.shadowRoot.innerHTML = `
+            <style>
+                .box { border: 1px solid var(--wiki-accent); border-radius: 4px; margin: 10px 0; }
+                .head { background: var(--wiki-accent); color: white; padding: 10px; cursor: pointer; user-select: none; }
+                .body { padding: 10px; display: ${this.isOpen ? 'block' : 'none'}; background: white; }
+            </style>
+            <div class="box">
+                <div class="head">${this.getAttribute('title') || 'Развернуть'}</div>
+                <div class="body">
+                    <slot></slot> <!-- Место для внешнего HTML -->
+                </div>
+            </div>
+            `;
+            this.shadowRoot.querySelector('.head').onclick = () => this.toggle();
+        }
+    }
+    customElements.define("wiki-spoiler", WikiSpoiler);
+
+    // --- 3. ПОВТОРИТЕЛЬ (Итерация) ---
+    class WikiRepeat extends HTMLElement {
+        connectedCallback() {
+            const count = parseInt(this.getAttribute('count')) || 1;
+            const content = this.innerHTML;
+            let result = '';
+            for(let i = 0; i < count; i++) {
+                result += `<div class="repeat-item">${content}</div>`;
+            }
+            this.innerHTML = result;
+        }
+    }
+    customElements.define("wiki-repeat", WikiRepeat);
+
+    // --- 4. КАРТОЧКА С ТЕМАМИ ---
+    class WikiCard extends HTMLElement {
+        connectedCallback() {
+            const theme = this.getAttribute('theme') || 'light';
+            const title = this.getAttribute('title');
+            
+            const styles = {
+                dark:  "background: #333; color: white;",
+                light: "background: white; color: #333;"
+            };
+
+            this.innerHTML = `
+                <div style="${styles[theme]} border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);">
+                    <h3>${title}</h3>
+                    <slot>${this.innerHTML}</slot>
+                </div>
+            `;
+        }
+    }
+    customElements.define("wiki-card", WikiCard);
+
+    // Пример твоего WikiImage для работы кода
+    class WikiImage extends HTMLElement {
+        connectedCallback() {
+            this.innerHTML = `<img src="${this.getAttribute('src')}" style="max-width:100px"><br><small>${this.getAttribute('caption')}</small>`;
+        }
+    }
+    customElements.define("w-image", WikiImage);
+
+</script>
+</body>
+</html>

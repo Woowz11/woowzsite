@@ -44,10 +44,32 @@ const __A_IDK = " (я не помню точно)"
 
 // ----------------------------------------------------------------------
 
-// надо бы заглянуть на сервер glitch старый акк посмотреть фотки
-
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("light3.png", "ExtraBackrooms GLSL Light Shaders №3", __A_WOOWZ)
+ADD("light2.png", "ExtraBackrooms GLSL Light Shaders №2", __A_WOOWZ)
+ADD("light1.png", "ExtraBackrooms GLSL Light Shaders №1", __A_WOOWZ)
+ADD("gliph3.png", "glyph03", __A_WOOWZ)
+ADD("gliph2.png", "glyph02", __A_WOOWZ)
+ADD("gliph.png", "glyph01", __A_WOOWZ)
+ADD("2025-05-29_23.29.21.png", "Minecraft 🟥🟩🟦", __A_WOOWZ, "2025.05.29")
+ADD("woowzcraft.png", "WoowzCraft", __A_WOOWZ, "2025.01.01")
+ADD("grid.png", "__field_of_grid__", __A_WOOWZ, "2025.05.30")
+ADD("colors2.png", "|ONLY TEXT| |ONLY TEXT| |ONLY TEXT|", __A_WOOWZ, "2025.05.30")
+ADD("mine.png", "GgLlIiTtCcHh__MmIiNnEeCcRrAaFfTt", __A_WOOWZ, "2025.05.30")
+ADD("bloodraw.png", "BROKEN BLOODRAW GENERATOR PREVIEW IMAGE", __A_WOOWZ, "2025.10.05")
+ADD("buffer.png", "WoowzEngine: №30", __A_WOOWZ, "2025.08.04")
+ADD("colors.png", "WoowzEngine: №29", __A_WOOWZ, "2025.08.22")
+ADD("tunel2.png", "WoowzEngine: №28", __A_WOOWZ, "2025.08.19")
+ADD("gglliittcchh.png", "WoowzEngine: №27", __A_WOOWZ)
+ADD("sex2.png", "WoowzEngine: №26", __A_WOOWZ)
+ADD("cb.png", "WoowzEngine: №25", __A_WOOWZ)
+ADD("giga.png", "WoowzEngine: №24", __A_WOOWZ)
+ADD("coral.png", "WoowzEngine: №23", __A_WOOWZ)
+ADD("woowzcorepro.png", "WoowzEngine: №22", __A_WOOWZ)
+ADD("redsky.png", "WoowzEngine: №21", __A_WOOWZ)
+ADD("gmm_garrymod_map_by_woowz_map_garry_game.png", "gmm_garrymod_map_by_woowz_map_garry_game", __A_WOOWZ, "2026.07.23")
+ADD("acidbuilders2.png", "ACIDBUILDERSLEAGUE", __A_SKREP, "2026.08.24")
 ADD("newava.png", "NEW CHANNEL AVA 🔒", __A_WOOWZ, "2026.08.04")
 ADD("indus.png", "ICON OF HIA-VGSL&VCEL-LCAOMSL-AND-LB10DS-WIP:NQLS©™", __A_SKREP, "2026.07.28")
 ADD("burg.png", "Burg, сделано сегодня", __A_SKREP, "2026.07.21")
@@ -691,6 +713,10 @@ BloodrawSkinEditorGradientsHairs = AddFullnessToTable([
 	
 ],"BloodRaw/Source/Skin/gradients/skins/",".png");
 
+WoowzsiteMultiverse = AddFullnessToTable([
+	"pavel_adekvat", "pavel_noyoutube"
+],"source/multiverse/",".png");
+
 /*__________________________________________________________________________________________________*/
 
 function GetAllWoowzsite(){
@@ -717,7 +743,8 @@ function GetAllWoowzsite(){
 		LithiumArts,
 		GOLUPREVIEW,
 		WoowzsiteSourceLituism,
-		TrueLithuismArts
+		TrueLithuismArts,
+		WoowzsiteMultiverse
 	);
 }
 

@@ -143,7 +143,10 @@
         return Multiverse;
     }
 
-    function AddSmartActions(Multiverse, Actions){
+    function AddSmartActions(Multiverse, Actions) {
+        // Если Actions не массив или пуст, выходим
+        if (!Array.isArray(Actions)) return;
+
         for (const ActionData of Actions) {
             const [ActionName, SolutionsData] = ActionData;
 
@@ -164,12 +167,24 @@
                 let TargetMultiverse;
                 let NestedActions = [];
 
+                // Обработка расширенного формата: [M_Multiverse, [Action1, Action2]] или [M_Multiverse, Action1, Action2]
                 if (Array.isArray(Target) && Target[0] && Target[0].ID) {
                     TargetMultiverse = Target[0];
-                    NestedActions = Target.slice(1);
+
+                    // Проверяем, передан ли список действий вторым аргументом как массив или просто списком
+                    if (Array.isArray(Target[1]) && Array.isArray(Target[1][0])) {
+                        // Формат: [M, [ [Name, Sol], [Name, Sol] ]]
+                        NestedActions = Target[1];
+                    } else {
+                        // Формат: [M, [Name, Sol], [Name, Sol]]
+                        NestedActions = Target.slice(1);
+                    }
                 } else {
                     TargetMultiverse = Target;
                 }
+
+                // Защита от пустых значений
+                if (!TargetMultiverse) { TargetMultiverse = __M_Placeholder; }
 
                 const IsSameMultiverse = (TargetMultiverse === Multiverse);
 
@@ -181,6 +196,7 @@
 
                 ActionObject.Solution.push(SolutionObject);
 
+                // Связываем мультиверсы
                 if (TargetMultiverse && !IsSameMultiverse) {
                     if (!Multiverse.Children.includes(TargetMultiverse)) {
                         Multiverse.Children.push(TargetMultiverse);
@@ -193,6 +209,7 @@
                     }
                 }
 
+                // РЕКУРСИЯ
                 if (NestedActions.length > 0) {
                     AddSmartActions(TargetMultiverse, NestedActions);
                 }
@@ -206,6 +223,8 @@
 
     // { Color: "rgb(0, 0, 0)", Desc: "" }
 
+    const __M_Placeholder = MultiverseCreate("!placeholder", "PLACEHOLDER", { Color: "rgb(0, 0, 0)", Desc: "" });
+
     const M_Real = MultiverseCreate("!real", "Реальный мир", { Color: "white", Desc: "Текущий реальный мир! Все текущие события происходят в нём." });
     const M_NoKnownPL = MultiverseCreate("woowz11_no_known_programm_language", "Woowz11 не знает программирования", { Color: "rgb(50, 150, 0)", Desc: "Woowz11 никогда не интерисовался программированием, посчитал это ненужным" });
     const M_NoKnownWldoui = MultiverseCreate("woowz11_no_known_wldoui", "Woowz11 не знает Wldoui", { Color: "rgb(200, 255, 200)", Desc: "Woowz11 и Wldoui никогда не пересекались, и вообще не знают о существовании друг друга" });
@@ -216,13 +235,13 @@
     const M_BugGOLU = MultiverseCreate("bug_golu", "GOLU обрёл случайное сознание", { Color: "rgb(255, 150, 150)", Desc: "GOLU смог найти лазейку в коде (из-за бага), и смог начать развиваться без контроля" });
     const M_AbandonedGOLU = MultiverseCreate("abandoned_golu", "GOLU неудачный проект", { Color: "rgb(200, 200, 200)", Desc: "Разработка GOLU велась очень долго, и неуспешно" });
     const M_WoowzFanGOLU = MultiverseCreate("woowz_fan_golu", "Woowz11 помешан на GOLU", { Color: "rgb(255, 200, 150)" });
-    const M_StupidGOLU = MultiverseCreate("stupid_golu", "Отупевший GOLU", { Color: "rgb(50, 25, 25)", Desc: "Интелект GOLU перестал развиваться, из-за бага или из-за чего неизвестно" });
+    const M_StupidGOLU = MultiverseCreate("stupid_golu", "Отупевший GOLU", { Color: "rgb(50, 25, 25)", Desc: "Интеллект GOLU перестал развиваться, из-за бага или из-за чего неизвестно" });
     const M_GOLUInInternet = MultiverseCreate("golu_in_internet", "GOLU в интернете", { Color: "rgb(255, 0, 0)", Desc: "GOLU получил доступ в интернет, и уже клонировал себя по интернету" });
     const M_GOLUDanger = MultiverseCreate("golu_danger", "GOLU обезврежен, считается опасным", { Color: "rgb(200, 150, 100)", Desc: "Вовремя замеитили как GOLU стал слишком много себе позволять, и его выключили" });
     const M_DeanonWldoui = MultiverseCreate("deanon_wldoui", "Информация об Wldoui была слита, а так же был ему нанесён вред", { Color: "rgb(255, 0, 0)", Desc: "Woowz11 ради того что-бы сломать жизнь Wldoui, научился деанонить и т.д, и попытался сломать жизнь Wldoui" })
     const M_DeanonWoowz11 = MultiverseCreate("deanon_woowz11", "Информация об Woowz11 была слита, а так же был ему нанесён вред", { Color: "rgb(0, 0, 255)", Desc: "Wldoui слил всю информацию об Woowz11, из-за чего нанёс ему вред" })
     const M_DeanonBoth = MultiverseCreate("deanon_woowz11_wldoui", "Woowz11 и Wldoui слили друг другу, и друг другу нанесли вред", { Color: "rgb(255, 0, 255)", Desc: "Woowz11 и Wldoui одновременно слили информацию об друг друге, тем самым нанесли друг другу вред" })
-    const M_YouTube = MultiverseCreate("youtube", "Woowz11 ютубер", { Color: "rgb(255, 50, 50)", Desc: "Woowz11 сильно заинтерисовался в ютубе, и стал активно снимать для него видео и развивать канал" })
+    const M_YouTube = MultiverseCreate("youtube", "Woowz11 ютубер", { Color: "rgb(255, 50, 50)", Desc: "Woowz11 сильно заинтересовался в ютубе, и стал активно снимать для него видео и развивать канал" })
     const M_NoYoutube = MultiverseCreate("no_youtube", "Woowz11 не интересен YouTube", { Color: "rgb(200, 255, 255)", Desc: "Woowz11 посчитал не нужным создавать канал на ютубе" })
     const M_NoApathia = MultiverseCreate("no_apathia", "Wldoui живёт без апатии", { Color: "rgb(150, 150, 255)", Desc: "Wldoui не зарабатывает апатию, и живёт своей спокойной жизнью без морок и грусти" } )
     const M_NoApathia_Woowz11 = MultiverseCreate("no_apathia_found_woowz11", "Wldoui без апатии, знаком с Woowz11", { Color: "rgb(200, 200, 255)", Desc: "Wldoui встречает Woowz11, начинают общение без всяких конфликтов" })
@@ -234,8 +253,55 @@
     const M_MaybeGOLU = MultiverseCreate("maybe_golu", "Woowz11 не отпускает мысли об GOLU", { Color: "rgb(255, 200, 255)", Desc: "Woowz11 думает, может быть всё таки сделать GOLU? Правда все его боятся..." })
     const M_WoowzCore = MultiverseCreate("woowzcore", "Woowz11 создал WoowzCore", { Color: "rgb(255, 128, 0)", Desc: "WoowzCore был создан" })
     const M_GOLUArt = MultiverseCreate("golu_art", "Искусство про GOLU", { Color: "rgb(128, 128, 0)", Desc: "Woowz11 делает картинки, видео, сайты про GOLU, в крупном количестве" })
+    const M_Woowz11Programmer = MultiverseCreate("woowz11_fan_programmer", "Woowz11 слишком интересуется программированием", { Color: "rgb(150, 100, 50)", Desc: "Woowz11 посчитал программирование главной задачей своей жизни, и начал углублённо изучать эту тему" })
+    const M_NoNotch = MultiverseCreate("no_notch", "Notch подал в отставку", { Color: "rgb(255, 230, 230)", Desc: "Notch посчитал, что Minecraft лучше никому не продавать, при этом он сам не готов дальше его развивать" })
+    const M_MinecraftNotch = MultiverseCreate("minecraft_notch", "Notch не продавал Minecraft", { Color: "rgb(230, 255, 230)", Desc: "Notch посчитал, что Minecraft лучше никому не продавать, что он сделает его лучше" })
+    const M_MinecraftEA = MultiverseCreate("minecraft_ea", "Notch продал Minecraft, Electronic Arts", { Color: "rgb(100, 100, 200)", Desc: "У Notch-а состоялась сделка с Electronic Arts, он решил им продать права на Minecraft" })
+    const M_MinecraftActivision = MultiverseCreate("minecraft_activision", "Notch продал Minecraft, Activision", { Color: "rgb(100, 200, 200)", Desc: "У Notch-а состоялась сделка с Activision, он решил им продать права на Minecraft" })
+    const M_NoLithiums = MultiverseCreate("no_lithiusm", "Литуизм не был придуман", { Color: "rgb(255, 200, 255)", Desc: "Woowz11 и Wldoui так и не придумали литуизм" })
+    const M_MoreLithiusm = MultiverseCreate("more_lithiusm", "Больше литуизма", { Color: "rgb(255, 200, 100)", Desc: "Woowz11 и Wldoui слишком сильно помешались на этой теме" })
+    const M_EnemyLithiums = MultiverseCreate("enemy_lithiums", "Ссора из-за литуизма", { Color: "rgb(255, 100, 200)", Desc: "Woowz11 и Wldoui что-то сильно не поделили из-за литуизма" })
+    const M_EnemyLithiums_Woowz11GOLU = MultiverseCreate("enemy_lithiums_woowz11_golu", "Woowz11 создаёт GOLU, после ссоры с Wldoui", { Color: "rgb(255, 100, 0)", Desc: "Woowz11 зная о литуизме, придумывает GOLU, на зло Wldoui" })
+    const M_EnemyLithiums_WldouiGOLU = MultiverseCreate("enemy_lithiums_wldoui_golu", "Wldoui создаёт GOLU, после ссоры с Woowz11", { Color: "rgb(0, 100, 255)", Desc: "Wldoui зная о литуизме, придумывает GOLU, на зло Woowz11" })
+    const M_PavelPisTV = MultiverseCreate("pavel_pischenik_tv", "Павел Писечник TV реален", { Color: "rgb(255, 0, 0)", Desc: "Павел Писечник TV это реальный человек!!!" })
+    const M_PavelPisTV_NoYoutube = MultiverseCreate("pavel_pischenik_tv_no_youtube", "Павел Писечник TV, не ютубер", { Color: "rgb(255, 128, 0)", Desc: "Павел Писечник TV, никогда не становился ютубером, теперь он обычный Павел" })
+    const M_PavelPisTV_NoLithiusm = MultiverseCreate("pavel_pischenik_tv_no_lithiusm", "Павел Писечник TV, Литуизм не существует", { Color: "rgb(255, 0, 128)", Desc: "Павел Писечник TV, никогда не пересекался с литуизмом, потому-что его не существует" })
+    const M_PavelPisTV_HaterLit = MultiverseCreate("pavel_pischenik_tv_hate_lithiusm", "Павел Писечник TV ненавидит Литуизм!", { Color: "rgb(0, 255, 0)", Desc: "Павел Писечник TV, считает Литуизм бредом сумашедшего, и решает отдалиться от этого максимально" })
+    const M_PavelPisTV_FanLit = MultiverseCreate("pavel_pischenik_tv_fan_lithiusm", "Павел Писечник TV сильно интересуется Литуизмом!", { Color: "rgb(128, 0, 0)", Desc: "Павел Писечник TV, считает Литуизм делом своей жизни!" })
+    const M_FatherPavelPisTV = MultiverseCreate("father_pavel_pischenik_tv", "Отец Павла Писечника TV существует", { Color: "rgb(200, 200, 255)", Desc: "Отец Павла Писечника TV существует в этом мире." })
+    const M_BloodEyeOS = MultiverseCreate("blood_eye_os", "BloodEye операционная система, существует", { Color: "rgb(255, 200, 200)", Desc: "BloodEye OS. существует, необычная операционная система" })
+    const M_SuicideWoowz11 = MultiverseCreate("suicide_woowz11", "Woowz11 больше нет", { Color: "rgb(0, 0, 0)", Desc: "Woowz11 не выдержал напасти, не смог стерпеть, и решил со всем покончить" })
+    const M_PopularWoowz11 = MultiverseCreate("popular_woowz11", "Woowz11 стал популярным", { Color: "rgb(0, 255, 0)", Desc: "Woowz11 смог достичь успеха, и стал популярным" })
+    const M_DestroyYoutube = MultiverseCreate("destroy_youtube", "YouTube как компания, больше не существует", { Color: "rgb(128, 50, 50)", Desc: "YouTube из-за каких-то проблем решила закрыться, что вызвало волну негодования" })
+    const M_RichWoowz11 = MultiverseCreate("rich_woowz11", "Woowz11 стал богатым", { Color: "rgb(255, 255, 0)", Desc: "Woowz11 смог стать богатым, используя свою популярность" })
+    const M_RichWoowz11_NoPopular = MultiverseCreate("rich_woowz11_no_popular", "Woowz11 богач, который не хочет быть популярным", { Color: "rgb(128, 128, 0)", Desc: "Woowz11 надоели взгляды и ожидания от его действий, что он решил с этим покончить и залёг на дно, что-бы все забыли про него" })
+    const M_RichWoowz11_FakeDead = MultiverseCreate("rich_woowz11_fake_dead", "Woowz11 богач, сымитировший свою смерть", { Color: "rgb(50, 50, 0)", Desc: "Woowz11 сильно надоела его популярность, он решил как можно быстрее от неё избавится, и сымитировал свою смерть" })
 
     AddSmartActions(M_Real, [
+        ["Отец Павла Писечника TV рождается...", [
+            ["Не рождается", M_Real],
+            ["Рождается",
+                [M_FatherPavelPisTV, [
+                    ["Павел Писечник TV рождается...", [
+                        ["Он не существует", M_FatherPavelPisTV],
+                        ["Реально родился",
+                            [M_PavelPisTV, [
+                                ["Павел Писечник TV становится YouTube-ром", [
+                                    ["Становится", M_PavelPisTV],
+                                    ["Считает это не нужным", M_PavelPisTV_NoYoutube]
+                                ]],
+                                ["Создание Литуизма", [
+                                    ["Создан Литуизм", M_PavelPisTV],
+                                    ["Не создан Литуизм", M_PavelPisTV_NoLithiusm],
+                                    ["Не навидит Литуизм", M_PavelPisTV_HaterLit],
+                                    ["Сильно обажает Литуизм", M_PavelPisTV_FanLit]
+                                ]]
+                            ]]
+                        ]
+                    ]]
+                ]]
+            ]
+        ]],
         ["Woowz11 рождается...", [
            ["Он родился", M_Real],
            ["Он никогда не рождался", M_NoWoowz11]
@@ -253,12 +319,56 @@
         ]],
         ["Woowz11 создал YouTube канал", [
             ["Создал", M_Real],
-            ["Начал относиться ответственно к нему", M_YouTube],
-            ["Не создал", M_NoYoutube]
+            ["Начал относиться ответственно к нему",
+                [M_YouTube,
+                    ["Woowz11 стал популярным", [
+                        ["Увы, не стал", M_YouTube],
+                        ["Стал",
+                            [M_PopularWoowz11,
+                                ["Woowz11 становится богатым", [
+                                    ["Не получается у него", M_PopularWoowz11],
+                                    ["Успех",
+                                        [M_RichWoowz11,
+                                            ["Woowz11 решил всё таки, что популярность не для него", [
+                                                ["Нет, его", M_RichWoowz11],
+                                                ["Залёг на дно", M_RichWoowz11_NoPopular],
+                                                ["Сымитировал свою смерть", M_RichWoowz11_FakeDead]
+                                            ]]
+                                        ]
+                                    ]
+                                ]]
+                            ]
+                        ]
+                    ]]
+                ]
+            ],
+            ["Не создал",
+                [M_NoYoutube,
+                    ["YouTube закрывается", [
+                        ["Нет, не закрывается", M_NoYoutube],
+                        ["Woowz11 оказался последней каплей что-ли? Ютуб загнулся", M_DestroyYoutube]
+                    ]]
+                ]
+            ]
+        ]],
+        ["Notch продаёт Minecraft", [
+            ["Продал Microsoft", M_Real],
+            ["Продал EA", M_MinecraftEA],
+            ["Продал Activision", M_MinecraftActivision],
+            ["Никому не продал", M_MinecraftNotch],
+            ["Никому не продал, но дал в отставку", M_NoNotch]
         ]],
         ["Woowz11 начал изучать программирование", [
             ["Начал изучать", M_Real],
-            ["Посчитал не нужным", M_NoKnownPL]
+            ["Посчитал не нужным", M_NoKnownPL],
+            ["Слишком заинтересовался этой темой",
+                [M_Woowz11Programmer,
+                    ["Woowz11 создаёт BloodEye OS.", [
+                        ["Не создаёт", M_Woowz11Programmer],
+                        ["Создаёт", M_BloodEyeOS]
+                    ]]
+                ]
+            ]
         ]],
         ["Woowz11 познакомился с Wldoui", [
             ["Познакомился", M_Real],
@@ -271,7 +381,14 @@
                             [M_DeanonWoowz11,
                                 ["Травма оказалось сильной", [
                                     ["Woowz11 выдержал напасть", M_DeanonWoowz11],
-                                    ["Woowz11 заработал апатию", M_ApathiaWoowz11],
+                                    ["Woowz11 заработал апатию",
+                                        [M_ApathiaWoowz11,
+                                            ["Woowz11 решил покончить со всем", [
+                                                ["Ещё поживёт", M_ApathiaWoowz11],
+                                                ["Конец...", M_SuicideWoowz11]
+                                            ]]
+                                        ]
+                                    ],
                                     ["Woowz11 пришёл в ярость", M_RevengeWoowz11]
                                 ]]
                             ]
@@ -290,17 +407,31 @@
                 ]
             ]
         ]],
+        ["Создания Lithiusm", [
+            ["Woowz11 и Wldoui создают литуизм", M_Real],
+            ["Не приходит такая идея", M_NoLithiums],
+            ["Слишком увлекаются этой темой", M_MoreLithiusm],
+            ["Woowz11 и Wldoui из-за этого сорятся",
+                [M_EnemyLithiums,
+                    ["Создание понятия GOLU", [
+                        ["Не создали", M_EnemyLithiums],
+                        ["Woowz11 создал GOLU", M_EnemyLithiums_Woowz11GOLU],
+                        ["Wldoui создал GOLU", M_EnemyLithiums_WldouiGOLU]
+                    ]]
+                ]
+            ]
+        ]],
         ["Создание понятия GOLU", [
-            ["Создать, но как вымешленного персонажа", M_Real],
+            ["Создать, но как вымышленного персонажа", M_Real],
             ["Создать, как настоящего AI",
                 [M_GOLU,
                     ["Разработка GOLU", [
-                        ["GOLU ожил как искуственный интелект!", M_GOLU],
+                        ["GOLU ожил как искусственный интеллект!", M_GOLU],
                         ["GOLU был создан случайно, из-за бага",
                             [M_BugGOLU,
                                 ["GOLU развивается", [
                                     ["GOLU развивается ещё больше! Учится новому.", M_BugGOLU],
-                                    ["GOLU перестаёт развиватся", M_StupidGOLU]
+                                    ["GOLU перестаёт развиваться", M_StupidGOLU]
                                 ]],
                                 ["GOLU получает доступ в интернет", [
                                     ["Не успевает, у него забирают доступ", M_BugGOLU],
@@ -313,7 +444,7 @@
                     ]],
                     ["Полностью помешаться на GOLU", [
                         ["GOLU просто существует", M_GOLU],
-                        ["Woowz11 полностью помешался на развии GOLU",
+                        ["Woowz11 полностью помешался на развитии GOLU",
                             [M_WoowzFanGOLU,
                                 ["Woowz11 создаёт контент по GOLU", [
                                     ["Не масштабный контент", M_WoowzFanGOLU],
@@ -683,7 +814,7 @@
             function GenerateLine(X2, I){
                 const Action = Multiverse.Actions[I];
                 if(Action){
-                    const NextX = X2 + StepSize;
+                    const NextX = X2 + StepSize * 3;
 
                     GenerateAction(Action, NextX, Y);
 
