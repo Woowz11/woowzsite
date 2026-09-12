@@ -46,6 +46,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("horseshit.png", "diarrhée de cheval", __A_SKREP, "2026.09.12")
 ADD("light3.png", "ExtraBackrooms GLSL Light Shaders №3", __A_WOOWZ)
 ADD("light2.png", "ExtraBackrooms GLSL Light Shaders №2", __A_WOOWZ)
 ADD("light1.png", "ExtraBackrooms GLSL Light Shaders №1", __A_WOOWZ)
@@ -428,7 +429,7 @@ WoowzsiteSourceImagesJPG = AddFullnessToTable([
 ],"source/",".jpg")
 
 WoowzsiteSourceImagesGIF = AddFullnessToTable([
-	"download","esqueleto","fire","forest","gif","git","git2","null","null_bug","pet","s","vinil","welcome","wowzsearch","WTR6","loading"
+	"download","esqueleto","fire","forest","gif","git","git2","null","null_bug","pet","s","vinil","welcome","wowzsearch","WTR6","loading","glitch"
 ],"source/",".gif")
 
 WoowzsiteSourceIcons = AddFullnessToTable([
