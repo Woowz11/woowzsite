@@ -26,11 +26,18 @@ const GenerateStyle = () => {
 
     // language=CSS
     const CSS = `
-*{ box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+@font-face{
+    font-family: "LaireSans";
+    src: url("../source/LaireSans.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+        
+*{ box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; cursor: default; }
 body{
     background: ${State.Theme.bg};
     color: ${State.Theme.text};
-    font-family: "Segoe UI", system-ui, sans-serif;
+    font-family: "LaireSans", system-ui, sans-serif;
     overflow: hidden;
     font-size: ${IsMobile ? "18px" : "14px"};
 }
@@ -52,31 +59,31 @@ aside{
 }
 
 aside.LeftSidebar{
-    width: ${IsMobile ? '85vw' : '260px'};
+    width: ${IsMobile ? "85vw" : "260px"};
     border-right: 1px solid ${State.Theme.border};
-    position: ${IsMobile ? 'fixed' : 'relative'};
+    position: ${IsMobile ? "fixed" : "relative"};
     left: 0;
-    transform: ${IsMobile && !State.LeftOpen ? 'translateX(-100%)' : 'translateX(0)'};
+    transform: ${IsMobile && !State.LeftOpen ? "translateX(-100%)" : "translateX(0)"};
 }
 
 aside.RightSidebar{
-    width: ${IsMobile ? '85vw' : '240px'};
+    width: ${IsMobile ? "85vw" : "240px"};
     border-left: 1px solid ${State.Theme.border};
-    position: ${IsMobile ? 'fixed' : 'relative'};
+    position: ${IsMobile ? "fixed" : "relative"};
     right: 0;
-    transform: ${IsMobile && !State.RightOpen ? 'translateX(100%)' : 'translateX(0)'};
+    transform: ${IsMobile && !State.RightOpen ? "translateX(100%)" : "translateX(0)"};
 }
 
 aside.ActivityBar{
-    width: ${IsMobile ? '100vw' : '50px'};
-    height: ${IsMobile ? '65px' : '100%'};
+    width: ${IsMobile ? "100vw" : "50px"};
+    height: ${IsMobile ? "65px" : "100%"};
     background: ${State.Theme.activityBar};
-    border-${IsMobile ? 'top' : 'right'}: 1px solid ${State.Theme.border};
+    border-${IsMobile ? "top" : "right"}: 1px solid ${State.Theme.border};
     display: flex;
-    flex-direction: ${IsMobile ? 'row' : 'column'};
-    position: ${IsMobile ? 'fixed' : 'relative'};
+    flex-direction: ${IsMobile ? "row" : "column"};
+    position: ${IsMobile ? "fixed" : "relative"};
     bottom: 0;
-    justify-content: ${IsMobile ? 'space-around' : 'flex-start'};
+    justify-content: ${IsMobile ? "space-around" : "flex-start"};
     align-items: center;
     z-index: 1100;
 }
@@ -99,11 +106,11 @@ aside.ActivityBar{
     flex-direction: column;
     min-width: 0;
     height: 100%;
-    padding-bottom: ${IsMobile ? '65px' : '0'};
+    padding-bottom: ${IsMobile ? "65px" : "0"};
 }
 
 header{
-    height: ${IsMobile ? '70px' : '50px'};
+    height: ${IsMobile ? "70px" : "50px"};
     border-bottom: 1px solid ${State.Theme.border};
     display: flex;
     align-items: center;
@@ -113,33 +120,53 @@ header{
 }
 
 .MenuBtn{
-    display: ${IsMobile ? 'flex' : 'none'};
+    display: ${IsMobile ? "flex" : "none"};
     width: 45px; height: 45px;
     align-items: center; justify-content: center;
     font-size: 1.8rem;
     background: #333; border-radius: 8px; border: none; color: white;
 }
 
-.ScrollArea{ flex-grow: 1; overflow-y: auto; padding: ${IsMobile ? '25px' : '40px'}; }
+.ScrollArea{ flex-grow: 1; overflow-y: auto; padding: ${IsMobile ? "25px" : "40px"}; }
 article{ max-width: 800px; margin: 0 auto; line-height: 1.6; }
-h1{ font-size: ${IsMobile ? '2rem' : '2.5rem'}; margin-bottom: 20px; }
-
-.TreeItem{
-    padding: ${IsMobile ? '18px 25px' : '8px 25px'};
-    cursor: pointer;
-    border-bottom: 1px solid ${IsMobile ? '#333' : 'transparent'};
-}
-.Folder{ padding: 15px 25px 5px; font-size: 0.8rem; color: #666; }
+h1{ font-size: ${IsMobile ? "2rem" : "2.5rem"}; margin-bottom: 20px; }
 
 .MobileOverlay{
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.7);
-    display: ${IsMobile && (State.LeftOpen || State.RightOpen) ? 'block' : 'none'};
+    display: ${IsMobile && (State.LeftOpen || State.RightOpen) ? "block" : "none"};
     z-index: 900;
     backdrop-filter: blur(4px);
 }
-    `;
+
+.TreeArticle{
+    padding: 5px 25px;
+    margin: 2px 0;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    color: #ccc;
+    font-size: 1.25em;
+}
+.TreeCategory{
+    background: ${State.Theme.border};
+    padding: 8px 15px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 1px;
+}
+.TreeCategoryBox{
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid ${State.Theme.border};
+    border-radius: 8px;
+    margin: 10px 15px;
+    overflow: hidden;
+}`;
 
     let StyleElement = document.getElementById("Styles");
     if(!StyleElement){
@@ -162,9 +189,10 @@ const GenerateLeftSidebar = () => {
     function GenerateTree(Items){
         return Items.map(Item => {
             if(Item.Type === 1){
-                return `<div class="TreeItem">${Item.ID}</div>`;
+                const IsActive = State.Page === Item.ID ? "Active" : "";
+                return `<div class="TreeArticle ${IsActive}" onclick="window.location.hash='${Item.ID}'">${Item.ID}</div>`;
             }else{
-                return `<div class="Folder">${Item.ID}</div><div class="FolderContent" style="padding-left: 15px;">${GenerateTree(Item.Children)}</div>`;
+                return `<div class="TreeCategoryBox"><div class="TreeCategory">${Item.ID}</div><div style="padding-left: 15px;">${GenerateTree(Item.Children)}</div></div>`;
             }
         }).join("");
     }
@@ -189,7 +217,7 @@ const GenerateRightSidebar = () => `
 const GenerateHeader = () => `
 <header>
     <button class="MenuBtn" onclick="ToggleLeft()">☰</button>
-    <div class="Path" style="font-size: 0.9rem;">${State.IsMobile ? '📱 Mobile_OS' : 'Root / ' + State.Page}</div>
+    <div class="Path" style="font-size: 0.9rem;">${State.IsMobile ? "📱 Mobile_OS" : "Root / " + State.Page}</div>
     <button class="MenuBtn" onclick="ToggleRight()">ℹ️</button>
 </header>`;
 

@@ -801,7 +801,7 @@ function GetAllWoowzsiteIcons(){
 /*__________________________________________________________________________________________________*/
 
 WoowzsiteSourceFonts = AddTableToTable(AddFullnessToTable([
-	"minecraft.ttf","Comfortaa.ttf","inkverse.ttf","topor.otf","concrete.otf","Kantsler Fraktur.ttf"
+	"minecraft.ttf","Comfortaa.ttf","inkverse.ttf","topor.otf","concrete.otf","Kantsler Fraktur.ttf","Hyatheus.otf","Movavi_Grotesque.ttf","2MASS_J1808.otf","Cascadia.ttf","LaireSans.otf"
 ],"source/",""),[
 	"BloodRaw/Source/minecraft.ttf", "BloodRaw/Source/minecraft-color.ttf"
 ])

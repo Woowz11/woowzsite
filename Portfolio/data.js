@@ -21,10 +21,6 @@ function AddCategories(Categories, Target = PortfolioData.Categories){
     });
 }
 
-function AddProject(){
-    
-}
-
 // ----------------------------------------------------------------------
 
 AddCategories([
@@ -32,29 +28,32 @@ AddCategories([
     
     "projects",
     
-    ["skills", [
+    ["skills", "red", [
         "languages",
         "gamedev",
         "tools",
         "libs"
     ]],
     
-    ["arts", [
+    ["arts", "green", [
         "art_video",
         "history"
     ]],
     
-    ["experience", [
+    ["experience", "blue", [
         "vehi"
     ]],
     
-    ["environment", [
+    ["environment", "magenta", [
         "programs",
         "iron"
     ]],
     
-    ["lichnoe", [
+    ["lichnoe", "white", [
         "likes_dislikes",
         "my_code_style"
     ]]
 ]);
+
+// добавить элементы
+// * cubemap,skybox - можно скриншоты смотреть в виде 3д шара и вращать
