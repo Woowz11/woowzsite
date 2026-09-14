@@ -2781,7 +2781,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				e.stopPropagation();
 
 				const delta = e.deltaY > 0 ? 0.9 : 1.1;
-				const newScale = Math.min(Math.max(0.25, zoomScale * delta), 30);
+				const newScale = Math.min(Math.max(0.125, zoomScale * delta), 50);
 
 				// Просто меняем масштаб, позиция не меняется
 				zoomScale = newScale;

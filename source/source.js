@@ -46,6 +46,8 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("ai.webp", "A.I ART-WORKS", "A.I NETWORK 🌐")
+ADD("on_ne_idet_v_voice.png", "Вот что будет, если не идти со мною в войс", __A_WOOWZ, "2026.09.13")
 ADD("horseshit.png", "diarrhée de cheval", __A_SKREP, "2026.09.12")
 ADD("light3.png", "ExtraBackrooms GLSL Light Shaders №3", __A_WOOWZ)
 ADD("light2.png", "ExtraBackrooms GLSL Light Shaders №2", __A_WOOWZ)
