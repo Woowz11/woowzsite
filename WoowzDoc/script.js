@@ -1,5 +1,46 @@
 ﻿// noinspection CssUnresolvedCustomProperty
 
+/*
+Сделать ещё элементы:
+* Клавиша, для отображение клавиши клавиатуры, и ещё можно мыши, геймпада
+* Просмотр 3д скайбокса
+* Просмотр других сайтов к примеру через iframe
+* Указание даты, что-бы указать сколько времени прошло к примеру с определённой даты
+* headers разного размера, и вида
+* line, и таблицы
+* карточка, с информацией
+* простое вставление картинки, и svg
+* галерея (что к прошлому что и к этому, возможность добавлять описания к элементам)
+* звук и видео
+* ссылка на ютуб видео
+* ссылка на другую статью, и ссылка на другой сайт (на другой сайт добавить значок стрелочки типо другой сайт)
+* списки, и деревья
+* графики
+* языки программирования
+* категория которую можно свернуть и развернуть
+* цитата?
+* возможность вставить вырезку из другой статьи? типо указать от куда до куда обрезать и вставить
+* разные текста, разного цвета, выделенности, наклонности
+* математические формулы конструктор
+* генератор графиков?
+* прогресс бар
+* разные кнопки, input, слайдеры
+* элементы типа как в markdown, там `` и ```
+* error, warning, info, note и т.д
+* мелкий текст
+* ВОЗМОЖНОСТЬ ДЕЛАТЬ ЭЛЕМЕНТЫ СПРАВА, мб сделать столб справа и туда вписывать? я хз как реализовать, Как на википедии короче
+* элемент с scrollbar's, типо что-бы туда можно было вписать широкий элемент, и появился scrollbar, или указать лимит высоту и т.д
+
+Доп идеи:
+* сделать возможность указывать иконки для страниц, и википедии (будет ещё указываться в document.title)
+* придумать занятие для правой sidebar, мб как в вики типо переход по категориям, добавить тогда в Element поддержку указания важности элемента, что-бы он там отображался
+* в Element добавить вызов Update, Render, и т.д, что-бы каждый кадр могло вызываться, для рендера чего-то допустим
+* добавить градиенты и иконки svg разные, и default language
+* мб для красоты добавить шейдеры, что-бы рисовать шейдеры
+* другие типы загрузки страниц, а именно просто "JS", и функцию сразу прописывать
+* если пролистал вниз, появится кнопка вверх
+ */
+
 const WoowzDoc = {
     State: {
         Const: {
@@ -16,6 +57,8 @@ const WoowzDoc = {
         
         Data: {},
         Translations: {},
+        Elements: {},
+        CustomStyles: [],
         
         ContainerApp: undefined,
         ContainerStyle: undefined,
@@ -24,6 +67,36 @@ const WoowzDoc = {
         Lang: "ru",
         
         Config: undefined
+    },
+    
+    Element: class extends HTMLElement{
+        constructor(){ super(); }
+        connectedCallback(){ this.Start(); }
+        
+        Start(){}
+    },
+    
+    AddCustomStyle(CSS){
+        this.State.CustomStyles.push(CSS);
+    },
+    
+    RegisterElement(ElementName, ElementClass, CSS = null){
+        this.State.Elements["wd-" + ElementName] = ElementClass;
+        if(CSS){
+            this.AddCustomStyle(CSS);
+        }
+    },
+    
+    RegisterDefaultElements(){
+        const self = this;
+        
+        this.RegisterElement("badge", class extends self.Element{
+            Start(){
+                const Color = this.getAttribute("color") || "var(--Accent)";
+                this.style.setProperty("--BadgeColor", Color);
+                this.classList.add("wd-badge");
+            }
+        }, /* language=CSS */ `.wd-badge{ display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background: color-mix(in srgb, var(--BadgeColor), transparent 80%); color: var(--BadgeColor); border: 1px solid var(--BadgeColor); margin-right: 5px; }`);
     },
     
     Init(Config){
@@ -38,14 +111,16 @@ const WoowzDoc = {
         if(Config.Theme       ){ this.State.Const.Theme = { ...this.State.Const.Theme, ...this.State.Config.Theme }; }
         if(Config.Data        ){ this.State.Data = Config.Data; }
         if(Config.Translations){ this.State.Translations = Config.Translations; }
-        
-        Config.Translations["ru"] = { ...Config.Translations["ru"], ...{
-            "core_unknown_author": "Неизвестный автор",
-            "core_unknown_wiki": "Без названия",
-            "core_author": "Автор",
-            "core_article_error_name": "Ошибка",
-            "core_article_error_error": "Ошибка"
-        }};
+
+        this.State.Translations["ru"] = { ...{
+                "core_unknown_author": "Неизвестный автор",
+                "core_unknown_wiki": "Без названия",
+                "core_author": "Автор",
+                "core_article_error_name": "Ошибка",
+                "core_article_error_error": "Ошибка",
+                "core_search_placeholder": "Поиск...",
+                "core_search_notfound": "Ничего не найдено"
+            }, ...this.State.Translations["ru"]};
         
         const SavedLang = localStorage.getItem("WoowzDoc_Lang");
         const BrowserLang = navigator.language.split('-')[0];
@@ -65,28 +140,18 @@ const WoowzDoc = {
         this.State.ContainerApp.id = "WoowzDoc";
         document.body.appendChild(this.State.ContainerApp);
 
-        // ----------------------------------------------------------------------
-
-        class WoowzDocElement extends HTMLElement{
-            constructor(){ super(); }
-        }
-        
-        class WD_Box extends WoowzDocElement{
-            connectedCallback(){
-                const Type = this.getAttribute("type") || "info";
-                this.classList.add('wd-box');
-                this.classList.add(`wd-box-${Type}`);
-
-                if (this.getAttribute('data-ready') !== 'true') {
-                    this.setAttribute('data-ready', 'true');
-                    this.innerHTML = `<div class="wd-box-content">${this.innerHTML}</div>`;
-                }
+        for(const [Element, Class] of Object.entries(this.State.Elements)){
+            if(!customElements.get(Element)){
+                customElements.define(Element, Class);
             }
         }
-        
-        customElements.define("wd-box", WD_Box);
-        
-        // ----------------------------------------------------------------------
+
+        document.addEventListener("click", (Event) => {
+            if(!Event.target.closest(".Sidebar-Left-Search")){
+                const Result = document.getElementById("WoowzDoc-SearchResults");
+                if(Result){ Result.style.display = "none"; }
+            }
+        });
         
         const HandleHash = async () => {
             this.State.Page = window.location.hash.replace("#", "") || this.GetStartPageID();
@@ -99,7 +164,9 @@ const WoowzDoc = {
 
     // ----------------------------------------------------------------------
     
-    GetLangKey(Lang, Key){
+    GetLangKey(Key, Lang = null){
+        if(!Lang){ Lang = this.State.Lang; }
+        
         const CurrentDirectory = this.State.Translations[Lang];
         if(CurrentDirectory && CurrentDirectory[Key] !== undefined){
             return CurrentDirectory[Key];
@@ -114,9 +181,10 @@ const WoowzDoc = {
     },
     
     TranslateAll(Text, Lang = null){
+        if(typeof Text !== "string"){ return Text; } 
         if(!Lang){ Lang = this.State.Lang; }
         return Text.replace(/%([a-zA-Z0-9_]+)/g, (Match, Key) => {
-            return this.GetLangKey(Lang, Key);
+            return this.GetLangKey(Key, Lang);
         })
     },
     
@@ -267,11 +335,54 @@ const WoowzDoc = {
         return "undefined";
     },
     
-    SetLang(Code){
+    async SetLang(Code){
+        if(this.State.Lang === Code){ return; }
         if(this.State.Translations[Code]){
             this.State.Lang = Code;
             localStorage.setItem("WoowzDoc_Lang", Code);
-            this.Build();
+            await this.Build();
+        }
+    },
+
+    Search(Query) {
+        const ResultsContainer = document.getElementById("WoowzDoc-SearchResults");
+        if(!ResultsContainer){ return; }
+
+        if(!Query || Query.trim().length === 0){
+            ResultsContainer.style.display = "none";
+            return;
+        }
+
+        const Query__ = Query.toLowerCase().trim();
+        const Articles = this.State.Data.Article;
+
+        let Matched = [];
+        for(let ID in Articles){
+            const Name = this.TranslateAll(Articles[ID].Name || ID);
+            const Name__ = Name.toLowerCase();
+            const ID__ = ID.toLowerCase();
+
+            if(Name__.includes(Query__) || ID__.includes(Query__)){
+                let Weight = 0;
+                if(Name__.startsWith(Query__) || ID__.startsWith(Query__)){ Weight = 2; }else{ Weight = 1; }
+
+                Matched.push({ ID: ID, Name: Name, Weight: Weight });
+            }
+        }
+
+        Matched.sort((A, B) => B.Weight - A.Weight);
+
+        if(Matched.length > 0){
+            ResultsContainer.innerHTML = Matched.map(Match => `
+                <div class="Search-Result-Item" onclick="location.hash='${Match.ID}'; document.getElementById('WoowzDoc-SearchResults').style.display='none';">
+                    <span class="Res-Name">${Match.Name}</span>
+                    <span class="Res-ID">ID: ${Match.ID}</span>
+                </div>
+            `).join("");
+            ResultsContainer.style.display = "block";
+        }else{
+            ResultsContainer.innerHTML = `<div class="Search-Result-Item" style="color:#666">${this.GetLangKey("core_search_notfound")}</div>`;
+            ResultsContainer.style.display = "block";
         }
     },
     
@@ -279,6 +390,9 @@ const WoowzDoc = {
     
     GenerateCSS(){
         let Theme = this.State.Const.Theme;
+        
+        const CustomElementsCSS = this.State.CustomStyles.join("\n");
+        
         // language=CSS
         return `
 :root{
@@ -300,6 +414,15 @@ body{ background: var(--Background); color: var(--Text); font-family: "Segoe UI"
 .Sidebar-Left-Header:hover{ background: rgba(255,255,255,0.03); }
 .Sidebar-Left-Tree{ flex-grow: 1; overflow-y: auto; padding: 10px; scrollbar-width: thin; scrollbar-color: var(--Border) transparent; }
 
+.Sidebar-Left-Search{ padding: 10px 20px; position: relative; border-bottom: 1px solid var(--Border);}
+.Search-Input{ width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--Border); border-radius: 4px; padding: 8px 12px; color: var(--Text); outline: none; font-size: 0.85rem; transition: border-color 0.2s; }
+.Search-Input:focus{ border-color: var(--Accent); }
+.Search-Results{ position: absolute; top: 100%; left: 10px; right: 10px; background: var(--Sidebar); border: 1px solid var(--Border); border-radius: 4px; z-index: 1000; max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Border) transparent; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.Search-Result-Item{ padding: 10px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.Search-Result-Item:hover{ background: rgba(255,255,255,0.05); }
+.Search-Result-Item .Res-Name{ display: block; font-weight: bold; font-size: 0.9rem;}
+.Search-Result-Item .Res-ID{ font-size: 0.7rem; color: #666; }
+
 .Sidebar-Right{ border-left: 1px solid var(--Border); display: flex; flex-direction: column; width: 260px; flex-shrink: 0; }
 
 .Tree-Item{ padding: 6px 12px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; transition: 0.2s; font-size: 0.95rem; color: #ccc; }
@@ -316,24 +439,9 @@ body{ background: var(--Background); color: var(--Text); font-family: "Segoe UI"
 .Header{ width: 100%; height: 60px; border-bottom: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; }
 .Footer{ width: 100%; height: 60px; border-top: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; margin-top: auto; }
 
-.Header-Left, .Header-Right, .Footer-Left, .Footer-Right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.Header-Center, .Footer-Center {
-    flex: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-}
-
-.Header-Right, .Footer-Right {
-    justify-content: flex-end;
-    gap: 15px;
-}
+.Header-Left, .Header-Right, .Footer-Left, .Footer-Right { flex: 1; display: flex; align-items: center; }
+.Header-Center, .Footer-Center{ flex: 2; display: flex; justify-content: center; align-items: center; font-weight: 500; }
+.Header-Right, .Footer-Right{ justify-content: flex-end; gap: 15px; }
 
 .Article-Wrapper { display: flex; flex-direction: row; width: 100%; justify-content: center; flex-grow: 1; }
 article{ width: 90%; line-height: 1.6; padding: 1em 2em; overflow-x: hidden; }
@@ -341,38 +449,10 @@ article{ width: 90%; line-height: 1.6; padding: 1em 2em; overflow-x: hidden; }
 .Lang-Button { cursor: pointer; padding: 2px 5px; border: 1px solid var(--Border); border-radius: 3px; font-size: 10px; }
 .Lang-Button.Active { background: var(--Accent); color: white; }
 
-/* ---------------------------------------------------------------------- */
-
 article p{ white-space: pre-wrap; min-height: 1em; }
-
-wd-box {
-    display: block;
-    margin: 1.5em 0;
-}
-
-.wd-box {
-    padding: 15px;
-    border-left: 5px solid var(--Accent);
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    width: 100%;
-}
-.wd-box-warning {
-    border-left-color: #ffa500 !important;
-    background: rgba(255, 165, 0, 0.1);
-}
-
-.wd-box-error {
-    border-left-color: #ff4444 !important;
-    background: rgba(255, 68, 68, 0.1);
-}
-
-.wd-box-content {
-    display: block;
-    white-space: pre-wrap; /* Чтобы внутри бокса тоже работали твои пробелы */
-}
         
-        `;
+/* ---------------------------------------------------------------------- */
+${CustomElementsCSS}}`;
     },
     
     GenerateTree(Items){
@@ -428,6 +508,10 @@ wd-box {
 <aside class="Sidebar-Left">
     <div class="Sidebar-Left-Header" onclick="location.hash='${this.GetStartPageID()}';">
         ${this.State.Const.Name}
+    </div>
+    <div class="Sidebar-Left-Search">
+        <input type="text" class="Search-Input" placeholder="%core_search_placeholder" oninput="WoowzDoc.Search(this.value)" onfocus="WoowzDoc.Search(this.value)">
+        <div id="WoowzDoc-SearchResults" class="Search-Results"></div>
     </div>
     <nav class="Sidebar-Left-Tree">
         ${this.GenerateTree(Items)}

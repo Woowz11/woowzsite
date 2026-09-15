@@ -7,13 +7,14 @@
     <body>
         <script src="../script.js"></script>
         <script>
+            WoowzDoc.RegisterDefaultElements();
             WoowzDoc.Init({
                 Name: "Showcase WoowzDoc",
                 
                 Data: {
                     Article: {
                         "objects": {
-                            Name: "Объекты",
+                            Name: "%objects",
                             RawContent: { Type: "FileJS", URL: "/example/article/article3.js" }
                         },
                         "trash": {
@@ -25,9 +26,11 @@
                 
                 Translations: {
                     ru: {
+                        "objects": "Объекты",
                         "test": "ТЕСТ, ЭТО РУССКАЯ СТРОКА!!!"
                     },
                     en: {
+                        "objects": "TEST",
                         "test": "TEST, THAT ENGLISH STRING!!!"
                     }
                 }

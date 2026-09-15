@@ -202,5 +202,10 @@ Portions of this content are ©1998–2026 by individual mozilla.org contributor
 
 %test
 
+<wd-badge>TEST</wd-badge>
+<wd-badge color="red">TEST</wd-badge>
+<wd-badge color="lime">TEST</wd-badge>
+<wd-badge color="blue">TEST</wd-badge>
+
 `);   
 };
