@@ -5,9 +5,24 @@
         <title>WIP</title>
     </head>
     <body>
-        <div id="Portfolio"></div>
-    
         <script src="data.js"></script>
-        <script src="script.js"></script>
+        <script src="../WoowzDoc/script.js"></script>
+        <script>
+            WoowzDoc.Init({
+                Name: "Portfolio",
+                Author: "Woowz11",
+                
+                Data: {
+                    StartArticle: "readme",
+                    
+                    Article: {
+                        "readme": {
+                            Name: "README",
+                            RawContent: { Type: "FileJS", URL: "/article/readme.js" }
+                        }
+                    }
+                }
+            });
+        </script>
     </body>
 </html>

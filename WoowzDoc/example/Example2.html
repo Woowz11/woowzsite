@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>EXAMPLE 1</title>
+    </head>
+    <body>
+        <script src="../script.js"></script>
+        <script>
+            WoowzDoc.Init({
+                Name: "Showcase WoowzDoc",
+                
+                Data: {
+                    Article: {
+                        "objects": {
+                            Name: "Объекты",
+                            RawContent: { Type: "FileJS", URL: "/example/article/article3.js" }
+                        },
+                        "trash": {
+                            Name: "Мусор",
+                            RawContent: { Type: "FileJS", URL: "/example/article/article2.js" }
+                        }
+                    }
+                },
+                
+                Translations: {
+                    ru: {
+                        "test": "ТЕСТ, ЭТО РУССКАЯ СТРОКА!!!"
+                    },
+                    en: {
+                        "test": "TEST, THAT ENGLISH STRING!!!"
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
