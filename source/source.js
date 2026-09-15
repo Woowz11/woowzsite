@@ -379,6 +379,10 @@ function AddTables(...tables){
 
 /* CMD команда на поиск файлов (пример, типа gif): dir /b /a-d *.gif    */
 
+WoowzsiteOther = [
+	"wiki/info.png"
+]
+
 WoowzsiteSourceImagesPNG = AddFullnessToTable([
 	"889288636829429760","about","anomaly-cat","arrowleft","arrowright","arrow_top","b","b2","background","background_","ban","bes1","bes2","bes3","bes4","bes5","bg","bloodeye","bloodeyeco_title","change","click",
 	"CLOSETHIS","CLOSETHIS2","CLOSETHIS3","concrete","concrete2","copy","copy_to","createelement","dark","delete","dexonmusic","discord","discord_error","easylocation","error-image","error","eyes","fence-bg","fence",
@@ -747,7 +751,8 @@ function GetAllWoowzsite(){
 		GOLUPREVIEW,
 		WoowzsiteSourceLituism,
 		TrueLithuismArts,
-		WoowzsiteMultiverse
+		WoowzsiteMultiverse,
+		WoowzsiteOther
 	);
 }
 

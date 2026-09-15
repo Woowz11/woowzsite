@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>EXAMPLE 1</title>
+    </head>
+    <body>
+        <script src="../script.js"></script>
+        <script>
+            WoowzDoc.Init({
+                Name: "Hello WIKI",
+                
+                StartPage: "start",
+                
+                Data: {
+                    Article: {
+                        "start": {
+                            Name: "START HELLO",
+                            RawContent: "<h1>WELCOME</h1>Это начало МОЕЙ вики!!!"
+                        },
+                        "start2": {
+                            Name: "START HELLO 222",
+                            RawContent: "wik...<br>".repeat(1000)
+                        },
+                        "start3": {
+                            Name: "START HELLO 333",
+                            RawContent: "<img src='https://woowz11.github.io/woowzsite/source/multiverse/pavel_noyoutube.png' />"
+                        },
+                        "start4": {
+                            Name: "gen page",
+                            RawContent: { Type: "FileJS", URL: "/example/article/article1.js" }
+                        },
+                        
+                        "error": {
+                            Name: "ERROR",
+                            RawContent: "ТЫ ОШИБКА!!!<br>%article_error"
+                        }
+                    },
+                    
+                    ErrorArticle: "error",
+                    
+                    Tree: [
+                        "start4",
+                        
+                        {Name: "F O L D E R", Child: [
+                                "start", "start2", "start3"
+                        ]},
+                        
+                        "error","error","error",
+
+                        {Name: "folder 😂", Child: [
+                            "start", "start2", "start3",
+                                {Name: "fo l d error", Child: [
+                                    "start", "start2", "start3"
+                                ]}
+                        ]}
+                    ]
+                }
+            });
+        </script>
+    </body>
+</html>
