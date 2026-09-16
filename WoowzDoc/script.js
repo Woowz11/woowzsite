@@ -81,7 +81,9 @@ const WoowzDoc = {
     
     Element: class extends HTMLElement{
         constructor(){ super(); }
-        connectedCallback(){ this.Start(); }
+        connectedCallback(){
+            this.Start();
+        }
         
         Start(){}
     },
@@ -134,17 +136,26 @@ const WoowzDoc = {
             }
         `);
 
-        // --- 3. CALLOUTS (INFO, WARNING, ERROR) ---
         this.RegisterElement("callout", class extends self.Element{
             Start(){
-                const Type = this.getAttribute("type") || "info";
+                const Type = (this.getAttribute("type") || "info").toLowerCase();
+                
                 const Colors = {
-                    info: "#3498db",
-                    warning: "#f1c40f",
-                    error: "#e74c3c",
-                    note: "#95a5a6"
+                    info   : "#3498DB",
+                    warning: "#F1C40F",
+                    error  : "#E74C3C",
+                    note   : "#95A5A6"
                 };
-                this.style.setProperty("--CalloutColor", Colors[Type] || Colors.info);
+                
+                const Icons = {
+                    info: "../../../source/mask-info.svg"   
+                };
+                
+                const Color = Colors[Type] || Colors.info;
+                const Icon  = Icons [Type] || Icons .info;
+
+                this.style.setProperty("--CalloutColor", Color);
+                this.style.setProperty("--CalloutIcon", `url("${Icon}")`);
                 this.classList.add("wd-callout");
                 this.innerHTML = `<div class="wd-callout-icon"></div><div class="wd-callout-content">${this.innerHTML}</div>`;
             }
@@ -157,13 +168,12 @@ const WoowzDoc = {
             .wd-callout-icon {
                 width: 24px; height: 24px; margin-right: 15px; flex-shrink: 0;
                 background: var(--CalloutColor);
-                mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') no-repeat center;
-                -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') no-repeat center;
+                mask: var(--CalloutIcon) no-repeat center;
             }
             .wd-callout-content { font-size: 0.95rem; color: var(--Text); }
         `);
 
-        this.RegisterElement("infobox", class extends self.Element {
+        this.RegisterElement("infobox", class extends self.Element{
             Start() {
                 const Name = this.getAttribute("name") || "Information";
 
@@ -242,7 +252,7 @@ const WoowzDoc = {
             }
         `);
 
-        this.RegisterElement("right", class extends self.Element {
+        this.RegisterElement("right", class extends self.Element{
             Start() {
                 const Width = this.getAttribute("width") || "300px";
                 this.style.width = Width;
@@ -254,18 +264,16 @@ const WoowzDoc = {
                 margin: 10px 0 20px 20px;
                 clear: right;
                 display: block;
-                position: relative; /* Чтобы z-index работал если надо */
+                position: relative;
             }
         `);
 
-        this.RegisterElement("collapse", class extends self.Element {
+        this.RegisterElement("collapse", class extends self.Element{
             Start() {
-                const Summary = this.getAttribute("label") || "Expand";
-                // Мы используем shadow-like структуру или просто innerHTML. 
-                // Важно, чтобы wd-details-content имел display: flow-root
+                const Name = this.getAttribute("name") || "Expand";
                 this.innerHTML = `
             <details class="wd-details">
-                <summary class="wd-summary">${Summary}</summary>
+                <summary class="wd-summary">${Name}</summary>
                 <div class="wd-details-content">${this.innerHTML}</div>
             </details>`;
             }
@@ -290,7 +298,7 @@ const WoowzDoc = {
             .wd-details-content {
                 padding: 15px;
                 border-top: 1px solid var(--Border);
-                display: flow-root; /* ФИКС: Заставляет родителя учитывать высоту float элементов */
+                display: flow-root;
             }
         `);
     },
@@ -687,8 +695,6 @@ article{ width: 90%; line-height: 1.6; padding: 1em 2em; overflow-x: hidden; }
 
 .Lang-Button { cursor: pointer; padding: 2px 5px; border: 1px solid var(--Border); border-radius: 3px; font-size: 10px; }
 .Lang-Button.Active { background: var(--Accent); color: white; }
-
-article p{ white-space: pre-wrap; min-height: 1em; }
         
 /* ---------------------------------------------------------------------- */
 ${CustomElementsCSS}}`;
@@ -724,8 +730,13 @@ ${CustomElementsCSS}}`;
             if(TLine === ""){ return "<br>"; }
             
             if(TLine.startsWith("///")){ return ""; }
+
+            if(TLine.includes("<wd-") || TLine.includes("</wd-")){ return Line; }
             
-            if(TLine.startsWith("<wd-") || TLine.startsWith("</wd-")){ return Line; }
+            Line = Line
+                .replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;")
+                .replace(/ {2,}/g, M => "&nbsp;".repeat(M.length))
+                .replace(/^ /g, "&nbsp;");
             
             return `<p>${Line}</p>`;
         }).join("");

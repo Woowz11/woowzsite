@@ -156,6 +156,7 @@ div{
 		"cur" : "CURSOR",
 		"mp4" : "VIDEO",
 		"mp3" : "AUDIO",
+		"svg" : "SVG"
 	}
 	
 	function Button_Rand(id){
@@ -252,6 +253,7 @@ div{
 		if(src.includes(".cur" )                         ){type = "cur" ;}
 		if(src.includes(".mp4" ) || src.includes(".mov") ){type = "mp4" ;}
 		if(src.includes(".mp3" )                         ){type = "mp3" ;}
+		if(src.includes(".svg" )                         ){type = "svg" ;}
 		
 		return type;
 	}
@@ -306,7 +308,7 @@ div{
 			if(time > 100000){time_col = "orange; background-color:black";}
 			if(time > 200000){time_col = "red; background-color:black"   ;}
 			
-			document.getElementById(text).innerHTML += (`<div class="grid-element" id="${src}"><div class="div-image${type=="mp3"?"-short":""}" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
+			document.getElementById(text).innerHTML += (`<div class="grid-element" id="${src}"><div class="div-image${type=="mp3"?"-short":""}" `+(type!="mp4"&&type!="mp3"?`onclick="var link=document.createElement('a');link.href='${src}';link.target='_blank';link.click();"`:"")+` style="background-size: auto; background-repeat: repeat; `+(type=="mp4"||type=="mp3"?"":`cursor:`+(type=="cur"||type=="ico"?"url('"+src+"'),auto":"pointer")+`;`)+` `+(type!="mp4"&&type!="mp3"?"padding: 10px;":"background-image:none; background-color:"+((type=="mp3")?"#F1F3F4;":"black;"))+` display:flex; justify-content: center; align-items: center;">
 			`+(type=="mp4"?
 			`<video style="width:100%; height:100%; object-fit: fill;" `+(mem_prikol_screamer?"autoplay":"")+` loop controls><source src="${src}#t=0.1" type="video/mp4"></video>`
 			:
@@ -317,9 +319,8 @@ div{
 			)+`
 			</div><div class="short-scroll" style="background-color:rgb(250,250,250); height:110px; white-space: nowrap;"><div style="padding:10px; height:calc(100% - 20px); overflow-y: hidden; overflow-x: auto;"><font class="src" style="cursor:pointer;" onclick="CopyToClipboard('${src}');" title="${src}">${src}</font><br>
 			<font style="color:${time_col};">${time}</font>ms (${types[type]})<br>`+
-			((type=="png"||type=="jpg"||type=="gif"||type=="webp")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button>`:``)+
-			((type=="ico")?`<button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
-			((type=="cur")?`<button onclick="ChangeCursor('${src}');">Установить курсор</button>`:``)+
+			((type=="png"||type=="jpg"||type=="gif"||type=="webp"||type=="svg"||type=="ico")?`<button onclick="ChangeStyle('div-image',\`background-image:url('${src}');\`);">Установить передний фон</button><br><button onclick="ChangeStyle('background-image-div',\`background-image:url('${src}');\`);">Установить задний фон</button><br><button onclick="ChangeIcon('${src}'); document.title='${src}';">Установить иконку</button>`:``)+
+			((type=="cur"||type=="ico")?`<button onclick="ChangeCursor('${src}');">Установить курсор</button>`:``)+
 			((type=="mp3")?`<button onclick="window.open('${src}', '_blank');">Открыть в новой вкладке</button>`:``)
 			+`</div></div></div>`)
 			var c = counts[text][1] + 1;
@@ -421,6 +422,7 @@ div{
 		"source/*.gif"					:WoowzsiteSourceImagesGIF,
 		"source/*.ico"					:WoowzsiteSourceIcons,
 		"source/*.cur"					:WoowzsiteSourceCursors,
+		"source/*.svg"					:WoowzsiteSVG,
 		"source/specialforrandomsite/*"	:WoowzsiteSourceRandomSite,
 		"core-wiki/source/*"			:WoowzsiteSourceCore,
 		"source/woowzbackrooms/*"		:WoowzsiteSourceBackrooms,

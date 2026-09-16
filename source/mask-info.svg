@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 6.3499999 6.35"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="mask-info.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="32.857054"
+     inkscape:cx="9.0087201"
+     inkscape:cy="10.941334"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="offset"
+       id="path-effect7"
+       is_visible="true"
+       lpeversion="1.3"
+       linejoin_type="bevel"
+       unit="px"
+       offset="7.25748"
+       miter_limit="4"
+       attempt_force_join="false"
+       update_on_knot_move="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path1"
+       style="fill:#ff0000;fill-rule:evenodd;stroke-width:0.0529167;stroke-linejoin:round;stroke-miterlimit:2.9;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="M 3.175 0 A 3.175 3.175 0 0 0 0 3.175 A 3.175 3.175 0 0 0 3.175 6.3499999 A 3.175 3.175 0 0 0 6.3499999 3.175 A 3.175 3.175 0 0 0 3.175 0 z M 3.175 0.85059407 A 0.43768707 0.43768707 0 0 1 3.6126994 1.2882934 A 0.43768707 0.43768707 0 0 1 3.175 1.7259928 A 0.43768707 0.43768707 0 0 1 2.7373006 1.2882934 A 0.43768707 0.43768707 0 0 1 3.175 0.85059407 z M 3.175 2.0810099 C 3.4167278 2.0810099 3.6126994 2.2769815 3.6126994 2.5187093 L 3.6126994 5.0648071 C 3.6126994 5.3065349 3.4167279 5.5025065 3.175 5.5025065 C 2.9332721 5.5025065 2.7373006 5.3065349 2.7373006 5.0648071 L 2.7373006 2.5187093 C 2.7373006 2.2769814 2.9332721 2.0810099 3.175 2.0810099 z " />
+  </g>
+</svg>

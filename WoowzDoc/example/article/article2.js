@@ -221,6 +221,24 @@ Portions of this content are ©1998–2026 by individual mozilla.org contributor
 <wd-callout type="error">Hello, my name</wd-callout>
 <wd-callout type="note">Hello, my name</wd-callout>
 
+<wd-callout>Экземплюешь?
+Не, я не такой
+
+увы...</wd-callout>
+
+<wd-callout>TEST</wd-callout>
+<wd-callout>TEST
+</wd-callout>
+<wd-callout>
+TEST</wd-callout>
+<wd-callout>
+TEST
+</wd-callout>
+<wd-callout>
+TEST newline
+
+</wd-callout>
+
 <wd-infobox name="Персонаж: Вувз">
     Вид | Программист
     Статус | <wd-badge color="#2ecc71">Online</wd-badge>
@@ -228,10 +246,10 @@ Portions of this content are ©1998–2026 by individual mozilla.org contributor
     Уровень | 99
 </wd-infobox>
 
-<wd-collapse label="test">hello</wd-collapse>
+<wd-collapse name="test">hello</wd-collapse>
 
-<wd-collapse label="COLLAPS">
-    <wd-collapse label="COLLAPS2">
+<wd-collapse name="COLLAPS">
+    <wd-collapse name="COLLAPS2">
         HELP ME PLEAE
         
         <wd-right width="200px">
