@@ -207,5 +207,49 @@ Portions of this content are ©1998–2026 by individual mozilla.org contributor
 <wd-badge color="lime">TEST</wd-badge>
 <wd-badge color="blue">TEST</wd-badge>
 
-`);   
+
+<wd-badge>Badge</wd-badge>
+
+<wd-badge color="red">Red Badge</wd-badge>
+
+<wd-key>w</wd-key>
+<wd-key>a</wd-key>
+<wd-key>LShift</wd-key>
+
+<wd-callout>Hello, my name</wd-callout>
+<wd-callout type="warning">Hello, my name</wd-callout>
+<wd-callout type="error">Hello, my name</wd-callout>
+<wd-callout type="note">Hello, my name</wd-callout>
+
+<wd-infobox name="Персонаж: Вувз">
+    Вид | Программист
+    Статус | <wd-badge color="#2ecc71">Online</wd-badge>
+    Оружие | Клавиатура
+    Уровень | 99
+</wd-infobox>
+
+<wd-collapse label="test">hello</wd-collapse>
+
+<wd-collapse label="COLLAPS">
+    <wd-collapse label="COLLAPS2">
+        HELP ME PLEAE
+        
+        <wd-right width="200px">
+            <div style="background: var(--Sidebar); padding: 10px; border-radius: 8px; border: 1px solid var(--Accent);">
+                <b>Заметка:</b>
+                Это произвольный блок, который будет висеть справа.
+            </div>
+        </wd-right>
+    </wd-collapse>
+</wd-collapse>
+
+<wd-right width="200px">
+    <div style="background: var(--Sidebar); padding: 10px; border-radius: 8px; border: 1px solid var(--Accent);">
+        <b>Заметка:</b>
+        Это произвольный блок, который будет висеть справа.
+    </div>
+</wd-right>
+test text ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa 
+
+`);
 };

@@ -46,6 +46,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("LSD.png", "GarryModMapLSDRef.png", __A_WOOWZ, "2026.09.16")
 ADD("ai.webp", "A.I ART-WORKS", "A.I NETWORK 🌐")
 ADD("on_ne_idet_v_voice.png", "Вот что будет, если не идти со мною в войс", __A_WOOWZ, "2026.09.13")
 ADD("horseshit.png", "diarrhée de cheval", __A_SKREP, "2026.09.12")

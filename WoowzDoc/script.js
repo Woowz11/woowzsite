@@ -30,6 +30,8 @@
 * мелкий текст
 * ВОЗМОЖНОСТЬ ДЕЛАТЬ ЭЛЕМЕНТЫ СПРАВА, мб сделать столб справа и туда вписывать? я хз как реализовать, Как на википедии короче
 * элемент с scrollbar's, типо что-бы туда можно было вписать широкий элемент, и появился scrollbar, или указать лимит высоту и т.д
+* отображение цвета
+* парсер cs, типо wd-cs-struct, и могу на прямую строку с struct cs вписать, и он выдаст его в красивом формате и т.д
 
 Доп идеи:
 * сделать возможность указывать иконки для страниц, и википедии (будет ещё указываться в document.title)
@@ -39,6 +41,7 @@
 * мб для красоты добавить шейдеры, что-бы рисовать шейдеры
 * другие типы загрузки страниц, а именно просто "JS", и функцию сразу прописывать
 * если пролистал вниз, появится кнопка вверх
+* сделать поиск и теги для страниц, типо захожу в страницу а там по тегам, или другим параметрам могу искать, ну короче для портфолио проекты
  */
 
 const WoowzDoc = {
@@ -47,11 +50,18 @@ const WoowzDoc = {
             Name  : "%core_unknown_wiki",
             Author: "%core_unknown_author",
             Theme: {
-                Background: "#1E1E1E",
-                Text      : "#D4D4D4",
-                Accent    : "#5C5C5C",
-                Sidebar   : "#252526",
-                Border    : "#333333"
+                Primary  : undefined,
+                Secondary: undefined,
+                
+                Background: undefined,
+                Text      : undefined,
+                Accent    : undefined,
+                Sidebar   : undefined,
+                Border    : undefined,
+                
+                IsDark : undefined,
+                Shadow : undefined,
+                MixBase: undefined
             }
         },
         
@@ -96,7 +106,193 @@ const WoowzDoc = {
                 this.style.setProperty("--BadgeColor", Color);
                 this.classList.add("wd-badge");
             }
-        }, /* language=CSS */ `.wd-badge{ display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background: color-mix(in srgb, var(--BadgeColor), transparent 80%); color: var(--BadgeColor); border: 1px solid var(--BadgeColor); margin-right: 5px; }`);
+        }, /* language=CSS */ `.wd-badge {
+            display: inline-flex; align-items: center; padding: 2px 12px;
+            border-radius: 6px; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: linear-gradient(135deg, color-mix(in srgb, var(--BadgeColor), transparent 80%), color-mix(in srgb, var(--BadgeColor), transparent 90%));
+            color: var(--BadgeColor);
+            border: 1px solid color-mix(in srgb, var(--BadgeColor), transparent 60%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0 4px; vertical-align: middle;
+        }`);
+
+        this.RegisterElement("key", class extends self.Element{
+            Start(){ this.classList.add("wd-key"); }
+        }, /* language=CSS */ `
+            .wd-key {
+                display: inline-block; padding: 2px 8px;
+                font-family: "Consolas", monospace; font-size: 14px; font-weight: bold;
+                color: var(--Text);
+                background: linear-gradient(to bottom, color-mix(in srgb, var(--Background), white 10%), color-mix(in srgb, var(--Background), white 5%));
+                border: 1px solid var(--Border);
+                border-bottom: 3px solid var(--Border);
+                border-radius: 4px; margin: 0 3px;
+                box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+                vertical-align: middle;
+                text-transform: uppercase;
+            }
+        `);
+
+        // --- 3. CALLOUTS (INFO, WARNING, ERROR) ---
+        this.RegisterElement("callout", class extends self.Element{
+            Start(){
+                const Type = this.getAttribute("type") || "info";
+                const Colors = {
+                    info: "#3498db",
+                    warning: "#f1c40f",
+                    error: "#e74c3c",
+                    note: "#95a5a6"
+                };
+                this.style.setProperty("--CalloutColor", Colors[Type] || Colors.info);
+                this.classList.add("wd-callout");
+                this.innerHTML = `<div class="wd-callout-icon"></div><div class="wd-callout-content">${this.innerHTML}</div>`;
+            }
+        }, /* language=CSS */ `
+            .wd-callout {
+                display: flex; margin: 20px 0; padding: 15px;
+                border-radius: 8px; border-left: 5px solid var(--CalloutColor);
+                background: color-mix(in srgb, var(--CalloutColor), transparent 92%);
+            }
+            .wd-callout-icon {
+                width: 24px; height: 24px; margin-right: 15px; flex-shrink: 0;
+                background: var(--CalloutColor);
+                mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') no-repeat center;
+                -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>') no-repeat center;
+            }
+            .wd-callout-content { font-size: 0.95rem; color: var(--Text); }
+        `);
+
+        this.RegisterElement("infobox", class extends self.Element {
+            Start() {
+                const Name = this.getAttribute("name") || "Information";
+
+                const pTags = this.querySelectorAll('p');
+                let lines = [];
+
+                if (pTags.length > 0) {
+                    pTags.forEach(p => {
+                        const text = p.innerHTML.trim();
+                        if (text) lines.push(text);
+                    });
+                } else {
+                    lines = this.innerHTML.trim().split('\n').map(l => l.trim()).filter(l => l);
+                }
+
+                const Rows = lines.map(line => {
+                    const parts = line.split('|');
+                    if (parts.length < 2) return "";
+
+                    return `
+                <div class="wd-infobox-row">
+                    <div class="wd-infobox-label">${parts[0].trim()}</div>
+                    <div class="wd-infobox-value">${parts[1].trim()}</div>
+                </div>
+            `;
+                }).join('');
+
+                this.classList.add("wd-infobox");
+                this.innerHTML = `
+            <div class="wd-infobox-title">${Name}</div>
+            <div class="wd-infobox-body">${Rows}</div>
+        `;
+            }
+        }, /* language=CSS */ `
+            .wd-infobox {
+                width: 320px;
+                margin: 10px 0 20px 20px;
+                background: var(--Sidebar);
+                border: 1px solid var(--Border);
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 15px 35px var(--Shadow);
+                clear: right;
+                display: block;
+            }
+            .wd-infobox-title {
+                padding: 12px;
+                text-align: center;
+                font-weight: 800;
+                background: linear-gradient(90deg, var(--Secondary), var(--Primary));
+                color: white;
+                font-size: 0.95rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .wd-infobox-body { padding: 10px; }
+            .wd-infobox-row {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid color-mix(in srgb, var(--Border), transparent 50%);
+                padding: 8px 4px;
+            }
+            .wd-infobox-row:last-child { border-bottom: none; }
+            .wd-infobox-label {
+                font-weight: bold;
+                font-size: 0.8rem;
+                color: color-mix(in srgb, var(--Text), transparent 40%);
+                padding-right: 10px;
+                white-space: nowrap;
+            }
+            .wd-infobox-value {
+                font-size: 0.85rem;
+                text-align: right;
+                color: var(--Text);
+                word-break: break-word;
+            }
+        `);
+
+        this.RegisterElement("right", class extends self.Element {
+            Start() {
+                const Width = this.getAttribute("width") || "300px";
+                this.style.width = Width;
+                this.classList.add("wd-right-container");
+            }
+        }, /* language=CSS */ `
+            .wd-right-container {
+                float: right;
+                margin: 10px 0 20px 20px;
+                clear: right;
+                display: block;
+                position: relative; /* Чтобы z-index работал если надо */
+            }
+        `);
+
+        this.RegisterElement("collapse", class extends self.Element {
+            Start() {
+                const Summary = this.getAttribute("label") || "Expand";
+                // Мы используем shadow-like структуру или просто innerHTML. 
+                // Важно, чтобы wd-details-content имел display: flow-root
+                this.innerHTML = `
+            <details class="wd-details">
+                <summary class="wd-summary">${Summary}</summary>
+                <div class="wd-details-content">${this.innerHTML}</div>
+            </details>`;
+            }
+        }, /* language=CSS */ `
+            .wd-details {
+                margin: 10px 0;
+                border: 1px solid var(--Border);
+                border-radius: 8px;
+                background: rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            .wd-summary {
+                padding: 12px;
+                cursor: pointer;
+                font-weight: bold;
+                outline: none;
+                background: rgba(255,255,255,0.02);
+                transition: background 0.2s;
+            }
+            .wd-summary:hover { background: rgba(255,255,255,0.05); }
+
+            .wd-details-content {
+                padding: 15px;
+                border-top: 1px solid var(--Border);
+                display: flow-root; /* ФИКС: Заставляет родителя учитывать высоту float элементов */
+            }
+        `);
     },
     
     Init(Config){
@@ -108,10 +304,19 @@ const WoowzDoc = {
 
         if(Config.Name        ){ this.State.Const.Name = Config.Name; }
         if(Config.Author      ){ this.State.Const.Author = Config.Author; }
-        if(Config.Theme       ){ this.State.Const.Theme = { ...this.State.Const.Theme, ...this.State.Config.Theme }; }
         if(Config.Data        ){ this.State.Data = Config.Data; }
         if(Config.Translations){ this.State.Translations = Config.Translations; }
 
+        this.State.Const.Theme = this.GenerateDarkTheme();
+        
+        if(Config.Theme){
+            if(Array.isArray(Config.Theme)){
+                this.State.Const.Theme = { ...this.State.Const.Theme, ...this.GenerateTheme(Config.Theme[0], Config.Theme[1], Config.Theme[2]) };
+            }else if(typeof Config.Theme === "object"){
+                this.State.Const.Theme = { ...this.State.Const.Theme, ...Config.Theme };
+            }
+        }
+        
         this.State.Translations["ru"] = { ...{
                 "core_unknown_author": "Неизвестный автор",
                 "core_unknown_wiki": "Без названия",
@@ -163,6 +368,32 @@ const WoowzDoc = {
     },
 
     // ----------------------------------------------------------------------
+    
+    GenerateTheme(Primary, Secondary, IsDark = true){
+        const ContrastInvert = IsDark ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.1)";
+        return {
+            Primary  : Primary,
+            Secondary: Secondary,
+            
+            Accent    : Secondary,
+            Background: Primary,
+            Sidebar   : IsDark ? `color-mix(in srgb, ${Primary}, white 3%)` : `color-mix(in srgb, ${Primary}, black 3%)`,
+            Border    : IsDark ? `color-mix(in srgb, ${Primary}, white 12%)` : `color-mix(in srgb, ${Primary}, black 12%)`,
+            Text      : IsDark ? `color-mix(in srgb, white, ${Primary} 20%)` : `color-mix(in srgb, black, ${Primary} 10%)`,
+            
+            IsDark : IsDark,
+            Shadow : ContrastInvert,
+            MixBase: IsDark ? "white" : "black"
+        };
+    },
+    
+    GenerateDarkTheme(){
+        return this.GenerateTheme("#1E1E1E", "#5C5C5C", true);
+    },
+    
+    GenerateLightTheme(){
+        return this.GenerateTheme("#FFFFFF", "#4A4A4A", false);
+    },
     
     GetLangKey(Key, Lang = null){
         if(!Lang){ Lang = this.State.Lang; }
@@ -396,48 +627,56 @@ const WoowzDoc = {
         // language=CSS
         return `
 :root{
+    --Primary  : ${Theme.Primary};
+    --Secondary: ${Theme.Secondary};
+    
     --Background: ${Theme.Background};
     --Text      : ${Theme.Text};
     --Accent    : ${Theme.Accent};
     --Sidebar   : ${Theme.Sidebar};
     --Border    : ${Theme.Border};
+    --Shadow    : ${Theme.Shadow};
+    --MixBase   : ${Theme.MixBase};
 }
 
-*{ box-sizing: border-box; margin: 0; padding: 0; font-size: 18px; letter-spacing: 1px; }
+::selection{ background: color-mix(in srgb, var(--Accent), transparent 80%); color: var(--MixBase); text-shadow: var(--Accent) 0 0 10px, var(--Accent) 0 0 10px, var(--Accent) 0 0 10px, var(--Accent) 0 0 10px; }
+
+*{ box-sizing: border-box; margin: 0; padding: 0; font-size: 18px; letter-spacing: 1px; cursor: default; }
 
 body{ background: var(--Background); color: var(--Text); font-family: "Segoe UI", Tahoma, sans-serif; overflow: hidden; }
 
 #WoowzDoc{ width: 100vw; height: 100vh; display: flex; flex-direction: row; }
    
-.Sidebar-Left{ background: var(--Sidebar); border-right: 1px solid var(--Border); display: flex; flex-direction: column; width: 260px; flex-shrink: 0; }
-.Sidebar-Left-Header{ padding: 20px; font-weight: bold; border-bottom: 1px solid var(--Border); cursor: pointer; transition: background 0.2s; }
-.Sidebar-Left-Header:hover{ background: rgba(255,255,255,0.03); }
+.Sidebar-Left{ background: linear-gradient(to bottom, var(--Sidebar), color-mix(in srgb, var(--Sidebar), black 5%)); border-right: 1px solid var(--Border); display: flex; flex-direction: column; width: 280px; flex-shrink: 0; }
+.Sidebar-Left-Header{ padding: 25px 20px; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid var(--Border); cursor: pointer; background: linear-gradient(90deg, var(--Secondary), var(--Primary)) 100% 0; color: var(--Text); text-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: background-position 0.5s ease; background-size: 200% 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 8px var(--Shadow); }
+.Sidebar-Left-Header:hover{ background-position: 0 0; }
 .Sidebar-Left-Tree{ flex-grow: 1; overflow-y: auto; padding: 10px; scrollbar-width: thin; scrollbar-color: var(--Border) transparent; }
 
 .Sidebar-Left-Search{ padding: 10px 20px; position: relative; border-bottom: 1px solid var(--Border);}
-.Search-Input{ width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--Border); border-radius: 4px; padding: 8px 12px; color: var(--Text); outline: none; font-size: 0.85rem; transition: border-color 0.2s; }
+.Search-Input{ width: 100%; cursor: text; background: color-mix(in srgb, var(--Background), black 20%); border: 1px solid var(--Border); border-radius: 4px; padding: 8px 12px; color: var(--Text); outline: none; font-size: 0.85rem; transition: border-color 0.2s; }
 .Search-Input:focus{ border-color: var(--Accent); }
 .Search-Results{ position: absolute; top: 100%; left: 10px; right: 10px; background: var(--Sidebar); border: 1px solid var(--Border); border-radius: 4px; z-index: 1000; max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Border) transparent; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 .Search-Result-Item{ padding: 10px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.Search-Result-Item:hover{ background: rgba(255,255,255,0.05); }
+.Search-Result-Item:hover{ background: color-mix(in srgb, var(--Accent), transparent 90%); }
 .Search-Result-Item .Res-Name{ display: block; font-weight: bold; font-size: 0.9rem;}
 .Search-Result-Item .Res-ID{ font-size: 0.7rem; color: #666; }
 
 .Sidebar-Right{ border-left: 1px solid var(--Border); display: flex; flex-direction: column; width: 260px; flex-shrink: 0; }
 
-.Tree-Item{ padding: 6px 12px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; transition: 0.2s; font-size: 0.95rem; color: #ccc; }
-.Tree-Item:hover{ background: rgba(255, 255, 255, 0.05); color: #fff; }
-.Tree-Item.Active{ background: var(--Accent); color: white; }
+.Tree-Item{ background: linear-gradient(90deg, var(--Secondary) 0%, transparent 50%, transparent 100%); background-size: 200% 100%; background-position: 100% 0; padding: 6px 12px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; transition: 0.2s; font-size: 0.95rem; color: color-mix(in srgb, var(--Text), transparent 30%); }
+.Tree-Item:hover{ background-position: 25% 0; fill-opacity: 1; color: var(--Text); }
+.Tree-Item.Active{ background-position: 0 0; color: white; }
 
 .Tree-Folder{ margin-bottom: 4px; }
-.Tree-Folder-Title{ padding: 8px 12px; font-size: 0.75rem; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-.Tree-Folder-Content{ padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.05); margin-left: 10px; }
+.Tree-Folder-Title{ padding: 8px 12px; font-size: 0.75rem; font-weight: bold; color: var(--Text); text-transform: uppercase; }
+.Tree-Folder-Content{ padding-left: 12px; border-left: 1px solid color-mix(in srgb, var(--MixBase), transparent 90%); margin-left: 10px; }
 
 .Main{ display: flex; flex-direction: column; flex-grow: 1; height: 100vh; overflow: hidden; }
-.Content{ flex-grow: 1; overflow-y: auto; padding: 0; display: flex; flex-direction: column; align-items: center; scrollbar-color: var(--Border) transparent; }
+.Content{ flex-grow: 1; overflow-y: scroll; padding: 0; display: flex; flex-direction: column; align-items: center; scrollbar-color: var(--Accent) transparent; scrollbar-width: thin }
 
-.Header{ width: 100%; height: 60px; border-bottom: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; }
-.Footer{ width: 100%; height: 60px; border-top: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; margin-top: auto; }
+.Header{ width: 100%; height: 60px; background: linear-gradient(to bottom, color-mix(in srgb, var(--Background), white 10%), var(--Background)); border-bottom: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; }
+.Header-Center span, .Footer-Center span{ font-weight: 700; font-size: 1.3rem; background: linear-gradient(to right, var(--Secondary), color-mix(in srgb, var(--Secondary), white 40%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.Footer{ width: 100%; height: 60px; background: linear-gradient(to bottom, var(--Background), color-mix(in srgb, var(--Background), black 10%)); border-top: 1px solid var(--Border); font-size: 12px; display: flex; align-items: center; padding: 0 20px; color: color-mix(in srgb, currentColor, transparent 50%); flex-shrink: 0; margin-top: auto; }
 
 .Header-Left, .Header-Right, .Footer-Left, .Footer-Right { flex: 1; display: flex; align-items: center; }
 .Header-Center, .Footer-Center{ flex: 2; display: flex; justify-content: center; align-items: center; font-weight: 500; }
@@ -485,6 +724,8 @@ ${CustomElementsCSS}}`;
             if(TLine === ""){ return "<br>"; }
             
             if(TLine.startsWith("///")){ return ""; }
+            
+            if(TLine.startsWith("<wd-") || TLine.startsWith("</wd-")){ return Line; }
             
             return `<p>${Line}</p>`;
         }).join("");
