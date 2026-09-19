@@ -68,6 +68,7 @@ const WoowzDoc = {
         Data: {},
         Translations: {},
         Elements: {},
+        ElementsList: [],
         CustomStyles: [],
         
         ContainerApp: undefined,
@@ -81,9 +82,12 @@ const WoowzDoc = {
     
     Element: class extends HTMLElement{
         constructor(){ super(); }
-        connectedCallback(){
+        connectedCallback(){}
+        __Init(){
+            if(this.__Initialized){ return; } this.__Initialized = true;
             this.Start();
         }
+        __Initialized = false;
         
         Start(){}
     },
@@ -93,10 +97,10 @@ const WoowzDoc = {
     },
     
     RegisterElement(ElementName, ElementClass, CSS = null){
-        this.State.Elements["wd-" + ElementName] = ElementClass;
-        if(CSS){
-            this.AddCustomStyle(CSS);
-        }
+        const FullName = "wd-" + ElementName;
+        this.State.Elements[FullName] = ElementClass;
+        this.State.ElementsList.push(FullName);
+        if(CSS){ this.AddCustomStyle(CSS); }
     },
     
     RegisterDefaultElements(){
@@ -123,16 +127,41 @@ const WoowzDoc = {
             Start(){ this.classList.add("wd-key"); }
         }, /* language=CSS */ `
             .wd-key {
-                display: inline-block; padding: 2px 8px;
-                font-family: "Consolas", monospace; font-size: 14px; font-weight: bold;
+                display: inline-block;
+                padding: 2px 8px;
+                font-family: "Consolas", monospace;
+                font-size: 14px;
+                font-weight: bold;
                 color: var(--Text);
-                background: linear-gradient(to bottom, color-mix(in srgb, var(--Background), white 10%), color-mix(in srgb, var(--Background), white 5%));
+                background: linear-gradient(to bottom,
+                color-mix(in srgb, var(--Background), white 12%),
+                color-mix(in srgb, var(--Background), white 5%)
+                );
+
                 border: 1px solid var(--Border);
-                border-bottom: 3px solid var(--Border);
-                border-radius: 4px; margin: 0 3px;
-                box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+                box-shadow: 0 3px 0 var(--Border);
+
+                border-radius: 4px;
+                margin: 0 3px;
                 vertical-align: middle;
                 text-transform: uppercase;
+
+                cursor: pointer;
+                user-select: none;
+
+                position: relative;
+                transition: transform 0.05s, box-shadow 0.05s;
+                transform: translateY(-2px);
+            }
+            .wd-key:active {
+                transform: translateY(0px);
+                box-shadow: 0 1px 0 var(--Border);
+
+                background: color-mix(in srgb, var(--Background), white 2%);
+                filter: brightness(0.95);
+            }
+            .wd-key:hover {
+                border-color: var(--Accent);
             }
         `);
 
@@ -177,28 +206,31 @@ const WoowzDoc = {
             Start() {
                 const Name = this.getAttribute("name") || "Information";
 
-                const pTags = this.querySelectorAll('p');
-                let lines = [];
+                const MaxWidth = this.getAttribute("width") || "300px";
+                this.style.setProperty("--MaxWidth", MaxWidth)
+                
+                const Lines = this.innerHTML
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/\s*\|\s*/g, "@@PIPE@@")
+                    .split(/<\/p>|<br\/?>|<\/?p>|\n|\s{2,}/gi)
+                    .map(Line => Line.trim())
+                    .filter(Line => Line.length > 0 && Line.includes("@@PIPE@@"));
 
-                if (pTags.length > 0) {
-                    pTags.forEach(p => {
-                        const text = p.innerHTML.trim();
-                        if (text) lines.push(text);
-                    });
-                } else {
-                    lines = this.innerHTML.trim().split('\n').map(l => l.trim()).filter(l => l);
-                }
+                const Rows = Lines.map(Line => {
+                    const Parts = Line.split("@@PIPE@@").map(Part => Part.trim());
+                    if(Parts.length < 2){ return ""; }
 
-                const Rows = lines.map(line => {
-                    const parts = line.split('|');
-                    if (parts.length < 2) return "";
+                    const IsStandard = Parts.length === 2;
+                    
+                    const Cells = Parts.map((Content, Index) => {
+                        let ClassName = "wd-infobox-cell";
+                        if(IsStandard && Index === 0){ ClassName += " is-label"; }
+                        if(IsStandard && Index === 1){ ClassName += " is-value"; }
 
-                    return `
-                <div class="wd-infobox-row">
-                    <div class="wd-infobox-label">${parts[0].trim()}</div>
-                    <div class="wd-infobox-value">${parts[1].trim()}</div>
-                </div>
-            `;
+                        return `<div class="${ClassName}">${Content}</div>`;
+                    }).join('');
+                    
+                    return `<div class="wd-infobox-row${!IsStandard ? ' multi-column' : ''}">${Cells}</div>`;
                 }).join('');
 
                 this.classList.add("wd-infobox");
@@ -209,7 +241,9 @@ const WoowzDoc = {
             }
         }, /* language=CSS */ `
             .wd-infobox {
-                width: 320px;
+                width: 100%;
+                max-width: var(--MaxWidth);
+                box-sizing: border-box;
                 margin: 10px 0 20px 20px;
                 background: var(--Sidebar);
                 border: 1px solid var(--Border);
@@ -232,23 +266,40 @@ const WoowzDoc = {
             .wd-infobox-body { padding: 10px; }
             .wd-infobox-row {
                 display: flex;
-                justify-content: space-between;
+                align-items: center;
                 border-bottom: 1px solid color-mix(in srgb, var(--Border), transparent 50%);
                 padding: 8px 4px;
+                gap: 10px;
             }
             .wd-infobox-row:last-child { border-bottom: none; }
-            .wd-infobox-label {
+
+            .wd-infobox-cell.is-label {
                 font-weight: bold;
                 font-size: 0.8rem;
                 color: color-mix(in srgb, var(--Text), transparent 40%);
-                padding-right: 10px;
                 white-space: nowrap;
+                flex-shrink: 0;
             }
-            .wd-infobox-value {
+            .wd-infobox-cell.is-value {
                 font-size: 0.85rem;
                 text-align: right;
                 color: var(--Text);
                 word-break: break-word;
+                flex-grow: 1;
+            }
+            .wd-infobox-row.multi-column .wd-infobox-cell {
+                flex: 1;
+                font-size: 0.8rem;
+                text-align: center;
+                color: var(--Text);
+                border-right: 1px solid color-mix(in srgb, var(--Border), transparent 70%);
+            }
+            .wd-infobox-row.multi-column .wd-infobox-cell:last-child {
+                border-right: none;
+            }
+            .wd-infobox-cell .wd-badge {
+                margin: 0 2px;
+                vertical-align: middle;
             }
         `);
 
@@ -625,6 +676,28 @@ const WoowzDoc = {
         }
     },
     
+    ApplyElements(Root = document){
+        const Selector = this.State.ElementsList.join(',');
+        if(!Selector){ return; }
+        
+        let Elements = Array.from(Root.querySelectorAll(Selector));
+        
+        const GetDepth = (E) => {
+            let Depth = 0;
+            while(E.parentNode){
+                Depth++;
+                E = E.parentNode;
+            }
+            return Depth;
+        };
+        
+        Elements.sort((A, B) => GetDepth(B) - GetDepth(A));
+        
+        Elements.forEach(E => {
+           E.__Init(); 
+        });
+    },
+    
     // ----------------------------------------------------------------------
     
     GenerateCSS(){
@@ -756,7 +829,7 @@ ${CustomElementsCSS}}`;
         
         const LangSwitcher = Object.keys(this.State.Translations).map(Code => `<span class="Lang-Button${this.State.Lang === Code ? " Active" : ""}" onclick="WoowzDoc.SetLang('${Code}');">${Code.toUpperCase()}</span>`).join("");
         
-        this.State.ContainerApp.innerHTML = this.TranslateAll(`
+        this.State.ContainerApp.innerHTML = `
 <aside class="Sidebar-Left">
     <div class="Sidebar-Left-Header" onclick="location.hash='${this.GetStartPageID()}';">
         ${this.State.Const.Name}
@@ -802,6 +875,10 @@ ${CustomElementsCSS}}`;
         </footer>
     </div>
 </main>
-`);
+`;
+        const ArticleArea = this.State.ContainerApp.querySelector("article");
+        this.ApplyElements(ArticleArea);
+        
+        this.State.ContainerApp.innerHTML = this.TranslateAll(this.State.ContainerApp.innerHTML);
     }
 };

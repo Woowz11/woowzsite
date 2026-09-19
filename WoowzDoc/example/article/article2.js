@@ -51,7 +51,6 @@ ${ "<img src='https://media.discordapp.net/attachments/1475624051111362763/15487
 
 
 
-<wd-box type="error">Говно помойное<wd-box type="warning">hello</wd-box>О БОЖЕ! ВНИМАНИЕ!</wd-box>
 
 
 
@@ -203,6 +202,7 @@ Portions of this content are ©1998–2026 by individual mozilla.org contributor
 %test
 
 <wd-badge>TEST</wd-badge>
+
 <wd-badge color="red">TEST</wd-badge>
 <wd-badge color="lime">TEST</wd-badge>
 <wd-badge color="blue">TEST</wd-badge>
@@ -269,5 +269,118 @@ TEST newline
 </wd-right>
 test text ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa ababa 
 
+Я своего персонажа
+<wd-right><wd-infobox name="Персонаж: Вувз">
+    Вид | Программист
+    Статус | <wd-badge color="#2ecc71">Online</wd-badge>
+    Оружие | Клавиатура
+    Уровень | 99
+</wd-infobox></wd-right>
+В аду видел
+
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+абаба?)))
+
+<wd-infobox width="100px" name="Персонаж: Вувз">
+    Вид | Программист
+    Статус | <wd-badge color="#2ecc71">Online</wd-badge>
+    Оружие | Клавиатура
+    Уровень | 99
+</wd-infobox>
+
+<wd-infobox width="100%" name="Персонаж: Вувз">
+    Вид | Программист
+    Статус | <wd-badge color="#2ecc71">Online</wd-badge>
+    Оружие | Клавиатура
+    Уровень | 99
+</wd-infobox>
+
+<wd-infobox name="TEST INFOBOX">
+    TAG | VALUE
+    Я | ТЫ
+    ОН | ОНО
+    ВАНЯ | ДАНЯ
+    ЖАБА | ЛЯГУШКА
+</wd-infobox>
+
+<wd-infobox name="TEST INFOBOX !2!">
+    TAG | VALUE | PARAMETER
+    Я | ТЫ | ВЫ
+    ОН | ОНО | ОНА
+    ВАНЯ | ДАНЯ | ЛЁНЯ
+    ЖАБА | ЛЯГУШКА | ну я хуй знает что там ещё есть
+</wd-infobox>
+
+<wd-infobox width="100%" name="TEST INFOBOX #3#">
+текст | обыкновенный
+<b>BOLD</b> | <i>ITALLIC</i>
+Что нужно нажать для победы | <wd-key>ESC</wd-key>
+а если... | <img src='https://media.discordapp.net/attachments/1475624051111362763/1533778825291370568/images.png?ex=6aafb0d8&is=6aae5f58&hm=15ec985f87e1cdd9dc35fa2602679b9333205775f476a569eb585582a9bcf85b&=&format=webp&quality=lossless' />
+</wd-infobox>
+
+<wd-code>
+текст
+тест текст
+        баба?
+        
+        ну а если
+        
+        а не если?
+</wd-code>
+
+<wd-code lines>
+текст
+тест текст
+        баба?
+        
+        ну а если
+        
+        а не если?
+</wd-code>
+
+<wd-code name="file.txt">
+текст
+тест текст
+        баба?
+        
+        ну а если
+        
+        а не если?
+</wd-code>
+
+<wd-code lines name="hello.py">
+print("Hello World")
+input("Press Enter...")
+</wd-code>
+
+<wd-code lang="csharp" lines name="Player.cs">
+public class Player {
+    public string Name { get; set; } = "Woowz";
+    
+    public void Update() {
+        Console.WriteLine("Hello!");
+    }
+}
+</wd-code>
+
+<wd-code lang="glsl">
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+    vec2 uv = fragCoord/iResolution.xy;
+    fragColor = vec4(uv.x, uv.y, 0.5, 1.0);
+}
+</wd-code>
 `);
 };
