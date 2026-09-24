@@ -35,16 +35,13 @@
                         return;
                     }
 
-                    // Вспомогательная функция для проверки на пустоту
                     const has = (val) => val !== null && val !== undefined && val !== "" && (Array.isArray(val) ? val.length > 0 : true);
 
-                    // Формирование списков (теги, языки)
                     const renderList = (list) => list.map(item => {
-                        const clean = item.toString().split('_')[1] || item; // убираем префиксы lang_, core_
+                        const clean = item.toString().split('_')[1] || item;
                         return `<span class="proj-tag">${clean}</span>`;
                     }).join("");
 
-                    // Формирование статов (только если есть значение)
                     const renderStat = (label, value) => {
                         if (!has(value)) return "";
                         return `
@@ -57,7 +54,6 @@
                     this.classList.add("wd-project-header");
                     this.innerHTML = `
             <div class="proj-main-row">
-                <!-- ЛЕВАЯ КОЛОНКА: Имя, Статус, Даты -->
                 <div class="proj-col proj-left">
                     ${has(P.__Icon) ? `<img src="${P.__Icon}" class="proj-big-icon">` : ""}
                     <div class="proj-title-group">
@@ -70,7 +66,6 @@
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА: Стек, Ссылки, Ядра -->
                 <div class="proj-col proj-right">
                     ${has(P.__Language) ? `<div class="proj-meta-item"><b>Языки:</b> <div>${renderList(P.__Language)}</div></div>` : ""}
                     ${has(P.__Core) ? `<div class="proj-meta-item"><b>Ядро:</b> <div>${renderList(P.__Core)}</div></div>` : ""}
@@ -79,7 +74,6 @@
                 </div>
             </div>
 
-            <!-- НИЖНЯЯ ПАНЕЛЬ: Статы (появляется только если есть хотя бы один стат) -->
             ${(has(P.__QCode) || has(P.__QVisual) || has(P.__QSeriousness)) ? `
             <div class="proj-stats-grid">
                 ${renderStat("Code Quality", P.__QCode)}
@@ -138,6 +132,93 @@
     .status_abandoned { background: #E74C3C; }
     .status_frozen { background: #3498DB; }
 `);
+
+            WoowzDoc.RegisterElement("commit", class extends WoowzDoc.Element {
+                Start() {
+                    const AuthorURL = this.getAttribute("author") || "https://github.com/Woowz11";
+                    const Avatar = this.getAttribute("avatar") || "https://avatars.githubusercontent.com/u/52042904?v=4";
+                    const URL = this.getAttribute("url") || "#";
+
+                    const Message = this.innerHTML.trim();
+                    const Author = AuthorURL.split('/').at(-1);
+                    
+                    let Hash = "-------";
+                    if (URL.includes("/commit/")) {
+                        Hash = URL.split("/commit/")[1].substring(0, 7);
+                    }
+
+                    this.style.display = "block";
+                    this.innerHTML = `
+            <div class="gh-commit-row">
+                <div class="gh-commit-main">
+                    <div class="gh-commit-title"><a href="${URL}" target="_blank" class="gh-commit-hash-only" style="font-size: 16px;">${Message}</a></div>
+                    <div class="gh-commit-meta">
+                        <img src="${Avatar}" class="gh-commit-avatar">
+                        <a href="${AuthorURL}" target="_blank" class="gh-commit-hash-only" style="font-size: 12px;">${Author}</a>
+                    </div>
+                </div>
+                <div class="gh-commit-side">
+                    <a href="${URL}" target="_blank" class="gh-commit-hash-only" style="font-size: 12px;">${Hash}</a>
+                </div>
+            </div>
+        `;
+                }
+            }, /* language=CSS */ `
+                .gh-commit-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 6px 10px;
+                    background: var(--Sidebar);
+                    border: 1px solid var(--Border);
+                    border-radius: 8px;
+                    margin: 10px 0;
+                    font-family: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Backtick Fix", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+                    transition: border-color 0.2s;
+                }
+                .gh-commit-row:hover {
+                    border-color: var(--Accent);
+                    background: color-mix(in srgb, var(--Sidebar), white 2%);
+                }
+
+                .gh-commit-main {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    min-width: 0;
+                }
+
+                .gh-commit-title {
+                    font-weight: 500;
+                    color: rgb(240, 246, 252);
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .gh-commit-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 13px;
+                    opacity: 0.6;
+                }
+                .gh-commit-avatar { width: 18px; height: 18px; border-radius: 50%; }
+
+                .gh-commit-side { display: flex; align-items: center; padding-left: 20px; }
+
+                .gh-commit-hash-only {
+                    cursor: pointer;
+                    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+                    cfont-weight: 600; color: var(--Text);
+                    text-decoration: none;
+                    transition: color 0.2s;
+                }
+                .gh-commit-hash-only:hover {
+                    color: #4493f8;
+                    text-decoration: underline;
+                }
+            `);
             
             WoowzDoc.Init({
                 Name: "Portfolio",

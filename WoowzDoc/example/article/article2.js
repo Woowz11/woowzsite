@@ -418,7 +418,7 @@ and welcome to my window!
 
 <wd-winwindow padding="0"><wd-firefox>hello and welcome to my page!</wd-firefox></wd-winwindow>
 
-<wd-winwindow padding="0" icon="https://github.com/Woowz11/woowzsite/raw/refs/heads/main/Portfolio/source/firefox.ico"><wd-firefox name="My Page!" icon="https://woowz11.github.io/woowzsite/source/cube.ico" url="https://woowz11.github.io/woowzsite/mypage.html">
+<wd-winwindow padding="0" icon="https://github.com/Woowz11/woowzsite/raw/refs/heads/main/Portfolio/source/firefox.ico" name="My Page! - Mozilla"><wd-firefox name="My Page!" icon="https://woowz11.github.io/woowzsite/source/cube.ico" url="https://woowz11.github.io/woowzsite/mypage.html">
 hello and welcome to my page!
 Today i gonna play
 to my game
@@ -429,5 +429,53 @@ i love minecraft
 please give me minecraft
 ТОП 100 СМЕРТЕЙ
 </wd-firefox></wd-winwindow>
+
+<wd-frame url="https://example.com" height="300px"></wd-frame>
+
+<wd-frame url="https://ru.wikipedia.org/wiki/%D0%9C%D1%83%D1%85%D0%B0%D0%BC%D0%BC%D0%B5%D0%B4" height="800px"></wd-frame>
+
+<wd-frame url="https://woowz11.github.io/woowzsite/quare.html" height="800px"></wd-frame>
+
+<wd-frame height="250px">
+    <style>
+        body { background: #333; color: lime; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        h1 { border: 2px solid lime; padding: 10px; }
+    </style>
+    <body>
+        <h1>SYSTEM ONLINE</h1>
+    </body>
+</wd-frame>
+
+<wd-frame height="450px">
+<!DOCTYPE HTML>
+<meta charset="utf-8">
+<title>Woowz Main Page!</title>
+<style>
+body {
+  background-image: url("https://github.com/Woowz11/woowzsite/blob/main/Portfolio/source/site/brick.jpg?raw=true");
+}
+font {
+  background-image: url("https://github.com/Woowz11/woowzsite/blob/main/Portfolio/source/site/ice.jpg?raw=true");
+}
+.search{
+  background-color: #D88F90;
+  cursor: pointer;
+}
+</style>
+<center><img src="https://github.com/Woowz11/woowzsite/blob/main/Portfolio/source/site/title.png?raw=true" width="480" height="256"></center>
+<center><img src="https://github.com/Woowz11/woowzsite/blob/main/Portfolio/source/site/title_smol.png?raw=true" width="256" height="35"></center>
+<center><font size="5">⬇ Поиск вувза ⬇</font></center>
+<p></p>
+<center><input type="text" placeholder="ВВЕДИТЕ ЧТО-ТО!!!!!!" size="100" id="search"><button class="search" type="button" id="button_search">SEARCH!</button></center>
+\t
+<p></p>
+<center><font color="blue" id="checkthis">    
+    &copy; Maked Woowz11 (1997)
+</font></center>
+</wd-frame>
+
+<wd-firefox realurl="https://woowz11.github.io/woowzsite/quare.html" height="800px"></wd-firefox>
+
+%core_unknown_author
 `);
 };

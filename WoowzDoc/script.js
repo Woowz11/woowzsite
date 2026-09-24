@@ -69,7 +69,9 @@ const WoowzDoc = {
         Translations: {},
         Elements: {},
         ElementsList: [],
+        ElementsInfo: {},
         CustomStyles: [],
+        FinalCallbacks: [],
         
         ContainerApp: undefined,
         ContainerStyle: undefined,
@@ -77,17 +79,19 @@ const WoowzDoc = {
         Page: "undefined",
         Lang: "ru",
         
+        Builded: false,
         Config: undefined
     },
     
     Element: class extends HTMLElement{
-        constructor(){ super(); this.__Initialized = false; }
+        constructor(){ super(); this.__Started = false; }
         connectedCallback(){}
-        __Init(){
-            if(this.__Initialized || this.dataset.wd_initialized === "true"){ return; } this.__Initialized = true; this.dataset.wd_initialized = "true";
+        __Start(){
+            if(this.__Started || this.dataset.wd_started === "true"){ return; } this.__Started = true; this.dataset.wd_started = "true";
             this.Start();
         }
         
+        static Stylize = true;
         Start(){}
     },
     
@@ -99,6 +103,9 @@ const WoowzDoc = {
         const FullName = "wd-" + ElementName;
         this.State.Elements[FullName] = ElementClass;
         this.State.ElementsList.push(FullName);
+        this.State.ElementsInfo[FullName] = {
+            Stylize: ElementClass.Stylize !== undefined ? ElementClass.Stylize : true,
+        };
         if(CSS){ this.AddCustomStyle(CSS); }
     },
     
@@ -463,39 +470,36 @@ const WoowzDoc = {
         `);
 
         this.RegisterElement("firefox", class extends self.Element {
-            Start() {
-                // 1. Собираем атрибуты
+            Start(){
                 const PageName = this.getAttribute("name") || "New Tab";
-                const URL = this.getAttribute("url") || "about:home";
-                const Icon = this.getAttribute("icon") || "https://woowz11.github.io/woowzsite/source/none.ico";
+                const RealURL = this.getAttribute("realurl");
+                const URL = this.getAttribute("url") || "index.html";
+                const Icon = this.getAttribute("icon");
 
                 const Width = this.getAttribute("width") || "100%";
                 const Height = this.getAttribute("height") || "auto";
 
-                // 2. Захватываем контент
-                const InnerContent = this.innerHTML;
-
+                const InnerContent = RealURL ? `<wd-frame url="${RealURL}" height="${Height}"></wd-frame>` : this.innerHTML;
+                
                 this.style.display = "block";
                 this.style.width = Width;
 
                 this.innerHTML = `
             <div class="ff-container">
-                <!-- Панель вкладок (Proton Dark Grey) -->
                 <div class="ff-tabs-area">
                     <div class="ff-tab ff-active">
-                        <img src="${Icon}" class="ff-tab-ico">
+                        <div class="ff-tab-icon-wrapper">${(Icon ? `<img src="${Icon}" class="ff-tab-ico">` : "")}</div>
                         <span class="ff-tab-title">${PageName}</span>
                         <div class="ff-close-tab">✕</div>
                     </div>
                     <div class="ff-new-tab">+</div>
                 </div>
 
-                <!-- Панель навигации -->
                 <div class="ff-nav-bar">
                     <div class="ff-nav-group">
                         <div class="ff-icon-btn">←</div>
                         <div class="ff-icon-btn">→</div>
-                        <div class="ff-icon-btn">↻</div>
+                        <div class="ff-icon-btn ff-refresh-btn">↻</div>
                     </div>
                     
                     <div class="ff-url-bar">
@@ -518,21 +522,88 @@ const WoowzDoc = {
         `;
 
                 self.ApplyElements(this);
+                
+                self.OnFinal(() => {
+                    if(RealURL){
+                        const Frame = this.querySelector('iframe');
+                        const TabTitle = this.querySelector('.ff-tab-title');
+                        const UrlText = this.querySelector('.ff-url-text');
+                        const IconWrapper = this.querySelector('.ff-tab-icon-wrapper');
+                        const RefreshBtn = this.querySelector('.ff-refresh-btn');
+
+                        UrlText.innerText = RealURL;
+
+                        const TrySync = () => {
+                            let Win, Doc, Href;
+                            
+                            let Title, Icon;
+                            
+                            try{
+                                Win = Frame.contentWindow;
+                                Href = Win.location.href;
+                                Doc = Win.document;
+                                
+                                Title = Doc.title;
+                                const Favicon = Doc.querySelector("link[rel*='icon'], link[rel='shortcut icon']");
+                                if(Favicon && Favicon.href) {
+                                    Icon = Favicon.href;
+                                }
+                            }catch(e){
+                                Title = "[CORS FAILED]";
+                                Href = "[CORS FAILED]";
+                                Icon = "https://woowz11.github.io/woowzsite/source/test.ico";
+                            }
+                            
+                            try{
+                                if(Title){
+                                    TabTitle.innerText = Title;
+                                }
+                                
+                                if(Href){
+                                    UrlText.innerText = Href;
+                                }
+                                
+                                if(Icon){
+                                    IconWrapper.innerHTML = `<img src="${Icon}" class="ff-tab-ico" />`;
+                                }
+                            }catch(e){
+                                console.warn("wd-firefox: sync failed", e);
+                            }
+                        };
+
+                        Frame.addEventListener("load", TrySync);
+                        try{
+                            if(Frame.contentDocument && Frame.contentDocument.readyState === "complete"){ TrySync(); }
+                        }catch(e){ TrySync(); }
+                        TrySync();
+                        
+                        RefreshBtn.onclick = () => {
+                            try{
+                                Frame.contentWindow.location.reload();
+                            }catch(e){
+                                const Src = Frame.src;
+                                Frame.src = "about:blank";
+                                requestAnimationFrame(() => { Frame.src = Src; });
+                            }
+                        };
+                    }
+                });
             }
         }, /* language=CSS */ `
             .ff-container {
-                background: #2B2A33; /* Основной темно-серый Firefox */
+                background: transparent;
                 display: flex;
                 flex-direction: column;
                 color: #fbfbfe;
                 font-family: 'Segoe UI', Tahoma, sans-serif;
                 overflow: hidden;
+                user-select: none;
             }
 
             /* Табы */
             .ff-tabs-area {
                 height: 44px;
-                background: #0C0C0D; /* Фон за табами */
+                background: #0C0C0D;
                 display: flex;
                 align-items: flex-end;
                 padding: 0 8px;
@@ -540,7 +611,7 @@ const WoowzDoc = {
             }
             .ff-tab {
                 height: 36px;
-                background: #42414D; /* Неактивный таб */
+                background: #42414D;
                 border-radius: 8px 8px 0 0;
                 padding: 0 12px;
                 display: flex;
@@ -551,7 +622,7 @@ const WoowzDoc = {
                 margin-bottom: 0;
             }
             .ff-active {
-                background: #2B2A33; /* Активный таб сливается с навбаром */
+                background: #2B2A33;
             }
             .ff-tab-ico { width: 16px; height: 16px; object-fit: contain; }
             .ff-tab-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -575,7 +646,7 @@ const WoowzDoc = {
                 gap: 8px;
             }
             .ff-nav-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-            .ff-right-group { margin-left: auto; } /* Прижимает пазл и меню вправо */
+            .ff-right-group { margin-left: auto; }
 
             .ff-icon-btn {
                 width: 32px; height: 32px;
@@ -585,18 +656,17 @@ const WoowzDoc = {
             }
             .ff-icon-btn:hover { background: #52525E; }
 
-            /* Адресная строка */
             .ff-url-bar {
                 flex-grow: 1;
                 height: 32px;
-                background: #1C1B22; /* Темное поле ввода */
+                background: #1C1B22;
                 border-radius: 8px;
                 display: flex;
                 align-items: center;
                 padding: 0 12px;
                 gap: 10px;
                 border: 1px solid transparent;
-                max-width: 80%; /* Чтобы не вытесняла кнопки справа */
+                max-width: 80%;
             }
             .ff-url-bar:hover { border-color: #5B5B66; }
             .ff-url-text {
@@ -606,16 +676,61 @@ const WoowzDoc = {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                user-select: text;
             }
             .ff-shield { color: #00ddff; }
             .ff-star { font-size: 16px; opacity: 0.6; }
 
-            /* Контент */
             .ff-viewport {
-                background: #ffffff;
-                color: #000000;
+                background: transparent;
+                color: var(--Text);
                 overflow: auto;
                 position: relative;
+                user-select: text;
+            }
+        `);
+
+        this.RegisterElement("frame", class extends self.Element {
+            static Stylize = false;
+            Start() {
+                const URL = this.getAttribute("url");
+                const Width = this.getAttribute("width") || "100%";
+                const Height = this.getAttribute("height") || "400px";
+                const Scrolling = this.getAttribute("scroll") || "auto";
+
+                // Сохраняем "сырой" контент, который был внутри тега
+                let RawHTML = this.innerHTML;
+
+                // Очищаем контейнер
+                this.style.display = "block";
+                this.style.width = Width;
+                this.innerHTML = `<iframe class="wd-frame-viewport" style="height: ${Height};" scrolling="${Scrolling}"></iframe>`;
+
+                const Iframe = this.querySelector('iframe');
+
+                if (URL) {
+                    // РЕЖИМ 1: По ссылке
+                    Iframe.src = URL;
+                } else {
+                    // РЕЖИМ 2: Сырой HTML
+                    // Декодируем HTML сущности, если они были пропарсены как текст
+                    const Decoded = RawHTML
+                        .replace(/&lt;/g, "<")
+                        .replace(/&gt;/g, ">")
+                        .replace(/&amp;/g, "&")
+                        .trim();
+
+                    // Используем srcdoc для изоляции стилей и скриптов
+                    Iframe.srcdoc = Decoded;
+                }
+            }
+        }, /* language=CSS */ `
+            .wd-frame-viewport {
+                width: 100%;
+                border: none;
+                background: white; /* Фон по умолчанию белый, как у чистого листа */
+                display: block;
+                box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
             }
         `);
     },
@@ -832,6 +947,15 @@ const WoowzDoc = {
         }
     },
     
+    OnFinal(Func){
+        if(typeof Func !== "function"){ return; }
+        if(this.State.Builded){
+            queueMicrotask(Func);
+        }else{
+            this.State.FinalCallbacks.push(Func);
+        }
+    },
+    
     async GetArticle(ID){
         if(!this.State.Data || !this.State.Data.Article){
             return this.GetErrorArticle("Статьи не указаны в Data!");
@@ -959,9 +1083,7 @@ const WoowzDoc = {
         
         Elements.sort((A, B) => GetDepth(B) - GetDepth(A));
         
-        Elements.forEach(E => {
-           E.__Init(); 
-        });
+        Elements.forEach(E => E.__Start());
     },
     
     // ----------------------------------------------------------------------
@@ -1059,31 +1181,54 @@ ${CustomElementsCSS}}`;
     Stylize(Text){
         if(typeof Text !== "string"){ return Text; }
         
-        let Result = Text
+        const ProtectedBlocks = [];
+        let TempText = Text;
+
+        for(const [TagName, Info] of Object.entries(this.State.ElementsInfo)){
+            if(Info.Stylize === false){
+                const Regex = new RegExp(`(<${TagName}[^>]*>)([\\s\\S]*?)(<\\/${TagName}>)`, 'gi');
+                TempText = TempText.replace(Regex, (Match, OpenTag, Inner, CloseTag) => {
+                    const Placeholder = `__WD_PROTECTED_${ProtectedBlocks.length}__`;
+                    ProtectedBlocks.push(OpenTag + Inner + CloseTag);
+                    return Placeholder;
+                });
+            }
+        }
+        
+        let Result = TempText
             .replace(/\\</g, "&lt;")
             .replace(/\\>/g, "&gt;");
         
-        return Result.split('\n').map(Line => {
+        Result = Result.split('\n').map(Line => {
             const TLine = Line.trim();
-
             if(TLine === ""){ return "<br>"; }
-            
             if(TLine.startsWith("///")){ return ""; }
 
+            if (TLine.includes("__WD_PROTECTED_")) { return Line; }
+
             if(TLine.includes("<wd-") || TLine.includes("</wd-")){ return Line; }
-            
+
             Line = Line
                 .replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;")
                 .replace(/ {2,}/g, M => "&nbsp;".repeat(M.length))
                 .replace(/^ /g, "&nbsp;");
-            
+
             return `<p>${Line}</p>`;
         }).join("");
+
+        ProtectedBlocks.forEach((RawHtml, Index) => {
+            Result = Result.replace(`__WD_PROTECTED_${Index}__`, RawHtml);
+        });
+        
+        return Result;
     },
     
     // ----------------------------------------------------------------------
     
     async Build(){
+        this.State.Builded = false;
+        this.State.FinalCallbacks = [];
+        
         const Article = await this.GetArticle(this.State.Page);
         
         this.State.ContainerStyle.innerHTML = this.GenerateCSS();
@@ -1142,9 +1287,15 @@ ${CustomElementsCSS}}`;
     </div>
 </main>
 `;
-        const ArticleArea = this.State.ContainerApp.querySelector("article");
-        this.ApplyElements(ArticleArea);
-        
         this.State.ContainerApp.innerHTML = this.TranslateAll(this.State.ContainerApp.innerHTML);
+
+        this.ApplyElements(this.State.ContainerApp.querySelector("article"));
+        
+        await new Promise(R => requestAnimationFrame(() => requestAnimationFrame(R)));
+        
+        this.State.Builded = true;
+        this.State.FinalCallbacks.forEach(Func => {
+            try { Func(); } catch(e){ console.error("FinalCallback Error:", e); }
+        });
     }
 };
