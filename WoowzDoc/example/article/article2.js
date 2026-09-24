@@ -385,6 +385,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
 <wd-winwindow></wd-winwindow>
 
+<wd-winwindow name="WoowzCore: FPS 120,0"></wd-winwindow>
+
+<wd-winwindow icon="https://woowz11.github.io/woowzsite/source/whitesponge.ico" name="WHITE SRANG SPANG WINDOW : Hello"></wd-winwindow>
+
 <wd-winwindow>
 
 HELLO!
@@ -393,8 +397,37 @@ and welcome to my window!
 
 </wd-winwindow>
 
-<wd-winwindow name="Окно батюшки">
-Это окно батюшки
+<wd-winwindow name="Окно батюшки">Это окно батюшки</wd-winwindow>
+
+<wd-winwindow name="hi">
+Окно в окне
+<wd-winwindow name="bye">Где такое видано?</wd-winwindow>
 </wd-winwindow>
+
+<wd-winwindow controls="false">ОКНО без кнопок</wd-winwindow>
+
+<wd-winwindow height="300px">${"ОКНО с скроллом\n".repeat(30)}</wd-winwindow>
+
+<wd-winwindow width="256px" height="256px">Окно 256x256</wd-winwindow>
+
+<wd-winwindow background="red">Окно красное</wd-winwindow>
+
+<wd-winwindow background="transparent">Окно прозрачное</wd-winwindow>
+
+<wd-winwindow opacity="0.5">Окно полу-прозрачное</wd-winwindow>
+
+<wd-winwindow padding="0"><wd-firefox>hello and welcome to my page!</wd-firefox></wd-winwindow>
+
+<wd-winwindow padding="0" icon="https://github.com/Woowz11/woowzsite/raw/refs/heads/main/Portfolio/source/firefox.ico"><wd-firefox name="My Page!" icon="https://woowz11.github.io/woowzsite/source/cube.ico" url="https://woowz11.github.io/woowzsite/mypage.html">
+hello and welcome to my page!
+Today i gonna play
+to my game
+his name, minecraft
+i love minecraft
+my best ever game
+i love minecraft
+please give me minecraft
+ТОП 100 СМЕРТЕЙ
+</wd-firefox></wd-winwindow>
 `);
 };

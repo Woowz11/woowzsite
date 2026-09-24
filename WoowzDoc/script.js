@@ -81,13 +81,12 @@ const WoowzDoc = {
     },
     
     Element: class extends HTMLElement{
-        constructor(){ super(); }
+        constructor(){ super(); this.__Initialized = false; }
         connectedCallback(){}
         __Init(){
-            if(this.__Initialized){ return; } this.__Initialized = true;
+            if(this.__Initialized || this.dataset.wd_initialized === "true"){ return; } this.__Initialized = true; this.dataset.wd_initialized = "true";
             this.Start();
         }
-        __Initialized = false;
         
         Start(){}
     },
@@ -360,8 +359,10 @@ const WoowzDoc = {
                 const Height = this.getAttribute("height") || "auto";
                 const Background = this.getAttribute("background") || "var(--Background)";
                 const HideControls = this.getAttribute("controls") === "false";
-                const Icon = this.getAttribute("icon") || "source/app.ico";
-
+                const Icon = this.getAttribute("icon") || "https://github.com/Woowz11/woowzsite/raw/refs/heads/main/Portfolio/source/app.ico";
+                const Opacity = this.getAttribute("opacity") || "1";
+                const Padding = this.getAttribute("padding") || "15px";
+                
                 const InnerContent = this.innerHTML;
 
                 this.style.display = "block";
@@ -369,21 +370,21 @@ const WoowzDoc = {
                 this.style.margin = "20px 0";
 
                 this.innerHTML = `
-            <div class="win-container-base">
+            <div class="win-container-base" style="background: ${Background}; opacity: ${Opacity};">
                 <div class="win-header-base">
                     <div class="win-title-base">
-                        <span class="win-icon-base"><img src="${Icon}"></span>
+                        <img src="${Icon}" class="win-icon-base" />
                         <span class="win-text-base">${Name}</span>
                     </div>
                     ${!HideControls ? `
                     <div class="win-controls-base">
-                        <div class="win-btn-base">─</div>
-                        <div class="win-btn-base">❏</div>
-                        <div class="win-btn-base win-close-base">✕</div>
+                        <span class="win-btn-base"><img src="https://woowz11.github.io/woowzsite/source/CLOSETHIS.png" /></span>
+                        <span class="win-btn-base"><img src="https://woowz11.github.io/woowzsite/source/CLOSETHIS2.png" /></span>
+                        <span class="win-btn-base win-close-base"><img src="https://woowz11.github.io/woowzsite/source/CLOSETHIS3.png" /></span>
                     </div>
                     ` : ''}
                 </div>
-                <div class="win-body-base" style="background: ${Background}; height: ${Height}">
+                <div class="win-body-base" style="background: ${Background}; height: ${Height}; padding: ${Padding};">
                     ${InnerContent}
                 </div>
             </div>
@@ -394,7 +395,6 @@ const WoowzDoc = {
         }, /* language=CSS */ `
             .win-container-base {
                 border: 1px solid var(--Border);
-                border-radius: 4px;
                 background: var(--Sidebar);
                 box-shadow: 0 8px 30px var(--Shadow);
                 overflow: hidden;
@@ -427,7 +427,11 @@ const WoowzDoc = {
                 object-fit: contain;
                 flex-shrink: 0;
             }
-            .win-text-base { font-size: 16px; font-family: 'Consolas', sans-serif; }
+            .win-text-base { font-family: "Segoe UI", "Segoe UI Variable Display", Arial, sans-serif;
+                font-size: 12px;
+                font-weight: 100;
+                letter-spacing: 0.1px;
+                color: black; }
         
             .win-controls-base { display: flex; height: 100%; }
             .win-btn-base {
@@ -436,18 +440,181 @@ const WoowzDoc = {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 10px;
-                color: #333;
                 transition: background 0.1s;
                 cursor: pointer;
             }
+            .win-btn-base img{
+                cursor: pointer;
+                filter: brightness(0);
+                transition: filter 0.2s ease;
+            }
             .win-btn-base:hover { background: #e5e5e5; }
-            .win-close-base:hover { background: #e81123 !important; color: white; }
-        
+            .win-close-base:hover { background: #e81123 !important; }
+
+            .win-btn-base.win-close-base:hover img {
+                filter: brightness(1);
+            }
+            
             .win-body-base {
-                padding: 15px;
                 overflow: auto;
                 color: var(--Text);
+                position: relative;
+            }
+        `);
+
+        this.RegisterElement("firefox", class extends self.Element {
+            Start() {
+                // 1. Собираем атрибуты
+                const PageName = this.getAttribute("name") || "New Tab";
+                const URL = this.getAttribute("url") || "about:home";
+                const Icon = this.getAttribute("icon") || "https://woowz11.github.io/woowzsite/source/none.ico";
+
+                const Width = this.getAttribute("width") || "100%";
+                const Height = this.getAttribute("height") || "auto";
+
+                // 2. Захватываем контент
+                const InnerContent = this.innerHTML;
+
+                this.style.display = "block";
+                this.style.width = Width;
+
+                this.innerHTML = `
+            <div class="ff-container">
+                <!-- Панель вкладок (Proton Dark Grey) -->
+                <div class="ff-tabs-area">
+                    <div class="ff-tab ff-active">
+                        <img src="${Icon}" class="ff-tab-ico">
+                        <span class="ff-tab-title">${PageName}</span>
+                        <div class="ff-close-tab">✕</div>
+                    </div>
+                    <div class="ff-new-tab">+</div>
+                </div>
+
+                <!-- Панель навигации -->
+                <div class="ff-nav-bar">
+                    <div class="ff-nav-group">
+                        <div class="ff-icon-btn">←</div>
+                        <div class="ff-icon-btn">→</div>
+                        <div class="ff-icon-btn">↻</div>
+                    </div>
+                    
+                    <div class="ff-url-bar">
+                        <span class="ff-shield">🛡️</span>
+                        <div class="ff-url-text">${URL}</div>
+                        <span class="ff-star">☆</span>
+                    </div>
+                    
+                    <div class="ff-nav-group ff-right-group">
+                        <div class="ff-icon-btn">🧩</div>
+                        <div class="ff-icon-btn">☰</div>
+                    </div>
+                </div>
+
+                <!-- Зона контента -->
+                <div class="ff-viewport" style="height: ${Height}">
+                    ${InnerContent}
+                </div>
+            </div>
+        `;
+
+                self.ApplyElements(this);
+            }
+        }, /* language=CSS */ `
+            .ff-container {
+                background: #2B2A33; /* Основной темно-серый Firefox */
+                display: flex;
+                flex-direction: column;
+                color: #fbfbfe;
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+                overflow: hidden;
+            }
+
+            /* Табы */
+            .ff-tabs-area {
+                height: 44px;
+                background: #0C0C0D; /* Фон за табами */
+                display: flex;
+                align-items: flex-end;
+                padding: 0 8px;
+                gap: 4px;
+            }
+            .ff-tab {
+                height: 36px;
+                background: #42414D; /* Неактивный таб */
+                border-radius: 8px 8px 0 0;
+                padding: 0 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                min-width: 190px;
+                margin-bottom: 0;
+            }
+            .ff-active {
+                background: #2B2A33; /* Активный таб сливается с навбаром */
+            }
+            .ff-tab-ico { width: 16px; height: 16px; object-fit: contain; }
+            .ff-tab-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .ff-close-tab { font-size: 10px; opacity: 0.7; cursor: pointer; }
+
+            .ff-new-tab {
+                width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 4px; font-size: 20px; cursor: pointer;
+                margin-bottom: 4px;
+            }
+            .ff-new-tab:hover { background: #52525E; }
+
+            /* Навбар */
+            .ff-nav-bar {
+                height: 48px;
+                background: #2B2A33;
+                display: flex;
+                align-items: center;
+                padding: 0 8px;
+                gap: 8px;
+            }
+            .ff-nav-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+            .ff-right-group { margin-left: auto; } /* Прижимает пазл и меню вправо */
+
+            .ff-icon-btn {
+                width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 4px; cursor: pointer; transition: 0.15s;
+                font-size: 14px;
+            }
+            .ff-icon-btn:hover { background: #52525E; }
+
+            /* Адресная строка */
+            .ff-url-bar {
+                flex-grow: 1;
+                height: 32px;
+                background: #1C1B22; /* Темное поле ввода */
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                padding: 0 12px;
+                gap: 10px;
+                border: 1px solid transparent;
+                max-width: 80%; /* Чтобы не вытесняла кнопки справа */
+            }
+            .ff-url-bar:hover { border-color: #5B5B66; }
+            .ff-url-text {
+                font-size: 13px;
+                opacity: 0.9;
+                font-family: 'Segoe UI', sans-serif;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .ff-shield { color: #00ddff; }
+            .ff-star { font-size: 16px; opacity: 0.6; }
+
+            /* Контент */
+            .ff-viewport {
+                background: #ffffff;
+                color: #000000;
+                overflow: auto;
                 position: relative;
             }
         `);
