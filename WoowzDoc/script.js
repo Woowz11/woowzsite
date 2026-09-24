@@ -498,14 +498,14 @@ const WoowzDoc = {
 
                 <div class="ff-nav-bar">
                     <div class="ff-nav-group">
-                        <div class="ff-icon-btn">←</div>
-                        <div class="ff-icon-btn">→</div>
+                        <div class="ff-icon-btn ff-back-btn">←</div>
+                        <div class="ff-icon-btn ff-forward-btn">→</div>
                         <div class="ff-icon-btn ff-refresh-btn">↻</div>
                     </div>
                     
                     <div class="ff-url-bar">
                         <span class="ff-shield">🛡️</span>
-                        <div class="ff-url-text">${URL}</div>
+                        <input class="ff-url-input" type="text" value="${URL}" readonly />
                         <span class="ff-star">☆</span>
                     </div>
                     
@@ -528,11 +528,28 @@ const WoowzDoc = {
                     if(RealURL){
                         const Frame = this.querySelector('iframe');
                         const TabTitle = this.querySelector('.ff-tab-title');
-                        const UrlText = this.querySelector('.ff-url-text');
+                        const UrlInput     = this.querySelector('.ff-url-input');
                         const IconWrapper = this.querySelector('.ff-tab-icon-wrapper');
                         const RefreshBtn = this.querySelector('.ff-refresh-btn');
+                        const BackBtn      = this.querySelector('.ff-back-btn');
+                        const ForwardBtn   = this.querySelector('.ff-forward-btn');
 
-                        UrlText.innerText = RealURL;
+                        UrlInput.readOnly = false;
+                        
+                        const History = [RealURL];
+                        let HistoryIndex = 0;
+
+                        const Navigate = (URL) => {
+                            Frame.src = URL;
+                        };
+
+                        const PushHistory = (URL) => {
+                            History.splice(HistoryIndex + 1);
+                            History.push(URL);
+                            HistoryIndex = History.length - 1;
+                        };
+
+                        UrlInput.value = RealURL;
 
                         const TrySync = () => {
                             let Win, Doc, Href;
@@ -561,7 +578,7 @@ const WoowzDoc = {
                                 }
                                 
                                 if(Href){
-                                    UrlText.innerText = Href;
+                                    UrlInput.value = Href;
                                 }
                                 
                                 if(Icon){
@@ -569,6 +586,10 @@ const WoowzDoc = {
                                 }
                             }catch(e){
                                 console.warn("wd-firefox: sync failed", e);
+                            }
+
+                            if(Href !== History[HistoryIndex]){
+                                PushHistory(Href);
                             }
                         };
 
@@ -587,6 +608,35 @@ const WoowzDoc = {
                                 requestAnimationFrame(() => { Frame.src = Src; });
                             }
                         };
+
+                        BackBtn.onclick    = () => {
+                            if(HistoryIndex <= 0){ return; }
+                            HistoryIndex--;
+                            Frame.src = History[HistoryIndex];
+                        };
+
+                        ForwardBtn.onclick = () => {
+                            if(HistoryIndex >= History.length - 1){ return; }
+                            HistoryIndex++;
+                            Frame.src = History[HistoryIndex];
+                        };
+
+                        UrlInput.addEventListener("keydown", (E) => {
+                            if(E.key !== "Enter"){ return; }
+                            E.preventDefault();
+
+                            let URL = UrlInput.value.trim();
+                            if(!URL){ return; }
+
+                            if(!/^https?:\/\//i.test(URL) && !URL.startsWith("//")){
+                                if(/^[\w-]+(\.[\w-]+)+/.test(URL)){
+                                    URL = "https://" + URL;
+                                }
+                            }
+
+                            Frame.src = URL;
+                            UrlInput.blur();
+                        });
                     }
                 });
             }
@@ -637,7 +687,6 @@ const WoowzDoc = {
             }
             .ff-new-tab:hover { background: #52525E; }
 
-            /* Навбар */
             .ff-nav-bar {
                 height: 48px;
                 background: #2B2A33;
@@ -670,14 +719,15 @@ const WoowzDoc = {
                 max-width: 80%;
             }
             .ff-url-bar:hover { border-color: #5B5B66; }
-            .ff-url-text {
+            .ff-url-input {
+                flex-grow: 1;
+                background: transparent;
+                border: none;
+                outline: none;
+                color: #fbfbfe;
                 font-size: 13px;
-                opacity: 0.9;
                 font-family: 'Segoe UI', sans-serif;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                user-select: text;
+                cursor: text;
             }
             .ff-shield { color: #00ddff; }
             .ff-star { font-size: 16px; opacity: 0.6; }
