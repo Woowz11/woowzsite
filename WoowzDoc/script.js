@@ -80,6 +80,7 @@ const WoowzDoc = {
         Lang: "ru",
         
         Builded: false,
+        IsLocal: false,
         Config: undefined
     },
     
@@ -741,7 +742,7 @@ const WoowzDoc = {
         if(this.State.Config !== undefined){ throw new Error("WoowzDoc Init вызван дважды!"); }
         
         this.State.Config = Config;
-
+        
         if(Config.Name        ){ this.State.Const.Name = Config.Name; }
         if(Config.Author      ){ this.State.Const.Author = Config.Author; }
         if(Config.Data        ){ this.State.Data = Config.Data; }
@@ -1299,3 +1300,23 @@ ${CustomElementsCSS}}`;
         });
     }
 };
+WoowzDoc.State.IsLocal= (() => {
+    const H = location.hostname;
+    const P = location.protocol;
+    if(P === "file:"){ return true; }
+
+    if(
+        H === "localhost"    ||
+        H === "127.0.0.1"    ||
+        H === "::1"          ||
+        H === "[::1]"        ||
+        H.endsWith(".local") ||
+        H.endsWith(".localhost")
+    ){ return true; }
+
+    if(/^10\./.test(H)){ return true; }
+    if(/^192\.168\./.test(H)){ return true; }
+    if(/^172\.(1[6-9]|2\d|3[01])\./.test(H)){ return true; }
+
+    return false;
+})();

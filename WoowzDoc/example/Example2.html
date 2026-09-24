@@ -15,11 +15,11 @@
                     Article: {
                         "objects": {
                             Name: "%objects",
-                            RawContent: { Type: "FileJS", URL: "/example/article/article3.js" }
+                            RawContent: { Type: "FileJS", URL: WoowzDoc.State.IsLocal ? "/example/article/article3.js" : "https://github.com/Woowz11/woowzsite/raw/refs/heads/main/WoowzDoc/example/article/article3.js" }
                         },
                         "trash": {
                             Name: "Мусор",
-                            RawContent: { Type: "FileJS", URL: "/example/article/article2.js" }
+                            RawContent: { Type: "FileJS", URL: WoowzDoc.State.IsLocal ? "/example/article/article2.js" : "https://github.com/Woowz11/woowzsite/raw/refs/heads/main/WoowzDoc/example/article/article2.js" }
                         }
                     }
                 },
