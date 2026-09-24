@@ -382,5 +382,19 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     fragColor = vec4(uv.x, uv.y, 0.5, 1.0);
 }
 </wd-code>
+
+<wd-winwindow></wd-winwindow>
+
+<wd-winwindow>
+
+HELLO!
+
+and welcome to my window!
+
+</wd-winwindow>
+
+<wd-winwindow name="Окно батюшки">
+Это окно батюшки
+</wd-winwindow>
 `);
 };

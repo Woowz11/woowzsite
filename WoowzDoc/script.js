@@ -352,6 +352,105 @@ const WoowzDoc = {
                 display: flow-root;
             }
         `);
+
+        this.RegisterElement("winwindow", class extends self.Element {
+            Start() {
+                const Name = this.getAttribute("name") || "Window";
+                const Width = this.getAttribute("width") || "100%";
+                const Height = this.getAttribute("height") || "auto";
+                const Background = this.getAttribute("background") || "var(--Background)";
+                const HideControls = this.getAttribute("controls") === "false";
+                const Icon = this.getAttribute("icon") || "source/app.ico";
+
+                const InnerContent = this.innerHTML;
+
+                this.style.display = "block";
+                this.style.width = Width;
+                this.style.margin = "20px 0";
+
+                this.innerHTML = `
+            <div class="win-container-base">
+                <div class="win-header-base">
+                    <div class="win-title-base">
+                        <span class="win-icon-base"><img src="${Icon}"></span>
+                        <span class="win-text-base">${Name}</span>
+                    </div>
+                    ${!HideControls ? `
+                    <div class="win-controls-base">
+                        <div class="win-btn-base">─</div>
+                        <div class="win-btn-base">❏</div>
+                        <div class="win-btn-base win-close-base">✕</div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="win-body-base" style="background: ${Background}; height: ${Height}">
+                    ${InnerContent}
+                </div>
+            </div>
+        `;
+                
+                self.ApplyElements(this);
+            }
+        }, /* language=CSS */ `
+            .win-container-base {
+                border: 1px solid var(--Border);
+                border-radius: 4px;
+                background: var(--Sidebar);
+                box-shadow: 0 8px 30px var(--Shadow);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                transition: transform 0.2s;
+            }
+        
+            .win-header-base {
+                height: 33px;
+                background: #fff;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-left: 13px;
+                user-select: none;
+                border-bottom: 1px solid var(--Border);
+            }
+        
+            .win-title-base {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #333;
+            }
+
+            .win-icon-base {
+                width: 16px;
+                height: 16px;
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+            .win-text-base { font-size: 16px; font-family: 'Consolas', sans-serif; }
+        
+            .win-controls-base { display: flex; height: 100%; }
+            .win-btn-base {
+                width: 45px;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 10px;
+                color: #333;
+                transition: background 0.1s;
+                cursor: pointer;
+            }
+            .win-btn-base:hover { background: #e5e5e5; }
+            .win-close-base:hover { background: #e81123 !important; color: white; }
+        
+            .win-body-base {
+                padding: 15px;
+                overflow: auto;
+                color: var(--Text);
+                position: relative;
+            }
+        `);
     },
     
     Init(Config){
@@ -535,7 +634,7 @@ const WoowzDoc = {
 
     GetErrorArticleRaw(){
         return (this.State.Data.Article && this.State.Data.Article[this.State.Data.ErrorArticle] ? this.GetArticleRaw(this.State.Data.ErrorArticle) : undefined) || {
-            Name: "%core_article_error_name",
+            Name      : "%core_article_error_name",
             RawContent: "%core_article_error_error: %core_article_error"
         };
     },

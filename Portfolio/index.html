@@ -8,6 +8,137 @@
         <script src="data.js"></script>
         <script src="../WoowzDoc/script.js"></script>
         <script>
+            WoowzDoc.RegisterDefaultElements();
+            
+            let Articles = {
+                "readme": {
+                    Name: "README",
+                    RawContent: { Type: "FileJS", URL: "/article/readme.js" }
+                }
+            }
+            
+            for(const ID in Data_Projects){
+                const Project = Data_Projects[ID];
+                Articles[ID] = {
+                    Name: Project.__Name,
+                    RawContent: WoowzDoc.Stylize(Project.__Content)
+                };
+            }
+
+            WoowzDoc.RegisterElement("profile-project", class extends WoowzDoc.Element {
+                Start() {
+                    const ID = this.getAttribute("id");
+                    const P = Data_Projects[ID];
+
+                    if (!P) {
+                        this.innerHTML = `<b style="color:red">Project ${ID} not found</b>`;
+                        return;
+                    }
+
+                    // Вспомогательная функция для проверки на пустоту
+                    const has = (val) => val !== null && val !== undefined && val !== "" && (Array.isArray(val) ? val.length > 0 : true);
+
+                    // Формирование списков (теги, языки)
+                    const renderList = (list) => list.map(item => {
+                        const clean = item.toString().split('_')[1] || item; // убираем префиксы lang_, core_
+                        return `<span class="proj-tag">${clean}</span>`;
+                    }).join("");
+
+                    // Формирование статов (только если есть значение)
+                    const renderStat = (label, value) => {
+                        if (!has(value)) return "";
+                        return `
+                <div class="proj-stat">
+                    <div class="proj-stat-label"><span>${label}</span> <span>${value}%</span></div>
+                    <div class="proj-stat-bar"><div style="width:${value}%"></div></div>
+                </div>`;
+                    };
+
+                    this.classList.add("wd-project-header");
+                    this.innerHTML = `
+            <div class="proj-main-row">
+                <!-- ЛЕВАЯ КОЛОНКА: Имя, Статус, Даты -->
+                <div class="proj-col proj-left">
+                    ${has(P.__Icon) ? `<img src="${P.__Icon}" class="proj-big-icon">` : ""}
+                    <div class="proj-title-group">
+                        <div class="proj-status-label ${P.__Status}">${P.__Status.split('_')[1]}</div>
+                        <h1 class="proj-name">${P.__Name} (WIP RENDER)</h1>
+                        <div class="proj-dates">
+                            ${has(P.__Created) ? `<span>Створен: ${P.__Created}</span>` : ""}
+                            ${has(P.__Updated) ? `<span>Оновлен: ${P.__Updated}</span>` : ""}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА: Стек, Ссылки, Ядра -->
+                <div class="proj-col proj-right">
+                    ${has(P.__Language) ? `<div class="proj-meta-item"><b>Языки:</b> <div>${renderList(P.__Language)}</div></div>` : ""}
+                    ${has(P.__Core) ? `<div class="proj-meta-item"><b>Ядро:</b> <div>${renderList(P.__Core)}</div></div>` : ""}
+                    ${has(P.__Tag) ? `<div class="proj-meta-item"><b>Теги:</b> <div>${renderList(P.__Tag)}</div></div>` : ""}
+                    ${has(P.__URL) ? `<div class="proj-meta-item"><b>Ссылки:</b> <div>${P.__URL.map(u => `<a href="${u}" target="_blank">GitHub / Link</a>`).join(", ")}</div></div>` : ""}
+                </div>
+            </div>
+
+            <!-- НИЖНЯЯ ПАНЕЛЬ: Статы (появляется только если есть хотя бы один стат) -->
+            ${(has(P.__QCode) || has(P.__QVisual) || has(P.__QSeriousness)) ? `
+            <div class="proj-stats-grid">
+                ${renderStat("Code Quality", P.__QCode)}
+                ${renderStat("Visual", P.__QVisual)}
+                ${renderStat("Seriousness", P.__QSeriousness)}
+                ${renderStat("Attitude", P.__QAttitude)}
+                ${renderStat("Aesthetics", P.__QAesthetics)}
+                ${renderStat("AI Usage", P.__QAI)}
+            </div>` : ""}
+        `;
+                }
+                }, /* language=CSS */ `
+    .wd-project-header {
+        width: 100%;
+        background: linear-gradient(145deg, var(--Sidebar), var(--Background));
+        border: 1px solid var(--Border);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 50px var(--Shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .proj-main-row { display: flex; justify-content: space-between; gap: 40px; }
+    .proj-col { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+
+    /* Лево */
+    .proj-left { flex-direction: row; align-items: flex-start; gap: 20px; flex: 1.5; }
+    .proj-big-icon { width: 80px; height: 80px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .proj-name { font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--Text); margin: 5px 0; }
+    .proj-status-label { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; text-transform: uppercase; background: var(--Accent); color: white; }
+    .proj-dates { font-size: 0.7rem; opacity: 0.5; display: flex; gap: 15px; }
+
+    /* Право */
+    .proj-right { background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--Border); }
+    .proj-meta-item { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; margin-bottom: 10px; }
+    .proj-meta-item b { font-size: 0.7rem; text-transform: uppercase; opacity: 0.4; }
+    .proj-tag { background: var(--Border); padding: 2px 6px; border-radius: 4px; margin-right: 4px; font-size: 0.75rem; }
+
+    /* Статы */
+    .proj-stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+        gap: 20px; 
+        padding-top: 20px; 
+        border-top: 1px solid var(--Border); 
+    }
+    .proj-stat-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+    .proj-stat-bar { width: 100%; height: 4px; background: var(--Border); border-radius: 2px; overflow: hidden; }
+    .proj-stat-bar div { height: 100%; background: var(--Accent); box-shadow: 0 0 8px var(--Accent); }
+
+    /* Цвета статусов */
+    .status_active { background: #2ECC71; }
+    .status_abandoned { background: #E74C3C; }
+    .status_frozen { background: #3498DB; }
+`);
+            
             WoowzDoc.Init({
                 Name: "Portfolio",
                 Author: "Woowz11",
@@ -15,12 +146,7 @@
                 Data: {
                     StartArticle: "readme",
                     
-                    Article: {
-                        "readme": {
-                            Name: "README",
-                            RawContent: { Type: "FileJS", URL: "/article/readme.js" }
-                        }
-                    }
+                    Article: Articles
                 }
             });
         </script>
