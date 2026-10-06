@@ -42,7 +42,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>𓆩 ??? 𓆪</title>
-	<link rel="icon" href="title_hover.png" type="image/x-icon">
+	<link rel="icon" href="../source/goluworld.png" type="image/x-icon">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="google" content="notranslate">
 	<style>
@@ -498,7 +498,7 @@ symbol{
 // сука это гвоно живое вообще нах?
 
 // ПРАВДИВАЯ ВЕРСИЯ МАНИФЕСТА
-const MANIFEST_VERSION = "0.0.III";
+const MANIFEST_VERSION = "0.0.IV";
 
 // ДОП. ИНФОРМАЦИЯ В ССЫЛКЕ САЙТА
 var HASH = window.location.hash ? window.location.hash.substring(1) : "" ;
@@ -780,6 +780,7 @@ ${ELEMENT_WEBINFO()}
 <button onclick="OPEN_PAGE('not-exist');" class="category_button">&lt;@&gt;</button>
 <button onclick="OPEN_PAGE();" class="category_button">{MAIN PAGE}</button>
 <button onclick="OPEN_PAGE('artsreal');" class="category_button">ИСКУССТВО 🖼</button>
+<button onclick="OPEN_PAGE('trash');" class="category_button">GOLUWorld 👾</button>
 <button onclick="OPEN_RANDOM_PAGE();" class="category_button">RANDOM_PAGE()</button>
 <button onclick="OPEN_PAGE('database');" class="category_button">DATABASE</button>
 
@@ -1324,28 +1325,28 @@ var PAGE_MANIFEST_GOLU = ELEMENT_SITE(
 
 
 var PAGE_MANIFEST_TRASH1 = ELEMENT_SITE(`
-<div style="padding: 2rem; height: calc(100vh - 150px); box-sizing: border-box;">
+<center>also try <text class="glitch2"><b>.exe</b></text> version for <text class="glitch2">multiplayer</text>...</center>
+<div style="padding: 1rem; height: calc(100vh - 190px); box-sizing: border-box;">
     <div style="
         border: 3px solid #ff0044;
         height: 100%;
-        border-radius: 12px 2px 12px 2px;
+        border-radius: 12px;
         padding: 6px;
         background: #0a0000;
         box-shadow: 0 0 60px rgba(255,0,68,0.2);
     ">
         <iframe
-            src="https://woowz11.github.io/woowzsite/GOLUWorld2/game"
+            src="GOLUWorld.html"
             style="
                 width: 100%;
                 height: 100%;
-                border: 1px solid #2a0a0a;
-                border-radius: 6px;
-                background: #000;
+                border: 0;
+                display: block;
+                background: transparent;
             "
-            frameborder="0"
-            loading="lazy"
-            allowfullscreen>
-        </iframe>
+            allow="autoplay; fullscreen"
+            allowtransparency="true"
+        ></iframe>
     </div>
 </div>
 `
@@ -3148,7 +3149,7 @@ const PAGES = {
 	"sranspang": {t:"𝓢𝓟𝓐𝓝𝓫𝓫𝓫𝓒𝓟𝓐𝓝𝓒𝓗",c:PAGE_MANIFEST_SRANIYSPANCH},
 	"crybird"  : {t:"❄️ 🐦 ❄️",c:PAGE_MANIFEST_CRYBIRD},
 	"golu"     : {t:"G∅LU",c:PAGE_MANIFEST_GOLU},
-	"trash"    : {t:"G-WORLD-2",c:PAGE_MANIFEST_TRASH1},
+	"trash"    : {t:"G-WORLD-3",c:PAGE_MANIFEST_TRASH1},
 	"arts"     : {t:"reject 🚫",c:PAGE_MANIFEST_ARTS},
 	"artsreal" : {t:"🖼",c:PAGE_MANIFEST_ARTS_NEW}
 };

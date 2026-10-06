@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Steam Mods Only Parser</title>
+    <style>
+        body { font-family: sans-serif; background-color: #1b2838; color: #c7d5e0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 90%; max-width: 800px; background: #2a475e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { color: #66c0f4; margin-top: 0; }
+        textarea { width: 100%; height: 200px; background: #101822; color: #a3a3a3; border: 1px solid #4f94bc; border-radius: 4px; padding: 10px; box-sizing: border-box; font-family: monospace; }
+        .buttons { margin: 15px 0; display: flex; gap: 10px; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-parse { background: #66c0f4; color: white; }
+        .btn-copy { background: #4c6b22; color: white; }
+        .result-info { margin-bottom: 10px; font-size: 0.9em; color: #8bb9d6; }
+        #output { height: 250px; color: #d1d1d1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Парсер ID (Только тег "Mods")</h2>
+    <p>Вставьте сюда текст из API Steam:</p>
+    <textarea id="input" placeholder='Вставьте текст...'></textarea>
+    
+    <div class="buttons">
+        <button class="btn-parse" onclick="parseModsOnly()">Найти только моды</button>
+        <button class="btn-copy" onclick="copyToClipboard()">Копировать результат</button>
+    </div>
+
+    <div class="result-info" id="status">Найдено модов: 0</div>
+    <textarea id="output" readonly placeholder="Здесь будут только команды для модов..."></textarea>
+</div>
+
+<script>
+    function parseModsOnly() {
+        const inputText = document.getElementById('input').value;
+        const appId = "1118200";
+        
+        // 1. Разбиваем текст на отдельные блоки (каждая работа начинается с {"result":1)
+        const blocks = inputText.split('{"result":');
+        
+        let modIds = [];
+        
+        blocks.forEach(block => {
+            // 2. Проверяем, есть ли в этом блоке тег "Mods"
+            // Мы ищем именно структуру "tag":"Mods"
+            if (block.includes('"tag":"Mods"')) {
+                
+                // 3. Если тег найден, вытаскиваем ID этой работы
+                const idMatch = block.match(/"publishedfileid"\s*:\s*"(\d+)"/);
+                
+                if (idMatch && idMatch[1]) {
+                    const id = idMatch[1];
+                    // Убираем дубликаты
+                    if (!modIds.includes(id)) {
+                        modIds.push(id);
+                    }
+                }
+            }
+        });
+        
+        if (modIds.length > 0) {
+            const commands = modIds.map(id => `workshop_download_item ${appId} ${id}`).join('\n');
+            document.getElementById('output').value = commands;
+            document.getElementById('status').innerText = `Найдено модов (с тегом Mods): ${modIds.length}`;
+        } else {
+            document.getElementById('output').value = "";
+            document.getElementById('status').innerText = "Моды не найдены. Возможно, в тексте только чертежи (Contraptions).";
+        }
+    }
+
+    function copyToClipboard() {
+        const output = document.getElementById('output');
+        output.select();
+        document.execCommand('copy');
+        alert('Скопировано!');
+    }
+</script>
+
+</body>
+</html>

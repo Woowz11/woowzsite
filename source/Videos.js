@@ -268,6 +268,10 @@ const VIDEOS = [
 
 	// FREE ->
 	
+	[825, "~", "2026.09.28 01:34", "C5BCGhCqiig", "2026.09.28", "00:19", P_Link,
+	[T_Woowz11, T_WIP, T_Glitch, T_Prikol],
+	"Моё первое видео сделанное в DaVinci Resolve после Vegas Pro"],
+	
 	[824, "~", "2026.09.22 16:11", "KlaaN_WyyHw", "2026.09.22", "01:01", P_Link,
 	[T_Woowz11, T_WIP, T_GarrysMod],
 	""],

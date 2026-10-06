@@ -1,0 +1,399 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Loading...</title>
+        <link rel="icon" type="image/x-icon" href="source\null.ico">
+        
+        <style>
+
+html, body{
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+canvas{
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent;
+}
+
+        </style>
+    </head>
+
+    <body>
+        <canvas id="GameCanvas"></canvas>
+
+        <div id="FileOverlay" style="
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            color: #ff0044;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Consolas, monospace;
+            gap: 20px;
+        ">
+                    <h1 style="margin: 0; text-shadow: 0 0 20px #ff0044;">ВЫБЕРИ СКРИПТЫ ИГРЫ</h1>
+                    <input id="FileInput" type="file" multiple accept=".js" style="
+                padding: 10px;
+                background: #0a0000;
+                border: 2px solid #ff0044;
+                color: #ff0044;
+                font-family: Consolas, monospace;
+                font-size: 14px;
+                cursor: pointer;
+            ">
+            <div id="FileStatus" style="color: #ff8899; font-size: 12px;"></div>
+        </div>
+    </body>
+</html>
+
+<script>
+    'use strict';
+    
+    const ScriptsData = [
+        "00_Bridge",
+        "01_Main",
+        "99_Test"
+    ]
+    
+    const ScreenW = 384;
+    const ScreenH = 216;
+    
+    const IsFileProtocol = window.location.protocol === "file:";
+    
+    const Canvas = document.getElementById("GameCanvas");
+    if(!Canvas){
+        throw new Error("GameCanvas не найден!");
+    }
+    
+    Canvas.width  = ScreenW;
+    Canvas.height = ScreenH;
+    
+    const CTX = Canvas.getContext("2d", { alpha: false });
+    
+    function ResizeCanvas(){
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        const Scale = Math.max(1, Math.min(W / ScreenW, H / ScreenH));
+        Canvas.style.width  = (ScreenW * Scale) + "px";
+        Canvas.style.height = (ScreenH * Scale) + "px";
+    }
+    window.addEventListener("resize", ResizeCanvas);
+    ResizeCanvas();
+    
+    const ImageData = CTX.createImageData(ScreenW, ScreenH);
+    const U32View = new Uint32Array(ImageData.data.buffer);
+    const FrameBuffer = new Uint8Array(ScreenW * ScreenH * 3);
+
+    let Running = false;
+    let RafID = 0;
+    let LastTime = 0;
+    let Accumulator = 0;
+
+    window.addEventListener("beforeunload", function (e){
+        if(Running){
+            e.preventDefault();
+            e.returnValue = "";
+        }
+    });
+    
+    let Bridge = null;
+    
+    function Render(){
+        const FB = FrameBuffer;
+        const Count = ScreenW * ScreenH;
+        for(let i = 0, j = 0; i < Count; i++, j += 3){
+            U32View[i] = 0xFF000000 | (FB[j + 2] << 16) | (FB[j + 1] << 8) | FB[j];
+        }
+        CTX.putImageData(ImageData, 0, 0);
+    }
+
+    function DrawLoading(Text){
+        CTX.fillStyle = "#0a0000";
+        CTX.fillRect(0, 0, ScreenW, ScreenH);
+        CTX.fillStyle = "#ff0044";
+        CTX.font = "bold 14px Consolas, monospace";
+        CTX.textAlign = "center";
+        CTX.textBaseline = "middle";
+        CTX.fillText(Text, ScreenW / 2, ScreenH / 2);
+    }
+    
+    const FixedStep = 1.0 / 30;
+    function Cycle(Now){
+        if(!Running){ return; }
+        
+        let DT = (Now - LastTime) / 1000.0;
+        LastTime = Now;
+        
+        if(DT > 0.2){ DT = 0.2; }
+        
+        Accumulator += DT;
+        
+        while(Accumulator >= FixedStep){
+            Accumulator -= FixedStep;
+            
+            try{
+                Bridge.Hook.Cycle(FixedStep);
+            }catch(e){
+                console.error("Ошибка в игровом цикле!", e);
+            }
+            
+            Render();
+        }
+        
+        RafID = requestAnimationFrame(Cycle);
+    }
+    
+    const CommitTTL = 10 * 60 * 1000;
+    async function GetCommitID(){
+        if(IsFileProtocol){ return null; }
+        
+        const Now = Date.now();
+        const CachedSHA = localStorage.getItem("golu_commit_sha");
+        const CachedTime = parseInt(localStorage.getItem("golu_commit_time") || "0", 10);
+        
+        if(CachedSHA && (Now - CachedTime) < CommitTTL){
+            return CachedSHA;
+        }
+        
+        try{
+            const Result = await fetch("https://api.github.com/repos/WoowzCore/GOLUWorld/commits/main");
+            if(!Result.ok){
+                console.warn("Ошибка Commit ID", Result.status);
+                return CachedSHA || null;
+            }
+            const Data = await Result.json();
+            const SHA = Data.sha;
+            
+            localStorage.setItem("golu_commit_sha", SHA);
+            localStorage.setItem("golu_commit_time", String(Now));
+            
+            return SHA;
+        }catch(e){
+            console.warn("Не удалось получить Commit ID", e);
+            return CachedSHA || null;
+        }
+    }
+
+    function PickScriptsFromDisk(){
+        return new Promise(function(Resolve){
+            const Overlay = document.getElementById("FileOverlay");
+            const Input = document.getElementById("FileInput");
+            const Status = document.getElementById("FileStatus");
+
+            Overlay.style.display = "flex";
+
+            Input.addEventListener("change", async function(){
+                const SelectedFiles = Input.files;
+
+                if(!SelectedFiles || SelectedFiles.length === 0){
+                    Status.textContent = "Файлы не выбраны!";
+                    return;
+                }
+
+                Status.textContent = `Читаем ${SelectedFiles.length} файлов...`;
+
+                try{
+                    const Result = {};
+                    for(const File of SelectedFiles){
+                        const Text = await File.text();
+                        const Name = File.name.replace(/\.js$/i, "");
+                        Result[Name] = Text;
+                    }
+
+                    Overlay.style.display = "none";
+                    Resolve(Result);
+                }catch(e){
+                    Status.textContent = "Ошибка чтения: " + e.message;
+                    console.error(e);
+                }
+            });
+        });
+    }
+
+    async function LoadScriptsFromFiles(){
+        const Files = await PickScriptsFromDisk();
+        const SortedNames = [...ScriptsData].sort();
+
+        let AllCode = "";
+        for(const Name of SortedNames){
+            const Code = Files[Name];
+            if(!Code){
+                throw new Error(`Не найден файл: ${Name}.js (ты его не выбрал?)`);
+            }
+            console.log(`Из файла: ${Name}.js (${Code.length} символов)`);
+            AllCode += Code + "\n\n";
+        }
+        return AllCode;
+    }
+    
+    async function LoadRemoteScript(Name, CommitID){
+        const FileName = Name + ".js";
+        const Cache = await caches.open("goluworld_scripts");
+        const StorageKey = "golu_commit_" + Name;
+        
+        const CDNURL = CommitID ? `https://cdn.jsdelivr.net/gh/WoowzCore/GOLUWorld@${CommitID}/GOLUWorld/Game/${FileName}` : "https://cdn.jsdelivr.net/gh/WoowzCore/GOLUWorld@main/GOLUWorld/Game/" + FileName;
+        
+        const CachedResponse = await Cache.match(CDNURL);
+        const StoredCommitID = localStorage.getItem(StorageKey);
+        
+        if(CommitID && StoredCommitID === CommitID && CachedResponse){
+            console.log(`Из кеша: ${FileName}`);
+            return await CachedResponse.text();
+        }
+        
+        console.log(`Загружаем: ${FileName}`);
+        const FreshResult = await fetch(CDNURL);
+        if(!FreshResult.ok){
+            throw new Error(`Fetch(${CDNURL}) ошибка: ${FreshResult.status}`);
+        }
+        
+        await Cache.put(CDNURL, FreshResult.clone());
+        
+        if(CommitID){
+            localStorage.setItem(StorageKey, CommitID);
+        }
+        
+        return await FreshResult.text();
+    }
+    
+    async function ClearOldCache(CurrentCommitID){
+        if(IsFileProtocol){ return null; }
+        if(!CurrentCommitID){ return; }
+        
+        const Cache = await caches.open("goluworld_scripts");
+        const Keys = await Cache.keys();
+        
+        for(const Request of Keys){
+            const URL = Request.url;
+            if(URL.includes("/GOLUWorld/Game/") && !URL.includes("@" + CurrentCommitID)){
+                console.log(`Удаляем из кэша: ${URL}`);
+                await Cache.delete(Request);
+            }
+        }
+    }
+    
+    function SetupCore(){
+        window.__Core = {
+            LogInfo: function(Message){
+                console.log(Message);
+            },
+            LogWarn: function(Message){
+                console.warn(Message);
+            },
+            LogError: function(Message){
+                console.error(Message);
+            },
+
+            PersistentRender: function(){
+                Render();
+            }
+        };
+        
+        return window.__Core;
+    }
+    
+    function BuildGameFunction(AllCode){
+        const Wrapped = `"use strict"; ${AllCode} return { Bridge };`;
+        
+        return new Function("__Core", Wrapped);
+    }
+    
+    async function Boot(){
+        DrawLoading("L O A D I N G . . .");
+        
+        const Core = SetupCore();
+        
+        const SortedNames = [...ScriptsData].sort();
+        
+        let AllCode = "";
+        
+        if(IsFileProtocol){
+            try{
+                AllCode = await LoadScriptsFromFiles();
+            }catch(e){
+                console.error("Ошибка выбора файлов", e);
+                DrawLoading("FILES MISSING");
+                return;
+            }
+        }else{
+            const CommitID = await GetCommitID();
+            console.log(`Commit ID: ${(CommitID || "Unknown")}`);
+
+            if(CommitID){
+                await ClearOldCache(CommitID);
+            }
+
+            const SortedNames = [...ScriptsData].sort();
+            for(const Name of SortedNames){
+                try{
+                    const Code = await LoadRemoteScript(Name, CommitID);
+                    console.log(`Загружен: ${Name}.js`);
+                    AllCode += Code + "\n\n";
+                }catch(e){
+                    console.error(`Ошибка загрузки скрипта: ${Name}`, e);
+                    DrawLoading("LOAD FAILED");
+                    return;
+                }
+            }
+        }
+        
+        let Game = null;
+        try{
+            const GameFunction = BuildGameFunction(AllCode);
+            Game = GameFunction(Core);
+        }catch(e){
+            console.error("Ошибка компиляции игры!", e);
+            DrawLoading("BUILD FAILED");
+            return;
+        }
+        
+        Bridge = Game.Bridge;
+        
+        if(!Bridge){
+            console.error("Bridge не определён!");
+            DrawLoading("BRIDGE MISSING");
+            return;
+        }
+        
+        Bridge.Hook.Start(false, ScreenW, ScreenH, FrameBuffer);
+        
+        Render();
+        
+        Running = true;
+        LastTime = performance.now();
+        Accumulator = 0;
+        RafID = requestAnimationFrame(Cycle);
+        
+        if(window.parent !== window){
+            window.parent.postMessage({ type: "goluworld:ready" }, "*");
+        }
+    }
+    
+    window.addEventListener("message", function(e){
+        const Message = e.data;
+        if(!Message || typeof Message !== "object"){ return; }
+        
+        if(Message.type === "goluworld:stop"){
+            Running = false;
+            if(RafID){ cancelAnimationFrame(RafID); }
+            RafID = 0;
+        }
+    })
+    
+    Boot();
+</script>
