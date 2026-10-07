@@ -2,7 +2,7 @@
 <html lang="ru">
     <head>
         <meta charset="utf-8">
-        <title>Loading...</title>
+        <title>GOLUWorld 3</title>
         <link rel="icon" type="image/x-icon" href="source\null.ico">
         
         <style>
@@ -14,38 +14,65 @@ html, body{
     width: 100%;
     height: 100%;
     overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#TitleBar{
+    width: 100%;
+    height: 24px;
+    background: #ffffff;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    font-weight: bold;
+    box-sizing: border-box;
+    border-bottom: 1px solid #ff0044;
+    user-select: none;
+}
+
+#GameWindow{
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: #000;
+    border: 1px solid #ff0044;
 }
 
 canvas{
     display: block;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    background: transparent;
 }
 
+#FileOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    color: #ff0044;
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Consolas, monospace;
+    gap: 20px;
+}
         </style>
     </head>
 
     <body>
-        <canvas id="GameCanvas"></canvas>
+        <div id="GameWindow">
+            <div id="TitleBar">Loading...</div>
+            <canvas id="GameCanvas"></canvas>
+        </div>
 
-        <div id="FileOverlay" style="
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            color: #ff0044;
-            z-index: 9999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: Consolas, monospace;
-            gap: 20px;
-        ">
+        <div id="FileOverlay">
                     <h1 style="margin: 0; text-shadow: 0 0 20px #ff0044;">ВЫБЕРИ СКРИПТЫ ИГРЫ</h1>
                     <input id="FileInput" type="file" multiple accept=".js" style="
                 padding: 10px;
@@ -67,18 +94,20 @@ canvas{
     const ScriptsData = [
         "00_Bridge",
         "01_Main",
+        "02_Graphic",
+        "03_Game",
         "99_Test"
     ]
     
     const ScreenW = 384;
     const ScreenH = 216;
+    const TargetDT = 1000 / 30;
     
     const IsFileProtocol = window.location.protocol === "file:";
     
     const Canvas = document.getElementById("GameCanvas");
-    if(!Canvas){
-        throw new Error("GameCanvas не найден!");
-    }
+    const GameWindow = document.getElementById("GameWindow");
+    const TitleBar = document.getElementById("TitleBar");
     
     Canvas.width  = ScreenW;
     Canvas.height = ScreenH;
@@ -87,22 +116,23 @@ canvas{
     
     function ResizeCanvas(){
         const W = window.innerWidth;
-        const H = window.innerHeight;
+        const H = window.innerHeight - 24;
         const Scale = Math.max(1, Math.min(W / ScreenW, H / ScreenH));
+        
         Canvas.style.width  = (ScreenW * Scale) + "px";
         Canvas.style.height = (ScreenH * Scale) + "px";
+
+        GameWindow.style.width = Canvas.style.width;
     }
     window.addEventListener("resize", ResizeCanvas);
     ResizeCanvas();
     
     const ImageData = CTX.createImageData(ScreenW, ScreenH);
-    const U32View = new Uint32Array(ImageData.data.buffer);
-    const FrameBuffer = new Uint8Array(ScreenW * ScreenH * 3);
+    const FrameBuffer = new Uint32Array(ImageData.data.buffer);
 
     let Running = false;
-    let RafID = 0;
     let LastTime = 0;
-    let Accumulator = 0;
+    let Bridge = null;
 
     window.addEventListener("beforeunload", function (e){
         if(Running){
@@ -111,16 +141,7 @@ canvas{
         }
     });
     
-    let Bridge = null;
-    
-    function Render(){
-        const FB = FrameBuffer;
-        const Count = ScreenW * ScreenH;
-        for(let i = 0, j = 0; i < Count; i++, j += 3){
-            U32View[i] = 0xFF000000 | (FB[j + 2] << 16) | (FB[j + 1] << 8) | FB[j];
-        }
-        CTX.putImageData(ImageData, 0, 0);
-    }
+    function Render(){ CTX.putImageData(ImageData, 0, 0); }
 
     function DrawLoading(Text){
         CTX.fillStyle = "#0a0000";
@@ -132,30 +153,30 @@ canvas{
         CTX.fillText(Text, ScreenW / 2, ScreenH / 2);
     }
     
-    const FixedStep = 1.0 / 30;
     function Cycle(Now){
         if(!Running){ return; }
-        
-        let DT = (Now - LastTime) / 1000.0;
-        LastTime = Now;
-        
-        if(DT > 0.2){ DT = 0.2; }
-        
-        Accumulator += DT;
-        
-        while(Accumulator >= FixedStep){
-            Accumulator -= FixedStep;
+
+        let Elapsed = Now - LastTime;
+
+        if(Elapsed >= (TargetDT - 1)){
+            const DT = 1 / 30;
+            
+            const FPS = Math.round(1000 / Elapsed);
+            
+            LastTime = Now;
             
             try{
-                Bridge.Hook.Cycle(FixedStep);
+                Bridge.Hook.Cycle(DT, FPS);
+
+                TitleBar.textContent = Bridge.Hook.WindowTitle();
             }catch(e){
                 console.error("Ошибка в игровом цикле!", e);
             }
-            
+
             Render();
         }
         
-        RafID = requestAnimationFrame(Cycle);
+        requestAnimationFrame(Cycle);
     }
     
     const CommitTTL = 10 * 60 * 1000;
@@ -289,19 +310,11 @@ canvas{
     
     function SetupCore(){
         window.__Core = {
-            LogInfo: function(Message){
-                console.log(Message);
-            },
-            LogWarn: function(Message){
-                console.warn(Message);
-            },
-            LogError: function(Message){
-                console.error(Message);
-            },
+            LogInfo : Message => console.log(Message),
+            LogWarn : Message => console.warn(Message),
+            LogError: Message => console.error(Message),
 
-            PersistentRender: function(){
-                Render();
-            }
+            PersistentRender: () => Render()
         };
         
         return window.__Core;
@@ -376,24 +389,13 @@ canvas{
         
         Running = true;
         LastTime = performance.now();
-        Accumulator = 0;
-        RafID = requestAnimationFrame(Cycle);
         
         if(window.parent !== window){
             window.parent.postMessage({ type: "goluworld:ready" }, "*");
         }
+
+        requestAnimationFrame(Cycle);
     }
-    
-    window.addEventListener("message", function(e){
-        const Message = e.data;
-        if(!Message || typeof Message !== "object"){ return; }
-        
-        if(Message.type === "goluworld:stop"){
-            Running = false;
-            if(RafID){ cancelAnimationFrame(RafID); }
-            RafID = 0;
-        }
-    })
     
     Boot();
 </script>
