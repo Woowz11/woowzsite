@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>GOLUWORLD-3 TEXTURE CONVERTER</title>
+    <style>
+        :root {
+            --neon-red: #ff003c;
+            --dark-red: #4d0012;
+            --bg-color: #0a0000;
+            --glow: 0 0 10px rgba(255, 0, 60, 0.7), 0 0 20px rgba(255, 0, 60, 0.4);
+            --glitch-border: 2px solid var(--neon-red);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffb3b3;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            text-transform: uppercase;
+        }
+
+        /* Эффект сканирующих линий */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        h1 {
+            color: var(--neon-red);
+            text-align: center;
+            text-shadow: var(--glow);
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 3;
+        }
+
+        .panel {
+            flex: 1;
+            background: rgba(20, 0, 0, 0.8);
+            border: var(--glitch-border);
+            padding: 20px;
+            box-shadow: inset 0 0 15px rgba(255, 0, 60, 0.2), 0 0 15px rgba(255, 0, 60, 0.2);
+            backdrop-filter: blur(2px);
+        }
+
+        h2 {
+            color: var(--neon-red);
+            font-size: 1.2em;
+            border-bottom: 1px solid var(--neon-red);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #1a0004;
+            color: #ff4d6a;
+            border: 1px solid var(--dark-red);
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            resize: none;
+            outline: none;
+            box-shadow: inset 0 0 5px #000;
+        }
+
+        textarea:focus {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.3);
+        }
+
+        .canvas-container {
+            background-color: #050000;
+            background-image: 
+                linear-gradient(45deg, #1a0000 25%, transparent 25%), 
+                linear-gradient(-45deg, #1a0000 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #1a0000 75%), 
+                linear-gradient(-45deg, transparent 75%, #1a0000 75%);
+            background-size: 10px 10px;
+            border: 1px solid var(--neon-red);
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            position: relative;
+        }
+
+        .canvas-container::after {
+            content: "ВСТАВЬТЕ ИЛИ ВЫБЕРИТЕ";
+            position: absolute;
+            font-size: 10px;
+            bottom: 5px;
+            opacity: 0.3;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            max-width: 100%;
+            z-index: 2;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            font-size: 0.85em;
+            color: #ff8095;
+        }
+
+        .info-item span {
+            color: var(--neon-red);
+            font-weight: bold;
+        }
+
+        button {
+            background: var(--neon-red);
+            color: #000;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: #fff;
+            box-shadow: var(--glow);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 10px;
+            border: 1px dashed var(--neon-red);
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            background: rgba(255, 0, 60, 0.05);
+        }
+
+        .file-label:hover {
+            background: rgba(255, 0, 60, 0.15);
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>GOLUWorld-3 TEXTURE CONVERTER</h1>
+
+    <div class="main-wrapper">
+        <div class="panel">
+            <h2>Кодирование [PNG > STRING]</h2>
+            
+            <label class="file-label" for="fileInput">
+                ВЫБРАТЬ ОБЪЕКТ ИЛИ CTRL+V
+            </label>
+            <input type="file" id="fileInput" accept="image/png">
+
+            <div class="canvas-container">
+                <canvas id="prevEncode"></canvas>
+            </div>
+
+            <div id="statusInfo" class="info-grid">
+                <div class="info-item">РАЗМЕР: <span id="infoSize">-</span></div>
+                <div class="info-item">АЛЬФА: <span id="infoAlpha">-</span></div>
+                <div class="info-item">Ч/Б: <span id="infoGray">-</span></div>
+                <div class="info-item">ФЛАГ: <span id="infoFlag">-</span></div>
+                <div class="info-item" style="grid-column: span 2;">ДЛИНА КОДА: <span id="infoLen">0</span></div>
+            </div>
+
+            <textarea id="outputText" readonly placeholder="ЗДЕСЬ ПОЯВИТСЯ КОД..."></textarea>
+            <button onclick="copyToClipboard()" id="copyBtn">КОПИРОВАТЬ В ПАМЯТЬ</button>
+        </div>
+
+        <div class="panel">
+            <h2>Декодирование [STRING > PREVIEW]</h2>
+            
+            <textarea id="inputText" placeholder="ВСТАВЬТЕ КОД ДЛЯ ВИЗУАЛИЗАЦИИ..."></textarea>
+
+            <div class="canvas-container">
+                <canvas id="prevDecode"></canvas>
+            </div>
+
+            <div id="decodeInfo" class="info-grid">
+                <div class="info-item">ВЫСОТА: <span id="decH">-</span></div>
+                <div class="info-item">ШИРИНА: <span id="decW">-</span></div>
+            </div>
+            
+            <button onclick="clearAll()" style="background: #4d0012; color: #ff003c; border: 1px solid #ff003c;">ОЧИСТИТЬ ВСЁ</button>
+        </div>
+    </div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const inputText = document.getElementById('inputText');
+    const outText = document.getElementById('outputText');
+    const encodeCanvas = document.getElementById('prevEncode');
+    const decodeCanvas = document.getElementById('prevDecode');
+
+    window.onload = () => { clearAll(); };
+
+    function clearAll() {
+        fileInput.value = "";
+        inputText.value = "";
+        outText.value = "";
+        encodeCanvas.width = 0;
+        decodeCanvas.width = 0;
+        document.querySelectorAll('.info-item span').forEach(s => s.innerText = "-");
+        document.getElementById('infoLen').innerText = "0";
+    }
+
+    function bytesToBase64(bytes) {
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    }
+
+    // Обработка вставки из буфера обмена
+    window.addEventListener('paste', e => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                handleImage(file);
+            }
+        }
+    });
+
+    fileInput.addEventListener('change', e => {
+        if (e.target.files[0]) handleImage(e.target.files[0]);
+    });
+
+    function handleImage(file) {
+        const img = new Image();
+        img.onload = function() {
+            const w = img.width;
+            const h = img.height;
+            encodeCanvas.width = w;
+            encodeCanvas.height = h;
+            const ctx = encodeCanvas.getContext('2d');
+            ctx.clearRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0);
+
+            const imgData = ctx.getImageData(0, 0, w, h).data;
+            
+            let hasAlpha = false;
+            let isGrayscale = true;
+            for (let i = 0; i < w * h; i++) {
+                const r = imgData[i * 4], g = imgData[i * 4 + 1], b = imgData[i * 4 + 2], a = imgData[i * 4 + 3];
+                if (a < 255) hasAlpha = true;
+                if (r !== g || g !== b) isGrayscale = false;
+            }
+
+            let flags = 0;
+            if (hasAlpha) flags |= 1;
+            if (isGrayscale) flags |= 2;
+
+            let bpp = (flags === 0) ? 3 : (flags === 1 ? 4 : (flags === 2 ? 1 : 2));
+            const buffer = new Uint8Array(w * h * bpp);
+            let ptr = 0;
+
+            for (let i = 0; i < w * h; i++) {
+                const r = imgData[i * 4], g = imgData[i * 4 + 1], b = imgData[i * 4 + 2], a = imgData[i * 4 + 3];
+                if (flags === 0) { buffer[ptr++] = r; buffer[ptr++] = g; buffer[ptr++] = b; }
+                else if (flags === 1) { buffer[ptr++] = r; buffer[ptr++] = g; buffer[ptr++] = b; buffer[ptr++] = a; }
+                else if (flags === 2) { buffer[ptr++] = r; }
+                else if (flags === 3) { buffer[ptr++] = r; buffer[ptr++] = a; }
+            }
+
+            const finalString = `${w}|${flags}|${bytesToBase64(buffer)}`;
+            outText.value = finalString;
+            
+            document.getElementById('infoSize').innerText = `${w}x${h}`;
+            document.getElementById('infoAlpha').innerText = hasAlpha ? "ДА" : "НЕТ";
+            document.getElementById('infoGray').innerText = isGrayscale ? "ДА" : "НЕТ";
+            document.getElementById('infoFlag').innerText = flags;
+            document.getElementById('infoLen').innerText = finalString.length.toLocaleString();
+        };
+        img.src = URL.createObjectURL(file);
+    }
+
+    inputText.addEventListener('input', function() {
+        const str = this.value.trim();
+        if (!str) { decodeCanvas.width = 0; return; }
+        const parts = str.split('|');
+        if (parts.length < 3) return;
+
+        try {
+            const w = parseInt(parts[0]);
+            const flags = parseInt(parts[1]);
+            const binary = atob(parts[2]);
+            const buffer = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
+            
+            let bpp = (flags === 0) ? 3 : (flags === 1 ? 4 : (flags === 2 ? 1 : 2));
+            const h = (buffer.length / bpp) / w;
+
+            decodeCanvas.width = w;
+            decodeCanvas.height = Math.floor(h);
+            const ctx = decodeCanvas.getContext('2d');
+            const imgData = ctx.createImageData(w, decodeCanvas.height);
+            let ptr = 0;
+
+            for (let i = 0; i < w * decodeCanvas.height; i++) {
+                let r, g, b, a;
+                if (flags === 0) { r = buffer[ptr++]; g = buffer[ptr++]; b = buffer[ptr++]; a = 255; }
+                else if (flags === 1) { r = buffer[ptr++]; g = buffer[ptr++]; b = buffer[ptr++]; a = buffer[ptr++]; }
+                else if (flags === 2) { r = g = b = buffer[ptr++]; a = 255; }
+                else if (flags === 3) { r = g = b = buffer[ptr++]; a = buffer[ptr++]; }
+
+                imgData.data[i * 4] = r;
+                imgData.data[i * 4 + 1] = g;
+                imgData.data[i * 4 + 2] = b;
+                imgData.data[i * 4 + 3] = a;
+            }
+            ctx.putImageData(imgData, 0, 0);
+            document.getElementById('decW').innerText = w;
+            document.getElementById('decH').innerText = Math.floor(h);
+        } catch(e) { console.error(e); }
+    });
+
+    function copyToClipboard() {
+        outText.select();
+        document.execCommand('copy');
+        const btn = document.getElementById('copyBtn');
+        btn.innerText = "УСПЕШНО СКОПИРОВАНО";
+        btn.style.background = "#00ffcc";
+        setTimeout(() => {
+            btn.innerText = "КОПИРОВАТЬ В ПАМЯТЬ";
+            btn.style.background = "var(--neon-red)";
+        }, 1000);
+    }
+</script>
+</body>
+</html>
