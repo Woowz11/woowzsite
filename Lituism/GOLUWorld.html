@@ -100,11 +100,13 @@ canvas{
         "01_Main",
         "02_Graphic",
         "03_Resource",
-        "04_Entity",
-        "05_Register",
-        "06_World",
-        "07_Interface",
-        "08_Game",
+        "04_Physic",
+        "05_Entity",
+        "06_Register",
+        "07_World",
+        "08_Interface",
+        "09_Player",
+        "10_Game",
         "99_Test"
     ]
     
@@ -145,6 +147,12 @@ canvas{
 
     let MouseX = 0;
     let MouseY = 0;
+
+    function MapMouseButton(Button){
+        if(Button === 1){ return 2; }
+        if(Button === 2){ return 1; }
+        return Button;
+    }
     
     function SetupInput(){
         GameWindow.addEventListener("click", () => {
@@ -184,12 +192,12 @@ canvas{
         
         window.addEventListener("mousedown", Event => {
             if(!Running || !Bridge){ return; }
-            Bridge.Hook.MouseButtonDown(Event.button);
+            Bridge.Hook.MouseButtonDown(MapMouseButton(Event.button));
         });
 
         window.addEventListener("mouseup", Event => {
             if(!Running || !Bridge){ return; }
-            Bridge.Hook.MouseButtonUp(Event.button);
+            Bridge.Hook.MouseButtonUp(MapMouseButton(Event.button));
         });
 
         Canvas.addEventListener("contextmenu", Event => Event.preventDefault());
@@ -220,14 +228,14 @@ canvas{
         let Elapsed = Now - LastTime;
 
         if(Elapsed >= (TargetDT - 1)){
-            const DT = 1 / 30;
+            const DT = Elapsed / 1000;
             
             const FPS = Math.round(1000 / Elapsed);
             
             LastTime = Now;
             
             try{
-                Bridge.Hook.Cycle(DT, FPS, MouseX, MouseY);
+                Bridge.Hook.Cycle(DT, FPS, Math.round(MouseX), Math.round(MouseY));
 
                 TitleBar.textContent = Bridge.Hook.WindowTitle();
             }catch(e){

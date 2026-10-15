@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Distance Scanner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #eee;
+            padding: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #2d2d2d;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { text-align: center; color: #fff; margin-bottom: 25px; }
+        
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group { display: flex; flex-direction: column; gap: 10px; }
+        
+        .coords-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        textarea {
+            height: 250px;
+            background: #1e1e1e;
+            color: #00ff00;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            resize: vertical;
+        }
+
+        input[type="number"] {
+            background: #3d3d3d;
+            border: 1px solid #555;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        button.main-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        button.main-btn:hover { background: #2ecc71; }
+
+        .results {
+            margin-top: 30px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            border-left: 6px solid transparent;
+            gap: 15px;
+        }
+
+        .in-range {
+            background: rgba(46, 204, 113, 0.1);
+            border-left-color: #2ecc71;
+            color: #d1ffd6;
+        }
+
+        .out-of-range {
+            background: rgba(231, 76, 60, 0.1);
+            border-left-color: #e74c3c;
+            color: #ffcfcf;
+        }
+
+        .text-content {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .dist-badge {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .copy-btn {
+            background: #444;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            min-width: 90px;
+        }
+        .copy-btn:hover {
+            background: #555;
+            border-color: #888;
+        }
+        .copy-btn.success {
+            background: #27ae60;
+            border-color: #2ecc71;
+        }
+
+        label { font-size: 14px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vector Distance Scanner</h1>
+
+        <div class="setup-grid">
+            <div class="input-group">
+                <label>Список строк (Vector):</label>
+                <textarea id="inputText" placeholder='Вставьте сюда строки вида {{"Default", "Old"}, {Vector(-517, 490, 448)}}, ...'></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Ваша позиция (X, Y, Z):</label>
+                <div class="coords-grid">
+                    <input type="number" id="targetX" value="-1168" placeholder="X">
+                    <input type="number" id="targetY" value="-951" placeholder="Y">
+                    <input type="number" id="targetZ" value="530" placeholder="Z">
+                    <input type="number" id="maxDist" value="15" placeholder="Дистанция">
+                </div>
+                <label style="margin-top:10px;">Подсветка если дистанция меньше указанной.</label>
+                <button class="main-btn" onclick="processData()">Проанализировать и Сортировать</button>
+            </div>
+        </div>
+
+        <div id="output" class="results"></div>
+    </div>
+
+    <script>
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Скопировано';
+                btn.classList.add('success');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('success');
+                }, 1500);
+            }).catch(err => {
+                console.error('Ошибка при копировании: ', err);
+            });
+        }
+
+        function processData() {
+            const text = document.getElementById('inputText').value;
+            const tx = parseFloat(document.getElementById('targetX').value);
+            const ty = parseFloat(document.getElementById('targetY').value);
+            const tz = parseFloat(document.getElementById('targetZ').value);
+            const limit = parseFloat(document.getElementById('maxDist').value);
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+
+            const regex = /Vector\s*\(\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*\)/g;
+            
+            const lines = text.split('\n');
+            let results = [];
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return;
+
+                // Убираем возможную запятую в конце строки для чистого копирования, 
+                // если она есть (по желанию можно оставить)
+                const cleanLine = trimmedLine.endsWith(',') ? trimmedLine.slice(0, -1) : trimmedLine;
+
+                regex.lastIndex = 0;
+                const match = regex.exec(cleanLine);
+
+                if (match) {
+                    const x = parseFloat(match[1]);
+                    const y = parseFloat(match[2]);
+                    const z = parseFloat(match[3]);
+
+                    const dist = Math.sqrt(
+                        Math.pow(x - tx, 2) +
+                        Math.pow(y - ty, 2) +
+                        Math.pow(z - tz, 2)
+                    );
+
+                    results.push({
+                        fullText: cleanLine,
+                        distance: dist
+                    });
+                }
+            });
+
+            results.sort((a, b) => a.distance - b.distance);
+
+            if (results.length === 0) {
+                outputDiv.innerHTML = '<p style="text-align:center">Векторы не найдены.</p>';
+                return;
+            }
+
+            results.forEach(item => {
+                const isInRange = item.distance <= limit;
+                const div = document.createElement('div');
+                div.className = `item ${isInRange ? 'in-range' : 'out-of-range'}`;
+                
+                // Создаем элементы вручную для безопасности и удобства управления кнопкой
+                const textSpan = document.createElement('span');
+                textSpan.className = 'text-content';
+                textSpan.innerText = item.fullText;
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'actions';
+
+                const distBadge = document.createElement('span');
+                distBadge.className = 'dist-badge';
+                distBadge.innerText = item.distance.toFixed(2);
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerText = 'Копировать';
+                copyBtn.onclick = () => copyToClipboard(item.fullText, copyBtn);
+
+                actionsDiv.appendChild(distBadge);
+                actionsDiv.appendChild(copyBtn);
+                
+                div.appendChild(textSpan);
+                div.appendChild(actionsDiv);
+                
+                outputDiv.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>

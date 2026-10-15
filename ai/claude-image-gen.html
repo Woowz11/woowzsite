@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLITCH ART GENERATOR v6</title>
+<style>
+  *{ box-sizing:border-box; }
+  html, body{ height:100%; margin:0; overflow:hidden; }
+  body{ background:#0a0a0a; color:#eee; font-family:'Courier New',monospace; display:flex; }
+
+  #left{ flex:0 0 370px; max-width:370px; height:100vh; overflow-y:auto; padding:14px; background:#111; border-right:2px solid #333; }
+  .leftTitle{ font-size:1.05em; letter-spacing:2px; color:#0ff; text-align:center; padding:6px 0 12px; border-bottom:1px dashed #333; margin-bottom:10px; }
+
+  #right{ flex:1; height:100vh; display:flex; flex-direction:column; padding:14px; gap:8px; min-width:0; }
+  #canvasWrap{ flex:1; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:3px solid #333; box-shadow:0 0 30px #000 inset,0 0 20px #0ff3; }
+  canvas#canvas{ display:block; image-rendering:pixelated; max-width:100%; max-height:100%; width:auto; height:auto; }
+
+  #genControls{ flex-shrink:0; width:100%; max-width:700px; margin:0 auto; }
+
+  .group{ margin-bottom:13px; border:1px dashed #333; padding:9px; border-radius:6px; }
+  .group h3{ margin:0 0 7px; color:#0ff; font-size:0.86em; }
+  label{ display:block; font-size:0.74em; margin:6px 0 2px; color:#ccc; cursor:help; }
+  input[type=range]{ width:100%; accent-color:#f0f; }
+  input[type=number], input[type=text]{ width:100%; background:#000; color:#0f0; border:1px solid #333; padding:4px; font-family:inherit; }
+  input[type=color]{ width:100%; height:28px; background:#000; border:1px solid #333; padding:0; }
+  select{ background:#000; color:#0f0; border:1px solid #333; width:100%; padding:4px; }
+  .chk{ display:flex; align-items:center; gap:6px; font-size:0.73em; color:#ccc; margin:4px 0; cursor:help; }
+  input[type=checkbox]{ accent-color:#f0f; width:14px; height:14px; }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+
+  button{ cursor:pointer; font-family:inherit; border:2px solid #0f0; background:#000; color:#0f0; padding:9px; width:100%; margin-top:5px; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; transition:0.15s; }
+  button:hover:not(:disabled){ background:#0f0; color:#000; box-shadow:0 0 15px #0f0; }
+  button:disabled{ opacity:0.35; cursor:not-allowed; }
+  button.yellow{ border-color:#ff0; color:#ff0; } button.yellow:hover{ background:#ff0; color:#000; box-shadow:0 0 15px #ff0;}
+  button.pink{ border-color:#f0f; color:#f0f; } button.pink:hover{ background:#f0f; color:#000; box-shadow:0 0 15px #f0f;}
+  button.cyan{ border-color:#0ff; color:#0ff; } button.cyan:hover{ background:#0ff; color:#000; box-shadow:0 0 15px #0ff;}
+
+  #dropzone{ border:2px dashed #555; border-radius:8px; padding:14px 8px; text-align:center; font-size:0.72em; color:#888; cursor:pointer; }
+  #dropzone.drag{ border-color:#0ff; color:#0ff; background:#002; }
+  #thumbs{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; max-height:110px; overflow-y:auto; }
+  .thumbWrap{ position:relative; }
+  .thumbWrap canvas{ display:block; border:1px solid #444; }
+  .thumbWrap span{ position:absolute; top:-5px; right:-5px; background:#f00; color:#fff; width:14px; height:14px; border-radius:50%; font-size:10px; text-align:center; line-height:14px; cursor:pointer; }
+  #imgInfo{ font-size:0.7em; color:#9f9; margin-top:4px; }
+  #siteStatus, #siteImgCacheInfo{ font-size:0.68em; color:#888; margin-top:4px; }
+
+  #status{ font-size:0.74em; color:#888; text-align:center; min-height:1.2em; }
+  .autoRow{ display:flex; align-items:center; gap:8px; justify-content:center; font-size:0.8em; margin-bottom:4px; cursor:help; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <div class="leftTitle">⚡ GLITCH ART GENERATOR</div>
+
+  <div class="group">
+    <h3>🎛 Пресеты</h3>
+    <select id="presetSelect" title="Набор готовых значений для всех параметров разом">
+      <option value="default">Стандартный</option>
+      <option value="clean">Чистый (без эффектов)</option>
+      <option value="max_chaos">Максимальный хаос</option>
+      <option value="horror3d">Жуткое 3D</option>
+      <option value="retro_ui">Ретро-UI / Windows</option>
+      <option value="random">🎲 Случайный пресет</option>
+    </select>
+    <button id="applyPresetBtn" class="cyan" title="Применить выбранный пресет и сразу перегенерировать">Применить пресет</button>
+  </div>
+
+  <div class="group">
+    <h3>🎲 Сид</h3>
+    <input type="number" id="seedInput" value="12345" title="Базовое число для генератора случайностей. Одинаковый сид + одни настройки = одинаковая картинка">
+    <div class="chk" title="Если включено — при явном клике «Сгенерировать» (или смене пресета/размера) подмешивается новое случайное число к сиду. При обычном изменении слайдеров сид НЕ перебрасывается заново, чтобы результат менялся предсказуемо">
+      <input type="checkbox" id="autoSeed" checked><label for="autoSeed">новая вариация при явной генерации</label>
+    </div>
+    <button id="randomSeedBtn" class="pink" title="Вписать совсем новое случайное число в поле сида">Новый случайный сид</button>
+  </div>
+
+  <div class="group">
+    <h3>📂 Картинки (локально)</h3>
+    <div id="dropzone" title="Клик — выбрать файлы; можно перетащить файлы сюда; можно вставить картинку из буфера обмена (Ctrl+V)">Клик, перетащи файлы<br>или вставь из буфера (Ctrl+V)</div>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+    <label for="maxSide" title="Чем меньше — тем быстрее работает генератор и меньше занимает памяти, но ниже чёткость деталей">Макс. сторона при загрузке</label>
+    <select id="maxSide" title="Картинки уменьшаются до этого размера сразу при загрузке">
+      <option value="400">400px — очень лёгкий</option>
+      <option value="600" selected>600px — баланс</option>
+      <option value="900">900px — качество</option>
+    </select>
+    <div id="thumbs"></div>
+    <div id="imgInfo">Картинок: 0</div>
+    <button id="clearImgsBtn" class="pink" title="Удалить все загруженные локальные картинки из памяти">🗑 Очистить картинки</button>
+  </div>
+
+  <div class="group">
+    <h3>🌐 Данные сайта (source.js)</h3>
+    <div id="siteStatus" title="Статус подключения необязательного файла ../source/source.js">Проверка ../source/source.js...</div>
+    <div class="chk" title="Если включено — весь текст на арте (подписи, подписи окон, лейблы) будет составляться из случайных слов массива WoowzsiteWords, а не из встроенных фраз">
+      <input type="checkbox" id="useSiteWords" disabled><label for="useSiteWords">использовать слова сайта для текста</label>
+    </div>
+    <div class="chk" title="Если включено — генератор будет (лениво, по одной) подгружать картинки сайта из списка GetAllWoowzsiteImages() и подмешивать их наравне с локальными">
+      <input type="checkbox" id="useSiteImages" disabled><label for="useSiteImages">использовать картинки сайта в генерации</label>
+    </div>
+    <label for="siteImagePrefix" title="Если пути из GetAllWoowzsiteImages() не находятся (404) — пропиши тут префикс, который допишется перед каждым путём, например ../ или /assets/">Префикс пути (если картинки не находятся)</label>
+    <input type="text" id="siteImagePrefix" placeholder="например: ../">
+    <div class="chk" title="Включай только если картинки сайта грузятся с другого домена и сервер поддерживает CORS. Для локальных/относительных путей держи выключенным">
+      <input type="checkbox" id="siteImgCors"><label for="siteImgCors">cross-origin загрузка (для внешних ссылок)</label>
+    </div>
+    <button id="refreshSiteListBtn" class="cyan" title="Заново вызвать GetAllWoowzsiteImages() и обновить список путей (сами картинки при этом не скачиваются)">🔄 Обновить список картинок сайта</button>
+    <div id="siteImgCacheInfo">Список путей ещё не получен.</div>
+  </div>
+
+  <div class="group">
+    <h3>🖼 Холст (любой размер)</h3>
+    <div class="two">
+      <div><label for="canvasWidth" title="Ширина итоговой картинки в пикселях">Ширина, px</label><input type="number" id="canvasWidth" value="700" min="100" max="3000"></div>
+      <div><label for="canvasHeight" title="Высота итоговой картинки в пикселях">Высота, px</label><input type="number" id="canvasHeight" value="700" min="100" max="3000"></div>
+    </div>
+    <button id="applySizeBtn" class="cyan" title="Применить новый размер холста и перегенерировать">Применить размер</button>
+    <label for="compMode" title="Общий принцип построения композиции: от полного хаоса до осмысленных, похожих на реальные арты раскладок">Режим композиции</label>
+    <select id="compMode">
+      <option value="chaos">Хаос-коллаж</option>
+      <option value="poster">Постер (осмысленный)</option>
+      <option value="windows">Окна / UI-скриншот</option>
+      <option value="frameart">Рамка-арт (как мем)</option>
+    </select>
+    <label for="chaos" title="Общий уровень беспорядка: ниже — спокойные смешения слоёв, выше — дикие режимы наложения (difference, exclusion и т.п.)">Хаос-баланс: <span id="chaosVal"></span></label>
+    <input type="range" id="chaos" min="0" max="100" value="40">
+  </div>
+
+  <div class="group">
+    <h3>🧩 Слои (для хаос-коллажа)</h3>
+    <label for="layers" title="Сколько дополнительных кусков картинок накладывается друг на друга">Слоёв картинок: <span id="layersVal"></span></label><input type="range" id="layers" min="0" max="25" value="6">
+    <label for="crop" title="Насколько случайно и сильно обрезаются куски картинок для каждого слоя">Хаотичность обрезки: <span id="cropVal"></span>%</label><input type="range" id="crop" min="0" max="100" value="55">
+    <label for="op" title="Общая прозрачность накладываемых слоёв">Прозрачность: <span id="opVal"></span>%</label><input type="range" id="op" min="10" max="100" value="75">
+    <label for="mirrorChance" title="Вероятность того, что слой отразится по горизонтали">Шанс зеркала: <span id="mirrorChanceVal"></span>%</label><input type="range" id="mirrorChance" min="0" max="100" value="20">
+    <label for="rotateAmt" title="Максимальный случайный угол поворота слоя в градусах">Поворот слоёв: ±<span id="rotateAmtVal"></span>°</label><input type="range" id="rotateAmt" min="0" max="45" value="8">
+    <label for="blendStyle" title="Какие режимы наложения (blend mode) используются для слоёв">Стиль смешивания</label>
+    <select id="blendStyle">
+      <option value="random">По хаос-балансу</option>
+      <option value="psychedelic">Психоделика</option>
+      <option value="dark">Тёмный</option>
+      <option value="bright">Яркий / свечение</option>
+      <option value="normal">Обычный</option>
+    </select>
+  </div>
+
+  <div class="group">
+    <h3>🧪 3D-стикеры (Three.js)</h3>
+    <p style="font-size:0.68em;color:#888;margin:0 0 6px;">Отдельные плавающие светящиеся фигуры поверх картинки. На 0 полностью отключены, не мешают 2D-слоям.</p>
+    <label for="layers3d" title="Сколько отдельных 3D-объектов (кластеров фигур) будет наложено поверх готовой картинки">Кол-во 3D-объектов: <span id="layers3dVal"></span></label><input type="range" id="layers3d" min="0" max="5" value="1">
+    <label for="shapes3d" title="Сколько геометрических фигур внутри одного 3D-кластера">Фигур в кластере: <span id="shapes3dVal"></span></label><input type="range" id="shapes3d" min="1" max="6" value="2">
+    <label for="theme3d" title="Цветовая палитра для 3D-фигур и подсветки">Палитра</label>
+    <select id="theme3d">
+      <option value="horror">Жуть (красный/фиолет/зелень)</option>
+      <option value="neon">Неон</option>
+      <option value="mono">Монохром</option>
+      <option value="random">Случайная</option>
+    </select>
+    <label for="glow3d" title="Насколько сильно 3D-объекты светятся (размытая подсветка вокруг них)">Свечение: <span id="glow3dVal"></span>%</label><input type="range" id="glow3d" min="0" max="100" value="60">
+    <label for="op3d" title="Прозрачность самих 3D-фигур">Непрозрачность: <span id="op3dVal"></span>%</label><input type="range" id="op3d" min="10" max="100" value="85">
+  </div>
+
+  <div class="group">
+    <h3>💥 Пиксельный глитч</h3>
+    <label for="rgb" title="Сдвигает красный и синий каналы относительно зелёного по горизонтали — классический хроматический глитч">RGB сдвиг: <span id="rgbVal"></span>px</label><input type="range" id="rgb" min="0" max="60" value="8">
+    <label for="block" title="Горизонтальные полосы картинки случайно сдвигаются по горизонтали">Блочный сдвиг: <span id="blockVal"></span>%</label><input type="range" id="block" min="0" max="100" value="20">
+    <label for="noise" title="Добавляет случайный цветовой шум на отдельные пиксели">Шум: <span id="noiseVal"></span>%</label><input type="range" id="noise" min="0" max="100" value="10">
+    <label for="pixel" title="Понижает разрешение картинки в X раз (эффект крупных пикселей)">Пикселизация: <span id="pixelVal"></span>x</label><input type="range" id="pixel" min="1" max="16" value="1">
+    <div class="two">
+      <div class="chk" title="Уменьшает количество градаций цвета, делая картинку похожей на плакат"><input type="checkbox" id="posterizeEnable"><label for="posterizeEnable">Постеризация</label></div>
+      <div class="chk" title="Выделяет контуры белым цветом поверх картинки"><input type="checkbox" id="edgeDetect"><label for="edgeDetect">Детекция краёв</label></div>
+    </div>
+    <input type="range" id="posterizeLevels" min="2" max="32" value="8" title="Количество уровней цвета для постеризации">
+    <input type="range" id="edgeStrength" min="1" max="100" value="40" title="Чувствительность детекции краёв">
+    <div class="two">
+      <div class="chk" title="Случайно переставляет местами каналы R/G/B у всей картинки"><input type="checkbox" id="channelSwap"><label for="channelSwap">Свап каналов</label></div>
+      <div class="chk" title="Несколько случайных прямоугольных блоков инвертируются в негатив"><input type="checkbox" id="invertBlocks" checked><label for="invertBlocks">Инверт блоков</label></div>
+    </div>
+    <div class="chk" title="Затемняет каждую вторую горизонтальную линию — имитация старого экрана"><input type="checkbox" id="scanlines" checked><label for="scanlines">Сканлайны</label></div>
+    <label for="wave" title="Синусоидальное смещение строк картинки по горизонтали">Волна: <span id="waveVal"></span></label><input type="range" id="wave" min="0" max="50" value="0">
+    <label for="smear" title="Размазывает картинку в случайном направлении, как смаз в движении">Смаз: <span id="smearVal"></span>%</label><input type="range" id="smear" min="0" max="100" value="0">
+    <label for="echo" title="Дублирует картинку со сдвигом по горизонтали, создавая эффект призрака/эха">Эхо: <span id="echoVal"></span>px</label><input type="range" id="echo" min="0" max="60" value="0">
+    <div class="chk" title="Подсвечивает углы картинки красным/синим, как через дешёвый объектив"><input type="checkbox" id="lensFringe"><label for="lensFringe">Хромо-виньетка (линза)</label></div>
+  </div>
+
+  <div class="group">
+    <h3>🧬 Доп. эффекты</h3>
+    <div class="chk" title="Пересжимает итоговую картинку в JPEG с низким качеством, добавляя характерные блочные артефакты сжатия"><input type="checkbox" id="jpegGlitch"><label for="jpegGlitch">JPEG-артефакты, качество: <span id="jpegQualityVal"></span></label></div>
+    <input type="range" id="jpegQuality" min="2" max="90" value="40">
+    <label for="kaleidoscope" title="Зеркально повторяет части картинки, создавая симметричный узор">Калейдоскоп</label>
+    <select id="kaleidoscope">
+      <option value="none">Выкл</option>
+      <option value="horizontal">Горизонтальный</option>
+      <option value="vertical">Вертикальный</option>
+      <option value="four">4 стороны</option>
+    </select>
+    <div class="chk" title="Добавляет мягкое яркое свечение ко всей картинке"><input type="checkbox" id="bloomEnable"><label for="bloomEnable">Bloom-свечение: <span id="bloomAmtVal"></span></label></div>
+    <input type="range" id="bloomAmt" min="0" max="100" value="40">
+    <div class="chk" title="Упорядоченный дизеринг (узор Байера) — ретро-эффект ограниченной палитры"><input type="checkbox" id="ditherEnable"><label for="ditherEnable">Дизеринг (ретро)</label></div>
+    <label for="zoomBlur" title="Радиальное размытие от центра наружу, как при резком зуме">Zoom-blur: <span id="zoomBlurVal"></span></label><input type="range" id="zoomBlur" min="0" max="100" value="0">
+    <div class="chk" title="Перекрашивает картинку только в два выбранных цвета по яркости"><input type="checkbox" id="duotoneEnable"><label for="duotoneEnable">Дуотон</label></div>
+    <div class="two">
+      <input type="color" id="duotoneA" value="#1a0030" title="Цвет для тёмных участков">
+      <input type="color" id="duotoneB" value="#ff7700" title="Цвет для светлых участков">
+    </div>
+    <div class="chk" title="Случайно заменяет часть символов во всех текстах на мусорные значки"><input type="checkbox" id="textGlitch"><label for="textGlitch">Глитч-текст</label></div>
+    <div class="chk" title="Добавляет горизонтальные светлые полосы-помехи как на старой кассете VHS"><input type="checkbox" id="vhsTracking"><label for="vhsTracking">VHS-трекинг полосы</label></div>
+  </div>
+
+  <div class="group">
+    <h3>🎨 Цвет</h3>
+    <label for="hue" title="Поворачивает все цвета картинки по цветовому кругу">Hue: <span id="hueVal"></span>°</label><input type="range" id="hue" min="0" max="360" value="0">
+    <label for="saturation" title="Насыщенность цветов: 0 — чёрно-белое, 100 — обычное, выше — кислотное">Насыщенность: <span id="saturationVal"></span>%</label><input type="range" id="saturation" min="0" max="250" value="100">
+    <label for="contrast" title="Контрастность итоговой картинки">Контраст: <span id="contrastVal"></span>%</label><input type="range" id="contrast" min="50" max="250" value="100">
+    <div class="chk" title="Затемняет края картинки по кругу к центру"><input type="checkbox" id="vignette" checked><label for="vignette">Виньетка</label></div>
+  </div>
+
+  <div class="group">
+    <h3>🪟 Декор-элементы</h3>
+    <div class="two">
+      <div class="chk" title="Полупрозрачные строки из нулей и единиц на фоне"><input type="checkbox" id="binary" checked><label for="binary">Бинарный фон</label></div>
+      <div class="chk" title="Имитация верхней панели браузера с адресной строкой"><input type="checkbox" id="browserUI"><label for="browserUI">Браузер-UI</label></div>
+      <div class="chk" title="Хаотичный узор из линий, похожий на лабиринт"><input type="checkbox" id="mazePattern"><label for="mazePattern">Лабиринт-узор</label></div>
+      <div class="chk" title="Тонкая равномерная сетка поверх картинки"><input type="checkbox" id="gridOverlay"><label for="gridOverlay">Сетка</label></div>
+      <div class="chk" title="Случайные белые стрелки, треугольники и окружности"><input type="checkbox" id="randomShapes"><label for="randomShapes">Стрелки/фигуры</label></div>
+      <div class="chk" title="Фейковые окна ошибок Windows с текстом"><input type="checkbox" id="errWin" checked><label for="errWin">Окна ошибок</label></div>
+      <div class="chk" title="Крупная текстовая подпись-мем поверх картинки"><input type="checkbox" id="memeText" checked><label for="memeText">Текст-мем</label></div>
+      <div class="chk" title="Текст-мем будет длинным предложением, а не коротким словом"><input type="checkbox" id="longPhrases"><label for="longPhrases">Длинные фразы</label></div>
+      <div class="chk" title="Колонка повторяющихся коротких слов/символов сбоку картинки"><input type="checkbox" id="repeatedLabel"><label for="repeatedLabel">Повтор-лейбл</label></div>
+      <div class="chk" title="Имитация панели задач Windows внизу экрана"><input type="checkbox" id="taskbar"><label for="taskbar">Таскбар</label></div>
+      <div class="chk" title="Рисует белую стрелку мыши в случайном месте"><input type="checkbox" id="cursor"><label for="cursor">Курсор</label></div>
+      <div class="chk" title="Пунктирная рамка выделения, как при выделении области мышью"><input type="checkbox" id="marquee"><label for="marquee">Выделение</label></div>
+      <div class="chk" title="Красная точка REC и таймкод в углу, как на видеокамере"><input type="checkbox" id="timestamp"><label for="timestamp">REC-таймкод</label></div>
+      <div class="chk" title="Белое облачко речи с короткой фразой"><input type="checkbox" id="speechBubble"><label for="speechBubble">Облачко речи</label></div>
+      <div class="chk" title="Рисует условный QR-код (случайные чёрные клетки)"><input type="checkbox" id="qrBlock"><label for="qrBlock">QR-блок</label></div>
+      <div class="chk" title="Полоса загрузки с процентами"><input type="checkbox" id="progressBar"><label for="progressBar">Прогресс-бар</label></div>
+      <div class="chk" title="Мелкая подпись с сидом в углу картинки"><input type="checkbox" id="watermark"><label for="watermark">Водяной знак</label></div>
+    </div>
+    <label for="errWinCount" title="Сколько окон ошибок нарисовать">Окон ошибок, шт: <span id="errWinCountVal"></span></label><input type="range" id="errWinCount" min="0" max="4" value="1">
+    <label for="customPhrases" title="Если заполнено — весь текст на арте берётся отсюда (приоритет выше, чем слова сайта)">Свои фразы (через запятую)</label>
+    <input type="text" id="customPhrases" placeholder="свои фразы через запятую (опц.)">
+  </div>
+
+  <div class="group">
+    <h3>🖼 Рамка</h3>
+    <select id="frameStyle" title="Декоративная рамка вокруг всей картинки">
+      <option value="none">Без рамки</option>
+      <option value="gold" selected>Золотая объёмная</option>
+      <option value="polaroid">Полароид</option>
+      <option value="neon">Неоновая</option>
+      <option value="tech">Tech-уголки</option>
+    </select>
+  </div>
+</div>
+
+<div id="right">
+  <div id="canvasWrap"><canvas id="canvas" width="700" height="700"></canvas></div>
+
+  <div id="genControls">
+    <div class="autoRow" title="Если включено — любое изменение параметра слева само перегенерирует картинку (с небольшой задержкой)">
+      <input type="checkbox" id="autoGen">
+      <label for="autoGen">⚡ Авто-генерация при изменении</label>
+    </div>
+    <button id="generateBtn" class="yellow" title="Сгенерировать картинку заново с текущими настройками">🎲 СГЕНЕРИРОВАТЬ</button>
+    <button id="downloadBtn" title="Сохранить текущий результат как PNG-файл">💾 Сохранить PNG</button>
+    <div id="status">Вставь/загрузи картинки и жми «Сгенерировать»</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const statusEl = document.getElementById('status');
+const thumbsEl = document.getElementById('thumbs');
+function el(id){ return document.getElementById(id); }
+
+let images = [];
+let siteImagePaths = [];
+let siteImageCache = new Map(); // path -> canvas | 'failed'
+let siteImageStats = { loaded:0, failed:0 };
+let currentSeed = 0;
+let seedVariation = 0;
+let rng = Math.random;
+let isGenerating = false;
+
+// ---------- RNG ----------
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function rand(a,b){ return rng()*(b-a)+a; }
+function randInt(a,b){ return Math.floor(rand(a,b+1)); }
+function pick(arr){ return arr[Math.floor(rng()*arr.length)]; }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+// ---------- source.js integration ----------
+function tryLoadSourceScript(){
+  return new Promise(resolve=>{
+    const s = document.createElement('script');
+    s.src = '../source/source.js';
+    s.onload = ()=> resolve(true);
+    s.onerror = ()=> resolve(false);
+    document.head.appendChild(s);
+  });
+}
+function refreshSiteImageList(){
+  if(typeof window.GetAllWoowzsiteImages === 'function'){
+    siteImagePaths = window.GetAllWoowzsiteImages() || [];
+  } else siteImagePaths = [];
+  siteImageCache.clear();
+  siteImageStats = { loaded:0, failed:0 };
+  el('useSiteImages').disabled = siteImagePaths.length===0;
+  el('siteImgCacheInfo').textContent = siteImagePaths.length
+    ? `Путей получено: ${siteImagePaths.length}. Сами картинки подгрузятся по одной во время генерации.`
+    : 'Пути картинок не получены (функция недоступна или вернула пусто).';
+}
+function updateSourceUI(ok){
+  const hasWords = ok && Array.isArray(window.WoowzsiteWords) && window.WoowzsiteWords.length>0;
+  el('useSiteWords').disabled = !hasWords;
+  el('siteStatus').textContent = ok
+    ? `source.js загружен. Слов доступно: ${hasWords?window.WoowzsiteWords.length:0}`
+    : 'source.js не найден (../source/source.js) — это опционально, не ошибка';
+  refreshSiteImageList();
+}
+tryLoadSourceScript().then(updateSourceUI);
+el('refreshSiteListBtn').addEventListener('click', refreshSiteImageList);
+
+function buildSiteUrl(path){ return (el('siteImagePrefix').value || '') + path; }
+function processHTMLImageToCanvas(imgEl){
+  const maxSide = parseInt(el('maxSide').value) || 600;
+  let w = imgEl.naturalWidth || imgEl.width, h = imgEl.naturalHeight || imgEl.height;
+  const scale = Math.min(1, maxSide/Math.max(w,h));
+  w = Math.max(1, Math.round(w*scale)); h = Math.max(1, Math.round(h*scale));
+  const work = document.createElement('canvas'); work.width=w; work.height=h;
+  work.getContext('2d').drawImage(imgEl,0,0,w,h);
+  return work;
+}
+function updateSiteCacheInfo(){
+  el('siteImgCacheInfo').textContent = `Путей всего: ${siteImagePaths.length} | в кэше: ${siteImageStats.loaded} | ошибок загрузки: ${siteImageStats.failed}`;
+}
+function loadSiteImageCached(path){
+  if(siteImageCache.has(path)){
+    const v = siteImageCache.get(path);
+    return Promise.resolve(v === 'failed' ? null : v);
+  }
+  return new Promise(resolve=>{
+    const img = new Image();
+    if(el('siteImgCors').checked) img.crossOrigin = 'anonymous';
+    img.onload = ()=>{
+      try{
+        const work = processHTMLImageToCanvas(img);
+        siteImageCache.set(path, work);
+        siteImageStats.loaded++; updateSiteCacheInfo();
+        resolve(work);
+      }catch(e){
+        siteImageCache.set(path,'failed'); siteImageStats.failed++; updateSiteCacheInfo(); resolve(null);
+      }
+    };
+    img.onerror = ()=>{
+      siteImageCache.set(path,'failed'); siteImageStats.failed++; updateSiteCacheInfo();
+      console.warn('Не удалось загрузить картинку сайта:', buildSiteUrl(path));
+      resolve(null);
+    };
+    img.src = buildSiteUrl(path);
+  });
+}
+async function pickImageSource(){
+  const useSite = el('useSiteImages').checked && siteImagePaths.length>0;
+  const hasLocal = images.length>0;
+  if(!useSite && !hasLocal) return null;
+  const tryOrder = [];
+  if(useSite && hasLocal) tryOrder.push(rng()<0.5?'site':'local', 'local', 'site');
+  else if(useSite) tryOrder.push('site');
+  else tryOrder.push('local');
+  for(const kind of tryOrder){
+    if(kind==='local' && hasLocal) return pick(images).working;
+    if(kind==='site' && useSite){
+      for(let attempt=0; attempt<4; attempt++){
+        const path = pick(siteImagePaths);
+        const c = await loadSiteImageCached(path);
+        if(c) return c;
+      }
+    }
+  }
+  return null;
+}
+
+// ---------- UI sync ----------
+const sliderIds = ['chaos','layers','crop','op','mirrorChance','rotateAmt','layers3d','shapes3d','glow3d','op3d',
+  'rgb','block','noise','pixel','posterizeLevels','edgeStrength','wave','smear','echo','hue','saturation','contrast',
+  'errWinCount','jpegQuality','bloomAmt','zoomBlur'];
+sliderIds.forEach(id=>{
+  const e = el(id), v = el(id+'Val');
+  if(!v) return;
+  const u = ()=> v.textContent = e.value; e.addEventListener('input', u); u();
+});
+
+// ---------- Debounced auto-generate ----------
+function debounce(fn, delay){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); }; }
+const scheduleGenerate = debounce(()=>{ if(el('autoGen').checked) generate(false); }, 350);
+const SKIP_IDS = new Set(['fileInput','canvasWidth','canvasHeight','presetSelect','seedInput','duotoneA','duotoneB','siteImagePrefix']);
+document.getElementById('left').addEventListener('input', e=>{ if(SKIP_IDS.has(e.target.id)) return; scheduleGenerate(); });
+document.getElementById('left').addEventListener('change', e=>{ if(SKIP_IDS.has(e.target.id)) return; scheduleGenerate(); });
+el('autoGen').addEventListener('change', scheduleGenerate);
+
+// ---------- Canvas size ----------
+el('applySizeBtn').addEventListener('click', ()=>{
+  const w = Math.max(100, Math.min(3000, parseInt(el('canvasWidth').value)||700));
+  const h = Math.max(100, Math.min(3000, parseInt(el('canvasHeight').value)||700));
+  el('canvasWidth').value = w; el('canvasHeight').value = h;
+  canvas.width = w; canvas.height = h;
+  generate(true);
+});
+
+// ---------- Presets ----------
+const DEFAULTS = { chaos:40, layers:6, crop:55, op:75, mirrorChance:20, rotateAmt:8,
+  layers3d:1, shapes3d:2, glow3d:60, op3d:85, rgb:8, block:20, noise:10, pixel:1,
+  posterizeLevels:8, edgeStrength:40, wave:0, smear:0, echo:0, hue:0, saturation:100, contrast:100, errWinCount:1,
+  jpegQuality:40, bloomAmt:40, zoomBlur:0 };
+const DEFAULT_CHECKS = { posterizeEnable:false, edgeDetect:false, channelSwap:false, invertBlocks:true,
+  scanlines:true, lensFringe:false, vignette:true, binary:true, browserUI:false, mazePattern:false,
+  gridOverlay:false, randomShapes:false, errWin:true, memeText:true, longPhrases:false, repeatedLabel:false,
+  taskbar:false, cursor:false, marquee:false, timestamp:false, speechBubble:false, qrBlock:false,
+  progressBar:false, watermark:false, jpegGlitch:false, bloomEnable:false, ditherEnable:false,
+  duotoneEnable:false, textGlitch:false, vhsTracking:false };
+const DEFAULT_SELECTS = { compMode:'chaos', blendStyle:'random', theme3d:'horror', frameStyle:'gold', kaleidoscope:'none' };
+
+function setAll(sliderVals, checkVals, selectVals){
+  Object.entries(sliderVals).forEach(([id,val])=>{ const e=el(id); if(e){ e.value=val; const v=el(id+'Val'); if(v) v.textContent=val; } });
+  Object.entries(checkVals).forEach(([id,val])=>{ const e=el(id); if(e) e.checked=val; });
+  Object.entries(selectVals).forEach(([id,val])=>{ const e=el(id); if(e) e.value=val; });
+}
+function randomizeAll(){
+  Object.keys(DEFAULTS).forEach(id=>{
+    const e = el(id); const min=parseFloat(e.min), max=parseFloat(e.max);
+    const val = Math.round(rand(min,max)); e.value=val; const v=el(id+'Val'); if(v) v.textContent=val;
+  });
+  Object.keys(DEFAULT_CHECKS).forEach(id=>{ el(id).checked = Math.random()<0.4; });
+  ['compMode','blendStyle','theme3d','frameStyle','kaleidoscope'].forEach(id=>{
+    const e=el(id); const opts=[...e.options].map(o=>o.value); e.value = opts[Math.floor(Math.random()*opts.length)];
+  });
+}
+function applyPreset(name){
+  if(name==='default'){ setAll(DEFAULTS, DEFAULT_CHECKS, DEFAULT_SELECTS); }
+  else if(name==='clean'){
+    setAll({...DEFAULTS, chaos:0, layers:1, crop:10, op:95, mirrorChance:0, rotateAmt:0, layers3d:0,
+        rgb:0, block:0, noise:0, pixel:1, wave:0, smear:0, echo:0, saturation:100, contrast:100, errWinCount:0,
+        jpegQuality:40, bloomAmt:0, zoomBlur:0},
+      {...DEFAULT_CHECKS, invertBlocks:false, scanlines:false, vignette:false, binary:false, errWin:false, memeText:false},
+      {compMode:'poster', blendStyle:'normal', theme3d:'random', frameStyle:'none', kaleidoscope:'none'});
+  }
+  else if(name==='max_chaos'){
+    setAll({chaos:100, layers:20, crop:95, op:90, mirrorChance:60, rotateAmt:40, layers3d:4, shapes3d:5, glow3d:90, op3d:90,
+        rgb:40, block:80, noise:60, pixel:1, posterizeLevels:6, edgeStrength:60, wave:25, smear:30, echo:20,
+        hue:0, saturation:140, contrast:130, errWinCount:3, jpegQuality:15, bloomAmt:70, zoomBlur:15},
+      {...DEFAULT_CHECKS, posterizeEnable:true, invertBlocks:true, scanlines:true, lensFringe:true, vignette:true,
+        binary:true, randomShapes:true, errWin:true, memeText:true, longPhrases:true, repeatedLabel:true, marquee:true,
+        watermark:true, jpegGlitch:true, bloomEnable:true, vhsTracking:true, textGlitch:true},
+      {compMode:'chaos', blendStyle:'random', theme3d:'random', frameStyle:'neon', kaleidoscope:'four'});
+  }
+  else if(name==='horror3d'){
+    setAll({...DEFAULTS, layers:1, layers3d:3, shapes3d:5, glow3d:85, op3d:90, rgb:6, block:5, noise:15,
+        saturation:110, contrast:120, bloomAmt:60},
+      {...DEFAULT_CHECKS, vignette:true, binary:false, errWin:false, memeText:false, lensFringe:true, bloomEnable:true},
+      {compMode:'chaos', blendStyle:'dark', theme3d:'horror', frameStyle:'none', kaleidoscope:'none'});
+  }
+  else if(name==='retro_ui'){
+    setAll({...DEFAULTS, layers:3, layers3d:1, rgb:10, block:15, noise:10, errWinCount:2, jpegQuality:50},
+      {...DEFAULT_CHECKS, browserUI:true, taskbar:true, cursor:true, marquee:true, errWin:true, memeText:true,
+        jpegGlitch:true, vhsTracking:true, ditherEnable:true},
+      {compMode:'windows', blendStyle:'random', theme3d:'neon', frameStyle:'none', kaleidoscope:'none'});
+  }
+  else if(name==='random'){ randomizeAll(); }
+  generate(true);
+}
+el('applyPresetBtn').addEventListener('click', ()=> applyPreset(el('presetSelect').value));
+
+// ---------- Local image loading (memory-safe) ----------
+const dropzone = el('dropzone'), fileInput = el('fileInput');
+function loadFile(file){
+  if(!file || !file.type || !file.type.startsWith('image/')) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = ()=>{
+    const work = processHTMLImageToCanvas(img);
+    const tSize = 46;
+    let w=work.width, h=work.height, sw=w, sh=h, sx=0, sy=0;
+    if(w>h){ sw=h; sx=(w-h)/2; } else { sh=w; sy=(h-w)/2; }
+    const thumb = document.createElement('canvas'); thumb.width=tSize; thumb.height=tSize;
+    thumb.getContext('2d').drawImage(work, sx,sy,sw,sh, 0,0,tSize,tSize);
+    images.push({ working: work, thumb });
+    URL.revokeObjectURL(url);
+    renderThumbs();
+  };
+  img.onerror = ()=> URL.revokeObjectURL(url);
+  img.src = url;
+}
+function renderThumbs(){
+  thumbsEl.innerHTML = '';
+  let bytes = 0;
+  images.forEach((o,i)=>{
+    bytes += o.working.width*o.working.height*4;
+    const wrap = document.createElement('div'); wrap.className='thumbWrap';
+    const x = document.createElement('span'); x.textContent='×';
+    x.onclick = ()=>{ images.splice(i,1); renderThumbs(); };
+    wrap.appendChild(o.thumb); wrap.appendChild(x); thumbsEl.appendChild(wrap);
+  });
+  el('imgInfo').textContent = `Картинок: ${images.length} (~${(bytes/1e6).toFixed(1)} MB в памяти)`;
+  scheduleGenerate();
+}
+dropzone.addEventListener('click', ()=> fileInput.click());
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e=>{ e.preventDefault(); dropzone.classList.remove('drag'); [...e.dataTransfer.files].forEach(loadFile); });
+fileInput.addEventListener('change', e=> [...e.target.files].forEach(loadFile));
+window.addEventListener('paste', e=>{
+  const items = e.clipboardData && e.clipboardData.items; if(!items) return;
+  for(const item of items){ if(item.type.indexOf('image')===0) loadFile(item.getAsFile()); }
+});
+el('clearImgsBtn').addEventListener('click', ()=>{ images=[]; renderThumbs(); statusEl.textContent='Картинки очищены'; });
+el('randomSeedBtn').addEventListener('click', ()=>{ el('seedInput').value = Math.floor(Math.random()*1e9); seedVariation=0; generate(true); });
+
+// ---------- helpers ----------
+function drawCover(src,x,y,w,h){
+  const ir = src.width/src.height, tr = w/h;
+  let sw,sh,sx,sy;
+  if(ir > tr){ sh=src.height; sw=sh*tr; sx=(src.width-sw)/2; sy=0; }
+  else{ sw=src.width; sh=sw/tr; sx=0; sy=(src.height-sh)/2; }
+  ctx.drawImage(src, sx,sy,sw,sh, x,y,w,h);
+}
+function drawFallbackPatch(x,y,w,h){
+  ctx.save();
+  const g = ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0, `hsl(${rand(0,360)},40%,20%)`);
+  g.addColorStop(1, `hsl(${rand(0,360)},40%,10%)`);
+  ctx.fillStyle=g; ctx.fillRect(x,y,w,h);
+  for(let i=0;i<randInt(3,8);i++){
+    ctx.globalAlpha=rand(0.1,0.4);
+    ctx.fillStyle = pick(['#fff','#000',`hsl(${rand(0,360)},60%,50%)`]);
+    const r=rand(5,Math.min(w,h)*0.3);
+    ctx.beginPath(); ctx.arc(x+rand(0,w), y+rand(0,h), r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+const blendPresets = {
+  psychedelic:['difference','exclusion','hue','saturation','color-dodge','hard-light'],
+  dark:['multiply','darken','color-burn'],
+  bright:['screen','lighten','color-dodge','lighter'],
+  normal:['source-over']
+};
+function pickBlendMode(chaos){
+  const mellow = ['source-over','source-over','multiply','screen','overlay','lighten','soft-light'];
+  const wild = ['difference','exclusion','hue','saturation','color-dodge','hard-light','darken','color-burn'];
+  return pick(rng() < chaos/150 ? wild : mellow);
+}
+
+// ---------- Text / phrases (unified) ----------
+const shortPool=['WOOW2','2FAST?','ERROR','ОНИ ЗДЕСЬ','ПОМОГИТЕ','SYSTEM.GLITCH','404 REALITY'];
+const longPool=['Я МАСТЕР ГЛИТЧА, РИСУЮ КАК ХОЧУ, НЕ НРАВИТСЯ — НЕ СМОТРИ','ЭТО НЕ БАГ ЭТО ФИЧА, ПРОСТО ПРИМИ ЭТО',
+  'ДОБРО ПОЖАЛОВАТЬ В ИСПОРЧЕННУЮ РЕАЛЬНОСТЬ','ВНИМАНИЕ: ДАЛЬШЕ ТОЛЬКО ХАОС','ОШИБКА 404: СМЫСЛ НЕ НАЙДЕН'];
+const labelWords=['GE','ЭГЕ','LOL','ERR','01','XD'];
+function glitchText(text, amount){
+  if(!amount) return text;
+  const symbols='!@#$%^&*▓▒░¿?×÷§¥€'.split('');
+  return text.split('').map(ch => (ch!==' ' && rng()<amount) ? pick(symbols) : ch).join('');
+}
+function pickText(kind, defaultPool){
+  let pool;
+  const custom = el('customPhrases').value.trim();
+  if(custom){
+    pool = custom.split(',').map(s=>s.trim()).filter(Boolean);
+  } else if(el('useSiteWords').checked && Array.isArray(window.WoowzsiteWords) && window.WoowzsiteWords.length){
+    pool = [];
+    for(let i=0;i<12;i++){
+      if(kind==='word'){ pool.push(pick(window.WoowzsiteWords)); }
+      else{
+        const n = kind==='long' ? randInt(3,7) : randInt(1,3);
+        let arr=[]; for(let j=0;j<n;j++) arr.push(pick(window.WoowzsiteWords));
+        pool.push(arr.join(' ').toUpperCase());
+      }
+    }
+  } else {
+    pool = defaultPool;
+  }
+  let txt = pick(pool);
+  if(el('textGlitch').checked) txt = glitchText(txt, 0.12);
+  return txt;
+}
+
+// ---------- 3D (прозрачные стикеры) ----------
+let threeRenderer=null, threeCamera=null, threeOK=true;
+let glowTexCache = {};
+function initThree(){
+  if(threeRenderer) return true;
+  try{
+    const c = document.createElement('canvas');
+    threeRenderer = new THREE.WebGLRenderer({ canvas:c, antialias:true, alpha:true, preserveDrawingBuffer:true });
+    threeRenderer.setClearColor(0x000000, 0);
+    threeCamera = new THREE.PerspectiveCamera(50,1,0.1,100);
+    return true;
+  }catch(e){ threeOK=false; return false; }
+}
+function getPalette3D(theme){
+  if(theme==='horror') return [0xff2222,0x8800ff,0x00ff44,0x440011];
+  if(theme==='neon') return [0xff00ff,0x00ffff,0xffff00,0xff0088];
+  if(theme==='mono'){ const g=Math.floor(rand(60,230)); const c=(g<<16)|(g<<8)|g; return [c]; }
+  return [Math.floor(rand(0,0xffffff)),Math.floor(rand(0,0xffffff)),Math.floor(rand(0,0xffffff))];
+}
+function getGlowTexture(colorHex){
+  if(glowTexCache[colorHex]) return glowTexCache[colorHex];
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const cx = c.getContext('2d');
+  const hex = '#'+colorHex.toString(16).padStart(6,'0');
+  const g = cx.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,'rgba(255,255,255,0.95)');
+  g.addColorStop(0.25, hex+'cc');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.fillRect(0,0,128,128);
+  const tex = new THREE.CanvasTexture(c);
+  glowTexCache[colorHex]=tex;
+  return tex;
+}
+function render3DScene(size, count){
+  if(!initThree()) return null;
+  size = Math.max(64, Math.round(size));
+  threeRenderer.setSize(size,size);
+  threeCamera.aspect = 1; threeCamera.updateProjectionMatrix();
+  const scene = new THREE.Scene();
+  const palette = getPalette3D(el('theme3d').value);
+  scene.add(new THREE.AmbientLight(0xffffff,0.25));
+  for(let i=0;i<3;i++){
+    const light = new THREE.PointLight(pick(palette), rand(1.6,3), 50);
+    light.position.set(rand(-10,10),rand(-8,8),rand(4,12));
+    scene.add(light);
+  }
+  const geoPool = [
+    ()=>new THREE.SphereGeometry(rand(1.5,4),24,24),
+    ()=>new THREE.ConeGeometry(rand(1.5,3.5),rand(3,7),6),
+    ()=>new THREE.TorusGeometry(rand(1.2,3),rand(0.4,1),12,30),
+    ()=>new THREE.BoxGeometry(rand(1.5,4),rand(1.5,4),rand(1.5,4)),
+    ()=>new THREE.OctahedronGeometry(rand(1.5,4)),
+    ()=>new THREE.TetrahedronGeometry(rand(1.5,4)),
+    ()=>new THREE.TorusKnotGeometry(rand(1,2),rand(0.3,0.6),100,16)
+  ];
+  for(let i=0;i<count;i++){
+    const geo = pick(geoPool)();
+    const col = pick(palette);
+    const flat = rng() < 0.35;
+    const mat = flat
+      ? new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:rand(0.85,1) })
+      : new THREE.MeshStandardMaterial({ color:col, emissive:col, emissiveIntensity:rand(0.3,1), roughness:rand(0.2,0.8), metalness:rand(0,0.5), transparent:true, opacity:rand(0.85,1) });
+    const mesh = new THREE.Mesh(geo,mat);
+    mesh.position.set(rand(-4,4),rand(-3,3),rand(-3,3));
+    mesh.rotation.set(rand(0,7),rand(0,7),rand(0,7));
+    scene.add(mesh);
+    if(rng() < 0.4){
+      const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map:getGlowTexture(col), blending:THREE.AdditiveBlending, transparent:true, depthWrite:false }));
+      spr.scale.set(rand(6,12),rand(6,12),1);
+      spr.position.copy(mesh.position);
+      scene.add(spr);
+    }
+  }
+  threeCamera.position.set(rand(-1.5,1.5),rand(-1.5,1.5),rand(7,10));
+  threeCamera.lookAt(0,0,0);
+  threeRenderer.setClearColor(0x000000,0);
+  threeRenderer.clear();
+  threeRenderer.render(scene,threeCamera);
+  const out = document.createElement('canvas'); out.width=size; out.height=size;
+  out.getContext('2d').drawImage(threeRenderer.domElement,0,0);
+  return out;
+}
+function drawThreeSticker(){
+  const clusterSize = Math.max(1, Math.min(6, parseInt(el('shapes3d').value)));
+  const count = randInt(1, clusterSize);
+  const src = render3DScene(rand(320,480), count);
+  if(!src) return;
+  const W=canvas.width,H=canvas.height;
+  const w = rand(W*0.18, W*0.55), h = w;
+  const x = rand(0, W-w), y = rand(0, H-h);
+  const glow = parseInt(el('glow3d').value)/100;
+  const op = parseInt(el('op3d').value)/100;
+  if(glow > 0){
+    ctx.save();
+    ctx.filter = `blur(${Math.round(6+glow*22)}px)`;
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha = 0.25+glow*0.45;
+    ctx.drawImage(src,x,y,w,h);
+    ctx.restore(); ctx.filter='none';
+  }
+  ctx.save();
+  ctx.globalAlpha = op;
+  ctx.drawImage(src,x,y,w,h);
+  ctx.restore();
+}
+function addThreeStickers(){
+  const n = parseInt(el('layers3d').value);
+  for(let i=0;i<n;i++) drawThreeSticker();
+}
+
+// ---------- Image layers (async, lazy site load) ----------
+async function drawImageLayer(){
+  const src = await pickImageSource();
+  if(!src) return;
+  const W=canvas.width,H=canvas.height;
+  const cropChaos = parseInt(el('crop').value)/100;
+  const opacityBase = parseInt(el('op').value)/100;
+  const rotateAmt = parseInt(el('rotateAmt').value);
+  const mirrorChance = parseInt(el('mirrorChance').value)/100;
+  const chaos = parseInt(el('chaos').value);
+  const style = el('blendStyle').value;
+
+  const w = rand(W*0.2, W*(0.5+cropChaos*0.6));
+  const h = rand(H*0.2, H*(0.5+cropChaos*0.6));
+  const x = rand(-w*0.2, W - w*0.8);
+  const y = rand(-h*0.2, H - h*0.8);
+
+  ctx.save();
+  ctx.globalCompositeOperation = style==='random' ? pickBlendMode(chaos) : pick(blendPresets[style]);
+  ctx.globalAlpha = rand(opacityBase*0.5, opacityBase);
+  const cx=x+w/2, cy=y+h/2;
+  ctx.translate(cx,cy); ctx.rotate(rand(-rotateAmt,rotateAmt)*Math.PI/180);
+  if(rng() < mirrorChance) ctx.scale(-1,1);
+  ctx.translate(-cx,-cy);
+  const sw = src.width*rand(0.3,1), sh = src.height*rand(0.3,1);
+  const sx = rand(0, src.width-sw), sy = rand(0, src.height-sh);
+  ctx.drawImage(src, sx,sy,sw,sh, x,y,w,h);
+  ctx.restore();
+}
+
+// ---------- Composition modes (без 3D внутри) ----------
+async function compChaos(){
+  const W=canvas.width,H=canvas.height;
+  const bg = await pickImageSource();
+  if(bg) drawCover(bg,0,0,W,H); else drawFallbackPatch(0,0,W,H);
+  const n = parseInt(el('layers').value);
+  for(let i=0;i<n;i++) await drawImageLayer();
+}
+
+async function compPoster(){
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle = `hsl(${rand(0,360)},${rand(20,50)}%,${rand(5,12)}%)`;
+  ctx.fillRect(0,0,W,H);
+  const bg = await pickImageSource();
+  if(bg) drawCover(bg,0,0,W,H); else drawFallbackPatch(0,0,W,H);
+
+  const insetCount = randInt(2,4);
+  for(let i=0;i<insetCount;i++){
+    const size = rand(W*0.16,W*0.28);
+    let x,y; const corner = i%4;
+    if(corner===0){ x=rand(10,30); y=rand(10,30); }
+    else if(corner===1){ x=W-size-rand(10,30); y=rand(10,30); }
+    else if(corner===2){ x=rand(10,30); y=H-size-rand(10,30); }
+    else { x=W-size-rand(10,30); y=H-size-rand(10,30); }
+    ctx.save();
+    ctx.translate(x+size/2,y+size/2); ctx.rotate(rand(-0.12,0.12)); ctx.translate(-(x+size/2),-(y+size/2));
+    ctx.fillStyle='#000'; ctx.fillRect(x-4,y-4,size+8,size+8);
+    const inset = await pickImageSource();
+    if(inset) drawCover(inset, x,y,size,size); else drawFallbackPatch(x,y,size,size);
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.strokeRect(x,y,size,size);
+    ctx.restore();
+  }
+}
+
+async function drawWindowChrome(x,y,w,h){
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(x+5,y+5,w,h);
+  ctx.fillStyle='#ddd'; ctx.fillRect(x,y,w,h);
+  const barH = Math.max(16,h*0.09);
+  ctx.fillStyle = pick(['#000080','#333','#5533aa','#800020']);
+  ctx.fillRect(x,y,w,barH);
+  ctx.fillStyle='#fff'; ctx.font=`${Math.max(9,barH*0.55)}px sans-serif`;
+  ctx.fillText(pickText('word', ['render.exe','VOID_preview','untitled_8','ERROR_VIEW','scene_final_v2','memory.dll']), x+6, y+barH*0.7);
+  ctx.fillStyle='#c00'; ctx.fillRect(x+w-barH,y,barH,barH);
+  const cY=y+barH, cH=h-barH;
+  ctx.save(); ctx.beginPath(); ctx.rect(x,cY,w,cH); ctx.clip();
+  const src = await pickImageSource();
+  if(src) drawCover(src, x,cY,w,cH); else drawFallbackPatch(x,cY,w,cH);
+  ctx.restore();
+  ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.strokeRect(x,y,w,h);
+  ctx.restore();
+}
+async function compWindows(){
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle = pick(['#008080','#1b1f3b','#2b2b2b','#3a3a5e']);
+  ctx.fillRect(0,0,W,H);
+  drawGridOverlayPattern(0.06);
+  const n = randInt(4,7);
+  for(let i=0;i<n;i++){
+    const w=rand(W*0.28,W*0.55), h=rand(H*0.2,H*0.38);
+    const x=rand(0,W-w), y=rand(0,H-h*0.95);
+    await drawWindowChrome(x,y,w,h);
+  }
+  drawTaskbar();
+  if(rng()<0.85) drawCursor();
+  if(rng()<0.5) drawMarquee();
+  drawRandomShapes();
+}
+
+async function compFrameArt(){
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle = `hsl(${rand(0,360)},30%,8%)`; ctx.fillRect(0,0,W,H);
+  drawMazePattern(0.12);
+  const margin = W*0.06;
+  const main = await pickImageSource();
+  if(main) drawCover(main, margin,margin, W-margin*2, H-margin*2);
+  else drawFallbackPatch(margin,margin,W-margin*2,H-margin*2);
+
+  const size=W*0.22, x=W-size-margin*1.5, y=H-size-margin*1.5;
+  const inset = await pickImageSource();
+  if(inset){
+    ctx.save();
+    ctx.translate(x+size/2,y+size/2); ctx.rotate(rand(-0.08,0.08)); ctx.translate(-(x+size/2),-(y+size/2));
+    drawCover(inset,x,y,size,size);
+    ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.strokeRect(x,y,size,size);
+    ctx.restore();
+  }
+}
+
+// ---------- Decor functions ----------
+function drawBinaryBackground(){
+  ctx.save(); ctx.globalCompositeOperation='overlay'; ctx.globalAlpha=0.22;
+  ctx.font='10px monospace'; ctx.fillStyle=pick(['#0f0','#f00','#0ff']);
+  for(let y=10;y<canvas.height;y+=14){
+    let s=''; for(let i=0;i<60;i++) s += rng()<0.5?'0':'1';
+    ctx.fillText(s, rand(-50,0), y);
+  }
+  ctx.restore();
+}
+function drawBrowserUI(){
+  const W=canvas.width;
+  ctx.save(); ctx.globalAlpha=0.9;
+  ctx.fillStyle='#cfcfcf'; ctx.fillRect(0,0,W,W*0.045);
+  ctx.fillStyle='#fff'; ctx.fillRect(W*0.02,W*0.008,W*0.55,W*0.03);
+  ctx.fillStyle='#3355ff'; ctx.font=`${Math.floor(W*0.02)}px sans-serif`;
+  ctx.fillText(pickText('short', ['X+Y=Z?','ERROR_FOUND','undefined.exe','почему?']), W*0.03, W*0.03);
+  ctx.restore();
+}
+function drawRandomShapes(){
+  const count = randInt(2,5);
+  for(let i=0;i<count;i++){
+    const type = pick(['arrow','triangle','circle']);
+    const x=rand(0,canvas.width), y=rand(0,canvas.height), size=rand(40,140), angle=rand(0,Math.PI*2);
+    ctx.save(); ctx.translate(x,y); ctx.rotate(angle); ctx.lineWidth=3; ctx.globalAlpha=0.85; ctx.strokeStyle='#fff';
+    if(type==='arrow'){
+      ctx.beginPath(); ctx.moveTo(-size/2,0); ctx.lineTo(size/2,0);
+      ctx.moveTo(size/2,0); ctx.lineTo(size/2-15,-15); ctx.moveTo(size/2,0); ctx.lineTo(size/2-15,15); ctx.stroke();
+    } else if(type==='triangle'){
+      ctx.beginPath(); ctx.moveTo(0,-size/2); ctx.lineTo(size/2,size/2); ctx.lineTo(-size/2,size/2); ctx.closePath(); ctx.stroke();
+    } else { ctx.beginPath(); ctx.arc(0,0,size/2,0,Math.PI*2); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+function drawFakeErrorWindows(){
+  const count = parseInt(el('errWinCount').value);
+  const defaultTexts=['2nd new mega pro max super ultra hyper giga update','System32 has encountered a critical failure',
+    'Application not responding...','MEMORY LEAK DETECTED','reality.exe stopped working','Вы точно хотите продолжить?'];
+  for(let i=0;i<count;i++){
+    const w=rand(140,220), h=rand(70,110);
+    const x=rand(0,canvas.width-w), y=rand(0,canvas.height-h);
+    ctx.save();
+    ctx.fillStyle='#d4d0c8'; ctx.fillRect(x,y,w,h);
+    ctx.fillStyle='#000080'; ctx.fillRect(x,y,w,18);
+    ctx.fillStyle='#fff'; ctx.font='bold 10px sans-serif'; ctx.fillText('Error',x+5,y+13);
+    ctx.fillStyle='#c00'; ctx.fillRect(x+w-16,y+2,14,14);
+    ctx.fillStyle='#fff'; ctx.fillText('X',x+w-13,y+13);
+    ctx.fillStyle='#000'; ctx.font='9px monospace';
+    const msg = pickText('short', defaultTexts);
+    wrapAndDraw2(msg, x+10, y+34, w-16, 11);
+    ctx.strokeStyle='#808080'; ctx.strokeRect(x,y,w,h);
+    ctx.restore();
+  }
+}
+function wrapAndDraw2(text,x,y,maxWidth,lineHeight){
+  const words=text.split(' '); let line=''; let yy=y;
+  for(const wd of words){ const test=line+wd+' '; if(ctx.measureText(test).width>maxWidth && line){ ctx.fillText(line.trim(),x,yy); line=wd+' '; yy+=lineHeight; } else line=test; }
+  ctx.fillText(line.trim(),x,yy);
+}
+function wrapAndDraw(text,x,y,maxWidth,lineHeight,stroke){
+  const words=text.split(' '); let line=''; const lines=[];
+  for(const w of words){ const test=line+w+' '; if(ctx.measureText(test).width>maxWidth && line){ lines.push(line); line=w+' '; } else line=test; }
+  lines.push(line);
+  const startY = y-(lines.length-1)*lineHeight/2;
+  lines.forEach((l,i)=> stroke ? ctx.strokeText(l.trim(),x,startY+i*lineHeight) : ctx.fillText(l.trim(),x,startY+i*lineHeight));
+}
+function drawBigCaption(longStyle){
+  const kind = (longStyle || el('longPhrases').checked) ? 'long' : 'short';
+  const defaultPool = kind==='long' ? longPool.concat(shortPool) : shortPool;
+  const txt = pickText(kind, defaultPool);
+  const fonts=['Impact, sans-serif','"Courier New", monospace','Georgia, serif','"Arial Black", sans-serif'];
+  const size = kind==='long' ? rand(24,36) : rand(30,58);
+  ctx.save();
+  ctx.font = `bold ${size}px ${pick(fonts)}`;
+  ctx.textAlign='center';
+  const x=canvas.width/2, y = kind==='long' ? canvas.height*rand(0.45,0.6) : canvas.height*rand(0.78,0.92);
+  ctx.lineWidth = size*0.12; ctx.strokeStyle='#000';
+  wrapAndDraw(txt,x,y,canvas.width*0.88,size*1.1,true);
+  ctx.fillStyle = pick(['#fff','#ff0','#0ff']);
+  wrapAndDraw(txt,x,y,canvas.width*0.88,size*1.1,false);
+  ctx.restore();
+}
+function drawRepeatedLabelColumn(){
+  const w = pickText('word', labelWords);
+  const colors=['#0f0','#f00','#ff0'];
+  ctx.save(); ctx.font='bold 15px monospace';
+  for(let i=0;i<randInt(10,18);i++){
+    ctx.fillStyle = pick(colors);
+    let s=''; for(let j=0;j<randInt(1,3);j++) s += w;
+    ctx.fillText(s, 4, 18+i*16);
+  }
+  ctx.restore();
+}
+function drawTaskbar(){
+  const W=canvas.width,H=canvas.height, h=H*0.05;
+  ctx.save();
+  ctx.fillStyle='#c0c0c0'; ctx.fillRect(0,H-h,W,h);
+  ctx.fillStyle='#000080'; ctx.fillRect(2,H-h+2,W*0.12,h-4);
+  ctx.fillStyle='#fff'; ctx.font=`${h*0.5}px sans-serif`; ctx.fillText('Start', 8, H-h/2+h*0.18);
+  ctx.fillStyle='#000'; ctx.fillText(new Date().toLocaleTimeString(), W-80, H-h/2+h*0.18);
+  ctx.restore();
+}
+function drawCursor(){
+  const x=rand(0,canvas.width), y=rand(0,canvas.height);
+  ctx.save(); ctx.translate(x,y);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,14); ctx.lineTo(4,11); ctx.lineTo(7,17); ctx.lineTo(9,16); ctx.lineTo(6,10); ctx.lineTo(11,10); ctx.closePath();
+  ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
+  ctx.restore();
+}
+function drawMarquee(){
+  const W=canvas.width,H=canvas.height;
+  const w=rand(W*0.2,W*0.5), h=rand(H*0.15,H*0.4);
+  const x=rand(0,W-w), y=rand(0,H-h);
+  ctx.save(); ctx.setLineDash([6,4]); ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.strokeRect(x,y,w,h);
+  ctx.setLineDash([]); ctx.fillStyle='#fff';
+  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([hx,hy])=> ctx.fillRect(hx-3,hy-3,6,6));
+  ctx.restore();
+}
+function drawTimestamp(){
+  ctx.save(); ctx.fillStyle='#f00'; ctx.beginPath(); ctx.arc(20,20,5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='14px monospace';
+  ctx.fillText('REC  '+new Date().toISOString().slice(11,19), 32,25);
+  ctx.restore();
+}
+function drawSpeechBubble(){
+  const W=canvas.width,H=canvas.height;
+  const w=rand(130,220), h=rand(60,100);
+  const x=rand(0,W-w), y=rand(0,H-h);
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath(); ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x+w*0.2,y+h*0.9); ctx.lineTo(x+w*0.05,y+h*1.3); ctx.lineTo(x+w*0.35,y+h*0.95); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#000'; ctx.font='bold 13px sans-serif';
+  const txt = pickText('short', ['что происходит?!','НЕ СМОТРИ ТУДА','баг или фича?','я тебя вижу','ЗАГРУЗКА...']);
+  ctx.fillText(txt, x+10, y+h/2);
+  ctx.restore();
+}
+function drawQrBlock(){
+  const size=rand(50,90), cells=randInt(8,14), cs=size/cells;
+  const x=rand(0,canvas.width-size), y=rand(0,canvas.height-size);
+  ctx.save(); ctx.fillStyle='#fff'; ctx.fillRect(x-4,y-4,size+8,size+8);
+  for(let r=0;r<cells;r++) for(let c=0;c<cells;c++){ if(rng()<0.5){ ctx.fillStyle='#000'; ctx.fillRect(x+c*cs,y+r*cs,cs,cs); } }
+  ctx.restore();
+}
+function drawProgressBar(){
+  const W=canvas.width; const w=rand(W*0.3,W*0.6), h=18;
+  const x=rand(0,W-w), y=rand(0,canvas.height-h);
+  const pct=rand(0.1,0.95);
+  ctx.save(); ctx.fillStyle='#222'; ctx.fillRect(x,y,w,h);
+  ctx.fillStyle=pick(['#0f0','#0ff','#f0f']); ctx.fillRect(x,y,w*pct,h);
+  ctx.strokeStyle='#fff'; ctx.strokeRect(x,y,w,h);
+  ctx.fillStyle='#fff'; ctx.font='11px monospace'; ctx.fillText(Math.round(pct*100)+'%', x+w/2-10,y+h-4);
+  ctx.restore();
+}
+function drawGridOverlayPattern(alpha){
+  ctx.save(); ctx.strokeStyle=`rgba(255,255,255,${alpha||0.08})`; ctx.lineWidth=1;
+  const step=canvas.width/20;
+  for(let i=0;i<=20;i++){
+    ctx.beginPath(); ctx.moveTo(i*step,0); ctx.lineTo(i*step,canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i*step); ctx.lineTo(canvas.width,i*step); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawMazePattern(alpha){
+  ctx.save(); ctx.strokeStyle=`rgba(255,255,255,${alpha||0.15})`; ctx.lineWidth=2;
+  const step=30;
+  for(let y=0;y<canvas.height;y+=step) for(let x=0;x<canvas.width;x+=step){
+    if(rng()<0.5){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+step,y); ctx.stroke(); }
+    if(rng()<0.5){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+step); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+function drawLensFringe(){
+  ctx.save(); ctx.globalCompositeOperation='overlay'; ctx.globalAlpha=0.5;
+  const g1=ctx.createRadialGradient(0,0,0,0,0,canvas.width*0.6);
+  g1.addColorStop(0,'rgba(255,0,0,0.5)'); g1.addColorStop(1,'rgba(255,0,0,0)');
+  ctx.fillStyle=g1; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const g2=ctx.createRadialGradient(canvas.width,canvas.height,0,canvas.width,canvas.height,canvas.width*0.6);
+  g2.addColorStop(0,'rgba(0,100,255,0.5)'); g2.addColorStop(1,'rgba(0,0,255,0)');
+  ctx.fillStyle=g2; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.restore();
+}
+function drawWatermark(){
+  ctx.save(); ctx.font='11px monospace'; ctx.fillStyle='rgba(255,255,255,0.55)';
+  ctx.fillText(`glitch_gen • seed:${currentSeed}`, canvas.width-180, canvas.height-10);
+  ctx.restore();
+}
+function drawVignette(){
+  const W=canvas.width,H=canvas.height;
+  const g = ctx.createRadialGradient(W/2,H/2,W*0.3,W/2,H/2,W*0.72);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.8)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+function drawVhsTracking(){
+  const W=canvas.width,H=canvas.height;
+  const count = randInt(2,5);
+  for(let i=0;i<count;i++){
+    const y = rand(0,H), h = rand(3,14);
+    ctx.save();
+    ctx.globalAlpha = rand(0.15,0.4);
+    ctx.fillStyle = pick(['#fff','#0ff','#f0f']);
+    ctx.fillRect(0,y,W,h);
+    ctx.restore();
+  }
+}
+
+// ---------- Frame ----------
+function drawFrame(style){
+  const W=canvas.width,H=canvas.height;
+  if(style==='none') return;
+  if(style==='gold'){
+    const t=W*0.055;
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=20;
+    const grad=ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#fff3b0'); grad.addColorStop(0.3,'#caa23d'); grad.addColorStop(0.5,'#5e4315'); grad.addColorStop(0.7,'#caa23d'); grad.addColorStop(1,'#fff3b0');
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,W,t); ctx.fillRect(0,H-t,W,t); ctx.fillRect(0,0,t,H); ctx.fillRect(W-t,0,t,H);
+    ctx.restore();
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=3; ctx.strokeRect(t*0.6,t*0.6,W-t*1.2,H-t*1.2);
+    ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=2; ctx.strokeRect(t,t,W-t*2,H-t*2);
+    const cs=t*1.3;
+    [[0,0],[W-cs,0],[0,H-cs],[W-cs,H-cs]].forEach(([cx,cy])=>{
+      ctx.save(); ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(cx+cs/2,cy+cs/2,cs*0.4,0,Math.PI*2); ctx.fill(); ctx.restore();
+    });
+  } else if(style==='polaroid'){
+    const t=W*0.045, bottom=H*0.16;
+    ctx.fillStyle='#f5f5f0';
+    ctx.fillRect(0,0,W,t); ctx.fillRect(0,H-bottom,W,bottom); ctx.fillRect(0,0,t,H); ctx.fillRect(W-t,0,t,H);
+    ctx.fillStyle='#333'; ctx.font=`${bottom*0.35}px cursive`;
+    ctx.fillText(pick(['memories...','glitch day','?!','oops']), W*0.08, H-bottom*0.4);
+  } else if(style==='neon'){
+    ctx.save(); ctx.lineWidth=6; ctx.strokeStyle=pick(['#0ff','#f0f','#ff0']);
+    ctx.shadowColor=ctx.strokeStyle; ctx.shadowBlur=20;
+    ctx.strokeRect(8,8,W-16,H-16);
+    ctx.restore();
+  } else if(style==='tech'){
+    ctx.save(); ctx.strokeStyle='#0ff'; ctx.lineWidth=3;
+    const L=W*0.08;
+    [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([cx,cy,dx,dy])=>{
+      ctx.beginPath(); ctx.moveTo(cx,cy+dy*L); ctx.lineTo(cx,cy); ctx.lineTo(cx+dx*L,cy); ctx.stroke();
+    });
+    ctx.restore();
+  }
+}
+
+// ---------- Pixel effects ----------
+function applyPosterize(data, levels){
+  const step = 255/(levels-1);
+  for(let i=0;i<data.length;i+=4){
+    data[i]=Math.round(Math.round(data[i]/step)*step);
+    data[i+1]=Math.round(Math.round(data[i+1]/step)*step);
+    data[i+2]=Math.round(Math.round(data[i+2]/step)*step);
+  }
+}
+function applyEdgeDetect(data,W,H,strength){
+  const src = new Uint8ClampedArray(data);
+  const gray = i => 0.3*src[i]+0.59*src[i+1]+0.11*src[i+2];
+  const threshold = 260 - strength*2.4;
+  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
+    const i=(y*W+x)*4;
+    const gx = gray(i+4)-gray(i-4), gy = gray(i+W*4)-gray(i-W*4);
+    const e = Math.sqrt(gx*gx+gy*gy);
+    if(e > threshold){ data[i]=255;data[i+1]=255;data[i+2]=255; }
+  }
+}
+function applyChannelSwap(data){
+  const modes=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  const m = pick(modes);
+  for(let i=0;i<data.length;i+=4){
+    const a=[data[i],data[i+1],data[i+2]];
+    data[i]=a[m[0]]; data[i+1]=a[m[1]]; data[i+2]=a[m[2]];
+  }
+}
+function applyWave(amt){
+  if(amt<=0) return;
+  const W=canvas.width,H=canvas.height;
+  const src = ctx.getImageData(0,0,W,H);
+  const dst = ctx.createImageData(W,H);
+  const freq = rand(0.02,0.08), phase = rand(0,Math.PI*2);
+  for(let y=0;y<H;y++){
+    const shift = Math.round(Math.sin(y*freq+phase)*amt);
+    for(let x=0;x<W;x++){
+      const sx = ((x+shift)%W+W)%W;
+      const si=(y*W+sx)*4, di=(y*W+x)*4;
+      dst.data[di]=src.data[si]; dst.data[di+1]=src.data[si+1];
+      dst.data[di+2]=src.data[si+2]; dst.data[di+3]=src.data[si+3];
+    }
+  }
+  ctx.putImageData(dst,0,0);
+}
+function applySmear(amt){
+  if(amt<=0) return;
+  const steps = Math.floor(amt/8)+1;
+  const angle = rand(0,Math.PI*2);
+  const dx = Math.cos(angle)*amt*0.25, dy = Math.sin(angle)*amt*0.25;
+  const temp = document.createElement('canvas'); temp.width=canvas.width; temp.height=canvas.height;
+  temp.getContext('2d').drawImage(canvas,0,0);
+  ctx.save(); ctx.globalAlpha=0.18;
+  for(let i=1;i<=steps;i++) ctx.drawImage(temp, dx*i, dy*i);
+  ctx.restore();
+}
+function applyEcho(offset){
+  if(offset<=0) return;
+  const temp = document.createElement('canvas'); temp.width=canvas.width; temp.height=canvas.height;
+  temp.getContext('2d').drawImage(canvas,0,0);
+  ctx.save(); ctx.globalAlpha=0.5; ctx.globalCompositeOperation='screen';
+  ctx.drawImage(temp, offset, 0); ctx.drawImage(temp, -offset, 0);
+  ctx.restore();
+}
+function applyColorFilter(){
+  const hue=parseInt(el('hue').value), sat=parseInt(el('saturation').value), con=parseInt(el('contrast').value);
+  if(hue===0 && sat===100 && con===100) return;
+  const temp=document.createElement('canvas'); temp.width=canvas.width; temp.height=canvas.height;
+  temp.getContext('2d').drawImage(canvas,0,0);
+  ctx.save(); ctx.filter=`hue-rotate(${hue}deg) saturate(${sat}%) contrast(${con}%)`;
+  ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(temp,0,0);
+  ctx.restore(); ctx.filter='none';
+}
+function applyPixelEffects(){
+  const W=canvas.width,H=canvas.height;
+  const rgbShift = parseInt(el('rgb').value);
+  if(rgbShift>0){
+    const copy = ctx.getImageData(0,0,W,H).data.slice();
+    const imgData = ctx.getImageData(0,0,W,H);
+    const data = imgData.data;
+    const sr = randInt(-rgbShift,rgbShift), sb = randInt(-rgbShift,rgbShift);
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      const idx=(y*W+x)*4;
+      const rx=Math.min(W-1,Math.max(0,x+sr)), bx=Math.min(W-1,Math.max(0,x+sb));
+      data[idx]=copy[(y*W+rx)*4]; data[idx+2]=copy[(y*W+bx)*4+2];
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+
+  const blockAmt = parseInt(el('block').value)/100;
+  if(blockAmt>0){
+    const bands = randInt(5,25), bandH = Math.ceil(H/bands);
+    for(let b=0;b<bands;b++){
+      if(rng() > blockAmt*0.9) continue;
+      const y0=b*bandH, shift = randInt(-40,40)*blockAmt;
+      const rowData = ctx.getImageData(0,y0,W,Math.min(bandH,H-y0));
+      ctx.putImageData(rowData, shift, y0);
+    }
+  }
+
+  let imgData = ctx.getImageData(0,0,W,H);
+  let data = imgData.data;
+
+  if(el('edgeDetect').checked) applyEdgeDetect(data,W,H, parseInt(el('edgeStrength').value));
+  if(el('posterizeEnable').checked) applyPosterize(data, parseInt(el('posterizeLevels').value));
+  if(el('channelSwap').checked) applyChannelSwap(data);
+
+  const noiseAmt = parseInt(el('noise').value)/100;
+  if(noiseAmt>0){
+    for(let i=0;i<data.length;i+=4){
+      if(rng() < noiseAmt*0.5){
+        const n = rand(-80,80);
+        data[i]=Math.min(255,Math.max(0,data[i]+n));
+        data[i+1]=Math.min(255,Math.max(0,data[i+1]+n));
+        data[i+2]=Math.min(255,Math.max(0,data[i+2]+n));
+      }
+    }
+  }
+
+  if(el('invertBlocks').checked){
+    const blocksCount = randInt(2,8);
+    for(let i=0;i<blocksCount;i++){
+      if(rng()>0.5) continue;
+      const bw=randInt(30,120), bh=randInt(20,80);
+      const bx=randInt(0,W-bw), by=randInt(0,H-bh);
+      for(let y=by;y<by+bh;y++) for(let x=bx;x<bx+bw;x++){
+        const idx=(y*W+x)*4;
+        data[idx]=255-data[idx]; data[idx+1]=255-data[idx+1]; data[idx+2]=255-data[idx+2];
+      }
+    }
+  }
+
+  if(el('scanlines').checked){
+    for(let y=0;y<H;y+=2) for(let x=0;x<W;x++){
+      const idx=(y*W+x)*4; data[idx]*=0.7; data[idx+1]*=0.7; data[idx+2]*=0.7;
+    }
+  }
+
+  ctx.putImageData(imgData,0,0);
+
+  const pixelFactor = parseInt(el('pixel').value);
+  if(pixelFactor>1){
+    const t=document.createElement('canvas');
+    t.width=Math.max(1,Math.floor(W/pixelFactor)); t.height=Math.max(1,Math.floor(H/pixelFactor));
+    t.getContext('2d').drawImage(canvas,0,0,t.width,t.height);
+    ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(t,0,0,t.width,t.height,0,0,W,H);
+  }
+}
+
+// ---------- Доп. эффекты ----------
+function applyKaleidoscope(mode){
+  if(mode==='none') return;
+  const W=canvas.width,H=canvas.height;
+  const src = document.createElement('canvas'); src.width=W; src.height=H;
+  src.getContext('2d').drawImage(canvas,0,0);
+  ctx.clearRect(0,0,W,H);
+  if(mode==='horizontal'){
+    ctx.drawImage(src,0,0,W/2,H,0,0,W/2,H);
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1); ctx.drawImage(src,0,0,W/2,H,0,0,W/2,H); ctx.restore();
+  } else if(mode==='vertical'){
+    ctx.drawImage(src,0,0,W,H/2,0,0,W,H/2);
+    ctx.save(); ctx.translate(0,H); ctx.scale(1,-1); ctx.drawImage(src,0,0,W,H/2,0,0,W,H/2); ctx.restore();
+  } else if(mode==='four'){
+    ctx.drawImage(src,0,0,W/2,H/2,0,0,W/2,H/2);
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1); ctx.drawImage(src,0,0,W/2,H/2,0,0,W/2,H/2); ctx.restore();
+    ctx.save(); ctx.translate(0,H); ctx.scale(1,-1); ctx.drawImage(src,0,0,W/2,H/2,0,0,W/2,H/2); ctx.restore();
+    ctx.save(); ctx.translate(W,H); ctx.scale(-1,-1); ctx.drawImage(src,0,0,W/2,H/2,0,0,W/2,H/2); ctx.restore();
+  }
+}
+function applyBloom(intensity){
+  if(intensity<=0) return;
+  const temp=document.createElement('canvas'); temp.width=canvas.width; temp.height=canvas.height;
+  temp.getContext('2d').drawImage(canvas,0,0);
+  ctx.save();
+  ctx.filter = `blur(${Math.round(4+intensity*0.3)}px) brightness(1.3)`;
+  ctx.globalCompositeOperation='screen';
+  ctx.globalAlpha = Math.min(1, intensity/100);
+  ctx.drawImage(temp,0,0);
+  ctx.restore(); ctx.filter='none';
+}
+const bayer4 = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+function applyDither(){
+  const W=canvas.width,H=canvas.height;
+  const imgData = ctx.getImageData(0,0,W,H); const data=imgData.data;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const idx=(y*W+x)*4;
+    const threshold = (bayer4[y%4][x%4]/16 - 0.5) * 48;
+    for(let c=0;c<3;c++){
+      let v = Math.round((data[idx+c]+threshold)/48)*48;
+      data[idx+c] = Math.min(255,Math.max(0,v));
+    }
+  }
+  ctx.putImageData(imgData,0,0);
+}
+function applyZoomBlur(amount){
+  if(amount<=0) return;
+  const W=canvas.width,H=canvas.height;
+  const temp=document.createElement('canvas'); temp.width=W; temp.height=H;
+  temp.getContext('2d').drawImage(canvas,0,0);
+  ctx.save(); ctx.globalAlpha=0.15;
+  const steps=8;
+  for(let i=1;i<=steps;i++){
+    const scale = 1 + (amount/100)*0.02*i;
+    const w=W*scale, h=H*scale;
+    ctx.drawImage(temp, (W-w)/2, (H-h)/2, w, h);
+  }
+  ctx.restore();
+}
+function hexToRgb(hex){
+  const v=parseInt(hex.replace('#',''),16);
+  return { r:(v>>16)&255, g:(v>>8)&255, b:v&255 };
+}
+function applyDuotone(colorA, colorB){
+  const W=canvas.width,H=canvas.height;
+  const imgData=ctx.getImageData(0,0,W,H); const data=imgData.data;
+  const ca = hexToRgb(colorA), cb = hexToRgb(colorB);
+  for(let i=0;i<data.length;i+=4){
+    const gray = (0.3*data[i]+0.59*data[i+1]+0.11*data[i+2])/255;
+    data[i]=ca.r+(cb.r-ca.r)*gray;
+    data[i+1]=ca.g+(cb.g-ca.g)*gray;
+    data[i+2]=ca.b+(cb.b-ca.b)*gray;
+  }
+  ctx.putImageData(imgData,0,0);
+}
+function applyJpegArtifact(quality){
+  return new Promise(resolve=>{
+    try{
+      const q = Math.max(0.02, Math.min(1, quality/100));
+      const url = canvas.toDataURL('image/jpeg', q);
+      const img = new Image();
+      img.onload = ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); resolve(); };
+      img.onerror = ()=> resolve();
+      img.src = url;
+    }catch(e){
+      console.warn('JPEG-эффект пропущен (возможно, CORS-блокировка canvas):', e);
+      resolve();
+    }
+  });
+}
+
+// ---------- Common decor pass ----------
+function applyCommonDecor(){
+  if(el('binary').checked) drawBinaryBackground();
+  if(el('browserUI').checked) drawBrowserUI();
+  if(el('mazePattern').checked) drawMazePattern();
+  if(el('gridOverlay').checked) drawGridOverlayPattern();
+  if(el('randomShapes').checked) drawRandomShapes();
+  if(el('errWin').checked) drawFakeErrorWindows();
+  if(el('memeText').checked) drawBigCaption(false);
+  if(el('repeatedLabel').checked) drawRepeatedLabelColumn();
+  if(el('taskbar').checked) drawTaskbar();
+  if(el('cursor').checked) drawCursor();
+  if(el('marquee').checked) drawMarquee();
+  if(el('timestamp').checked) drawTimestamp();
+  if(el('speechBubble').checked) drawSpeechBubble();
+  if(el('qrBlock').checked) drawQrBlock();
+  if(el('progressBar').checked) drawProgressBar();
+}
+
+// ---------- Main ----------
+function setupRNG(explicit){
+  const base = parseInt(el('seedInput').value) || 0;
+  if(explicit && el('autoSeed').checked){
+    seedVariation = Math.floor(Math.random()*1000000);
+  }
+  currentSeed = (base + seedVariation) >>> 0;
+  rng = mulberry32(currentSeed);
+}
+async function doGenerate(explicit){
+  setupRNG(explicit);
+  const W=canvas.width,H=canvas.height;
+  ctx.setTransform(1,0,0,1,0,0); ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+  ctx.clearRect(0,0,W,H);
+
+  const mode = el('compMode').value;
+  if(mode==='chaos') await compChaos();
+  else if(mode==='poster') await compPoster();
+  else if(mode==='windows') await compWindows();
+  else await compFrameArt();
+
+  addThreeStickers();
+  applyCommonDecor();
+  applyColorFilter();
+  applyPixelEffects();
+  applyWave(parseInt(el('wave').value));
+  applySmear(parseInt(el('smear').value));
+  applyEcho(parseInt(el('echo').value));
+
+  const kMode = el('kaleidoscope').value;
+  if(kMode !== 'none') applyKaleidoscope(kMode);
+  if(el('duotoneEnable').checked) applyDuotone(el('duotoneA').value, el('duotoneB').value);
+  if(el('ditherEnable').checked) applyDither();
+  applyZoomBlur(parseInt(el('zoomBlur').value));
+  if(el('bloomEnable').checked) applyBloom(parseInt(el('bloomAmt').value));
+  if(el('vhsTracking').checked) drawVhsTracking();
+  if(el('vignette').checked) drawVignette();
+  if(el('lensFringe').checked) drawLensFringe();
+  if(el('jpegGlitch').checked) await applyJpegArtifact(parseInt(el('jpegQuality').value));
+  if(el('watermark').checked) drawWatermark();
+  drawFrame(el('frameStyle').value);
+
+  const base = parseInt(el('seedInput').value) || 0;
+  statusEl.textContent = `Готово. База сида ${base} + вариация ${seedVariation} = ${currentSeed} | локальных картинок: ${images.length} | сайт-кэш: ${siteImageStats.loaded}/${siteImagePaths.length} | режим: ${mode} | ${W}×${H}`;
+}
+async function generate(explicit=false){
+  if(isGenerating) return;
+  isGenerating = true;
+  statusEl.textContent = '⏳ Генерация...';
+  await new Promise(r=>requestAnimationFrame(r));
+  try{ await doGenerate(explicit); } finally { isGenerating = false; }
+}
+
+el('generateBtn').addEventListener('click', ()=> generate(true));
+el('downloadBtn').addEventListener('click', ()=>{
+  try{
+    const link = document.createElement('a');
+    link.download = `glitch_art_${currentSeed}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }catch(e){
+    statusEl.textContent = '⚠ Не удалось сохранить: внешняя картинка заблокировала canvas (CORS). Отключи "картинки сайта" или cross-origin загрузку.';
+  }
+});
+</script>
+</body>
+</html>
