@@ -732,7 +732,21 @@ WoowzsiteSVG = AddFullnessToTable([
 	"mask-info"
 ],"source/",".svg");
 
+
+WoowzsitePortfolio = AddFullnessToTable([
+	"app.ico", "firefox.ico",
+	"site/brick.jpg", "site/ice.jpg", "site/title.png", "site/title_smol.png"
+], "Portfolio/source/","");
 /*__________________________________________________________________________________________________*/
+
+function HasExtension(path, extensions) {
+    const lower = path.toLowerCase();
+    return extensions.some(ext => lower.endsWith("." + ext));
+}
+
+function FilterWoowzsite(extensions) {
+    return GetAllWoowzsite().filter(src => HasExtension(src, extensions));
+}
 
 function GetAllWoowzsite(){
 	return AddTables(
@@ -760,7 +774,8 @@ function GetAllWoowzsite(){
 		WoowzsiteSourceLituism,
 		TrueLithuismArts,
 		WoowzsiteMultiverse,
-		WoowzsiteOther
+		WoowzsiteOther,
+		WoowzsitePortfolio
 	);
 }
 
@@ -789,28 +804,12 @@ function GetAllBloodrawSkinEditor(){
 	);
 }
 
-function GetAllWoowzsiteImages(){
-	var tabl = GetAllWoowzsite();
-	var result = [];
-	for(var src of tabl){
-		src = src.toLowerCase();
-		if(src.includes(".png") || src.includes(".jpg") || src.includes(".jpeg") || src.includes(".gif") || src.includes(".webp")){
-			result.push(src);
-		}
-	}
-	return result;
+function GetAllWoowzsiteImages() {
+    return FilterWoowzsite(["png", "jpg", "jpeg", "gif", "webp"]);
 }
 
-function GetAllWoowzsiteIcons(){
-	var tabl = GetAllWoowzsite();
-	var result = [];
-	for(var src of tabl){
-		src = src.toLowerCase();
-		if(src.includes(".ico")){
-			result.push(src);
-		}
-	}
-	return result;
+function GetAllWoowzsiteIcons() {
+    return FilterWoowzsite(["ico"]);
 }
 
 function GetAllWoowzsiteSVG(){
