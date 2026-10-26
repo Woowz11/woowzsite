@@ -733,7 +733,7 @@ WoowzsiteSVG = AddFullnessToTable([
 ],"source/",".svg");
 
 GitHubExplorerSVG = AddFullnessToTable([
-	"file", "file-empty", "file-unknown"
+	"file", "file-empty", "file-unknown", "error", "folder"
 ],"source/GitHubExlorer/",".svg");
 
 WoowzsitePortfolio = AddFullnessToTable([
