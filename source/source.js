@@ -732,6 +732,9 @@ WoowzsiteSVG = AddFullnessToTable([
 	"mask-info"
 ],"source/",".svg");
 
+GitHubExplorerSVG = AddFullnessToTable([
+	"file", "file-empty", "file-unknown"
+],"source/GitHubExlorer/",".svg");
 
 WoowzsitePortfolio = AddFullnessToTable([
 	"app.ico", "firefox.ico",
@@ -813,7 +816,7 @@ function GetAllWoowzsiteIcons() {
 }
 
 function GetAllWoowzsiteSVG(){
-	return WoowzsiteSVG;
+	return AddTables(WoowzsiteSVG, GitHubExplorerSVG);
 }
 
 /*__________________________________________________________________________________________________*/
