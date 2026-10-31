@@ -776,9 +776,9 @@ const VIDEOS = [
 	[T_INotAuthor, T_Stream, T_Minecraft, T_UnknownPeople, T_WIP, T_NotControlled, T_Woowz11],
 	"сантинел стрим"],
 	
-	[740, "~", "2024.08.05", "R-zzlcnV_ss", "2026.06.23", "42:14", P_Link,
+	[740, "Кочерга стрим выдра Игорь стрим сочные дыньки Иван 16+", "2024.08.05", "R-zzlcnV_ss", "2026.06.23", "42:14", P_Link,
 	[T_Pavel, T_INotAuthor, T_GarrysMod, T_Woowz11, T_Wyldi, T_WIP, T_Stream, T_Troll],
-	""],
+	"https://www.youtube.com/live/AIk879v71ws Стрим где играли в garry's mod, павел тестировал вьютубер модельку выдры... потом пришли фанатики кирка и хуйню какую-то начали писать :/  А павел поддался им... и начал их развивать. Короче кидала да."],
 	
 	[739, "~", "2026.06.04 15:41:15", "CMMyp2lwPoQ", "2026.07.18", "06:36", P_Hide,
 	[T_Woowz11, T_WIP],

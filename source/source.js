@@ -46,6 +46,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("nydno.png", "ОПЯЯЯЯТЬ НУДНОООООО", __A_WOOWZ, "2026.10.29")
 ADD("server.png", "|WOOWZCORE| . server", __A_WOOWZ, "2026.10.27")
 ADD("euthanasia1.png", "glasswindowbreak070a", __A_SKREP, "2026.10.08")
 ADD("gustavo.png", "Anatoliy from GMM", __A_WOOWZ, "2026.10.06")
