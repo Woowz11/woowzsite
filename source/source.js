@@ -1,4 +1,5 @@
 const TRUE_LIT_ARTS_COLLECTION = []
+const TRUE_AI_ARTS_COLLECTION  = []
 
 let PREFIX;
 if(window.location.protocol === "file:"){
@@ -30,6 +31,23 @@ let ADD = function(SOURCE, NAME, AUTHOR, DATE, ALREADY){
 	}
 }
 
+const TrueAIArts = []
+let ADD_AI = function(SOURCE, RATE, ALREADY){
+	if(!SOURCE){ SOURCE = "ERROR.png" }
+	if(!RATE){ RATE = 50 }
+
+	const FULLSOURCE = `${PREFIX}/woowzsite/${(ALREADY === true ? SOURCE : `Lituism/art/ai/${SOURCE}`)}`
+
+	TRUE_AI_ARTS_COLLECTION.push({
+		SOURCE: FULLSOURCE,
+		RATE  : RATE
+	})
+
+	if(ALREADY !== true) {
+		TrueAIArts.push(`Lituism/art/ai/${SOURCE}`)
+	}
+}
+
 // ----------------------------------------------------------------------
 
 const __A_WOOWZ = "𐌸𐍈𐍈𐌸𐌶𐌹𐌹"
@@ -44,15 +62,134 @@ const __A_IDK = " (я не помню точно)"
 
 // ----------------------------------------------------------------------
 
+// ADD_AI("ERROR.png", 50)
+
+ADD_AI("source/specialforrandomsite/37171e31-de56-4637-a31c-8c0b1c0bd4db.png", 50, true)
+ADD_AI("source/specialforrandomsite/e6222ea2-92f7-4005-a436-289a9370e03b.png", 50, true)
+ADD_AI("source/specialforrandomsite/PAVEL.png", 50, true)
+ADD_AI("artchallange.png", 50)
+ADD_AI("arteye.png", 50)
+ADD_AI("artgoluworld.png", 50)
+ADD_AI("artmeatball.png", 50)
+ADD_AI("artsransponggolu.png", 50)
+ADD_AI("birdcrylogo.png", 50)
+ADD_AI("bombomandcatskin.png", 50)
+ADD_AI("bookcpp.png", 50)
+ADD_AI("catgolu.png", 50)
+ADD_AI("catneon.png", 50)
+ADD_AI("catneongolu.png", 50)
+ADD_AI("characterslituism.png", 50)
+ADD_AI("charactersnaturalism.png", 50)
+ADD_AI("coolmagazgolu.png", 50)
+ADD_AI("coolmagazgoludarker.png", 50)
+ADD_AI("coolmagazwoowzcore.png", 50)
+ADD_AI("darkcitygolu.png", 50)
+ADD_AI("disco.png", 50)
+ADD_AI("entityerror.png", 50)
+ADD_AI("golubrigadier.png", 50)
+ADD_AI("golubrigadierred.png", 50)
+ADD_AI("golucomics.png", 50)
+ADD_AI("golulitium.png", 50)
+ADD_AI("goluskull.png", 50)
+ADD_AI("golutotem.png", 50)
+ADD_AI("gtoken.png", 50)
+ADD_AI("lifetoxicmeat.png", 50)
+ADD_AI("lituismcharacters.png", 50)
+ADD_AI("lituismcharactersgolu.png", 50)
+ADD_AI("lituismcharactersscary.png", 50)
+ADD_AI("lituismcity.png", 50)
+ADD_AI("lituismplanet.png", 50)
+ADD_AI("memeguy.png", 50)
+ADD_AI("pavelalt.png", 50)
+ADD_AI("pavelalt2.png", 50)
+ADD_AI("pavelandbackrooms.png", 50)
+ADD_AI("pavelandcrybird.png", 50)
+ADD_AI("pavelandgoluandotherdestroycar.png", 50)
+ADD_AI("pavelandshadow.png", 50)
+ADD_AI("pavelart.png", 50)
+ADD_AI("pavelbackrooms.png", 50)
+ADD_AI("pavelbiohazard.png", 50)
+ADD_AI("pavelblackeyes.png", 50)
+ADD_AI("pavelcat.png", 50)
+ADD_AI("pavelcat2.png", 50)
+ADD_AI("pavelcave.png", 50)
+ADD_AI("pavelcompany.png", 50)
+ADD_AI("pavelcrazy.png", 50)
+ADD_AI("pavelcrazyvery.png", 50)
+ADD_AI("pavelcyborg.png", 50)
+ADD_AI("paveldadfullsize.png", 50)
+ADD_AI("paveldiamond.png", 50)
+ADD_AI("pavelemoji.png", 50)
+ADD_AI("pavelfanecoil.png", 50)
+ADD_AI("pavelfullsize.png", 50)
+ADD_AI("pavelgolureallife.png", 50)
+ADD_AI("pavelgreenbackground.png", 50)
+ADD_AI("pavelhouse.png", 50)
+ADD_AI("pavelhouselituism.png", 50)
+ADD_AI("pavelinbackrooms.png", 50)
+ADD_AI("paveljew.png", 50)
+ADD_AI("pavelmagicdust.png", 50)
+ADD_AI("pavelmagicdustlituism.png", 50)
+ADD_AI("pavelmagicstory.png", 50)
+ADD_AI("pavelmagicstory2.png", 50)
+ADD_AI("pavelmagicstory3.png", 50)
+ADD_AI("pavelmagicstory4.png", 50)
+ADD_AI("pavelmeat.png", 50)
+ADD_AI("pavelmonster.png", 50)
+ADD_AI("pavelnormal.png", 50)
+ADD_AI("paveloffice.png", 50)
+ADD_AI("pavelpoop.png", 50)
+ADD_AI("pavelpurple.png", 50)
+ADD_AI("pavelpurpleandevil.png", 50)
+ADD_AI("pavelroots.png", 50)
+ADD_AI("pavelsmile.png", 50)
+ADD_AI("pavelsmile2.png", 50)
+ADD_AI("pavelsmile3.png", 50)
+ADD_AI("pavelsmile4.png", 50)
+ADD_AI("pavelson.png", 50)
+ADD_AI("pavelsonpoop.png", 50)
+ADD_AI("pavelsourcehammer.png", 50)
+ADD_AI("pavelsranspongstory.png", 50)
+ADD_AI("pavelsranspongstory2.png", 50)
+ADD_AI("pavelsranspongstory2alt.png", 50)
+ADD_AI("pavelsranspongstory3.png", 50)
+ADD_AI("pavelsranspongstory4.png", 50)
+ADD_AI("pavelsranspongstory5.png", 50)
+ADD_AI("pavelsranspongstory6.png", 50)
+ADD_AI("pavelstilllife.png", 50)
+ADD_AI("pavelstreet.png", 50)
+ADD_AI("paveltomatopaste.png", 50)
+ADD_AI("paveltroll.png", 50)
+ADD_AI("pavelwall.png", 50)
+ADD_AI("pavelwoowzcore.png", 50)
+ADD_AI("pavelwoowzcorebadend.png", 50)
+ADD_AI("pisechnik2fullsize.png", 50)
+ADD_AI("pisechnikfullsize.png", 50)
+ADD_AI("pisechniksmile.png", 50)
+ADD_AI("pisechniksmile2.png", 50)
+ADD_AI("pot.png", 50)
+ADD_AI("realgmm.png", 50)
+ADD_AI("sranspong.png", 50)
+ADD_AI("sranspongcreepy.png", 50)
+ADD_AI("sransponghack.png", 50)
+ADD_AI("stupidguy.png", 50)
+ADD_AI("woowzcoreentities.png", 50)
+ADD_AI("woowzcoreindia.png", 50)
+ADD_AI("woowzcorepurple.png", 50)
+ADD_AI("woowzcorevapercore.png", 50)
+
+// ----------------------------------------------------------------------
+
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("source/specialforrandomsite/v.03.gif", "BAN Dermo | синий лис", __A_WOOWZ, undefined, true)
+ADD("source/specialforrandomsite/chto.png", "CH-TO", __A_ANONIM, undefined, true)
 ADD("nydno.png", "ОПЯЯЯЯТЬ НУДНОООООО", __A_WOOWZ, "2026.10.29")
 ADD("server.png", "|WOOWZCORE| . server", __A_WOOWZ, "2026.10.27")
 ADD("euthanasia1.png", "glasswindowbreak070a", __A_SKREP, "2026.10.08")
 ADD("gustavo.png", "Anatoliy from GMM", __A_WOOWZ, "2026.10.06")
 ADD("Artboard_1.png", "мистер биаст е ли бы транс не ливнлу", __A_SKREP, "2026.09.22")
 ADD("LSD.png", "GarryModMapLSDRef.png", __A_WOOWZ, "2026.09.16")
-ADD("ai.webp", "A.I ART-WORKS", "A.I NETWORK 🌐")
 ADD("on_ne_idet_v_voice.png", "Вот что будет, если не идти со мною в войс", __A_WOOWZ, "2026.09.13")
 ADD("horseshit.png", "diarrhée de cheval", __A_SKREP, "2026.09.12")
 ADD("light3.png", "ExtraBackrooms GLSL Light Shaders №3", __A_WOOWZ)
@@ -590,7 +727,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 
 WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
 	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
-	"bg10"
+	"bg10","bg11"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"
@@ -780,7 +917,8 @@ function GetAllWoowzsite(){
 		TrueLithuismArts,
 		WoowzsiteMultiverse,
 		WoowzsiteOther,
-		WoowzsitePortfolio
+		WoowzsitePortfolio,
+		TrueAIArts
 	);
 }
 
