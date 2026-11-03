@@ -1,5 +1,9 @@
-var PAGE_MANIFEST_GOLU = ELEMENT_SITE(
-``
-,function(){
+REGISTER_PAGE("golu", "G∅LU", function(){
+	return ELEMENT_SITE(
+		``,
+		function(){
 
-},false);
+		},
+		false
+	);
+});

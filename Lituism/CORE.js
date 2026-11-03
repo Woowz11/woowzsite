@@ -298,21 +298,110 @@ const ELEMENT_SITETOP = `${ELEMENT_TOPBANNER}<site>${ELEMENT_COLUMN_IMG(false)}$
 
 const ELEMENT_SITEBOTTOM = `</site_content></site>`;
 
-/* PREPAGES: сюда каждая PAGE_*.js пушит свою запись.
-   Никакого выполнения внутри ELEMENT_SITE — только push. */
 const PREPAGES = [];
+const PAGE_REGISTRY = {};   // key -> {title, factory}
+
+function REGISTER_PAGE(key, title, factory){
+	PAGE_REGISTRY[key] = { title: title, factory: factory };
+}
+
 function ELEMENT_SITE(content, func = function(){}, newlines = true, runafteropen = function(){}){
 	PREPAGES.push([content, func, newlines, PREPAGES.length, runafteropen]);
 	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
 }
 
-/* renderLoop — определение, запускается из BOOT.js */
 var t = 0;
 function renderLoop(){
 	if(HASH==="crybird"){
 		document.getElementById("bytes").style.width = `${50+((Math.sin(t/250)+1)/2)*50}%`;
 	}
-
 	t++;
 	requestAnimationFrame(renderLoop);
 }
+
+/* ===================================================================
+   АВТОЗАГРУЗКА PAGE_*.js + BOOT
+   Всё в одном файле. Порядок подключения страниц не важен.
+   =================================================================== */
+/* ===================================================================
+   АВТОЗАГРУЗКА PAGE_*.js + BOOT
+   Всё в одном файле. Порядок подключения страниц не важен.
+   =================================================================== */
+(function LITUISM_BOOTLOADER(){
+	const PAGE_FILES = [
+		"PAGE_main.js",
+		"PAGE_database.js",
+		"PAGE_sranspang.js",
+		"PAGE_crybird.js",
+		"PAGE_golu.js",
+		"PAGE_trash.js",
+		"PAGE_arts.js",
+		"PAGE_artsreal.js",
+		"PAGE_pavpis.js",
+		"PAGE_portal.js"
+	];
+
+	let loaded = 0;
+	let failed = 0;
+
+	function onAllDone(){
+		if(loaded + failed < PAGE_FILES.length) return;
+
+		if(failed > 0){
+			console.warn(`[LITUISM] ${failed} page script(s) failed to load.`);
+		}
+
+		// --- BOOT ---
+		// ВАЖНО: PAGES должен быть глобальным (window.PAGES),
+		// потому что func() внутри PAGE_*.js обращаются к нему напрямую.
+		window.PAGES = {};
+
+		for(const key in PAGE_REGISTRY){
+			const entry = PAGE_REGISTRY[key];
+			window.PAGES[key] = { t: entry.title, c: null, factory: entry.factory };
+		}
+
+		for(const key in window.PAGES){
+			window.PAGES[key].factory();
+		}
+
+		for(const j in PREPAGES){
+			var PAGE = PREPAGES[j];
+			var content_result = SITE_BASE(PAGE[0]);
+			SETBODY_CONTENT(content_result, PAGE[2]);
+			PAGE[1]();
+
+			const i = PAGE[3];
+			const key = Object.keys(window.PAGES)[i];
+			window.PAGES[key]["c"] = document.getElementById("BODY").innerHTML;
+			window.PAGES[key]["f"] = PAGE[4];
+			delete window.PAGES[key].factory;
+		}
+
+		renderLoop();
+
+		if(!DEV){
+			document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+		}
+
+		window.addEventListener("hashchange", () => {
+			const clean = window.location.hash.replace(/^#/, "");
+			OPEN_PAGE(clean);
+		});
+
+		OPEN_PAGE(HASH);
+	}
+
+	PAGE_FILES.forEach(function(file){
+		const s = document.createElement("script");
+		s.src = file;
+		s.async = false;
+		s.onload = function(){ loaded++; onAllDone(); };
+		s.onerror = function(){
+			failed++;
+			console.error(`[LITUISM] Failed to load ${file}`);
+			onAllDone();
+		};
+		document.head.appendChild(s);
+	});
+})();

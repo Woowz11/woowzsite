@@ -1,787 +1,788 @@
-var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
-<style>
-/* ===== ОСНОВНОЙ КОНТЕЙНЕР ===== */
-.lituism-gallery-wrap {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0.5rem;
-}
-
-.lituism-gallery-title {
-    font-size: 2.8em;
-    color: #ff0044;
-    text-shadow: 0 0 30px #ff0044, 0 0 60px #ff004466, 0 0 100px #ff004422;
-    text-align: center;
-    letter-spacing: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    margin-bottom: 0.3rem;
-    font-family: 'Courier New', monospace;
-}
-
-.lituism-gallery-sub {
-    text-align: center;
-    color: #ff2244;
-    font-size: 0.8rem;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    border-bottom: 1px solid #441122;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-    font-family: 'Courier New', monospace;
-}
-
-/* ===== СЕТКА ГАЛЕРЕИ — МЕНЬШИЕ КАРТОЧКИ ДЛЯ БОЛЬШЕГО КОЛИЧЕСТВА ===== */
-.lituism-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-    padding: 0.5rem;
-}
-
-/* ===== КАРТОЧКА ===== */
-.lituism-card {
-    background: #0a0a0a;
-    border: 2px solid #2a0a0a;
-    border-radius: 8px 2px 8px 2px;
-    padding: 0.5rem;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    transition: all 0.15s ease;
-    position: relative;
-    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-}
-
-.lituism-card:hover {
-    border-color: #ff0044;
-    box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
-    transform: translateY(-2px);
-}
-
-.lituism-card-img-wrap {
-    width: 100%;
-    aspect-ratio: 4/3;
-    overflow: hidden;
-    border-radius: 6px 2px 6px 2px;
-    background: #050505;
-    position: relative;
-    background: linear-gradient(
-        135deg,
-        #ff0000,
-        #3bff00,
-        #ff00f2,
-        #ffd800,
-        #00ffec,
-        #0015ff,
-        #ff7400
-    );
-    background-size: 400% 400%;
-    animation: galleryGradientShift 1s ease infinite;
-}
-
-@keyframes galleryGradientShift {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 50% 0%; }
-    50% { background-position: 100% 50%; }
-    75% { background-position: 50% 100%; }
-    100% { background-position: 0% 50%; }
-}
-
-.lituism-card-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: all 0.3s ease;
-    border: 1px solid #1a0a0a;
-    position: relative;
-    z-index: 1;
-    /* НЕМНОГО ПРОЗРАЧНОСТИ ЧТОБЫ ФОН ПРОСВЕЧИВАЛ */
-    background: transparent;
-}
-
-.lituism-card:hover .lituism-card-img-wrap img {
-    transform: scale(1.03);
-    border-color: #ff004466;
-}
-
-.lituism-card-info {
-    padding: 0.4rem 0.1rem 0.1rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.lituism-card-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #ff4466;
-    text-shadow: 0 0 10px rgba(255, 0, 68, 0.2);
-    margin-bottom: 0.1rem;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.5px;
-}
-
-.lituism-card-author {
-    font-size: 0.7rem;
-    color: #ff6688;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
-}
-
-.lituism-card-date {
-    font-size: 0.6rem;
-    color: #884444;
-    font-family: 'Courier New', monospace;
-    margin-top: auto;
-    border-top: 1px dashed #2a0a0a;
-    padding-top: 0.2rem;
-}
-
-.lituism-card-hover-hint {
-    position: absolute;
-    bottom: 6px;
-    right: 6px;
-    background: rgba(255, 0, 68, 0.8);
-    color: white;
-    font-size: 0.5rem;
-    padding: 1px 8px;
-    border-radius: 20px;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 1;
-}
-
-.lituism-card:hover .lituism-card-hover-hint {
-    opacity: 1;
-}
-
-/* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ===== */
-.lituism-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.92);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(8px);
-    animation: modalFade 0.2s ease;
-}
-
-.lituism-modal.active {
-    display: flex;
-}
-
-@keyframes modalFade {
-    0% { opacity: 0; transform: scale(0.95); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-.lituism-modal-content {
-    max-width: 90vw;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: transparent;
-    border: none;
-    padding: 0;
-    box-shadow: none;
-    position: relative;
-}
-
-/* ===== РЕЖИМ ЛУПЫ ===== */
-.lituism-modal-img-wrapper {
-    padding: 8px;
-    background: linear-gradient(135deg, #ff0000, #3bff00, #ff00f2, #ffd800, #00ffec, #0015ff, #ff7400);
-    background-size: 400% 400%;
-    animation: modalGradientShift 3s ease infinite;
-    box-shadow: 0 0 60px rgba(255, 0, 68, 0.3);
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    position: relative;
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-/* ===== КРЕСТИК В РЕЖИМЕ ЛУПЫ ===== */
-.lituism-modal-img-wrapper.zoomed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.95);
-    box-shadow: none;
-    z-index: 99998;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    border-radius: 0;
-    overflow: hidden;
-}
-
-.lituism-modal-img-wrapper.zoomed:active {
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-}
-
-.lituism-modal-img-wrapper.zoomed .lituism-modal-img {
-    max-width: none;
-    max-height: none;
-    width: auto;
-    height: auto;
-    object-fit: none;
-    box-shadow: none;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    transition: none;
-    border: none !important;
-}
-
-.lituism-modal-img-wrapper.zoomed:active .lituism-modal-img {
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-}
-
-/* Индикатор зума */
-.lituism-zoom-indicator {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.8rem;
-    font-family: 'Courier New', monospace;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 6px 16px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 0, 68, 0.3);
-    letter-spacing: 1px;
-    pointer-events: none;
-    z-index: 100000;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-.lituism-modal-img-wrapper.zoomed .lituism-zoom-indicator {
-    opacity: 1;
-}
-
-@keyframes modalGradientShift {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 50% 0%; }
-    50% { background-position: 100% 50%; }
-    75% { background-position: 50% 100%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* ===== КНОПКА ЗАКРЫТИЯ — ВСЕГДА ПОВЕРХ ВСЕГО ===== */
-.lituism-modal-close {
-    position: fixed;
-    top: 20px;
-    right: 30px;
-    font-size: 3rem;
-    color: #ff0044;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    font-family: 'Courier New', monospace;
-    transition: all 0.2s ease;
-    background: none;
-    border: none;
-    text-shadow: 0 0 40px #ff0044, 0 0 80px #ff004466;
-    z-index: 999999 !important; /* ПОДНИМАЕМ ВЫШЕ ВСЕГО! */
-    line-height: 1;
-    pointer-events: auto !important; /* Убеждаемся что кликабелен */
-}
-
-.lituism-modal-close:hover {
-    color: #ff4488;
-    transform: rotate(90deg) scale(1.2);
-    text-shadow: 0 0 60px #ff4488, 0 0 120px #ff448866;
-}
-
-/* ===== КАРТИНКА — В ЦЕНТРЕ, БЕЗ ЛИШНИХ ЭЛЕМЕНТОВ ===== */
-.lituism-modal-img {
-    max-width: 85vw;
-    max-height: 70vh;
-    object-fit: contain;
-    display: block;
-    border: 5px solid black;
-}
-
-/* ===== ИНФОРМАЦИЯ ВНИЗУ — БОЛЕЕ ВИДИМАЯ ===== */
-.lituism-modal-info {
-    width: 85vw;
-    max-width: 800px;
-    margin-top: 1.2rem;
-    padding: 1rem 1.5rem;
-    background: rgba(255, 0, 68, 0.08);
-    border-left: 4px solid #ff0044;
-    border-right: 4px solid #ff0044;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 0 30px rgba(255, 0, 68, 0.05);
-}
-
-.lituism-modal-title {
-    font-size: 1.6rem;
-    color: #ff4466;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    text-shadow: 0 0 30px rgba(255, 0, 68, 0.3), 0 0 60px rgba(255, 0, 68, 0.1);
-    letter-spacing: 2px;
-}
-
-.lituism-modal-author {
-    color: #ff6688;
-    font-family: 'Courier New', monospace;
-    font-size: 1.1rem;
-    text-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
-    letter-spacing: 1px;
-}
-
-.lituism-modal-date {
-    color: #ff8899;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
-    letter-spacing: 1px;
-}
-
-.lituism-modal-size {
-    color: #ff8899;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
-    letter-spacing: 1px;
-}
-
-/* ===== СЧЁТЧИК ===== */
-.lituism-counter {
-    text-align: center;
-    color: red;
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    font-family: 'Courier New', monospace;
-    margin-top: 0.5rem;
-    text-shadow:
-		0 0 10px red,
-		0 0 20px red,
-		0 0 40px red,
-		0 0 80px red;
-}
-
-/* ===== ГЛЮЧНЫЙ ЭФФЕКТ ===== */
-.lituism-glitch-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 9998;
-    background: repeating-linear-gradient(
-        15deg,
-        transparent 0px,
-        rgba(255, 0, 68, 0.1) 2px,
-        transparent 4px,
-        transparent 6px,
-        transparent 8px
-    );
-    animation: glitchScan 0.5s linear infinite;
-}
-
-@keyframes glitchScan {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
-}
-
-/* ===== АДАПТИВ ===== */
-@media (max-width: 768px) {
-    .lituism-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 0.8rem;
-    }
-    .lituism-gallery-title {
-        font-size: 1.8em;
-        letter-spacing: 5px;
-    }
-    .lituism-modal-img {
-        max-width: 95vw;
-        max-height: 50vh;
-    }
-    .lituism-modal-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.2rem;
-    }
-    .lituism-modal-title {
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .lituism-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 0.6rem;
-    }
-    .lituism-gallery-title {
-        font-size: 1.4em;
-        letter-spacing: 3px;
-    }
-}
-
-/* ===== КОНТРОЛЛЕРЫ ФИЛЬТРОВ В РЕЖИМЕ ЛУПЫ ===== */
-.lituism-filter-controls {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
-    padding: 10px 15px; /* Уменьшаем паддинг */
-    border-radius: 12px 4px 12px 4px;
-    border: 2px solid #ff0044;
-    box-shadow: 0 0 40px rgba(255, 0, 68, 0.2);
-    z-index: 100000;
-    display: none;
-    gap: 6px; /* Уменьшаем отступ между группами */
-    flex-wrap: nowrap; /* ЗАПРЕЩАЕМ ПЕРЕНОС НА СЛЕДУЮЩУЮ СТРОКУ */
-    justify-content: center;
-    max-width: 98vw; /* Чуть шире */
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    overflow-x: auto; /* Добавляем скролл если не влезают */
-}
-
-.lituism-filter-controls.visible {
-    display: flex;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.lituism-filter-controls .filter-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px; /* Минимальный отступ */
-    min-width: auto; /* Убираем минимальную ширину */
-    flex-shrink: 0; /* Запрещаем сжиматься */
-}
-
-.lituism-filter-controls label {
-    color: #ff4466;
-    font-size: 0.5rem; /* Уменьшаем текст */
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(255, 0, 68, 0.3);
-    white-space: nowrap; /* Текст в одну строку */
-}
-
-.lituism-filter-controls input[type="range"] {
-    width: 120px; /* УВЕЛИЧИВАЕМ ШИРИНУ */
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: linear-gradient(90deg, #440022, #ff0044);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-
-.lituism-filter-controls input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px; /* Чуть больше ползунок */
-    height: 14px;
-    border-radius: 50%;
-    background: #ff0044;
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(255, 0, 68, 0.5);
-    border: 2px solid #000;
-}
-
-.lituism-filter-controls input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ff0044;
-    cursor: pointer;
-    border: 2px solid #000;
-}
-
-.lituism-filter-controls .filter-value {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.45rem; /* Уменьшаем цифры */
-    font-family: 'Courier New', monospace;
-    min-width: 20px;
-    text-align: center;
-}
-
-.lituism-filter-controls .filter-reset {
-    background: none;
-    border: 1px solid rgba(255, 0, 68, 0.3);
-    color: #ff0044;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.45rem;
-    font-family: 'Courier New', monospace;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.lituism-filter-controls .filter-reset:hover {
-    background: #ff0044;
-    color: #000;
-}
-
-.lituism-filter-controls .filter-reset-all {
-    background: #ff0044;
-    border: none;
-    color: #000;
-    padding: 3px 12px;
-    border-radius: 20px;
-    font-size: 0.5rem;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 1px;
-    white-space: nowrap;
-}
-
-.lituism-filter-controls .filter-reset-all:hover {
-    background: #ff4488;
-    box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
-}
-
-/* Скрываем скроллбар но оставляем возможность скролла */
-.lituism-filter-controls::-webkit-scrollbar {
-    height: 3px;
-}
-
-.lituism-filter-controls::-webkit-scrollbar-track {
-    background: rgba(255, 0, 68, 0.1);
-    border-radius: 2px;
-}
-
-.lituism-filter-controls::-webkit-scrollbar-thumb {
-    background: #ff0044;
-    border-radius: 2px;
-}
-
-@media (max-width: 1200px) {
-    .lituism-filter-controls input[type="range"] {
-        width: 100px; /* Чуть уже на средних экранах */
-    }
-}
-
-@media (max-width: 992px) {
-    .lituism-filter-controls input[type="range"] {
-        width: 80px;
-    }
-    .lituism-filter-controls label {
-        font-size: 0.45rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .lituism-filter-controls {
-        bottom: 70px;
-        padding: 8px 10px;
-        gap: 4px;
-        max-width: 98vw;
-        flex-wrap: nowrap; /* Оставляем в одну строку */
-    }
-    .lituism-filter-controls input[type="range"] {
-        width: 65px;
-    }
-    .lituism-filter-controls label {
-        font-size: 0.4rem;
-    }
-    .lituism-filter-controls .filter-value {
-        font-size: 0.4rem;
-    }
-    .lituism-filter-controls .filter-reset-all {
-        font-size: 0.4rem;
-        padding: 2px 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .lituism-filter-controls input[type="range"] {
-        width: 50px;
-    }
-    .lituism-filter-controls label {
-        font-size: 0.35rem;
-        letter-spacing: 0px;
-    }
-    .lituism-filter-controls .filter-value {
-        font-size: 0.35rem;
-        min-width: 15px;
-    }
-}
-
-/* ===== СОРТИРОВОЧНАЯ ПАНЕЛЬ ===== */
-.lituism-sort-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    padding: 0.8rem 1rem;
-    margin-bottom: 1rem;
-    background: rgba(255, 0, 68, 0.05);
-    border-bottom: 1px solid rgba(255, 0, 68, 0.15);
-    border-top: 1px solid rgba(255, 0, 68, 0.15);
-}
-
-.lituism-sort-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 0, 68, 0.25);
-    color: #ff4466;
-    padding: 0.4rem 1.2rem;
-    border-radius: 20px 4px 20px 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    transition: all 0.2s ease;
-    text-shadow: 0 0 10px rgba(255, 0, 68, 0.1);
-}
-
-.lituism-sort-btn:hover {
-    border-color: #ff0044;
-    background: rgba(255, 0, 68, 0.1);
-    box-shadow: 0 0 20px rgba(255, 0, 68, 0.1);
-}
-
-.lituism-sort-btn.active {
-    border-color: #ff0044;
-    background: rgba(255, 0, 68, 0.2);
-    box-shadow: 0 0 30px rgba(255, 0, 68, 0.15);
-    color: #ff0044;
-}
-
-.lituism-sort-toggle {
-    background: transparent;
-    border: 1px solid rgba(255, 0, 68, 0.25);
-    color: #ff4466;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px 4px 20px 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.8rem;
-    cursor: url("../source/lit_cur_pointer.cur"), auto;
-    transition: all 0.2s ease;
-}
-
-.lituism-sort-toggle:hover {
-    border-color: #ff0044;
-    background: rgba(255, 0, 68, 0.1);
-}
-</style>
-
-<div class="lituism-glitch-overlay"></div>
-
-<div class="lituism-gallery-wrap">
-    <h1 class="lituism-gallery-title" id="galleryTitle">✦ LITUISM · GALLERY ✦</h1>
-    <div class="lituism-gallery-sub" id="gallerySub">// РЕЕСТР ВИЗУАЛЬНЫХ АРТЕФАКТОВ //</div>
-
-    <div class="lituism-grid" id="lituismGrid"></div>
-
-    <div class="lituism-counter" id="lituismCounter">// ЗАГРУЗКА АРТЕФАКТОВ... //</div>
-
-    <div class="lituism-sort-bar">
-		<button class="lituism-sort-btn" data-sort="default" data-label="🔀 RANDOM">🔀 RANDOM</button>
-		<button class="lituism-sort-btn" data-sort="title" data-label="📛 NAME">📛 NAME</button>
-		<button class="lituism-sort-btn" data-sort="author" data-label="✍️ AUTHOR">✍️ AUTHOR</button>
-		<button class="lituism-sort-btn" data-sort="date" data-label="📅 DATE">📅 DATE</button>
-		<button class="lituism-sort-toggle" id="lituismSortToggle">↑↓</button>
-	</div>
-</div>
-
-<div class="lituism-modal" id="lituismModal">
-    <div class="lituism-modal-content">
-        <button class="lituism-modal-close" id="lituismModalClose">✕</button>
-        <div class="lituism-modal-img-wrapper" id="modalImgWrapper" title="PUT SOME TEXT PLEASE, I WAIT 😒">
-			<img class="lituism-modal-img" id="lituismModalImg" src="" alt="">
+REGISTER_PAGE("artsreal", "🖼", function(){
+	return ELEMENT_SITE(`
+		<style>
+		/* ===== ОСНОВНОЙ КОНТЕЙНЕР ===== */
+		.lituism-gallery-wrap {
+			max-width: 1600px;
+			margin: 0 auto;
+			padding: 0.5rem;
+		}
+
+		.lituism-gallery-title {
+			font-size: 2.8em;
+			color: #ff0044;
+			text-shadow: 0 0 30px #ff0044, 0 0 60px #ff004466, 0 0 100px #ff004422;
+			text-align: center;
+			letter-spacing: 10px;
+			font-weight: 900;
+			text-transform: uppercase;
+			margin-bottom: 0.3rem;
+			font-family: 'Courier New', monospace;
+		}
+
+		.lituism-gallery-sub {
+			text-align: center;
+			color: #ff2244;
+			font-size: 0.8rem;
+			letter-spacing: 6px;
+			text-transform: uppercase;
+			border-bottom: 1px solid #441122;
+			padding-bottom: 1rem;
+			margin-bottom: 1.5rem;
+			font-family: 'Courier New', monospace;
+		}
+
+		/* ===== СЕТКА ГАЛЕРЕИ — МЕНЬШИЕ КАРТОЧКИ ДЛЯ БОЛЬШЕГО КОЛИЧЕСТВА ===== */
+		.lituism-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+			gap: 1rem;
+			padding: 0.5rem;
+		}
+
+		/* ===== КАРТОЧКА ===== */
+		.lituism-card {
+			background: #0a0a0a;
+			border: 2px solid #2a0a0a;
+			border-radius: 8px 2px 8px 2px;
+			padding: 0.5rem;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			transition: all 0.15s ease;
+			position: relative;
+			box-shadow: 0 2px 10px rgba(255, 0, 0, 0.1);
+			display: flex;
+			flex-direction: column;
+		}
+
+		.lituism-card:hover {
+			border-color: #ff0044;
+			box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+			transform: translateY(-2px);
+		}
+
+		.lituism-card-img-wrap {
+			width: 100%;
+			aspect-ratio: 4/3;
+			overflow: hidden;
+			border-radius: 6px 2px 6px 2px;
+			background: #050505;
+			position: relative;
+			background: linear-gradient(
+				135deg,
+				#ff0000,
+				#3bff00,
+				#ff00f2,
+				#ffd800,
+				#00ffec,
+				#0015ff,
+				#ff7400
+			);
+			background-size: 400% 400%;
+			animation: galleryGradientShift 1s ease infinite;
+		}
+
+		@keyframes galleryGradientShift {
+			0% { background-position: 0% 50%; }
+			25% { background-position: 50% 0%; }
+			50% { background-position: 100% 50%; }
+			75% { background-position: 50% 100%; }
+			100% { background-position: 0% 50%; }
+		}
+
+		.lituism-card-img-wrap img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+			transition: all 0.3s ease;
+			border: 1px solid #1a0a0a;
+			position: relative;
+			z-index: 1;
+			/* НЕМНОГО ПРОЗРАЧНОСТИ ЧТОБЫ ФОН ПРОСВЕЧИВАЛ */
+			background: transparent;
+		}
+
+		.lituism-card:hover .lituism-card-img-wrap img {
+			transform: scale(1.03);
+			border-color: #ff004466;
+		}
+
+		.lituism-card-info {
+			padding: 0.4rem 0.1rem 0.1rem;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.lituism-card-title {
+			font-size: 0.85rem;
+			font-weight: 700;
+			color: #ff4466;
+			text-shadow: 0 0 10px rgba(255, 0, 68, 0.2);
+			margin-bottom: 0.1rem;
+			font-family: 'Courier New', monospace;
+			letter-spacing: 0.5px;
+		}
+
+		.lituism-card-author {
+			font-size: 0.7rem;
+			color: #ff6688;
+			font-family: 'Courier New', monospace;
+			letter-spacing: 1px;
+		}
+
+		.lituism-card-date {
+			font-size: 0.6rem;
+			color: #884444;
+			font-family: 'Courier New', monospace;
+			margin-top: auto;
+			border-top: 1px dashed #2a0a0a;
+			padding-top: 0.2rem;
+		}
+
+		.lituism-card-hover-hint {
+			position: absolute;
+			bottom: 6px;
+			right: 6px;
+			background: rgba(255, 0, 68, 0.8);
+			color: white;
+			font-size: 0.5rem;
+			padding: 1px 8px;
+			border-radius: 20px;
+			font-family: 'Courier New', monospace;
+			letter-spacing: 1px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			z-index: 1;
+		}
+
+		.lituism-card:hover .lituism-card-hover-hint {
+			opacity: 1;
+		}
+
+		/* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ===== */
+		.lituism-modal {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, 0.92);
+			z-index: 9999;
+			justify-content: center;
+			align-items: center;
+			backdrop-filter: blur(8px);
+			animation: modalFade 0.2s ease;
+		}
+
+		.lituism-modal.active {
+			display: flex;
+		}
+
+		@keyframes modalFade {
+			0% { opacity: 0; transform: scale(0.95); }
+			100% { opacity: 1; transform: scale(1); }
+		}
+
+		.lituism-modal-content {
+			max-width: 90vw;
+			max-height: 90vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: transparent;
+			border: none;
+			padding: 0;
+			box-shadow: none;
+			position: relative;
+		}
+
+		/* ===== РЕЖИМ ЛУПЫ ===== */
+		.lituism-modal-img-wrapper {
+			padding: 8px;
+			background: linear-gradient(135deg, #ff0000, #3bff00, #ff00f2, #ffd800, #00ffec, #0015ff, #ff7400);
+			background-size: 400% 400%;
+			animation: modalGradientShift 3s ease infinite;
+			box-shadow: 0 0 60px rgba(255, 0, 68, 0.3);
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			position: relative;
+			transition: all 0.3s ease;
+			overflow: hidden;
+		}
+
+		/* ===== КРЕСТИК В РЕЖИМЕ ЛУПЫ ===== */
+		.lituism-modal-img-wrapper.zoomed {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			max-width: 100vw;
+			max-height: 100vh;
+			padding: 0;
+			background: rgba(0, 0, 0, 0.95);
+			box-shadow: none;
+			z-index: 99998;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			border-radius: 0;
+			overflow: hidden;
+		}
+
+		.lituism-modal-img-wrapper.zoomed:active {
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+		}
+
+		.lituism-modal-img-wrapper.zoomed .lituism-modal-img {
+			max-width: none;
+			max-height: none;
+			width: auto;
+			height: auto;
+			object-fit: none;
+			box-shadow: none;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			transition: none;
+			border: none !important;
+		}
+
+		.lituism-modal-img-wrapper.zoomed:active .lituism-modal-img {
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+		}
+
+		/* Индикатор зума */
+		.lituism-zoom-indicator {
+			position: fixed;
+			bottom: 30px;
+			left: 50%;
+			transform: translateX(-50%);
+			color: rgba(255, 255, 255, 0.6);
+			font-size: 0.8rem;
+			font-family: 'Courier New', monospace;
+			background: rgba(0, 0, 0, 0.7);
+			padding: 6px 16px;
+			border-radius: 20px;
+			border: 1px solid rgba(255, 0, 68, 0.3);
+			letter-spacing: 1px;
+			pointer-events: none;
+			z-index: 100000;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		}
+
+		.lituism-modal-img-wrapper.zoomed .lituism-zoom-indicator {
+			opacity: 1;
+		}
+
+		@keyframes modalGradientShift {
+			0% { background-position: 0% 50%; }
+			25% { background-position: 50% 0%; }
+			50% { background-position: 100% 50%; }
+			75% { background-position: 50% 100%; }
+			100% { background-position: 0% 50%; }
+		}
+
+		/* ===== КНОПКА ЗАКРЫТИЯ — ВСЕГДА ПОВЕРХ ВСЕГО ===== */
+		.lituism-modal-close {
+			position: fixed;
+			top: 20px;
+			right: 30px;
+			font-size: 3rem;
+			color: #ff0044;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			font-family: 'Courier New', monospace;
+			transition: all 0.2s ease;
+			background: none;
+			border: none;
+			text-shadow: 0 0 40px #ff0044, 0 0 80px #ff004466;
+			z-index: 999999 !important; /* ПОДНИМАЕМ ВЫШЕ ВСЕГО! */
+			line-height: 1;
+			pointer-events: auto !important; /* Убеждаемся что кликабелен */
+		}
+
+		.lituism-modal-close:hover {
+			color: #ff4488;
+			transform: rotate(90deg) scale(1.2);
+			text-shadow: 0 0 60px #ff4488, 0 0 120px #ff448866;
+		}
+
+		/* ===== КАРТИНКА — В ЦЕНТРЕ, БЕЗ ЛИШНИХ ЭЛЕМЕНТОВ ===== */
+		.lituism-modal-img {
+			max-width: 85vw;
+			max-height: 70vh;
+			object-fit: contain;
+			display: block;
+			border: 5px solid black;
+		}
+
+		/* ===== ИНФОРМАЦИЯ ВНИЗУ — БОЛЕЕ ВИДИМАЯ ===== */
+		.lituism-modal-info {
+			width: 85vw;
+			max-width: 800px;
+			margin-top: 1.2rem;
+			padding: 1rem 1.5rem;
+			background: rgba(255, 0, 68, 0.08);
+			border-left: 4px solid #ff0044;
+			border-right: 4px solid #ff0044;
+			border-radius: 4px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			backdrop-filter: blur(4px);
+			box-shadow: 0 0 30px rgba(255, 0, 68, 0.05);
+		}
+
+		.lituism-modal-title {
+			font-size: 1.6rem;
+			color: #ff4466;
+			font-weight: 700;
+			font-family: 'Courier New', monospace;
+			text-shadow: 0 0 30px rgba(255, 0, 68, 0.3), 0 0 60px rgba(255, 0, 68, 0.1);
+			letter-spacing: 2px;
+		}
+
+		.lituism-modal-author {
+			color: #ff6688;
+			font-family: 'Courier New', monospace;
+			font-size: 1.1rem;
+			text-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+			letter-spacing: 1px;
+		}
+
+		.lituism-modal-date {
+			color: #ff8899;
+			font-family: 'Courier New', monospace;
+			font-size: 1rem;
+			text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
+			letter-spacing: 1px;
+		}
+
+		.lituism-modal-size {
+			color: #ff8899;
+			font-family: 'Courier New', monospace;
+			font-size: 1rem;
+			text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
+			letter-spacing: 1px;
+		}
+
+		/* ===== СЧЁТЧИК ===== */
+		.lituism-counter {
+			text-align: center;
+			color: red;
+			font-size: 0.75rem;
+			letter-spacing: 4px;
+			font-family: 'Courier New', monospace;
+			margin-top: 0.5rem;
+			text-shadow:
+				0 0 10px red,
+				0 0 20px red,
+				0 0 40px red,
+				0 0 80px red;
+		}
+
+		/* ===== ГЛЮЧНЫЙ ЭФФЕКТ ===== */
+		.lituism-glitch-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			pointer-events: none;
+			z-index: 9998;
+			background: repeating-linear-gradient(
+				15deg,
+				transparent 0px,
+				rgba(255, 0, 68, 0.1) 2px,
+				transparent 4px,
+				transparent 6px,
+				transparent 8px
+			);
+			animation: glitchScan 0.5s linear infinite;
+		}
+
+		@keyframes glitchScan {
+			0% { transform: translateY(-100%); }
+			100% { transform: translateY(100%); }
+		}
+
+		/* ===== АДАПТИВ ===== */
+		@media (max-width: 768px) {
+			.lituism-grid {
+				grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+				gap: 0.8rem;
+			}
+			.lituism-gallery-title {
+				font-size: 1.8em;
+				letter-spacing: 5px;
+			}
+			.lituism-modal-img {
+				max-width: 95vw;
+				max-height: 50vh;
+			}
+			.lituism-modal-info {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 0.2rem;
+			}
+			.lituism-modal-title {
+				font-size: 1.1rem;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.lituism-grid {
+				grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+				gap: 0.6rem;
+			}
+			.lituism-gallery-title {
+				font-size: 1.4em;
+				letter-spacing: 3px;
+			}
+		}
+
+		/* ===== КОНТРОЛЛЕРЫ ФИЛЬТРОВ В РЕЖИМЕ ЛУПЫ ===== */
+		.lituism-filter-controls {
+			position: fixed;
+			bottom: 80px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(0, 0, 0, 0.85);
+			backdrop-filter: blur(10px);
+			padding: 10px 15px; /* Уменьшаем паддинг */
+			border-radius: 12px 4px 12px 4px;
+			border: 2px solid #ff0044;
+			box-shadow: 0 0 40px rgba(255, 0, 68, 0.2);
+			z-index: 100000;
+			display: none;
+			gap: 6px; /* Уменьшаем отступ между группами */
+			flex-wrap: nowrap; /* ЗАПРЕЩАЕМ ПЕРЕНОС НА СЛЕДУЮЩУЮ СТРОКУ */
+			justify-content: center;
+			max-width: 98vw; /* Чуть шире */
+			opacity: 0;
+			transition: opacity 0.4s ease;
+			pointer-events: none;
+			overflow-x: auto; /* Добавляем скролл если не влезают */
+		}
+
+		.lituism-filter-controls.visible {
+			display: flex;
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.lituism-filter-controls .filter-group {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px; /* Минимальный отступ */
+			min-width: auto; /* Убираем минимальную ширину */
+			flex-shrink: 0; /* Запрещаем сжиматься */
+		}
+
+		.lituism-filter-controls label {
+			color: #ff4466;
+			font-size: 0.5rem; /* Уменьшаем текст */
+			font-family: 'Courier New', monospace;
+			letter-spacing: 0.5px;
+			text-transform: uppercase;
+			text-shadow: 0 0 10px rgba(255, 0, 68, 0.3);
+			white-space: nowrap; /* Текст в одну строку */
+		}
+
+		.lituism-filter-controls input[type="range"] {
+			width: 120px; /* УВЕЛИЧИВАЕМ ШИРИНУ */
+			height: 4px;
+			-webkit-appearance: none;
+			appearance: none;
+			background: linear-gradient(90deg, #440022, #ff0044);
+			border-radius: 2px;
+			outline: none;
+			cursor: pointer;
+		}
+
+		.lituism-filter-controls input[type="range"]::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 14px; /* Чуть больше ползунок */
+			height: 14px;
+			border-radius: 50%;
+			background: #ff0044;
+			cursor: pointer;
+			box-shadow: 0 0 20px rgba(255, 0, 68, 0.5);
+			border: 2px solid #000;
+		}
+
+		.lituism-filter-controls input[type="range"]::-moz-range-thumb {
+			width: 14px;
+			height: 14px;
+			border-radius: 50%;
+			background: #ff0044;
+			cursor: pointer;
+			border: 2px solid #000;
+		}
+
+		.lituism-filter-controls .filter-value {
+			color: rgba(255, 255, 255, 0.5);
+			font-size: 0.45rem; /* Уменьшаем цифры */
+			font-family: 'Courier New', monospace;
+			min-width: 20px;
+			text-align: center;
+		}
+
+		.lituism-filter-controls .filter-reset {
+			background: none;
+			border: 1px solid rgba(255, 0, 68, 0.3);
+			color: #ff0044;
+			padding: 1px 6px;
+			border-radius: 4px;
+			font-size: 0.45rem;
+			font-family: 'Courier New', monospace;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.lituism-filter-controls .filter-reset:hover {
+			background: #ff0044;
+			color: #000;
+		}
+
+		.lituism-filter-controls .filter-reset-all {
+			background: #ff0044;
+			border: none;
+			color: #000;
+			padding: 3px 12px;
+			border-radius: 20px;
+			font-size: 0.5rem;
+			font-family: 'Courier New', monospace;
+			font-weight: bold;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			letter-spacing: 1px;
+			white-space: nowrap;
+		}
+
+		.lituism-filter-controls .filter-reset-all:hover {
+			background: #ff4488;
+			box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
+		}
+
+		/* Скрываем скроллбар но оставляем возможность скролла */
+		.lituism-filter-controls::-webkit-scrollbar {
+			height: 3px;
+		}
+
+		.lituism-filter-controls::-webkit-scrollbar-track {
+			background: rgba(255, 0, 68, 0.1);
+			border-radius: 2px;
+		}
+
+		.lituism-filter-controls::-webkit-scrollbar-thumb {
+			background: #ff0044;
+			border-radius: 2px;
+		}
+
+		@media (max-width: 1200px) {
+			.lituism-filter-controls input[type="range"] {
+				width: 100px; /* Чуть уже на средних экранах */
+			}
+		}
+
+		@media (max-width: 992px) {
+			.lituism-filter-controls input[type="range"] {
+				width: 80px;
+			}
+			.lituism-filter-controls label {
+				font-size: 0.45rem;
+			}
+		}
+
+		@media (max-width: 768px) {
+			.lituism-filter-controls {
+				bottom: 70px;
+				padding: 8px 10px;
+				gap: 4px;
+				max-width: 98vw;
+				flex-wrap: nowrap; /* Оставляем в одну строку */
+			}
+			.lituism-filter-controls input[type="range"] {
+				width: 65px;
+			}
+			.lituism-filter-controls label {
+				font-size: 0.4rem;
+			}
+			.lituism-filter-controls .filter-value {
+				font-size: 0.4rem;
+			}
+			.lituism-filter-controls .filter-reset-all {
+				font-size: 0.4rem;
+				padding: 2px 8px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.lituism-filter-controls input[type="range"] {
+				width: 50px;
+			}
+			.lituism-filter-controls label {
+				font-size: 0.35rem;
+				letter-spacing: 0px;
+			}
+			.lituism-filter-controls .filter-value {
+				font-size: 0.35rem;
+				min-width: 15px;
+			}
+		}
+
+		/* ===== СОРТИРОВОЧНАЯ ПАНЕЛЬ ===== */
+		.lituism-sort-bar {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 8px;
+			padding: 0.8rem 1rem;
+			margin-bottom: 1rem;
+			background: rgba(255, 0, 68, 0.05);
+			border-bottom: 1px solid rgba(255, 0, 68, 0.15);
+			border-top: 1px solid rgba(255, 0, 68, 0.15);
+		}
+
+		.lituism-sort-btn {
+			background: transparent;
+			border: 1px solid rgba(255, 0, 68, 0.25);
+			color: #ff4466;
+			padding: 0.4rem 1.2rem;
+			border-radius: 20px 4px 20px 4px;
+			font-family: 'Courier New', monospace;
+			font-size: 0.7rem;
+			letter-spacing: 1.5px;
+			text-transform: uppercase;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			transition: all 0.2s ease;
+			text-shadow: 0 0 10px rgba(255, 0, 68, 0.1);
+		}
+
+		.lituism-sort-btn:hover {
+			border-color: #ff0044;
+			background: rgba(255, 0, 68, 0.1);
+			box-shadow: 0 0 20px rgba(255, 0, 68, 0.1);
+		}
+
+		.lituism-sort-btn.active {
+			border-color: #ff0044;
+			background: rgba(255, 0, 68, 0.2);
+			box-shadow: 0 0 30px rgba(255, 0, 68, 0.15);
+			color: #ff0044;
+		}
+
+		.lituism-sort-toggle {
+			background: transparent;
+			border: 1px solid rgba(255, 0, 68, 0.25);
+			color: #ff4466;
+			padding: 0.4rem 0.8rem;
+			border-radius: 20px 4px 20px 4px;
+			font-family: 'Courier New', monospace;
+			font-size: 0.8rem;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			transition: all 0.2s ease;
+		}
+
+		.lituism-sort-toggle:hover {
+			border-color: #ff0044;
+			background: rgba(255, 0, 68, 0.1);
+		}
+		</style>
+
+		<div class="lituism-glitch-overlay"></div>
+
+		<div class="lituism-gallery-wrap">
+			<h1 class="lituism-gallery-title" id="galleryTitle">✦ LITUISM · GALLERY ✦</h1>
+			<div class="lituism-gallery-sub" id="gallerySub">// РЕЕСТР ВИЗУАЛЬНЫХ АРТЕФАКТОВ //</div>
+
+			<div class="lituism-grid" id="lituismGrid"></div>
+
+			<div class="lituism-counter" id="lituismCounter">// ЗАГРУЗКА АРТЕФАКТОВ... //</div>
+
+			<div class="lituism-sort-bar">
+				<button class="lituism-sort-btn" data-sort="default" data-label="🔀 RANDOM">🔀 RANDOM</button>
+				<button class="lituism-sort-btn" data-sort="title" data-label="📛 NAME">📛 NAME</button>
+				<button class="lituism-sort-btn" data-sort="author" data-label="✍️ AUTHOR">✍️ AUTHOR</button>
+				<button class="lituism-sort-btn" data-sort="date" data-label="📅 DATE">📅 DATE</button>
+				<button class="lituism-sort-toggle" id="lituismSortToggle">↑↓</button>
+			</div>
 		</div>
-        <div class="lituism-modal-info">
-            <span class="lituism-modal-title" id="lituismModalTitle">—</span>
-            <span class="lituism-modal-author" id="lituismModalAuthor">—</span>
-            <span class="lituism-modal-date" id="lituismModalDate">—</span>
-			<span class="lituism-modal-size" id="lituismModalSize">—</span>
-        </div>
-    </div>
-</div>
-<div class="lituism-zoom-indicator" id="zoomIndicator">&gg; 🔍 MOUSE WHEEL — ZOOM | ✋✊ GRAB — DRAGGING &ll;</div>
 
-<div class="lituism-filter-controls" id="filterControls">
-    <div class="filter-group">
-        <label>Яркость</label>
-        <input type="range" id="filterBrightness" min="0" max="500" value="100">
-        <span class="filter-value" id="filterBrightnessVal">100%</span>
-    </div>
-    <div class="filter-group">
-        <label>Насыщенность</label>
-        <input type="range" id="filterSaturate" min="0" max="500" value="100">
-        <span class="filter-value" id="filterSaturateVal">100%</span>
-    </div>
-    <div class="filter-group">
-        <label>Инверт</label>
-        <input type="range" id="filterInvert" min="0" max="100" value="0">
-        <span class="filter-value" id="filterInvertVal">0%</span>
-    </div>
-    <div class="filter-group">
-        <label>Hue</label>
-        <input type="range" id="filterHue" min="0" max="360" value="0">
-        <span class="filter-value" id="filterHueVal">0°</span>
-    </div>
-    <div class="filter-group">
-        <label>Блюр</label>
-        <input type="range" id="filterBlur" min="0" max="20" value="0" step="0.5">
-        <span class="filter-value" id="filterBlurVal">0px</span>
-    </div>
-    <div class="filter-group">
-        <label>Scale X</label>
-        <input type="range" id="filterScaleX" min="-500" max="500" value="100">
-        <span class="filter-value" id="filterScaleXVal">100%</span>
-    </div>
-    <div class="filter-group">
-        <label>Scale Y</label>
-        <input type="range" id="filterScaleY" min="-500" max="500" value="100">
-        <span class="filter-value" id="filterScaleYVal">100%</span>
-    </div>
-    <div class="filter-group">
-		<label>Поворот</label>
-		<input type="range" id="filterRotate" min="-180" max="180" value="0">
-		<span class="filter-value" id="filterRotateVal">0°</span>
-	</div>
-    <div class="filter-group">
-        <button class="filter-reset-all" id="filterResetAll">СБРОС</button>
-    </div>
-</div>
+		<div class="lituism-modal" id="lituismModal">
+			<div class="lituism-modal-content">
+				<button class="lituism-modal-close" id="lituismModalClose">✕</button>
+				<div class="lituism-modal-img-wrapper" id="modalImgWrapper" title="PUT SOME TEXT PLEASE, I WAIT 😒">
+					<img class="lituism-modal-img" id="lituismModalImg" src="" alt="">
+				</div>
+				<div class="lituism-modal-info">
+					<span class="lituism-modal-title" id="lituismModalTitle">—</span>
+					<span class="lituism-modal-author" id="lituismModalAuthor">—</span>
+					<span class="lituism-modal-date" id="lituismModalDate">—</span>
+					<span class="lituism-modal-size" id="lituismModalSize">—</span>
+				</div>
+			</div>
+		</div>
+		<div class="lituism-zoom-indicator" id="zoomIndicator">&gg; 🔍 MOUSE WHEEL — ZOOM | ✋✊ GRAB — DRAGGING &ll;</div>
 
-<footer style="margin-top:2rem; text-align:center; font-size:0.7rem; color:#442222; letter-spacing:3px; font-family:'Courier New',monospace;">
-    ✴ LITUISM · VISUAL ARCHIVE v2.0 ✴<br>
-    SYSTEM INTEGRITY: 73% 🩸
-</footer>
-`
-		,function(){
+		<div class="lituism-filter-controls" id="filterControls">
+			<div class="filter-group">
+				<label>Яркость</label>
+				<input type="range" id="filterBrightness" min="0" max="500" value="100">
+				<span class="filter-value" id="filterBrightnessVal">100%</span>
+			</div>
+			<div class="filter-group">
+				<label>Насыщенность</label>
+				<input type="range" id="filterSaturate" min="0" max="500" value="100">
+				<span class="filter-value" id="filterSaturateVal">100%</span>
+			</div>
+			<div class="filter-group">
+				<label>Инверт</label>
+				<input type="range" id="filterInvert" min="0" max="100" value="0">
+				<span class="filter-value" id="filterInvertVal">0%</span>
+			</div>
+			<div class="filter-group">
+				<label>Hue</label>
+				<input type="range" id="filterHue" min="0" max="360" value="0">
+				<span class="filter-value" id="filterHueVal">0°</span>
+			</div>
+			<div class="filter-group">
+				<label>Блюр</label>
+				<input type="range" id="filterBlur" min="0" max="20" value="0" step="0.5">
+				<span class="filter-value" id="filterBlurVal">0px</span>
+			</div>
+			<div class="filter-group">
+				<label>Scale X</label>
+				<input type="range" id="filterScaleX" min="-500" max="500" value="100">
+				<span class="filter-value" id="filterScaleXVal">100%</span>
+			</div>
+			<div class="filter-group">
+				<label>Scale Y</label>
+				<input type="range" id="filterScaleY" min="-500" max="500" value="100">
+				<span class="filter-value" id="filterScaleYVal">100%</span>
+			</div>
+			<div class="filter-group">
+				<label>Поворот</label>
+				<input type="range" id="filterRotate" min="-180" max="180" value="0">
+				<span class="filter-value" id="filterRotateVal">0°</span>
+			</div>
+			<div class="filter-group">
+				<button class="filter-reset-all" id="filterResetAll">СБРОС</button>
+			</div>
+		</div>
+
+		<footer style="margin-top:2rem; text-align:center; font-size:0.7rem; color:#442222; letter-spacing:3px; font-family:'Courier New',monospace;">
+			✴ LITUISM · VISUAL ARCHIVE v2.0 ✴<br>
+			SYSTEM INTEGRITY: 73% 🩸
+		</footer>
+		`,
+		function(){
 			// ===== ЭТО ВЫПОЛНЯЕТСЯ ОДИН РАЗ ПРИ ЗАГРУЗКЕ =====
 			// Оформление контейнера
 			const bg = document.getElementById('MAIN');
@@ -861,24 +862,24 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 				if (oldStyle) oldStyle.remove();
 
 				style.textContent = `
-            .lituism-gallery-title { color: ${design.color1} !important; text-shadow: 0 0 30px ${design.color1}, 0 0 60px ${design.color1}66, 0 0 100px ${design.color1}22 !important; }
-            .lituism-gallery-sub { color: ${design.color2} !important; border-bottom-color: ${design.color3} !important; }
-            .lituism-grid { grid-template-columns: repeat(auto-fill, minmax(${design.cardSize}px, 1fr)) !important; }
-            .lituism-card { border-color: ${design.color3} !important; background: #0a0000 !important; transform: skew(${design.skewX}deg, ${design.skewY}deg) !important; border-style: ${design.borderStyle} !important; border-radius: ${design.radius1}px ${design.radius2}px ${design.radius3}px ${design.radius4}px !important; }
-            .lituism-card:hover { border-color: ${design.color1} !important; box-shadow: 0 0 30px ${design.glowColor} !important; }
-            .lituism-card-title { color: ${design.color1} !important; text-shadow: 0 0 10px ${design.glowColor} !important; }
-            .lituism-card-author { color: ${design.color2} !important; }
-            .lituism-card-date { border-top-color: ${design.color3} !important; }
-            .lituism-modal-content { border-color: ${design.color1} !important; box-shadow: 0 0 60px ${design.glowColor} !important; }
-            .lituism-modal-close { color: ${design.color1} !important; text-shadow: 0 0 20px ${design.color1} !important; }
-            .lituism-modal-info { border-left-color: ${design.color1} !important; background: ${design.color1}0D !important; }
-            .lituism-gallery-wrap { background: ${design.bgGradient} !important; }
-            .lituism-card-img-wrap img { border-color: ${design.color3} !important; }
-            .lituism-card:hover .lituism-card-img-wrap img { border-color: ${design.color1}66 !important; }
-            .lituism-card-hover-hint { background: ${design.color1}CC !important; }
-            .lituism-modal-img { border-color: ${design.color3} !important; }
-            footer { color: ${design.color3} !important; }
-        `;
+			.lituism-gallery-title { color: ${design.color1} !important; text-shadow: 0 0 30px ${design.color1}, 0 0 60px ${design.color1}66, 0 0 100px ${design.color1}22 !important; }
+			.lituism-gallery-sub { color: ${design.color2} !important; border-bottom-color: ${design.color3} !important; }
+			.lituism-grid { grid-template-columns: repeat(auto-fill, minmax(${design.cardSize}px, 1fr)) !important; }
+			.lituism-card { border-color: ${design.color3} !important; background: #0a0000 !important; transform: skew(${design.skewX}deg, ${design.skewY}deg) !important; border-style: ${design.borderStyle} !important; border-radius: ${design.radius1}px ${design.radius2}px ${design.radius3}px ${design.radius4}px !important; }
+			.lituism-card:hover { border-color: ${design.color1} !important; box-shadow: 0 0 30px ${design.glowColor} !important; }
+			.lituism-card-title { color: ${design.color1} !important; text-shadow: 0 0 10px ${design.glowColor} !important; }
+			.lituism-card-author { color: ${design.color2} !important; }
+			.lituism-card-date { border-top-color: ${design.color3} !important; }
+			.lituism-modal-content { border-color: ${design.color1} !important; box-shadow: 0 0 60px ${design.glowColor} !important; }
+			.lituism-modal-close { color: ${design.color1} !important; text-shadow: 0 0 20px ${design.color1} !important; }
+			.lituism-modal-info { border-left-color: ${design.color1} !important; background: ${design.color1}0D !important; }
+			.lituism-gallery-wrap { background: ${design.bgGradient} !important; }
+			.lituism-card-img-wrap img { border-color: ${design.color3} !important; }
+			.lituism-card:hover .lituism-card-img-wrap img { border-color: ${design.color1}66 !important; }
+			.lituism-card-hover-hint { background: ${design.color1}CC !important; }
+			.lituism-modal-img { border-color: ${design.color3} !important; }
+			footer { color: ${design.color3} !important; }
+		`;
 
 				document.head.appendChild(style);
 			}
@@ -997,27 +998,27 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 					});
 
 					html += `
-            <div class="lituism-card"
-                 style="transform: skew(${GALLERY_currentDesign ? GALLERY_currentDesign.skewX : 0}deg, ${GALLERY_currentDesign ? GALLERY_currentDesign.skewY : 0}deg) rotate(${rot}deg) scale(${scale});"
-                 data-url="${item.SOURCE}"
-                 data-title="${item.NAME}"
-                 data-author="${item.AUTHOR}"
-                 data-date="${item.DATE}">
-                <div class="lituism-card-img-wrap" style="
-                    background: ${gradient};
-                    background-size: 400% 400%;
-                    animation: galleryGradientShift ${animDuration}s ease infinite;
-                ">
-                    <img src="${item.SOURCE}" alt="${item.NAME}" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/source/error-image.png'">
-                    <span class="lituism-card-hover-hint">👁️ ПРОСМОТР</span>
-                </div>
-                <div class="lituism-card-info">
-                    <div class="lituism-card-title">${item.NAME}</div>
-                    <div class="lituism-card-author">✧ ${item.AUTHOR}</div>
-                    <div class="lituism-card-date glitch2">⏱ ${item.DATE}&nbsp;|&nbsp; <span class="lituism-card-size">☣ L O A D I N G . . .</span></div>
-                </div>
-            </div>
-        `;
+			<div class="lituism-card"
+				 style="transform: skew(${GALLERY_currentDesign ? GALLERY_currentDesign.skewX : 0}deg, ${GALLERY_currentDesign ? GALLERY_currentDesign.skewY : 0}deg) rotate(${rot}deg) scale(${scale});"
+				 data-url="${item.SOURCE}"
+				 data-title="${item.NAME}"
+				 data-author="${item.AUTHOR}"
+				 data-date="${item.DATE}">
+				<div class="lituism-card-img-wrap" style="
+					background: ${gradient};
+					background-size: 400% 400%;
+					animation: galleryGradientShift ${animDuration}s ease infinite;
+				">
+					<img src="${item.SOURCE}" alt="${item.NAME}" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/source/error-image.png'">
+					<span class="lituism-card-hover-hint">👁️ ПРОСМОТР</span>
+				</div>
+				<div class="lituism-card-info">
+					<div class="lituism-card-title">${item.NAME}</div>
+					<div class="lituism-card-author">✧ ${item.AUTHOR}</div>
+					<div class="lituism-card-date glitch2">⏱ ${item.DATE}&nbsp;|&nbsp; <span class="lituism-card-size">☣ L O A D I N G . . .</span></div>
+				</div>
+			</div>
+		`;
 				}
 
 				grid.innerHTML = html;
@@ -1425,4 +1426,7 @@ var PAGE_MANIFEST_ARTS_NEW = ELEMENT_SITE(`
 
 			console.log('✦ LITUISM GALLERY v2.0 ИНИЦИАЛИЗИРОВАНА ✦');
 			console.log('📦 Артефактов:', typeof TRUE_LIT_ARTS_COLLECTION !== 'undefined' ? TRUE_LIT_ARTS_COLLECTION.length : 'НЕТ');
-		}, false);
+		},
+		false
+	);
+});

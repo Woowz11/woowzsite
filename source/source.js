@@ -64,6 +64,12 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD_AI("ERROR.png", 50)
 
+ADD_AI("lituismlookupurban.png", 50)
+ADD_AI("lituismlookup.png", 50)
+ADD_AI("construct.png", 50)
+ADD_AI("pavelanalog2.png", 50)
+ADD_AI("pavelanalog.png", 50)
+ADD_AI("pavelhorror.png", 50)
 ADD_AI("source/specialforrandomsite/37171e31-de56-4637-a31c-8c0b1c0bd4db.png", 50, true)
 ADD_AI("source/specialforrandomsite/e6222ea2-92f7-4005-a436-289a9370e03b.png", 50, true)
 ADD_AI("source/specialforrandomsite/PAVEL.png", 50, true)
