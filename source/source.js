@@ -188,6 +188,7 @@ ADD_AI("woowzcorevapercore.png", 50)
 
 // ADD("ERROR.png", "NAME", __A_WOOWZ)
 
+ADD("Lituism/prev.png", "PREVIUEW FOR THAT THIS SITE!", __A_WOOWZ, "2026.11.03", true)
 ADD("source/specialforrandomsite/v.03.gif", "BAN Dermo | синий лис", __A_WOOWZ, undefined, true)
 ADD("source/specialforrandomsite/chto.png", "CH-TO", __A_ANONIM, undefined, true)
 ADD("nydno.png", "ОПЯЯЯЯТЬ НУДНОООООО", __A_WOOWZ, "2026.10.29")
@@ -733,7 +734,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 
 WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
 	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
-	"bg10","bg11"
+	"bg10","bg11","prev"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"

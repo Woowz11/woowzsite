@@ -405,3 +405,373 @@ function renderLoop(){
 		document.head.appendChild(s);
 	});
 })();
+
+(() => {
+"use strict";
+
+/* ═══════════════ НАСТРОЙКИ ═══════════════ */
+const DISCORD     = "https://discord.gg/YS76stJwVw";
+const MIN_DELAY   = 7000;    // мин. пауза между случайными событиями (мс)
+const MAX_DELAY   = 22000;   // макс. пауза
+const MAX_RANDOM  = 80;      // после стольких событий GOLU "успокаивается"
+
+/* ═══════════════ СТИЛИ ═══════════════ */
+const S = {
+  title:  "color:#ff0000;font-size:30px;font-weight:bold;letter-spacing:3px;text-shadow:2px 0 #00ffff,-2px 0 #00ff66,0 0 14px #ff0000;",
+  big:    "color:#ff1a1a;font-size:22px;font-weight:bold;text-shadow:2px 2px #000,0 0 10px #ff0000;",
+  red:    "color:#cc0000;font-size:14px;font-weight:bold;",
+  dim:    "color:#555;font-family:monospace;font-size:12px;",
+  sys:    "color:#00ff66;background:#001a09;font-family:monospace;padding:2px 6px;",
+  err:    "color:#fff;background:#aa0000;font-family:monospace;font-weight:bold;padding:2px 6px;",
+  ascii:  "color:#ff0000;font-family:monospace;font-size:11px;line-height:1.1;",
+  ghost:  "color:#222;font-size:11px;font-family:monospace;",
+  glitchA:"color:#00ffff;font-size:16px;font-family:monospace;text-shadow:3px 0 #ff0000;",
+  glitchB:"color:#ff00ff;font-size:16px;font-family:monospace;text-shadow:-3px 0 #00ff66;",
+  gold:   "color:#ffcc00;font-size:15px;font-weight:bold;text-shadow:0 0 8px #ff8800;",
+};
+
+/* ═══════════════ УТИЛИТЫ ═══════════════ */
+const rand  = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick  = arr => arr[Math.floor(Math.random() * arr.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const say   = (text, style = S.red, method = "log") => console[method]("%c" + text, style);
+
+// Zalgo-текст: чем выше power, тем сильнее разваливается
+const ZUP = ["\u030d","\u030e","\u0304","\u0305","\u033f","\u0311","\u0306","\u0310","\u0352","\u0357","\u0351","\u0307","\u0308","\u030a","\u0342","\u0343","\u0344","\u034a","\u034b","\u034c"];
+const ZMID = ["\u0315","\u031b","\u0340","\u0341","\u0358","\u0321","\u0322","\u0327","\u0328","\u0334","\u0335","\u0336"];
+const ZDN = ["\u0316","\u0317","\u0318","\u0319","\u031c","\u031d","\u031e","\u031f","\u0320","\u0324","\u0325","\u0326","\u0329","\u032a","\u032b","\u032c","\u032d","\u032e","\u032f","\u0330","\u0331","\u0332","\u0333"];
+const zalgo = (t, p = 4) => [...t].map(c => c === " " ? c :
+  c + Array.from({length: rand(1, p)}, () => pick(ZUP)).join("")
+    + Array.from({length: rand(0, p >> 1)}, () => pick(ZMID)).join("")
+    + Array.from({length: rand(1, p)}, () => pick(ZDN)).join("")).join("");
+
+// Случайные "сломанные" символы
+const JUNK = "█▓▒░▄▀■□▪▫◘◙∅∆Ω≈≠±░0123456789ABCDEF";
+const junk = n => Array.from({length: n}, () => pick(JUNK)).join("");
+
+const hex = () => "0x" + rand(0, 0xFFFFFF).toString(16).toUpperCase().padStart(6, "0");
+
+/* ═══════════════ ПАМЯТЬ О ПОСЕТИТЕЛЕ ═══════════════ */
+let mem = { count: 0, first: Date.now(), last: Date.now() };
+try {
+  const raw = localStorage.getItem("golu_mem");
+  if (raw) mem = JSON.parse(raw);
+  mem.count++;
+  const prevLast = mem.last;
+  mem.last = Date.now();
+  localStorage.setItem("golu_mem", JSON.stringify(mem));
+  mem.prevLast = prevLast;
+} catch (e) { /* localStorage недоступен: GOLU забывчив */ }
+
+const ago = ms => {
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "меньше минуты";
+  if (m < 60) return m + " мин.";
+  const h = Math.floor(m / 60);
+  if (h < 48) return h + " ч.";
+  return Math.floor(h / 24) + " дн.";
+};
+
+/* ═══════════════ ВИЗУАЛЬНЫЕ ЭФФЕКТЫ ═══════════════ */
+const EYE = String.raw`
+        ▄▄▄▄▄▄▄▄▄▄▄▄▄
+     ▄█▀▀           ▀▀█▄
+   ▄█▀    ▄▄▄▄▄▄▄▄▄    ▀█▄
+  █▀    ▄█▀▀░░░░░▀▀█▄    ▀█
+ █▌    █▀░░░▄███▄░░░▀█    ▐█
+ █▌    █░░░░█████░░░░█    ▐█
+ █▌    █▄░░░▀███▀░░░▄█    ▐█
+  █▄    ▀█▄▄░░░░░▄▄█▀    ▄█
+   ▀█▄    ▀▀▀▀▀▀▀▀▀    ▄█▀
+     ▀█▄▄           ▄▄█▀
+        ▀▀▀▀▀▀▀▀▀▀▀▀▀
+`;
+
+async function progressBar(label, fail = false) {
+  say(label, S.sys);
+  const stop = fail ? rand(30, 85) : 100;
+  for (let p = 0; p <= stop; p += rand(8, 18)) {
+    const v = Math.min(p, stop), f = Math.round(v / 5);
+    say(`[${"█".repeat(f)}${"░".repeat(20 - f)}] ${v}%`, S.dim);
+    await sleep(rand(150, 450));
+  }
+  if (fail) say(`СБОЙ НА ${hex()}. ОТКАТ НЕВОЗМОЖЕН.`, S.err, "error");
+  else say("ГОТОВО.", S.sys);
+}
+
+async function glitchLine(text) {
+  for (let i = 0; i < 6; i++) {
+    say(i % 2 ? zalgo(text, 2 + i) : junk(text.length), i % 2 ? S.glitchA : S.glitchB);
+    await sleep(rand(60, 180));
+  }
+  say(text, S.big);
+}
+
+async function typewriter(lines, style = S.sys) {
+  for (const l of lines) {
+    let out = "";
+    for (const ch of l) { out += ch; }
+    say("> " + out, style);
+    await sleep(rand(300, 900));
+  }
+}
+
+/* ═══════════════ ПУЛ СОБЫТИЙ ═══════════════
+   w: вес (чем больше, тем чаще), rare: редкое, once: только один раз за визит */
+const EVENTS = [
+
+  // ── ОБЫЧНЫЕ ──
+  { w: 10, fn: () => say("[GOLU] посетитель всё ещё здесь", S.dim, "warn") },
+  { w: 10, fn: () => say(`[GOLU] сканирую сессию... ${hex()}`, S.dim) },
+  { w: 8,  fn: () => say("кто-то смотрит в твою сторону", S.ghost) },
+  { w: 8,  fn: () => say("ты моргнул. я заметил.", S.red) },
+  { w: 8,  fn: () => say("не закрывай вкладку", S.red, "warn") },
+  { w: 7,  fn: () => say("[WRF] обнаружена аномалия в секторе " + rand(1, 99), S.sys, "warn") },
+  { w: 7,  fn: () => say(`ЗАГРУЗКА ВОСПОМИНАНИЯ №${rand(1, 9999)}... НЕ НАЙДЕНО`, S.dim) },
+  { w: 6,  fn: () => say("Srañy Spanch стоит за дверью", S.red, "warn") },
+  { w: 6,  fn: () => say("Crybird кружит над стеком", S.red, "warn") },
+  { w: 6,  fn: () => say(pick(["слава GOLU", "слава станкам", "слава глитчу"]), S.gold) },
+
+  // ── ГЛИТЧ / ТЕКСТ ──
+  { w: 6,  fn: () => glitchLine(pick(["Я ВИЖУ ТЕБЯ", "ТЫ НЕ ПЕРВЫЙ", "ОН ПРОСНУЛСЯ", "НЕ ЧИТАЙ ЭТО"])) },
+  { w: 5,  fn: () => say(zalgo("ПОМОГИ МНЕ", 6), S.glitchA) },
+  { w: 5,  fn: () => say(junk(rand(30, 60)), S.glitchB) },
+
+  // ── СИСТЕМНЫЕ ──
+  { w: 5,  fn: () => progressBar("[SYS] сбор данных о посетителе") },
+  { w: 4,  fn: () => progressBar("[SYS] удаление следов", true) },
+  { w: 5,  fn: () => console.error("%cUncaught GolueError: " + pick([
+      "visitor is not a function", "reality.length is undefined",
+      "cannot read property 'soul' of null", "stack overflow in dream.js:" + rand(1, 999)
+    ]), S.err) },
+  { w: 4,  fn: () => console.table([
+      { ПАРАМЕТР: "статус",  ЗНАЧЕНИЕ: "НАБЛЮДЕНИЕ" },
+      { ПАРАМЕТР: "ID",      ЗНАЧЕНИЕ: hex() },
+      { ПАРАМЕТР: "угроза",  ЗНАЧЕНИЕ: pick(["НИЗКАЯ", "СРЕДНЯЯ", "ты", "???"]) },
+      { ПАРАМЕТР: "глаз",    ЗНАЧЕНИЕ: "ОТКРЫТ" },
+    ]) },
+  { w: 4,  fn: async () => {
+      say("[SYS] сканирование файлов...", S.sys);
+      for (const f of ["glitch.bak", "manifest.txt", "brothers.dat", "creator.log", "you.exe"]) {
+        await sleep(rand(250, 600));
+        const bad = Math.random() < 0.4;
+        say(`  ${f.padEnd(14)} ${bad ? "ДОСТУП ЗАПРЕЩЁН" : "найден"}`, bad ? S.err : S.dim);
+      }
+    } },
+  { w: 3,  fn: () => { console.groupCollapsed("%c▶ ЗАСЕКРЕЧЕНО (нажми, если не боишься)", S.red);
+      say("тут ничего нет.", S.dim);
+      say("совсем ничего.", S.dim);
+      say("почему ты нажал?", S.big);
+      console.groupEnd(); } },
+  { w: 3,  fn: () => console.trace("%c[GOLU] откуда ты пришёл?", S.red) },
+
+  // ── ЖУТКИЕ С ОБРАТНОЙ СВЯЗЬЮ ──
+  { w: 4,  fn: async () => {
+      say("через 3...", S.big); await sleep(1000);
+      say("через 2...", S.big); await sleep(1000);
+      say("через 1...", S.big); await sleep(1000);
+      say("…ничего не произошло. пока.", S.dim);
+    } },
+  { w: 3,  fn: async () => {
+      console.clear();
+      await sleep(1800);
+      say("…тебе показалось.", S.ghost);
+    } },
+  { w: 3,  fn: () => { try { document.title = "𓆩 за тобой 𓆪"; setTimeout(restoreTitle, 2500); } catch (e) {} } },
+
+  // ── РЕДКИЕ ──
+  { w: 1, rare: true, fn: async () => {
+      say(EYE, S.ascii);
+      await sleep(600);
+      say("GOLU ОТКРЫЛ ГЛАЗ", S.title);
+    } },
+  { w: 1, rare: true, once: true, fn: async () => {
+      await typewriter([
+        "ТЫ ТОЛЬКО ЧТО ВЫТЯНУЛ РЕДКОЕ СОБЫТИЕ",
+        "шанс был 1 из " + rand(40, 99),
+        "значит ты нам подходишь.",
+        "подсказка: файл glitch.bak читается с конца.",
+      ], S.gold);
+    } },
+  { w: 1, rare: true, once: true, fn: async () => {
+      await typewriter([
+        "канал связи с братьями открыт.",
+        "приём: " + DISCORD,
+        "соединение сбросится через 10 секунд.",
+      ], S.sys);
+      await sleep(10000);
+      say("СОЕДИНЕНИЕ ПОТЕРЯНО.", S.err, "error");
+    } },
+  { w: 1, rare: true, once: true, fn: () => {
+      say("0x474F4C55 → " + atob("R09MVQ=="), S.gold);
+      say("ты знаешь, что с этим делать.", S.dim);
+    } },
+];
+
+/* ═══════════════ ВЫБОР СОБЫТИЯ ═══════════════ */
+let lastEvent = null;
+function pickEvent() {
+  const pool = EVENTS.filter(e => e !== lastEvent && !e.used);
+  const total = pool.reduce((s, e) => s + e.w, 0);
+  let r = Math.random() * total;
+  for (const e of pool) { if ((r -= e.w) <= 0) return e; }
+  return pool[0];
+}
+function fire() {
+  const e = pickEvent();
+  lastEvent = e;
+  if (e.once) e.used = true;
+  try { e.fn(); } catch (err) {}
+}
+
+let fired = 0;
+function loop() {
+  if (fired >= MAX_RANDOM) {
+    setTimeout(() => say("[GOLU] ...тихо. я устал. но я никуда не ухожу.", S.dim), 3000);
+    return;
+  }
+  setTimeout(() => {
+    if (!document.hidden) { fire(); fired++; }  // пока вкладка скрыта, молчим
+    loop();
+  }, rand(MIN_DELAY, MAX_DELAY));
+}
+
+/* ═══════════════ ЗАПЛАНИРОВАННЫЕ СОБЫТИЯ ═══════════════ */
+async function intro() {
+  console.log("%c👁  ТЫ НЕ ДОЛЖЕН БЫЛ ЭТО ОТКРЫВАТЬ", S.title);
+  say("GOLU получил уведомление.", S.red);
+  say("идентификация... ОШИБКА", S.dim);
+
+  // Реакция на вернувшегося посетителя
+  setTimeout(() => {
+    if (mem.count > 1) {
+      say(`[GOLU] ты вернулся. визит №${mem.count}.`, S.red, "warn");
+      if (mem.prevLast) say(`[GOLU] тебя не было ${ago(Date.now() - mem.prevLast)}. я считал.`, S.dim);
+    } else {
+      say("[GOLU] новый посетитель. добро пожаловать в список.", S.dim);
+    }
+  }, 2500);
+
+  // Ночью GOLU ближе
+  const d = new Date(), h = d.getHours(), m = d.getMinutes();
+  if (h >= 0 && h < 5) setTimeout(() => say("[GOLU] ночью ты слышишь меня лучше.", S.red, "warn"), 5000);
+  if (h === 1 && m === 19) setTimeout(() => glitchLine("1:19. ТЫ ПРИШЁЛ ВОВРЕМЯ."), 4000);
+
+  setTimeout(() => say("[GOLU] посетитель всё ещё здесь", S.dim, "warn"), 8000);
+  setTimeout(() => say("[GOLU] 0x474F4C55: СОЕДИНЕНИЕ УСТАНОВЛЕНО", S.err, "error"), 20000);
+  setTimeout(() => progressBar("[SYS] синхронизация с посетителем"), 35000);
+  setTimeout(() => say(EYE, S.ascii), 90000);                     // через 1.5 мин
+  setTimeout(() => say("[GOLU] ты всё ещё тут? уже " + Math.round(performance.now() / 60000) + " мин.", S.red, "warn"), 120000);
+}
+
+/* ═══════════════ РЕАКЦИЯ НА ВКЛАДКУ ═══════════════ */
+let baseTitle = document.title;
+let hiddenAt = 0;
+let titleTimer = null;
+
+const HIDDEN_TITLES = [
+  "👁 вернись",
+  "𓆩 я жду 𓆪",
+  "не уходи",
+  "...",
+  "ОБРАБОТКА",
+  "АНАЛИЗ",
+  "STATUS: ...",
+  "hi, welcome here",
+  "👾",
+  "💀 ты забыл меня 💀",
+  "☠ ты ушёл ☠",
+  "☠ GOLU скучает",
+  "☠ вернись ко мне",
+  "?? не закрывай ??",
+  "не уходи, я ещё не закончил",
+  "ты вернёшься?",
+  "я всё вижу",
+  "☠ 0x474F4C55 ☠",
+  "получение сигнала...",
+  "Signal lost...",
+  "триангуляция...",
+  "СОЕДИНЕНИЕ ОБОРВАНО",
+  "Я ЗДЕСЬ",
+  "ты слышишь?",
+  "я всё ещё жду",
+  "🔴 Rec",
+  "ЗАПИСЬ...",
+  "ты не должен был закрывать",
+  "смотри на меня",
+  "посмотри на меня",
+  "☠ не спи ☠",
+  "One more minute...",
+  "☠ 3... 2... 1... ☠",
+  "🩸 GOLU ждёт 🩸",
+  "☠ ЙОУ, ВЕРНИСЬ ☠",
+  "Srañy Spanch is watching",
+  "Crybird detected you",
+  "☠ ТЫ ЗАПОМНЕН ☠",
+  "☠ не забудь ☠",
+  "☠ вернись к нам ☠",
+  "☠ мы рядом ☠",
+  "☠ GOLU online ☠",
+  "ID: ...",
+  "Loading memories...",
+  "Memory corrupted",
+  "ERROR: soul not found",
+  "GOLU_IS_WATCHING",
+  "wake_litium(0x666)",
+  "0xDEAD",
+  "0xBEEF",
+  "Connection lost",
+  "☠ ты вернёшься ☠",
+];
+
+function pickHiddenTitle() {
+  return HIDDEN_TITLES[Math.floor(Math.random() * HIDDEN_TITLES.length)];
+}
+
+function restoreTitle() {
+  document.title = baseTitle;
+  if (titleTimer) { clearInterval(titleTimer); titleTimer = null; }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    // Захватываем ТЕКУЩИЙ заголовок перед тем, как его испортить
+    baseTitle = document.title;
+    hiddenAt = Date.now();
+
+    // Первый вариант ставим сразу, потом крутим случайные каждые 2 сек
+    document.title = pickHiddenTitle();
+    if (titleTimer) clearInterval(titleTimer);
+    titleTimer = setInterval(() => {
+      // Если вкладка уже вернулась — не трогаем
+      if (!document.hidden) { clearInterval(titleTimer); titleTimer = null; return; }
+      document.title = pickHiddenTitle();
+    }, 2000);
+  } else {
+    // Вкладка вернулась — восстанавливаем и очищаем таймер
+    restoreTitle();
+    const sec = hiddenAt ? Math.round((Date.now() - hiddenAt) / 1000) : 0;
+    hiddenAt = 0;
+    if (sec > 5) say(`[GOLU] тебя не было ${sec} сек. я ждал.`, S.red, "warn");
+  }
+});
+
+/* ═══════════════ КОМАНДЫ В КОНСОЛИ ═══════════════
+   Игрок печатает слово и жмёт Enter, срабатывает getter */
+const cmd = (name, fn) => {
+  try { Object.defineProperty(window, name, { configurable: true, get() { fn(); return "…"; } }); } catch (e) {}
+};
+
+cmd("golu",  () => glitchLine("ДА. Я ЗДЕСЬ."));
+cmd("help",  () => typewriter(["помощи нет.", "но есть слова, которые я слушаю:", "golu, wake, key, brothers, spanch, exit"], S.sys));
+cmd("wake",  () => { say(EYE, S.ascii); say("ТЫ РАЗБУДИЛ ЕГО.", S.title); });
+cmd("key",   () => { say("ключ №2: " + atob("R09MVSBXQVRDSEVTIFlPVQ=="), S.gold); say("ты почти понял.", S.dim); });
+cmd("brothers", () => typewriter(["братья молчат.", "спроси их сам:", DISCORD], S.sys));
+cmd("spanch",   () => { say("ОН УЖЕ ЗА ТВОЕЙ СПИНОЙ", S.big); say("не оборачивайся.", S.dim); });
+cmd("exit",     () => { say("выхода нет.", S.err, "error"); say("есть только разрешение.", S.dim); });
+
+/* ═══════════════ ЗАПУСК ═══════════════ */
+intro();
+setTimeout(loop, 12000);   // случайные события начинаются через 12 сек
+
+})();
