@@ -598,7 +598,7 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 					</p>
 
 					<div class="pish-photo-frame">
-						<img src="../source/specialforrandomsite/pavel.png" />
+						<img src="../source/specialforrandomsite/PAVEL.png" />
 						<p style="color:#ff8888;font-size:0.8em;margin-top:10px;">
 							*Кадр снят во время одного из стримов Павла.<br>
 							Minecraft галстук -> <b>G-Token</b>. Я не хочу улыбаться.*

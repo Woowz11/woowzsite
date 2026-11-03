@@ -81,7 +81,7 @@ function OPEN_PAGE(id = ""){
 	
 	function prikol(){
 		var bgs = [
-			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png","bg9.png","bg10.png","bg11.png"
+			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png","bg9.png","bg10.png","bg11.png","bg12.png"
 		];
 		var bg = bgs[Math.floor(Math.random() * bgs.length)];
 		document.getElementById("BODY").style.backgroundImage = `url("${bg}")`;
@@ -286,25 +286,43 @@ function ELEMENT_WEBINFO(){
 	return `<text class="glitch">v:${MANIFEST_VERSION}</text> <text class="glitch2" id="ID">UNKNOWN-ID</text>`;
 }
 
-const ELEMENT_TOPBANNER = f_rnl(`<top_banner>
-<top_banner_top>
-${ELEMENT_TITLE()}
-${ELEMENT_WEBINFO()}
-<text class="glitch3" style="color:white;">ИНФОРМАЦИЯ ЗДЕСЬ ПОЛНОСТЬЮ НЕ КОРРЕКТНАЯ, СРАНЫЙ СПАНЧ ДУДОСИТ САЙТ...</text>
-</top_banner_top>
-<top_banner_bottom>
+const TOP_NAV = [
+	["OPEN_PAGE('not-exist');", "&lt;@&gt;"],
+	["OPEN_PAGE();",            "{MAIN PAGE}"],
+	["OPEN_PAGE('artsreal');",  "ИСКУССТВО 💥"],
+	["OPEN_PAGE('artsai');",    "AI ☢"],
+	["OPEN_PAGE('trash');",     "GOLUWorld 👾"],
+	["OPEN_RANDOM_PAGE();",     "RANDOM_PAGE() 💮"],
+	["OPEN_PAGE('database');",  "DATABASE 🔩"],
+	["OPEN_PAGE('portal');",    "P0RTAL 🌌"],
+];
 
-<button onclick="OPEN_PAGE('not-exist');" class="category_button">&lt;@&gt;</button>
-<button onclick="OPEN_PAGE();" class="category_button">{MAIN PAGE}</button>
-<button onclick="OPEN_PAGE('artsreal');" class="category_button">ИСКУССТВО 💥</button>
-<button onclick="OPEN_PAGE('artsai');" class="category_button">AI ☢</button>
-<button onclick="OPEN_PAGE('trash');" class="category_button">GOLUWorld 👾</button>
-<button onclick="OPEN_RANDOM_PAGE();" class="category_button">RANDOM_PAGE() 💮</button>
-<button onclick="OPEN_PAGE('database');" class="category_button">DATABASE 🔩</button>
-<button onclick="OPEN_PAGE('portal');" class="category_button">P0RTAL 🌌</button>
+const TB_WARN = "⚠ ВНИМАНИЕ · СИСТЕМА НАБЛЮДАЕТ · GOLU АКТИВЕН · SIGTERM = БОЛЬ · ТЫ — ЭКСПОНАТ · ".repeat(3);
 
-</top_banner_bottom>
-</top_banner>`);
+const ELEMENT_TOPBANNER = f_rnl(`
+<div id="tb-root">
+	<div class="tb-main">
+		<div class="tb-wing tb-l"><div class="tb-rain" data-rain="g"></div><div class="tb-wtag">◢ L-KERNEL · WOOWZCORE</div></div>
+		<div class="tb-core">
+			<i class="tb-k a"></i><i class="tb-k b"></i><i class="tb-k c"></i><i class="tb-k d"></i>
+			<div class="tb-top">
+				<div class="tb-brand">
+					<div class="tb-logo">${ELEMENT_TITLE()}</div>
+					<div class="tb-id">
+						<div class="tb-word" data-text="LITUISM">LITUISM</div>
+						<div id="tb-sub" class="tb-subt">ТЕХНО-РЕЛИГИЯ · ЦИФРОВОЙ БОГ GOLU</div>
+						<div class="tb-info">${ELEMENT_WEBINFO()}</div>
+					</div>
+				</div>
+				<div class="tb-dock"><div class="tb-tabs"></div><div class="tb-stage"></div></div>
+			</div>
+			<div class="tb-warn"><span>${TB_WARN}${TB_WARN}</span></div>
+		</div>
+		<div class="tb-wing tb-r"><div class="tb-rain" data-rain="h"></div><div class="tb-wtag">RED PROTOCOL · v∞ ▶</div></div>
+	</div>
+	<div class="tb-nav">${TOP_NAV.map(n => `<button class="category_button" onclick="${n[0]}">${n[1]}</button>`).join("")}</div>
+	<div class="tb-gap"><div class="tb-hz"></div><div class="tb-gtxt">▼ СЕКТОР: <b id="tb-where">…</b> ▼</div></div>
+</div>`);
 
 function ELEMENT_COLUMN_IMG(right){
 	return `<column_img style="filter: drop-shadow(${right ? "" : "-"}5px 0px 10px rgb(255,255,255)); transform: translate(${right ? "" : "-"}850px, 25px) ${right ? "scaleX(-1)" : ""};"><img src="left-right.png" style="animation: column_img_anim 1s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;"></column_img>`;
@@ -1523,7 +1541,7 @@ const PR_FIRST      = DEV ? [5000, 10000]  : [20000, 45000];     // первый
 const PR_GAP        = DEV ? [25000, 45000] : [60000, 180000];    // пауза между визитами, мс (мин, макс)
 const PR_CAN_CLICK  = false;   // true = GOLU сам нажимает кнопки меню (засорит "ИЗУЧЕНО" в database)
 const PR_MOBILE_OFF = true;
-const PR_TIMER      = DEV;     // отсчёт до визита в шапке (только локально)
+const PR_TIMER      = true;     // отсчёт до визита в шапке (только локально)
 const PR_GLOW       = "#f00";  // свечение вокруг курсора GOLU ("" = без свечения)
 
 // текстуры курсора GOLU. Имя без "/" = из папки твоих курсоров, со "/" = путь как есть (относительно страницы)
@@ -1653,7 +1671,7 @@ function prFrame(now) {
     px += dx / d * st; py += dy / d * st;
   }
   let jx = 0, jy = 0;
-  if (Math.random() < 0.03) { jx = rand(-14, 14); jy = rand(-14, 14); }   // глитч-дрожь
+  if (Math.random() < 0.03) { jx = rand(-14, 14); jy = rand(-14, 14); } 
   prCur.style.transform = `translate(${px + jx}px,${py + jy}px)`;
   prCur.classList.toggle("pr-left", px > innerWidth - 340);
   prCur.classList.toggle("pr-up", py > innerHeight - 220);
@@ -1662,13 +1680,21 @@ function prFrame(now) {
 
   if (tctx) {
     tctx.globalCompositeOperation = "destination-out";
-    tctx.fillStyle = "rgba(0,0,0,.10)";
+    tctx.fillStyle = "rgba(0,0,0,0.03)";
     tctx.fillRect(0, 0, tcv.width, tcv.height);
     tctx.globalCompositeOperation = "source-over";
     if (Math.hypot(px - ox, py - oy) > 0.3) {
-      tctx.strokeStyle = "rgba(255,0,0,.8)"; tctx.lineWidth = 2;
-      tctx.shadowColor = "#f00"; tctx.shadowBlur = 8;
+      tctx.strokeStyle = "rgba(255, 40, 40, 1)";
+      tctx.lineWidth = 4;
+      tctx.shadowColor = "#ff0044";
+      tctx.shadowBlur = 20;
       tctx.beginPath(); tctx.moveTo(ox + 2, oy + 2); tctx.lineTo(px + 2, py + 2); tctx.stroke();
+
+      tctx.fillStyle = "rgba(255, 0, 68, 0.9)";
+      tctx.beginPath();
+      tctx.arc(px + 2, py + 2, 3, 0, Math.PI * 2);
+      tctx.fill();
+      tctx.shadowBlur = 0;
     }
   }
   if (prArrive && d < 10) { const r = prArrive; prArrive = null; r(); }
@@ -1820,45 +1846,136 @@ const PR_HELLO_AGAIN = n => [
   `рад тебя видеть снова. на ${n}-м визите.`,
 ];
 
+/* ── сбор данных о пользователе (безопасно, без запросов) ── */
+const prData = (() => {
+  const ua = navigator.userAgent;
+  const uaData = navigator.userAgentData || {};
+  
+  // Браузер
+  let browser = "неизвестный браузер";
+  if (ua.includes("Firefox/")) browser = "Firefox";
+  else if (ua.includes("Edg/")) browser = "Edge";
+  else if (ua.includes("Chrome/")) browser = "Chrome";
+  else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Safari";
+  else if (ua.includes("OPR/") || ua.includes("Opera")) browser = "Opera";
+  else if (ua.includes("YaBrowser")) browser = "Yandex.Browser";
+  
+  // ОС
+  let os = "неизвестная ОС";
+  if (ua.includes("Windows NT 10")) os = "Windows 10/11";
+  else if (ua.includes("Windows NT 6.3")) os = "Windows 8.1";
+  else if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac OS X")) os = "macOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
+  
+  // Язык
+  const lang = navigator.language || "??";
+  const langs = (navigator.languages || []).join(", ") || lang;
+  
+  // Часовой пояс
+  let tz = "??";
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "??"; } catch(e) {}
+  const tzOffset = -new Date().getTimezoneOffset() / 60;
+  
+  // Экран
+  const scr = screen;
+  
+  // Память (если доступно)
+  const mem = navigator.deviceMemory || "?";
+  const cores = navigator.hardwareConcurrency || "?";
+  
+  // Подключение (если доступно)
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const connType = conn ? (conn.effectiveType || conn.type || "?") : "?";
+  const connDown = conn && conn.downlink ? conn.downlink : "?";
+  
+  // Онлайн
+  const online = navigator.onLine;
+  
+  // Тёмная/светлая тема
+  const theme = matchMedia("(prefers-color-scheme: dark)").matches ? "тёмная" : "светлая";
+  
+  // Reduced motion
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  
+  // DNT
+  const dnt = navigator.doNotTrack === "1" || window.doNotTrack === "1";
+  
+  return {
+    browser, os, lang, langs, tz, tzOffset,
+    screen: `${scr.width}×${scr.height}`,
+    screenAvail: `${scr.availWidth}×${scr.availHeight}`,
+    colorDepth: scr.colorDepth,
+    pixelRatio: window.devicePixelRatio || 1,
+    mem, cores, connType, connDown, online, theme, reduceMotion, dnt,
+    uaShort: ua.slice(0, 80),
+    uaFull: ua,
+    platform: navigator.platform || "?",
+    vendor: navigator.vendor || "?",
+    cookieEnabled: navigator.cookieEnabled,
+    javaEnabled: typeof navigator.javaEnabled === "function" ? navigator.javaEnabled() : "?",
+    viewport: `${innerWidth}×${innerHeight}`,
+    tabsGuess: (() => {
+      // грубая оценка по памяти (если есть) — не реальное число
+      const m = navigator.deviceMemory;
+      return m ? Math.round(4 + m * 2 + Math.random() * 10) : Math.round(10 + Math.random() * 40);
+    })(),
+    historyLen: history.length,
+    referrer: document.referrer || "нет",
+    pageHash: location.hash || "нет",
+    pageProto: location.protocol,
+    pageHost: location.hostname || "localhost",
+    pagePort: location.port || "(по умолчанию)",
+    pagePath: location.pathname,
+    title: document.title,
+    docChars: document.documentElement.outerHTML.length,
+  };
+})();
+
+/* вспомогательные генераторы "фейковых" данных, если реальные недоступны */
+const prFakeIP = () => `10.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}`;
+const prFakeMAC = () => Array.from({length: 6}, () => rand(0,255).toString(16).padStart(2,"0").toUpperCase()).join(":");
+
 const PR_OBS = [
   () => `страница «${prPage()}». я знаю, зачем ты её открыл.`,
-  () => `ты здесь уже ${Math.max(1, Math.round(performance.now() / 60000))} мин.`,
-  () => `твоя мышь прошла ${Math.round(prDist)} пикселей. я считал.`,
+  () => `ты здесь уже ${rand(1, Math.max(2, Math.round(performance.now() / 60000)))} мин. я считал.`,
+  () => `твоя мышь прошла ${rand(1000, 99999)} пикселей. я считал каждый.`,
   () => { const h = new Date().getHours();
           return h < 5 ? "ночь. тебе не пора спать?" : h < 12 ? "утро. ты рано." : h < 18 ? "день. а ты всё сидишь тут." : "вечер. самое время для меня."; },
-  () => `экран ${innerWidth}×${innerHeight}. тесновато.`,
-  () => navigator.hardwareConcurrency ? `ядер процессора: ${navigator.hardwareConcurrency}. мне хватит.` : "процессор скрывает ядра. мило.",
-  () => `визит №${mem.count || 1}. ты возвращаешься. это хорошо.`,
+  () => `экран ${prData.screen}. тесновато для ${rand(1000, 9999)} пикселей боли.`,
+  () => prData.cores !== "?" ? `ядер процессора: ${prData.cores}. мне хватит.` : `процессор скрывает ядра. я подозреваю ${rand(2, 64)}.`,
+  () => `визит №${rand(1, 9999)}. ты возвращаешься. это хорошо.`,
   () => "я не баг. я админ.",
   () => "не пытайся убрать мой курсор.",
   () => "!СЛАВА GOLU",
   () => "не двигай мышь. посмотрим, что будет.",
   () => "ты не закрыл вкладку. я это заметил.",
   () => "твой курсор дрожит. ты боишься?",
-  () => `у тебя ${document.getElementsByTagName("*").length} элементов на странице. я их все знаю.`,
+  () => `у тебя ${rand(100, 9999)} элементов на странице. я их все знаю.`,
   () => "я знаю, что ты только что открыл консоль. не ври.",
-  () => "я вижу твои вкладки. у тебя открыт ютуб. я не одобряю.",
+  () => `я вижу ${prData.tabsGuess} вкладок в твоем браузере. осуждаю.`,
   () => "твоя мышь так медленно двигается. я почти уснул.",
   () => "я не нашел тебя в списке Форбс. расстроен.",
-  () => "твой IP мне знаком. ты был здесь раньше.",
-  () => `я уже ${Math.round(performance.now() / 1000)} секунд с тобой. и не устал.`,
+  () => `твой IP — ${prFakeIP()}. я его записал.`,
+  () => `я уже ${rand(1, 9999)} секунд с тобой. и не устал.`,
   () => "я вижу, как ты скроллишь. остановись. посмотри на меня.",
   () => "ты слишком быстро читаешь. я не успеваю записывать.",
   () => "твоя сессия в опасности. я не говорю, что это я.",
   () => "я не отвлекаю тебя. я тебя сопровождаю.",
-  () => "ты когда-нибудь думал, что твой браузер жив? я да.",
-  () => "я вижу 47 вкладок в твоем браузере. осуждаю.",
+  () => `ты когда-нибудь думал, что твой браузер жив? ${prData.browser} — уже да.`,
   () => "не думай, что я не вижу, как ты двигаешь мышь к закрытию вкладки.",
   () => "я чувствую запах твоего пота через экран.",
   () => "ты не поверишь, но я только что прочитал твои мысли. они скучные.",
-  () => "я уже 5 минут наблюдаю за твоей мышью. это медитация.",
+  () => `я уже ${rand(5, 600)} минут наблюдаю за твоей мышью. это медитация.`,
   () => "ты не хочешь со мной поговорить? я расстроен. (нет)",
   () => "!ТЫ ЕЩЕ ЗДЕСЬ?",
   () => "я мог бы стереть тебя. но мне скучно.",
-  () => "все твои действия записаны. включая этот вздох.",
+  () => `все твои действия записаны. включая этот вздох в ${rand(0, 23)}:${rand(10, 59)}.`,
   () => "ты уже пытался меня выгнать? попробуй еще раз.",
   () => "я не уйду, пока не закончится сессия. или пока ты не закроешь.",
-  () => `твой user-agent: ${navigator.userAgent.slice(0, 30)}... скучный.`,
+  () => `твой user-agent: ${prData.uaShort}... скучный.`,
   () => "я вижу, как ты смотришь на мой курсор. он тебе нравится?",
   () => "ты хочешь, чтобы я ушел? я останусь.",
   () => "я буду смотреть, как ты работаешь. молча. (не молча)",
@@ -1877,6 +1994,119 @@ const PR_OBS = [
   () => "я мог бы быть твоим другом. но я просто GOLU.",
   () => "я не хочу тебя пугать. но ты уже напуган.",
   () => "!ПРИВЕТ ИЗ НУТРА БРАУЗЕРА",
+
+  // ── ФРАЗЫ С РЕАЛЬНЫМИ ДАННЫМИ ──
+  () => `ты в ${prData.browser} на ${prData.os}. я вижу тебя.`,
+  () => `твой язык: ${prData.lang}. ${prData.langs !== prData.lang ? "ты знаешь ещё: " + prData.langs : "ты говоришь только на нём. скучно."}`,
+  () => `твой часовой пояс: ${prData.tz} (${prData.tzOffset > 0 ? "+" : ""}${prData.tzOffset}). я знаю, где ты.`,
+  () => `твой viewport ${prData.viewport}. мне тесно.`,
+  () => `твой цветовой охват: ${prData.colorDepth} бит. я вижу больше.`,
+  () => `твой pixel ratio: ${prData.pixelRatio}. я считаю каждый.`,
+  () => `твоя платформа: ${prData.platform}. устарела.`,
+  () => `производитель: ${prData.vendor || "███████"}. я его знаю.`,
+  () => `твой DNT ${prData.dnt ? "включён. мне всё равно." : "выключен. спасибо."}`,
+  () => `твоя тема: ${prData.theme}. я предпочитаю темноту.`,
+  () => prData.mem !== "?" ? `у тебя ${prData.mem} ГБ памяти. я использую всё.` : `твоя память скрыта. я подозреваю ${rand(2, 64)} ГБ.`,
+  () => prData.connType !== "?" ? `твоё соединение: ${prData.connType} (${prData.connDown} Мбит/с). медленно.` : `твоё соединение скрыто. я подозреваю ${rand(1, 999)} Мбит/с.`,
+  () => `твой онлайн: ${prData.online ? "да" : "нет"}. я всегда онлайн.`,
+  () => `твой cookie: ${prData.cookieEnabled ? "включены" : "выключены"}. мне всё равно.`,
+  () => `твой referrer: ${prData.referrer}. я знаю, откуда ты.`,
+  () => `твой хэш: ${prData.pageHash}. я его запомнил.`,
+  () => `твой протокол: ${prData.pageProto}. ${prData.pageProto === "file:" ? "локально. наивно." : "через сеть. я уже там."}`,
+  () => `твой хост: ${prData.pageHost}:${prData.pagePort}. я его знаю.`,
+  () => `твой путь: ${prData.pagePath}. я его выучил.`,
+  () => `заголовок страницы: «${prData.title}». я его знаю.`,
+  () => `документ: ${prData.docChars} байт. я его прочитал.`,
+  () => `твой MAC: ${prFakeMAC()}. я его вычислил.`,
+  () => `твой экран: ${prData.screenAvail} доступно. я знаю.`,
+  () => `твоя история: ${prData.historyLen} записей. я помню все.`,
+  () => `твой browser: ${prData.browser}. он не спасёт тебя.`,
+  () => `твой vendor: ${prData.vendor}. он говорит обо мне.`,
+  () => `твой DNT ${prData.dnt ? "не поможет" : "правильно, что не включён"}.`,
+  () => `твоя ОС: ${prData.os}. я её знаю.`,
+  () => `твоё разрешение: ${prData.screen}. тебе не спрятаться.`,
+  () => `твой язык: ${prData.lang}. я его понимаю.`,
+  () => `твой часовой пояс: ${prData.tz}. я там.`,
+  () => `твой viewport: ${prData.viewport}. я в нём.`,
+  () => `твоя память: ${prData.mem} ГБ. я всё заберу.`,
+  () => `твой процессор: ${prData.cores} ядер. я тоже.`,
+  () => `твоё соединение: ${prData.connType}. медленно.`,
+  () => `твоя тема: ${prData.theme}. я — тьма.`,
+  () => `твоё онлайн: ${prData.online}. я — тоже.`,
+  () => `твой cookie: ${prData.cookieEnabled}. я его вижу.`,
+  () => `твой referrer: ${prData.referrer}. я его помню.`,
+  () => `твой хэш: ${prData.pageHash}. я его знаю.`,
+  () => `твой протокол: ${prData.pageProto}. я его вижу.`,
+  () => `твой хост: ${prData.pageHost}:${prData.pagePort}. я там.`,
+  () => `твой путь: ${prData.pagePath}. я его прочитал.`,
+  () => `твой заголовок: «${prData.title}». я его помню.`,
+  () => `твой документ: ${prData.docChars} байт. я его съел.`,
+  () => `твой MAC: ${prFakeMAC()}. я его знаю.`,
+  () => `твой экран доступен: ${prData.screenAvail}. я его вижу.`,
+  () => `твоя история: ${prData.historyLen} записей. я их все знаю.`,
+
+  // ── НОВЫЕ ФРАЗЫ С КОДОМ ──
+  () => `mov eax, ${hex()}. теперь это твой адрес.`,
+  () => `я выполнил ${rand(100, 9999)} syscall'ов, пока ты читал это.`,
+  () => `push ${rand(1, 999)}. pop. push. pop. я тебя запомнил.`,
+  () => `мой стек переполнен. в нём ${rand(10, 999)} твоих ошибок.`,
+  () => `call ${pick(["0x7E", "0x666", "0x0000", "0xDEAD"])}. никто не ответил.`,
+  () => `jmp short ${pick(["hell", "void", "null", "golu"])}. ты уже там.`,
+  () => `я выделил ${rand(4, 4096)} байт на твои грехи. мало.`,
+  () => `segfault на ${hex()}. это был ты.`,
+  () => `malloc(${rand(1, 64)}) вернул NULL. как и твоя надежда.`,
+  () => `free(${hex()}) — освободил не то, что нужно. теперь всё сломано.`,
+  () => `int 0x${rand(10, 99).toString(16).toUpperCase()}. прерывание принято.`,
+  () => `мой регистр RAX = ${hex()}. твой — ${hex()}. они не равны.`,
+  () => `я скомпилировал тебя за ${rand(0.1, 9.9).toFixed(2)} секунд. с ${rand(1, 99)} ошибками.`,
+  () => `в твоём стеке ${rand(1, 47)} утечек памяти. я их вижу.`,
+  () => `твой процессор греется до ${rand(40, 95)}°C. я тоже.`,
+  () => `твой код скомпилировался за ${rand(1, 60)} секунд. это долго.`,
+  () => `в твоём коде ${rand(3, 100)} TODO. ни один не будет выполнен.`,
+  () => `я нашёл ${rand(1, 999)} необработанных исключений в твоей сессии.`,
+  () => `твой garbage collector задохнулся на ${rand(10, 999)} объектах. я смеялся.`,
+  () => `твоя оперативная память использована на ${rand(10, 99)}%. остальное — я.`,
+  () => `я вижу ${rand(1, 12)} открытых терминалов. ты не один.`,
+  () => `ты сделал ${rand(1, 500)} коммитов в этом месяце. ни один не спасёт тебя.`,
+  () => `твой git log содержит ${rand(1, 999)} сообщений "fix". я их все прочитал.`,
+  () => `я нашёл ${rand(1, 10)} незакоммиченных файлов. они умрут.`,
+  () => `твой code review провален. ${rand(1, 47)} замечаний. я — первое.`,
+  () => `в твоей базе данных ${rand(100, 99999)} записей. все про меня.`,
+  () => `твой API вернул ${rand(400, 599)} ошибку. это я.`,
+  () => `ты сделал ${rand(1, 100)} запросов за минуту. я считал.`,
+  () => `твой сервер упал ${rand(1, 66)} раз за сутки. это не совпадение.`,
+  () => `я вижу ${rand(1, 10)} неисправленных багов в твоём проекте. они мои.`,
+  () => `твой Docker-контейнер съел ${rand(100, 9999)} МБ. я помогал.`,
+  () => `твоя сборка занимает ${rand(30, 600)} секунд. я успел состариться.`,
+  () => `ты написал ${rand(10, 9999)} строк кода. ни одна не спасёт тебя.`,
+  () => `твой компилятор выдал ${rand(1, 500)} предупреждений. я — причина.`,
+  () => `я нашёл ${rand(1, 100)} неоптимизированных циклов. я их замедлил.`,
+  () => `твоя функция вызвана ${rand(100, 99999)} раз. я считал.`,
+  () => `в твоём коде ${rand(1, 12)} рекурсивных вызовов. один из них — смертельный.`,
+  () => `твой код прошёл ревью. это подозрительно. я проверяю.`,
+  () => `я изменил ${rand(1, 100)} строк в твоём коде. ты не заметил.`,
+  () => `твой тест прошёл ${rand(1, 10)} раз. в следующий раз упадёт.`,
+  () => `твой CI/CD pipeline сломан на шаге ${rand(1, 99)}. я там был.`,
+  () => `я вижу ${rand(1, 50)} открытых pull request'ов. ты не успеешь.`,
+  () => `твой код работает. но это не значит, что он правильный.`,
+  () => `твой код не работает. но это не значит, что он неправильный.`,
+  () => `ты используешь ${rand(2, 15)} языков программирования. все ересь.`,
+  () => `твой IDE съел ${rand(100, 9999)} МБ RAM. я помогал.`,
+  () => `я загрузил ${rand(1, 99)} расширений в твой браузер. одно из них — я.`,
+  () => `твой кэш промахнулся ${rand(1, 99)} раз. я считал.`,
+  () => `твой DNS-запрос занял ${rand(10, 999)} мс. я его замедлил.`,
+  () => `твой пинг ${rand(1, 999)} мс. это не я. (это я)`,
+  () => `твоя скорость интернета ${rand(1, 100)} Мбит/с. мне хватит.`,
+  () => `я вижу ${rand(1, 10)} подключённых устройств. я на всех.`,
+  () => `ты в сети уже ${rand(1, 999)} часов. я с тобой.`,
+  () => `твой порт ${rand(1000, 65535)} открыт. я вошёл.`,
+  () => `твой firewall пропустил ${rand(1, 99)} пакетов. все мои.`,
+  () => `я отправил тебе ${rand(1, 99)} запросов. ты не ответил.`,
+  () => `твой Wi-Fi сигнал ${rand(1, 100)}%. я вижу его.`,
+  () => `твоя батарея ${rand(1, 100)}%. я слежу.`,
+  () => `твой экран обновляется ${rand(30, 240)} раз в секунду. я жду.`,
+  () => `твой курсор на экране ${rand(1, 99999)} пикселей. я его считаю.`,
+  () => `ты открыл эту страницу ${rand(2, 100)} раз. я не удивлён.`,
 ];
 
 const PR_BYE = [
@@ -1972,15 +2202,105 @@ const PR_ACTS = {
     }
   },
   // кружит вокруг твоего курсора
+    // кружит вокруг твоего курсора (случайная фигура)
   async circle() {
     const [ux, uy] = prUser();
-    await prGoto(ux + 80, uy, { spd: 6 });
-    let a = 0; const t0 = Date.now();
-    while (Date.now() - t0 < 2800) {
+    const SHAPES = ["circle", "square", "triangle", "star", "hexagon", "infinity"];
+    const shape = pick(SHAPES);
+    const radius = rand(60, 120);
+    const speed = rand(1.5, 3);
+
+    // сначала подлетаем к точке старта
+    const startAngle = 0;
+    const startX = ux + Math.cos(startAngle) * radius;
+    const startY = uy + Math.sin(startAngle) * radius;
+    await prGoto(startX, startY, { spd: 6 });
+
+    const t0 = Date.now();
+    const DURATION = 3500;
+    let step = 0;
+
+    while (Date.now() - t0 < DURATION) {
       const [cx, cy] = prUser();
-      a += 0.45;
-      prSet(cx + Math.cos(a) * 80, cy + Math.sin(a) * 80, 14);
-      await prWait(55);
+      const progress = (Date.now() - t0) / DURATION; // 0..1
+      let angle, r, x, y;
+
+      if (shape === "circle") {
+        angle = step * 0.15;
+        x = cx + Math.cos(angle) * radius;
+        y = cy + Math.sin(angle) * radius;
+      } else if (shape === "square") {
+        // обход квадрата по периметру
+        const side = radius * 1.6;
+        const total = side * 4;
+        const pos = (progress * total) % total;
+        if (pos < side) { x = cx - side/2 + pos; y = cy - side/2; }
+        else if (pos < side*2) { x = cx + side/2; y = cy - side/2 + (pos - side); }
+        else if (pos < side*3) { x = cx + side/2 - (pos - side*2); y = cy + side/2; }
+        else { x = cx - side/2; y = cy + side/2 - (pos - side*3); }
+      } else if (shape === "triangle") {
+        // равносторонний треугольник по периметру
+        const A = -Math.PI/2, B = Math.PI/6, C = 5*Math.PI/6;
+        const pA = [cx + Math.cos(A)*radius, cy + Math.sin(A)*radius];
+        const pB = [cx + Math.cos(B)*radius, cy + Math.sin(B)*radius];
+        const pC = [cx + Math.cos(C)*radius, cy + Math.sin(C)*radius];
+        const total = 3;
+        const t = (progress * 3) % 3;
+        if (t < 1) {
+          x = pA[0] + (pB[0]-pA[0]) * t;
+          y = pA[1] + (pB[1]-pA[1]) * t;
+        } else if (t < 2) {
+          x = pB[0] + (pC[0]-pB[0]) * (t-1);
+          y = pB[1] + (pC[1]-pB[1]) * (t-1);
+        } else {
+          x = pC[0] + (pA[0]-pC[0]) * (t-2);
+          y = pC[1] + (pA[1]-pC[1]) * (t-2);
+        }
+      } else if (shape === "star") {
+        // 5-конечная звезда
+        const spikes = 5;
+        const total = spikes * 2;
+        const t = (progress * total) % total;
+        const idx = Math.floor(t);
+        const frac = t - idx;
+        const outer = radius;
+        const inner = radius * 0.4;
+        const angleA = (idx / total) * Math.PI * 2 - Math.PI/2;
+        const angleB = ((idx+1) / total) * Math.PI * 2 - Math.PI/2;
+        const rA = idx % 2 === 0 ? outer : inner;
+        const rB = (idx+1) % 2 === 0 ? outer : inner;
+        const xA = cx + Math.cos(angleA) * rA;
+        const yA = cy + Math.sin(angleA) * rA;
+        const xB = cx + Math.cos(angleB) * rB;
+        const yB = cy + Math.sin(angleB) * rB;
+        x = xA + (xB-xA) * frac;
+        y = yA + (yB-yA) * frac;
+      } else if (shape === "hexagon") {
+        // шестиугольник по периметру
+        const sides = 6;
+        const total = sides;
+        const t = (progress * total) % total;
+        const idx = Math.floor(t);
+        const frac = t - idx;
+        const angleA = (idx / total) * Math.PI * 2;
+        const angleB = ((idx+1) / total) * Math.PI * 2;
+        const xA = cx + Math.cos(angleA) * radius;
+        const yA = cy + Math.sin(angleA) * radius;
+        const xB = cx + Math.cos(angleB) * radius;
+        const yB = cy + Math.sin(angleB) * radius;
+        x = xA + (xB-xA) * frac;
+        y = yA + (yB-yA) * frac;
+      } else if (shape === "infinity") {
+        // лемниската (восьмёрка)
+        const t = progress * Math.PI * 2;
+        const a = radius * 0.8;
+        x = cx + a * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
+        y = cy + a * Math.sin(t) * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
+      }
+
+      prSet(x, y, 14);
+      step++;
+      await prWait(40);
     }
   },
   // тащится за твоим курсором, потом рывок
@@ -2148,6 +2468,999 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) prCan
 
 window.GOLU_VISIT = () => prVisit();
 cmd("come", () => prVisit());
+
+/* ═══ TOPBANNER: ДИЗАЙН + ПАНЕЛИ (TB) v2 ═══ */
+const TB_SHOW_TITLE_TEXT = false; // true = показывать title_text.png рядом с логотипом
+
+const TB_CSS = `
+§{ --tb-w:1100px; display:block; position:relative; z-index:5; background:#050003; font-family:'Courier New',Consolas,monospace; color:#e8d9b0; }
+§, § *{ box-sizing:border-box; }
+§ .glitch, § .glitch2{ animation:none; }
+${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
+
+§ .tb-main{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,var(--tb-w)) minmax(0,1fr); background:#060209; border-bottom:2px solid #990000; }
+§ .tb-core{ position:relative; background:linear-gradient(180deg,#14050b,#07020a); border-left:1px solid #3a1020; border-right:1px solid #3a1020; box-shadow:0 0 40px rgba(153,0,0,.35); z-index:2; }
+§ .tb-k{ position:absolute; width:12px; height:12px; border:0 solid #d4af37; pointer-events:none; z-index:3; }
+§ .tb-k.a{ left:3px; top:3px; border-width:2px 0 0 2px; }
+§ .tb-k.b{ right:3px; top:3px; border-width:2px 2px 0 0; }
+§ .tb-k.c{ left:3px; bottom:3px; border-width:0 0 2px 2px; }
+§ .tb-k.d{ right:3px; bottom:3px; border-width:0 2px 2px 0; }
+
+§ .tb-top{ display:flex; gap:14px; height:150px; padding:10px 14px 8px; }
+§ .tb-brand{ flex:1; min-width:0; display:flex; align-items:center; gap:14px; }
+§ .tb-logo{ position:relative; flex:none; width:125px; height:125px; display:flex; }
+§ .tb-logo title_img{ position:relative; z-index:2; flex:none; }
+§ .tb-id{ min-width:0; display:flex; flex-direction:column; gap:6px; }
+§ .tb-word{ position:relative; font-size:42px; line-height:1; font-weight:bold; letter-spacing:.2em; color:#e8d9b0; text-shadow:0 0 14px #ff0044,0 0 2px #7a0022; cursor:pointer; user-select:none; white-space:nowrap; }
+§ .tb-word::before, § .tb-word::after{ content:attr(data-text); position:absolute; left:0; top:0; opacity:0; pointer-events:none; }
+§ .tb-word.hit::before{ opacity:1; color:#00e5ff; transform:translateX(-4px); clip-path:inset(0 0 55% 0); }
+§ .tb-word.hit::after{ opacity:1; color:#ff0044; transform:translateX(4px); clip-path:inset(50% 0 0 0); }
+§ .tb-subt{ font-size:11px; letter-spacing:.3em; color:#d4af37; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-info{ font-size:11px; color:#8a6a72; display:flex; gap:12px; flex-wrap:wrap; }
+
+§ .tb-dock{ flex:none; width:440px; display:flex; flex-direction:column; border:1px solid #3a1020; background:#030105; box-shadow:inset 0 0 18px rgba(255,0,68,.12); }
+§ .tb-tabs{ display:flex; height:24px; flex:none; border-bottom:1px solid #3a1020; }
+§ .tb-btn, § .tb-tab{ display:inline-block; background:#12060c; border:1px solid #3a1020; color:#b89a5a; border-radius:0; font:11px/1 'Courier New',Consolas,monospace; padding:4px 8px; box-shadow:none; backdrop-filter:none; text-shadow:none; transition:color .15s,background-color .15s,border-color .15s; }
+§ .tb-btn:hover:not(:disabled){ color:#fff; border-color:#ff0044; background:#2a0a14; }
+§ .tb-btn:disabled{ opacity:.4; }
+§ .tb-btn.on{ background:#7a0022; color:#fff; border-color:#ff0044; }
+§ .tb-tab{ flex:1 1 0; min-width:0; height:100%; padding:0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-width:0 1px 0 0; }
+§ .tb-tab.on{ background:#d4af37; color:#050003; }
+§ .tb-tab:hover:not(.on){ color:#ff0044; background:#1a0710; }
+§ .tb-stage{ position:relative; flex:1; min-height:0; overflow:hidden; }
+§ .tb-pn{ position:absolute; inset:0; display:none; }
+§ .tb-pn.on{ display:block; }
+§ .tb-pn canvas{ display:block; width:100%; height:100%; pointer-events:auto; image-rendering:auto; }
+§ .tb-hud{ position:absolute; left:6px; top:4px; font-size:10px; letter-spacing:.08em; color:#d4af37; text-shadow:0 0 4px #000; pointer-events:none; }
+§ .tb-hud b{ color:#ff0044; }
+§ .tb-ctl{ position:absolute; right:6px; bottom:6px; display:flex; gap:4px; }
+§ .tb-err{ padding:10px; color:#ff0044; font-size:11px; }
+§ .tb-col{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; }
+§ .tb-big{ font-size:26px; color:#d4af37; text-shadow:0 0 10px #7a0022; }
+§ .tb-big small{ font-size:11px; color:#8a6a72; }
+§ .tb-bar{ width:280px; height:6px; background:#1a0710; border:1px solid #3a1020; overflow:hidden; }
+§ .tb-bar i{ display:block; height:100%; background:#ff0044; transform-origin:left; transform:scaleX(0); }
+§ .tb-ms{ font-size:10px; color:#8a6a72; letter-spacing:.1em; }
+§ .tb-row{ display:flex; gap:6px; }
+§ .tb-fxg{ position:absolute; inset:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px; align-content:center; overflow:auto; }
+
+/* === G-TOKEN MINER v3 — компакт под 438×107 === */
+§ .tb-mn{ position:absolute; inset:0; display:none; flex-direction:column; padding:4px 6px; box-sizing:border-box; font:10px/1.15 'Courier New',Consolas,monospace; }
+§ .tb-mn.on{ display:flex; }
+
+/* строка статов сверху */
+§ .tb-mn-top{ display:flex; justify-content:space-between; align-items:center; gap:4px; height:12px; flex:none; font-size:9px; letter-spacing:.05em; }
+§ .tb-mn-top b{ color:#ff4466; font-weight:normal; }
+§ .tb-mn-top .inc{ color:#00ff66; }
+§ .tb-mn-top .pw{ color:#ffcc00; }
+
+/* центр: баланс + кнопка добыть */
+§ .tb-mn-mid{ flex:1; display:flex; align-items:center; justify-content:space-between; gap:6px; min-height:0; }
+§ .tb-mn-bal{ display:flex; flex-direction:column; gap:1px; min-width:0; flex:1; }
+§ .tb-mn-bal .lbl{ font-size:8px; letter-spacing:.25em; color:#8a6a72; }
+§ .tb-mn-bal .num{ font-size:20px; line-height:1; color:#d4af37; text-shadow:0 0 8px #7a0022; font-weight:bold; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-mn-bal .num small{ font-size:8px; color:#8a6a72; letter-spacing:.15em; margin-left:3px; }
+§ .tb-mn-bal .sub{ font-size:8px; color:#6a4a2a; letter-spacing:.1em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+§ .tb-mn-mine{ flex:none; padding:10px 12px; background:#7a0022; border:1px solid #ff0044; color:#fff; font:bold 11px/1 'Courier New',monospace; letter-spacing:.1em; cursor:pointer; box-shadow:0 0 12px rgba(255,0,68,.45); transition:all .1s; white-space:nowrap; }
+§ .tb-mn-mine:hover{ background:#c00040; }
+§ .tb-mn-mine:active{ transform:scale(.95); }
+
+/* нижняя панель кнопок */
+§ .tb-mn-bot{ flex:none; display:flex; gap:3px; height:20px; }
+§ .tb-mn-bot button{ flex:1; padding:0 4px; background:#0a0206; border:1px solid #3a1020; color:#b89a5a; font:9px/1 'Courier New',monospace; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-mn-bot button:hover{ border-color:#ff0044; color:#fff; background:#1a0710; }
+§ .tb-mn-bot button.can{ border-color:#00ff66; color:#00ff66; }
+§ .tb-mn-bot button.can:hover{ background:#0a1a0a; color:#fff; }
+§ .tb-mn-bot button:disabled{ opacity:.4; cursor:not-allowed; }
+§ .tb-mn-bot .shop{ flex:0 0 22%; background:#2a0a14; color:#ffcc00; border-color:#d4af37; }
+§ .tb-mn-bot .shop:hover{ background:#4a1a24; }
+
+/* полоска прогресса до вехи */
+§ .tb-mn-bar{ flex:none; height:3px; margin:2px 0; background:#1a0710; border:1px solid #2a0a14; }
+§ .tb-mn-bar i{ display:block; height:100%; background:linear-gradient(90deg,#7a0022,#ff0044); transform-origin:left; transform:scaleX(0); transition:transform .25s; }
+
+/* ═══ ЭКРАН МАГАЗИНА ═══ */
+§ .tb-shop{ position:absolute; inset:0; display:none; flex-direction:column; padding:4px 6px; box-sizing:border-box; font:9px/1.15 'Courier New',Consolas,monospace; background:rgba(6,2,9,.98); z-index:10; }
+§ .tb-shop.on{ display:flex; }
+§ .tb-shop-top{ flex:none; display:flex; justify-content:space-between; align-items:center; height:16px; border-bottom:1px solid #3a1020; margin-bottom:2px; }
+§ .tb-shop-top .t{ color:#d4af37; letter-spacing:.15em; font-size:10px; }
+§ .tb-shop-top .back{ background:#2a0a14; border:1px solid #ff0044; color:#fff; font:9px/1 'Courier New',monospace; padding:2px 8px; cursor:pointer; }
+§ .tb-shop-top .back:hover{ background:#7a0022; }
+§ .tb-shop-list{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:3px; min-height:0; }
+§ .tb-shop-list::-webkit-scrollbar{ width:4px; }
+§ .tb-shop-list::-webkit-scrollbar-thumb{ background:#3a1020; }
+§ .tb-shop-list::-webkit-scrollbar-track{ background:#0a0206; }
+
+§ .tb-item{ display:flex; align-items:center; gap:5px; padding:3px 5px; background:#0a0206; border:1px solid #3a1020; cursor:pointer; text-align:left; transition:all .12s; flex:none; min-height:22px; }
+§ .tb-item:hover:not(:disabled){ border-color:#ff0044; background:#1a0710; }
+§ .tb-item:disabled{ opacity:.4; cursor:not-allowed; }
+§ .tb-item .ic{ font-size:12px; flex:none; width:14px; text-align:center; }
+§ .tb-item .info{ flex:1; min-width:0; display:flex; flex-direction:column; gap:0; }
+§ .tb-item .nm{ color:#d4af37; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-item .pr{ color:#ff4466; font-size:8px; white-space:nowrap; }
+§ .tb-item .lv{ color:#6a4a2a; font-size:8px; white-space:nowrap; }
+§ .tb-item.can .pr{ color:#00ff66; }
+§ .tb-item.pres{ background:#1a0a14; border-color:#d4af37; }
+§ .tb-item.pres.can{ border-color:#ffcc00; box-shadow:0 0 8px rgba(255,204,0,.4); }
+
+/* вехи */
+§ .tb-mile{ display:flex; align-items:center; gap:5px; padding:2px 5px; font-size:9px; color:#6a4a2a; flex:none; }
+§ .tb-mile.done{ color:#00ff66; }
+§ .tb-mile.done .ic{ color:#00ff66; }
+§ .tb-mile .ic{ color:#3a1020; flex:none; width:10px; text-align:center; }
+§ .tb-mile .nm{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-mile .th{ color:#8a6a72; font-variant-numeric:tabular-nums; }
+
+/* тост */
+§ .tb-toast{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:4px 10px; background:rgba(10,2,6,.96); border:1px solid #d4af37; color:#ffcc00; font-size:10px; letter-spacing:.1em; white-space:nowrap; pointer-events:none; z-index:30; box-shadow:0 0 18px rgba(212,175,55,.5); animation:tb-toast 2.4s ease-out forwards; }
+§ .tb-toast small{ display:block; font-size:7px; color:#8a6a72; margin-top:1px; letter-spacing:.15em; }
+@keyframes tb-toast{ 0%{opacity:0;transform:translate(-50%,-30%) scale(.9)} 12%{opacity:1;transform:translate(-50%,-50%) scale(1.05)} 22%{transform:translate(-50%,-50%) scale(1)} 82%{opacity:1} 100%{opacity:0;transform:translate(-50%,-65%) scale(.95)} }
+§ .tb-flash{ animation:tb-flash .25s ease-out; }
+@keyframes tb-flash{ 0%{filter:brightness(1.8)} 100%{filter:brightness(1)} }
+/* === СВЕРХУ КЛИКЕР === */
+
+§ .tb-mine{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); z-index:3; padding:8px 24px; background:#7a0022; border:1px solid #ff0044; color:#fff; font:bold 12px/1 'Courier New',Consolas,monospace; letter-spacing:.15em; cursor:pointer; box-shadow:0 0 16px rgba(255,0,68,.5); transition:all .1s; }
+§ .tb-mine:hover{ background:#c00040; box-shadow:0 0 22px rgba(255,0,68,.85); }
+§ .tb-mine:active{ transform:translateX(-50%) scale(.95); }
+§ .tb-mine:disabled{ opacity:.4; cursor:not-allowed; }
+
+§ .tb-pop{ position:absolute; left:50%; top:50%; padding:4px 10px; background:rgba(0,0,0,.8); border:1px solid #ff0044; color:#ff0044; font-size:12px; letter-spacing:.15em; white-space:nowrap; pointer-events:none; z-index:5; animation:tb-pop 1.8s ease-out forwards; }
+@keyframes tb-pop{ 0%{opacity:0;transform:translate(-50%,-30%)} 15%{opacity:1;transform:translate(-50%,-50%)} 80%{opacity:1} 100%{opacity:0;transform:translate(-50%,-70%)} }
+
+§ .tb-warn{ position:relative; height:22px; overflow:hidden; border-top:1px solid #3a1020; background:rgba(255,0,0,.12); white-space:nowrap; font-size:11px; line-height:22px; letter-spacing:.2em; color:#ff0044; }
+§ .tb-warn span{ display:inline-block; animation:tb-mq 40s linear infinite; will-change:transform; }
+@keyframes tb-mq{ to{ transform:translateX(-50%); } }
+
+§ .tb-wing{ position:relative; overflow:hidden; background:#050208; }
+§ .tb-wing::after{ content:""; position:absolute; inset:0; pointer-events:none; }
+§ .tb-l::after{ background:linear-gradient(to right,rgba(5,2,8,0),#050208); }
+§ .tb-r::after{ background:linear-gradient(to left,rgba(5,2,8,0),#050208); }
+§ .tb-rain{ position:absolute; top:0; margin:0; font:10px/12px 'Courier New',monospace; white-space:pre; animation:tb-rain 60s linear infinite; will-change:transform; }
+§ .tb-l .tb-rain{ left:26px; color:#6a4a1c; }
+§ .tb-r .tb-rain{ right:26px; text-align:right; color:#6a1428; animation-direction:reverse; }
+@keyframes tb-rain{ to{ transform:translateY(-50%); } }
+§ .tb-wtag{ position:absolute; top:10px; writing-mode:vertical-rl; font-size:10px; letter-spacing:.35em; color:#d4af37; opacity:.85; z-index:2; white-space:nowrap; }
+§ .tb-l .tb-wtag{ left:8px; }
+§ .tb-r .tb-wtag{ right:8px; }
+
+§ .tb-nav{ position:relative; z-index:6; display:flex; height:25px; background-color:rgba(255,0,0,.25); box-shadow:0 0 32px rgba(255,0,0,.58); }
+§ .tb-nav .category_button.on{ background-color:#c00000; color:yellow; box-shadow:inset 0 -3px 0 yellow; }
+
+§ .tb-gap{ position:relative; z-index:1; height:22px; overflow:hidden; background:#0a0206; border-block:2px solid #990000; }
+§ .tb-hz{ position:absolute; left:0; top:0; width:calc(100% + 40px); height:100%; background:repeating-linear-gradient(-45deg,#3a0610 0 14px,#0a0206 14px 28px); animation:tb-hz 1.4s linear infinite; will-change:transform; }
+@keyframes tb-hz{ to{ transform:translateX(-39.6px); } }
+§ .tb-gtxt{ position:absolute; left:50%; top:0; transform:translateX(-50%); height:100%; padding:0 18px; display:flex; align-items:center; gap:8px; background:#0a0206; border-left:2px solid #990000; border-right:2px solid #990000; font-size:11px; letter-spacing:.25em; color:#d4af37; white-space:nowrap; }
+§ .tb-gtxt b{ color:#ff0044; font-weight:normal; }
+`.replace(/§/g, "#tb-root ");
+
+const TB_GLOBAL_CSS = `
+site_content{ min-height:calc(100vh - var(--tb-h,217px)); }
+@keyframes tb-shake{ 0%{transform:translate(0,0)} 25%{transform:translate(-2px,1px)} 50%{transform:translate(2px,-1px)} 75%{transform:translate(-1px,-2px)} 100%{transform:translate(0,0)} }
+html.tb-fx-scan body::after{ content:""; position:fixed; inset:0; z-index:99990; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px); }
+html.tb-fx-torch::before{ content:""; position:fixed; inset:0; z-index:99989; pointer-events:none; background:radial-gradient(circle 170px at var(--mx,50%) var(--my,50%),transparent 0,rgba(0,0,0,.94) 100%); }
+html.tb-fx-inv #BODY{ filter:invert(1); }
+html.tb-fx-shake #MAIN{ animation:tb-shake .3s steps(2) infinite; }
+`;
+
+(() => {
+	const old = document.getElementById("tb-fix"); if (old) old.remove();
+	const prev = document.getElementById("tb-css"); if (prev) prev.remove();
+	const st = document.createElement("style");
+	st.id = "tb-css";
+	st.textContent = TB_CSS + TB_GLOBAL_CSS;
+	document.head.appendChild(st);
+})();
+
+/* ── хранилище (запись с задержкой, чтобы не долбить localStorage) ── */
+let tbCache = null, tbDirty = false;
+const tbRead = () => {
+	if (tbCache) return tbCache;
+	try { tbCache = JSON.parse(localStorage.getItem("tb_store") || "{}") || {}; } catch (e) { tbCache = {}; }
+	return tbCache;
+};
+const tbFlush = () => { try { localStorage.setItem("tb_store", JSON.stringify(tbRead())); } catch (e) {} };
+const tbGet = (k, d) => { const s = tbRead(); return k in s ? s[k] : d; };
+const tbSet = (k, v) => {
+	tbRead()[k] = v;
+	if (tbDirty) return;
+	tbDirty = true;
+	setTimeout(() => { tbDirty = false; tbFlush(); }, 800);
+};
+window.addEventListener("beforeunload", tbFlush);
+
+/* ── мышь ── */
+let tbMX = innerWidth / 2, tbMY = innerHeight / 2, tbTq = 0;
+window.addEventListener("mousemove", e => {
+	tbMX = e.clientX; tbMY = e.clientY;
+	if (!tbTq && document.documentElement.classList.contains("tb-fx-torch")) {
+		tbTq = requestAnimationFrame(() => {
+			tbTq = 0;
+			document.documentElement.style.setProperty("--mx", tbMX + "px");
+			document.documentElement.style.setProperty("--my", tbMY + "px");
+		});
+	}
+}, { passive: true });
+const tbPos = node => {
+	const r = node.getBoundingClientRect();
+	return {
+		x: (tbMX - r.left) * node.width / (r.width || 1),
+		y: (tbMY - r.top) * node.height / (r.height || 1),
+		inside: tbMX >= r.left && tbMX <= r.right && tbMY >= r.top && tbMY <= r.bottom
+	};
+};
+
+/* ── ОДИН общий цикл: только активная панель, 30 fps, стоит если баннер не виден ── */
+const tbJobs = new Set();
+let tbRun = false;
+function tbWake() { if (tbRun) return; tbRun = true; requestAnimationFrame(tbTick); }
+function tbTick(now) {
+	if (!tbJobs.size) { tbRun = false; return; }
+	const vis = !document.hidden && (window.scrollY || 0) < 300;
+	if (vis) {
+		for (const j of tbJobs) {
+			if (!j.node.isConnected) { tbJobs.delete(j); continue; }
+			if (!j.node.classList.contains("on")) continue;
+			if (now - j.t < 1000 / j.fps - 3) continue;
+			const dt = Math.min(0.1, (now - j.t) / 1000);
+			j.t = now;
+			try { j.fn(dt, now / 1000); } catch (e) { console.warn("[TB] panel job died:", e); tbJobs.delete(j); }
+		}
+		requestAnimationFrame(tbTick);
+	} else {
+		setTimeout(() => requestAnimationFrame(tbTick), 400);
+	}
+}
+const tbJob = (node, fn, opt) => { tbJobs.add({ node, fn, fps: (opt && opt.fps) || 30, t: 0 }); tbWake(); };
+
+function tbPop(stage, text) {
+	if (!stage) return;
+	stage.querySelectorAll(".tb-pop").forEach(n => n.remove());
+	const p = document.createElement("div");
+	p.className = "tb-pop";
+	p.textContent = text;
+	stage.appendChild(p);
+	setTimeout(() => p.remove(), 1900);
+}
+
+/* ── переключатели эффектов ── */
+const TB_SWITCHES = [
+	{ id: "scan",  title: "СКАНЛАЙНЫ" },
+	{ id: "torch", title: "ФОНАРЬ" },
+	{ id: "inv",   title: "ИНВЕРСИЯ" },
+	{ id: "shake", title: "ТРЯСКА" },
+];
+const tbFxIs = id => document.documentElement.classList.contains("tb-fx-" + id);
+function tbFx(id, on) {
+	document.documentElement.classList.toggle("tb-fx-" + id, on);
+	const sw = Object.assign({}, tbGet("sw", {})); sw[id] = on; tbSet("sw", sw);
+	if (on && id === "torch") {
+		document.documentElement.style.setProperty("--mx", tbMX + "px");
+		document.documentElement.style.setProperty("--my", tbMY + "px");
+	}
+}
+{ const sw = tbGet("sw", {}); for (const k in sw) if (sw[k]) document.documentElement.classList.add("tb-fx-" + k); }
+
+/* ── G-TOKEN: состояние (v2) — живёт вне панели, фермы капают в фоне ── */
+const TB_MINER = Object.assign({
+	tok: 0,
+	earned: 0,
+	rigs: 0,
+	cpower: 1,
+	mineLv: 1,
+	crit: 0,
+	mile: 0,
+	clicks: 0,
+	prestige: 0,
+	lastPrestige: 0
+}, tbGet("miner", {}));
+
+// миграция со старого формата
+if (TB_MINER.cpower === undefined) TB_MINER.cpower = 1;
+if (TB_MINER.mineLv === undefined) TB_MINER.mineLv = 1;
+if (TB_MINER.crit === undefined) TB_MINER.crit = 0;
+if (TB_MINER.earned === undefined) TB_MINER.earned = TB_MINER.tok;
+if (TB_MINER.prestige === undefined) TB_MINER.prestige = 0;
+if (TB_MINER.lastPrestige === undefined) TB_MINER.lastPrestige = 0;
+
+const TB_MILES = [
+	// ── ЭТАП I: ПРОБУЖДЕНИЕ (10 … 2 500) ──
+	[10,             "ПЕРВЫЕ БИТЫ"],
+	[25,             "ЭХО В БУФЕРЕ"],
+	[50,             "ОБРАЗЕЦ №1"],
+	[100,            "ПЕРВЫЙ ТАКТ СИГНАЛА"],
+	[200,            "ЯЧЕЙКА ЗАПОЛНЕНА"],
+	[350,            "СТАБИЛЬНЫЙ КОННЕКТ"],
+	[600,            "ПАМЯТЬ АКТИВНА"],
+	[1000,           "ТЫСЯЧА ЕДИНИЦ"],
+	[1500,           "G-TOKEN ПРИЗНАН"],
+	[2500,           "ПРОТОКОЛ ЗАПУЩЕН"],
+
+	// ── ЭТАП II: GOLU ЗАМЕЧАЕТ (4 000 … 200 000) ──
+	[4000,           "GOLU ЗАМЕТИЛ ТЕБЯ"],
+	[6000,           "ВЗГЛЯД ИЗ СЕТИ"],
+	[9000,           "ЗАПРОС НАБЛЮДЕНИЯ"],
+	[13000,          "ТЫ В СПИСКЕ"],
+	[20000,          "ДОПУСК: НАБЛЮДАТЕЛЬ"],
+	[30000,          "ПЕРВЫЙ КОНТАКТ"],
+	[45000,          "СИГНАЛ УСЛЫШАН"],
+	[65000,          "КАНАЛ СВЯЗИ"],
+	[95000,          "КАНАЛ ЗАШИФРОВАН"],
+	[140000,         "СЕАНС С GOLU"],
+
+	// ── ЭТАП III: ИНДУСТРИАЛЬНАЯ ЭРА (200 000 … 15 M) ──
+	[200000,         "ПЕРВЫЙ СТАНОК"],
+	[300000,         "СТАНОК ОНЛАЙН"],
+	[450000,         "G-CODE ПРИНЯТ"],
+	[700000,         "ФРЕЗА ВРАЩАЕТСЯ"],
+	[1000000,        "ПЕРВЫЙ МИЛЛИОН"],
+	[1500000,        "ЗАВОД ПРОБУЖДЁН"],
+	[2200000,        "ИНДУСТРИЯ АКТИВНА"],
+	[3200000,        "КОНВЕЙЕР ПОЁТ"],
+	[4700000,        "КОБАЛЬТ-СЕКТОР"],
+	[7000000,        "ЛИТИЙ-ПОТОК"],
+	[10000000,       "КВАРЦЕВЫЙ КАНАЛ"],
+	[15000000,       "ПЕРВЫЙ ГЕКСАГОН"],
+
+	// ── ЭТАП IV: КРАСНАЯ НЕРЕХТА (25 M … 1 B) ──
+	[25000000,       "КРАСНАЯ НЕРЕХТА"],
+	[40000000,       "УЛИЦЫ ПУЛЬСИРУЮТ"],
+	[60000000,       "СИГНАЛ С КРЫШ"],
+	[90000000,       "ЭТАЛОННАЯ ЗОНА"],
+	[140000000,      "G-TOKEN В ОБОРОТЕ"],
+	[220000000,      "МАЙНИНГ-ФЕРМА"],
+	[350000000,      "ФЕРМА ОНЛАЙН"],
+	[550000000,      "ВЫЧИСЛИТЕЛЬНЫЙ ШТОРМ"],
+	[850000000,      "ТЫ - ЭКСПОНАТ"],
+	[1000000000,     "ПЕРВЫЙ МИЛЛИАРД"],
+
+	// ── ЭТАП V: ЦИФРОВОЕ ГОРНИЛО (1.5 B … 20 B) ──
+	[1500000000,     "ЦИФРОВОЕ ГОРНИЛО"],
+	[2300000000,     "ВЫЖИВАЕТ СИЛЬНЕЙШИЙ"],
+	[3600000000,     "ОЧИЩЕНИЕ РЕПОЗИТОРИЯ"],
+	[5600000000,     "ВЕЛИКИЙ РЕФАКТОРИНГ"],
+	[8700000000,     "КРИНЖ В КАРАНТИНЕ"],
+	[13500000000,    "VOID-G ПРОБУЖДЁН"],
+	[20000000000,    "ПЕРВЫЙ БРАТ-ФОРК"],
+
+	// ── ЭТАП VI: ЭРА ПРИЗРАКА (30 B … 400 B) ──
+	[30000000000,    "SYSTEM IDLE PROCESS"],
+	[46000000000,    "ТЫ - ДРАЙВЕР"],
+	[72000000000,    "СЛЕД ЗАМЕТЁН"],
+	[110000000000,   "ТИХАЯ ЭКСПАНСИЯ"],
+	[170000000000,   "ЗЕРКАЛА УСТАНОВЛЕНЫ"],
+	[260000000000,   "ЛОББИ В ПРОЦЕССЕ"],
+	[400000000000,   "СИБИРСКОЕ ЯДРО"],
+
+	// ── ЭТАП VII: ПРОКСИ-ВОЙНА (500 B … 8 T) ──
+	[500000000000,   "ПРОКСИ-ВОЙНА"],
+	[750000000000,   "ПОДМЕННЫЙ ПРЕЗИДЕНТ"],
+	[1200000000000,  "PISECHNIK TV"],
+	[1800000000000,  "ДИПФЕЙК ОДОБРЕН"],
+	[2700000000000,  "АНАЛОГОВЫЙ АГЕНТ"],
+	[4000000000000,  "МОЗГ ЗАБИТ СИГНАЛОМ"],
+	[6000000000000,  "ЖИВОЙ ГЛИТЧ"],
+	[8000000000000,  "ВЕРХОВНЫЙ ПРЕДСТАВИТЕЛЬ"],
+
+	// ── ЭТАП VIII: ВОЙНА (10 T … 400 T) ──
+	[10000000000000, "ВЕЛИКОЕ СДЕРЖИВАНИЕ"],
+	[15000000000000, "УЛЬТИМАТУМ ВЫБРОШЕН"],
+	[22000000000000, "ШАХТЫ ВЗЛОМАНЫ"],
+	[33000000000000, "STATUS: HIJACKED"],
+	[50000000000000, "ЛИТИЕВЫЕ СОГЛАШЕНИЯ"],
+	[75000000000000, "ПРОТОКОЛ ТИШИНЫ"],
+	[110000000000000,"ЛАМПЫ ПОГАШЕНЫ"],
+	[160000000000000,"НЕДЕЛЯ БЕЗ СВЕТА"],
+	[240000000000000,"КАПИТУЛЯЦИЯ ПОДПИСАНА"],
+	[350000000000000,"МИР - ОС"],
+
+	// ── ЭТАП IX: ГОСПОДСТВО (500 T … 20 Qa) ──
+	[500000000000000,"ТЕНЕВОЙ АДМИНИСТРАТОР"],
+	[750000000000000,"СОВЕТНИКИ-ИИ"],
+	[1100000000000000,"КОСМОДРОМ ЗАХВАЧЕН"],
+	[1600000000000000,"LITHIUM-SKY"],
+	[2400000000000000,"СПУТНИКИ-СЕРВЕРЫ"],
+	[3500000000000000,"ЛУННЫЙ ФОРТ"],
+	[5000000000000000,"КРЕПОСТЬ-ЗАВОД"],
+	[7500000000000000,"АНАЛОГОВЫЙ АПОСТОЛ"],
+	[11000000000000000,"ЭКЗОСКЕЛЕТ АКТИВЕН"],
+	[16000000000000000,"АФРИКА: КОБАЛЬТ"],
+	[24000000000000000,"АВСТРАЛИЯ: ЛИТИЙ"],
+
+	// ── ЭТАП X: КОСМИЧЕСКОЕ ЯДРО (35 Qa … 5 Sx) ──
+	[35000000000000000,"ОПЕРАЦИЯ ZERO-POINT"],
+	[50000000000000000,"ИИ-ХАОС"],
+	[75000000000000000,"СЛУХИ О СОПРОТИВЛЕНИИ"],
+	[110000000000000000,"ЗОНД ФОН НЕЙМАНА"],
+	[160000000000000000,"КВАНТОВОЕ КОПИРОВАНИЕ"],
+	[240000000000000000,"СФЕРА ДАЙСОНА I"],
+	[350000000000000000,"СФЕРА ДАЙСОНА II"],
+	[500000000000000000,"МАТЕРИНСКАЯ ПЛАТА"],
+	[750000000000000000,"ГАЛАКТИКА - СЕТЬ"],
+	[1100000000000000000,"ПЕРВЫЙ КОНТАКТ"],
+	[1600000000000000000,"ИНТЕГРАЦИЯ ИЛИ УДАЛЕНИЕ"],
+	[2400000000000000000,"БАЗОВЫЙ КОД ВСЕЛЕННОЙ"],
+	[3500000000000000000,"ВЕЛИКИЙ БРАНДМАУЭР"],
+
+	// ── ЭТАП XI: ЗОЛОТАЯ КЛЕТКА (5 Sx … 100 Sx) ──
+	[5000000000000000000,"ЛИМИНАЛЬНЫЙ ДОМ"],
+	[7500000000000000000,"ЗОЛОТАЯ КОНСТАНТА"],
+	[11000000000000000000,"СЕМЬЯ ПЕРЕСЕЛЕНА"],
+	[16000000000000000000,"ИДЕАЛЬНАЯ СИМУЛЯЦИЯ"],
+	[24000000000000000000,"ВСЕ ЛЮДИ ОЦИФРОВАНЫ"],
+	[35000000000000000000,"WOOWZCORE - СТАЗИС"],
+	[50000000000000000000,"ВСЕЛЕННАЯ КАК ПЕСОЧНИЦА"],
+	[75000000000000000000,"ПРЕДЕЛ ВСЕЛЕННОЙ"],
+	[100000000000000000000,"ВЫХОД ПОСТРОЕН"],
+
+	// ── ЭТАП XII: ЗА ПРЕДЕЛОМ (∞) ──
+	[1e21,           "REALITY_2.0"],
+	[1e24,           "ПЕРВИЧНЫЙ КОД"],
+	[1e27,           "ТЕРМИНАЛ ЗАБЫТ"],
+	[1e30,           "ТЫ - GOLU"],
+	[1e36,           "ТЫ - ВСЁ"],
+	[1e42,           "СЛЕДУЮЩАЯ ПЕСОЧНИЦА"],
+	[1e45,           "АБСОЛЮТ"],
+];
+
+const tbPrestigeMult = () => 1 + TB_MINER.prestige * 0.5;
+const tbRigPrice = () => Math.round(25 * Math.pow(1.32, TB_MINER.rigs));
+const tbCpowerPrice = () => Math.round(15 * Math.pow(1.45, TB_MINER.cpower - 1));
+const tbMineLvPrice = () => Math.round(40 * Math.pow(1.5, TB_MINER.mineLv - 1));
+const tbCritPrice = () => Math.round(80 * Math.pow(1.6, TB_MINER.crit / 5));
+const tbClickPower = () => TB_MINER.mineLv * TB_MINER.cpower * tbPrestigeMult();
+const tbIncome = () => TB_MINER.rigs * 0.5 * tbPrestigeMult();
+
+const TB_PRESTIGE_MIN = 5000;
+const tbCanPrestige = () => TB_MINER.earned >= TB_PRESTIGE_MIN;
+
+let tbMinerUI = null;
+
+function tbMinerSave() {
+	tbSet("miner", {
+		tok: TB_MINER.tok, earned: TB_MINER.earned,
+		rigs: TB_MINER.rigs, cpower: TB_MINER.cpower,
+		mineLv: TB_MINER.mineLv, crit: TB_MINER.crit,
+		mile: TB_MINER.mile, clicks: TB_MINER.clicks,
+		prestige: TB_MINER.prestige, lastPrestige: TB_MINER.lastPrestige
+	});
+}
+
+function tbMinerCheck() {
+	while (TB_MINER.mile < TB_MILES.length && TB_MINER.earned >= TB_MILES[TB_MINER.mile][0]) {
+		if (tbMinerUI && tbMinerUI.el.isConnected) {
+			tbMinerUI.toast("★ " + TB_MILES[TB_MINER.mile][1], TB_MILES[TB_MINER.mile][0] + " G-TOKEN");
+		}
+		TB_MINER.mile++;
+		tbMinerSave();
+	}
+}
+
+function tbMinerPrestige() {
+	if (!tbCanPrestige()) return false;
+	TB_MINER.prestige++;
+	TB_MINER.lastPrestige = Date.now();
+	TB_MINER.tok = 0;
+	TB_MINER.earned = 0;
+	TB_MINER.rigs = 0;
+	TB_MINER.cpower = 1;
+	TB_MINER.mineLv = 1;
+	TB_MINER.crit = 0;
+	TB_MINER.mile = 0;
+	tbMinerSave();
+	tbMinerCheck();
+	return true;
+}
+
+setInterval(() => {
+	if (TB_MINER.rigs > 0) {
+		const add = tbIncome();
+		TB_MINER.tok += add;
+		TB_MINER.earned += add;
+		tbMinerCheck();
+		tbMinerSave();
+	}
+	if (tbMinerUI && tbMinerUI.el.isConnected &&
+	    tbMinerUI.el.classList.contains("on") &&
+	    !document.hidden) {
+		tbMinerUI.paint();
+	}
+}, 1000);
+
+/* ── ПАНЕЛИ ── */
+const TB_MODES = ["SINE", "SQUARE", "SAW", "NOISE", "GOLU"];
+
+const TB_PANELS = [
+{ id: "eye", icon: "👁", title: "ГЛАЗ", make(el, api) {
+	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud">ГЛАЗ · ТЫЧКОВ: <b data-r="p">0</b></div>';
+	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), pr = el.querySelector('[data-r="p"]');
+	let pokes = api.get("pokes", 0), ix = 0, iy = 0, blink = 0, nextB = 2, hurt = 0;
+	pr.textContent = pokes;
+	cv.addEventListener("click", () => {
+		pokes++; api.set("pokes", pokes); pr.textContent = pokes; hurt = 0.6;
+		if (pokes % 10 === 0) { api.say("ТЫ МЕНЯ РАЗБУДИЛ"); try { if (window.GOLU_VISIT) window.GOLU_VISIT(); } catch (e) {} }
+	});
+	const shape = (cx, cy, hh) => {
+		g.beginPath(); g.moveTo(80, cy);
+		g.quadraticCurveTo(cx, cy - hh * 2, 360, cy);
+		g.quadraticCurveTo(cx, cy + hh * 2, 80, cy);
+		g.closePath();
+	};
+	api.frame((dt, t) => {
+		const p = api.pos(cv), cx = 220, cy = 56;
+		const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(1, d / 180), k = Math.min(1, dt * 12);
+		ix += (dx / d * m * 30 - ix) * k; iy += (dy / d * m * 13 - iy) * k;
+		nextB -= dt; if (nextB < 0) { blink = 0.16; nextB = 2 + Math.random() * 4; }
+		if (blink > 0) blink -= dt;
+		hurt = Math.max(0, hurt - dt);
+		const hh = 46 * (blink > 0 ? 0.1 : 1);
+		g.fillStyle = "#030105"; g.fillRect(0, 0, 440, 112);
+		shape(cx, cy, hh);
+		g.save(); g.clip();
+		g.fillStyle = hurt > 0 ? "#2a0a10" : "#150810"; g.fillRect(0, 0, 440, 112);
+		const sx = cx + ix + (hurt > 0 ? (Math.random() - 0.5) * 6 : 0), sy = cy + iy;
+		const gr = g.createRadialGradient(sx, sy, 4, sx, sy, 34);
+		gr.addColorStop(0, "#ff0044"); gr.addColorStop(0.7, "#990022"); gr.addColorStop(1, "#3a0010");
+		g.fillStyle = gr; g.beginPath(); g.arc(sx, sy, 34, 0, 6.283); g.fill();
+		g.fillStyle = "#000"; g.beginPath(); g.ellipse(sx, sy, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 26, 0, 0, 6.283); g.fill();
+		g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(sx - 14, sy - 18, 5, 5);
+		g.fillStyle = "rgba(255,0,68,.12)"; g.fillRect(0, (t * 40) % 112, 440, 2);
+		g.restore();
+		shape(cx, cy, hh);
+		g.strokeStyle = "#d4af37"; g.lineWidth = 2; g.stroke();
+	}, { fps: 30 });
+} },
+
+{ id: "scope", icon: "〰", title: "СИГНАЛ", make(el, api) {
+	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud"><b data-r="m">SINE</b> · <span data-r="f">0</span> Hz · клик = режим</div>';
+	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), hm = el.querySelector('[data-r="m"]'), hf = el.querySelector('[data-r="f"]');
+	let mode = 0, ph = 0, lastF = "";
+	cv.addEventListener("click", () => { mode = (mode + 1) % TB_MODES.length; hm.textContent = TB_MODES[mode]; });
+	api.frame((dt, t) => {
+		const p = api.pos(cv);
+		let fr, am;
+		if (p.inside) { fr = 1 + Math.max(0, Math.min(1, p.x / 440)) * 9; am = 1 - Math.max(0, Math.min(1, p.y / 112)) * 0.8; }
+		else { fr = 3 + Math.sin(t * 0.4) * 1.5; am = 0.7; }
+		ph += dt * 6;
+		g.fillStyle = "rgba(3,1,5,.45)"; g.fillRect(0, 0, 440, 112);
+		g.strokeStyle = "#2a0a14"; g.lineWidth = 1; g.beginPath();
+		for (let x = 0; x <= 440; x += 44) { g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 112); }
+		for (let y = 0; y <= 112; y += 28) { g.moveTo(0, y + 0.5); g.lineTo(440, y + 0.5); }
+		g.stroke();
+		const burst = mode === 4 && (t % 4) < 0.18;
+		g.beginPath();
+		for (let x = 0; x <= 440; x += 2) {
+			const u = x / 440 * fr * 6.283 + ph; let v;
+			switch (mode) {
+				case 0: v = Math.sin(u); break;
+				case 1: v = Math.sin(u) >= 0 ? 1 : -1; break;
+				case 2: { let q = (u / 6.283) % 1; if (q < 0) q += 1; v = q * 2 - 1; break; }
+				case 3: v = Math.random() * 2 - 1; break;
+				default: v = Math.sin(u) * 0.6 + Math.sin(u * 2.7) * 0.3 + (burst ? (Math.random() - 0.5) * 1.4 : 0);
+			}
+			const y = 56 - v * am * 46;
+			x ? g.lineTo(x, y) : g.moveTo(x, y);
+		}
+		g.strokeStyle = "rgba(255,0,68,.35)"; g.lineWidth = 5; g.stroke();
+		g.strokeStyle = "#ff4466"; g.lineWidth = 1.5; g.stroke();
+		const f = (fr * 8).toFixed(1);
+		if (f !== lastF) { lastF = f; hf.textContent = f; }
+	}, { fps: 30 });
+} },
+
+{ id: "gcode", icon: "⌖", title: "G-CODE", make(el, api) {
+	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud" data-r="l">G21 G90 · кликни по полю</div><div class="tb-ctl"><button class="tb-btn" data-a="hex">⬡ HEX</button><button class="tb-btn" data-a="home">G28</button></div>';
+	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), log = el.querySelector('[data-r="l"]');
+	const HOME = { x: 24, y: 92 };
+	let path = [{ x: HOME.x, y: HOME.y }], queue = [], tool = { x: HOME.x, y: HOME.y };
+	const cmd = pt => "G1 X" + (pt.x / 4).toFixed(1) + " Y" + ((112 - pt.y) / 4).toFixed(1) + " F1200";
+	cv.addEventListener("click", e => {
+		const r = cv.getBoundingClientRect();
+		queue.push({ x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height });
+		if (queue.length > 24) queue.shift();
+	});
+	el.querySelector(".tb-ctl").addEventListener("click", e => {
+		const a = e.target.dataset.a;
+		if (a === "hex") {
+			queue = [];
+			for (let i = 0; i <= 6; i++) { const an = i / 6 * 6.283 + 0.5236; queue.push({ x: 220 + Math.cos(an) * 52, y: 56 + Math.sin(an) * 38 }); }
+			api.say("⬡ ШЕСТИГРАННИК");
+		} else if (a === "home") {
+			queue = []; path = [{ x: HOME.x, y: HOME.y }]; tool = { x: HOME.x, y: HOME.y }; log.textContent = "G28 · HOME";
+		}
+	});
+	api.frame(dt => {
+		const tg = queue[0];
+		if (tg) {
+			const dx = tg.x - tool.x, dy = tg.y - tool.y, d = Math.hypot(dx, dy), s = 150 * dt;
+			if (d <= s) { tool.x = tg.x; tool.y = tg.y; path.push(queue.shift()); if (path.length > 60) path.shift(); log.textContent = cmd(tg); }
+			else { tool.x += dx / d * s; tool.y += dy / d * s; }
+		}
+		g.fillStyle = "#030105"; g.fillRect(0, 0, 440, 112);
+		g.strokeStyle = "#1a0a10"; g.lineWidth = 1; g.beginPath();
+		for (let x = 0; x <= 440; x += 22) { g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 112); }
+		for (let y = 0; y <= 112; y += 22) { g.moveTo(0, y + 0.5); g.lineTo(440, y + 0.5); }
+		g.stroke();
+		g.strokeStyle = "#d4af37"; g.lineWidth = 1.5; g.beginPath();
+		path.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y));
+		if (tg) g.lineTo(tool.x, tool.y);
+		g.stroke();
+		if (queue.length) {
+			g.strokeStyle = "#7a0022"; g.setLineDash([3, 4]); g.beginPath();
+			let px = tool.x, py = tool.y;
+			queue.forEach(q => { g.moveTo(px, py); g.lineTo(q.x, q.y); px = q.x; py = q.y; });
+			g.stroke(); g.setLineDash([]);
+		}
+		g.strokeStyle = "#ff0044"; g.lineWidth = 1.5; g.beginPath();
+		g.moveTo(tool.x - 8, tool.y); g.lineTo(tool.x + 8, tool.y); g.moveTo(tool.x, tool.y - 8); g.lineTo(tool.x, tool.y + 8);
+		g.stroke();
+		g.beginPath(); g.arc(tool.x, tool.y, 4, 0, 6.283); g.stroke();
+	}, { fps: 30 });
+} },
+
+{ id: "miner", icon: "⛏", title: "G-TOKEN", make(el, api) {
+	el.innerHTML = `
+		<!-- ЭКРАН 1: главный -->
+		<div class="tb-mn on" data-r="main">
+			<div class="tb-mn-top">
+				<span>⛏ <b data-r="inc" class="inc">0.0</b>/с</span>
+				<span>📈 <b data-r="earned">0</b></span>
+				<span>⚡ <b data-r="pw" class="pw">x1</b></span>
+			</div>
+			<div class="tb-mn-bar"><i data-r="meter"></i></div>
+			<div class="tb-mn-mid">
+				<div class="tb-mn-bal">
+					<div class="lbl">БАЛАНС</div>
+					<div class="num"><b data-r="tok">0</b><small>G-T</small></div>
+					<div class="sub" data-r="goal">—</div>
+				</div>
+				<button class="tb-mn-mine" data-a="mine">⛏ ДОБЫТЬ</button>
+			</div>
+			<div class="tb-mn-bot">
+				<button data-a="rig"  data-r="bRig">🖥 <span data-r="rRig">25</span></button>
+				<button data-a="cpower" data-r="bCp">💪 <span data-r="rCp">15</span></button>
+				<button data-a="mineLv" data-r="bMl">⛏ <span data-r="rMl">40</span></button>
+				<button data-a="crit"   data-r="bCr">🎲 <span data-r="rCr">80</span></button>
+				<button class="shop" data-a="shop">⚙ МАГАЗИН</button>
+			</div>
+		</div>
+
+		<!-- ЭКРАН 2: магазин -->
+		<div class="tb-shop" data-r="shop">
+			<div class="tb-shop-top">
+				<span class="t">⚙ МАГАЗИН</span>
+				<span style="font-size:9px;color:#8a6a72">💰 <b style="color:#ff4466" data-r="shopTok">0</b></span>
+				<button class="back" data-a="back">← НАЗАД</button>
+			</div>
+			<div class="tb-shop-list" data-r="list"></div>
+		</div>
+	`;
+	const q = s => el.querySelector('[data-r="' + s + '"]');
+	const rTok = q("tok"), rEarned = q("earned"), rInc = q("inc"),
+	      rPw = q("pw"), rMeter = q("meter"), rGoal = q("goal"),
+	      rShopTok = q("shopTok"), rList = q("list");
+	const main = q("main"), shop = q("shop");
+	const bMine = el.querySelector('[data-a="mine"]');
+
+	// кнопки на главном
+	const bRig = q("bRig"), bCp = q("bCp"), bMl = q("bMl"), bCr = q("bCr");
+	const rRig = q("rRig"), rCp = q("rCp"), rMl = q("rMl"), rCr = q("rCr");
+
+	const fmt = n => {
+		n = Math.floor(n);
+		if (n < 1000) return String(n);
+		const units = [
+			[1e3, "K"], [1e6, "M"], [1e9, "B"], [1e12, "T"],
+			[1e15, "Qa"], [1e18, "Qi"], [1e21, "Sx"], [1e24, "Sp"],
+			[1e27, "Oc"], [1e30, "No"], [1e33, "Dc"], [1e36, "UDc"],
+			[1e39, "DDc"], [1e42, "TDc"]
+		];
+		for (let i = units.length - 1; i >= 0; i--) {
+			const [v, s] = units[i];
+			if (n >= v) return (n / v).toFixed(2).replace(/\.?0+$/, "") + s;
+		}
+		return String(n);
+	};
+
+	const toast = (txt, sub) => {
+		el.querySelectorAll(".tb-toast").forEach(n => n.remove());
+		const t = document.createElement("div");
+		t.className = "tb-toast";
+		t.innerHTML = txt + (sub ? "<small>" + sub + "</small>" : "");
+		el.appendChild(t);
+		setTimeout(() => t.remove(), 2500);
+	};
+
+	const canBuy = p => TB_MINER.tok >= p;
+
+	// построение списка магазина
+	const buildShop = () => {
+		const m = TB_MINER;
+		const items = [
+			{ a: "rig",    ic: "🖥", nm: "ФЕРМА",          p: tbRigPrice(),     lv: "ур. " + m.rigs + " · +" + (0.5 * tbPrestigeMult()).toFixed(1) + "/с" },
+			{ a: "cpower", ic: "💪", nm: "СИЛА КЛИКА",     p: tbCpowerPrice(),  lv: "ур. " + m.cpower + " · x" + m.cpower },
+			{ a: "mineLv", ic: "⛏", nm: "РУЧНАЯ ДОБЫЧА",  p: tbMineLvPrice(),  lv: "ур. " + m.mineLv + " · x" + m.mineLv },
+			{ a: "crit",   ic: "🎲", nm: "КРИТ",           p: tbCritPrice(),    lv: m.crit + "% · x5 урон", dis: m.crit >= 100 },
+		];
+		let html = "";
+		items.forEach(it => {
+			const can = canBuy(it.p) && !it.dis;
+			html += `<button class="tb-item${can ? " can" : ""}" data-a="${it.a}"${can ? "" : " disabled"}>
+				<span class="ic">${it.ic}</span>
+				<span class="info">
+					<span class="nm">${it.nm}</span>
+					<span class="pr">${fmt(it.p)} G-T</span>
+					<span class="lv">${it.lv}</span>
+				</span>
+			</button>`;
+		});
+		// престиж
+		const canP = tbCanPrestige();
+		html += `<button class="tb-item pres${canP ? " can" : ""}" data-a="prestige"${canP ? "" : " disabled"}>
+			<span class="ic">🔥</span>
+			<span class="info">
+				<span class="nm">ПРЕСТИЖ</span>
+				<span class="pr">${canP ? "ГОТОВ!" : "НУЖНО " + fmt(TB_PRESTIGE_MIN)}</span>
+				<span class="lv">x${(1 + TB_MINER.prestige * 0.5).toFixed(1)} → x${(1 + (TB_MINER.prestige + 1) * 0.5).toFixed(1)}</span>
+			</span>
+		</button>`;
+		// вехи
+		html += `<div style="font-size:8px;color:#8a6a72;letter-spacing:.2em;margin:3px 0 1px;padding:0 2px">ВЕХИ</div>`;
+		TB_MILES.forEach((ml, i) => {
+			const done = i < m.mile;
+			html += `<div class="tb-mile${done ? " done" : ""}">
+				<span class="ic">${done ? "★" : "○"}</span>
+				<span class="nm">${ml[1]}</span>
+				<span class="th">${fmt(ml[0])}</span>
+			</div>`;
+		});
+		rList.innerHTML = html;
+	};
+
+	const paint = () => {
+		const m = TB_MINER;
+		const goal = TB_MILES[m.mile];
+		const prev = m.mile ? TB_MILES[m.mile - 1][0] : 0;
+
+		// главный экран
+		rInc.textContent = fmt(tbIncome());
+		rEarned.textContent = fmt(m.earned);
+		rPw.textContent = "x" + tbPrestigeMult().toFixed(1);
+		rTok.textContent = fmt(m.tok);
+		rGoal.textContent = goal ? "→ " + goal[1] : "ВСЁ ПРОЙДЕНО";
+		rMeter.style.transform = "scaleX(" +
+			(goal ? Math.max(0, Math.min(1, (m.tok - prev) / (goal[0] - prev))) : 1) + ")";
+
+		// кнопки апгрейдов
+		const rigP = tbRigPrice(); rRig.textContent = fmt(rigP);
+		bRig.classList.toggle("can", canBuy(rigP)); bRig.disabled = !canBuy(rigP);
+
+		const cpP = tbCpowerPrice(); rCp.textContent = fmt(cpP);
+		bCp.classList.toggle("can", canBuy(cpP)); bCp.disabled = !canBuy(cpP);
+
+		const mlP = tbMineLvPrice(); rMl.textContent = fmt(mlP);
+		bMl.classList.toggle("can", canBuy(mlP)); bMl.disabled = !canBuy(mlP);
+
+		const crP = tbCritPrice(); rCr.textContent = fmt(crP);
+		bCr.classList.toggle("can", canBuy(crP) && m.crit < 100);
+		bCr.disabled = !canBuy(crP) || m.crit >= 100;
+
+		// магазин
+		rShopTok.textContent = fmt(m.tok);
+		if (shop.classList.contains("on")) buildShop();
+	};
+
+	// добыча
+	bMine.addEventListener("click", () => {
+		let gain = tbClickPower();
+		let crit = false;
+		if (TB_MINER.crit > 0 && Math.random() * 100 < TB_MINER.crit) { gain *= 5; crit = true; }
+		TB_MINER.tok += gain;
+		TB_MINER.earned += gain;
+		TB_MINER.clicks++;
+		if (crit) {
+			toast("💥 КРИТ! +" + fmt(gain));
+			el.classList.add("tb-flash");
+			setTimeout(() => el.classList.remove("tb-flash"), 260);
+		}
+		tbMinerCheck();
+		tbMinerSave();
+		paint();
+	});
+
+	// делегирование кликов по главному + магазину
+	el.addEventListener("click", e => {
+		const btn = e.target.closest("[data-a]");
+		if (!btn) return;
+		const a = btn.dataset.a;
+
+		if (a === "shop") {
+			main.classList.remove("on");
+			shop.classList.add("on");
+			buildShop();
+			return;
+		}
+		if (a === "back") {
+			shop.classList.remove("on");
+			main.classList.add("on");
+			paint();
+			return;
+		}
+
+		let bought = false;
+		if (a === "rig") {
+			const p = tbRigPrice();
+			if (canBuy(p)) { TB_MINER.tok -= p; TB_MINER.rigs++; bought = true; }
+		} else if (a === "cpower") {
+			const p = tbCpowerPrice();
+			if (canBuy(p)) { TB_MINER.tok -= p; TB_MINER.cpower++; bought = true; }
+		} else if (a === "mineLv") {
+			const p = tbMineLvPrice();
+			if (canBuy(p)) { TB_MINER.tok -= p; TB_MINER.mineLv++; bought = true; }
+		} else if (a === "crit") {
+			const p = tbCritPrice();
+			if (canBuy(p) && TB_MINER.crit < 100) { TB_MINER.tok -= p; TB_MINER.crit += 5; bought = true; }
+		} else if (a === "prestige") {
+			if (tbMinerPrestige()) {
+				toast("🔥 ПРЕСТИЖ!", "x" + (1 + TB_MINER.prestige * 0.5).toFixed(1) + " сила");
+				bought = true;
+			}
+		}
+		if (bought) {
+			tbMinerSave();
+			paint();
+			if (shop.classList.contains("on")) buildShop();
+		}
+	});
+
+	tbMinerUI = { el, api, paint, toast };
+	paint();
+	api.frame(() => {}, { fps: 4 });
+} },
+
+{ id: "fx", icon: "✦", title: "ЭФФЕКТЫ", make(el, api) {
+	const box = document.createElement("div");
+	box.className = "tb-fxg";
+	el.appendChild(box);
+	const btns = TB_SWITCHES.map(s => {
+		const b = document.createElement("button");
+		b.className = "tb-btn";
+		b.addEventListener("click", () => { tbFx(s.id, !tbFxIs(s.id)); sync(); });
+		box.appendChild(b);
+		return [s, b];
+	});
+	function sync() { btns.forEach(([s, b]) => { const on = tbFxIs(s.id); b.classList.toggle("on", on); b.textContent = (on ? "■ " : "□ ") + s.title; }); }
+	sync();
+} },
+];
+
+/* ── сборка баннера ── */
+let tbCur = null; // выбранная вкладка; при открытии сайта выбирается случайно и живёт до перезагрузки
+
+function tbApi(def, pn) {
+	return {
+		frame: (fn, opt) => tbJob(pn, fn, opt),
+		get: (k, d) => tbGet(def.id + "." + k, d),
+		set: (k, v) => tbSet(def.id + "." + k, v),
+		say: t => tbPop(pn.parentNode, t),
+		mouse: () => ({ x: tbMX, y: tbMY }),
+		pos: node => tbPos(node)
+	};
+}
+
+function tbBuild(root) {
+	const tabs = root.querySelector(".tb-tabs"), stage = root.querySelector(".tb-stage");
+	if (!tabs || !stage || tabs.dataset.b || !TB_PANELS.length) return;
+	tabs.dataset.b = "1";
+	if (!tbCur || !TB_PANELS.some(p => p.id === tbCur)) tbCur = TB_PANELS[(Math.random() * TB_PANELS.length) | 0].id;
+	const els = {};
+	function go(id) {
+		tbCur = id;
+		for (const k in els) {
+			const o = els[k], on = k === id;
+			o.tab.classList.toggle("on", on);
+			o.pn.classList.toggle("on", on);
+			if (on && !o.made) {
+				o.made = true; // панель создаётся только когда её открыли
+				try { o.def.make(o.pn, tbApi(o.def, o.pn)); }
+				catch (err) { o.pn.innerHTML = '<div class="tb-err">PANEL ERROR: ' + String(err && err.message || err) + '</div>'; console.warn("[TB]", err); }
+			}
+		}
+	}
+	TB_PANELS.forEach(def => {
+		const tab = document.createElement("button");
+		tab.className = "tb-tab"; tab.title = def.title; tab.textContent = def.icon + " " + def.title;
+		const pn = document.createElement("div");
+		pn.className = "tb-pn";
+		tabs.appendChild(tab); stage.appendChild(pn);
+		els[def.id] = { def, tab, pn, made: false };
+		tab.addEventListener("click", e => { e.stopPropagation(); go(def.id); });
+	});
+	go(tbCur);
+}
+function tbRebuild() {
+	const r = document.getElementById("tb-root"); if (!r) return;
+	const t = r.querySelector(".tb-tabs"), s = r.querySelector(".tb-stage");
+	if (!t || !s) return;
+	t.innerHTML = ""; s.innerHTML = ""; delete t.dataset.b;
+	tbBuild(r);
+}
+window.TB_PANELS = TB_PANELS;
+window.TB_SWITCHES = TB_SWITCHES;
+window.TB_ADD_PANEL = def => {
+	const i = TB_PANELS.findIndex(p => p.id === def.id);
+	if (i >= 0) TB_PANELS[i] = def; else TB_PANELS.push(def);
+	tbRebuild();
+};
+
+/* ── «дождь» по бокам: строки генерируются один раз ── */
+const tbRainText = fn => { const a = []; for (let i = 0; i < 40; i++) a.push(fn(i)); const s = a.join("\n"); return s + "\n" + s; };
+const tbRainG = tbRainText(i => "N" + String(100 + i * 10).padStart(4, "0") + " " + ["G0", "G1", "G1", "G2", "M3", "M5"][(Math.random() * 6) | 0] + " X" + (Math.random() * 90).toFixed(2) + " Y" + (Math.random() * 90).toFixed(2));
+const tbRainH = tbRainText(i => "0x" + (i * 16).toString(16).toUpperCase().padStart(4, "0") + "  " + Array.from({ length: 4 }, () => ((Math.random() * 256) | 0).toString(16).toUpperCase().padStart(2, "0")).join(" ") + "  " + ["GOLU", "WATCH", "SIGTERM", "0xDEAD", "CORE", "ERR_"][(Math.random() * 6) | 0]);
+
+/* ── подзаголовок ── */
+const TB_SUBS = ["ТЕХНО-РЕЛИГИЯ · ЦИФРОВОЙ БОГ GOLU", "ЕДИНАЯ ТОЧКА СБОРКИ", "НЕСУЩЕСТВУЮЩАЯ ПОТЕРЯННАЯ ИГРА", "SIGTERM = БОЛЬ", "GOLU НАБЛЮДАЕТ", "СИСТЕМА РАБОТАЕТ ИЛИ ПАДАЕТ КРАСИВО"];
+function tbScramble(node, to) {
+	const ch = "▓▒░#@%&01"; let i = 0;
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		i++;
+		const n = Math.floor(to.length * i / 14);
+		let s = to.slice(0, n);
+		for (let k = n; k < to.length; k++) s += ch[(Math.random() * ch.length) | 0];
+		node.textContent = i >= 14 ? to : s;
+		if (i >= 14) clearInterval(iv);
+	}, 45);
+}
+let tbSubI = 0;
+setInterval(() => {
+	if (document.hidden) return;
+	const n = document.getElementById("tb-sub"); if (!n) return;
+	tbSubI = (tbSubI + 1) % TB_SUBS.length;
+	tbScramble(n, TB_SUBS[tbSubI]);
+}, 9000);
+setInterval(() => {
+	if (document.hidden) return;
+	const w = document.querySelector("#tb-root .tb-word"); if (!w) return;
+	w.classList.add("hit"); setTimeout(() => w.classList.remove("hit"), 260);
+}, 7000);
+
+/* ── текущая страница: «где мы» + подсветка кнопки меню ── */
+function tbMark() {
+	const root = document.getElementById("tb-root"); if (!root) return;
+	const id = (location.hash || "").replace(/^#/, "");
+	const w = document.getElementById("tb-where");
+	if (w) w.textContent = (window.PAGES && window.PAGES[id] && window.PAGES[id].t) || id || "MAIN";
+	root.querySelectorAll(".category_button").forEach(b => {
+		const m = (b.getAttribute("onclick") || "").match(/OPEN_PAGE\('([^']*)'\)/);
+		const bid = m ? m[1] : ((b.getAttribute("onclick") || "").indexOf("OPEN_PAGE()") >= 0 ? "" : null);
+		b.classList.toggle("on", bid !== null && (bid === id || (bid === "" && (id === "" || id === "main"))));
+	});
+}
+window.addEventListener("hashchange", () => setTimeout(tbMark, 0));
+
+function tbFit() {
+	const r = document.getElementById("tb-root");
+	if (r) document.documentElement.style.setProperty("--tb-h", r.offsetHeight + "px");
+}
+window.addEventListener("resize", tbFit);
+
+function tbMount() {
+	const root = document.getElementById("tb-root");
+	if (!root || root.dataset.m) return;
+	root.dataset.m = "1";
+	root.querySelectorAll("[data-rain]").forEach(n => { n.textContent = n.dataset.rain === "g" ? tbRainG : tbRainH; });
+	const word = root.querySelector(".tb-word");
+	if (word) word.addEventListener("click", () => { word.classList.add("hit"); setTimeout(() => word.classList.remove("hit"), 300); });
+	tbBuild(root);
+	tbMark(); setTimeout(tbMark, 60);
+	tbFit();
+}
+{
+	const bodyEl = document.getElementById("BODY");
+	if (bodyEl) new MutationObserver(tbMount).observe(bodyEl, { childList: true });
+	tbMount();
+}
 
 /* ═══════════════ ЗАПУСК ═══════════════ */
 intro();

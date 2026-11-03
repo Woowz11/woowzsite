@@ -737,7 +737,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 
 WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
 	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
-	"bg10","bg11","prev"
+	"bg10","bg11","prev","bg12"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"
