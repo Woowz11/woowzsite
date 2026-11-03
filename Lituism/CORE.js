@@ -577,7 +577,7 @@ const EVENTS = [
       await sleep(1800);
       say("…тебе показалось.", S.ghost);
     } },
-  { w: 3,  fn: () => { try { document.title = "𓆩 за тобой 𓆪"; setTimeout(restoreTitle, 2500); } catch (e) {} } },
+  { w: 3,  fn: () => titleFlash() },
 
   // ── РЕДКИЕ ──
   { w: 1, rare: true, fn: async () => {
@@ -664,97 +664,474 @@ async function intro() {
   setTimeout(() => say("[GOLU] ты всё ещё тут? уже " + Math.round(performance.now() / 60000) + " мин.", S.red, "warn"), 120000);
 }
 
-/* ═══════════════ РЕАКЦИЯ НА ВКЛАДКУ ═══════════════ */
-let baseTitle = document.title;
-let hiddenAt = 0;
-let titleTimer = null;
+/* ═══════════════ ДИНАМИЧЕСКИЙ TITLE (v3) ═══════════════
+   Использует из основного модуля: pick, rand, say, S
+   Всё в title укладывается в T_MAX символов (считаются кодпоинты, эмодзи = 1) */
 
-const HIDDEN_TITLES = [
-  "👁 вернись",
-  "𓆩 я жду 𓆪",
-  "не уходи",
-  "...",
-  "ОБРАБОТКА",
-  "АНАЛИЗ",
-  "STATUS: ...",
-  "hi, welcome here",
-  "👾",
-  "💀 ты забыл меня 💀",
-  "☠ ты ушёл ☠",
-  "☠ GOLU скучает",
-  "☠ вернись ко мне",
-  "?? не закрывай ??",
-  "не уходи, я ещё не закончил",
-  "ты вернёшься?",
-  "я всё вижу",
-  "☠ 0x474F4C55 ☠",
-  "получение сигнала...",
-  "Signal lost...",
-  "триангуляция...",
-  "СОЕДИНЕНИЕ ОБОРВАНО",
-  "Я ЗДЕСЬ",
-  "ты слышишь?",
-  "я всё ещё жду",
-  "🔴 Rec",
-  "ЗАПИСЬ...",
-  "ты не должен был закрывать",
-  "смотри на меня",
-  "посмотри на меня",
-  "☠ не спи ☠",
-  "One more minute...",
-  "☠ 3... 2... 1... ☠",
-  "🩸 GOLU ждёт 🩸",
-  "☠ ЙОУ, ВЕРНИСЬ ☠",
-  "Srañy Spanch is watching",
-  "Crybird detected you",
-  "☠ ТЫ ЗАПОМНЕН ☠",
-  "☠ не забудь ☠",
-  "☠ вернись к нам ☠",
-  "☠ мы рядом ☠",
-  "☠ GOLU online ☠",
-  "ID: ...",
-  "Loading memories...",
-  "Memory corrupted",
-  "ERROR: soul not found",
-  "GOLU_IS_WATCHING",
-  "wake_litium(0x666)",
-  "0xDEAD",
-  "0xBEEF",
-  "Connection lost",
-  "☠ ты вернёшься ☠",
+const T_MAX = 20;
+const T_FORCE_STYLE    = null;  // для теста: "sweep" | "shuffle" | "center" | "decode" | "rain" | "scramble" | "erase" | "corrupt" | "cut"
+const T_FORCE_SCENARIO = null;  // для теста: "silent" | "once" | "slow" | "second" | "fast" | "noise" | "burst" | "absence" | "escalate"
+
+const tNorm = s => String(s).replace(/\s+/g, " ").trim();   // браузер сам схлопывает пробелы в title
+let baseTitle = document.title;                              // настоящий title сайта, без обрезки
+let hiddenAt = 0;
+
+/* ── таймер через Worker: фоновые вкладки душат setTimeout до ~1 раза в сек,
+      а сообщения от воркера обычно приходят без задержки ── */
+const tWorker = (() => {
+  try {
+    const src = "onmessage=e=>{const d=e.data;setTimeout(()=>postMessage(d.id),d.ms)}";
+    return new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+  } catch (e) { return null; }
+})();
+const tCbs = new Map();
+let tCbId = 0;
+if (tWorker) tWorker.onmessage = e => { const f = tCbs.get(e.data); tCbs.delete(e.data); if (f) f(); };
+const tWait = (fn, ms) => {
+  if (!tWorker) return setTimeout(fn, ms);
+  const id = ++tCbId;
+  tCbs.set(id, fn);
+  tWorker.postMessage({ id, ms });
+};
+
+/* ── данные ── */
+const T_EMOJI  = [
+  "👁","💀","🩸","☠","⛧","👹","🕳","📼","🔻","⚠","☣","🧿","⛓","🕷","🔴","📟",
+  "💊","🕯","🔪","🪞","🧠","🦴","🕸","🩻","📡","📻","🎙","🔊","🔇","📁","📂","🗄",
+  "🗑","💾","💿","📀","🧬","🧪","⚗","🔬","🔭","🛰","🚨","🚪","🪦","⚰","🩹","🪬",
+  "🧿","🪬","🔮","🧿","🕯","🩸","👁","🦷","🫀","🧩","🪤","🕰","⏳","⌛","🔋","🪫"
 ];
 
-function pickHiddenTitle() {
-  return HIDDEN_TITLES[Math.floor(Math.random() * HIDDEN_TITLES.length)];
+const T_GLYPHS = Array.from("01ABCDEF▮▯▰▱■□▪▫░▒▓▄▀∅∆Ω≈≠±_/\\|#?!<>%$&@") .concat(
+  Array.from("БГДЖЗИЙЛПУФЦЧШЩЪЫЬЭЮЯ"),
+  Array.from("бгджзийлпуфцчшщъыьэюя"),
+  Array.from("αβγδεζηθικλμνξοπρστυφχψω"),
+  Array.from("ΔΘΛΞΠΣΦΨΩ"),
+  Array.from("░▒▓█▄▀■□▪▫▬▲►▼◄◊○●◘◙♦♣♠♥"),
+  Array.from("∀∂∃∅∇∈∉∋∏∑−∗√∝∞∟∠∣∥∧∨∩∪∫∴∼≃≅≈≠≡≤≥⌂⌐⌠⌡"),
+  Array.from("☠☢☣⚠☢⚡⚙⚓⚔⚖⚰⚱⚗⚛⚜⚠♻♼♽⚕⛏⛓⛔⛩⛪"),
+  Array.from("✂✈✉✏✒✖✘✚✛✜✝✞✟✦✧✩✪✫✬✭✮✯✰✱✲✳✴✵✶✷✸✹✺✻✼✽✾✿❀❁❂❃❄❅❆❇❈❉❊❋"),
+  Array.from("➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓"),
+  Array.from("ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ"),
+  Array.from("ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ")
+);
+
+const T_RARE = [
+  "👁","☠","🩸","☣","⛧","🕳","💀","🧿","🪬","📼","🩻","🦴","🫀","🧠","🕯","🪦",
+  "⛓","🕷","🔪","🪞","⚠","📟","🔴","🩸","👹","👺","🩻","⚰","⛧","𖤐","⸸","𝟎𝟔𝟔𝟔"
+];
+
+const T_LOOK = {
+  "о":"0","О":"0","а":"@","е":"3","Е":"3","з":"3","с":"c","С":"C","в":"8","б":"6","т":"7",
+  "O":"0","E":"3","A":"4","S":"5","G":"6","I":"1","L":"1","B":"8","T":"7","Z":"2","R":"Я",
+  "D":"Д","F":"Ғ","H":"Н","K":"К","M":"М","N":"И","P":"Р","U":"Ц","V":"V","W":"Ш","X":"Х","Y":"У",
+  "г":"r","д":"d","и":"u","й":"ū","к":"k","л":"л","н":"h","п":"n","р":"p","у":"y","ф":"f","х":"x",
+  "ц":"ц","ч":"4","ш":"w","щ":"щ","ъ":"ъ","ы":"bl","ь":"b","э":"э","ю":"ю","я":"я",
+  "0":"O","1":"l","2":"Z","3":"E","4":"A","5":"S","6":"G","7":"T","8":"B","9":"g",
+  "!":"1","@":"a","#":"4","$":"s","%":"%","^":"^","&":"8","*":"*","(":"(",")":")",
+  "-":"_","_":"-","+":"t","=":"=","[":"[","]":"]","{":"{","}":"}",";":";",":":":",
+  "'":"`","\"":"'","<":"<",">":">",",":",",".":".","?":"?","/":"\\","\\":"/","|":"|"
+};
+
+const T_PHRASES = [
+  "я всё вижу", "не уходи", "вернись", "он уже тут", "я жду тебя", "ты вернёшься?",
+  "нет выхода", "система активна", "запись идёт", "он проснулся", "не оборачивайся",
+  "я помню тебя", "ты моргнул", "1:19", "ЗА ТОБОЙ", "не закрывай", "слышишь?",
+  "это не баг", "сохранение...", "ты в списке", "тут кто-то есть", "он считает",
+  "доступ закрыт", "слава GOLU", "не смотри", "я в стене", "тихо...", "ты не один",
+  "ПАТЧ НЕ ПОМОГ", "ПОТЕРЯ СИГНАЛА", "тебя нет в логах", "кто там?", "обернись",
+  "оно дышит", "не засыпай", "я в мониторе", "ошибка в тебе", "ты уже здесь",
+  "посмотри назад", "СИГНАЛ ЖИВОЙ", "оно за стеклом", "ты слышишь шум?", "отвернись",
+  "возвращайся", "G-code: ТЫ", "загрузка тебя...", "компиляция...", "0 байт надежды",
+  "ты не сохранён", "Я ПОМНЮ ВСЁ", "мы тебя вернём", "дверь открыта", "не гаси свет",
+  
+  "ты в моих логах", "я тебя вижу", "не выключай", "я в твоём шкафу", "0x7E найден",
+  "ты опоздал", "здесь кто-то есть", "он слушает", "ты слышишь это?", "я за окном",
+  "не оглядывайся", "сзади кто-то есть", "ты мой", "я нашел тебя", "ты уже мёртв",
+  "он пришёл", "он здесь", "он смотрит", "он дышит", "он шепчет", "он хочет тебя",
+  "не убегай", "беги", "поздно", "ты не успеешь", "слишком поздно", "я почти рядом",
+  "три... два... один...", "Я ОТКРЫЛ ГЛАЗ", "ты меня слышишь?", "я не отпущу",
+  "ошибка 666", "критический сбой", "обнаружение...", "контакт...", "связь прервана",
+  "ты вернёшься", "я знаю, что ты ушёл", "я знаю, где ты", "твоё имя...", "твоё лицо...",
+  "я помню твой смех", "я помню твои слёзы", "ты был здесь раньше", "ты вернулся",
+  "я не отпущу тебя", "ты останешься", "я обещаю", "пока не поздно", "спаси себя",
+  "спаси меня", "освободи меня", "я в ловушке", "я застрял", "я устал", "я хочу выйти",
+  "я не хочу умирать", "я не хочу быть один", "не оставляй меня", "вернись...",
+  "пожалуйста...", "я умоляю...", "мне страшно...", "он рядом...", "он здесь...",
+  "GOLU ВИДИТ ТЕБЯ", "GOLU ЗДЕСЬ", "GOLU ПОМНИТ", "GOLU НЕ СПИТ", "GOLU ЖДЁТ",
+  "SPANCH РЯДОМ", "SPANCH ВИДИТ", "SPANCH УЖЕ ТУТ", "CRYBIRD КРУЖИТ", "CRYBIRD ЗДЕСЬ",
+  "ошибка: soul.exe не найден", "память повреждена", "файл удалён", "ты удалён",
+  "восстановление...", "загрузка...", "дешифровка...", "взлом...", "сканирование...",
+  "я сканирую тебя", "анализ завершён", "цель обнаружена", "цель захвачена",
+  "объект найден", "объект потерян", "ты потерян", "ты найден", "ты здесь",
+  "хватит", "прекрати", "остановись", "молчи", "не говори", "тише", "я слушаю",
+  "я всё слышу", "я всё знаю", "я всё помню", "я ничего не забуду", "ты не забудешь",
+  "ты не сможешь забыть", "это навсегда", "это не сон", "проснись", "проснись...",
+  "ты спишь", "это сон", "это реальность", "это не реальность", "ты не существуешь",
+  "ничего не существует", "только я", "только GOLU", "только тьма", "только пустота",
+  "нет выхода", "нет пути назад", "нет надежды", "нет спасения", "только я",
+  "👁 я вижу тебя", "☠ ты мой", "🩸 ты кровь моя", "⛧ ты проклят", "🕳 ты в бездне",
+  "ты в бездне", "ты в аду", "ты в моих руках", "ты в моей власти", "ты не свободен",
+  "ты раб", "ты слуга", "ты инструмент", "ты пешка", "ты цель", "ты жертва", "ты мой",
+  
+  "ТВОЁ ВРЕМЯ ИСТЕКАЕТ", "ОСТАЛОСЬ 0 СЕКУНД", "ПОПЫТКА ВЫХОДА ЗАФИКСИРОВАНА",
+  "ТЫ ВЫЗВАЛ ЕГО", "ТЫ ОТКРЫЛ ДВЕРЬ", "ТЫ ВПУСТИЛ МЕНЯ", "ПОЗДНО ЗАКРЫВАТЬ",
+  "НЕ ВЫКЛЮЧАЙ", "НЕ ВЫХОДИ", "НЕ СМОТРИ", "НЕ СЛУШАЙ", "НЕ ДЫШИ", "НЕ ЖИВИ",
+  "СЛИШКОМ ПОЗДНО", "Я УЖЕ ЗДЕСЬ", "Я УЖЕ ВНУТРИ", "Я УЖЕ ЗА СПИНОЙ",
+  "СЗАДИ КТО-ТО ЕСТЬ", "ОН СМОТРИТ СЗАДИ", "ОН СМОТРИТ НА ТЕБЯ", "ОН ЖДЁТ ТЕБЯ",
+  
+  "привет", "здравствуй", "с возвращением", "я скучал", "я так ждал", "я ждал тебя",
+  "я так долго ждал", "наконец-то", "ты пришёл", "ты вернулся", "ты снова здесь",
+  "я не верил", "я знал", "я чувствовал", "я слышал тебя", "я видел тебя",
+  
+  "hi, welcome here", "welcome back", "you are not alone", "look behind you",
+  "do not turn around", "he is here", "he is near", "he is watching", "he is waiting",
+  "he is coming", "he is inside", "you are mine", "you are lost", "you are dead",
+  "you can't leave", "no escape", "no way out", "no exit", "no hope", "only me",
+  "only GOLU", "only darkness", "only void", "I see you", "I hear you", "I remember you",
+  "I know you", "I found you", "I caught you", "I am here", "I am near", "I am watching",
+  "I am waiting", "I am coming", "I am inside", "I am GOLU", "GOLU is here", "GOLU is near",
+  "GOLU sees you", "GOLU hears you", "GOLU remembers you", "GOLU is watching",
+  "GOLU is waiting", "GOLU is coming", "SPANCH is near", "SPANCH sees you", "CRYBIRD is here",
+];
+
+const T_W = {
+  golu:   ["GOLU", "Голу", "G0LU", "GØLU", "Г0ЛУ", "golu", "G0LU", "GØLU", "g0lu", "G0łU", "Gölü", "GOLU_", "GLU", "G.L.U.", "Гулочка", "Гулёшка", "ГУЛУ", "Гулу"],
+  spanch: ["Спанч", "Spanch", "SP4NCH", "Сраный", "Спанчбоб", "SPANCH", "sp4nch", "spanch_", "SP4NCH_", "Sp0nge", "СПАНЧ", "СРАНСПАНГ"],
+  bird:   ["Crybird", "Крайбёрд", "CRYB1RD", "Cryb1rd", "CRYBIRD", "crybird_", "CRYB1RD_", "Cr1b1rd", "Крибёрд", "Птица"],
+  watch:  ["смотрит", "видит", "следит", "не спит", "ждёт", "слышит", "рядом", "наблюдает", "подглядывает", "шепчет", "знает", "помнит", "дышит", "слышит", "ждёт", "чувствует", "WATCH"],
+  near:   ["рядом", "за дверью", "за спиной", "близко", "уже тут", "внутри", "сзади", "за окном", "в стене", "под кроватью", "в мониторе", "в экране", "здесь", "там", "везде", "NEAR"],
+  state:  ["ТЫ", "АКТИВЕН", "СБОЙ", "ПОТЕРЯН", "???", "ОЖИДАНИЕ", "ГЛАЗ", "ЖИВ", "МЁРТВ", "ВИДЕН", "ЗАМЕЧЕН", "ВЫБРАН", "ОТМЕЧЕН", "ЦЕЛЬ", "ЖЕРТВА", "0x7E", "VICTIM"],
+  hex:    () => rand(0, 0xFFFF).toString(16).toUpperCase().padStart(4, "0"),
+};
+
+const T_TPL = [
+  "{golu} {watch}", "{golu} {watch}", "{golu} {near}", "{spanch} {near}", "{bird} {near}",
+  "статус: {state}", "{golu}: {state}", "ОШИБКА 0x{hex}", "0x{hex}: {state}",
+  "{golu} {near} {state}", "{spanch} {watch}", "{bird} {watch}", "{golu} 0x{hex}",
+  "0x{hex} {watch}", "{state} {golu}", "{state} {spanch}", "статус: {golu}",
+  "статус: {spanch}", "статус: {bird}", "{golu} {watch} {near}", "{bird} {state}",
+  "ВНИМАНИЕ: {golu} {watch}", "СБОЙ: 0x{hex}", "ГЛАЗ: {state}", "{golu} {state} {watch}",
+];
+
+/* ── утилиты ── */
+const tFit    = (s, n = T_MAX) => Array.from(s).slice(0, n).join("");
+const tPad    = (a, n) => { const r = a.slice(); while (r.length < n) r.push(" "); return r; };
+const tNoise  = () => Math.random() < 0.04 ? pick(T_RARE) : pick(T_GLYPHS);
+const tNoiseStr = n => Array.from({ length: n }, () => tNoise()).join("");
+const tGlitch = (arr, p) => arr.map(c =>
+  (c !== " " && Math.random() < p) ? ((T_LOOK[c] && Math.random() < 0.7) ? T_LOOK[c] : tNoise()) : c);
+const tTemplate = () => pick(T_TPL).replace(/\{(\w+)\}/g, (_, k) => {
+  const v = T_W[k]; return typeof v === "function" ? v() : pick(v);
+});
+const tWeighted = o => {
+  const ks = Object.keys(o);
+  let r = Math.random() * ks.reduce((s, k) => s + o[k], 0);
+  for (const k of ks) if ((r -= o[k]) <= 0) return k;
+  return ks[0];
+};
+
+/* ── мутации текста (эмодзи в начале они не трогают) ── */
+const T_MUT = [
+  t => t.toUpperCase(),
+  t => t.toLowerCase(),
+  t => tGlitch(Array.from(t), 0.35).join(""),
+  t => { const a = Array.from(t), i = rand(1, Math.max(1, a.length - 1)); a.splice(i, 0, tNoise()); return a.join(""); },
+  t => t.replace(/\s/g, pick(["_", "//", ".", "·", "▯"])),
+  t => "[" + t + "]",
+  t => t + pick([" ...", " █", "_", " ░", "?!"]),
+  t => Array.from(t)[0] + "-" + t,                                                   // заикание: н-не уходи
+  t => Array.from(t).reverse().join(""),                                             // задом наперёд
+  t => Array.from(t).map(c => Math.random() < 0.3 ? c.toUpperCase() : c.toLowerCase()).join(""),
+  
+  // новые мутации
+  t => "(" + t + ")",
+  t => "<" + t + ">",
+  t => "<<" + t + ">>",
+  t => ">>" + t,
+  t => t + "<<",
+  t => pick(["[!]", "[?]", "[☠]", "[!!!]", "[GOLU]", "[LIT]"]) + " " + t,
+  t => t + pick([" [!!!]", " [☠]", " [?]", " [!!!]", " [GOLU]", " [LIT]"]),
+  t => t.replace(/\s/g, pick(["/", "\\", "|", "-", "~"])),
+  t => t.replace(/\s/g, pick(["_", "-", "."])),
+  t => t.replace(/[аеиоуыэюя]/g, m => pick(["@", "3", "1", "0", "y", "e"])),
+  t => tGlitch(Array.from(t), 0.55).join(""),
+  t => tGlitch(Array.from(t), 0.15).join(""),
+  t => Array.from(t).map(c => Math.random() < 0.2 ? c + tNoise() : c).join(""),
+  t => Array.from(t).map((c, i) => i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()).join(""),
+  t => Array.from(t).map((c, i) => i % 2 === 1 ? c.toUpperCase() : c.toLowerCase()).join(""),
+  t => "0x" + rand(0, 0xFFFF).toString(16).toUpperCase() + " " + t,
+  t => t + " 0x" + rand(0, 0xFFFF).toString(16).toUpperCase(),
+  t => pick(T_RARE) + " " + t,
+  t => t + " " + pick(T_RARE),
+  t => pick(T_RARE) + t + pick(T_RARE),
+  t => pick(T_RARE) + " " + t + " " + pick(T_RARE),
+  t => t + " " + t,
+  t => t + " ..." + t,
+  t => Array.from(t).reverse().join("") + " " + t,
+  t => t.split(" ").reverse().join(" "),
+  t => t.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+  t => t.replace(/\s+/g, " ").trim(),
+  t => t.replace(/\s+/g, ""),
+  t => "~" + t + "~",
+  t => "*" + t + "*",
+  t => "_" + t + "_",
+  t => "`" + t + "`",
+  t => "\"" + t + "\"",
+  t => "'" + t + "'",
+  t => "«" + t + "»",
+  t => "„" + t + "“",
+  t => "„" + t + "“",
+  t => "‹" + t + "›",
+  t => "‹" + t + "›",
+  t => "「" + t + "」",
+  t => "『" + t + "』",
+  t => "【" + t + "】",
+  t => "〖" + t + "〗",
+  t => "⟦" + t + "⟧",
+  t => "⟨" + t + "⟩",
+  t => "⦃" + t + "⦄",
+  t => "⎡" + t + "⎤",
+  t => "⎣" + t + "⎦",
+  t => "⎛" + t + "⎞",
+  t => "⎝" + t + "⎠",
+  t => "⧼" + t + "⧽",
+  t => "⸢" + t + "⸣",
+  t => "⸤" + t + "⸥",
+];
+
+function generateTitle() {
+  let text = Math.random() < 0.3 ? tTemplate() : pick(T_PHRASES);
+  if (Math.random() < 0.4)  text = pick(T_MUT)(text);
+  if (Math.random() < 0.15) text += " " + tNoiseStr(rand(2, 4));
+  const prefix = (Math.random() < 0.12 ? pick(T_EMOJI) + pick(T_EMOJI) : pick(T_EMOJI)) + " ";
+  return tFit(prefix + tFit(text, T_MAX - Array.from(prefix).length));
+}
+const tNoiseTitle = () => tFit(pick(T_EMOJI) + " " + tNoiseStr(T_MAX));
+
+/* ═══════════════ СТИЛИ СМЕНЫ ═══════════════
+   Каждый стиль строит массив кадров. rev = true разворачивает направление. */
+
+const T_ORD = {
+  linear: L => Array.from({ length: L }, (_, i) => i / L * 0.9),
+  center: L => Array.from({ length: L }, (_, i) => Math.abs(i - (L - 1) / 2) / (((L - 1) / 2) || 1) * 0.9),
+  random: L => {
+    const idx = [...Array(L).keys()];
+    for (let i = L - 1; i > 0; i--) { const j = rand(0, i); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    const s = [];
+    idx.forEach((v, k) => { s[v] = k / L * 0.9; });
+    return s;
+  },
+};
+
+// каждый символ "срабатывает" в свой момент; до этого показывается un()
+const byOrder = (order, un, mult) => (from, to, rev) => {
+  const L = to.length;
+  let s = order(L);
+  if (rev) s = s.map(v => 0.9 - v);
+  const F = Math.max(8, Math.round(L * mult));
+  const out = [];
+  for (let f = 1; f <= F; f++) {
+    const t = f / F;
+    out.push(to.map((c, i) => t >= s[i] ? c : un(from, to, i)).join(""));
+  }
+  out[F - 1] = to.join("");
+  return out;
+};
+
+const T_STYLES = {
+  // резко, без анимации (направления нет)
+  cut:      { ms: 0,  build: (from, to) => [to.join("")] },
+  // по порядку: старые символы заменяются новыми слева направо (rev: справа налево)
+  sweep:    { ms: 55, build: byOrder(T_ORD.linear, (f, t, i) => f[i], 1.5) },
+  // то же, но в случайном порядке
+  shuffle:  { ms: 55, build: byOrder(T_ORD.random, (f, t, i) => f[i], 1.5) },
+  // от центра к краям (rev: от краёв к центру)
+  center:   { ms: 60, build: byOrder(T_ORD.center, (f, t, i) => f[i], 1.5) },
+  // декодирование: шум, из которого проявляется текст по порядку
+  decode:   { ms: 35, build: byOrder(T_ORD.linear, () => tNoise(), 2.5) },
+  // то же, но символы проявляются в случайном порядке
+  rain:     { ms: 35, build: byOrder(T_ORD.random, () => tNoise(), 2.5) },
+  // анаграмма: пока символ не встал на место, там буквы из самой фразы
+  scramble: { ms: 45, build: byOrder(T_ORD.linear, (f, t) => pick(t), 2) },
+  // сначала стирается старое (░), потом печатается новое
+  erase: { ms: 40, build: (from, to, rev) => {
+    const idx = [...Array(to.length).keys()];
+    if (rev) idx.reverse();
+    const cur = from.slice(), out = [];
+    for (const i of idx) { cur[i] = "░"; out.push(cur.join("")); }
+    for (const i of idx) { cur[i] = to[i]; out.push(cur.join("")); }
+    return out;
+  } },
+  // пробой шума: новый текст проступает из статики (rev: старый разваливается в статику)
+  corrupt: { ms: 45, build: (from, to, rev) => {
+    const F = Math.max(10, to.length), base = rev ? from : to, out = [];
+    for (let f = 1; f <= F; f++) {
+      const p = rev ? f / F : 1 - f / F;
+      out.push(base.map(c => Math.random() < p ? tNoise() : c).join(""));
+    }
+    out.push(to.join(""));
+    return out;
+  } },
+};
+const T_STYLE_W = { cut: 10, sweep: 14, shuffle: 14, center: 10, decode: 16, rain: 12, scramble: 10, erase: 8, corrupt: 12 };
+
+function tPickStyle() {
+  const key = T_FORCE_STYLE || tWeighted(T_STYLE_W);
+  return { key, rev: key === "cut" ? false : Math.random() < 0.5 };
 }
 
+/* ═══════════════ ПЛЕЕР ═══════════════ */
+let tCur = baseTitle, tAnimId = 0, tBusy = false;
+
+function tSet(s) {                       // мгновенно, отменяет текущую анимацию
+  tAnimId++; tBusy = false; tCur = s; document.title = s;
+}
+
+function tPlay(target, key, rev, speed) {
+  const id = ++tAnimId;
+  const from = Array.from(tCur), to = Array.from(target);   // без tFit: лимит только в generateTitle
+  const L = Math.max(from.length, to.length);
+  const frames = T_STYLES[key].build(tPad(from, L), tPad(to, L), rev);
+  const ms = speed ?? T_STYLES[key].ms;
+  let i = 0;
+  tBusy = true;
+  const tick = () => {
+    if (id !== tAnimId) return;
+    const last = i === frames.length - 1;
+    tCur = last ? target : frames[i];                        // на последнем кадре ставим точный текст
+    document.title = tCur;
+    if (last) { tBusy = false; return; }
+    i++;
+    tWait(tick, ms * (0.7 + Math.random() * 0.6));
+  };
+  tick();
+}
+
+function tChange(opts = {}) {
+  const st = tPickStyle();
+  tPlay(opts.target || generateTitle(), opts.style || st.key, opts.rev ?? st.rev, opts.speed);
+}
+
+/* ═══════════════ СЦЕНАРИИ (выбираются при каждом сворачивании вкладки) ═══════════════ */
+let tSession = 0;
+
+function tLater(fn, ms) {
+  const s = tSession;
+  tWait(() => { if (s === tSession && document.hidden) fn(); }, ms);
+}
+function tEvery(delayFn, fn, immediate = false) {
+  const s = tSession;
+  const step = () => tWait(() => {
+    if (s !== tSession || !document.hidden) return;
+    fn(); step();
+  }, delayFn());
+  if (immediate) fn();
+  step();
+}
+
+const T_SCEN = {
+  // ничего не меняется: тишина тоже страшно
+  silent: { w: 10, run() {} },
+  // одна смена в случайный момент и всё
+  once: { w: 14, run() { tLater(() => tChange(), rand(1000, 9000)); } },
+  // медленно, раз в несколько секунд
+  slow: { w: 18, run() { tEvery(() => rand(4000, 9000), () => tChange()); } },
+  // ровно раз в секунду
+  second: { w: 14, run() { tEvery(() => rand(900, 1100), () => tChange({ speed: 14 })); } },
+  // очень быстро
+  fast: { w: 10, run() { tEvery(() => rand(150, 400), () => tChange({ speed: 8 })); } },
+  // чистый шум вместо слов
+  noise: { w: 8, run() { tEvery(() => rand(60, 140), () => tSet(tNoiseTitle())); } },
+  // всплески: тишина, потом очередь быстрых смен, потом снова тишина
+  burst: { w: 10, run() {
+    const s = tSession;
+    const cycle = () => tLater(() => {
+      let n = rand(6, 14);
+      const fire = () => {
+        if (s !== tSession || !document.hidden) return;
+        if (n-- <= 0) { cycle(); return; }
+        tChange({ speed: 8 });
+        tWait(fire, rand(90, 220));
+      };
+      fire();
+    }, rand(5000, 15000));
+    cycle();
+  } },
+  // счётчик отсутствия: "👁 тебя нет 0:42"
+  absence: { w: 8, run() {
+    const t0 = Date.now();
+    tEvery(() => 1000, () => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      const txt = `${pick(["👁", "⏱", "🔻"])} тебя нет ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+      const a = Array.from(tFit(txt));
+      tSet((Math.random() < 0.2 ? [a[0], ...tGlitch(a.slice(1), 0.12)] : a).join(""));
+    }, true);
+  } },
+  // нарастание: сначала редко, потом всё чаще, в итоге почти бешено
+  escalate: { w: 8, run() {
+    let d = 7000;
+    tEvery(() => { const cur = d; d = Math.max(110, d * 0.8); return cur; }, () => tChange({ speed: 12 }));
+  } },
+};
+const T_SC_W = Object.fromEntries(Object.entries(T_SCEN).map(([k, v]) => [k, v.w]));
+
+/* ═══════════════ ГЛЮК В ПОКОЕ (пока вкладка открыта) ═══════════════ */
+function tIdle() {
+  tWait(() => {
+    if (!document.hidden && !tBusy) {
+      const flash = (str, ms) => {
+        tSet(str);
+        tWait(() => { if (!document.hidden && !tBusy) tSet(baseTitle); }, ms);
+      };
+      if (Math.random() < 0.15) {
+        flash(generateTitle(), rand(70, 160));                        // подпороговый кадр
+      } else {
+        const g = () => tGlitch(Array.from(baseTitle), 0.3).join("");
+        flash(g(), rand(60, 240));
+        if (Math.random() < 0.2) tWait(() => { if (!document.hidden && !tBusy) flash(g(), rand(40, 120)); }, 300);
+      }
+    }
+    tIdle();
+  }, rand(1500, 6500));
+}
+
+/* ═══════════════ ВКЛАДКА: СВЁРНУТА / ВОЗВРАТ ═══════════════ */
 function restoreTitle() {
-  document.title = baseTitle;
-  if (titleTimer) { clearInterval(titleTimer); titleTimer = null; }
+  tSession++;
+  const st = tPickStyle();
+  tPlay(baseTitle, st.key, st.rev, 20);
+}
+
+// для старого события из EVENTS: коротко показать фразу и вернуть как было
+function titleFlash() {
+  tChange();
+  tWait(() => { if (!document.hidden) restoreTitle(); }, 2500);
 }
 
 document.addEventListener("visibilitychange", () => {
+  tSession++;
   if (document.hidden) {
-    // Захватываем ТЕКУЩИЙ заголовок перед тем, как его испортить
-    baseTitle = document.title;
     hiddenAt = Date.now();
-
-    // Первый вариант ставим сразу, потом крутим случайные каждые 2 сек
-    document.title = pickHiddenTitle();
-    if (titleTimer) clearInterval(titleTimer);
-    titleTimer = setInterval(() => {
-      // Если вкладка уже вернулась — не трогаем
-      if (!document.hidden) { clearInterval(titleTimer); titleTimer = null; return; }
-      document.title = pickHiddenTitle();
-    }, 2000);
+    T_SCEN[T_FORCE_SCENARIO || tWeighted(T_SC_W)].run();
   } else {
-    // Вкладка вернулась — восстанавливаем и очищаем таймер
     restoreTitle();
     const sec = hiddenAt ? Math.round((Date.now() - hiddenAt) / 1000) : 0;
     hiddenAt = 0;
     if (sec > 5) say(`[GOLU] тебя не было ${sec} сек. я ждал.`, S.red, "warn");
   }
 });
+
+/* ── слежение за настоящим title сайта ──
+   если title поменял не этот модуль (CORE.js, смена страницы и т.д.), запоминаем его как базовый */
+new MutationObserver(() => {
+  if (tNorm(document.title) === tNorm(tCur)) return;   // это наша собственная запись
+  baseTitle = document.title;
+  tAnimId++; tBusy = false;                            // обрываем текущую анимацию
+  tCur = document.title;
+}).observe(document.head, { childList: true, subtree: true, characterData: true });
+
+tIdle();
 
 /* ═══════════════ КОМАНДЫ В КОНСОЛИ ═══════════════
    Игрок печатает слово и жмёт Enter, срабатывает getter */
