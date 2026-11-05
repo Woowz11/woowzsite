@@ -32,7 +32,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			font-family: 'Courier New', monospace;
 		}
 
-		/* ===== СЕТКА ГАЛЕРЕИ — МЕНЬШИЕ КАРТОЧКИ ДЛЯ БОЛЬШЕГО КОЛИЧЕСТВА ===== */
+		/* ===== СЕТКА ГАЛЕРЕИ ===== */
 		.lituism-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -69,13 +69,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			position: relative;
 			background: linear-gradient(
 				135deg,
-				#ff0000,
-				#3bff00,
-				#ff00f2,
-				#ffd800,
-				#00ffec,
-				#0015ff,
-				#ff7400
+				#ff0000, #3bff00, #ff00f2, #ffd800, #00ffec, #0015ff, #ff7400
 			);
 			background-size: 400% 400%;
 			animation: galleryGradientShift 1s ease infinite;
@@ -98,7 +92,6 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			border: 1px solid #1a0a0a;
 			position: relative;
 			z-index: 1;
-			/* НЕМНОГО ПРОЗРАЧНОСТИ ЧТОБЫ ФОН ПРОСВЕЧИВАЛ */
 			background: transparent;
 		}
 
@@ -160,7 +153,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			opacity: 1;
 		}
 
-		/* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ===== */
+		/* ===== МОДАЛЬНОЕ ОКНО ===== */
 		.lituism-modal {
 			display: none;
 			position: fixed;
@@ -211,7 +204,6 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			overflow: hidden;
 		}
 
-		/* ===== КРЕСТИК В РЕЖИМЕ ЛУПЫ ===== */
 		.lituism-modal-img-wrapper.zoomed {
 			position: fixed;
 			top: 0;
@@ -284,7 +276,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			100% { background-position: 0% 50%; }
 		}
 
-		/* ===== КНОПКА ЗАКРЫТИЯ — ВСЕГДА ПОВЕРХ ВСЕГО ===== */
+		/* ===== КНОПКА ЗАКРЫТИЯ ===== */
 		.lituism-modal-close {
 			position: fixed;
 			top: 20px;
@@ -297,9 +289,9 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			background: none;
 			border: none;
 			text-shadow: 0 0 40px #ff0044, 0 0 80px #ff004466;
-			z-index: 999999 !important; /* ПОДНИМАЕМ ВЫШЕ ВСЕГО! */
+			z-index: 999999 !important;
 			line-height: 1;
-			pointer-events: auto !important; /* Убеждаемся что кликабелен */
+			pointer-events: auto !important;
 		}
 
 		.lituism-modal-close:hover {
@@ -308,7 +300,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			text-shadow: 0 0 60px #ff4488, 0 0 120px #ff448866;
 		}
 
-		/* ===== КАРТИНКА — В ЦЕНТРЕ, БЕЗ ЛИШНИХ ЭЛЕМЕНТОВ ===== */
+		/* ===== КАРТИНКА ===== */
 		.lituism-modal-img {
 			max-width: 85vw;
 			max-height: 70vh;
@@ -317,7 +309,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			border: 5px solid black;
 		}
 
-		/* ===== ИНФОРМАЦИЯ ВНИЗУ — БОЛЕЕ ВИДИМАЯ ===== */
+		/* ===== ИНФОРМАЦИЯ ВНИЗУ ===== */
 		.lituism-modal-info {
 			width: 85vw;
 			max-width: 800px;
@@ -361,12 +353,116 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			letter-spacing: 1px;
 		}
 
+		/* ===== РАЗМЕР + КНОПКА КОПИРОВАНИЯ (компактно) ===== */
 		.lituism-modal-size {
 			color: #ff8899;
 			font-family: 'Courier New', monospace;
 			font-size: 1rem;
 			text-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
 			letter-spacing: 1px;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		/* ИКОНКА-КНОПКА КОПИРОВАНИЯ — маленькая, квадратная */
+		.lituism-copy-btn {
+			width: 26px;
+			height: 26px;
+			padding: 0;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 0, 68, 0.12);
+			border: 1px solid #ff0044;
+			border-radius: 6px;
+			color: #ff8899;
+			font-size: 14px;
+			line-height: 1;
+			cursor: url("../source/lit_cur_pointer.cur"), auto;
+			transition: all 0.18s ease;
+			flex: none;
+			user-select: none;
+		} !important;
+
+		.lituism-copy-btn:hover {
+			background: #ff0044;
+			color: #000;
+			box-shadow: 0 0 14px rgba(255, 0, 68, 0.6);
+			transform: scale(1.08);
+		}
+
+		.lituism-copy-btn:active {
+			transform: scale(0.92);
+		}
+
+		.lituism-copy-btn:disabled {
+			opacity: 0.5;
+			cursor: wait;
+			transform: none;
+		}
+
+		.lituism-copy-btn.ok {
+			background: #001a09;
+			border-color: #00ff66;
+			color: #00ff66;
+			box-shadow: 0 0 14px rgba(0, 255, 102, 0.5);
+		}
+
+		/* в режиме лупы кнопка скрыта */
+		.lituism-modal-img-wrapper.zoomed ~ .lituism-modal-info .lituism-copy-btn {
+			display: none;
+		}
+
+		/* ===== POPUP «СКОПИРОВАНО» ===== */
+		.lituism-copy-toast {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%) scale(0.85);
+			padding: 14px 28px;
+			background: rgba(0, 20, 8, 0.96);
+			border: 2px solid #00ff66;
+			border-radius: 8px;
+			color: #00ff66;
+			font: bold 1rem/1 'Courier New', monospace;
+			letter-spacing: 3px;
+			box-shadow: 0 0 40px rgba(0, 255, 102, 0.6), inset 0 0 20px rgba(0, 255, 102, 0.1);
+			z-index: 1000001;
+			pointer-events: none;
+			opacity: 0;
+			text-shadow: 0 0 10px #00ff66;
+			white-space: nowrap;
+			text-align: center;
+		}
+
+		.lituism-copy-toast.show {
+			animation: copyToastPop 1.6s ease forwards;
+		}
+
+		.lituism-copy-toast.error {
+			background: rgba(20, 15, 0, 0.96);
+			border-color: #ffcc00;
+			color: #ffcc00;
+			box-shadow: 0 0 40px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.1);
+			text-shadow: 0 0 10px #ffcc00;
+		}
+
+		.lituism-copy-toast small {
+			display: block;
+			font-size: 0.55rem;
+			letter-spacing: 2px;
+			margin-top: 4px;
+			opacity: 0.7;
+			font-weight: normal;
+		}
+
+		@keyframes copyToastPop {
+			0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+			15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+			25%  { transform: translate(-50%, -50%) scale(1); }
+			80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+			100% { opacity: 0; transform: translate(-50%, -60%) scale(0.95); }
 		}
 
 		/* ===== СЧЁТЧИК ===== */
@@ -377,11 +473,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			letter-spacing: 4px;
 			font-family: 'Courier New', monospace;
 			margin-top: 0.5rem;
-			text-shadow:
-				0 0 10px red,
-				0 0 20px red,
-				0 0 40px red,
-				0 0 80px red;
+			text-shadow: 0 0 10px red, 0 0 20px red, 0 0 40px red, 0 0 80px red;
 		}
 
 		/* ===== ГЛЮЧНЫЙ ЭФФЕКТ ===== */
@@ -444,7 +536,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			}
 		}
 
-		/* ===== КОНТРОЛЛЕРЫ ФИЛЬТРОВ В РЕЖИМЕ ЛУПЫ ===== */
+		/* ===== ФИЛЬТРЫ В РЕЖИМЕ ЛУПЫ ===== */
 		.lituism-filter-controls {
 			position: fixed;
 			bottom: 80px;
@@ -452,20 +544,20 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			transform: translateX(-50%);
 			background: rgba(0, 0, 0, 0.85);
 			backdrop-filter: blur(10px);
-			padding: 10px 15px; /* Уменьшаем паддинг */
+			padding: 10px 15px;
 			border-radius: 12px 4px 12px 4px;
 			border: 2px solid #ff0044;
 			box-shadow: 0 0 40px rgba(255, 0, 68, 0.2);
 			z-index: 100000;
 			display: none;
-			gap: 6px; /* Уменьшаем отступ между группами */
-			flex-wrap: nowrap; /* ЗАПРЕЩАЕМ ПЕРЕНОС НА СЛЕДУЮЩУЮ СТРОКУ */
+			gap: 6px;
+			flex-wrap: nowrap;
 			justify-content: center;
-			max-width: 98vw; /* Чуть шире */
+			max-width: 98vw;
 			opacity: 0;
 			transition: opacity 0.4s ease;
 			pointer-events: none;
-			overflow-x: auto; /* Добавляем скролл если не влезают */
+			overflow-x: auto;
 		}
 
 		.lituism-filter-controls.visible {
@@ -478,23 +570,23 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			gap: 4px; /* Минимальный отступ */
-			min-width: auto; /* Убираем минимальную ширину */
-			flex-shrink: 0; /* Запрещаем сжиматься */
+			gap: 4px;
+			min-width: auto;
+			flex-shrink: 0;
 		}
 
 		.lituism-filter-controls label {
 			color: #ff4466;
-			font-size: 0.5rem; /* Уменьшаем текст */
+			font-size: 0.5rem;
 			font-family: 'Courier New', monospace;
 			letter-spacing: 0.5px;
 			text-transform: uppercase;
 			text-shadow: 0 0 10px rgba(255, 0, 68, 0.3);
-			white-space: nowrap; /* Текст в одну строку */
+			white-space: nowrap;
 		}
 
 		.lituism-filter-controls input[type="range"] {
-			width: 120px; /* УВЕЛИЧИВАЕМ ШИРИНУ */
+			width: 120px;
 			height: 4px;
 			-webkit-appearance: none;
 			appearance: none;
@@ -507,7 +599,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 		.lituism-filter-controls input[type="range"]::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
-			width: 14px; /* Чуть больше ползунок */
+			width: 14px;
 			height: 14px;
 			border-radius: 50%;
 			background: #ff0044;
@@ -527,27 +619,10 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 
 		.lituism-filter-controls .filter-value {
 			color: rgba(255, 255, 255, 0.5);
-			font-size: 0.45rem; /* Уменьшаем цифры */
+			font-size: 0.45rem;
 			font-family: 'Courier New', monospace;
 			min-width: 20px;
 			text-align: center;
-		}
-
-		.lituism-filter-controls .filter-reset {
-			background: none;
-			border: 1px solid rgba(255, 0, 68, 0.3);
-			color: #ff0044;
-			padding: 1px 6px;
-			border-radius: 4px;
-			font-size: 0.45rem;
-			font-family: 'Courier New', monospace;
-			cursor: pointer;
-			transition: all 0.2s ease;
-		}
-
-		.lituism-filter-controls .filter-reset:hover {
-			background: #ff0044;
-			color: #000;
 		}
 
 		.lituism-filter-controls .filter-reset-all {
@@ -570,71 +645,42 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
 		}
 
-		/* Скрываем скроллбар но оставляем возможность скролла */
 		.lituism-filter-controls::-webkit-scrollbar {
 			height: 3px;
 		}
-
 		.lituism-filter-controls::-webkit-scrollbar-track {
 			background: rgba(255, 0, 68, 0.1);
 			border-radius: 2px;
 		}
-
 		.lituism-filter-controls::-webkit-scrollbar-thumb {
 			background: #ff0044;
 			border-radius: 2px;
 		}
 
 		@media (max-width: 1200px) {
-			.lituism-filter-controls input[type="range"] {
-				width: 100px; /* Чуть уже на средних экранах */
-			}
+			.lituism-filter-controls input[type="range"] { width: 100px; }
 		}
-
 		@media (max-width: 992px) {
-			.lituism-filter-controls input[type="range"] {
-				width: 80px;
-			}
-			.lituism-filter-controls label {
-				font-size: 0.45rem;
-			}
+			.lituism-filter-controls input[type="range"] { width: 80px; }
+			.lituism-filter-controls label { font-size: 0.45rem; }
 		}
-
 		@media (max-width: 768px) {
 			.lituism-filter-controls {
 				bottom: 70px;
 				padding: 8px 10px;
 				gap: 4px;
 				max-width: 98vw;
-				flex-wrap: nowrap; /* Оставляем в одну строку */
+				flex-wrap: nowrap;
 			}
-			.lituism-filter-controls input[type="range"] {
-				width: 65px;
-			}
-			.lituism-filter-controls label {
-				font-size: 0.4rem;
-			}
-			.lituism-filter-controls .filter-value {
-				font-size: 0.4rem;
-			}
-			.lituism-filter-controls .filter-reset-all {
-				font-size: 0.4rem;
-				padding: 2px 8px;
-			}
+			.lituism-filter-controls input[type="range"] { width: 65px; }
+			.lituism-filter-controls label { font-size: 0.4rem; }
+			.lituism-filter-controls .filter-value { font-size: 0.4rem; }
+			.lituism-filter-controls .filter-reset-all { font-size: 0.4rem; padding: 2px 8px; }
 		}
-
 		@media (max-width: 480px) {
-			.lituism-filter-controls input[type="range"] {
-				width: 50px;
-			}
-			.lituism-filter-controls label {
-				font-size: 0.35rem;
-				letter-spacing: 0px;
-			}
-			.lituism-filter-controls .filter-value {
-				font-size: 0.35rem;
-				min-width: 15px;
-			}
+			.lituism-filter-controls input[type="range"] { width: 50px; }
+			.lituism-filter-controls label { font-size: 0.35rem; letter-spacing: 0px; }
+			.lituism-filter-controls .filter-value { font-size: 0.35rem; min-width: 15px; }
 		}
 
 		/* ===== СОРТИРОВОЧНАЯ ПАНЕЛЬ ===== */
@@ -725,11 +771,16 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 					<span class="lituism-modal-title" id="lituismModalTitle">—</span>
 					<span class="lituism-modal-author" id="lituismModalAuthor">—</span>
 					<span class="lituism-modal-date" id="lituismModalDate">—</span>
-					<span class="lituism-modal-size" id="lituismModalSize">—</span>
+					<span class="lituism-modal-size" id="lituismModalSize">
+						<span id="lituismModalSizeText">—</span>
+						<button class="lituism-copy-btn" id="lituismCopyBtn" title="Скопировать картинку в буфер">📋</button>
+					</span>
 				</div>
 			</div>
 		</div>
 		<div class="lituism-zoom-indicator" id="zoomIndicator">&gg; 🔍 MOUSE WHEEL — ZOOM | ✋✊ GRAB — DRAGGING &ll;</div>
+
+		<div class="lituism-copy-toast" id="copyToast"></div>
 
 		<div class="lituism-filter-controls" id="filterControls">
 			<div class="filter-group">
@@ -783,8 +834,6 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 		</footer>
 		`,
 		function(){
-			// ===== ЭТО ВЫПОЛНЯЕТСЯ ОДИН РАЗ ПРИ ЗАГРУЗКЕ =====
-			// Оформление контейнера
 			const bg = document.getElementById('MAIN');
 			if (bg) {
 				bg.style.background = 'radial-gradient(ellipse at center, #0a0000 0%, #000000 100%)';
@@ -795,9 +844,11 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 				bg.style.borderRight = '3px solid #2a0a0a';
 			}
 		},
-		false,function(){
-			// ===== ЭТО ВЫПОЛНЯЕТСЯ КАЖДЫЙ РАЗ ПРИ OPEN_PAGE() =====
-			// ВСЯ ЛОГИКА ГАЛЕРЕИ ЗДЕСЬ!
+		false, function(){
+
+			// ======================================================
+			// ===== ВСЯ ЛОГИКА ГАЛЕРЕИ =====
+			// ======================================================
 
 			function GALLERY_randomRange(min, max) {
 				return Math.random() * (max - min) + min;
@@ -910,24 +961,20 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 							case 'author':
 								valA = a.AUTHOR.toLowerCase();
 								valB = b.AUTHOR.toLowerCase();
-
 								if(valA == valB){
 									valA = a.NAME.toLowerCase();
 									valB = b.NAME.toLowerCase();
 								}
-
 								break;
 							case 'date':
 							function parseDateWeight(str) {
 								if (!str || str.startsWith('????')) {
 									return { date: new Date(0), unknown: true };
 								}
-
 								let d = new Date(str);
 								if (!isNaN(d.getTime())) {
 									return { date: d, unknown: false };
 								}
-
 								let match = str.match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/);
 								if (match) {
 									let year = parseInt(match[1]);
@@ -937,7 +984,6 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 										return { date: new Date(year, month, day), unknown: false };
 									}
 								}
-
 								match = str.match(/(\d{1,2})[.\-](\d{1,2})[.\-](\d{4})/);
 								if (match) {
 									let day = parseInt(match[1]);
@@ -947,17 +993,13 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 										return { date: new Date(year, month, day), unknown: false };
 									}
 								}
-
 								return { date: new Date(0), unknown: true };
 							}
-
 								const aData = parseDateWeight(a.DATE);
 								const bData = parseDateWeight(b.DATE);
-
 								if (aData.unknown !== bData.unknown) {
 									return aData.unknown ? 1 : -1;
 								}
-
 								valA = aData.date;
 								valB = bData.date;
 								break;
@@ -1075,14 +1117,103 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 
 			function GALLERY_render() { GALLERY_renderWithSort(); }
 
+			// ======================================================
+			// ===== POPUP «СКОПИРОВАНО» =====
+			// ======================================================
+			function GALLERY_showToast(text, isError, sub) {
+				const toast = document.getElementById('copyToast');
+				if (!toast) return;
+				toast.className = 'lituism-copy-toast' + (isError ? ' error' : '');
+				toast.innerHTML = text + (sub ? '<small>' + sub + '</small>' : '');
+				void toast.offsetWidth; // reflow, чтобы анимация перезапустилась
+				toast.classList.add('show');
+				clearTimeout(toast._timer);
+				toast._timer = setTimeout(() => {
+					toast.classList.remove('show');
+				}, 1600);
+			}
+
+			// ======================================================
+			// ===== РЕАЛЬНОЕ КОПИРОВАНИЕ КАРТИНКИ =====
+			// ======================================================
+			async function GALLERY_copyImage(src, btn) {
+				if (!src || !btn) return;
+
+				btn.disabled = true;
+
+				// конверт любого изображения в PNG через canvas
+				function toPng(blob) {
+					return new Promise((resolve, reject) => {
+						const u = URL.createObjectURL(blob);
+						const im = new Image();
+						im.onload = () => {
+							try {
+								const c = document.createElement('canvas');
+								c.width = im.naturalWidth;
+								c.height = im.naturalHeight;
+								c.getContext('2d').drawImage(im, 0, 0);
+								c.toBlob(b => {
+									URL.revokeObjectURL(u);
+									b ? resolve(b) : reject(new Error('toBlob null'));
+								}, 'image/png');
+							} catch (err) {
+								URL.revokeObjectURL(u);
+								reject(err);
+							}
+						};
+						im.onerror = () => { URL.revokeObjectURL(u); reject(new Error('img load error')); };
+						im.src = u;
+					});
+				}
+
+				try {
+					// 1) картинка → blob
+					const res = await fetch(src, { mode: 'cors', cache: 'no-cache' });
+					if (!res.ok) throw new Error('fetch ' + res.status);
+					const blob = await res.blob();
+
+					// 2) в буфер как PNG
+					if (!navigator.clipboard || !window.ClipboardItem) {
+						throw new Error('Clipboard API недоступен (нужен https/localhost)');
+					}
+
+					const png = await toPng(blob);
+					await navigator.clipboard.write([
+						new ClipboardItem({ 'image/png': png })
+					]);
+
+					// 3) успех
+					btn.textContent = '✅';
+					btn.classList.add('ok');
+					GALLERY_showToast('✅ СКОПИРОВАНО', false, 'IMAGE → CLIPBOARD');
+
+					setTimeout(() => {
+						btn.textContent = '📋';
+						btn.classList.remove('ok');
+						btn.disabled = false;
+					}, 1600);
+				} catch (err) {
+					console.warn('[gallery] copy failed:', err);
+					btn.disabled = false;
+
+					// фолбэк: открываем в новой вкладке
+					GALLERY_showToast('⚠ ОШИБКА', true, 'ОТКРЫТО В НОВОЙ ВКЛАДКЕ');
+					try { window.open(src, '_blank', 'noopener'); } catch (e) {}
+				}
+			}
+
+			// ======================================================
+			// ===== ОТКРЫТИЕ МОДАЛКИ =====
+			// ======================================================
 			function GALLERY_openModal(url, title, author, date, width, height) {
 				const modal = document.getElementById('lituismModal');
 				const img = document.getElementById('lituismModalImg');
 				const titleEl = document.getElementById('lituismModalTitle');
 				const authorEl = document.getElementById('lituismModalAuthor');
 				const dateEl = document.getElementById('lituismModalDate');
-				const sizeEl = document.getElementById('lituismModalSize');
 				const wrapper = document.getElementById('modalImgWrapper');
+				const copyBtn = document.getElementById('lituismCopyBtn');
+				const sizeText = document.getElementById('lituismModalSizeText');
 
 				if (!modal || !img) return;
 
@@ -1091,7 +1222,25 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 				titleEl.textContent = title || '—';
 				authorEl.textContent = author || '—';
 				dateEl.textContent = date || '—';
-				sizeEl.textContent = `☣ ${width || '?'} × ${height || '?'}`;
+
+				if (sizeText) sizeText.textContent = `☣ ${width || '?'} × ${height || '?'}`;
+
+				// сброс кнопки
+				if (copyBtn) {
+					copyBtn.disabled = false;
+					copyBtn.textContent = '📋';
+					copyBtn.classList.remove('ok');
+					copyBtn.dataset.src = url;
+
+					if (!copyBtn.dataset.bound) {
+						copyBtn.dataset.bound = '1';
+						copyBtn.addEventListener('click', function(e) {
+							e.stopPropagation();
+							e.preventDefault();
+							GALLERY_copyImage(copyBtn.dataset.src, copyBtn);
+						});
+					}
+				}
 
 				if (wrapper) wrapper.classList.remove('zoomed');
 
@@ -1101,12 +1250,10 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 						"#00ffec", "#0015ff", "#ff7400", "#ff0044",
 						"#ff4488", "#ff8844", "#ff00ff", "#00ff88"
 					];
-
 					for (let i = colors.length - 1; i > 0; i--) {
 						const j = Math.floor(Math.random() * (i + 1));
 						[colors[i], colors[j]] = [colors[j], colors[i]];
 					}
-
 					const count = 5 + Math.floor(Math.random() * 4);
 					const selectedColors = colors.slice(0, count);
 					const gradient = `linear-gradient(135deg, ${selectedColors.join(', ')})`;
@@ -1115,9 +1262,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 					wrapper.style.backgroundSize = '400% 400%';
 					wrapper.style.backgroundPosition = '0% 50%';
 					wrapper.style.animation = 'none';
-
 					void wrapper.offsetHeight;
-
 					const duration = 3 + Math.random() * 4;
 					wrapper.style.animation = `modalGradientShift ${duration}s ease infinite`;
 				}
@@ -1152,12 +1297,10 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 					"#00ffec", "#0015ff", "#ff7400", "#ff0044",
 					"#ff4488", "#ff8844", "#ff00ff", "#00ff88"
 				];
-
 				for (let i = colors.length - 1; i > 0; i--) {
 					const j = Math.floor(Math.random() * (i + 1));
 					[colors[i], colors[j]] = [colors[j], colors[i]];
 				}
-
 				const count = 5 + Math.floor(Math.random() * 4);
 				const selectedColors = colors.slice(0, count);
 				const gradient = `linear-gradient(135deg, ${selectedColors.join(', ')})`;
@@ -1190,7 +1333,6 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 				if (!wrapper) return;
 
 				wrapper.classList.remove('zoomed');
-
 				if (controls) controls.classList.remove('visible');
 
 				if (img) {
@@ -1280,6 +1422,14 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 				modal.classList.remove('active');
 				document.body.style.overflow = '';
 				isPanning = false;
+
+				const cb = document.getElementById('lituismCopyBtn');
+				if (cb) {
+					cb.disabled = false;
+					cb.textContent = '📋';
+					cb.classList.remove('ok');
+					cb.dataset.src = '';
+				}
 			}
 
 			function GALLERY_closeOnBackground(e) {
@@ -1382,6 +1532,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 				}
 			}
 
+			// ===== ЗАПУСК =====
 			const design = GALLERY_randomDesign();
 			GALLERY_applyDesign(design);
 			GALLERY_render();
@@ -1424,7 +1575,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			const resetBtn = document.getElementById('filterResetAll');
 			if (resetBtn) resetBtn.addEventListener('click', GALLERY_resetFilters);
 
-			console.log('✦ LITUISM GALLERY v2.0 ИНИЦИАЛИЗИРОВАНА ✦');
+			console.log('✦ LITUISM GALLERY v2.1 ИНИЦИАЛИЗИРОВАНА ✦');
 			console.log('📦 Артефактов:', typeof TRUE_LIT_ARTS_COLLECTION !== 'undefined' ? TRUE_LIT_ARTS_COLLECTION.length : 'НЕТ');
 		},
 		false

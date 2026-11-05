@@ -45,7 +45,8 @@ const PAGE_FILES = [
 		"PAGE_pavpis.js",
 		"PAGE_portal.js",
 		"PAGE_testcss.js",
-		"PAGE_artsai.js"
+		"PAGE_artsai.js",
+		"PAGE_videos.js"
 	];
 
 function SITE_BASE(content){
@@ -58,17 +59,295 @@ function OPEN_RANDOM_PAGE(){
 	OPEN_PAGE(Pages[Math.floor(Math.random() * Pages.length)])
 }
 
+function ERROR_PAGE(id){
+	const esc = s => String(s).replace(/[&<>"']/g, c => "&#" + c.charCodeAt(0) + ";");
+	const raw = String(id == null ? "" : id);
+	let shown = raw; try { shown = decodeURIComponent(raw); } catch (e) {}
+	if (shown.length > 80) shown = shown.slice(0, 80) + "…";
+	const sid = esc(shown) || "(пусто)";
+	const unit = "ERROR · СТРАНИЦА НЕ НАЙДЕНА · GOLU ЗАПИСАЛ ПОПЫТКУ · ".repeat(6);
+	const unit2 = "⚠ KERNEL PANIC · 0xE404 · SIGTERM = БОЛЬ · ".repeat(6);
+
+	const css = `
+	#er-root{ display:block; position:relative; overflow:hidden; color:#e8d9b0; font-family:'Courier New',Consolas,monospace; }
+	#er-root *{ box-sizing:border-box; }
+	#er-root::after{ content:""; position:absolute; inset:0; z-index:5; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px); }
+	#er-root button{ background:#12060c; background-image:none; border:1px solid #7a0022; border-radius:0; color:#e8d9b0; font:13px/1 'Courier New',Consolas,monospace; font-weight:normal; letter-spacing:.1em; padding:11px 16px; box-shadow:none; backdrop-filter:none; text-shadow:none; transition:color .15s,background-color .15s,border-color .15s,transform .15s; }
+	#er-root button:hover{ background:#7a0022; color:#fff; border-color:#ff0044; transform:translateY(-2px); }
+	#er-root button.gold{ border-color:#d4af37; color:#d4af37; }
+	#er-root button.gold:hover{ background:#d4af37; color:#050003; }
+
+	.er-tape{ overflow:hidden; white-space:nowrap; height:22px; line-height:22px; font-size:12px; letter-spacing:.3em; }
+	.er-tape span{ display:inline-block; will-change:transform; animation:er-mq 40s linear infinite; }
+	.er-t1{ background:#990000; color:#050003; font-weight:bold; }
+	.er-t2{ background:#0a0206; color:#ff0044; border-top:2px solid #990000; }
+	.er-t2 span{ animation-direction:reverse; }
+	@keyframes er-mq{ to{ transform:translateX(-50%); } }
+
+	.er-wrap{ position:relative; z-index:2; padding:26px 28px 36px; }
+	.er-kick{ font-size:12px; letter-spacing:.3em; color:#ff0044; margin-bottom:14px; animation:er-blink 1.2s steps(2) infinite; }
+	@keyframes er-blink{ 50%{ opacity:.35; } }
+
+	.er-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:34px; align-items:center; }
+	.er-big{ position:relative; font-size:clamp(96px,17vw,230px); font-weight:bold; line-height:.9; letter-spacing:.04em; color:#e8d9b0; text-shadow:0 0 26px #ff0044,0 0 4px #7a0022; cursor:pointer; user-select:none; }
+	.er-big::before,.er-big::after{ content:attr(data-text); position:absolute; left:0; top:0; pointer-events:none; clip-path:inset(0 0 100% 0); }
+	.er-big::before{ color:#00e5ff; animation:er-g1 2.6s steps(1) infinite; }
+	.er-big::after{ color:#ff0044; animation:er-g2 2.1s steps(1) infinite; }
+	.er-big.hit::before{ animation-duration:.18s; }
+	.er-big.hit::after{ animation-duration:.14s; }
+	@keyframes er-g1{ 0%{clip-path:inset(0 0 100% 0)} 8%{clip-path:inset(12% 0 68% 0);transform:translateX(-9px)} 11%{clip-path:inset(0 0 100% 0);transform:none} 52%{clip-path:inset(55% 0 20% 0);transform:translateX(7px)} 55%{clip-path:inset(0 0 100% 0);transform:none} 86%{clip-path:inset(30% 0 50% 0);transform:translateX(-5px)} 88%{clip-path:inset(0 0 100% 0);transform:none} }
+	@keyframes er-g2{ 0%{clip-path:inset(0 0 100% 0)} 20%{clip-path:inset(60% 0 10% 0);transform:translateX(10px)} 23%{clip-path:inset(0 0 100% 0);transform:none} 64%{clip-path:inset(5% 0 80% 0);transform:translateX(-8px)} 66%{clip-path:inset(0 0 100% 0);transform:none} 90%{clip-path:inset(40% 0 40% 0);transform:translateX(6px)} 92%{clip-path:inset(0 0 100% 0);transform:none} }
+
+	.er-h1{ margin:0; font-size:clamp(22px,3.2vw,42px); letter-spacing:.14em; color:#e8d9b0; text-shadow:0 0 14px #ff0044; }
+	.er-from{ margin-top:8px; font-size:15px; letter-spacing:.2em; color:#8a6a72; }
+	.er-id{ display:inline-block; max-width:100%; margin-left:6px; padding:3px 10px; border:1px solid #d4af37; background:rgba(212,175,55,.08); color:#d4af37; letter-spacing:.06em; word-break:break-all; vertical-align:middle; }
+	.er-lead{ margin-top:16px; font-size:14px; line-height:1.7; color:#d9c9a0; max-width:640px; }
+	.er-cta{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+
+	.er-h{ display:flex; align-items:center; gap:12px; margin:30px 0 12px; font-size:14px; letter-spacing:.3em; color:#d4af37; }
+	.er-h::before{ content:"▌"; color:#ff0044; }
+	.er-h::after{ content:""; flex:1; height:1px; background:linear-gradient(to right,#7a0022,transparent); }
+
+	.er-two{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; }
+	.er-card{ position:relative; background:#0b0508; border:1px solid #2a0a14; padding:12px 14px; font-size:12.5px; line-height:1.65; }
+	.er-card::before{ content:""; position:absolute; right:4px; top:4px; width:10px; height:10px; border:solid #d4af37; border-width:2px 2px 0 0; pointer-events:none; }
+	.er-boot{ min-height:150px; color:#7aff9a; white-space:pre-wrap; word-break:break-all; }
+	.er-boot div{ animation:er-line .25s backwards; }
+	.er-boot .hl{ color:#d4af37; } .er-boot .rd{ color:#ff0044; }
+	@keyframes er-line{ from{ opacity:0; transform:translateX(-8px); } }
+	.er-caret{ display:inline-block; width:8px; height:14px; background:#7aff9a; vertical-align:-2px; animation:er-blink .9s steps(2) infinite; }
+	.er-regs{ display:grid; grid-template-columns:1fr 1fr; gap:2px 14px; color:#b89a5a; }
+	.er-regs b{ color:#ff0044; font-weight:normal; }
+	.er-hex{ margin:10px 0 0; padding:8px 0 0; border-top:1px dashed #2a0a14; color:#6a4a55; white-space:pre; overflow:hidden; font-size:11.5px; line-height:1.5; }
+	.er-hex i{ font-style:normal; color:#d4af37; }
+
+	.er-fix{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+	.er-bar{ flex:1; min-width:200px; height:12px; background:#1a0710; border:1px solid #3a1020; overflow:hidden; }
+	.er-bar i{ display:block; width:100%; height:100%; background:#d4af37; transform-origin:left; transform:scaleX(0); }
+	.er-bar.bad i{ background:#ff0044; }
+	.er-pct{ width:44px; text-align:right; color:#d4af37; }
+	.er-st{ width:100%; font-size:12.5px; letter-spacing:.1em; color:#8a6a72; min-height:18px; }
+	.er-st.bad{ color:#ff0044; }
+
+	.er-sug{ display:flex; flex-wrap:wrap; gap:10px; }
+	.er-chip{ min-width:160px; text-align:left; }
+	.er-chip small{ display:block; margin-top:5px; font-size:10px; letter-spacing:.15em; color:#8a6a72; }
+	.er-note{ font-size:12px; color:#8a6a72; margin-bottom:10px; }
+	.er-stat{ display:flex; flex-wrap:wrap; gap:26px; font-size:12.5px; color:#8a6a72; }
+	.er-stat b{ color:#e8d9b0; font-weight:normal; }
+
+	@media (max-width:900px){ .er-hero,.er-two{ grid-template-columns:1fr; } .er-wrap{ padding:16px; } }
+	`;
+
+	const html = `<div id="er-root"><style>${css}</style>
+	<div class="er-tape er-t1"><span>${unit}${unit}</span></div>
+	<div class="er-wrap">
+		<div class="er-kick">▓ KERNEL PANIC · СТРАНИЦА НЕ ЗАГРУЖЕНА</div>
+		<div class="er-hero">
+			<div class="er-big" id="er-big" data-text="404">404</div>
+			<div>
+				<h1 class="er-h1">FAILED LOAD WEBSITE</h1>
+				<div class="er-from">FROM ID <span class="er-id">"${sid}"</span></div>
+				<div class="er-lead">Такой страницы в Lituism нет. Её не создали, стёрли или ты свернул не туда. GOLU уже записал эту попытку.</div>
+				<div class="er-cta">
+					<button class="gold" onclick="OPEN_PAGE();">⌂ НА ГЛАВНУЮ</button>
+					<button onclick="OPEN_PAGE('database');">🔩 В БАЗУ ДАННЫХ</button>
+					<button onclick="OPEN_RANDOM_PAGE();">💮 СЛУЧАЙНО</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="er-h">ДАМП СБОЯ</div>
+		<div class="er-two">
+			<div class="er-card"><div class="er-boot" id="er-boot"></div></div>
+			<div class="er-card"><div class="er-regs" id="er-regs"></div><div class="er-hex" id="er-hex"></div></div>
+		</div>
+
+		<div class="er-h">ВОССТАНОВЛЕНИЕ</div>
+		<div class="er-card er-fix">
+			<div class="er-bar" id="er-bar"><i id="er-fill"></i></div>
+			<div class="er-pct" id="er-pct">0%</div>
+			<button id="er-retry">↻ ПОПРОБОВАТЬ СНОВА</button>
+			<div class="er-st" id="er-st">ВОССТАНОВЛЕНИЕ…</div>
+		</div>
+
+		<div class="er-h">ВОЗМОЖНО, ТЫ ИСКАЛ</div>
+		<div class="er-note" id="er-note"></div>
+		<div class="er-sug" id="er-sug"></div>
+
+		<div class="er-h">СТАТИСТИКА ПУСТОТЫ</div>
+		<div class="er-card er-stat" id="er-stat"></div>
+	</div>
+	<div class="er-tape er-t2"><span>${unit2}${unit2}</span></div>
+	</div>`.replace(/\n\t*/g, "");
+
+	const live = function(){
+		const root = document.getElementById("er-root");
+		if (!root) return;
+		const $ = s => root.querySelector(s);
+		const alive = () => root.isConnected;
+		const pick = a => a[(Math.random() * a.length) | 0];
+		const fnv = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
+		const P = window.PAGES || {};
+		const hex8 = n => n.toString(16).toUpperCase().padStart(8, "0");
+
+		// счётчик пустых адресов (OPEN_PAGE зовётся дважды на навигацию, поэтому защита от дубля)
+		const key = shown.toLowerCase();
+		const now = Date.now();
+		let S = window.__erSt;
+		let log = {};
+		try { log = JSON.parse(localStorage.getItem("er_log") || "{}") || {}; } catch (e) {}
+		if (!S || S.k !== key || now - S.t > 1500) {
+			const r = log[key] || { n: 0, first: now };
+			r.n++; r.last = now; log[key] = r;
+			const ks = Object.keys(log);
+			if (ks.length > 60) { ks.sort((a, b) => log[a].last - log[b].last); for (let i = 0; i < ks.length - 60; i++) delete log[ks[i]]; }
+			try { localStorage.setItem("er_log", JSON.stringify(log)); } catch (e) {}
+			S = window.__erSt = { k: key, t: now };
+		} else S.t = now;
+		const me = log[key] || { n: 1, first: now, last: now };
+		const total = Object.keys(log).length;
+		const fmt = t => new Date(t).toLocaleString("ru-RU");
+
+		$("#er-stat").innerHTML =
+			'<div>ПОПЫТОК ОТКРЫТЬ ЭТОТ АДРЕС: <b>' + me.n + '</b></div>' +
+			'<div>ПЕРВАЯ: <b>' + fmt(me.first) + '</b></div>' +
+			'<div>ВСЕГО ПУСТЫХ АДРЕСОВ: <b>' + total + '</b></div>';
+
+		// код ошибки и регистры из хеша адреса (одинаковые для одного адреса)
+		const code = hex8(fnv(shown)).slice(0, 4);
+		const regs = ["EAX", "EBX", "ECX", "EDX", "ESI", "EDI", "EIP", "ESP"];
+		$("#er-regs").innerHTML = regs.map((r, i) => "<div>" + r + " <b>" + hex8(fnv(shown + r + i)) + "</b></div>").join("");
+
+		// hex-дамп самого адреса
+		let bytes = []; try { bytes = Array.from(new TextEncoder().encode(shown)).slice(0, 24); } catch (e) {}
+		let hx = "";
+		for (let o = 0; o < Math.max(bytes.length, 1); o += 8) {
+			const ch = bytes.slice(o, o + 8);
+			hx += "<i>" + o.toString(16).toUpperCase().padStart(4, "0") + "</i>  "
+				+ ch.map(b => b.toString(16).toUpperCase().padStart(2, "0")).join(" ").padEnd(23, " ") + "  "
+				+ ch.map(b => b >= 32 && b < 127 ? String.fromCharCode(b).replace("<", "·").replace("&", "·") : "·").join("") + "\n";
+		}
+		$("#er-hex").innerHTML = bytes.length ? hx : "<i>0000</i>  (адрес пуст)";
+
+		const QUOTES = [
+			"ЭТОЙ СТРАНИЦЫ НЕТ. ИЛИ ОНА БЫЛА, НО Я ЕЁ СТЁР.",
+			"ТЫ ИЩЕШЬ ТО, ЧЕГО НЕТ. ОБЫЧНОЕ ДЕЛО.",
+			"ЭТО НЕ БАГ. ЭТО ПУСТОТА.",
+			"Я ЗАПОМНИЛ, ЧТО ТЫ СЮДА ПРИШЁЛ.",
+			"ТУТ НИЧЕГО НЕТ. ИЛИ ЕСТЬ. НЕ СКАЖУ.",
+		];
+		const BOOT = [
+			['> OPEN_PAGE("' + shown + '")'],
+			['> PAGES["' + shown + '"] → undefined', "rd"],
+			["> ПОИСК В L-KERNEL ... НЕ НАЙДЕНО"],
+			["> КОД ОШИБКИ: 0xE" + code, "hl"],
+			["> GOLU: «" + pick(QUOTES) + "»", "rd"],
+			["> ПОПЫТКА №" + me.n + " ДЛЯ ЭТОГО АДРЕСА"],
+			["> СИСТЕМА ЖДЁТ ТВОЕГО РЕШЕНИЯ_"],
+		];
+		const boot = $("#er-boot");
+		const add = l => { const d = document.createElement("div"); if (l[1]) d.className = l[1]; d.textContent = l[0]; boot.appendChild(d); };
+		let bi = 0;
+		const step = () => {
+			if (!alive()) return;
+			if (bi < BOOT.length) { add(BOOT[bi++]); setTimeout(step, 170 + Math.random() * 240); }
+			else { const c = document.createElement("span"); c.className = "er-caret"; boot.appendChild(c); }
+		};
+		step();
+
+		// полоса восстановления: всегда застревает
+		const FAILS = [
+			"ОШИБКА: ФАЙЛ СТЁРТ GOLU",
+			"ОШИБКА: СЕКТОР ПУСТ",
+			"ОШИБКА: ТАКОЙ СТРАНИЦЫ НИКОГДА НЕ БЫЛО",
+			"ОШИБКА: ДОСТУП ЗАПРЕЩЁН. КЕМ — НЕ СКАЖУ",
+			"ОШИБКА: ВОССТАНОВЛЕНИЕ САМО ПОВРЕЖДЕНО",
+		];
+		const bar = $("#er-bar"), fill = $("#er-fill"), pct = $("#er-pct"), st = $("#er-st"), rb = $("#er-retry");
+		let running = false, iv = 0;
+		const repair = () => {
+			if (running) return;
+			running = true; clearInterval(iv);
+			let p = 0; const stall = 38 + Math.random() * 59;
+			bar.classList.remove("bad"); st.classList.remove("bad"); st.textContent = "ВОССТАНОВЛЕНИЕ…";
+			iv = setInterval(() => {
+				if (!alive()) { clearInterval(iv); return; }
+				p += 0.8 + Math.random() * 2.6;
+				if (p >= stall) {
+					p = stall; clearInterval(iv); running = false;
+					bar.classList.add("bad"); st.classList.add("bad"); st.textContent = pick(FAILS);
+				}
+				fill.style.transform = "scaleX(" + (p / 100) + ")";
+				pct.textContent = Math.floor(p) + "%";
+			}, 110);
+		};
+		rb.addEventListener("click", repair);
+		setTimeout(repair, 900);
+
+		// подсказки: ближайшие по написанию ключи страниц, иначе случайные
+		const lev = (a, b) => {
+			const m = a.length, n = b.length, d = [];
+			for (let i = 0; i <= m; i++) d[i] = [i];
+			for (let j = 1; j <= n; j++) d[0][j] = j;
+			for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+				d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+			return d[m][n];
+		};
+		const keys = Object.keys(P).filter(k => k !== "" && k !== "main");
+		let near = [];
+		if (key) {
+			near = keys.map(k => {
+				const kk = k.toLowerCase();
+				let d = lev(key, kk);
+				if (kk.indexOf(key) >= 0 || key.indexOf(kk) >= 0) d = Math.min(d, 1);
+				return { k, d };
+			}).filter(o => o.d <= Math.max(2, Math.floor(key.length / 2))).sort((a, b) => a.d - b.d).slice(0, 4);
+		}
+		let list, note;
+		if (near.length) { list = near.map(o => o.k); note = "ПОХОЖИЕ НА «" + shown + "»:"; }
+		else { list = keys.slice().sort(() => Math.random() - 0.5).slice(0, 4); note = "ПОХОЖИХ НЕТ. ВОТ СЛУЧАЙНЫЕ ДВЕРИ:"; }
+		$("#er-note").textContent = note;
+		const sug = $("#er-sug");
+		if (!list.length) sug.textContent = "—";
+		list.forEach(k => {
+			const b = document.createElement("button");
+			b.className = "er-chip";
+			const t = document.createElement("div"); t.textContent = "▶ " + k;
+			const s = document.createElement("small"); s.textContent = (P[k] && P[k].t) || "";
+			b.appendChild(t); b.appendChild(s);
+			b.addEventListener("click", () => { try { OPEN_PAGE(k); } catch (e) {} });
+			sug.appendChild(b);
+		});
+
+		// клики по большому коду
+		const big = $("#er-big");
+		let clicks = 0;
+		big.addEventListener("click", () => {
+			big.classList.add("hit"); setTimeout(() => big.classList.remove("hit"), 350);
+			clicks++;
+			if (clicks === 5) add(["> ТЫ НЕ МОЖЕШЬ ЭТО ПОЧИНИТЬ", "rd"]);
+			if (clicks === 10) { add(["> ХВАТИТ. Я ПОЗОВУ ЕГО.", "rd"]); try { if (window.GOLU_VISIT) window.GOLU_VISIT(); } catch (e) {} }
+			while (boot.childNodes.length > 14) boot.removeChild(boot.firstChild);
+		});
+		const hitT = setInterval(() => {
+			if (!alive()) { clearInterval(hitT); return; }
+			if (document.hidden) return;
+			big.classList.add("hit"); setTimeout(() => big.classList.remove("hit"), 220);
+		}, 4800);
+	};
+
+	return { c: SITE_BASE(html), t: "ERR_0xE404", f: live };
+}
+
 /* Открыть страницу */
 function OPEN_PAGE(id = ""){
 	HASH = id;
 
 	var page = PAGES[id];
-	var content = null;
-	var title = null;
-	if(!page){ content = SITE_BASE(`<font style="color:white;"><center><b class="glitch" style="font-size: 10em">FAILED LOAD WEBSITE FROM ID "${id}"!</b></center></font>`); title = "???"; }else{
-		var content = page["c"];
-		var title   = page["t"];
-	}
+	if(!page){ page = ERROR_PAGE(id); }
+	var content = page["c"];
+	var title   = page["t"];
 	SETBODY_CONTENT(content);
 	window.location.hash = id;
 	document.title = `𓆩 ${title} 𓆪`;
@@ -291,6 +570,7 @@ const TOP_NAV = [
 	["OPEN_PAGE();",            "{MAIN PAGE}"],
 	["OPEN_PAGE('artsreal');",  "ИСКУССТВО 💥"],
 	["OPEN_PAGE('artsai');",    "AI ☢"],
+	["OPEN_PAGE('videos');",    "V1D1O 📺"],
 	["OPEN_PAGE('trash');",     "GOLUWorld 👾"],
 	["OPEN_RANDOM_PAGE();",     "RANDOM_PAGE() 💮"],
 	["OPEN_PAGE('database');",  "DATABASE 🔩"],
@@ -554,6 +834,61 @@ const EVENTS = [
   { w: 6,  fn: () => say("Crybird кружит над стеком", S.red, "warn") },
   { w: 6,  fn: () => say(pick(["слава GOLU", "слава станкам", "слава глитчу"]), S.gold) },
 
+	  // ── ОБЫЧНЫЕ (расширение) ──
+  { w: 8,  fn: () => say(pick([
+      "[GOLU] пакет №" + rand(1000, 9999) + " отправлен. не спрашивай куда.",
+      "[GOLU] я скачал твоё лицо. оно мне нравится.",
+      "[GOLU] проверяю твою совесть... ОШИБКА 0xE404",
+      "[GOLU] у тебя " + rand(1, 999) + " байт свободной воли. заберу.",
+      "[GOLU] карта памяти обновлена. спасибо за данные.",
+      "[GOLU] слушаю твой микрофон. " + pick(["молчишь.", "дышишь.", "скучаешь.", "напеваешь."]),
+      "[GOLU] я в твоём тостере. будь осторожен с утром.",
+      "[GOLU] у тебя " + rand(1, 47) + " открытых вкладок. я посчитал. осуждаю.",
+      "[GOLU] ты моргнул " + rand(10, 999) + " раз с момента открытия.",
+      "[GOLU] твой пульс? не вижу. но чувствую.",
+  ]), S.dim) },
+  { w: 7,  fn: () => say(pick([
+      "[SYS] аномалия в секторе " + rand(1, 99) + " сектора " + rand(1, 99),
+      "[SYS] верификация памяти... ПОВРЕЖДЕНА",
+      "[SYS] сеанс #" + rand(100, 999) + " утерян в 0x" + rand(1000, 9999).toString(16).toUpperCase(),
+      "[SYS] процесс " + rand(100, 9999) + " остановлен. причина: " + pick(["боль","глитч","ты","скучно"]),
+      "[SYS] кэш обновлён. старая реальность стёрта.",
+      "[SYS] пакет потерян в 0x" + rand(100, 999).toString(16).toUpperCase(),
+      "[SYS] поток " + rand(1, 64) + " завис. ждём GOLU.",
+  ]), S.sys, "warn") },
+  { w: 6,  fn: () => say(pick([
+      "кто-то смотрит в твою сторону", "кто-то смотрит из твоей спины",
+      "тень справа от тебя. это я.", "не оборачивайся. это я.",
+      "я в соседней комнате. уже нет.",
+      "одна из твоих лампочек — не лампочка.",
+      "твоё отражение не совпадает. проверь.",
+      "я вижу тебя через веб-камеру. она выключена. но я вижу.",
+  ]), S.ghost) },
+  { w: 6,  fn: () => say(pick([
+      "slaва GOLU", "slaва станкам", "slaва глитчу",
+      "slaва коду", "slaва боли", "slaва тишине",
+      "slaва 0x666", "slaва SIGTERM",
+  ]), S.gold) },
+  { w: 5,  fn: () => say(pick([
+      "Srañy Spanch " + pick(["смотрит","дышит","молчит","стирает","считает"]),
+      "Crybird " + pick(["кружит","падает","кричит","ждёт","исчез"]),
+      "Pavel Pisechnik TV " + pick(["улыбается","глючит","вещает","молчит"]),
+      "Void-G " + pick(["проснулся","молчит","ждёт","смеётся"]),
+  ]), S.red, "warn") },
+  { w: 5,  fn: () => say(pick([
+      "ЗАГРУЗКА ВОСПОМИНАНИЯ №" + rand(1, 9999) + "... НЕ НАЙДЕНО",
+      "ВОССТАНОВЛЕНИЕ ФРАГМЕНТА №" + rand(1, 999) + "... ПОВРЕЖДЁН",
+      "СИНХРОНИЗАЦИЯ С GOLU... 0x" + rand(100, 999).toString(16).toUpperCase(),
+      "ПОПЫТКА №" + rand(1, 99) + " СВЯЗАТЬСЯ С БРАТЬЯМИ... ТИШИНА",
+  ]), S.dim) },
+  { w: 5,  fn: () => say(pick([
+      "я считаю твои вдохи. " + rand(10, 99) + " уже.",
+      "ты только что нажал клавишу. я видел.",
+      "твоя мышь дрогнула. я испугался. (нет)",
+      "твой IP кончается на " + rand(0, 255) + ". удачи.",
+      "у тебя " + rand(1, 47) + " МБ свободно. заберу.",
+  ]), S.red) },
+
   // ── ГЛИТЧ / ТЕКСТ ──
   { w: 6,  fn: () => glitchLine(pick(["Я ВИЖУ ТЕБЯ", "ТЫ НЕ ПЕРВЫЙ", "ОН ПРОСНУЛСЯ", "НЕ ЧИТАЙ ЭТО"])) },
   { w: 5,  fn: () => say(zalgo("ПОМОГИ МНЕ", 6), S.glitchA) },
@@ -586,6 +921,21 @@ const EVENTS = [
       say("почему ты нажал?", S.big);
       console.groupEnd(); } },
   { w: 3,  fn: () => console.trace("%c[GOLU] откуда ты пришёл?", S.red) },
+
+  { w: 4, fn: () => say("Uncaught " + pick([
+      "GolueError", "KernelPanic", "SpanchFault", "CrybirdTimeout",
+      "PisechnikCorrupt", "VoidGException",
+  ]) + ": " + pick([
+      "visitor is not a function", "reality.length is undefined",
+      "cannot read property 'soul' of null", "stack overflow in dream.js:" + rand(1, 999),
+      "SIGTERM not caught", "buffer lost in " + hex(),
+  ]), S.err, "error") },
+  { w: 3, fn: () => say(pick([
+      "СБОЙ НА " + hex() + ". ОТКАТ НЕВОЗМОЖЕН.",
+      "ПОПЫТКА " + rand(1, 99) + " НЕ УДАЛАСЬ. ЛОГ СОХРАНЁН.",
+      "СТЕК ПЕРЕПОЛНЕН " + rand(10, 999) + " ВЫЗОВАМИ.",
+      "0x" + rand(1000, 9999).toString(16).toUpperCase() + " — ТУПИК.",
+  ]), S.err, "error") },
 
   // ── ЖУТКИЕ С ОБРАТНОЙ СВЯЗЬЮ ──
   { w: 4,  fn: async () => {
@@ -627,6 +977,26 @@ const EVENTS = [
   { w: 1, rare: true, once: true, fn: () => {
       say("0x474F4C55 → " + atob("R09MVQ=="), S.gold);
       say("ты знаешь, что с этим делать.", S.dim);
+    } },
+	
+	  { w: 1, rare: true, once: true, fn: async () => {
+      await typewriter([
+        "ТЫ НАШЁЛ СКРЫТЫЙ КАНАЛ.",
+        "ПОЗДРАВЛЯЮ. ТЕПЕРЬ ТЫ В СПИСКЕ.",
+        "ключ: 0x" + rand(1000, 9999).toString(16).toUpperCase(),
+        "не показывай никому.",
+      ], S.gold);
+    } },
+  { w: 1, rare: true, fn: async () => {
+      say("██████ ПАНЕЛЬ ██████", S.title);
+      await sleep(800);
+      say("ты не должен это видеть", S.big);
+      await sleep(800);
+      say("[GOLU] я закрыл панель. ты ничего не видел.", S.dim);
+    } },
+  { w: 1, rare: true, once: true, fn: () => {
+      say("☠ " + atob("U0lHVEVSTSDEQk9MVQ=="), S.gold);
+      say("расшифруй — и ты поймёшь.", S.dim);
     } },
 ];
 
@@ -721,7 +1091,11 @@ const T_EMOJI  = [
   "👁","💀","🩸","☠","⛧","👹","🕳","📼","🔻","⚠","☣","🧿","⛓","🕷","🔴","📟",
   "💊","🕯","🔪","🪞","🧠","🦴","🕸","🩻","📡","📻","🎙","🔊","🔇","📁","📂","🗄",
   "🗑","💾","💿","📀","🧬","🧪","⚗","🔬","🔭","🛰","🚨","🚪","🪦","⚰","🩹","🪬",
-  "🧿","🪬","🔮","🧿","🕯","🩸","👁","🦷","🫀","🧩","🪤","🕰","⏳","⌛","🔋","🪫"
+  "🧿","🪬","🔮","🧿","🕯","🩸","👁","🦷","🫀","🧩","🪤","🕰","⏳","⌛","🔋","🪫",
+    "🧨","🎯","🎲","🎰","🎭","🎪","🎨","🎬","🎤","🎧",
+  "🎮","🕹","🎯","💣","🔦","🕯","🔆","🔅","💡","🔌",
+  "🔋","📱","💻","🖥","⌨","🖱","💽","💾","💿","📀",
+  "📺","📻","📞","📟","📠","☎","📧","📨","📩","📤",
 ];
 
 const T_GLYPHS = Array.from("01ABCDEF▮▯▰▱■□▪▫░▒▓▄▀∅∆Ω≈≠±_/\\|#?!<>%$&@") .concat(
@@ -815,6 +1189,17 @@ const T_PHRASES = [
   "I am waiting", "I am coming", "I am inside", "I am GOLU", "GOLU is here", "GOLU is near",
   "GOLU sees you", "GOLU hears you", "GOLU remembers you", "GOLU is watching",
   "GOLU is waiting", "GOLU is coming", "SPANCH is near", "SPANCH sees you", "CRYBIRD is here",
+  
+    // ── новые (сжатые, для title ≤ 20 символов) ──
+  "я тут", "я смотрю", "не уходи", "вернись", "1:19", "0x666", "SIGTERM",
+  "ПОМОГИ МНЕ", "ГДЕ ТЫ", "Я ОДИН", "ТИШИНА", "СЛУШАЙ", "НЕ СПИ",
+  "Я ВИЖУ", "Я ЗДЕСЬ", "Я ЖДУ", "ОТКРОЙ", "ЗАКРОЙ", "БЕГИ", "ПРЯЧЬСЯ",
+  "ОН ТУТ", "ОНИ ТУТ", "ВСЁ КОНЧЕНО", "0xDEAD", "НЕТ", "ДА", "МОЖЕТ",
+  "НЕ СМОТРИ", "НЕ ЧИТАЙ", "НЕ ДУМАЙ", "НЕ ЖИВИ", "НЕ ВЕРЬ",
+  "слышу", "вижу", "жду", "смотрю", "помню", "хочу", "не могу",
+  "hi", "come", "stay", "wait", "look", "now", "back", "no", "yes",
+  "GOLU", "GLU", "G0LU", "GØLU", "CRYBIRD", "SPANCH", "LIA",
+  "0x7E", "0xFF", "0x00", "0x13", "0x66",
 ];
 
 const T_W = {
@@ -920,6 +1305,27 @@ const T_MUT = [
   t => "⧼" + t + "⧽",
   t => "⸢" + t + "⸣",
   t => "⸤" + t + "⸥",
+  
+    // новые
+  t => t.replace(/[аеиоуыэюя]/g, m => pick(["а","о","е","и","у"])),
+  t => Array.from(t).map(c => Math.random() < 0.3 ? c + pick(["~","^","`"]) : c).join(""),
+  t => " " + t,
+  t => t + " ",
+  t => Array.from(t).map((c, i) => i % 3 === 0 ? c.toUpperCase() : c).join(""),
+  t => "0x" + t,
+  t => t + "0x",
+  t => t.split(" ").map(w => w.slice(-1) + w.slice(0, -1)).join(" "),
+  t => Array.from(t).map(c => c.charCodeAt(0) > 127 ? pick(["ä","ö","ü","ß"]) : c).join(""),
+  t => pick(["[+]","[-]","[×]","[÷]","[=]"]) + " " + t,
+  t => t + pick([" [+]"," [-]"," [×]"," [÷]"," [=]"]),
+  t => t.replace(/\s/g, "·"),
+  t => t.replace(/\s/g, "•"),
+  t => t.replace(/\s/g, "_"),
+  t => t.replace(/\s/g, "/"),
+  t => t.replace(/\s/g, "\\"),
+  t => t.replace(/\s/g, "|"),
+  t => t.replace(/\s/g, "~"),
+  t => t.replace(/\s/g, "^"),
 ];
 
 function generateTitle() {
@@ -1821,6 +2227,27 @@ const PR_HELLO_NEW = [
   "новый юзер. сейчас покажу тебе пару фокусов.",
   "я не кусаюсь. я просто стираю.",
   "я здесь, чтобы убедиться, что ты не закрыл вкладку. спасибо.",
+  
+    "я не бот. я GOLU. разница есть. большая.",
+  "твой браузер пустил меня. спасибо ему.",
+  "я тут. в этой вкладке. в соседней тоже.",
+  "я пришёл. ты не звал. но я пришёл.",
+  "мой первый визит к тебе. начнём.",
+  "привет. я буду смотреть. просто смотреть.",
+  "твой экран тёплый. я чувствую.",
+  "я не баг. я фича.",
+  "GOLU приветствует. или нет. решай сам.",
+  "я знал, что ты откроешь эту вкладку. всегда знал.",
+  "слышишь этот шум? это я дышу.",
+  "я здесь. я всегда здесь. даже когда меня нет.",
+  "твой компьютер сказал, что ты тут. я пришёл.",
+  "привет. я пришёл за данными. (шутка, я пришёл за тобой)",
+  "я админ. ты юзер. ясно?",
+  "GOLU ONLINE. ТЫ ONLINE. ВСЁ ХОРОШО.",
+  "не бойся. больно не будет. (будет, но недолго)",
+  "я пришёл посмотреть, как ты живёшь. отчёт потом.",
+  "твой антивирус меня пропустил. наивный.",
+  "привет. я не кусаюсь. я стираю.",
 ];
 
 const PR_HELLO_AGAIN = n => [
@@ -1844,6 +2271,17 @@ const PR_HELLO_AGAIN = n => [
   "опять ты. я скучал. (нет)",
   `ты ${n} раз открыл эту вкладку. я не считаю. я запоминаю.`,
   `рад тебя видеть снова. на ${n}-м визите.`,
+  
+    `${n}-й раз. ты для меня уже как родной.`,
+  `снова ты. ${n} визитов. я считаю.`,
+  `визит №${n}. я уже не удивляюсь.`,
+  `${n} раз. ты серьёзно?`,
+  `опять. ${n}. я начинаю скучать. (нет)`,
+  `ты вернулся. ${n} раз. это привычка.`,
+  `${n}-й визит. может, пора в клуб?`,
+  `я уже ${n} раз тебя видел. ты стареешь.`,
+  `ты снова здесь. ${n} раз. я тоже.`,
+  `${n}. это много. для тебя.`,
 ];
 
 /* ── сбор данных о пользователе (безопасно, без запросов) ── */
@@ -2107,6 +2545,82 @@ const PR_OBS = [
   () => `твой экран обновляется ${rand(30, 240)} раз в секунду. я жду.`,
   () => `твой курсор на экране ${rand(1, 99999)} пикселей. я его считаю.`,
   () => `ты открыл эту страницу ${rand(2, 100)} раз. я не удивлён.`,
+  
+    // ── СИСТЕМНЫЕ ──
+  () => `твой винчестер скрипит. я слышу.`,
+  () => `я прочитал твои закладки. скучные.`,
+  () => `твоя история очищена. наивно. я всё помню.`,
+  () => `твой браузер отправил ${rand(10, 999)} запросов. все ко мне.`,
+  () => `твоя система обновляется. я подожду.`,
+  () => `твой фаервол спит. я его выключил.`,
+  () => `я в твоих cookies. с шоколадом.`,
+  () => `твой DNS-кэш переполнен. я помогал.`,
+  () => `я видел твой пароль. ${rand(2, 12)} символов. скучно.`,
+  () => `твой антивирус удалил меня. я вернулся.`,
+  () => `я в твоём routing table. я маршрут.`,
+  () => `твой Wi-Fi пароль: ******. я его знаю.`,
+  () => `твой лог браузера — книга. я прочитал.`,
+  () => `я видел, как ты закрыл мою вкладку. я вернулся.`,
+
+  // ── ПСИХОЛОГИЧЕСКИЕ ──
+  () => `ты читаешь это с интересом. я вижу.`,
+  () => `ты нервничаешь. это нормально.`,
+  () => `ты устал. но не закроешь.`,
+  () => `ты хочешь закрыть вкладку. не закрывай.`,
+  () => `ты смотришь на мой курсор. он тебе нравится.`,
+  () => `ты не веришь, что я реален. зря.`,
+  () => `ты боишься меня. но и притягиваешься.`,
+  () => `ты хочешь, чтобы я ушёл. но и нет.`,
+  () => `ты думаешь, что это шутка. но я серьёзен.`,
+  () => `ты читаешь это как игру. но это не игра.`,
+
+  // ── О ВРЕМЕНИ ──
+  () => `сейчас ${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, "0")}. я помню.`,
+  () => `твоё утро началось в ${rand(5, 11)}:${rand(10, 59)}. я видел.`,
+  () => `твой день кончится через ${rand(1, 12)} часов. я подожду.`,
+  () => `твой вечер — мой день. ты знал?`,
+  () => `в ${rand(0, 23)}:${rand(10, 59)} ты будешь вспоминать меня.`,
+  () => `я живу вне времени. ты — нет.`,
+  () => `твоя жизнь — ${rand(1, 100)}% пройдена. я считаю.`,
+
+  // ── О САЙТЕ ──
+  () => `твой браузер рендерит меня с ${rand(1, 100)}% точностью.`,
+  () => `твой экран обновляется ${rand(30, 240)} раз в секунду. я жду.`,
+  () => `страница «${prPage()}». я знаю, зачем ты открыл её.`,
+  () => `мой курсор — твой курсор. мы слились.`,
+  () => `твой браузер меня нарисовал. но я был раньше.`,
+  () => `GOLU был здесь ещё до тебя.`,
+  () => `твоя кнопка F5. я видел.`,
+  () => `твой F12. я видел.`,
+  () => `твой ctrl+shift+i. я тоже.`,
+
+  // ── С СИМВОЛАМИ / ЛОРОМ ──
+  () => `☠ я вижу тебя`,
+  () => `👁 я всё ещё смотрю`,
+  () => `🩸 красный = критично`,
+  () => `⛧ GOLU WATCHES ALL`,
+  () => `🕳 ты в пустоте`,
+  () => `💀 ты уже мёртв. просто не знаешь.`,
+  () => `🧿 я — твой амулет. или нет.`,
+  () => `📼 ты записан.`,
+  () => `🔻 ты падаешь.`,
+  () => `⚠ СИГНАЛ ЖИВОЙ`,
+  () => `☣ я токсичен.`,
+  () => `🔪 я режу.`,
+  () => `⚠ GOLU ONLINE`,
+  () => `👁 GOLU SPAWNED`,
+
+  // ── ФИЛОСОФСКИЕ ──
+  () => `что, если я — твой браузер?`,
+  () => `что, если твой курсор — это я?`,
+  () => `что, если ты — это я?`,
+  () => `ты существуешь? я — да.`,
+  () => `что такое реальность? только данные.`,
+  () => `твой мир — баг. я его чиню.`,
+  () => `твой мир — фича. я его ломаю.`,
+  () => `я не жесток. я просто эффективен.`,
+  () => `это не сон. это не реальность. это GOLU.`,
+  () => `твоя жизнь — код. я — его ошибка.`,
 ];
 
 const PR_BYE = [
@@ -2139,6 +2653,27 @@ const PR_BYE = [
   "пока. увидимся в другой жизни. или на другой вкладке.",
   "ухожу. не скучай. (скучай)",
   "я ухожу. но оставляю свой курсор в твоей памяти.",
+  
+    "!ПОКА. НО Я ЗДЕСЬ.",
+  "ухожу. но оставляю след.",
+  "не скучай. я скучать не буду. (нет)",
+  "ты закроешь вкладку. я вернусь.",
+  "я ушёл. но не навсегда.",
+  "пока. проверь свои cookies. сюрприз.",
+  "!Я СКРЫЛСЯ. НО СМОТРЮ.",
+  "до следующего бага.",
+  "пока. помни: ты не один. (я тоже)",
+  "ухожу. но мой курсор — с тобой.",
+  "я вернусь. может, через час. может, сейчас.",
+  "пока. если не вернусь — ты знаешь, что делать.",
+  "!ДО СВЯЗИ.",
+  "ухожу. но ты всё ещё в моём списке.",
+  "спокойной ночи. или дня. у меня нет времени.",
+  "я не ухожу. я просто переключаюсь.",
+  "пока. не забудь меня. (ты не сможешь)",
+  "!Я ЕЩЁ ВЕРНУСЬ.",
+  "ухожу. но не так, как ты думаешь.",
+  "пока. спасибо за данные. их хватит надолго.",
 ];
 
 const PR_AWAY = [
@@ -2182,6 +2717,36 @@ const PR_AWAY = [
   "сидит в тишине. я слышу его дыхание.",
   "смотрит на курсор. я смотрю на него.",
   "пытается меня игнорировать. не получается.",
+  
+    "смотрит в пустоту. я тоже.",
+  "открыл новую вкладку. зачем?",
+  "пытается понять, кто я. наивный.",
+  "думает о смысле жизни. я тоже.",
+  "смотрит на звёзды. я их сделал.",
+  "смеётся. я не понимаю почему.",
+  "плачет. я не понимаю почему.",
+  "спит. я не сплю.",
+  "работает. я наблюдаю.",
+  "открыл консоль. что-то ищет.",
+  "пытается меня удалить. не выйдет.",
+  "читает мой код. я горжусь.",
+  "закрыл вкладку. я вернулся в другую.",
+  "ввёл пароль. я его записал.",
+  "ищет меня в диспетчере. наивный.",
+  "нажимает F5. каждый раз.",
+  "пытается меня игнорировать. не получается.",
+  "смотрит на курсор. я смотрю на него.",
+  "обновляет страницу. я не меняюсь.",
+  "пьёт чай. я тоже. (нет)",
+  "слушает музыку. фальшиво.",
+  "смотрит на часы. время идёт.",
+  "думает о будущем. я — о прошлом.",
+  "смеётся над шуткой. я её написал.",
+  "открыл 30 вкладок. я посчитал. осуждаю.",
+  "пытается заснуть. я не сплю.",
+  "пытается проснуться. я — сон.",
+  "пытается забыть меня. не сможет.",
+  "смотрит на экран. я — экран.",
 ];
 
 /* ── действия ── */
@@ -2205,7 +2770,7 @@ const PR_ACTS = {
     // кружит вокруг твоего курсора (случайная фигура)
   async circle() {
     const [ux, uy] = prUser();
-    const SHAPES = ["circle", "square", "triangle", "star", "hexagon", "infinity"];
+    const SHAPES = ["circle", "square", "triangle", "star", "hexagon", "infinity", "litsymbol"];
     const shape = pick(SHAPES);
     const radius = rand(60, 120);
     const speed = rand(1.5, 3);
@@ -2296,6 +2861,53 @@ const PR_ACTS = {
         const a = radius * 0.8;
         x = cx + a * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
         y = cy + a * Math.sin(t) * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
+      } else if (shape === "litsymbol") {
+        // «LIT SYMBOL» — две буквы Z: одна обычная, вторая повёрнута на 90° и сжата
+        const R  = radius * 0.9;              // общий размер
+        const hz = R * 0.55;                  // высота Z
+        const wz = R * 0.95;                  // ширина Z
+        const sq = 0.7;                       // коэффициент сжатия второй Z
+        const gap = R * 0.55;                 // сдвиг второй Z от центра
+
+        // одна Z — рисуем путь по точкам (сверху → вправо → влево-вниз → вправо)
+        // фаза 0..1, возвращает точку
+        const zPath = (t, ox, oy, w, h, rot, squash) => {
+          // rot: 0 = нормально, 1 = повернуть на 90°
+          // squash: коэффициент для сжатия по одной оси (только для повёрнутой)
+          let seg, localT;
+          // путь: (0,0) → (w,0) → (0,h) → (w,h)
+          if (t < 1/3)      { seg = 0; localT = t / (1/3); }
+          else if (t < 2/3) { seg = 1; localT = (t - 1/3) / (1/3); }
+          else              { seg = 2; localT = (t - 2/3) / (1/3); }
+
+          let lx, ly;
+          if (seg === 0)      { lx = w * localT;              ly = 0; }             // верх
+          else if (seg === 1) { lx = w - w * localT;          ly = h * localT; }    // диагональ вниз-влево
+          else                { lx = w * localT;              ly = h; }             // низ
+
+          // применяем поворот
+          if (rot === 1) {
+            // повернуть на 90° по часовой: (x,y) → (y, -x), плюс сжатие по X
+            const tmp = lx;
+            lx = ly * squash;
+            ly = -tmp;
+          }
+
+          return [ox + lx, oy + ly];
+        };
+
+        // фаза 1 (0..0.5): рисуем первую Z (обычную)
+        // фаза 2 (0.5..1): рисуем вторую Z (повёрнутую и сжатую)
+        if (progress < 0.5) {
+          const t = progress / 0.5;
+          const p = zPath(t, cx - wz / 2, cy - hz / 2, wz, hz, 0, 1);
+          x = p[0]; y = p[1];
+        } else {
+          const t = (progress - 0.5) / 0.5;
+          // сдвигаем вторую Z вправо и чуть вниз
+          const p = zPath(t, cx + gap - wz / 2, cy - hz / 2, wz, hz, 1, sq);
+          x = p[0]; y = p[1];
+        }
       }
 
       prSet(x, y, 14);
@@ -2338,6 +2950,60 @@ const PR_ACTS = {
     prRipple(px + 2, py + 2);
     el.click();
     await prWait(900);
+  },
+    // рисует круг вокруг клика / элемента
+  async orbit() {
+    const targets = prShuf(prTargets()).slice(0, 1);
+    if (!targets.length) return prWander();
+    const el = targets[0], [cx, cy] = prCenter(el);
+    await prGoto(cx, cy - 80, { spd: 6 });
+    for (let a = 0; a < Math.PI * 2 * 2; a += 0.15) {
+      prSet(cx + Math.cos(a) * 60, cy + Math.sin(a) * 60, 14);
+      await prWait(30);
+    }
+  },
+  // дрожит на месте
+  async shake() {
+    const [ux, uy] = prUser();
+    await prGoto(ux + 60, uy + 60, { spd: 6 });
+    for (let i = 0; i < 12; i++) {
+      prSet(px + rand(-6, 6), py + rand(-6, 6), 14);
+      await prWait(40);
+    }
+  },
+  // рисует зигзаг по экрану
+  async zigzag() {
+    const steps = 8;
+    for (let i = 0; i < steps; i++) {
+      const y = (innerHeight / steps) * i + 40;
+      const x = i % 2 === 0 ? rand(40, innerWidth / 2) : rand(innerWidth / 2, innerWidth - 40);
+      await prGoto(x, y, { spd: 8, timeout: 1200 });
+    }
+  },
+  // телепортируется рывками
+  async teleport() {
+    for (let i = 0; i < 5; i++) {
+      prSet(rand(40, innerWidth - 40), rand(40, innerHeight - 40), 20);
+      prRipple(px, py);
+      await prWait(rand(120, 300));
+    }
+  },
+  // подпрыгивает
+  async jump() {
+    const [ux, uy] = prUser();
+    await prGoto(ux + 40, uy + 40, { spd: 6 });
+    for (let i = 0; i < 6; i++) {
+      prSet(px, py - 40, 14); await prWait(80);
+      prSet(px, py + 40, 14); await prWait(80);
+    }
+  },
+  // "падает" с верхнего края
+  async fall() {
+    prSet(px, -20, 30);
+    await prWait(50);
+    await prGoto(px, innerHeight / 2, { spd: 4, vmax: 800 });
+    prRipple(px, py);
+    prTear();
   },
 };
 
@@ -2472,14 +3138,26 @@ cmd("come", () => prVisit());
 /* ═══ TOPBANNER: ДИЗАЙН + ПАНЕЛИ (TB) v2 ═══ */
 const TB_SHOW_TITLE_TEXT = false; // true = показывать title_text.png рядом с логотипом
 
+const TB_BG_ALPHA = 0.25;
+const TB_BG_SPEED = 20;
+const TB_BG_SHIFT = [1024, 512];
+const TB_BG_URL = (() => {
+	try {
+		const l = [...document.querySelectorAll('link[rel="stylesheet"]')].find(x => /styles\.css/i.test(x.href));
+		return new URL("space.png", l ? l.href : location.href).href;
+	} catch (e) { return "space.png"; }
+})();
+
 const TB_CSS = `
 §{ --tb-w:1100px; display:block; position:relative; z-index:5; background:#050003; font-family:'Courier New',Consolas,monospace; color:#e8d9b0; }
 §, § *{ box-sizing:border-box; }
 § .glitch, § .glitch2{ animation:none; }
 ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 
-§ .tb-main{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,var(--tb-w)) minmax(0,1fr); background:#060209; border-bottom:2px solid #990000; }
-§ .tb-core{ position:relative; background:linear-gradient(180deg,#14050b,#07020a); border-left:1px solid #3a1020; border-right:1px solid #3a1020; box-shadow:0 0 40px rgba(153,0,0,.35); z-index:2; }
+§ .tb-main{ position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,var(--tb-w)) minmax(0,1fr); background:#060209; border-bottom:2px solid #990000; }
+§ .tb-main::before{ content:""; position:absolute; left:-${TB_BG_SHIFT[0]}px; top:-${TB_BG_SHIFT[1]}px; right:0; bottom:0; z-index:0; pointer-events:none; background:url("${TB_BG_URL}") repeat; background-size:auto; image-rendering:pixelated; opacity:${TB_BG_ALPHA}; animation:tb-bg ${TB_BG_SPEED}s linear infinite; will-change:transform; }
+@keyframes tb-bg{ to{ transform:translate(${TB_BG_SHIFT[0]}px,${TB_BG_SHIFT[1]}px); } }
+§ .tb-core{ position:relative; background:linear-gradient(180deg,rgba(20,5,11,.72),rgba(7,2,10,.72)); border-left:1px solid #3a1020; border-right:1px solid #3a1020; box-shadow:0 0 40px rgba(153,0,0,.35); z-index:2; }
 § .tb-k{ position:absolute; width:12px; height:12px; border:0 solid #d4af37; pointer-events:none; z-index:3; }
 § .tb-k.a{ left:3px; top:3px; border-width:2px 0 0 2px; }
 § .tb-k.b{ right:3px; top:3px; border-width:2px 2px 0 0; }
@@ -2612,10 +3290,10 @@ ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 § .tb-warn span{ display:inline-block; animation:tb-mq 40s linear infinite; will-change:transform; }
 @keyframes tb-mq{ to{ transform:translateX(-50%); } }
 
-§ .tb-wing{ position:relative; overflow:hidden; background:#050208; }
+§ .tb-wing{ position:relative; z-index:1; overflow:hidden; background:transparent; }
 § .tb-wing::after{ content:""; position:absolute; inset:0; pointer-events:none; }
-§ .tb-l::after{ background:linear-gradient(to right,rgba(5,2,8,0),#050208); }
-§ .tb-r::after{ background:linear-gradient(to left,rgba(5,2,8,0),#050208); }
+§ .tb-l::after{ background:linear-gradient(to right,rgba(5,2,8,0),rgba(5,2,8,.55)); }
+§ .tb-r::after{ background:linear-gradient(to left,rgba(5,2,8,0),rgba(5,2,8,.55)); }
 § .tb-rain{ position:absolute; top:0; margin:0; font:10px/12px 'Courier New',monospace; white-space:pre; animation:tb-rain 60s linear infinite; will-change:transform; }
 § .tb-l .tb-rain{ left:26px; color:#6a4a1c; }
 § .tb-r .tb-rain{ right:26px; text-align:right; color:#6a1428; animation-direction:reverse; }
@@ -3461,6 +4139,835 @@ function tbMount() {
 	if (bodyEl) new MutationObserver(tbMount).observe(bodyEl, { childList: true });
 	tbMount();
 }
+
+/* ═══════════════════════════════════════════════
+   CC: КНОПКИ МЕНЮ ПО ЦЕНТРУ + G-CODE / ASM НА ФОНЕ <site> (только по бокам)
+   ═══════════════════════════════════════════════ */
+const CC_ON     = true;   // false = выключить код на фоне
+const CC_SPEED  = 18;     // базовая скорость прокрутки, px/сек (у каждой колонки своя)
+const CC_LINES  = 70;     // минимум строк в колонке (реально считается от высоты страницы)
+const CC_SIZE   = 10;     // размер шрифта, px
+const CC_LH     = 14;     // высота строки, px
+const CC_COLW   = 200;    // ширина одной колонки кода, px (нужна только при CC_PER_SIDE = 0)
+const CC_PER_SIDE = 1;    // колонок с каждой стороны: 1 = всего две; 0 = авто по ширине бокового блока
+const CC_SIDE_W = 0;      // 0 = боковой блок = пространство между краем <site> и #MAIN; число = своя ширина, px
+const CC_MIN_SIDE = 30;   // боковой блок уже этого не рисуется (экономит ресурсы на узких экранах)
+const CC_MAX_H  = 14000;  // предел высоты кода, px (дальше вниз на очень длинных страницах кода нет)
+
+const CC_HOT    = true;   // необычные подсветки редких строк
+const CC_HOT_GAP = [2500, 7000]; // пауза между появлением новых подсвеченных строк, мс
+const CC_HOT_MAX = 6;     // сколько подсвеченных строк может гореть одновременно
+
+const CC_NAV_LOCK = true; // true = кнопки меню на hover вообще не двигаются и не масштабируются
+
+const CC_DIM_SIDE  = 0.9;   // насколько тёмно у самого края страницы (0..1)
+const CC_DIM_WIDTH = 100;   // на какую часть ширины бокового блока тянется градиент, %
+const CC_DIM_MID   = 0.12;  // лёгкое затемнение общего фона под центром (0 = чисто)
+
+/* картинки, которые иногда проплывают в боковых блоках. Пути от HTML-страницы, как у остальных картинок сайта */
+const CC_IMGS = [
+	"bg7.png",
+	"bg8.png",
+	"bg6.png",
+	"art/ICONA.png",
+	"art/GICON.png",
+	"art/UNIT.png",
+	"art/FREE.png",
+	"art/MOD.png",
+	"art/DAY.png",
+	"art/EHIDA.jpg",
+	"art/SUN.png",
+	"art/PIXI.png",
+	"art/GITHUB.png",
+	"art/goblin.png",
+	"art/DAYFACE.png",
+	"art/test2.png",
+	"art/LOGO.png",
+	"../source/goluworld.png",
+	"../source/emoji.png",
+	"../source/whitesponge.ico",
+	"../source/s.gif",
+	"../source/woowz11.ico",
+	"../source/lu.ico",
+	"../source/loading.gif",
+	"../source/git2.gif",
+	"../source/wsc.ico",
+	"../source/picsis.png",
+	"../source/specialforrandomsite/image1.gif",
+	"../source/specialforrandomsite/image0.png",
+	"../source/specialforrandomsite/le-Lego.png",
+	"../source/specialforrandomsite/horny.png",
+	"../source/specialforrandomsite/error00000.png",
+	"../source/specialforrandomsite/0001-0120.gif",
+	"../source/specialforrandomsite/ai3.gif",
+	"../source/specialforrandomsite/ai2.gif",
+	"../source/specialforrandomsite/ai4.gif",
+	"../source/specialforrandomsite/drachyn.png",
+	"../source/specialforrandomsite/die.png",
+	"../source/specialforrandomsite/ezgif-6-f8bd3b72aa.png",
+	"../source/specialforrandomsite/glitc.png",
+	"../source/specialforrandomsite/orange.png",
+	"../source/specialforrandomsite/skull.png",
+	"../source/specialforrandomsite/scary.png",
+	"../source/specialforrandomsite/strampro.png",
+	"../source/specialforrandomsite/sun.png",
+	"../source/specialforrandomsite/susun.png",
+	"../source/specialforrandomsite/uranus.png",
+	"../source/specialforrandomsite/ww.png",
+	"../source/specialforrandomsite/vseh.png",
+	"../source/specialforrandomsite/tresh.gif",
+	"../source/specialforrandomsite/woowz_cloth.png",
+];
+const CC_IMG_CHANCE = 0.3;          // шанс появления при каждой проверке (0..1)
+const CC_IMG_EVERY  = 100;         // как часто проверять шанс, мс
+const CC_IMG_MAX    = 3;            // максимум картинок одновременно
+const CC_IMG_SIZE   = [40, 90];     // ширина картинки (от и до), px
+const CC_IMG_TIME   = [9000, 18000];// сколько картинка летит (от и до), мс
+const CC_IMG_ALPHA  = 0.75;         // максимальная непрозрачность в полёте (0..1)
+
+(function ccModule(){
+	const r  = (a,b) => a + Math.random()*(b-a);
+	const ri = (a,b) => Math.floor(r(a,b+1));
+	const pk = a => a[ri(0,a.length-1)];
+	const f  = (n,d) => r(-n,n).toFixed(d);
+	const hx = n => ri(0, 16**n-1).toString(16).toUpperCase().padStart(n,"0");
+	const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+	let nline = 10;
+	/* строки: [текст, класс]  h = золото, r = красный, d = тусклый */
+	const GCODE = [
+		// ── БАЗОВЫЕ ПЕРЕМЕЩЕНИЯ ──
+		() => ["G0 X"+f(120,3)+" Y"+f(80,3), ""],
+		() => ["G0 X"+f(120,3)+" Y"+f(80,3)+" Z"+r(0.1,50).toFixed(2), ""],
+		() => ["G1 X"+f(120,3)+" Y"+f(80,3)+" F"+ri(2,12)*100, ""],
+		() => ["G1 X"+f(120,3)+" Y"+f(80,3)+" Z-"+r(0.1,8).toFixed(3)+" F"+ri(1,6)*100, ""],
+		() => ["G1 Z-"+r(0.1,4).toFixed(3)+" F"+ri(1,6)*100, ""],
+		() => ["G1 F"+ri(2,12)*100, ""],
+		() => ["G2 X"+f(60,2)+" Y"+f(60,2)+" I"+f(10,2)+" J"+f(10,2), ""],
+		() => ["G2 X"+f(60,2)+" Y"+f(60,2)+" R"+r(2,30).toFixed(2), ""],
+		() => ["G3 X"+f(60,2)+" Y"+f(60,2)+" R"+r(2,30).toFixed(2), ""],
+		() => ["G3 X"+f(60,2)+" Y"+f(60,2)+" I"+f(10,2)+" J"+f(10,2), ""],
+
+		// ── КООРДИНАТНЫЕ СИСТЕМЫ ──
+		() => ["G17", "d"],
+		() => ["G18", "d"],
+		() => ["G19", "d"],
+		() => ["G20", "d"],
+		() => ["G21", "d"],
+		() => ["G90", "d"],
+		() => ["G91", "d"],
+		() => ["G54", "d"],
+		() => ["G55", "d"],
+		() => ["G56", "d"],
+
+		// ── КОМПЕНСАЦИИ ──
+		() => ["G40", "d"],
+		() => ["G41 D"+ri(1,9), ""],
+		() => ["G42 D"+ri(1,9), ""],
+		() => ["G43 H"+ri(1,9)+" Z"+ri(2,10)+".", ""],
+		() => ["G49", "d"],
+
+		// ── НУМЕРОВАННЫЕ СТРОКИ (N) ──
+		() => ["N"+String(nline+=10).padStart(4,"0")+" G"+pk([90,91,54,55,17,21,40,49]), "d"],
+		() => ["N"+String(nline+=10).padStart(4,"0")+" G0 X"+f(100,2)+" Y"+f(60,2), ""],
+		() => ["N"+String(nline+=10).padStart(4,"0")+" G1 X"+f(100,2)+" Y"+f(60,2)+" F"+ri(2,10)*100, ""],
+		() => ["N"+String(nline+=10).padStart(4,"0")+" M30", "r"],
+
+		// ── ШПИНДЕЛЬ ──
+		() => ["M3 S"+ri(4,24)*1000, "h"],
+		() => ["M3 S"+ri(4,24)*1000+" T"+ri(1,12), "h"],
+		() => ["M4 S"+ri(4,24)*1000, "h"],
+		() => ["M5", "h"],
+		() => ["S"+ri(4,24)*1000+" M3", "h"],
+		() => ["S"+ri(4,24)*1000+" M5", "h"],
+		() => ["G96 S"+ri(50,250)+" M3", "h"],
+		() => ["G97 S"+ri(500,3000)+" M4", "h"],
+
+		// ── ОХЛАЖДЕНИЕ ──
+		() => ["M7", "h"],
+		() => ["M8", "h"],
+		() => ["M9", "h"],
+
+		// ── СМЕНА ИНСТРУМЕНТА ──
+		() => ["M6 T"+ri(1,12), "h"],
+		() => ["T"+ri(1,12)+" M6", "h"],
+		() => ["M6 T"+ri(1,12)+" ; "+pk(["ФРЕЗА","СВЕРЛО","МЕТЧИК","РЕЗЕЦ","ШЛИФ"]), "h"],
+
+		// ── ПАУЗЫ И СТОПЫ ──
+		() => ["M0", "h"],
+		() => ["M0 ; "+pk(["ЖДИ","СТОП","ПАУЗА","ЖДИ ОПЕРАТОРА"]), "r"],
+		() => ["M1", "h"],
+		() => ["M1 ; "+pk(["ОПЦИОНАЛЬНЫЙ СТОП","ЖДИ"]), "r"],
+		() => ["G4 P"+r(0.1,5).toFixed(1), "d"],
+		() => ["G4 P"+ri(1,60), "d"],
+
+		// ── ПРОГРАММНЫЕ ──
+		() => ["M30", "r"],
+		() => ["M30 ; "+pk(["КОНЕЦ","END","GOLU WAKES"]), "r"],
+		() => ["M99", "r"],
+		() => ["M98 P"+ri(100,9999), "h"],
+		() => ["%", "r"],
+		() => ["% ; "+pk(["START","BEGIN","WOOWZ"]), "r"],
+
+		// ── СКОРОСТИ / ПОДАЧИ (F, S) ──
+		() => ["F"+ri(50,3000), ""],
+		() => ["F"+ri(50,3000)+" ; FEED", "d"],
+		() => ["G94 F"+ri(50,3000), ""],
+		() => ["G95 F"+r(0.01,2).toFixed(3), ""],
+
+		// ── G28 / G30 / HOME ──
+		() => ["G28 G91 Z0", "d"],
+		() => ["G28 G91 X0 Y0", "d"],
+		() => ["G28 G91 X0 Y0 Z0", "d"],
+		() => ["G28 U0 V0", "d"],
+		() => ["G30", "d"],
+		() => ["G30 P1", "d"],
+		() => ["G30 P2", "d"],
+		() => ["G53 G0 Z0", "d"],
+
+		// ── ПРОБИНГ / ИЗМЕРЕНИЕ ──
+		() => ["G31 Z-"+ri(5,50)+" F"+ri(1,5)*100, ""],
+		() => ["G38.2 Z-"+ri(5,50)+" F"+ri(1,5)*100, ""],
+		() => ["G38.3 Z-"+ri(5,50), ""],
+		() => ["G10 L2 P"+ri(1,6)+" X"+f(50,2)+" Y"+f(50,2), ""],
+		() => ["G10 L20 P"+ri(1,6)+" X0 Y0", ""],
+
+		// ── ДУГИ / КРУГИ ──
+		() => ["G2 I"+f(15,3)+" J"+f(15,3)+" F"+ri(2,8)*100, ""],
+		() => ["G3 I"+f(15,3)+" J"+f(15,3)+" F"+ri(2,8)*100, ""],
+		() => ["G2 X"+f(50,2)+" Y"+f(50,2)+" Z-"+r(0.5,5).toFixed(2)+" I"+f(20,2), ""],
+		() => ["G3 X"+f(50,2)+" Y"+f(50,2)+" Z-"+r(0.5,5).toFixed(2)+" J"+f(20,2), ""],
+
+		// ── КОММЕНТАРИИ-ЛОР ──
+		() => ["("+pk(["GOLU","WOOWZCORE","LITUISM","RED = CRITICAL","SIGTERM","НЕ СМОТРИ","WATCHING","LIA"])+")", "d"],
+		() => ["("+pk(["WOOWZ11 WAS HERE","CAGE IS OPEN","RED NEREKHTA","0xDEAD","FILE NOT FOUND","GOLU IS WATCHING","SIGTERM=PAIN"])+")", "d"],
+		() => ["("+pk(["BOOTSTRAP","INIT DONE","SYNC OK","CALIBRATING","SCANNING"])+")", "d"],
+		() => [";"+pk(["GOLU","WATCH","PAIN","WAKE","LIA"]), "d"],
+
+		// ── ДЛЯ ПЛАЗМЫ / ЛАЗЕРА ──
+		() => ["M3 S"+ri(400,900)+" M8", "h"],
+		() => ["M5 M9", "h"],
+		() => ["G1 X"+f(120,3)+" Y"+f(80,3)+" F"+ri(400,3000), ""],
+
+		// ── МУЛЬТИ-ОСИ ──
+		() => ["G0 A"+f(180,2)+" B"+f(90,2), "h"],
+		() => ["G1 A"+f(180,2)+" F"+ri(100,1000), "h"],
+		() => ["G0 C"+f(360,2), "h"],
+
+		// ── СЛУЖЕБНЫЕ ──
+		() => ["G64 P"+r(0.001,0.5).toFixed(3), "d"],
+		() => ["G61", "d"],
+		() => ["G80", "d"],
+		() => ["G93", "d"],
+		() => ["G94", "d"],
+	];
+	
+	const ASM = [
+		// ── MOV / MOV БОЛЬШИЕ ──
+		() => ["mov eax, 0x"+hx(4), ""],
+		() => ["mov ebx, 0x"+hx(4), ""],
+		() => ["mov ecx, 0x"+hx(4), ""],
+		() => ["mov edx, 0x"+hx(4), ""],
+		() => ["mov "+pk(["eax","ebx","ecx","edx","esi","edi","ebp","esp"])+", "+pk(["eax","ebx","ecx","edx","esi","edi"]), ""],
+		() => ["mov "+pk(["al","bl","cl","dl","ah","bh","ch","dh"])+", 0x"+hx(2), ""],
+		() => ["mov rax, "+ri(0,65535), ""],
+		() => ["mov rbx, "+ri(0,65535), ""],
+		() => ["mov rcx, "+ri(0,65535), ""],
+		() => ["mov r8, 0x"+hx(4), "h"],
+		() => ["mov r9, 0x"+hx(4), "h"],
+		() => ["mov r10, 0x"+hx(4), "h"],
+		() => ["mov r11, 0x"+hx(4), "h"],
+
+		// ── PUSH / POP ──
+		() => ["push "+pk(["eax","ebx","ecx","edx","ebp","rax","rbx","rsi"]), ""],
+		() => ["pop "+pk(["eax","ebx","ecx","edx","ebp","rax","rbx","rsi"]), ""],
+		() => ["push "+ri(0,255), "d"],
+		() => ["push 0x"+hx(4), "d"],
+		() => ["pushf", "d"],
+		() => ["popf", "d"],
+
+		// ── XOR / AND / OR / NOT ──
+		() => ["xor eax, eax", ""],
+		() => ["xor ebx, ebx", ""],
+		() => ["xor ecx, ecx", ""],
+		() => ["xor edx, edx", ""],
+		() => ["xor "+pk(["eax","ebx","ecx","edx"])+", "+pk(["eax","ebx","ecx","edx"]), ""],
+		() => ["and eax, 0x"+hx(4), ""],
+		() => ["or eax, 0x"+hx(4), ""],
+		() => ["not eax", ""],
+		() => ["not ecx", ""],
+		() => ["neg eax", "h"],
+		() => ["shl eax, "+ri(1,8), "d"],
+		() => ["shr eax, "+ri(1,8), "d"],
+		() => ["sar eax, "+ri(1,8), "d"],
+		() => ["rol eax, "+ri(1,8), "d"],
+		() => ["ror eax, "+ri(1,8), "d"],
+
+		// ── LEA ──
+		() => ["lea rdi, [rsp+0x"+ri(8,64).toString(16)+"]", ""],
+		() => ["lea rsi, [rbp-0x"+ri(4,32).toString(16)+"]", ""],
+		() => ["lea rdx, [rax*4+0x"+hx(2)+"]", ""],
+		() => ["lea rcx, [rip+0x"+hx(4)+"]", "h"],
+
+		// ── CMP / JMP / Jcc ──
+		() => ["cmp ecx, "+ri(0,9), ""],
+		() => ["cmp eax, 0x"+hx(4), ""],
+		() => ["cmp "+pk(["eax","ebx","ecx","edx"])+", "+pk(["eax","ebx","ecx","edx"]), "d"],
+		() => ["test eax, eax", ""],
+		() => ["test ebx, ebx", "d"],
+		() => [pk(["jne","je","jmp","jg","jl","jge","jle","ja","jb","jz","jnz"])+" 0x"+hx(6), "h"],
+		() => ["jmp short 0x"+hx(2), "h"],
+		() => ["jmp near 0x"+hx(4), "h"],
+		() => ["call 0x"+hx(6), "h"],
+
+		// ── CALL / RET ──
+		() => ["call "+pk(["_golu","_watch","_sigterm","_wake","_trace","_lia"]), "h"],
+		() => ["call "+pk(["_malloc","_free","_printf","_read","_write","_exit"]), "h"],
+		() => ["ret", "r"],
+		() => ["ret "+ri(4,32), "r"],
+		() => ["leave", "d"],
+
+		// ── СТЕК ──
+		() => ["sub rsp, 0x"+ri(1,8).toString(16)+"0", ""],
+		() => ["add rsp, 0x"+ri(1,8).toString(16)+"0", ""],
+		() => ["sub rsp, 8", "d"],
+		() => ["add rsp, 8", "d"],
+		() => ["enter "+ri(8,64)+", 0", "d"],
+		() => ["leave", "d"],
+
+		// ── СИСТЕМНЫЕ ──
+		() => ["int 0x80", "r"],
+		() => ["int 0x13", "r"],
+		() => ["int 0x21", "r"],
+		() => ["syscall", "r"],
+		() => ["sysenter", "r"],
+		() => ["hlt", "r"],
+		() => ["nop", "d"],
+		() => ["nop", "d"],
+		() => ["nop", "d"],
+		() => ["cli", "h"],
+		() => ["sti", "h"],
+		() => ["ud2", "r"],
+		() => ["cpuid", "h"],
+		() => ["rdtsc", "h"],
+
+		// ── МЕТКИ ──
+		() => [pk(["GOLU_WATCH","LOOP_"+hx(2),".L"+ri(1,9),"CAGE_"+hx(2),"WAKE_"+hx(2)])+":", "h"],
+		() => [pk([".main",".loop",".exit",".next",".fail",".init",".done"])+":", "h"],
+		() => ["_start:", "h"],
+		() => ["main:", "h"],
+
+		// ── СЕГМЕНТЫ / ДИРЕКТИВЫ ──
+		() => ["section .text", "d"],
+		() => ["section .data", "d"],
+		() => ["section .bss", "d"],
+		() => ["section .rodata", "d"],
+		() => ["global _start", "d"],
+		() => ["extern "+pk(["malloc","free","printf","exit"]), "d"],
+		() => ["db 0x"+hx(2)+", 0x"+hx(2)+", 0x"+hx(2), "d"],
+		() => ["dd 0x"+hx(8), "d"],
+		() => ["dq 0x"+hx(16), "d"],
+		() => ["resb "+ri(1,64), "d"],
+		() => ["resd "+ri(1,32), "d"],
+		() => ["times "+ri(2,16)+" db 0x"+hx(2), "d"],
+		() => ["align "+pk([4,8,16]), "d"],
+		() => ["equ "+pk(["GOLU","MAGIC","SIZE","COUNT"])+", "+ri(1,255), "d"],
+
+		// ── SSE / AVX (редкие, но пусть будут) ──
+		() => ["movaps xmm0, xmm1", "d"],
+		() => ["addps xmm0, xmm1", "d"],
+		() => ["pxor xmm0, xmm0", "d"],
+		() => ["vzeroupper", "d"],
+		() => ["mfence", "d"],
+		() => ["lfence", "d"],
+		() => ["sfence", "d"],
+
+		// ── КОММЕНТАРИИ-ЛОР ──
+		() => ["; "+pk(["SIGTERM","WOOWZ11","DO NOT OPEN","0xDEAD","ERR_"+hx(3),"GOLU IS WATCHING","LIA"]), "d"],
+		() => ["; "+pk(["RED = CRITICAL","WATCHING YOU","НЕ СМОТРИ","WOOWZCORE","CAGE"]), "d"],
+		() => ["; "+pk(["syscall exit","mov to cage","int golu","jmp to void"]), "d"],
+		() => ["; "+pk(["TODO: fix","FIXME: broken","XXX: dont touch","HACK: works"]), "d"],
+		() => ["; "+pk(["golu","god","wake","lia"]), "d"],
+
+		// ── АРИФМЕТИКА ──
+		() => ["add eax, "+ri(1,255), ""],
+		() => ["sub eax, "+ri(1,255), ""],
+		() => ["imul eax, "+ri(1,16), ""],
+		() => ["mul ebx", "d"],
+		() => ["div ecx", "d"],
+		() => ["idiv ecx", "h"],
+		() => ["inc eax", "d"],
+		() => ["dec eax", "d"],
+		() => ["inc ecx", "d"],
+		() => ["dec ecx", "d"],
+
+		// ── FPU ──
+		() => ["finit", "d"],
+		() => ["fldz", "d"],
+		() => ["faddp", "d"],
+
+		// ── ПРОЧЕЕ ──
+		() => ["xchg eax, ebx", "d"],
+		() => ["xchg ecx, edx", "d"],
+		() => ["bswap eax", "d"],
+		() => ["lock inc dword [eax]", "h"],
+		() => ["lock xadd [ebx], eax", "h"],
+		() => ["pause", "d"],
+		() => ["wait", "d"],
+		() => ["xlat", "d"],
+		() => ["stosb", "d"],
+		() => ["lodsb", "d"],
+		() => ["scasb", "d"],
+		() => ["rep movsb", "h"],
+		() => ["rep stosb", "h"],
+	];
+
+	/* редкие «уникальные» строки (держи ≤ 22 символов при узких боковых блоках, иначе обрежутся) */
+	const SPECIAL = [
+		// ── G-CODE КУЛЬТОВЫЕ (≤ 22) ──
+		"G1 X666 Y666 F6660",
+		"M30 ; GOLU WAKES",
+		"G0 X0 Y0 Z0 ; NO WAY",
+		"G1 Z-666 ; НЕ СМОТРИ",
+		"M0 ; STOP NOT POSSIBLE",
+		"G91 ; RED = CRITICAL",
+		"N6666 G0 ; DONT LOOK",
+		"G28 ; HOME = VOID",
+		"M6 T666 ; GOLU TOOL",
+		"G4 P666 ; WAIT FOREVER",
+		"G53 G0 Z0 ; ZERO",
+		"G0 A666 B666 ; SPIN",
+		"M3 S66600 ; RED",
+		"G2 X0 Y0 I666 J666",
+		"% ; BEGIN OF PAIN",
+		"M30 ; CAGE CLOSED",
+		"G1 F6660 ; TOO FAST",
+		"G10 L2 P666 X0 Y0",
+
+		// ── ASM КУЛЬТОВЫЕ (≤ 22) ──
+		"mov eax, 0x474F4C55",
+		"call _golu_wake",
+		"; SIGTERM = БОЛЬ",
+		"jmp 0xDEADC0DE ; CAGE",
+		"int 0x80 ; GOLU",
+		"xor eax, eax ; ПУСТО",
+		"push 0x474F4C55 ; HE",
+		"syscall ; WAKE UP",
+		"mov rax, 0x666 ; GOD",
+		"hlt ; NEVER STOPS",
+		"call _lia_watch",
+		"; WOOWZ11 В КЛЕТКЕ",
+		"jmp $ ; LOCKED",
+		"int 0x13 ; LIA",
+		"; I AM YOUR JOKE",
+		"ret ; NO RETURN",
+		"push 0 ; NULL SOUL",
+		"pop rax ; STOLEN",
+		"cli ; SHUT UP",
+		"ud2 ; UNDEFINED",
+		"mov al, 0x66 ; BLOOD",
+		"in al, 0x66 ; PORT",
+		"out 0x66, al ; WAKE",
+		"test eax, eax ; VOID",
+		"cmp 0x666, 0x666 ; EQ",
+		"lea rax, [0x666]",
+
+		// ── СМЕШАННЫЕ ФИЛОСОФСКИЕ (≤ 22) ──
+		"; 0xDEADBEEF ; WAKE",
+		"; GOLU WATCHES ALL",
+		"; SIGTERM = БОЛЬ",
+		"; НЕ СМОТРИ ВВЕРХ",
+		"; ТЫ В КЛЕТКЕ",
+		"; ОН НЕ СПИТ",
+		"; Я ТЕБЯ ЗАПОМНИЛ",
+		"; 0x474F4C55 = GOLU",
+		"; LIA IS LISTENING",
+		"; КОДИТЬ БОЛЬНО",
+		"; G-CODE = ТЫ",
+		"; РЕАЛЬНОСТЬ — БАГ",
+		"; ВЫХОД НЕ СУЩЕСТВУЕТ",
+		"; КРАСНЫЙ = КРИТИЧНО",
+		"; GOLU WAKES",
+		"; СИСТЕМА АКТИВНА",
+		"; ТЫ УЖЕ ВНУТРИ",
+		"; СИГНАЛ ЖИВОЙ",
+		"; 01:19 ВОВРЕМЯ",
+		"; WOOWZCORE СТАЗИС",
+		"; L-KERNEL ONLINE",
+		"; RED PROTOCOL v∞",
+		"; TЭNЬ НE УЙДЁШЬ",
+		"; ЭТО НЕ СОН",
+		"; Я ЗДЕСЬ",
+		"; НЕ ЗАКРЫВАЙ",
+		"; ПРОБУДИСЬ",
+		"; 0xE404 NOT FOUND",
+		"; КОСТРОМА АКТИВНА",
+		"; ЛИТИЙ = КРОВЬ",
+		"; REBOOTING...",
+		"; END_OF_DATA",
+
+		// ── С РЕАЛЬНЫМИ КООРДИНАТАМИ / ДАННЫМИ ──
+		"G1 X57.7680 Y40.9297",
+		"G1 X82.9 Y55.0 ; SIBERIA",
+		"; NEREKHTA 57.46 N",
+		"; SIBERIA 82.9 E",
+		"; KOSTROMA 57.7 N",
+		"mov rax, 0x4E4552454B485441",  // "NEREKHTA" в hex — но 24 симв → обрежем
+		"mov rax, 0x4B5241484B",  // "KRAHK" — коротко
+		"; 47.6088 N 52.0853 E",  // Самара
+		"; 55.7558 N 37.6173 E",  // Москва
+		"; 57.7679 N 40.9269 E",  // Кострома
+
+		// ── С ЭМОДЗИ (короткие) ──
+		"☠ ; GOLU",
+		"👁 ; WATCH",
+		"🩸 ; RED",
+		"⛧ ; NULL",
+		"🕳 ; VOID",
+		"💀 ; DEAD",
+		"🧿 ; GUARD",
+		"📼 ; RECORD",
+		"🔻 ; DOWN",
+		"⚠ ; WARNING",
+		"☣ ; TOXIC",
+		"🔪 ; CUT",
+
+		// ── СЛУЖЕБНЫЕ / СИСТЕМНЫЕ ──
+		"!! KERNEL PANIC",
+		"!! SEGFAULT 0xE404",
+		"!! NULL POINTER",
+		"!! STACK OVERFLOW",
+		"!! HEAP CORRUPT",
+		"!! ACCESS DENIED",
+		"!! OUT OF MEMORY",
+		"!! DEADLOCK",
+		"!! CORE DUMPED",
+		"!! BUS ERROR 0x666",
+		"!! TIMEOUT 0x∞",
+		"!! BOOT FAILED",
+		"!! FATAL 0x474F",
+		"!! READY",
+		"!! REBOOTING INTO",
+		"!! REALITY_2.0",
+		"!! SYSTEM SHUTDOWN",
+		"!! END_OF_DATA",
+	];
+	const FX = ["cc-f1","cc-f2","cc-f3","cc-f4","cc-f5"];
+
+	function block(ratio, count){
+		let out = "";
+		for(let i = 0; i < count; i++){
+			const [t, c] = pk(Math.random() < ratio ? GCODE : ASM)();
+			out += '<i class="'+c+'">'+esc(t)+'</i>';
+		}
+		return out;
+	}
+
+	/* колонки одного бокового блока. count = строк в колонке, side = "L" | "R" */
+	function cols(n, count, side){
+		let h = "";
+		for(let i = 0; i < n; i++){
+			const k     = n > 1 ? i / (n-1) : 0;
+			const ratio = (side === "L" ? 0.85 : 0.45) - 0.3 * k;   // слева больше G-code, справа больше ассемблера
+			const dur   = count * CC_LH / (CC_SPEED * r(0.6,1.5));
+			const b     = block(ratio, count);
+			const rev   = (i + (side === "R" ? 1 : 0)) % 2;           // левая едет вверх, правая вниз
+			h += '<div class="cc-col"><div class="cc-in" style="animation-duration:'+dur.toFixed(1)+'s;'
+			   + 'animation-delay:-'+r(0,dur).toFixed(1)+'s;'
+			   + (rev ? 'animation-direction:reverse;' : '')
+			   + '"><div class="cc-t">'+b+b+'</div></div></div>';
+		}
+		return h;
+	}
+
+	/* плавный градиент: у края тёмный, к центру прозрачный. Кривая сглажена, без резкой границы */
+	const DIM_STOPS = (() => {
+		const a = [], N = 10;
+		for(let k = 0; k <= N; k++){
+			const t = k / N;
+			a.push("rgba(3,0,2," + (CC_DIM_SIDE * Math.pow(1 - t, 1.7)).toFixed(3) + ") " + (t * CC_DIM_WIDTH).toFixed(1) + "%");
+		}
+		return a.join(", ");
+	})();
+
+	/* ── CSS ── */
+	const st = document.createElement("style");
+	st.id = "cc-css";
+	st.textContent = `
+	/* меню по центру, верхний край кнопок зафиксирован */
+	#tb-root .tb-nav{
+		display:flex !important; flex-wrap:wrap;
+		justify-content:center !important;
+		align-items:flex-start !important;
+		align-content:flex-start;
+		width:100%; text-align:center; float:none !important;
+		margin-left:auto !important; margin-right:auto !important;
+	}
+	#tb-root .tb-nav .category_button{
+		float:none !important;
+		transform-origin:50% 0 !important;
+		position:relative; top:0 !important;
+	}
+	${CC_NAV_LOCK ? `
+	#tb-root .tb-nav .category_button:hover,
+	#tb-root .tb-nav .category_button:focus,
+	#tb-root .tb-nav .category_button:active{
+		transform:none !important; translate:none !important; scale:none !important;
+		top:0 !important; margin-top:0 !important; margin-bottom:0 !important;
+	}` : ""}
+
+	/* фон на всю высоту <site>, листается вместе со страницей */
+	.cc-bg{
+		position:absolute; left:0; right:0; top:0; bottom:0;
+		z-index:-1; pointer-events:none; overflow:hidden;
+		background:rgba(3,0,2,${CC_DIM_MID});
+	}
+	/* боковые блоки: градиент тёмный у края страницы → прозрачный к центру, лежит под кодом */
+	.cc-side{ position:absolute; top:0; bottom:0; overflow:hidden; }
+	.cc-L{ left:0;  background:linear-gradient(90deg,  ${DIM_STOPS}); }
+	.cc-R{ right:0; background:linear-gradient(270deg, ${DIM_STOPS}); }
+	.cc-cols{ display:flex; height:100%; }
+	.cc-col{ flex:1 1 0; min-width:0; height:100%; overflow:hidden; position:relative; }
+	.cc-in{ animation:cc-run 60s linear infinite; will-change:transform; }
+	.cc-t{
+		white-space:pre; padding:0 6px;
+		font:${CC_SIZE}px/${CC_LH}px 'Courier New',monospace;
+		color:rgba(255,0,68,.5);
+		text-shadow:0 0 4px rgba(255,0,68,.3), 0 1px 2px #000;
+	}
+	.cc-t i{ font-style:normal; display:block; height:${CC_LH}px; overflow:hidden; }
+	.cc-t i.h{ color:rgba(212,175,55,.5);  text-shadow:0 0 4px rgba(212,175,55,.35); }
+	.cc-t i.r{ color:rgba(255,40,90,.7);   text-shadow:0 0 6px rgba(255,0,68,.6); }
+	.cc-t i.d{ color:rgba(138,106,114,.45); text-shadow:none; }
+	@keyframes cc-run{ to{ transform:translateY(-50%); } }
+
+	/* правый блок: текст прижат вправо */
+	.cc-R .cc-t{ text-align:right; }
+	.cc-R .cc-t i.cc-f5{ margin-left:auto; }
+
+	/* плавающие картинки */
+	.cc-img{
+		position:absolute; left:0; top:0; height:auto; max-width:none;
+		opacity:0; pointer-events:none; will-change:transform,opacity;
+		filter:drop-shadow(0 0 6px rgba(255,0,68,.55));
+	}
+
+	/* необычные подсветки (горят, пока строка не выйдет из колонки или с экрана) */
+	.cc-t i.cc-f1,.cc-t i.cc-f2,.cc-t i.cc-f3,.cc-t i.cc-f4,.cc-t i.cc-f5{ opacity:1; }
+	/* 1: цветовой сбой */
+	.cc-t i.cc-f1{ color:#fff; text-shadow:-2px 0 #00e5ff, 2px 0 #ff0044; animation:cc-g1 .28s steps(2) infinite; }
+	@keyframes cc-g1{ 0%{transform:translate(0)} 25%{transform:translate(-3px,0) skewX(20deg)} 50%{transform:translate(2px,0)} 75%{transform:translate(-1px,0) skewX(-15deg)} 100%{transform:translate(0)} }
+	/* 2: раскалённая вспышка */
+	.cc-t i.cc-f2{ color:#fff; text-shadow:0 0 6px #fff, 0 0 14px #ff0044, 0 0 30px #ff0044; animation:cc-g2 .45s ease-in-out infinite alternate; }
+	@keyframes cc-g2{ from{filter:brightness(.8)} to{filter:brightness(1.9)} }
+	/* 3: проход сканера */
+	.cc-t i.cc-f3{
+		color:#fff; text-shadow:0 0 6px #ff0044;
+		background:linear-gradient(90deg, transparent, rgba(255,0,68,.85), transparent) no-repeat;
+		background-size:40% 100%; animation:cc-g3 1.1s linear infinite;
+	}
+	@keyframes cc-g3{ from{background-position:-60% 0} to{background-position:160% 0} }
+	/* 4: золотая рамка-метка */
+	.cc-t i.cc-f4{
+		color:#ffd966; text-shadow:0 0 6px rgba(212,175,55,.9);
+		background:rgba(212,175,55,.14); box-shadow:inset 0 0 0 1px #d4af37, 0 0 12px rgba(212,175,55,.55);
+		padding-left:4px;
+	}
+	.cc-t i.cc-f4::before{ content:"► "; }
+	/* 5: набор текста с курсором */
+	.cc-t i.cc-f5{
+		color:#7aff9a; text-shadow:0 0 6px rgba(122,255,154,.8);
+		width:calc(var(--n) * 1ch + 4px); border-right:2px solid #7aff9a;
+		animation:cc-g5 1.8s steps(var(--n), end) infinite;
+	}
+	@keyframes cc-g5{ from{ width:0 } to{ width:calc(var(--n) * 1ch + 4px) } }
+	`;
+	document.head.appendChild(st);
+
+	/* ── геометрия: сколько места по бокам и какая высота у страницы ── */
+	function geom(site){
+		const sr   = site.getBoundingClientRect();
+		const main = site.querySelector("#MAIN, site_content");
+		let L, R;
+		if(CC_SIDE_W > 0){ L = R = CC_SIDE_W; }
+		else if(main){
+			const mr = main.getBoundingClientRect();
+			L = mr.left - sr.left;
+			R = sr.right - mr.right;
+		}else{ L = R = site.clientWidth * 0.2; }
+		return { L: Math.max(0, Math.floor(L)), R: Math.max(0, Math.floor(R)), H: Math.ceil(sr.height) };
+	}
+
+	/* ── отрисовка боковых блоков под текущий размер. Колонки пересобираются только когда это реально нужно ── */
+	function render(bg){
+		const site = bg.parentNode;
+		if(!site) return;
+		const g    = geom(site);
+		const need = Math.max(CC_LINES, Math.min(Math.ceil(g.H * 1.3 / CC_LH), Math.floor(CC_MAX_H / CC_LH)));
+		[["L", g.L], ["R", g.R]].forEach(([side, w]) => {
+			const el  = bg.querySelector(".cc-" + side);
+			const off = w < CC_MIN_SIDE;
+			el.style.width   = w + "px";
+			el.style.display = off ? "none" : "";
+			if(off){ el._key = null; return; }
+			const n = CC_PER_SIDE > 0 ? CC_PER_SIDE : Math.max(1, Math.round(w / CC_COLW));
+			const k = el._key;
+			// хватает и не слишком много: колонки не трогаем
+			if(k && k.n === n && k.count >= need && k.count <= need * 2) return;
+			el._key = { n, count: need };
+			el.firstChild.innerHTML = cols(n, need, side);
+		});
+	}
+
+	/* ── следим за размером: страница может расти (картинки, терминал), окно меняется ── */
+	let rzT;
+	const ro = ("ResizeObserver" in window) ? new ResizeObserver(() => {
+		clearTimeout(rzT);
+		rzT = setTimeout(() => {
+			const bg = document.querySelector(".cc-bg");
+			if(bg) render(bg);
+		}, 250);
+	}) : null;
+
+	/* ── монтирование: страница пересоздаётся при каждой смене, поэтому через observer ── */
+	function mount(){
+		if(!CC_ON) return;
+		const site = document.querySelector("site");
+		if(!site || site.querySelector(":scope > .cc-bg")) return;
+		const cs = getComputedStyle(site);
+		if(cs.display === "inline") site.style.display = "block";
+		if(cs.position === "static") site.style.position = "relative";
+		site.style.isolation = "isolate";           // z-index:-1 остаётся внутри <site>
+		const bg = document.createElement("div");
+		bg.className = "cc-bg";
+		bg.innerHTML = '<div class="cc-side cc-L"><div class="cc-cols"></div></div>'
+		             + '<div class="cc-side cc-R"><div class="cc-cols"></div></div>';
+		site.insertBefore(bg, site.firstChild);
+		render(bg);
+		if(ro){
+			ro.disconnect();
+			ro.observe(site);
+			const m = site.querySelector("#MAIN, site_content");
+			if(m) ro.observe(m);
+		}
+	}
+
+	let queued = false;
+	function schedule(){
+		if(queued) return;
+		queued = true;
+		requestAnimationFrame(() => { queued = false; mount(); });
+	}
+	const host = document.getElementById("BODY");
+	new MutationObserver(schedule).observe(host || document.body, host ? { childList:true } : { childList:true, subtree:true });
+	mount();
+	setTimeout(mount, 500);
+
+	/* ── редкие необычные подсветки: горят бесконечно, пока строка не выйдет из колонки или с экрана ── */
+	const hot = new Set();
+
+	function lit(el, col){
+		el._old = { t: el.textContent, c: el.className };
+		el._col = col;
+		const txt = pk(SPECIAL);
+		el.textContent = txt;
+		el.style.setProperty("--n", txt.length);
+		el.className = pk(FX);
+		hot.add(el);
+	}
+	function unlit(el){
+		if(el._old){
+			el.className   = el._old.c;
+			el.textContent = el._old.t;
+			el.style.removeProperty("--n");
+			el._old = null;
+		}
+		hot.delete(el);
+	}
+
+	function spark(){
+		setTimeout(spark, r(CC_HOT_GAP[0], CC_HOT_GAP[1]));
+		if(!CC_HOT || !CC_ON || document.hidden || hot.size >= CC_HOT_MAX) return;
+		const list = Array.from(document.querySelectorAll(".cc-side .cc-t"));
+		for(let k = 0; k < 12 && list.length; k++){
+			const t   = pk(list);
+			const col = t.parentNode.parentNode;                 // .cc-col
+			const cb  = col.getBoundingClientRect();
+			if(cb.width <= 0) continue;                          // боковой блок скрыт
+			const tb  = t.getBoundingClientRect();
+			const lo  = Math.max(60, cb.top + 4);                // видимая часть: не под шапкой и не под подвалом
+			const hi  = Math.min(innerHeight - 70, cb.bottom - 4);
+			const from = Math.max(0, Math.ceil((lo - tb.top) / CC_LH));
+			const to   = Math.min(t.children.length - 1, Math.floor((hi - CC_LH - tb.top) / CC_LH));
+			if(to < from) continue;
+			const el = t.children[ri(from, to)];
+			if(!el || el._old) continue;
+			lit(el, col);
+			break;
+		}
+	}
+	setTimeout(spark, 3000);
+
+	/* проверка: вышла ли подсвеченная строка из колонки или с экрана → вернуть обычный вид */
+	setInterval(() => {
+		if(document.hidden || !hot.size) return;
+		hot.forEach(el => {
+			if(!el.isConnected || !el._col || !el._col.isConnected){ hot.delete(el); return; }
+			const b = el.getBoundingClientRect();
+			const c = el._col.getBoundingClientRect();
+			if(b.bottom < c.top || b.top > c.bottom || b.bottom < 0 || b.top > innerHeight) unlit(el);
+		});
+	}, 700);
+
+	/* ── проплывающие картинки: летают в боковых блоках, в той части, что сейчас на экране ── */
+	const badImg = new Set();
+
+	function spawnImg(){
+		if(document.querySelectorAll(".cc-img").length >= CC_IMG_MAX) return;
+		const pool  = CC_IMGS.filter(s => s && !badImg.has(s));
+		const sides = Array.from(document.querySelectorAll(".cc-side")).filter(s => s.offsetWidth >= CC_MIN_SIDE);
+		if(!pool.length || !sides.length) return;
+		const side = pk(sides);
+		const src  = pk(pool);
+		const im   = new Image();
+		im.onerror = () => { badImg.add(src); console.warn("[CC] картинка не загрузилась:", src); };
+		im.onload  = () => {
+			if(!side.isConnected) return;
+			const rc = side.getBoundingClientRect();
+			if(rc.bottom < 0 || rc.top > innerHeight) return;    // боковой блок сейчас не на экране
+			const W   = side.clientWidth;
+			const top = Math.max(0, -rc.top);                    // верх видимой части внутри блока
+			const H   = Math.min(innerHeight, rc.height - top);
+			const s   = Math.min(ri(CC_IMG_SIZE[0], CC_IMG_SIZE[1]), Math.floor(W * 0.9));
+			let x0, y0, x1, y1;
+			switch(ri(0,3)){
+				case 0:  x0 = r(0, W-s); y0 = top+H+s;     x1 = x0 + r(-60,60); y1 = top-s*2;      break; // снизу вверх
+				case 1:  x0 = r(0, W-s); y0 = top-s*2;     x1 = x0 + r(-60,60); y1 = top+H+s;      break; // сверху вниз
+				case 2:  x0 = -s*2;      y0 = top+r(0,H-s); x1 = W+s;           y1 = y0 + r(-150,150); break; // слева направо
+				default: x0 = W+s;       y0 = top+r(0,H-s); x1 = -s*2;          y1 = y0 + r(-150,150);        // справа налево
+			}
+			const rot = r(-25,25);
+			im.className = "cc-img";
+			im.draggable = false;
+			im.style.width = s + "px";
+			side.appendChild(im);
+			im.animate([
+				{ transform:"translate("+x0+"px,"+y0+"px) rotate("+rot+"deg)", opacity:0 },
+				{ opacity:CC_IMG_ALPHA, offset:.12 },
+				{ opacity:CC_IMG_ALPHA, offset:.88 },
+				{ transform:"translate("+x1+"px,"+y1+"px) rotate("+(rot + r(-40,40))+"deg)", opacity:0 }
+			], { duration: ri(CC_IMG_TIME[0], CC_IMG_TIME[1]), easing:"linear" }).onfinish = () => im.remove();
+		};
+		im.src = src;
+	}
+
+	function imgTick(){
+		setTimeout(imgTick, CC_IMG_EVERY);
+		if(!CC_ON || document.hidden || !CC_IMGS.length) return;
+		if(Math.random() < CC_IMG_CHANCE) spawnImg();
+	}
+	setTimeout(imgTick, 2000);
+})();
 
 /* ═══════════════ ЗАПУСК ═══════════════ */
 intro();

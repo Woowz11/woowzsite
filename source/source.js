@@ -63,6 +63,15 @@ const __A_IDK = " (я не помню точно)"
 // ----------------------------------------------------------------------
 
 // ADD_AI("ERROR.png", )
+ADD_AI("happyfamily.png", 86)
+ADD_AI("pavelsmile4fullsize.png", 58)
+ADD_AI("pisechnikfullsizemultiply4.png", 47)
+ADD_AI("pisechnikfullsizemultiply3.png", 67)
+ADD_AI("pisechnikfullsizemultiply2.png", 52)
+ADD_AI("pisechnikfullsizemultiply.png", 45)
+ADD_AI("pisechnikfullsizefake.png", 33)
+ADD_AI("pisechnikfullsizetrue.png", 66)
+ADD_AI("pavelfullsizetrue.png", 79)
 ADD_AI("pavelbackrooms4.png", 32)
 ADD_AI("pavelbackrooms3.png", 23)
 ADD_AI("pavelbackrooms2.png", 31)
@@ -883,7 +892,7 @@ WoowzsiteSVG = AddFullnessToTable([
 
 GitHubExplorerSVG = AddFullnessToTable([
 	"file", "file-empty", "file-unknown", "error", "folder"
-],"source/GitHubExlorer/",".svg");
+],"source/GitHubExplorer/",".svg");
 
 WoowzsitePortfolio = AddFullnessToTable([
 	"app.ico", "firefox.ico",

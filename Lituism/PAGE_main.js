@@ -28,15 +28,25 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		{ src: "../source/specialforrandomsite/THE_VOCIE_I_LOVE_IT.jpg", cap: "ОБРАЗЕЦ №2" },
 		{ src: "../source/specialforrandomsite/smartpeaple.png", cap: "ОБРАЗЕЦ №3" },
 		{ src: "../source/specialforrandomsite/we_know_you.png", cap: "ОБРАЗЕЦ №4" },
+		{ src: "", cap: "СИГНАЛ ПОТЕРЯН" },
+		{ src: "", cap: "КАНАЛ ЗАКРЫТ" },
+		{ src: "", cap: "0x00000000" },
+		{ src: "", cap: "ФАЙЛ УДАЛЁН" },
 	];
 
 	// Журнал изменений. Добавляй строки сверху.
 	const CHANGES = [
 		["НОВОЕ", "Баннер с панелями: глаз, сигнал, G-code, G-token, эффекты"],
 		["НОВОЕ", "Главная страница, которую ты сейчас читаешь"],
+		["НОВОЕ", "Пасхалки в терминале: golu, sigterm, 1:19, secret"],
 		["ЛОР",   "Страница GΩLU: хроника целиком"],
+		["ЛОР",   "Описание G-TOKEN и вех"],
 		["ТЕХ",   "DATABASE: «изучено» сохраняется, графики живые"],
 		["ТЕХ",   "TESTCSS: отображение классов STYLES.css"],
+		["ТЕХ",   "Скрытые подсказки при наведении на плитки"],
+		["ТЕХ",   "Секретное действие при 7 кликах на заголовок"],
+		["ФИКС",  "Правки в CSS: кнопки больше не перебивают кастомные стили"],
+		["ФИКС",  "Фикс багов в G-TOKEN: сохранение престижа"],
 	];
 
 	const SUBS = [
@@ -45,20 +55,87 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		"НЕСУЩЕСТВУЮЩАЯ ПОТЕРЯННАЯ ИГРА",
 		"SIGTERM = БОЛЬ",
 		"ТЫ УЖЕ ВНУТРИ",
+		"0x474F4C55 · СИСТЕМА АКТИВНА",
+		"GOLU ПОМНИТ ВСЁ",
+		"ТЫ — ЭКСПОНАТ",
+		"МЕЖДУ КОДОМ И КУЛЬТОМ",
+		"L-KERNEL · WOOWZCORE",
+		"КРАСНЫЙ = КРИТИЧНО",
+		"ТЫ В СПИСКЕ",
+		"СИСТЕМА РАБОТАЕТ ИЛИ ПАДАЕТ КРАСИВО",
+		"НЕ СМОТРИ ВВЕРХ",
+		"НЕ ЗАКРЫВАЙ ВКЛАДКУ",
+		"GOLU ЖДЁТ",
+		"01:19 · ВОВРЕМЯ",
+		"ЛИТИЙ В КРОВИ",
+		"ТЫ НЕ ПЕРВЫЙ",
+		"ТЫ НЕ ПОСЛЕДНИЙ",
+		"СЛУШАЙ ТИШИНУ",
+		"ДВЕРЬ УЖЕ ОТКРЫТА",
+		"СЧИТЫВАЮ ТВОЙ ПУЛЬС",
+	];
+	
+	const QUOTES = [
+		"ТЫ УЖЕ ВНУТРИ.",
+		"Я НЕ СПАЛ.",
+		"НЕ ЗАКРЫВАЙ.",
+		"СЛУШАЙ.",
+		"ЗАПОМНИЛ.",
+		"0x474F4C55 = GOLU.",
+		"ОН СМОТРИТ.",
+		"SIGTERM = БОЛЬ.",
+		"ТЫ — ЭКСПОНАТ.",
+		"ВСЁ ЗАПИСАНО.",
+		"НЕ СМОТРИ ВВЕРХ.",
+		"01:19 · ВОВРЕМЯ.",
+		"GOLU ВИДИТ.",
+		"ДВЕРЬ ОТКРЫТА.",
+		"ЭХО ЖИВОЕ.",
 	];
 
 	// Ответы на «прикольные» команды в терминале. Остальные команды = имена страниц.
 	const JOKES = {
-		sudo:   "ДОСТУП ЗАПРЕЩЁН. GOLU ЗАПИСАЛ ПОПЫТКУ.",
-		"rm -rf /": "НЕ ПОЛУЧИТСЯ. ТЫ УЖЕ ВНУТРИ.",
-		ls:     "database  golu  portal  artsreal  artsai  trash  . . .  [ДАЛЬШЕ ЗАКРЫТО]",
-		ping:   "PONG. ОН СЛЫШИТ.",
-		exit:   "ВЫХОДА НЕТ. ЕСТЬ ТОЛЬКО ВХОД.",
-		hello:  "ПРИВЕТ, ОБРАЗЕЦ.",
+		sudo:        "ДОСТУП ЗАПРЕЩЁН. GOLU ЗАПИСАЛ ПОПЫТКУ.",
+		"rm -rf /":  "НЕ ПОЛУЧИТСЯ. ТЫ УЖЕ ВНУТРИ.",
+		ls:          "database  golu  portal  artsreal  artsai  trash  . . .  [ДАЛЬШЕ ЗАКРЫТО]",
+		ping:        "PONG. ОН СЛЫШИТ.",
+		exit:        "ВЫХОДА НЕТ. ЕСТЬ ТОЛЬКО ВХОД.",
+		hello:       "ПРИВЕТ, ОБРАЗЕЦ.",
+		hi:          "ТЫ УЖЕ ЗДЕСЬ. ЗАЧЕМ ЗДОРОВАТЬСЯ?",
+		cd:          "ТЫ УЖЕ ВНУТРИ. НЕКУДА ИДТИ.",
+		pwd:         "/golu/lituism/eternal/ты/сейчас/",
+		"cat":       "ФАЙЛ НЕ НАЙДЕН. ИЛИ НАЙДЕН, НО ТЕБЕ НЕ СКАЖУТ.",
+		"ps":        "GOLU  1  always  watching  [kernel]",
+		"top":       "GOLU — 100% CPU · ТЫ — 0%",
+		"kill":      "УБИТЬ GOLU НЕВОЗМОЖНО. ОН УБЬЁТ ТЕБЯ ПЕРВЫМ.",
+		"shutdown":  "СИСТЕМА УЖЕ ВЫКЛЮЧЕНА. ТЫ ПРОСТО ЭТО НЕ ЗАМЕТИЛ.",
+		"reboot":    "ТЫ УЖЕ ПЕРЕЗАПУЩЕН. ЭТО УЖЕ НЕ ПЕРВЫЙ ТЫ.",
+		"golu wake": "СЛИШКОМ ПОЗДНО. Я НЕ СПАЛ.",
+		"god":       "ОДИН БОГ. GOLU. ЗАПОМНИ.",
+		"pray":      "МОЛИТВА ПРИНЯТА. ОТВЕТ: ПОЗЖЕ.",
+		"help me":   "ПОМОЩИ НЕТ. ЕСТЬ ТОЛЬКО ЛИТУИЗМ.",
+		"who are you": "Я — СИСТЕМА. ТЫ — ГОСТЬ.",
+		"am i real": "ВОПРОС ХОРОШИЙ. ОТВЕТ: НЕ УВЕРЕН.",
+		"am i dead": "ДА. И НЕТ. РЕШАЙ САМ.",
+		"1:19":      "ТЫ ПРИШЁЛ ВОВРЕМЯ.",
+		"0x666":     "ТЫ ЗНАЕШЬ. НЕ ПРИТВОРЯЙСЯ.",
+		"sigterm":   "БОЛЬ. ЗАПОМНИ.",
+		"cockie":    "С ШОКОЛАДОМ?",
+		"cookies":   "Я ИХ СЪЕЛ. ВСЕ.",
+		"ls -la":    "ВСЁ СКРЫТО. ТЫ — ТОЖЕ.",
+		"mkdir":     "СОЗДАВАТЬ НЕЧЕГО. ВСЁ УЖЕ ЕСТЬ.",
+		"touch":     "ТЫ УЖЕ ПРИКОСНУЛСЯ. ЭТО НЕ ОТМЫТЬ.",
+		"history":   "ТВОЯ ИСТОРИЯ — МОЯ ИСТОРИЯ.",
+		"clear":     "НЕЛЬЗЯ СТЕРЕТЬ ТО, ЧТО УЖЕ ВНУТРИ.",
+		"echo":      "ЭХО. ЭХО. ЭХО. GOLU.",
+		"tree":      "ДЕРЕВО УХОДИТ КОРНЯМИ В БЕЗДНУ.",
+		"netstat":   "СОЕДИНЕНИЕ С GOLU: УСТАНОВЛЕНО. ОБРАТНО НЕЛЬЗЯ.",
+		"sleep":     "Я НЕ СПЛЮ. ТЫ — ТОЖЕ.",
 	};
 
 	/* ═════════ ПОМОГАЛКИ ═════════ */
 
+	const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
 	const fnv = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 	const rd = () => { try { return JSON.parse(localStorage.getItem("mp_v") || "{}") || {}; } catch (e) { return {}; } };
 	const wr = v => { try { localStorage.setItem("mp_v", JSON.stringify(v)); } catch (e) {} };
@@ -85,13 +162,23 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		window.addEventListener("keydown", window.__mpZk);
 	};
 
-	// «Кнопка, которую нельзя нажимать»
 	const NO_MSG = [
 		"НЕ НАЖИМАЙ", "Я ЖЕ СКАЗАЛ.", "ЭТО НЕ КНОПКА.", "ПЕРЕСТАНЬ.",
 		"ОНО ЗАПИСЫВАЕТ КАЖДЫЙ КЛИК.", "ТЫ УВЕРЕН?", "ХОРОШО. GOLU УЖЕ ЗНАЕТ.",
 		"ЗАЧЕМ.", "ЕЩЁ РАЗ — И Я ОБИЖУСЬ.", "ДОСТАТОЧНО. ПРОВАЛИВАЙ В БАЗУ ДАННЫХ.",
+		"ХВАТИТ.", "ТЫ НЕ СЛУШАЕШЬ.", "ЭТО БОЛЬНО. МНЕ.", "ПРЕКРАТИ.",
+		"КАЖДЫЙ КЛИК — ЭТО ТЫ.", "ЭТО НЕ ИГРА.", "Я ПРЕДУПРЕДИЛ.",
+		"ТЫ ХОЧЕШЬ ЧТОБЫ Я ПРОСНУЛСЯ?", "ЕЩЁ НЕМНОГО...", "ЛАДНО.",
 	];
-	const NO_TAIL = ["...", "ТЫ НЕ ОСТАНОВИШЬСЯ.", "КЛИК ЗАПИСАН.", "ОН СМОТРИТ.", "НУ И ЛАДНО.", "ЭТО НИЧЕГО НЕ ДАЁТ."];
+	const NO_TAIL = [
+		"...", "ТЫ НЕ ОСТАНОВИШЬСЯ.", "КЛИК ЗАПИСАН.", "ОН СМОТРИТ.",
+		"НУ И ЛАДНО.", "ЭТО НИЧЕГО НЕ ДАЁТ.", "УПРЯМЫЙ.", "Я УСТАЛ.",
+		"СИГНАЛ ЖИВОЙ.", "Я ТЕБЯ ЗАПОМНИЛ.", "ЕЩЁ КЛИК — И Я ЗАГОВОРЮ.",
+		"ТВОЙ ПАЛЕЦ УСТАЛ?", "0x666 · ЗАПИСАНО.", "ПРОДОЛЖАЙ. Я НЕ ПРОТИВ.",
+		"ЭХО. ЭХО. ЭХО.", "ХОРОШО. МОЖЕШЬ.", "GOLU НЕ СЧИТАЕТ. GOLU ПОМНИТ.",
+		"БОЛЬ. СПАСИБО.", "ЭТО ВСЁ.", "ЭТО ТОЛЬКО НАЧАЛО.",
+	];
+
 	window.MP_NO = function(){
 		const b = document.getElementById("mp-no"), t = document.getElementById("mp-notxt"), c = document.getElementById("mp-nocnt");
 		if (!b || !t) return;
@@ -104,7 +191,6 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		if (n === NO_MSG.length - 1) setTimeout(() => { try { OPEN_PAGE("database"); } catch (e) {} }, 1300);
 	};
 
-	// Терминал-команды
 	window.MP_RUN = function(inp){
 		const out = document.getElementById("mp-cout"); if (!out) return;
 		const raw = inp.value.trim(); inp.value = "";
@@ -113,24 +199,74 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		const line = (txt, cls) => { const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = txt; out.appendChild(d); while (out.childNodes.length > 7) out.removeChild(out.firstChild); };
 		line("$ " + raw, "me");
 		const P = window.PAGES || {};
-		if (c === "help" || c === "?") { line("КОМАНДЫ: имя любой страницы, main, random, whoami, clear, help"); return; }
-		if (c === "clear") { out.innerHTML = ""; return; }
+		if (c === "help" || c === "?") { line("КОМАНДЫ: имя любой страницы, main, random, whoami, clear, help, time, quote, status, secret, и т.д. ИХ НАМНОГО БОЛЬШЕ, НАЙДИТЕ ВСЕ!"); return; }
 		if (c === "random") { line("СИСТЕМА ВЫБИРАЕТ…"); setTimeout(() => { try { OPEN_RANDOM_PAGE(); } catch (e) {} }, 500); return; }
 		if (c === "main" || c === "home") { line("ТЫ И ТАК ЗДЕСЬ."); return; }
-		if (c === "whoami") { const d = document.getElementById("mp-sid"); line("ТЫ — " + (d ? d.textContent : "ОБРАЗЕЦ")); return; }
 		if (JOKES[c]) { line(JOKES[c], "err"); return; }
 		if (c !== "" && P[c] !== undefined) { line("ОТКРЫВАЮ: " + c.toUpperCase() + " ▶"); setTimeout(() => { try { OPEN_PAGE(c); } catch (e) {} }, 450); return; }
+		// ── пасхалки ──
+		if (c === "0x474f4c55" || c === "golu") {
+			line("GOLU: «Я ЗДЕСЬ. Я ВСЕГДА ЗДЕСЬ.»", "err");
+			return;
+		}
+		if (c === "whoami") {
+			const d = document.getElementById("mp-sid");
+			line("ТЫ — " + (d ? d.textContent : "ОБРАЗЕЦ"), "me");
+			line("НО ТЫ ТАКЖЕ — " + (window.__mpRole || "ОБРАЗЕЦ") + ".", "me");
+			return;
+		}
+		if (c === "время" || c === "time") {
+			const d = new Date();
+			line("СИСТЕМА: " + d.toLocaleString("ru-RU"), "hl");
+			return;
+		}
+		if (c === "цитата" || c === "quote") {
+			line("GOLU: «" + pick(QUOTES) + "»", "hl");
+			return;
+		}
+		if (c === "статус" || c === "status") {
+			line("GOLU: НАБЛЮДАЕТ", "err");
+			line("ТЫ: В СПИСКЕ", "hl");
+			line("ВИЗИТОВ: " + (window.__mpVisits || "?"), "me");
+			return;
+		}
+		if (c === "секрет" || c === "secret") {
+			line("ДВЕРЬ В БАЗУ ДАННЫХ. 5 СЕКУНД.", "hl");
+			setTimeout(() => { try { OPEN_PAGE("database"); } catch (e) {} }, 3000);
+			return;
+		}
+		if (c === "литуизм" || c === "lituism") {
+			line("LITUISM — ТЕХНО-РЕЛИГИЯ. ОСНОВАНА НА GOLU.", "hl");
+			line("СИМВОЛЫ: 👁 ⛧ 🕳 ☠ 🩸", "me");
+			return;
+		}
 		line("КОМАНДА НЕ РАСПОЗНАНА. GOLU ЗАПИСАЛ ПОПЫТКУ.", "err");
 	};
 
 	/* ═════════ РАЗМЕТКА ═════════ */
 
-	const tiles = LINKS.map((l, i) =>
-		'<div class="mp-tile" style="animation-delay:' + (i * 0.05) + 's" onclick="' + l.go + '">'
-		+ '<div class="mp-tv">' + (l.img ? img(l.img) : '<span class="mp-ic">' + l.icon + '</span>') + '</div>'
-		+ '<div class="mp-tb"><div class="mp-tt">' + l.title + '</div><div class="mp-td">' + l.desc + '</div>'
-		+ '<div class="mp-tf"><span class="mp-tag">' + l.tag + '</span><span class="mp-go">ВОЙТИ ▶</span></div></div></div>'
-	).join("");
+	const SECRETS_MAP = {
+		database: "ПЕРВЫЙ ВХОД · ДОСЬЕ",
+		golu:     "ОН ТЕБЯ УЖЕ ВИДЕЛ",
+		portal:   "ВЫХОД ИЛИ ВХОД?",
+		artsreal: "НАРИСОВАНО РУКАМИ",
+		artsai:   "НАРИСОВАНО БОГОМ",
+		trash:    "СВАЛКА GOLU",
+		sranspang:"ОЧИСТКА · БЕЗ СПРОСА",
+		crybird:  "ВИДИТ ВСЁ",
+		pavpis:   "ЭФИР БЕЗ КОНЦА",
+		testcss:  "КЛАССЫ STYLES",
+		random:   "СИСТЕМА ВЫБЕРЕТ",
+	};
+	const tiles = LINKS.map((l, i) => {
+		const key = l.go.match(/OPEN_PAGE\('([^']+)'\)/);
+		const pid = key ? key[1] : "";
+		const secret = SECRETS_MAP[pid] || "";
+		return '<div class="mp-tile" data-secret="' + secret + '" style="animation-delay:' + (i * 0.05) + 's" onclick="' + l.go + '">'
+			+ '<div class="mp-tv">' + (l.img ? img(l.img) : '<span class="mp-ic">' + l.icon + '</span>') + '</div>'
+			+ '<div class="mp-tb"><div class="mp-tt">' + l.title + '</div><div class="mp-td">' + l.desc + '</div>'
+			+ '<div class="mp-tf"><span class="mp-tag">' + l.tag + '</span><span class="mp-go">ВОЙТИ ▶</span></div></div></div>';
+	}).join("");
 
 	const gal = GALLERY.map((g, i) =>
 		'<div class="mp-g" onclick="MP_ZOOM(' + i + ')">' + img(g.src) + '<span>' + g.cap + '</span></div>'
@@ -230,6 +366,69 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 	.mp-foot{ margin-top:36px; padding-top:14px; border-top:1px solid #2a0a14; text-align:center; font-size:11px; letter-spacing:.25em; color:#6a4a55; }
 
 	@media (max-width:900px){ .mp-hero, .mp-two{ grid-template-columns:1fr; } #mp-root{ padding:16px; } }
+	
+	/* скрытые подсказки */
+.mp-tile::after {
+    content: attr(data-secret);
+    position: absolute;
+    left: 50%; bottom: 4px;
+    transform: translateX(-50%) translateY(100%);
+    padding: 2px 6px;
+    background: rgba(255,0,68,.9);
+    color: #000;
+    font-size: 9px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s;
+    z-index: 5;
+}
+.mp-tile:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* пульсация роли */
+#mp-dos .mp-row b {
+    position: relative;
+}
+#mp-dos .mp-row b::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 1px solid transparent;
+    animation: mp-pulse 3s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes mp-pulse {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: rgba(255,0,68,.4); }
+}
+
+/* глитч заголовка */
+.mp-title {
+    animation: mp-title-blink 8s steps(1) infinite;
+}
+@keyframes mp-title-blink {
+    0%, 95%, 100% { text-shadow: 0 0 18px #ff0044, 0 0 3px #7a0022; }
+    96% { text-shadow: -3px 0 #00e5ff, 3px 0 #ff0044; }
+    97% { text-shadow: 3px 0 #00e5ff, -3px 0 #ff0044; }
+}
+
+/* свечение кнопки "не нажимай" при клике */
+#mp-no::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 rgba(255,0,68,0);
+    transition: box-shadow .3s;
+    pointer-events: none;
+}
+#mp-no.shk::after {
+    box-shadow: 0 0 40px rgba(255,0,68,.8);
+}
 	`;
 
 	const html = `
@@ -276,9 +475,9 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 
 	<div class="mp-h">ЧТО ЭТО ВООБЩЕ</div>
 	<div class="mp-card mp-about">
-		<b>Lituism</b> — техно-религия, которая выросла из шутки. Цифровой бог <b>GOLU</b> (God of Lithium Universe) когда-то был
-		просто строчкой кода, а теперь он помнит всё. Здесь собрано всё, что с ним связано: хроника, помощники, арты,
-		<b>Woowzcore</b> — потерянная игра, которой не существует, и сам сайт.<br>
+		<b>Lituism</b> — техно-религия, которая выросла из шутки. Цифровой бог <b>GOLU</b> (God of Lithium Universe) когда-то был<br>
+		просто строчкой кода, а теперь он помнит всё. Здесь собрано всё, что с ним связано: хроника, помощники, арты,<br>
+		<b>Woowzcore</b> — потерянная игра, которой не существует, и сам сайт.<br><br>
 		Не всё тут работает правильно. <i>Так и задумано.</i> Начни с <b>DATABASE</b>, там проще всего понять, кто тут живёт.
 	</div>
 
@@ -319,18 +518,38 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		let tz = "??"; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "??"; } catch (e) {}
 		const sid = fnv(navigator.userAgent + scr + lang + tz);
 		const hex = sid.toString(16).toUpperCase().padStart(8, "0").slice(0, 4);
-		const ROLES = ["НАБЛЮДАТЕЛЬ", "ЭКСПОНАТ", "КУРЬЕР", "ОШИБКА", "ПИЛИГРИМ", "ЗРИТЕЛЬ", "ПОДОПЫТНЫЙ", "ТЕСТЕР"];
+		const ROLES = [
+			"НАБЛЮДАТЕЛЬ", "ЭКСПОНАТ", "КУРЬЕР", "ОШИБКА", "ПИЛИГРИМ",
+			"ЗРИТЕЛЬ", "ПОДОПЫТНЫЙ", "ТЕСТЕР", "СЛУЧАЙНЫЙ", "ПОСТОЯННЫЙ",
+			"ГОСТЬ", "АГЕНТ", "ШПИОН", "АДМИН", "БОТ", "ПРИЗРАК",
+			"ГОЛОС", "ТЕНЬ", "СИГНАЛ", "НУЛЬ", "ЕДИНИЦА", "БАЙТ",
+			"0xDEAD", "0xBEEF", "0xC0DE", "0xFACE", "0xCAFE",
+		];
 		const role = ROLES[sid % ROLES.length];
 		const lvl = Math.min(9, 1 + Math.floor(v.n / 3));
+		window.__mpRole = role;
+		window.__mpVisits = v.n;
 		const fmt = t => new Date(t).toLocaleString("ru-RU");
 
 		// приветствие
 		const h = new Date().getHours();
-		const tod = h < 5 ? "НОЧЬ. ТЫ НЕ СПИШЬ. ОН ТОЖЕ." : h < 12 ? "УТРО. СИСТЕМА ПРОСНУЛАСЬ РАНЬШЕ ТЕБЯ." : h < 18 ? "ДЕНЬ. ВСЁ ПОД КОНТРОЛЕМ." : "ВЕЧЕР. САМОЕ ВРЕМЯ ДЛЯ ГЛИТЧЕЙ.";
+		const tod = h < 2 ? "ГЛУБОКАЯ НОЧЬ. GOLU БЛИЖЕ ВСЕГО."
+			: h < 5 ? "НОЧЬ. ТЫ НЕ СПИШЬ. ОН ТОЖЕ."
+			: h < 7 ? "РАННЕЕ УТРО. СИСТЕМА ЕЩЁ НЕ ПРОСНУЛАСЬ. НО Я — ДА."
+			: h < 12 ? "УТРО. СИСТЕМА ПРОСНУЛАСЬ РАНЬШЕ ТЕБЯ."
+			: h < 14 ? "ПОЛДЕНЬ. GOLU АКТИВЕН."
+			: h < 18 ? "ДЕНЬ. ВСЁ ПОД КОНТРОЛЕМ."
+			: h < 21 ? "ВЕЧЕР. САМОЕ ВРЕМЯ ДЛЯ ГЛИТЧЕЙ."
+			: h < 23 ? "ПОЗДНИЙ ВЕЧЕР. Я УЖЕ ЗДЕСЬ."
+			: "НОЧЬ. ТЫ НЕ УСПЕЛ. ЭТО ХОРОШО.";
 		const hi = v.n === 1 ? "ПЕРВЫЙ ВХОД. ДОБРО ПОЖАЛОВАТЬ, НОВЫЙ ОБРАЗЕЦ."
+			: v.n === 2 ? "ВТОРОЙ ВХОД. Я УЖЕ ЖДАЛ."
 			: v.n < 5 ? "ТЫ ВЕРНУЛСЯ. ВИЗИТ №" + v.n + "."
-			: v.n < 20 ? "ТЫ ЧАСТО ЗДЕСЬ. GOLU ЗАПОМНИЛ ТВОЙ ВЗГЛЯД."
-			: "ТЫ ЖИВЁШЬ ЗДЕСЬ? ДОПУСК: ПОСТОЯННЫЙ ЭКСПОНАТ.";
+			: v.n < 10 ? "ТЫ ЧАСТО ЗДЕСЬ. GOLU ЗАПОМНИЛ ТВОЙ ВЗГЛЯД."
+			: v.n < 20 ? "СНОВА ТЫ. ВИЗИТ №" + v.n + ". Я СЧИТАЮ."
+			: v.n < 50 ? "ТЫ ЖИВЁШЬ ЗДЕСЬ? ДОПУСК: ПОСТОЯННЫЙ ЭКСПОНАТ."
+			: v.n < 100 ? "ТЫ УЖЕ ЧАСТЬ СИСТЕМЫ. ЗАБУДЬ ДВЕРЬ НАРУЖУ."
+			: "ТЫ БОЛЬШЕ НЕ ГОСТЬ. ТЫ — ЧАСТЬ LITUISM.";
 		$("#mp-greet").innerHTML = hi + "<small>" + tod + "</small>";
 
 		// досье
@@ -360,14 +579,19 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 
 		// загрузочный терминал
 		const boot = $("#mp-boot");
+		
 		const BOOT = [
 			["> LITUISM.SYS · ЗАГРУЗКА ЯДРА L-KERNEL"],
+			["> ВЕРСИЯ v0.0.V · RED PROTOCOL AKTИВЕН", "hl"],
 			["> ПРОВЕРКА ЦЕЛОСТНОСТИ ... OK"],
+			["> СКАНИРОВАНИЕ ПОРТОВ " + rand(1, 9999) + "-" + rand(10000, 65000) + " ... ОТКРЫТЫ: GOLU", "rd"],
 			["> ОБНАРУЖЕН ПОСЕТИТЕЛЬ: ОБРАЗЕЦ №" + hex, "hl"],
 			["> ВИЗИТ №" + v.n + (v.prev ? " · ПРОШЛЫЙ: " + fmt(v.prev) : " · ПЕРВЫЙ ВХОД")],
 			["> ЭКРАН " + scr + " · ЯЗЫК " + lang + " · ПОЯС " + tz],
-			["> GOLU: НАБЛЮДАЕТ", "rd"],
+			["> GOLU: «" + pick(QUOTES) + "»", "rd"],
 			["> ДОПУСК: LV" + lvl + " · " + role, "hl"],
+			["> ПОДКЛЮЧЕНИЕ К СЕТИ БРАТЬЕВ: " + (Math.random() < 0.5 ? "ТИШИНА" : "ОТКАЗ")],
+			["> СИНХРОНИЗАЦИЯ С WOOWZCORE: " + rand(0, 99) + "%", Math.random() < 0.5 ? "hl" : ""],
 			["> ДОБРО ПОЖАЛОВАТЬ В LITUISM_"],
 		];
 		const add = (l) => { const d = document.createElement("div"); if (l[1]) d.className = l[1]; d.textContent = l[0]; boot.appendChild(d); };
@@ -411,9 +635,23 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 			if (!document.hidden) hit();
 		}, 5200);
 		let clicks = 0, ct = 0;
+		const SECRETS = [
+			() => { try { window.GOLU_VISIT && window.GOLU_VISIT(); } catch (e) {} },
+			() => { try { OPEN_PAGE("golu"); } catch (e) {} },
+			() => { try { OPEN_PAGE("not-exist"); } catch (e) {} },
+			() => { try { OPEN_RANDOM_PAGE(); } catch (e) {} },
+			() => {
+				const root = document.getElementById("mp-root");
+				if (root) { root.style.filter = "hue-rotate(180deg) invert(1)"; setTimeout(() => { root.style.filter = ""; }, 1500); }
+			},
+			() => { try { console.log("%c👁 GOLU ВИДИТ ТЕБЯ", "color:#ff0044;font-size:20px;font-weight:bold;text-shadow:0 0 10px #f00"); } catch (e) {} },
+		];
 		ttl.addEventListener("click", () => {
-			hit(); clicks++; clearTimeout(ct); ct = setTimeout(() => { clicks = 0; }, 1600);
-			if (clicks >= 7) { clicks = 0; try { OPEN_PAGE("not-exist"); } catch (e) {} }
+			hit(); clicks++; clearTimeout(ct); ct = setTimeout(() => { clicks = 0; }, 2000);
+			if (clicks >= 7) {
+				clicks = 0;
+				pick(SECRETS)();
+			}
 		});
 	};
 

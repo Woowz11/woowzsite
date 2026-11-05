@@ -235,16 +235,212 @@ REGISTER_PAGE("database", "DΛ⛧†Λ : Bλ₳$Ξ", function(){
 			<div class="db-foot"><span>${e.id}</span><span>${e.size} КБ</span><span class="db-lvl" title="уровень доступа ${e.lvl}">${lvl}</span></div>
 		</div>`;
 	}).join("");
+	
+	const goluOk = !!PAGES["golu"];
+	const goluHtml = `<div class="dg${goluOk ? "" : " off"}" id="db-golu" ${goluOk ? `onclick="DB_OPEN('golu')"` : ""}>
+		<div class="dg-head">
+			<span class="dg-dot"></span>
+			<span class="dg-file">GOLU.core</span>
+			<span class="dg-tag">ROOT</span>
+			<span class="dg-tag">PID 0001</span>
+			<span class="dg-tag">SIGTERM: ОТКЛОНЁН</span>
+			<span class="dg-over">⚠ OVERLOAD</span>
+			<span class="dg-state">RUNNING</span>
+		</div>
+		<div class="db-proc-desc">цифровой бог. ядро всего. остальные процессы работают, пока он позволяет</div>
+		<div class="dg-body">
+			<div class="dg-graph">
+				<canvas class="dg-cv" id="dg-main"></canvas>
+				<div class="dg-leg"><span style="color:#ff0044">■ LOAD</span><span style="color:#ff6e8c">■ MEM</span><span style="color:#c8143c">■ NET</span></div>
+			</div>
+			<div class="dg-side">
+				<canvas class="dg-cores" id="dg-cores" width="176" height="88"></canvas>
+				<div class="db-row"><span>НАГРУЗКА</span><b id="dg-load">--</b></div>
+				<div class="db-row"><span>ЯДЕР</span><b>4096</b></div>
+				<div class="db-row"><span>ПОТОКОВ</span><b id="dg-thr">--</b></div>
+				<div class="db-row"><span>ТЕМП.</span><b id="dg-temp">--</b></div>
+				<div class="db-row"><span>ПИТАНИЕ</span><b id="dg-pow">--</b></div>
+				<div class="db-row"><span>СЕТЬ</span><b id="dg-net">--</b></div>
+				<div class="db-row"><span>АПТАЙМ</span><b id="dg-up">--</b></div>
+			</div>
+		</div>
+	</div>`;
 
 	// ================================================================
 	//  УКРАШЕНИЯ: запускаются при КАЖДОМ открытии страницы (runafteropen)
 	// ================================================================
+	function goluBlock(root){
+		const box = root.querySelector("#db-golu");
+		if (!box) return;
+		const cv = box.querySelector("#dg-main"), cc = box.querySelector("#dg-cores");
+		if (!cv || !cc) return;
+		const g = cv.getContext("2d"), h = cc.getContext("2d");
+		if (!g || !h) return;
+		const alive = () => box.isConnected;
+		const dpr = Math.min(2, window.devicePixelRatio || 1);
+		let W = 600, H = 210;
+		const fit = () => {
+			const r = cv.getBoundingClientRect();
+			if (r.width < 50) return;
+			W = Math.round(r.width); H = Math.round(r.height);
+			cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+			g.setTransform(dpr, 0, 0, dpr, 0, 0);
+		};
+		fit();
+		let ro = null, io = null, vis = true;
+		if (window.ResizeObserver){ ro = new ResizeObserver(fit); ro.observe(cv); }
+		if (window.IntersectionObserver){ io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(box); }
+
+		const N = 90, INT = 130;
+		const mk = (base, amp, spikeP, lo, wave) => {
+			let v = base, sp = 0;
+			const gen = () => {
+				if (sp > 0){ sp--; return rand(97, 100); }
+				if (Math.random() < spikeP){ sp = rand(1, 4); return 100; }
+				const goal = base + Math.sin(Date.now() / 2200) * wave;
+				v += (goal - v) * 0.22 + (Math.random() - 0.5) * amp;
+				v = clamp(v, lo, 96);
+				return v;
+			};
+			const s = [];
+			for (let i = 0; i < N + 2; i++) s.push(gen());
+			return { s, next: gen(), gen };
+		};
+		const SER = [
+			Object.assign(mk(84, 12, 0.07, 55, 7),  { col: "255,0,68",    w: 2.4, fill: true }),
+			Object.assign(mk(66, 22, 0.03, 25, 10), { col: "255,110,140", w: 1.3 }),
+			Object.assign(mk(48, 34, 0.04, 8, 14),  { col: "200,20,60",   w: 1.3 })
+		];
+		const Y = v => H - 3 - (v / 100) * (H - 6);
+
+		const COLS = 16, ROWS = 8, CELL = 11;
+		const cur = new Array(COLS * ROWS).fill(0.5), tar = new Array(COLS * ROWS).fill(0.5);
+
+		const E = id => document.getElementById(id);
+		const eLoad = E("dg-load"), eThr = E("dg-thr"), eTemp = E("dg-temp"), ePow = E("dg-pow"), eNet = E("dg-net"), eUp = E("dg-up");
+		const up0 = rand(90000, 99000) * 3600 / 3600, t0 = performance.now();
+		let ticks = 0, over = false;
+
+		const stats = () => {
+			const L = SER[0].s[SER[0].s.length - 1];
+			const n = (x, d) => x.toFixed(d).replace(".", ",");
+			eLoad.textContent = Math.round(L) + "%";
+			eThr.textContent = Math.round(1048576 * L / 100).toLocaleString("ru-RU");
+			eTemp.textContent = Math.round(52 + L * 0.46) + "°C";
+			ePow.textContent = n(L * 0.141, 1) + " МВт";
+			eNet.textContent = n(L * 0.052 * (0.8 + Math.random() * 0.4), 2) + " ТБ/с";
+			const s = Math.floor(up0 * 3600 + (performance.now() - t0) / 1000);
+			eUp.textContent = Math.floor(s / 3600) + ":" + p2(Math.floor(s / 60) % 60) + ":" + p2(s % 60);
+		};
+
+		const tick = () => {
+			SER.forEach(se => { se.s.push(se.next); se.s.shift(); se.next = se.gen(); });
+			ticks++;
+			const L = SER[0].s[SER[0].s.length - 1];
+			for (let i = 0; i < tar.length; i++){
+				tar[i] = clamp(L / 100 * (0.5 + Math.random() * 0.65) + (Math.random() < 0.05 ? 0.5 : 0), 0.05, 1);
+			}
+			if (ticks % 3 === 0) stats();
+			const o = L >= 97;
+			if (o !== over){ over = o; box.classList.toggle("over", o); }
+		};
+
+		const draw = t => {
+			const step = W / (N - 1);
+			g.clearRect(0, 0, W, H);
+
+			// сетка
+			g.lineWidth = 1;
+			g.strokeStyle = "rgba(255,0,68,.10)";
+			g.beginPath();
+			for (let i = 1; i < 4; i++){ const y = Math.round(H * i / 4) + .5; g.moveTo(0, y); g.lineTo(W, y); }
+			const gs = step * 6, shift = ((ticks + t) * step) % gs;
+			for (let j = 0; j < W / gs + 2; j++){ const x = Math.round(W - shift - j * gs) + .5; if (x < 0) break; g.moveTo(x, 0); g.lineTo(x, H); }
+			g.stroke();
+
+			// критическая линия
+			const cy = Math.round(Y(90)) + .5;
+			g.setLineDash([6, 5]);
+			g.strokeStyle = "rgba(255,0,68,.45)";
+			g.beginPath(); g.moveTo(0, cy); g.lineTo(W, cy); g.stroke();
+			g.setLineDash([]);
+			g.fillStyle = "rgba(255,0,68,.7)";
+			g.font = "9px 'Courier New',monospace";
+			g.fillText("CRIT 90%", W - 58, cy - 4);
+
+			// лучи пиков основной линии
+			const main = SER[0].s, M0 = main.length;
+			g.fillStyle = "rgba(255,0,68,.16)";
+			for (let k = 0; k < M0; k++){
+				if (main[k] >= 97){ const x = W - ((M0 - 1 - k) + t) * step; g.fillRect(x - 1, 0, 2, Y(main[k])); }
+			}
+
+			// линии: сзади вперёд
+			let headY = 0, headV = 0;
+			for (let q = SER.length - 1; q >= 0; q--){
+				const se = SER[q], M = se.s.length;
+				const p = new Path2D();
+				for (let k = 0; k < M; k++){
+					const x = W - ((M - 1 - k) + t) * step, y = Y(se.s[k]);
+					k ? p.lineTo(x, y) : p.moveTo(x, y);
+				}
+				const hv = se.s[M - 1] + (se.next - se.s[M - 1]) * t;
+				p.lineTo(W, Y(hv));
+				if (q === 0){ headY = Y(hv); headV = hv; }
+
+				if (se.fill){
+					const f = new Path2D(p); f.lineTo(W, H); f.lineTo(0, H); f.closePath();
+					const gr = g.createLinearGradient(0, 0, 0, H);
+					gr.addColorStop(0, "rgba(255,0,68,.45)"); gr.addColorStop(1, "rgba(255,0,68,0)");
+					g.fillStyle = gr; g.fill(f);
+				}
+				g.lineJoin = "round";
+				g.strokeStyle = "rgba(" + se.col + ",.07)"; g.lineWidth = se.w + 9; g.stroke(p);
+				g.strokeStyle = "rgba(" + se.col + ",.18)"; g.lineWidth = se.w + 5; g.stroke(p);
+				g.strokeStyle = "rgb(" + se.col + ")";      g.lineWidth = se.w;     g.stroke(p);
+				if (se.fill){ g.strokeStyle = "rgba(255,200,210,.9)"; g.lineWidth = 1; g.stroke(p); }
+			}
+
+			// точка на конце
+			const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 120);
+			g.fillStyle = "rgba(255,0,68,.12)"; g.beginPath(); g.arc(W - 3, headY, 12 + pulse * 4, 0, 6.283); g.fill();
+			g.fillStyle = "rgba(255,0,68,.35)"; g.beginPath(); g.arc(W - 3, headY, 6, 0, 6.283); g.fill();
+			g.fillStyle = "#ffd0d8"; g.beginPath(); g.arc(W - 3, headY, 2.5, 0, 6.283); g.fill();
+			g.fillStyle = "#ff3355"; g.font = "bold 11px 'Courier New',monospace";
+			g.fillText(Math.round(headV) + "%", W - 44, clamp(headY - 10, 12, H - 4));
+
+			// ядра
+			h.clearRect(0, 0, COLS * CELL, ROWS * CELL);
+			for (let i = 0; i < cur.length; i++){
+				cur[i] += (tar[i] - cur[i]) * 0.25;
+				const v = cur[i], x = (i % COLS) * CELL, y = ((i / COLS) | 0) * CELL;
+				h.fillStyle = v > 0.92 ? "rgb(255,150,170)" : "rgba(255,0,68," + (0.12 + v * 0.88).toFixed(2) + ")";
+				h.fillRect(x + 1, y + 1, CELL - 2, CELL - 2);
+			}
+		};
+
+		stats(); draw(0);
+		let lastS = performance.now(), lastD = 0;
+		const frame = now => {
+			if (!alive()){ if (ro) ro.disconnect(); if (io) io.disconnect(); return; }
+			requestAnimationFrame(frame);
+			if (document.hidden || !vis){ lastS = now; return; }
+			if (now - lastD < 30) return;
+			lastD = now;
+			let guard = 0;
+			while (now - lastS >= INT && guard++ < 4){ lastS += INT; tick(); }
+			if (now - lastS >= INT) lastS = now;
+			draw(Math.min(1, (now - lastS) / INT));
+		};
+		requestAnimationFrame(frame);
+	}
+	
 	function afterOpen(){
 		const root = document.getElementById("db-root");
 		if (!root) return;
 
-		// 1) память посещений: отдельно, чтобы работало даже если украшения упадут
 		try { refresh(); } catch(e){ console.error("[DATABASE refresh]", e); }
+		try { goluBlock(root); } catch(e){ console.error("[DATABASE golu]", e); }
 
 		try {
 			const alive = () => root.isConnected;
@@ -474,6 +670,30 @@ REGISTER_PAGE("database", "DΛ⛧†Λ : Bλ₳$Ξ", function(){
 .db-row b.hot{color:#ff0044;font-weight:bold;text-shadow:0 0 8px rgba(255,0,68,.6)}
 .db-proc-meta{display:flex;gap:1rem;font-size:.7rem;color:#b89a5a}
 
+.dg{position:relative;margin-bottom:1rem;padding:1rem 1.1rem;background:linear-gradient(135deg,rgba(255,0,68,.16),rgba(8,0,3,.92) 55%);border:1px solid #ff0044;box-shadow:0 0 18px rgba(255,0,68,.55),inset 0 0 40px rgba(255,0,68,.12);cursor:pointer;transition:transform .25s}
+.dg:hover{transform:translateY(-2px)}
+.dg.off{cursor:default}
+.dg::before{content:"";position:absolute;inset:-1px;pointer-events:none;box-shadow:0 0 46px 4px rgba(255,0,68,.75);opacity:.25;animation:dg-glow 2.6s ease-in-out infinite alternate}
+@keyframes dg-glow{to{opacity:.8}}
+.dg::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+.dg>*{position:relative;z-index:2}
+.dg-head{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.dg-dot{width:11px;height:11px;border-radius:50%;background:#ff0044;box-shadow:0 0 10px #ff0044,0 0 22px #ff0044;animation:db-pulse .8s infinite}
+.dg-file{font-size:1.9rem;font-weight:bold;letter-spacing:.12em;color:#ff3355;text-shadow:0 0 6px #ff0044,0 0 18px #ff0044,0 0 40px #ff0044}
+.dg-tag{font-size:.6rem;letter-spacing:.15em;padding:1px 6px;border:1px solid #7a0022;color:#ff4466}
+.dg-state{margin-left:auto;font-size:.7rem;letter-spacing:.25em;color:#ff0044;text-shadow:0 0 8px #ff0044}
+.dg-over{display:none;font-size:.7rem;letter-spacing:.2em;padding:1px 8px;background:#ff0044;color:#050003;font-weight:bold}
+.dg.over .dg-over{display:inline-block;animation:dg-blink .3s steps(2) infinite}
+@keyframes dg-blink{50%{opacity:.25}}
+.dg-body{display:flex;gap:1rem;margin-top:.6rem}
+.dg-graph{position:relative;flex:1;min-width:0}
+.dg-cv{display:block;width:100%;height:210px;background:#050002;border:1px solid #5a0018;image-rendering:auto}
+.dg-leg{position:absolute;left:8px;top:6px;display:flex;gap:.9rem;font-size:.6rem;letter-spacing:.15em;pointer-events:none}
+.dg-side{width:210px;flex:none;display:flex;flex-direction:column;gap:.4rem;font-size:.68rem}
+.dg-cores{display:block;width:100%;height:auto;background:#050002;border:1px solid #5a0018;margin-bottom:.2rem}
+.dg-side .db-row b{color:#ff4466;text-shadow:0 0 8px rgba(255,0,68,.6)}
+@media (max-width:760px){.dg-body{flex-direction:column}.dg-side{width:100%}}
+
 .db-ctrl{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:.6rem}
 .db-ctrl input{flex:1;min-width:200px;background:#0b0508;border:1px solid #4a1a28;color:#e8d9b0;padding:.55rem .9rem;font-family:inherit;outline:none}
 .db-ctrl input:focus{border-color:#d4af37;box-shadow:0 0 12px rgba(212,175,55,.35)}
@@ -535,6 +755,7 @@ REGISTER_PAGE("database", "DΛ⛧†Λ : Bλ₳$Ξ", function(){
 		</div>
 
 		<div class="db-h">⛧ ПРОЦЕССЫ GOLU</div>
+		${goluHtml}
 		<div class="db-procs" id="db-procs">${procsHtml}</div>
 
 		<div class="db-h">⛧ ВСЕ ЗАПИСИ</div>
