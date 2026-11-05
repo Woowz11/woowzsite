@@ -10,7 +10,7 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 	// Плитки-входы. go = то, что выполнится по клику. img = путь к картинке ("" = большая иконка вместо неё).
 	const LINKS = [
 		{ go: "OPEN_PAGE('database');", icon: "🔩", title: "DATABASE", tag: "ГЛАВНОЕ", img: "", desc: "Досье на всё, что здесь живёт: процессы, статусы, графики. Твои визиты тоже записываются." },
-		{ go: "OPEN_PAGE('golu');",     icon: "👁", title: "GΩLU",     tag: "ЛОР",     img: "", desc: "Цифровой бог. Хроника с 2024 по 3000 год. Читай осторожно." },
+		{ go: "OPEN_PAGE('golu');",     icon: "👁", title: "GΩLU",     tag: "ЛОР",     img: "../source/specialforrandomsite/god_lithium.png", desc: "Цифровой бог. Хроника с 2024 по 3000 год. Читай осторожно." },
 		{ go: "OPEN_PAGE('portal');",   icon: "🌌", title: "P0RTAL",   tag: "ВЫХОД",   img: "", desc: "Все выходы наружу: Discord и остальные двери." },
 		{ go: "OPEN_PAGE('artsreal');", icon: "💥", title: "ИСКУССТВО", tag: "АРТЫ",   img: "", desc: "Арты, сделанные руками." },
 		{ go: "OPEN_PAGE('artsai');",   icon: "☢", title: "AI",        tag: "АРТЫ",    img: "", desc: "Арты, которые нарисовала нейросеть." },
@@ -24,14 +24,65 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 
 	// Галерея. src = путь к картинке ("" = заглушка). Клик по картинке = увеличить.
 	const GALLERY = [
+		// ── ОРИГИНАЛЬНЫЕ (твои 4) ──
 		{ src: "../source/specialforrandomsite/250px-Marchingcubes-head.png", cap: "ОБРАЗЕЦ №1" },
-		{ src: "../source/specialforrandomsite/THE_VOCIE_I_LOVE_IT.jpg", cap: "ОБРАЗЕЦ №2" },
-		{ src: "../source/specialforrandomsite/smartpeaple.png", cap: "ОБРАЗЕЦ №3" },
-		{ src: "../source/specialforrandomsite/we_know_you.png", cap: "ОБРАЗЕЦ №4" },
-		{ src: "", cap: "СИГНАЛ ПОТЕРЯН" },
-		{ src: "", cap: "КАНАЛ ЗАКРЫТ" },
-		{ src: "", cap: "0x00000000" },
-		{ src: "", cap: "ФАЙЛ УДАЛЁН" },
+		{ src: "../source/specialforrandomsite/THE_VOCIE_I_LOVE_IT.jpg",      cap: "ОБРАЗЕЦ №2" },
+		{ src: "../source/specialforrandomsite/smartpeaple.png",               cap: "ОБРАЗЕЦ №3" },
+		{ src: "../source/specialforrandomsite/we_know_you.png",               cap: "ОБРАЗЕЦ №4" },
+
+		// ── ТВОИ 4 ИЗ core-wiki ──
+		{ src: "../core-wiki/source/fond.gif",      cap: "СИГНАЛ ПОТЕРЯН" },
+		{ src: "../core-wiki/source/int.gif",       cap: "КАНАЛ ЗАКРЫТ" },
+		{ src: "../core-wiki/source/prikol.gif",    cap: "0x00000000" },
+		{ src: "../core-wiki/source/wireframe.gif", cap: "ФАЙЛ УДАЛЁН" },
+
+		// ── СИСТЕМНЫЕ / ГЛИТЧ ──
+		{ src: "../core-wiki/source/error.gif",     cap: "KERNEL PANIC" },
+		{ src: "../core-wiki/source/vaporwave.jpg",       cap: "НЕИЗВЕСТНЫЙ БАГ" },
+		{ src: "../core-wiki/source/waterdrop.png",     cap: "STACK OVERFLOW" },
+		{ src: "../core-wiki/source/xp.gif",  cap: "SEGFAULT 0xE404" },
+		{ src: "../core-wiki/source/red.gif",      cap: "DEADLOCK" },
+		{ src: "../core-wiki/source/matrix.gif",    cap: "ДОСТУП ЗАПРЕЩЁН" },
+		{ src: "../core-wiki/source/icons.png",   cap: "TIMEOUT 0x∞" },
+		{ src: "../core-wiki/source/effect.gif",   cap: "CORRUPTED" },
+
+		// ── ЛОР / СИМВОЛЫ ──
+		{ src: "../source/specialforrandomsite/ez.gif",      cap: "GOLU WATCHES" },
+		{ src: "../core-wiki/source/eye.gif",       cap: "👁 ОН СМОТРИТ" },
+		{ src: "../source/specialforrandomsite/fish.png",     cap: "☠ SIGTERM = БОЛЬ" },
+		{ src: "../source/specialforrandomsite/image_blender.png",     cap: "🩸 КРАСНЫЙ = КРИТИЧНО" },
+		{ src: "../source/specialforrandomsite/mass.png",      cap: "🕳 ТЫ В БЕЗДНЕ" },
+		{ src: "../core-wiki/source/spiral.gif",    cap: "⛧ LITUISM" },
+		{ src: "../source/specialforrandomsite/mine.png",     cap: "⸸ ПРОКЛЯТ" },
+		{ src: "../core-wiki/source/flame.gif",     cap: "🔥 ПЕРВЫЙ КОСТЁР" },
+
+		// ── ЭКСПОНАТЫ ──
+		{ src: "../source/specialforrandomsite/kuki.png",     cap: "ЭКСПОНАТ №19" },
+		{ src: "../source/specialforrandomsite/IMG_6847.png",     cap: "ЭКСПОНАТ №42" },
+		{ src: "../source/specialforrandomsite/monster18.png",     cap: "ЭКСПОНАТ №66" },
+		{ src: "../source/specialforrandomsite/popa.gif",     cap: "ЭКСПОНАТ №77" },
+		{ src: "../source/specialforrandomsite/pavka.png",     cap: "ЭКСПОНАТ №99" },
+		{ src: "../source/specialforrandomsite/skeleton.png",     cap: "ЭКСПОНАТ №00" },
+
+		// ── КОНТАКТ / СИГНАЛ ──
+		{ src: "../source/specialforrandomsite/spheres.png",    cap: "СИГНАЛ ЖИВОЙ" },
+		{ src: "../core-wiki/source/glitch.gif",    cap: "0x666 · ЗАПИСАНО" },
+		{ src: "../core-wiki/source/wave.gif",      cap: "01:19 · ВОВРЕМЯ" },
+		{ src: "../source/specialforrandomsite/sxema-raboty-rektifikacionnoj-kolonny-foto.gif",   cap: "КАНАЛ С GOLU" },
+		{ src: "../source/specialforrandomsite/uranus_megus.png",      cap: "PONG · ОН СЛЫШИТ" },
+		{ src: "../source/specialforrandomsite/Ножницы_ESTEL_Premier_для_точных_стрижек,_5.5_1.png",      cap: "СЕТКА АКТИВНА" },
+
+		// ── ИНДУСТРИАЛЬНОЕ / G-CODE ──
+		{ src: "../source/specialforrandomsite/woowz_cloth.png",       cap: "G1 X666 Y666" },
+		{ src: "../source/specialforrandomsite/who.gif",   cap: "ЗАВОД ПРОБУЖДЁН" },
+		{ src: "../source/specialforrandomsite/m.png",     cap: "ШПИНДЕЛЬ ONLINE" },
+		{ src: "../source/specialforrandomsite/mine_semen.png",      cap: "ПРОВОД · КРАСНЫЙ" },
+		{ src: "../source/specialforrandomsite/paint.png",       cap: "⬡ ГЕКСАГОН" },
+
+		// ── ФИЛОСОФИЯ ──
+		{ src: "../source/specialforrandomsite/pngimg.com - sun_PNG13446.png",     cap: "НОЧЬ · ТЫ НЕ СПИШЬ" },
+		{ src: "../source/specialforrandomsite/ppg.png",    cap: "ЗЕРКАЛО · СМОТРИ" },
+		{ src: "../source/specialforrandomsite/happy_cat.png",      cap: "END_OF_DATA" },
 	];
 
 	// Журнал изменений. Добавляй строки сверху.
@@ -154,7 +205,7 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		const o = document.createElement("div");
 		o.id = "mp-zoom";
 		o.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:'Courier New',monospace;";
-		o.innerHTML = '<img src="' + (g.src || PH) + '" style="max-width:90vw;max-height:78vh;border:1px solid #d4af37;box-shadow:0 0 40px rgba(255,0,68,.45)" onerror="this.onerror=null;this.src=\'' + PH + '\'">'
+		o.innerHTML = '<img class="mp-toxic-zoom" src="' + (g.src || PH) + '" style="max-width:90vw;max-height:78vh;border:1px solid #d4af37;box-shadow:0 0 40px rgba(255,0,68,.45)" onerror="this.onerror=null;this.src=\'' + PH + '\'">'
 			+ '<div style="color:#d4af37;letter-spacing:.2em;font-size:13px">' + g.cap + ' · клик или Esc = закрыть</div>';
 		o.addEventListener("click", window.MP_ZOOM_CLOSE);
 		document.documentElement.appendChild(o);
@@ -262,14 +313,17 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 		const key = l.go.match(/OPEN_PAGE\('([^']+)'\)/);
 		const pid = key ? key[1] : "";
 		const secret = SECRETS_MAP[pid] || "";
-		return '<div class="mp-tile" data-secret="' + secret + '" style="animation-delay:' + (i * 0.05) + 's" onclick="' + l.go + '">'
+		return '<div class="mp-tile mp-toxic-tile" data-secret="' + secret + '" style="animation-delay:' + (i * 0.05) + 's" onclick="' + l.go + '">'
 			+ '<div class="mp-tv">' + (l.img ? img(l.img) : '<span class="mp-ic">' + l.icon + '</span>') + '</div>'
 			+ '<div class="mp-tb"><div class="mp-tt">' + l.title + '</div><div class="mp-td">' + l.desc + '</div>'
 			+ '<div class="mp-tf"><span class="mp-tag">' + l.tag + '</span><span class="mp-go">ВОЙТИ ▶</span></div></div></div>';
 	}).join("");
 
 	const gal = GALLERY.map((g, i) =>
-		'<div class="mp-g" onclick="MP_ZOOM(' + i + ')">' + img(g.src) + '<span>' + g.cap + '</span></div>'
+		'<div class="mp-g mp-toxic" onclick="MP_ZOOM(' + i + ')">'
+			+ '<div class="mp-g-media">' + img(g.src) + '</div>'
+			+ '<span>' + g.cap + '</span>'
+		+ '</div>'
 	).join("");
 
 	const chg = CHANGES.map(c => '<div class="mp-ch"><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join("");
@@ -352,22 +406,46 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 	.mp-about b{ color:#d4af37; font-weight:normal; }
 	.mp-about i{ color:#ff0044; font-style:normal; }
 
-	.mp-gal{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
-	.mp-g{ position:relative; height:150px; overflow:hidden; background:#030105; border:1px solid #2a0a14; cursor:pointer; transition:border-color .2s, transform .2s; }
-	.mp-g img{ width:100%; height:100%; object-fit:cover; transition:transform .3s, filter .3s; }
-	.mp-g:hover{ border-color:#d4af37; transform:translateY(-3px); }
-	.mp-g:hover img{ transform:scale(1.1); filter:contrast(1.2) saturate(1.3); }
-	.mp-g span{ position:absolute; left:0; right:0; bottom:0; padding:4px 8px; background:rgba(0,0,0,.75); font-size:10px; letter-spacing:.2em; color:#d4af37; }
+.mp-gal{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.mp-g{
+	position:relative;
+	display:flex;
+	flex-direction:column;
+	background:#030105;
+	border:1px solid #2a0a14;
+	cursor:pointer;
+	transition:border-color .2s, transform .2s;
+	overflow:hidden;
+}
+.mp-g-media{
+	position:relative;
+	width:100%;
+	height:150px;
+	overflow:hidden;
+	flex:none;
+}
+.mp-g img{
+	width:100%;
+	height:100%;
+	object-fit:cover;
+	display:block;
+	transition:transform .3s, filter .3s;
+}
+.mp-g:hover{ border-color:#d4af37; transform:translateY(-3px); }
+.mp-g:hover img{ transform:scale(1.1); filter:contrast(1.2) saturate(1.3); }
+.mp-g span{
+	display:block;
+	padding:6px 8px;
+	background:rgba(0,0,0,.75);
+	border-top:1px solid #2a0a14;
+	font-size:10px;
+	letter-spacing:.2em;
+	color:#d4af37;
+	text-align:center;
+	flex:none;
+}
 
-	.mp-ch{ display:flex; gap:12px; padding:6px 0; border-bottom:1px dashed #2a0a14; font-size:13px; }
-	.mp-ch b{ flex:none; width:64px; color:#ff0044; font-weight:normal; letter-spacing:.1em; }
-	.mp-ch span{ color:#b89a5a; }
-
-	.mp-foot{ margin-top:36px; padding-top:14px; border-top:1px solid #2a0a14; text-align:center; font-size:11px; letter-spacing:.25em; color:#6a4a55; }
-
-	@media (max-width:900px){ .mp-hero, .mp-two{ grid-template-columns:1fr; } #mp-root{ padding:16px; } }
-	
-	/* скрытые подсказки */
+.mp-ch{ display:flex; gap:12px; padding:6px 0; border-bottom:1px dashed #2a0a14; font-size:13px; }
 .mp-tile::after {
     content: attr(data-secret);
     position: absolute;
@@ -428,6 +506,150 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 }
 #mp-no.shk::after {
     box-shadow: 0 0 40px rgba(255,0,68,.8);
+}
+
+/* ═══ ТОКСИЧНЫЙ ФИЛЬТР ═══ */
+.mp-g.mp-toxic img,
+.mp-tile.mp-toxic-tile .mp-tv img,
+.mp-toxic-zoom {
+    filter:
+        hue-rotate(75deg)
+        saturate(1.8)
+        contrast(1.25)
+        brightness(0.92)
+        drop-shadow(0 0 8px rgba(120, 255, 60, 0.35));
+    animation: mp-toxic-pulse 3.5s ease-in-out infinite;
+}
+
+@keyframes mp-toxic-pulse {
+    0%, 100% { filter: hue-rotate(75deg) saturate(1.8) contrast(5) brightness(0.92) drop-shadow(0 0 8px rgba(120,255,60,.35)); }
+    50%      { filter: hue-rotate(5deg) saturate(5) contrast(1.35) brightness(1.05) drop-shadow(0 0 16px rgba(120,255,60,.55)); }
+}
+
+/* радиационные сканлайны поверх картинки (только в галерее и zoom) */
+.mp-g.mp-toxic::after,
+.mp-toxic-zoom::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(120, 255, 60, 0.10) 0 2px,
+        transparent 2px 4px
+    );
+    mix-blend-mode: overlay;
+    animation: mp-toxic-scan 6s linear infinite;
+    z-index: 2;
+}
+@keyframes mp-toxic-scan {
+    from { background-position: 0 0; }
+    to   { background-position: 0 100px; }
+}
+
+/* токсичный ореол у контейнеров */
+.mp-tile.mp-toxic-tile {
+    border-color: rgba(120, 255, 60, 0.35);
+    box-shadow: 0 0 18px rgba(120, 255, 60, 0.18);
+}
+.mp-tile.mp-toxic-tile:hover {
+    border-color: rgba(120, 255, 60, 0.85);
+    box-shadow: 0 0 32px rgba(120, 255, 60, 0.45);
+}
+.mp-g.mp-toxic {
+    border-color: rgba(120, 255, 60, 0.25);
+}
+.mp-g.mp-toxic:hover {
+    border-color: rgba(120, 255, 60, 0.85);
+    box-shadow: 0 0 26px rgba(120, 255, 60, 0.45);
+}
+
+/* в контейнере галереи нужна relative-позиция, чтобы ::after лёг сверху картинки */
+.mp-g.mp-toxic {
+    position: relative;
+}
+
+/* радиационные сканлайны поверх картинки */
+.mp-toxic::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(120, 255, 60, 0.10) 0 2px,
+        transparent 2px 4px
+    );
+    mix-blend-mode: overlay;
+    animation: mp-toxic-scan 6s linear infinite;
+    z-index: 2;
+}
+@keyframes mp-toxic-scan {
+    from { background-position: 0 0; }
+    to   { background-position: 0 100px; }
+}
+
+/* едва заметный токсичный ореол вокруг плитки */
+.mp-tile.mp-toxic-tile {
+    border-color: rgba(120, 255, 60, 0.35);
+    box-shadow: 0 0 18px rgba(120, 255, 60, 0.18);
+}
+.mp-tile.mp-toxic-tile:hover {
+    border-color: rgba(120, 255, 60, 0.85);
+    box-shadow: 0 0 32px rgba(120, 255, 60, 0.45);
+}
+
+/* лёгкий токсичный оттенок у самой галереи */
+.mp-g.mp-toxic {
+    border-color: rgba(120, 255, 60, 0.25);
+}
+.mp-g.mp-toxic:hover {
+    border-color: rgba(120, 255, 60, 0.85);
+    box-shadow: 0 0 26px rgba(120, 255, 60, 0.45);
+}
+
+/* токсичный zoom */
+.mp-toxic-zoom {
+    filter: hue-rotate(75deg) saturate(1.9) contrast(1.2) brightness(0.95);
+    animation: mp-toxic-pulse 3.5s ease-in-out infinite;
+}
+
+.mp-g.mp-toxic img {
+    position: relative;
+    z-index: 1;
+}
+
+/* ═══ ПОДВАЛ ═══ */
+.mp-foot{
+    margin-top: 40px;
+    padding: 22px 0 10px;
+    border-top: 1px solid #2a0a14;
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: .3em;
+    color: #d4af37;
+    text-shadow: 0 0 10px rgba(255,0,68,.35), 0 0 2px #7a0022;
+    position: relative;
+}
+.mp-foot::before{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -1px;
+    width: 120px;
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, #ff0044, transparent);
+    box-shadow: 0 0 8px #ff0044;
+}
+.mp-foot small{
+    display: block;
+    margin-top: 10px;
+    font-size: 10px;
+    letter-spacing: .18em;
+    color: #6a4a55;
+    text-shadow: none;
+    font-family: 'Courier New', monospace;
 }
 	`;
 

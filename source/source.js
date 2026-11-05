@@ -744,13 +744,19 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 	"bg","bg1","bg2",
 ],"corrupted_minecraft/",".png");
 
-WoowzsiteLituism = AddTableToTable(AddFullnessToTable([
+WoowzsiteLituism = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
 	"bg10","bg11","prev","bg12"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"
-],"Lituism/",".mp3"));
+],"Lituism/",".mp3")),
+AddFullnessToTable([
+	"bit.png", "signal.png", "joke.png", "zero.png", "one.png", "byte.png", "word.png", "code.png", "packet.png", "noise.png", "bug.png", "crit.png", "crash.png", "cycle.png", "patch.png",
+	"kernel.png", "root.png", "sigterm.png", "virus.png", "ai.png", "fork.png", "hash.png", "buffer.png", "stack.png", "que.png", "th.png", "lock.png", "deadlock.png", "rec.png", "null.png",
+	"und.png", "nan.png", "inf.png", "leak.png", "over.png", "int.png", "float.png", "bool.png", "char.png", "string.png", "ar.png", "object.png", "pointer.png", "str.png", "class.png",
+	"enum.png", "void.png", "cast.png", "npointer.png"
+],"Lituism/alc/"));
 
 WoowzsiteSourceWoowzcore = AddFullnessToTable([
 	"version1","version2","version2console","version2mainmenu","version3","version3mainmenu","version3nevada","version3todo","version4","version4mainmenu","version4todo","version5","version5mainmenu","version5seedworld","version5todo"

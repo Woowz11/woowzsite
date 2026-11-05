@@ -335,15 +335,7 @@ REGISTER_PAGE("portal", "->P0RTAL<-", function(){
 
 			<div class="lituism-discord-widget-frame" id="lituismDiscordWidgetWrap">
 				<div class="lituism-discord-widget-label">◈ LIVE FEED · GUILD NODE ◈</div>
-				<iframe
-					id="lituismDiscordIframe"
-					src="https://discord.com/widget?id=1564700583645028404&theme=dark"
-					width="100%"
-					height="420"
-					allowtransparency="true"
-					frameborder="0"
-					sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
-				</iframe>
+				<iframe id="lituismDiscordIframe" src="https://discord.com/widget?id=1564700583645028404&theme=dark" width="100%" height="420" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 				<div id="lituismDiscordFallback" style="display:none; padding:1rem; text-align:center; font-family:'Courier New',monospace; font-size:0.72rem; color:#884444; line-height:1.6;">
 					// УЗЕЛ DISCORD НЕДОСТУПЕН //<br>
 					Проверьте: включён ли Server Widget в настройках сервера Discord.<br>

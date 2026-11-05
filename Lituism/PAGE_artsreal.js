@@ -383,7 +383,7 @@ REGISTER_PAGE("artsreal", "🖼", function(){
 			transition: all 0.18s ease;
 			flex: none;
 			user-select: none;
-		} !important;
+		} 
 
 		.lituism-copy-btn:hover {
 			background: #ff0044;

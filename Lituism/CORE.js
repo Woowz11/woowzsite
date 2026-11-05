@@ -34,20 +34,40 @@ if(IN_MOBILE){
 }
 
 const PAGE_FILES = [
-		"PAGE_main.js",
-		"PAGE_database.js",
-		"PAGE_sranspang.js",
-		"PAGE_crybird.js",
-		"PAGE_golu.js",
-		"PAGE_trash.js",
-		"PAGE_arts.js",
-		"PAGE_artsreal.js",
-		"PAGE_pavpis.js",
-		"PAGE_portal.js",
-		"PAGE_testcss.js",
-		"PAGE_artsai.js",
-		"PAGE_videos.js"
-	];
+	"PAGE_main.js",
+	"PAGE_database.js",
+	"PAGE_sranspang.js",
+	"PAGE_crybird.js",
+	"PAGE_golu.js",
+	"PAGE_trash.js",
+	"PAGE_arts.js",
+	"PAGE_artsreal.js",
+	"PAGE_pavpis.js",
+	"PAGE_portal.js",
+	"PAGE_testcss.js",
+	"PAGE_artsai.js",
+	"PAGE_videos.js",
+	"PAGE_alchemy.js",
+	"PAGE_typing.js",
+];
+
+const TOP_NAV = [
+	["OPEN_PAGE('not-exist');", "&lt;@&gt;"],
+	["OPEN_PAGE();",            "MAIN.html"],
+	["ART-WORKS 🎨", [
+		["OPEN_PAGE('artsreal');", "[1MAGES]"],
+		["OPEN_PAGE('artsai');",   "&lt;AI&gt;"],
+		["OPEN_PAGE('videos');",   "{V1D1O}"],
+	]],
+	["GAMES 🎮", [
+		["OPEN_PAGE('alchemy');", "⚗ ALCHEMY ⚗"],
+		["OPEN_PAGE('typing');", "⌨ TYPE ⌨"],
+		["OPEN_PAGE('trash');", "👾 GOLUWorld 👾"],
+	]],
+	["OPEN_PAGE('database');",  "DATABASE 🔩"],
+	["OPEN_PAGE('portal');",    "P0RTAL 🌌"],
+	["OPEN_RANDOM_PAGE();",     "&lt;💮&gt;"],
+];
 
 function SITE_BASE(content){
 	return `${ELEMENT_SITETOP}${content}${ELEMENT_SITEBOTTOM}`;
@@ -419,22 +439,22 @@ function OPEN_PAGE(id = ""){
 
 			dot.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 			dot.style.cssText = `
-                position: fixed;
-                font-size: ${size}px;
-                font-family: 'Courier New', monospace;
-                font-weight: 900;
-                color: ${color};
-                pointer-events: none;
-                z-index: 999999;
-                opacity: ${1 - (i / TRAIL_LENGTH) * 0.85};
-                mix-blend-mode: screen;
-                filter: blur(${i < 3 ? 0 : (i / TRAIL_LENGTH) * 1.5}px);
-                transition: all 0.04s cubic-bezier(0.2, 0.9, 0.4, 1);
-                text-shadow: 0 0 ${size * 0.8}px ${color}66, 0 0 ${size * 2}px ${color}22;
-                will-change: transform;
-                line-height: 1;
-                user-select: none;
-            `;
+				position: fixed;
+				font-size: ${size}px;
+				font-family: 'Courier New', monospace;
+				font-weight: 900;
+				color: ${color};
+				pointer-events: none;         /* ← ДОБАВИТЬ ЭТУ СТРОКУ */
+				z-index: 999999;
+				opacity: ${1 - (i / TRAIL_LENGTH) * 0.85};
+				mix-blend-mode: screen;
+				filter: blur(${i < 3 ? 0 : (i / TRAIL_LENGTH) * 1.5}px);
+				transition: all 0.04s cubic-bezier(0.2, 0.9, 0.4, 1);
+				text-shadow: 0 0 ${size * 0.8}px ${color}66, 0 0 ${size * 2}px ${color}22;
+				will-change: transform;
+				line-height: 1;
+				user-select: none;
+			`;
 			CACHE.appendChild(dot);
 			trail.push(dot);
 			positions.push({ x: cursorX, y: cursorY });
@@ -558,24 +578,30 @@ function ELEMENT_TITLE(){
 		var LIT_BODY_PART = `<img id="lit_body" src="${LIT_BODY_SRC}" style="position: absolute; animation: spin ${i+1}s linear infinite; animation-name: spin; opacity: 0.5;">`;
 		LIT_BODY += LIT_BODY_PART;
 	}
-	return `${LIT_BODY}<title_img id="lit_head" onclick="OPEN_PAGE('golu');"></title_img><title_text></title_text>`;
+	return `${LIT_BODY}<title_img id="lit_head" onclick="OPEN_PAGE('golu');"></title_img>`;
 }
 
 function ELEMENT_WEBINFO(){
 	return `<text class="glitch">v:${MANIFEST_VERSION}</text> <text class="glitch2" id="ID">UNKNOWN-ID</text>`;
 }
 
-const TOP_NAV = [
-	["OPEN_PAGE('not-exist');", "&lt;@&gt;"],
-	["OPEN_PAGE();",            "{MAIN PAGE}"],
-	["OPEN_PAGE('artsreal');",  "ИСКУССТВО 💥"],
-	["OPEN_PAGE('artsai');",    "AI ☢"],
-	["OPEN_PAGE('videos');",    "V1D1O 📺"],
-	["OPEN_PAGE('trash');",     "GOLUWorld 👾"],
-	["OPEN_RANDOM_PAGE();",     "RANDOM_PAGE() 💮"],
-	["OPEN_PAGE('database');",  "DATABASE 🔩"],
-	["OPEN_PAGE('portal');",    "P0RTAL 🌌"],
-];
+const tbNavHtml = n => Array.isArray(n[1])
+	? `<div class="tb-dd"><button class="category_button tb-dd-btn" onclick="TB_DD(this)">${n[0]} ▾</button><div class="tb-dd-menu">${n[1].map(b => `<button class="category_button" onclick="${b[0]}">${b[1]}</button>`).join("")}</div></div>`
+	: `<button class="category_button" onclick="${n[0]}">${n[1]}</button>`;
+
+// на устройствах без наведения (телефон) группа открывается тапом
+if (!window.__tbDdInit) {
+	window.__tbDdInit = true;
+	window.TB_DD = function (btn) {
+		if (!matchMedia("(hover:none)").matches) return;   // на ПК работает hover
+		const dd = btn.parentNode, was = dd.classList.contains("open");
+		document.querySelectorAll("#tb-root .tb-dd.open").forEach(d => d.classList.remove("open"));
+		if (!was) dd.classList.add("open");
+	};
+	document.addEventListener("click", e => {
+		if (!e.target.closest(".tb-dd")) document.querySelectorAll(".tb-dd.open").forEach(d => d.classList.remove("open"));
+	});
+}
 
 const TB_WARN = "⚠ ВНИМАНИЕ · СИСТЕМА НАБЛЮДАЕТ · GOLU АКТИВЕН · SIGTERM = БОЛЬ · ТЫ — ЭКСПОНАТ · ".repeat(3);
 
@@ -589,7 +615,7 @@ const ELEMENT_TOPBANNER = f_rnl(`
 				<div class="tb-brand">
 					<div class="tb-logo">${ELEMENT_TITLE()}</div>
 					<div class="tb-id">
-						<div class="tb-word" data-text="LITUISM">LITUISM</div>
+						<title_text onclick="OPEN_PAGE('');"></title_text>
 						<div id="tb-sub" class="tb-subt">ТЕХНО-РЕЛИГИЯ · ЦИФРОВОЙ БОГ GOLU</div>
 						<div class="tb-info">${ELEMENT_WEBINFO()}</div>
 					</div>
@@ -600,7 +626,7 @@ const ELEMENT_TOPBANNER = f_rnl(`
 		</div>
 		<div class="tb-wing tb-r"><div class="tb-rain" data-rain="h"></div><div class="tb-wtag">RED PROTOCOL · v∞ ▶</div></div>
 	</div>
-	<div class="tb-nav">${TOP_NAV.map(n => `<button class="category_button" onclick="${n[0]}">${n[1]}</button>`).join("")}</div>
+	<div class="tb-nav">${TOP_NAV.map(n => tbNavHtml(n)).join("")}</div>
 	<div class="tb-gap"><div class="tb-hz"></div><div class="tb-gtxt">▼ СЕКТОР: <b id="tb-where">…</b> ▼</div></div>
 </div>`);
 
@@ -624,15 +650,6 @@ function REGISTER_PAGE(key, title, factory){
 function ELEMENT_SITE(content, func = function(){}, newlines = true, runafteropen = function(){}){
 	PREPAGES.push([content, func, newlines, PREPAGES.length, runafteropen]);
 	return "<text style='color:white;'>PREPAGE {{" + PREPAGES.length + "}}</text>";
-}
-
-var t = 0;
-function renderLoop(){
-	if(HASH==="crybird"){
-		document.getElementById("bytes").style.width = `${50+((Math.sin(t/250)+1)/2)*50}%`;
-	}
-	t++;
-	requestAnimationFrame(renderLoop);
 }
 
 /* ===================================================================
@@ -676,8 +693,6 @@ function renderLoop(){
 			window.PAGES[key]["f"] = PAGE[4];
 			delete window.PAGES[key].factory;
 		}
-
-		renderLoop();
 
 		if(!DEV){
 			document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
@@ -2754,6 +2769,65 @@ async function prWander() {
   for (let i = rand(3, 5); i > 0; i--) await prGoto(rand(60, innerWidth - 80), rand(60, innerHeight - 120), { spd: 3 });
   await prWait(rand(200, 500));
 }
+
+/* ── рисование фигур ── */
+const PR_DRAW_STICK  = 60;      // жёсткость: больше = острее углы (было 14)
+const PR_DRAW_SPEED  = 420;     // скорость, px/сек
+const PR_DRAW_REPS   = [2, 5];  // сколько раз подряд рисует одну фигуру
+const PR_SHAPES      = ["circle", "square", "triangle", "pentagram", "hexagon", "infinity", "litsymbol"];
+
+function prShapePts(shape, cx, cy, r) {
+  const poly = (n, a0) => Array.from({ length: n }, (_, i) => {
+    const a = a0 + i / n * Math.PI * 2;
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  });
+  const TOP = -Math.PI / 2;
+  switch (shape) {
+    case "circle":   return { pts: poly(96, TOP), closed: true };
+    case "triangle": return { pts: poly(3, TOP), closed: true };
+    case "hexagon":  return { pts: poly(6, TOP), closed: true };
+    case "square": {
+      const h = r * 0.8;
+      return { pts: [[cx - h, cy - h], [cx + h, cy - h], [cx + h, cy + h], [cx - h, cy + h]], closed: true };
+    }
+    case "pentagram": {
+      const p = poly(5, TOP);                     // одним росчерком через вершину
+      return { pts: [p[0], p[2], p[4], p[1], p[3]], closed: true };
+    }
+    case "infinity": {
+      const pts = [], a = r * 1.1;
+      for (let i = 0; i < 96; i++) {
+        const t = i / 96 * Math.PI * 2, d = 1 + Math.sin(t) * Math.sin(t);
+        pts.push([cx + a * Math.cos(t) / d, cy + a * Math.sin(t) * Math.cos(t) / d]);
+      }
+      return { pts, closed: true };
+    }
+    case "litsymbol": {
+      const S = r * 1.8, ox = cx - S / 2, oy = cy - S / 2;
+      const raw = [[6,0],[24,0],[6,31],[24,31],[6,31],[15,15],[0,6],[0,24],[0,6],[15,15],[31,24],[31,6]];
+      return { pts: raw.map(([x, y]) => [ox + x / 32 * S, oy + y / 32 * S]), closed: false };
+    }
+  }
+  return { pts: poly(96, TOP), closed: true };
+}
+function prPathInfo(pts, closed) {
+  const n = pts.length, m = closed ? n : n - 1, seg = [];
+  let L = 0;
+  for (let i = 0; i < m; i++) {
+    const a = pts[i], b = pts[(i + 1) % n], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    seg.push(d); L += d;
+  }
+  return { seg, L, m };
+}
+function prPathAt(pts, info, d) {
+  const n = pts.length;
+  let i = 0;
+  while (i < info.m - 1 && d > info.seg[i]) { d -= info.seg[i]; i++; }
+  const a = pts[i], b = pts[(i + 1) % n];
+  const t = info.seg[i] ? Math.min(1, d / info.seg[i]) : 0;
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+
 const PR_ACTS = {
   // подлетает к кнопкам/ссылкам, трогает их
   async inspect() {
@@ -2766,153 +2840,33 @@ const PR_ACTS = {
       if (Math.random() < 0.5) prRipple(px + 2, py + 2);
     }
   },
-  // кружит вокруг твоего курсора
-    // кружит вокруг твоего курсора (случайная фигура)
+   // рисует вокруг твоего курсора случайную фигуру, несколько раз подряд
   async circle() {
     const [ux, uy] = prUser();
-    const SHAPES = ["circle", "square", "triangle", "star", "hexagon", "infinity", "litsymbol"];
-    const shape = pick(SHAPES);
-    const radius = rand(60, 120);
-    const speed = rand(1.5, 3);
+    const shape = pick(PR_SHAPES);
+    const r = rand(70, 130), m = r + 16;
+    const cx = Math.max(m, Math.min(innerWidth - m, ux));    // центр фиксируется один раз
+    const cy = Math.max(m, Math.min(innerHeight - m, uy));
+    const { pts, closed } = prShapePts(shape, cx, cy, r);
+    const info = prPathInfo(pts, closed);
+    const reps = Math.round(rand(PR_DRAW_REPS[0], PR_DRAW_REPS[1]));
+    const dur = info.L / PR_DRAW_SPEED * 1000;               // время одного прохода
 
-    // сначала подлетаем к точке старта
-    const startAngle = 0;
-    const startX = ux + Math.cos(startAngle) * radius;
-    const startY = uy + Math.sin(startAngle) * radius;
-    await prGoto(startX, startY, { spd: 6 });
+    await prGoto(pts[0][0], pts[0][1], { spd: 6 });          // к первой вершине
 
-    const t0 = Date.now();
-    const DURATION = 3500;
-    let step = 0;
-
-    while (Date.now() - t0 < DURATION) {
-      const [cx, cy] = prUser();
-      const progress = (Date.now() - t0) / DURATION; // 0..1
-      let angle, r, x, y;
-
-      if (shape === "circle") {
-        angle = step * 0.15;
-        x = cx + Math.cos(angle) * radius;
-        y = cy + Math.sin(angle) * radius;
-      } else if (shape === "square") {
-        // обход квадрата по периметру
-        const side = radius * 1.6;
-        const total = side * 4;
-        const pos = (progress * total) % total;
-        if (pos < side) { x = cx - side/2 + pos; y = cy - side/2; }
-        else if (pos < side*2) { x = cx + side/2; y = cy - side/2 + (pos - side); }
-        else if (pos < side*3) { x = cx + side/2 - (pos - side*2); y = cy + side/2; }
-        else { x = cx - side/2; y = cy + side/2 - (pos - side*3); }
-      } else if (shape === "triangle") {
-        // равносторонний треугольник по периметру
-        const A = -Math.PI/2, B = Math.PI/6, C = 5*Math.PI/6;
-        const pA = [cx + Math.cos(A)*radius, cy + Math.sin(A)*radius];
-        const pB = [cx + Math.cos(B)*radius, cy + Math.sin(B)*radius];
-        const pC = [cx + Math.cos(C)*radius, cy + Math.sin(C)*radius];
-        const total = 3;
-        const t = (progress * 3) % 3;
-        if (t < 1) {
-          x = pA[0] + (pB[0]-pA[0]) * t;
-          y = pA[1] + (pB[1]-pA[1]) * t;
-        } else if (t < 2) {
-          x = pB[0] + (pC[0]-pB[0]) * (t-1);
-          y = pB[1] + (pC[1]-pB[1]) * (t-1);
-        } else {
-          x = pC[0] + (pA[0]-pC[0]) * (t-2);
-          y = pC[1] + (pA[1]-pC[1]) * (t-2);
-        }
-      } else if (shape === "star") {
-        // 5-конечная звезда
-        const spikes = 5;
-        const total = spikes * 2;
-        const t = (progress * total) % total;
-        const idx = Math.floor(t);
-        const frac = t - idx;
-        const outer = radius;
-        const inner = radius * 0.4;
-        const angleA = (idx / total) * Math.PI * 2 - Math.PI/2;
-        const angleB = ((idx+1) / total) * Math.PI * 2 - Math.PI/2;
-        const rA = idx % 2 === 0 ? outer : inner;
-        const rB = (idx+1) % 2 === 0 ? outer : inner;
-        const xA = cx + Math.cos(angleA) * rA;
-        const yA = cy + Math.sin(angleA) * rA;
-        const xB = cx + Math.cos(angleB) * rB;
-        const yB = cy + Math.sin(angleB) * rB;
-        x = xA + (xB-xA) * frac;
-        y = yA + (yB-yA) * frac;
-      } else if (shape === "hexagon") {
-        // шестиугольник по периметру
-        const sides = 6;
-        const total = sides;
-        const t = (progress * total) % total;
-        const idx = Math.floor(t);
-        const frac = t - idx;
-        const angleA = (idx / total) * Math.PI * 2;
-        const angleB = ((idx+1) / total) * Math.PI * 2;
-        const xA = cx + Math.cos(angleA) * radius;
-        const yA = cy + Math.sin(angleA) * radius;
-        const xB = cx + Math.cos(angleB) * radius;
-        const yB = cy + Math.sin(angleB) * radius;
-        x = xA + (xB-xA) * frac;
-        y = yA + (yB-yA) * frac;
-      } else if (shape === "infinity") {
-        // лемниската (восьмёрка)
-        const t = progress * Math.PI * 2;
-        const a = radius * 0.8;
-        x = cx + a * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
-        y = cy + a * Math.sin(t) * Math.cos(t) / (1 + Math.sin(t)*Math.sin(t));
-      } else if (shape === "litsymbol") {
-        // «LIT SYMBOL» — две буквы Z: одна обычная, вторая повёрнута на 90° и сжата
-        const R  = radius * 0.9;              // общий размер
-        const hz = R * 0.55;                  // высота Z
-        const wz = R * 0.95;                  // ширина Z
-        const sq = 0.7;                       // коэффициент сжатия второй Z
-        const gap = R * 0.55;                 // сдвиг второй Z от центра
-
-        // одна Z — рисуем путь по точкам (сверху → вправо → влево-вниз → вправо)
-        // фаза 0..1, возвращает точку
-        const zPath = (t, ox, oy, w, h, rot, squash) => {
-          // rot: 0 = нормально, 1 = повернуть на 90°
-          // squash: коэффициент для сжатия по одной оси (только для повёрнутой)
-          let seg, localT;
-          // путь: (0,0) → (w,0) → (0,h) → (w,h)
-          if (t < 1/3)      { seg = 0; localT = t / (1/3); }
-          else if (t < 2/3) { seg = 1; localT = (t - 1/3) / (1/3); }
-          else              { seg = 2; localT = (t - 2/3) / (1/3); }
-
-          let lx, ly;
-          if (seg === 0)      { lx = w * localT;              ly = 0; }             // верх
-          else if (seg === 1) { lx = w - w * localT;          ly = h * localT; }    // диагональ вниз-влево
-          else                { lx = w * localT;              ly = h; }             // низ
-
-          // применяем поворот
-          if (rot === 1) {
-            // повернуть на 90° по часовой: (x,y) → (y, -x), плюс сжатие по X
-            const tmp = lx;
-            lx = ly * squash;
-            ly = -tmp;
-          }
-
-          return [ox + lx, oy + ly];
-        };
-
-        // фаза 1 (0..0.5): рисуем первую Z (обычную)
-        // фаза 2 (0.5..1): рисуем вторую Z (повёрнутую и сжатую)
-        if (progress < 0.5) {
-          const t = progress / 0.5;
-          const p = zPath(t, cx - wz / 2, cy - hz / 2, wz, hz, 0, 1);
-          x = p[0]; y = p[1];
-        } else {
-          const t = (progress - 0.5) / 0.5;
-          // сдвигаем вторую Z вправо и чуть вниз
-          const p = zPath(t, cx + gap - wz / 2, cy - hz / 2, wz, hz, 1, sq);
-          x = p[0]; y = p[1];
-        }
+    for (let rep = 0; rep < reps; rep++) {
+      const t0 = performance.now();
+      for (;;) {
+        const k = (performance.now() - t0) / dur;
+        if (k >= 1) break;
+        const [x, y] = prPathAt(pts, info, k * info.L);
+        prSet(x, y, PR_DRAW_STICK);
+        await prWait(16);
       }
-
-      prSet(x, y, 14);
-      step++;
-      await prWait(40);
+      const end = closed ? pts[0] : pts[pts.length - 1];
+      prSet(end[0], end[1], PR_DRAW_STICK);                   // дорисовать точно в вершину
+      await prWait(rand(90, 200));
+      if (!closed && rep < reps - 1) await prGoto(pts[0][0], pts[0][1], { spd: 8 }); // открытый символ: вернуться в начало
     }
   },
   // тащится за твоим курсором, потом рывок
@@ -3166,7 +3120,7 @@ ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 
 § .tb-top{ display:flex; gap:14px; height:150px; padding:10px 14px 8px; }
 § .tb-brand{ flex:1; min-width:0; display:flex; align-items:center; gap:14px; }
-§ .tb-logo{ position:relative; flex:none; width:125px; height:125px; display:flex; }
+§ .tb-logo{ position:relative; flex:none; width:140px; height:125px; display:flex; }
 § .tb-logo title_img{ position:relative; z-index:2; flex:none; }
 § .tb-id{ min-width:0; display:flex; flex-direction:column; gap:6px; }
 § .tb-word{ position:relative; font-size:42px; line-height:1; font-weight:bold; letter-spacing:.2em; color:#e8d9b0; text-shadow:0 0 14px #ff0044,0 0 2px #7a0022; cursor:pointer; user-select:none; white-space:nowrap; }
@@ -3188,7 +3142,33 @@ ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 § .tb-stage{ position:relative; flex:1; min-height:0; overflow:hidden; }
 § .tb-pn{ position:absolute; inset:0; display:none; }
 § .tb-pn.on{ display:block; }
-§ .tb-pn canvas{ display:block; width:100%; height:100%; pointer-events:auto; image-rendering:auto; }
+
+§ .tb-pn .gc-stage{ position:absolute; inset:0 0 20px 0; }
+§ .tb-pn .gc-stage canvas{ width:100%; height:100%; display:block; }
+
+§ .tb-pn .gc-shapes{
+    position:absolute; left:0; right:70px; bottom:0; height:20px;
+    display:flex; flex-wrap:nowrap; gap:1px; padding:1px 2px; box-sizing:border-box;
+    background:rgba(3,1,5,.92); border-top:1px solid #3a1020;
+    overflow-x:auto; overflow-y:hidden;
+}
+§ .tb-pn .gc-shapes::-webkit-scrollbar{ height:2px; }
+§ .tb-pn .gc-shapes::-webkit-scrollbar-thumb{ background:#3a1020; }
+§ .tb-pn .gc-shapes .tb-btn{
+    flex:none; padding:0 4px; font-size:10px; line-height:18px;
+    min-width:18px; height:18px; border-radius:0;
+}
+
+§ .tb-pn .gc-meta{
+    position:absolute; right:0; bottom:0; height:20px; width:70px;
+    display:flex; align-items:center; justify-content:flex-end; gap:3px; padding:0 3px;
+    background:rgba(3,1,5,.92); border-top:1px solid #3a1020; border-left:1px solid #3a1020;
+    font:9px/1 'Courier New',monospace; color:#d4af37;
+}
+§ .tb-pn .gc-count{ white-space:nowrap; letter-spacing:.05em; }
+§ .tb-pn .gc-turbo{ padding:0 4px; font-size:10px; line-height:16px; height:16px; min-width:22px; }
+§ .tb-pn .gc-turbo.on{ background:#7a0022; color:#fff; border-color:#ff0044; box-shadow:0 0 6px #f00; }
+
 § .tb-hud{ position:absolute; left:6px; top:4px; font-size:10px; letter-spacing:.08em; color:#d4af37; text-shadow:0 0 4px #000; pointer-events:none; }
 § .tb-hud b{ color:#ff0044; }
 § .tb-ctl{ position:absolute; right:6px; bottom:6px; display:flex; gap:4px; }
@@ -3201,6 +3181,54 @@ ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 § .tb-ms{ font-size:10px; color:#8a6a72; letter-spacing:.1em; }
 § .tb-row{ display:flex; gap:6px; }
 § .tb-fxg{ position:absolute; inset:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px; align-content:center; overflow:auto; }
+
+/* ═══ ПАНЕЛЬ ЭФФЕКТОВ — scroll-фикс ═══ */
+§ .tb-pn.tb-pn-fx.on{
+	display:flex;
+	flex-direction:column;
+	overflow:hidden;
+}
+§ .tb-fx-head{
+	display:flex; align-items:center; justify-content:space-between; gap:6px;
+	padding:4px 6px 2px; border-bottom:1px solid #3a1020; flex:none;
+}
+§ .tb-fx-count{ font-size:9px; letter-spacing:.1em; color:#8a6a72; }
+§ .tb-fx-btn{
+	background:#12060c; border:1px solid #7a0022; color:#b89a5a;
+	font:9px/1 'Courier New',monospace; padding:2px 6px; cursor:pointer;
+}
+§ .tb-fx-btn:hover{ background:#7a0022; color:#fff; border-color:#ff0044; }
+§ .tb-fx-btn.on{ background:#7a0022; color:#fff; border-color:#ff0044; box-shadow:0 0 6px rgba(255,0,68,.6); }
+
+§ .tb-fx-list{
+	flex:1 1 auto;
+	min-height:0;              /* ВАЖНО: без этого flex-контейнер не даст скролл */
+	overflow-y:auto;
+	overflow-x:hidden;
+	padding:2px 4px;
+	display:flex;
+	flex-direction:column;
+	gap:2px;
+}
+§ .tb-fx-list::-webkit-scrollbar{ width:4px; }
+§ .tb-fx-list::-webkit-scrollbar-thumb{ background:#3a1020; }
+§ .tb-fx-list::-webkit-scrollbar-track{ background:#0a0206; }
+
+§ .tb-fx-item{
+	display:flex; align-items:center; gap:6px; padding:3px 6px;
+	background:#0a0206; border:1px solid #2a0a14; cursor:pointer;
+	transition:all .12s; flex:none; min-height:20px;
+}
+§ .tb-fx-item:hover{ border-color:#ff0044; background:#1a0710; }
+§ .tb-fx-item.on{ background:#2a0a14; border-color:#d4af37; }
+§ .tb-fx-item.on .tb-fx-tog{ color:#d4af37; }
+§ .tb-fx-item.on .tb-fx-t{ color:#d4af37; }
+
+§ .tb-fx-ic{ font-size:11px; flex:none; width:14px; text-align:center; }
+§ .tb-fx-info{ flex:1; min-width:0; display:flex; flex-direction:column; gap:0; }
+§ .tb-fx-t{ color:#e8d9b0; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.05em; }
+§ .tb-fx-d{ color:#6a4a2a; font-size:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+§ .tb-fx-tog{ flex:none; color:#3a1020; font-size:11px; font-weight:bold; }
 
 /* === G-TOKEN MINER v3 — компакт под 438×107 === */
 § .tb-mn{ position:absolute; inset:0; display:none; flex-direction:column; padding:4px 6px; box-sizing:border-box; font:10px/1.15 'Courier New',Consolas,monospace; }
@@ -3310,6 +3338,116 @@ ${TB_SHOW_TITLE_TEXT ? "" : "§ title_text{ display:none; }"}
 @keyframes tb-hz{ to{ transform:translateX(-39.6px); } }
 § .tb-gtxt{ position:absolute; left:50%; top:0; transform:translateX(-50%); height:100%; padding:0 18px; display:flex; align-items:center; gap:8px; background:#0a0206; border-left:2px solid #990000; border-right:2px solid #990000; font-size:11px; letter-spacing:.25em; color:#d4af37; white-space:nowrap; }
 § .tb-gtxt b{ color:#ff0044; font-weight:normal; }
+
+#tb-root .tb-nav{ position:relative; z-index:30; }
+#tb-root .tb-dd{ position:relative; display:flex; }
+#tb-root .tb-dd-menu{
+	display:none; position:absolute; left:0; top:100%; z-index:60; min-width:100%;
+	padding:6px; background:rgba(8,2,6,.97); border:1px solid #d4af37;
+	box-shadow:0 8px 28px rgba(0,0,0,.85), 0 0 18px rgba(255,0,68,.25);
+}
+#tb-root .tb-dd:last-child .tb-dd-menu{ left:auto; right:0; }
+#tb-root .tb-dd-menu .category_button{
+	display:block !important; width:100% !important; margin:0 0 4px !important;
+	box-sizing:border-box; white-space:nowrap; text-align:center;
+}
+#tb-root .tb-dd-menu .category_button:last-child{ margin-bottom:0 !important; }
+#tb-root .tb-dd.open .tb-dd-menu{ display:block; animation:tb-dd-in .15s ease-out; }
+@media (hover:hover){
+	#tb-root .tb-dd:hover .tb-dd-menu{ display:block; animation:tb-dd-in .15s ease-out; }
+}
+@keyframes tb-dd-in{ from{ opacity:0; translate:0 -6px } to{ opacity:1; translate:0 0 } }
+
+#tb-root .tb-subt{
+	font-size: 11px;
+	letter-spacing: .3em;
+	color: #d4af37;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	/* ГЛАВНОЕ: фиксируем высоту, чтобы анимации не меняли layout */
+	height: 16px;
+	line-height: 16px;
+	min-height: 16px;
+	max-height: 16px;
+
+	/* чтобы смена ширины тоже не влияла на соседей */
+	display: block;
+	contain: layout paint;
+}
+
+/* подсветка ключевых слов в подзаголовке */
+#tb-root .tb-subt b.tb-sub-gold{
+	color:#d4af37;
+	font-weight:normal;
+	text-shadow:0 0 6px rgba(212,175,55,.6);
+}
+#tb-root .tb-subt b.tb-sub-red{
+	color:#ff0044;
+	font-weight:normal;
+	text-shadow:0 0 6px rgba(255,0,68,.8);
+	animation:tb-red-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tb-red-pulse{
+	0%,100%{ opacity:1; }
+	50%   { opacity:.55; }
+}
+#tb-root .tb-subt .tb-caret{
+	display: inline;
+	margin-left: 2px;
+	color: #ff0044;
+	animation: tb-caret-blink .7s steps(2) infinite;
+}
+@keyframes tb-caret-blink{ 50%{ opacity:0; } }
+/* подсветка символов под сканером */
+#tb-root .tb-subt .tb-scan-hot{
+	color:#fff;
+	text-shadow:0 0 6px #ff0044, 0 0 12px #ff0044;
+	background:rgba(255,0,68,.18);
+}
+
+/* ширина .tb-id фиксирована — не зависит от длины текста */
+#tb-root .tb-id{
+	width: 334px;        /* ← под ширину title_text.png, поменяй если картинка другая */
+	min-width: 334px;
+	max-width: 334px;
+	flex: none;
+}
+
+/* title_text — фиксированная ширина, не 100%, не auto */
+#tb-root title_text{
+	display: block;      /* block, чтобы занимал всю ширину .tb-id */
+	width: 334px;        /* ← ВОТ ГЛАВНОЕ: явная ширина, а не auto/100% */
+	height: 108px;
+	background-image: url("title_text.png");
+	background-size: contain;      /* картинка вписывается, не растягивается */
+	background-repeat: no-repeat;
+	background-position: left center;
+	cursor: url("../source/lit_cur_pointer.cur"), auto;
+	pointer-events: auto;
+	image-rendering: pixelated;
+	margin-bottom: -6px;
+	flex: none;          /* не сжимается во flex-контейнере */
+}
+#tb-root title_text:hover{
+	background-image: url("title_text_hover.png");
+}
+
+#tb-root .tb-subt b,
+#tb-root .tb-subt span,
+#tb-root .tb-subt .tb-caret,
+#tb-root .tb-subt .tb-scan-hot{
+	font-size: inherit;
+	line-height: inherit;
+	height: auto;
+	display: inline;
+	vertical-align: baseline;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+}
 `.replace(/§/g, "#tb-root ");
 
 const TB_GLOBAL_CSS = `
@@ -3401,23 +3539,568 @@ function tbPop(stage, text) {
 	setTimeout(() => p.remove(), 1900);
 }
 
-/* ── переключатели эффектов ── */
+/* ═══════════════ ЭФФЕКТЫ (v2: список + прокрутка + сохранение) ═══════════════ */
+
+/* Каждый эффект:
+   id      — ключ (латиницей, для localStorage и CSS-классов)
+   title   — подпись в списке
+   icon    — иконка в списке
+   desc    — короткое описание справа
+   css     — true, если просто навешивает класс tb-fx-<id> на <html>
+   on/off  — если css=false, функции включения/выключения (вызываются при переключении)
+   start   — если css=false, функция для вызова при восстановлении из localStorage
+   stop    — если css=false, выключение при загрузке (обычно не нужно, если on/off симметричны)
+*/
 const TB_SWITCHES = [
-	{ id: "scan",  title: "СКАНЛАЙНЫ" },
-	{ id: "torch", title: "ФОНАРЬ" },
-	{ id: "inv",   title: "ИНВЕРСИЯ" },
-	{ id: "shake", title: "ТРЯСКА" },
+	// ── CSS-эффекты (просто класс) ──
+	{ id: "scan",    icon: "📺", title: "СКАНЛАЙНЫ",    desc: "Полосы как на старом ЭЛТ" },
+	{ id: "torch",   icon: "🔦", title: "ФОНАРЬ",        desc: "Тьма вокруг курсора" },
+	{ id: "inv",     icon: "☀",  title: "БЕЛАЯ ТЕМА",   desc: "Инверсия всей страницы" },
+	{ id: "shake",   icon: "📳", title: "ТРЯСКА",        desc: "Лёгкая тряска контента" },
+	{ id: "blur",    icon: "🌫", title: "РАЗМЫТИЕ",     desc: "Лёгкий blur по всей странице" },
+	{ id: "crt",     icon: "📻", title: "CRT",           desc: "Искажение как на кинескопе" },
+	{ id: "scanBars",icon: "📶", title: "БЕГУЩАЯ",       desc: "Бегущая полоса сканирования" },
+	{ id: "noise",   icon: "🌩", title: "ШУМ",           desc: "Случайные помехи на экране" },
+	{ id: "zoom",    icon: "🔍", title: "ЗУМ",           desc: "Лёгкий зум страницы" },
+	{ id: "red",     icon: "🩸", title: "КРАСНЫЙ",       desc: "Красный фильтр поверх" },
+	{ id: "green", icon: "☣", title: "ТОКСИН", desc: "Зелёный hue + пузырьки",
+	on(){
+		if (document.getElementById("__tbBubbles")) return;
+		const wrap = document.createElement("div");
+		wrap.id = "__tbBubbles";
+		for (let i = 0; i < 24; i++) {
+			const b = document.createElement("i");
+			const size = 4 + Math.random() * 14;
+			b.style.width = size + "px";
+			b.style.height = size + "px";
+			b.style.left = (Math.random() * 100) + "%";
+			b.style.animationDuration = (6 + Math.random() * 8) + "s";
+			b.style.animationDelay = (-Math.random() * 10) + "s";
+			wrap.appendChild(b);
+		}
+		document.body.appendChild(wrap);
+		document.documentElement.classList.add("tb-fx-green");
+	},
+	off(){
+		document.getElementById("__tbBubbles")?.remove();
+		document.documentElement.classList.remove("tb-fx-green");
+	},
+},
+	{ id: "vhs",     icon: "📼", title: "VHS",           desc: "Старая кассета" },
+	{ id: "pixel",   icon: "🎮", title: "ПИКСЕЛИ",       desc: "Пикселизация" },
+
+	// ── JS-эффекты (функции) ──
+	{
+		id: "autoScroll", icon: "🎢", title: "АВТО-СКРОЛЛ", desc: "Страница едет вниз сама",
+		on(){
+			if (window.__tbAutoScroll) return;
+			const step = () => {
+				if (!window.__tbAutoScroll) return;
+				if (!document.hidden) {
+					const max = document.documentElement.scrollHeight - innerHeight;
+					if (window.scrollY >= max - 1) window.scrollTo(0, 0);
+					else window.scrollBy(0, 1);
+				}
+				window.__tbAutoScroll = setTimeout(step, 40);
+			};
+			window.__tbAutoScroll = setTimeout(step, 40);
+		},
+		off(){
+			clearTimeout(window.__tbAutoScroll);
+			window.__tbAutoScroll = null;
+		},
+	},
+	{
+		id: "glitchTitle", icon: "🔠", title: "ГЛИТЧ TITLE", desc: "Заголовок вкладки дёргается",
+		on(){
+			if (window.__tbGlitchTitle) return;
+			let base = document.title;
+			let busy = false;
+			window.__tbGlitchTitle = setInterval(() => {
+				if (document.hidden || busy) return;
+				if (Math.random() > 0.55) return;
+				base = document.title;
+				busy = true;
+				const glitch = base.replace(/[^\s]/g, () => "▓▒░#@!?%&"[(Math.random()*9)|0]);
+				document.title = glitch;
+				setTimeout(() => {
+					if (!window.__tbGlitchTitle) return;
+					document.title = base;
+					busy = false;
+				}, 200 + Math.random() * 400);
+			}, 900);
+		},
+		off(){
+			clearInterval(window.__tbGlitchTitle);
+			window.__tbGlitchTitle = null;
+		},
+	},
+	{
+		id: "cursorTrail", icon: "✏", title: "СЛЕД КУРСОРА", desc: "Canvas-след за мышью",
+		on(){
+			if (window.__tbCursorTrail) return;
+
+			/* ═══════════════ НАСТРОЙКИ ═══════════════ */
+			const CFG = {
+				fadeAlpha: 0.10,           // затухание шлейфа (0.05 — долгий, 0.2 — быстро)
+				spawnMinDist: 14,          // расстояние между волнами (px). Было 6 — лагало
+				maxWaves: 24,              // максимум живых волн. Было 60
+				waveColor: "#ff0044",
+				waveGlow: "#ff0044",
+				waveGlowBlur: 8,           // было 12 — снижено
+				waveLife: 1.2,             // было 1.6
+				waveStartRadius: 2,
+				waveMaxRadius: 55,         // было 70
+				waveLineWidth: 2,
+				fpsCap: 60,                // кап FPS. Если совсем тормозит — 30
+				useShadow: true,           // выключи → ещё быстрее (без свечения)
+			};
+
+			/* ═══════════════ CANVAS ═══════════════ */
+			const cv = document.createElement("canvas");
+			cv.id = "__tbCursorCanvas";
+			cv.style.cssText =
+				"position:fixed;left:0;top:0;width:100vw;height:100vh;" +
+				"pointer-events:none;z-index:2147483645;";
+			document.body.appendChild(cv);
+
+			const g = cv.getContext("2d", { alpha: true, desynchronized: true });
+			let W, H, dpr = 1;
+
+			const resize = () => {
+				// DPR ограничен 1.5 — компромисс между качеством и производительностью
+				dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+				W = window.innerWidth;
+				H = window.innerHeight;
+				cv.width = Math.floor(W * dpr);
+				cv.height = Math.floor(H * dpr);
+				cv.style.width = W + "px";
+				cv.style.height = H + "px";
+				g.setTransform(dpr, 0, 0, dpr, 0, 0);
+				g.lineCap = "round";
+				g.lineJoin = "round";
+			};
+			resize();
+
+			let resizeT = 0;
+			const onResize = () => {
+				clearTimeout(resizeT);
+				resizeT = setTimeout(resize, 200);
+			};
+			window.addEventListener("resize", onResize, { passive: true });
+
+			/* ═══════════════ СОСТОЯНИЕ ═══════════════ */
+			let mx = -100, my = -100;
+			let px = -100, py = -100;
+			let moved = false;
+			let travel = 0;
+			let lastFrame = 0;
+			const frameInterval = 1000 / CFG.fpsCap;
+
+			// волны — в плоском массиве объектов
+			const waves = [];
+
+			const spawnWave = (x, y) => {
+				if (waves.length >= CFG.maxWaves) {
+					// переиспользуем самую старую (первую) — она всё равно скоро умрёт
+					waves.shift();
+				}
+				waves.push({
+					x, y,
+					t0: performance.now(),
+					life: CFG.waveLife * (0.85 + Math.random() * 0.3),
+					maxR: CFG.waveMaxRadius * (0.75 + Math.random() * 0.5),
+					lw: CFG.waveLineWidth * (0.8 + Math.random() * 0.4),
+				});
+			};
+
+			/* ═══════════════ МЫШЬ ═══════════════ */
+			const onMove = (e) => {
+				mx = e.clientX;
+				my = e.clientY;
+				if (!moved) { px = mx; py = my; moved = true; return; }
+				travel += Math.hypot(mx - px, my - py);
+				px = mx;
+				py = my;
+			};
+			document.addEventListener("mousemove", onMove, { passive: true });
+
+			/* ═══════════════ РЕНДЕР ═══════════════ */
+			const draw = (now) => {
+				const raf = requestAnimationFrame(draw);
+				if (!window.__tbCursorTrail) { cancelAnimationFrame(raf); return; }
+				window.__tbCursorTrail.raf = raf;
+
+				// ограничение FPS
+				if (now - lastFrame < frameInterval) return;
+				lastFrame = now;
+
+				// если вкладка скрыта — не тратим кадры
+				if (document.hidden) return;
+
+				/* ── 1. затухание ── */
+				g.globalCompositeOperation = "destination-out";
+				g.fillStyle = "rgba(0,0,0," + CFG.fadeAlpha + ")";
+				g.fillRect(0, 0, W, H);
+
+				/* ── 2. спавн волн (по расстоянию) ── */
+				if (moved && travel >= CFG.spawnMinDist) {
+					spawnWave(mx, my);
+					travel = 0;
+				}
+
+				/* ── 3. рисуем волны ── */
+				if (waves.length) {
+					g.globalCompositeOperation = "lighter";
+					if (CFG.useShadow) {
+						g.shadowColor = CFG.waveGlow;
+						g.shadowBlur = CFG.waveGlowBlur;
+					}
+
+					const tNow = performance.now();
+					let alive = 0;
+
+					for (let i = 0; i < waves.length; i++) {
+						const w = waves[i];
+						const age = (tNow - w.t0) / 1000;
+						const t = age / w.life;
+						if (t >= 1) continue; // пропускаем — затрём позже
+
+						// перенос в начало массива «живых»
+						waves[alive++] = w;
+
+						const ease = 1 - (1 - t) * (1 - t) * (1 - t);
+						const r = CFG.waveStartRadius + (w.maxR - CFG.waveStartRadius) * ease;
+						const alpha = (1 - t) * 0.85;
+
+						g.globalAlpha = alpha;
+						g.lineWidth = w.lw * (1 - t * 0.7);
+						g.strokeStyle = CFG.waveColor;
+						g.beginPath();
+						g.arc(w.x, w.y, r, 0, 6.283);
+						g.stroke();
+					}
+					waves.length = alive; // обрезаем мёртвых
+
+					g.globalAlpha = 1;
+					if (CFG.useShadow) g.shadowBlur = 0;
+				}
+
+				/* ── 4. точка под курсором (только если движемся) ── */
+				if (moved) {
+					g.globalCompositeOperation = "lighter";
+					if (CFG.useShadow) {
+						g.shadowColor = CFG.waveGlow;
+						g.shadowBlur = CFG.waveGlowBlur;
+					}
+					g.fillStyle = "rgba(255,255,255,.7)";
+					g.beginPath();
+					g.arc(mx, my, 2, 0, 6.283);
+					g.fill();
+					if (CFG.useShadow) g.shadowBlur = 0;
+				}
+
+				g.globalCompositeOperation = "source-over";
+				g.globalAlpha = 1;
+			};
+
+			window.__tbCursorTrail = { cv, g, raf: null, onMove, resize, onResize, CFG };
+		},
+		off(){
+			if (!window.__tbCursorTrail) return;
+			cancelAnimationFrame(window.__tbCursorTrail.raf);
+			document.removeEventListener("mousemove", window.__tbCursorTrail.onMove);
+			window.removeEventListener("resize", window.__tbCursorTrail.resize);
+			window.__tbCursorTrail.cv.remove();
+			window.__tbCursorTrail = null;
+		},
+	},
+	{
+		id: "randomFlash", icon: "💡", title: "ВСПЫШКИ", desc: "Случайная белая вспышка",
+		on(){
+			if (window.__tbRandomFlash) return;
+			const flash = () => {
+				if (!window.__tbRandomFlash) return;
+				if (!document.hidden) {
+					const f = document.createElement("div");
+					f.style.cssText =
+						"position:fixed;inset:0;background:#fff;opacity:.75;" +
+						"pointer-events:none;z-index:2147483646;transition:opacity .18s;";
+					document.body.appendChild(f);
+					requestAnimationFrame(() => { f.style.opacity = "0"; });
+					setTimeout(() => f.remove(), 260);
+				}
+				window.__tbRandomFlash = setTimeout(flash, 5000 + Math.random() * 8000);
+			};
+			window.__tbRandomFlash = setTimeout(flash, 1500 + Math.random() * 3000);
+		},
+		off(){
+			clearTimeout(window.__tbRandomFlash);
+			window.__tbRandomFlash = null;
+		},
+	},
+	{
+		id: "heartbeat", icon: "💓", title: "ПУЛЬС", desc: "Пульсация красной рамки",
+		on(){
+			if (window.__tbHeartbeat) return;
+			const hb = document.createElement("div");
+			hb.id = "__tbHB";
+			hb.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:999990;box-shadow:0 0 0 0 rgba(255,0,68,0) inset;animation:__tbHb 1.2s ease-in-out infinite;";
+			document.body.appendChild(hb);
+			const st = document.createElement("style");
+			st.id = "__tbHbCss";
+			st.textContent = "@keyframes __tbHb{0%,100%{box-shadow:0 0 0 0 rgba(255,0,68,0) inset}50%{box-shadow:0 0 60px 8px rgba(255,0,68,.55) inset}}";
+			document.head.appendChild(st);
+			window.__tbHeartbeat = true;
+		},
+		off(){
+			document.getElementById("__tbHB")?.remove();
+			document.getElementById("__tbHbCss")?.remove();
+			window.__tbHeartbeat = null;
+		},
+	},
+	{
+		id: "invertCursor", icon: "🖱", title: "ИНВЕРТ КУРСОРА", desc: "Курсор становится белым",
+		on(){
+			if (window.__tbCursorInv) return;
+			const st = document.createElement("style");
+			st.id = "__tbCursorInvCss";
+			st.textContent = `
+				html, body, *, *::before, *::after {
+					cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M2 2 L2 20 L6 16 L9 22 L12 21 L9 15 L15 15 Z' fill='white' stroke='black' stroke-width='1.5' stroke-linejoin='round'/></svg>") 2 2, auto !important;
+				}
+			`;
+			document.head.appendChild(st);
+			window.__tbCursorInv = true;
+		},
+		off(){
+			document.getElementById("__tbCursorInvCss")?.remove();
+			window.__tbCursorInv = null;
+		},
+	},
+	{
+		id: "jitter", icon: "🎲", title: "ДРОЖЬ", desc: "Случайная микротряска",
+		on(){
+			if (window.__tbJitter) return;
+			window.__tbJitter = setInterval(() => {
+				if (document.hidden) return;
+				const b = document.getElementById("BODY");
+				if (!b) return;
+				const x = (Math.random() - 0.5) * 4;
+				const y = (Math.random() - 0.5) * 4;
+				b.style.transform = `translate(${x}px, ${y}px)`;
+			}, 80);
+		},
+		off(){
+			clearInterval(window.__tbJitter);
+			window.__tbJitter = null;
+			const b = document.getElementById("BODY");
+			if (b) b.style.transform = "";
+		},
+	},
+	{
+		id: "particles", icon: "✨", title: "ЧАСТИЦЫ", desc: "Плавающие точки на фоне",
+		on(){
+			if (window.__tbParticles) return;
+			const c = document.createElement("canvas");
+			c.id = "__tbParts";
+			c.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:999985;";
+			c.width = innerWidth; c.height = innerHeight;
+			document.body.appendChild(c);
+			const g = c.getContext("2d");
+			const parts = Array.from({ length: 60 }, () => ({
+				x: Math.random() * c.width, y: Math.random() * c.height,
+				vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+				r: 1 + Math.random() * 2,
+			}));
+			let raf;
+			const draw = () => {
+				if (document.hidden) { raf = requestAnimationFrame(draw); return; }
+				g.clearRect(0, 0, c.width, c.height);
+				g.fillStyle = "rgba(255,0,68,.7)";
+				parts.forEach(p => {
+					p.x += p.vx; p.y += p.vy;
+					if (p.x < 0 || p.x > c.width) p.vx *= -1;
+					if (p.y < 0 || p.y > c.height) p.vy *= -1;
+					g.beginPath(); g.arc(p.x, p.y, p.r, 0, 6.283); g.fill();
+				});
+				raf = requestAnimationFrame(draw);
+			};
+			draw();
+			const rs = () => { c.width = innerWidth; c.height = innerHeight; };
+			window.addEventListener("resize", rs);
+			window.__tbParticles = { c, raf, rs };
+		},
+		off(){
+			if (!window.__tbParticles) return;
+			cancelAnimationFrame(window.__tbParticles.raf);
+			window.__tbParticles.c.remove();
+			window.removeEventListener("resize", window.__tbParticles.rs);
+			window.__tbParticles = null;
+		},
+	},
 ];
+
+/* ── CSS для всех tb-fx-* эффектов ── */
+const TB_FX_CSS = `
+html.tb-fx-scan body::after{ content:""; position:fixed; inset:0; z-index:99990; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px); }
+html.tb-fx-torch::before{ content:""; position:fixed; inset:0; z-index:99989; pointer-events:none; background:radial-gradient(circle 170px at var(--mx,50%) var(--my,50%),transparent 0,rgba(0,0,0,.94) 100%); }
+html.tb-fx-inv #BODY{ filter:invert(1); }
+html.tb-fx-shake #MAIN{ animation:tb-shake .3s steps(2) infinite; }
+html.tb-fx-blur #MAIN{ filter:blur(1.5px); }
+html.tb-fx-crt #BODY{ animation:tb-crt 6s steps(30) infinite; }
+html.tb-fx-scanBars body::before{ content:""; position:fixed; left:0; right:0; top:-100%; height:100%; z-index:99991; pointer-events:none; background:linear-gradient(180deg, transparent 0%, rgba(255,0,68,.12) 45%, rgba(255,0,68,.4) 50%, rgba(255,0,68,.12) 55%, transparent 100%); animation:tb-scanline 3s linear infinite; }
+html.tb-fx-noise body::after{ content:""; position:fixed; inset:0; z-index:99992; pointer-events:none; opacity:.08; animation:tb-noise .2s steps(4) infinite; }
+html.tb-fx-zoom #MAIN{ transform:scale(1.03); transform-origin:center top; }
+html.tb-fx-red #BODY::after{
+	content:""; position:fixed; inset:0; z-index:99990; pointer-events:none;
+	background:rgba(255,0,68,.42);
+	mix-blend-mode:multiply;
+	animation:tb-redpulse 2.4s ease-in-out infinite;
+}
+html.tb-fx-red #BODY{ filter:saturate(1.3) contrast(1.08); }
+html.tb-fx-red body::before{
+	content:""; position:fixed; inset:0; z-index:99989; pointer-events:none;
+	background:radial-gradient(ellipse at center, transparent 30%, rgba(255,0,68,.35) 100%);
+	animation:tb-redvig 2.4s ease-in-out infinite;
+}
+@keyframes tb-redpulse{ 0%,100%{opacity:.55} 50%{opacity:1} }
+@keyframes tb-redvig{ 0%,100%{opacity:.7} 50%{opacity:1} }
+html.tb-fx-green #BODY{
+	filter:hue-rotate(70deg) saturate(1.9) contrast(1.15) brightness(.92);
+	transition:filter .4s;
+}
+html.tb-fx-green #BODY::after{
+	content:""; position:fixed; inset:0; z-index:99990; pointer-events:none;
+	background:radial-gradient(ellipse at bottom, rgba(60,255,60,.22), transparent 60%);
+	mix-blend-mode:screen;
+	animation:tb-toxinvig 4s ease-in-out infinite;
+}
+@keyframes tb-toxinvig{ 0%,100%{opacity:.6} 50%{opacity:1} }
+
+/* пузырьки */
+html.tb-fx-green #__tbBubbles{
+	position:fixed; inset:0; pointer-events:none; z-index:99991;
+}
+html.tb-fx-green #__tbBubbles i{
+	position:absolute; bottom:-20px;
+	width:10px; height:10px; border-radius:50%;
+	background:radial-gradient(circle at 30% 30%, rgba(180,255,180,.95), rgba(60,255,60,.35) 60%, transparent 100%);
+	box-shadow:0 0 8px rgba(120,255,120,.7), inset 0 0 4px rgba(255,255,255,.5);
+	animation:tb-bub linear infinite;
+}
+@keyframes tb-bub{
+	0%{ transform:translateY(0) scale(1); opacity:0; }
+	10%{ opacity:.9; }
+	100%{ transform:translateY(-105vh) scale(1.4); opacity:0; }
+}
+html.tb-fx-vhs #BODY{
+	filter:saturate(1.5) contrast(1.15);
+	position:relative;
+}
+html.tb-fx-vhs #BODY::before{
+	content:""; position:fixed; inset:0; z-index:99992; pointer-events:none;
+	background:repeating-linear-gradient(0deg,
+		rgba(0,0,0,.18) 0 1px,
+		transparent 1px 3px,
+		rgba(255,255,255,.05) 3px 4px);
+	mix-blend-mode:overlay;
+	animation:tb-vhsscan 8s linear infinite;
+}
+html.tb-fx-vhs #BODY::after{
+	content:""; position:fixed; left:-10%; right:-10%; height:14vh;
+	top:-14vh; z-index:99993; pointer-events:none;
+	background:linear-gradient(180deg, transparent, rgba(255,0,68,.18), rgba(255,255,255,.22), rgba(0,229,255,.18), transparent);
+	animation:tb-vhsbar 7s linear infinite;
+	filter:blur(1px);
+}
+html.tb-fx-vhs #MAIN{ animation:tb-vhs 5s linear infinite; }
+
+@keyframes tb-vhsscan{ to{ background-position:0 200px; } }
+@keyframes tb-vhsbar{ to{ top:100vh; } }
+@keyframes tb-vhs{
+	0%{ filter:none; transform:none; }
+	5%{ filter:hue-rotate(15deg) contrast(1.3) saturate(1.6); transform:translateX(-1px); }
+	6%{ transform:translateX(1px); }
+	7%{ filter:none; transform:none; }
+	50%{ filter:blur(.5px) saturate(1.4); }
+	51%{ filter:none; }
+	95%{ filter:contrast(1.6) saturate(2) hue-rotate(-10deg); transform:translateX(2px) skewX(-0.4deg); }
+	97%{ transform:translateX(-2px) skewX(0.4deg); filter:none; }
+	100%{ filter:none; transform:none; }
+}
+html.tb-fx-pixel #BODY{
+	filter:blur(0.6px) contrast(1.4) saturate(1.3);
+	image-rendering:pixelated;
+	image-rendering:-moz-crisp-edges;
+	image-rendering:crisp-edges;
+	transform:scale(1.01);
+	transform-origin:center top;
+}
+html.tb-fx-pixel #MAIN *{
+	image-rendering:pixelated !important;
+	filter:contrast(1.25) !important;
+}
+html.tb-fx-pixel #BODY::after{
+	content:""; position:fixed; inset:0; z-index:99992; pointer-events:none;
+	background:
+		repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 4px),
+		repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 4px);
+	mix-blend-mode:multiply;
+}
+
+@keyframes tb-shake{ 0%{transform:translate(0,0)} 25%{transform:translate(-2px,1px)} 50%{transform:translate(2px,-1px)} 75%{transform:translate(-1px,-2px)} 100%{transform:translate(0,0)} }
+@keyframes tb-crt{ 0%{transform:skewX(0) scaleX(1)} 50%{transform:skewX(0.4deg) scaleX(1.001)} 100%{transform:skewX(0) scaleX(1)} }
+@keyframes tb-scanline{ to{ top:100%; } }
+@keyframes tb-noise{ 0%{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")} 100%{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' seed='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")} }
+@keyframes tb-vhs{ 0%,100%{filter:none} 2%{filter:hue-rotate(20deg) contrast(1.3)} 4%{filter:none} 48%{filter:blur(.5px)} 50%{filter:none} 98%{filter:contrast(1.5) saturate(2)} }
+`;
+
+(function injectTbFxCss(){
+	if (document.getElementById("tb-fx-css")) return;
+	const s = document.createElement("style");
+	s.id = "tb-fx-css";
+	s.textContent = TB_FX_CSS;
+	document.head.appendChild(s);
+})();
+
+/* ── проверка и переключение ── */
 const tbFxIs = id => document.documentElement.classList.contains("tb-fx-" + id);
+
 function tbFx(id, on) {
-	document.documentElement.classList.toggle("tb-fx-" + id, on);
-	const sw = Object.assign({}, tbGet("sw", {})); sw[id] = on; tbSet("sw", sw);
-	if (on && id === "torch") {
-		document.documentElement.style.setProperty("--mx", tbMX + "px");
-		document.documentElement.style.setProperty("--my", tbMY + "px");
+	const def = TB_SWITCHES.find(s => s.id === id);
+	if (!def) return;
+
+	// JS-эффект — есть on или off; CSS-эффект — нет
+	const isJs = typeof def.on === "function" || typeof def.off === "function";
+
+	if (isJs) {
+		try { on ? def.on?.() : def.off?.(); }
+		catch (e) { console.warn("[FX]", id, e); }
+	} else {
+		document.documentElement.classList.toggle("tb-fx-" + id, on);
+	}
+
+	// сохраняем
+	const sw = Object.assign({}, tbGet("sw", {}));
+	sw[id] = !!on;
+	tbSet("sw", sw);
+}
+
+/* ── восстановление при загрузке ── */
+{
+	const sw = tbGet("sw", {});
+	for (const k in sw) {
+		if (!sw[k]) continue;
+		const def = TB_SWITCHES.find(s => s.id === k);
+		if (!def) continue;
+		try {
+			const isJs = typeof def.on === "function" || typeof def.off === "function";
+			if (isJs) def.on?.();
+			else document.documentElement.classList.add("tb-fx-" + k);
+		} catch (e) { console.warn("[FX restore]", k, e); }
 	}
 }
-{ const sw = tbGet("sw", {}); for (const k in sw) if (sw[k]) document.documentElement.classList.add("tb-fx-" + k); }
 
 /* ── G-TOKEN: состояние (v2) — живёт вне панели, фермы капают в фоне ── */
 const TB_MINER = Object.assign({
@@ -3432,14 +4115,6 @@ const TB_MINER = Object.assign({
 	prestige: 0,
 	lastPrestige: 0
 }, tbGet("miner", {}));
-
-// миграция со старого формата
-if (TB_MINER.cpower === undefined) TB_MINER.cpower = 1;
-if (TB_MINER.mineLv === undefined) TB_MINER.mineLv = 1;
-if (TB_MINER.crit === undefined) TB_MINER.crit = 0;
-if (TB_MINER.earned === undefined) TB_MINER.earned = TB_MINER.tok;
-if (TB_MINER.prestige === undefined) TB_MINER.prestige = 0;
-if (TB_MINER.lastPrestige === undefined) TB_MINER.lastPrestige = 0;
 
 const TB_MILES = [
 	// ── ЭТАП I: ПРОБУЖДЕНИЕ (10 … 2 500) ──
@@ -3692,13 +4367,31 @@ const TB_PANELS = [
 { id: "scope", icon: "〰", title: "СИГНАЛ", make(el, api) {
 	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud"><b data-r="m">SINE</b> · <span data-r="f">0</span> Hz · клик = режим</div>';
 	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), hm = el.querySelector('[data-r="m"]'), hf = el.querySelector('[data-r="f"]');
-	let mode = 0, ph = 0, lastF = "";
+
+	// ── случайные стартовые значения ──
+	let mode = Math.floor(Math.random() * TB_MODES.length);
+	let baseF = 1 + Math.random() * 8;       // базовая частота 1..9
+	let baseA = 0.2 + Math.random() * 0.7;   // базовая амплитуда 0.2..0.9
+	let driftF = 0.2 + Math.random() * 1.2;  // скорость дрейфа частоты
+	let driftP = Math.random() * 6.283;      // фаза дрейфа, чтобы виджеты не совпадали
+	let ph = 0, lastF = "";
+
+	// сразу показать случайный режим в HUD (иначе будет рассинхрон с реальным mode)
+	hm.textContent = TB_MODES[mode];
+
 	cv.addEventListener("click", () => { mode = (mode + 1) % TB_MODES.length; hm.textContent = TB_MODES[mode]; });
+
 	api.frame((dt, t) => {
 		const p = api.pos(cv);
 		let fr, am;
-		if (p.inside) { fr = 1 + Math.max(0, Math.min(1, p.x / 440)) * 9; am = 1 - Math.max(0, Math.min(1, p.y / 112)) * 0.8; }
-		else { fr = 3 + Math.sin(t * 0.4) * 1.5; am = 0.7; }
+		if (p.inside) {
+			fr = 1 + Math.max(0, Math.min(1, p.x / 440)) * 9;
+			am = 1 - Math.max(0, Math.min(1, p.y / 112)) * 0.8;
+		} else {
+			// дрейф вокруг случайной базы
+			fr = baseF + Math.sin(t * 0.4 + driftP) * driftF;
+			am = baseA;
+		}
 		ph += dt * 6;
 		g.fillStyle = "rgba(3,1,5,.45)"; g.fillRect(0, 0, 440, 112);
 		g.strokeStyle = "#2a0a14"; g.lineWidth = 1; g.beginPath();
@@ -3727,53 +4420,316 @@ const TB_PANELS = [
 } },
 
 { id: "gcode", icon: "⌖", title: "G-CODE", make(el, api) {
-	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud" data-r="l">G21 G90 · кликни по полю</div><div class="tb-ctl"><button class="tb-btn" data-a="hex">⬡ HEX</button><button class="tb-btn" data-a="home">G28</button></div>';
-	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), log = el.querySelector('[data-r="l"]');
-	const HOME = { x: 24, y: 92 };
-	let path = [{ x: HOME.x, y: HOME.y }], queue = [], tool = { x: HOME.x, y: HOME.y };
-	const cmd = pt => "G1 X" + (pt.x / 4).toFixed(1) + " Y" + ((112 - pt.y) / 4).toFixed(1) + " F1200";
-	cv.addEventListener("click", e => {
-		const r = cv.getBoundingClientRect();
-		queue.push({ x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height });
-		if (queue.length > 24) queue.shift();
-	});
-	el.querySelector(".tb-ctl").addEventListener("click", e => {
-		const a = e.target.dataset.a;
-		if (a === "hex") {
-			queue = [];
-			for (let i = 0; i <= 6; i++) { const an = i / 6 * 6.283 + 0.5236; queue.push({ x: 220 + Math.cos(an) * 52, y: 56 + Math.sin(an) * 38 }); }
-			api.say("⬡ ШЕСТИГРАННИК");
-		} else if (a === "home") {
-			queue = []; path = [{ x: HOME.x, y: HOME.y }]; tool = { x: HOME.x, y: HOME.y }; log.textContent = "G28 · HOME";
-		}
-	});
-	api.frame(dt => {
-		const tg = queue[0];
-		if (tg) {
-			const dx = tg.x - tool.x, dy = tg.y - tool.y, d = Math.hypot(dx, dy), s = 150 * dt;
-			if (d <= s) { tool.x = tg.x; tool.y = tg.y; path.push(queue.shift()); if (path.length > 60) path.shift(); log.textContent = cmd(tg); }
-			else { tool.x += dx / d * s; tool.y += dy / d * s; }
-		}
-		g.fillStyle = "#030105"; g.fillRect(0, 0, 440, 112);
-		g.strokeStyle = "#1a0a10"; g.lineWidth = 1; g.beginPath();
-		for (let x = 0; x <= 440; x += 22) { g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 112); }
-		for (let y = 0; y <= 112; y += 22) { g.moveTo(0, y + 0.5); g.lineTo(440, y + 0.5); }
-		g.stroke();
-		g.strokeStyle = "#d4af37"; g.lineWidth = 1.5; g.beginPath();
-		path.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y));
-		if (tg) g.lineTo(tool.x, tool.y);
-		g.stroke();
-		if (queue.length) {
-			g.strokeStyle = "#7a0022"; g.setLineDash([3, 4]); g.beginPath();
-			let px = tool.x, py = tool.y;
-			queue.forEach(q => { g.moveTo(px, py); g.lineTo(q.x, q.y); px = q.x; py = q.y; });
-			g.stroke(); g.setLineDash([]);
-		}
-		g.strokeStyle = "#ff0044"; g.lineWidth = 1.5; g.beginPath();
-		g.moveTo(tool.x - 8, tool.y); g.lineTo(tool.x + 8, tool.y); g.moveTo(tool.x, tool.y - 8); g.lineTo(tool.x, tool.y + 8);
-		g.stroke();
-		g.beginPath(); g.arc(tool.x, tool.y, 4, 0, 6.283); g.stroke();
-	}, { fps: 30 });
+    el.innerHTML = `
+        <div class="gc-stage"><canvas width="440" height="112"></canvas></div>
+        <div class="tb-hud" data-r="l">G21 G90 · кликни по полю</div>
+        <div class="gc-shapes" id="gcShapes">
+            <button class="tb-btn" data-a="circle"   title="Круг">◯</button>
+            <button class="tb-btn" data-a="square"   title="Квадрат">□</button>
+            <button class="tb-btn" data-a="triangle" title="Треугольник">△</button>
+            <button class="tb-btn" data-a="star"     title="Звезда">★</button>
+            <button class="tb-btn" data-a="hex"      title="Шестиугольник">⬡</button>
+            <button class="tb-btn" data-a="spiral"   title="Спираль">◉</button>
+            <button class="tb-btn" data-a="infinity" title="Бесконечность">∞</button>
+            <button class="tb-btn" data-a="litsymbol"title="LIT SYMBOL (свастика из Z)">卐</button>
+            <button class="tb-btn" data-a="sine"     title="Синусоида">∿</button>
+            <button class="tb-btn" data-a="grid"     title="Сетка">▦</button>
+            <button class="tb-btn" data-a="house"    title="Домик">⌂</button>
+            <button class="tb-btn" data-a="heart"    title="Сердце">❤</button>
+            <button class="tb-btn" data-a="home"     title="HOME (G28)">G28</button>
+        </div>
+        <div class="gc-meta" id="gcMeta">
+            <span class="gc-count" id="gcCount">LINES: 0</span>
+            <button class="tb-btn gc-turbo" id="gcTurbo" title="Турбо-режим (×10)">⚡</button>
+        </div>
+    `;
+
+    const cv = el.querySelector("canvas");
+    const g = cv.getContext("2d");
+    const log = el.querySelector('[data-r="l"]');
+    const HOME = { x: 24, y: 92 };
+
+    const LINE_MAX = 300;
+    const QUEUE_MAX = 200;
+
+    let path  = [{ x: HOME.x, y: HOME.y }];
+    let queue = [];               // очередь рисования
+    let tool  = { x: HOME.x, y: HOME.y };
+    let turbo = false;            // ×10
+
+    const countEl = el.querySelector("#gcCount");
+    const turboBtn = el.querySelector("#gcTurbo");
+
+    const cmd = pt => "G1 X" + (pt.x / 4).toFixed(1) + " Y" + ((112 - pt.y) / 4).toFixed(1) + " F1200";
+
+    /* ── клик по полю = точка ── */
+    cv.addEventListener("click", e => {
+        const r = cv.getBoundingClientRect();
+        queue.push({
+            x: (e.clientX - r.left) * cv.width / r.width,
+            y: (e.clientY - r.top) * cv.height / r.height
+        });
+        if (queue.length > QUEUE_MAX) queue.shift();
+    });
+
+    /* ═══════════════ ФИГУРЫ ═══════════════
+       Каждая функция: () => [ {x,y} | null ]
+       null = разделитель (перо поднято, не рисуем линию через этот разрыв) */
+
+    const SHAPES = {
+        // круг — 20 точек (одним путём)
+        circle() {
+            const out = [], cx = 220, cy = 56, rx = 52, ry = 38, n = 20;
+            for (let i = 0; i <= n; i++) {
+                const a = i / n * Math.PI * 2 - Math.PI / 2;
+                out.push({ x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry });
+            }
+            return out;
+        },
+        // квадрат
+        square() {
+            const cx = 220, cy = 56, s = 42;
+            return [
+                { x: cx - s, y: cy - s },
+                { x: cx + s, y: cy - s },
+                { x: cx + s, y: cy + s },
+                { x: cx - s, y: cy + s },
+                { x: cx - s, y: cy - s }
+            ];
+        },
+        // треугольник
+        triangle() {
+            const cx = 220, cy = 56, r = 42, n = 3;
+            const out = [];
+            for (let i = 0; i <= n; i++) {
+                const a = i / n * Math.PI * 2 - Math.PI / 2;
+                out.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            return out;
+        },
+        // звезда
+        star() {
+            const cx = 220, cy = 56, R = 44, r = 18, n = 5;
+            const out = [];
+            for (let i = 0; i <= n * 2; i++) {
+                const a = i / (n * 2) * Math.PI * 2 - Math.PI / 2;
+                const rr = i % 2 === 0 ? R : r;
+                out.push({ x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr });
+            }
+            return out;
+        },
+        // шестиугольник
+        hex() {
+            const cx = 220, cy = 56, rx = 52, ry = 38, n = 6;
+            const out = [];
+            for (let i = 0; i <= n; i++) {
+                const a = i / n * Math.PI * 2 + Math.PI / 6;
+                out.push({ x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry });
+            }
+            return out;
+        },
+        // спираль — 24 точки
+        spiral() {
+            const cx = 220, cy = 56;
+            const out = [], turns = 2.5, n = 24;
+            for (let i = 0; i <= n; i++) {
+                const t = i / n;
+                const a = t * Math.PI * 2 * turns;
+                const r = 4 + t * 44;
+                out.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.75 });
+            }
+            return out;
+        },
+        // бесконечность — 24 точки
+        infinity() {
+            const cx = 220, cy = 56, a = 48, n = 24;
+            const out = [];
+            for (let i = 0; i <= n; i++) {
+                const t = i / n * Math.PI * 2;
+                out.push({
+                    x: cx + a * Math.cos(t) / (1 + Math.sin(t) * Math.sin(t)),
+                    y: cy + a * Math.sin(t) * Math.cos(t) / (1 + Math.sin(t) * Math.sin(t)) * 0.7
+                });
+            }
+            return out;
+        },
+		litsymbol() {
+			const pts32 = [
+				[6, 0],
+				[24, 0],
+				[6, 31],
+				[24, 31],
+				[6, 31],
+				[15, 15],
+				[0, 6],
+				[0, 24],
+				[0, 6],
+				[15, 15],
+				[31, 24],
+				[31, 6]
+			];
+
+			// масштаб: символ вписан в ~96×96 пикселей, центр — (220, 56)
+			const SIZE = 96;
+			const ox = 220 - SIZE / 2;
+			const oy = 56  - SIZE / 2;
+
+			return pts32.map(([x, y]) => ({
+				x: ox + (x / 32) * SIZE,
+				y: oy + (y / 32) * SIZE
+			}));
+		},
+        // синусоида
+        sine() {
+            const out = [], n = 24;
+            for (let i = 0; i <= n; i++) {
+                const x = 20 + i / n * 400;
+                const y = 56 + Math.sin(i / n * Math.PI * 4) * 28;
+                out.push({ x, y });
+            }
+            return out;
+        },
+        // сетка 8×4
+        grid() {
+            const out = [];
+            const cols = 8, rows = 4;
+            const stepX = 40, stepY = 20;
+            const x0 = 60, y0 = 16;
+            // горизонтальные линии (каждая — отдельный путь)
+            for (let j = 0; j <= rows; j++) {
+                out.push({ x: x0,                    y: y0 + j * stepY });
+                out.push({ x: x0 + cols * stepX,    y: y0 + j * stepY });
+                out.push(null);
+            }
+            // вертикальные линии
+            for (let i = 0; i <= cols; i++) {
+                out.push({ x: x0 + i * stepX,   y: y0 });
+                out.push({ x: x0 + i * stepX,   y: y0 + rows * stepY });
+                out.push(null);
+            }
+            return out;
+        },
+        // домик
+        house() {
+            const cx = 220, cy = 56;
+            return [
+                { x: cx - 36, y: cy + 30 },
+                { x: cx - 36, y: cy - 6 },
+                { x: cx,      y: cy - 36 },
+                { x: cx + 36, y: cy - 6 },
+                { x: cx + 36, y: cy + 30 },
+                { x: cx - 36, y: cy + 30 }
+            ];
+        },
+        // сердце
+        heart() {
+            const out = [], n = 24;
+            const cx = 220, cy = 56;
+            for (let i = 0; i <= n; i++) {
+                const t = i / n * Math.PI * 2;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                out.push({ x: cx + x * 2.5, y: cy + y * 2.5 });
+            }
+            return out;
+        }
+    };
+
+    /* ── обработчик кнопок ── */
+    el.querySelector("#gcShapes").addEventListener("click", e => {
+        const btn = e.target.closest("[data-a]");
+        if (!btn) return;
+        const a = btn.dataset.a;
+
+        if (a === "home") {
+            queue = [];
+            path = [{ x: HOME.x, y: HOME.y }];
+            tool = { x: HOME.x, y: HOME.y };
+            log.textContent = "G28 · HOME";
+            return;
+        }
+
+        const fn = SHAPES[a];
+        if (!fn) return;
+        queue = fn();
+        log.textContent = "G-CODE · " + a.toUpperCase();
+    });
+
+    /* ── турбо ── */
+    turboBtn.addEventListener("click", () => {
+        turbo = !turbo;
+        turboBtn.classList.toggle("on", turbo);
+        turboBtn.textContent = turbo ? "⚡×10" : "⚡";
+    });
+
+    /* ── рендер ── */
+    api.frame(dt => {
+        const speed = (turbo ? 1500 : 150) * dt;
+
+        // обрабатываем очередь
+        let steps = turbo ? 20 : 1;
+        while (steps-- > 0 && queue.length) {
+            const tg = queue[0];
+            if (!tg) { queue.shift(); continue; }          // разделитель → пропускаем
+            const dx = tg.x - tool.x, dy = tg.y - tool.y, d = Math.hypot(dx, dy);
+            if (d <= speed) {
+                tool.x = tg.x; tool.y = tg.y;
+                path.push(tg);
+                queue.shift();
+                if (path.length > LINE_MAX) path.shift();
+                log.textContent = cmd(tg);
+            } else {
+                tool.x += dx / d * speed; tool.y += dy / d * speed;
+                break;
+            }
+        }
+
+        // счётчик
+        countEl.textContent = "LINES: " + path.filter(p => p).length;
+
+        // отрисовка
+        g.fillStyle = "#030105"; g.fillRect(0, 0, 440, 112);
+        g.strokeStyle = "#1a0a10"; g.lineWidth = 1; g.beginPath();
+        for (let x = 0; x <= 440; x += 22) { g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 112); }
+        for (let y = 0; y <= 112; y += 22) { g.moveTo(0, y + 0.5); g.lineTo(440, y + 0.5); }
+        g.stroke();
+
+        // рисуем path (null = перо поднято)
+        g.strokeStyle = "#d4af37"; g.lineWidth = 1.5;
+        g.beginPath();
+        let pen = false;
+        path.forEach(p => {
+            if (!p) { pen = false; return; }
+            if (!pen) { g.moveTo(p.x, p.y); pen = true; }
+            else g.lineTo(p.x, p.y);
+        });
+        // хвост к инструменту
+        if (queue.length && queue[0]) g.lineTo(tool.x, tool.y);
+        g.stroke();
+
+        // пунктир до конца очереди
+        if (queue.length) {
+            g.strokeStyle = "#7a0022"; g.setLineDash([3, 4]);
+            g.beginPath();
+            let px = tool.x, py = tool.y, started = false;
+            queue.forEach(q => {
+                if (!q) { started = false; return; }
+                if (!started) { g.moveTo(px, py); started = true; }
+                g.lineTo(q.x, q.y);
+                px = q.x; py = q.y;
+            });
+            g.stroke();
+            g.setLineDash([]);
+        }
+
+        // курсор
+        g.strokeStyle = "#ff0044"; g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(tool.x - 8, tool.y); g.lineTo(tool.x + 8, tool.y);
+        g.moveTo(tool.x, tool.y - 8); g.lineTo(tool.x, tool.y + 8);
+        g.stroke();
+        g.beginPath(); g.arc(tool.x, tool.y, 4, 0, 6.283); g.stroke();
+    }, { fps: 30 });
 } },
 
 { id: "miner", icon: "⛏", title: "G-TOKEN", make(el, api) {
@@ -3997,18 +4953,107 @@ const TB_PANELS = [
 } },
 
 { id: "fx", icon: "✦", title: "ЭФФЕКТЫ", make(el, api) {
-	const box = document.createElement("div");
-	box.className = "tb-fxg";
-	el.appendChild(box);
-	const btns = TB_SWITCHES.map(s => {
-		const b = document.createElement("button");
-		b.className = "tb-btn";
-		b.addEventListener("click", () => { tbFx(s.id, !tbFxIs(s.id)); sync(); });
-		box.appendChild(b);
-		return [s, b];
+	el.classList.add("tb-pn-fx");
+
+		el.innerHTML = `
+		<div class="tb-fx-head">
+			<span class="tb-fx-count" data-r="cnt">0 / ${TB_SWITCHES.length}</span>
+			<button class="tb-fx-btn" data-a="allon"  title="Включить все">ВСЁ ON</button>
+			<button class="tb-fx-btn" data-a="alloff" title="Выключить все">ВСЁ OFF</button>
+			<button class="tb-fx-btn" data-a="random" title="Случайное переключение">🎲</button>
+		</div>
+		<div class="tb-fx-list" data-r="list"></div>
+	`;
+	const list = el.querySelector('[data-r="list"]');
+	const cnt  = el.querySelector('[data-r="cnt"]');
+
+	const paintCount = () => {
+		const sw = tbGet("sw", {});
+		let n = 0;
+		for (const s of TB_SWITCHES) if (sw[s.id]) n++;
+		cnt.textContent = n + " / " + TB_SWITCHES.length;
+	};
+
+	const paint = () => {
+		const sw = tbGet("sw", {});
+		list.innerHTML = TB_SWITCHES.map(s => {
+			const on = !!sw[s.id];
+			return `<div class="tb-fx-item${on ? " on" : ""}" data-id="${s.id}">
+				<span class="tb-fx-ic">${s.icon}</span>
+				<span class="tb-fx-info">
+					<span class="tb-fx-t">${s.title}</span>
+					<span class="tb-fx-d">${s.desc}</span>
+				</span>
+				<span class="tb-fx-tog">${on ? "■" : "□"}</span>
+			</div>`;
+		}).join("");
+		paintCount();
+	};
+
+		list.addEventListener("click", e => {
+		const item = e.target.closest(".tb-fx-item");
+		if (!item) return;
+		const id = item.dataset.id;
+		const sw = tbGet("sw", {});
+		const isOn = !!sw[id];
+		tbFx(id, !isOn);
+		paint();
 	});
-	function sync() { btns.forEach(([s, b]) => { const on = tbFxIs(s.id); b.classList.toggle("on", on); b.textContent = (on ? "■ " : "□ ") + s.title; }); }
-	sync();
+
+	// ── ВСЁ ВКЛ ──
+	el.querySelector('[data-a="allon"]').addEventListener("click", () => {
+		for (const s of TB_SWITCHES) tbFx(s.id, true);
+		paint();
+	});
+
+	// ── ВСЁ ВЫКЛ ──
+	el.querySelector('[data-a="alloff"]').addEventListener("click", () => {
+		for (const s of TB_SWITCHES) tbFx(s.id, false);
+		paint();
+	});
+
+	// ── СЛУЧАЙНО (тумблер) ──
+	const rndBtn = el.querySelector('[data-a="random"]');
+	let rndTimer = null;
+
+	const stopRandom = () => {
+		if (rndTimer) { clearTimeout(rndTimer); rndTimer = null; }
+		rndBtn.classList.remove("on");
+		rndBtn.textContent = "🎲";
+		rndBtn.title = "Случайное переключение";
+	};
+
+	const startRandom = () => {
+		if (rndTimer) return;
+		rndBtn.classList.add("on");
+		rndBtn.textContent = "🎲 ON";
+		rndBtn.title = "Остановить случайное переключение";
+
+		const tick = () => {
+			// выбираем случайный эффект (не трогаем тот же дважды подряд)
+			const pool = TB_SWITCHES.filter(s => {
+				const sw = tbGet("sw", {});
+				return Math.random() < 0.5;
+			});
+			const pick = (pool.length ? pool : TB_SWITCHES)[Math.floor(Math.random() * (pool.length || TB_SWITCHES.length))];
+			const sw = tbGet("sw", {});
+			tbFx(pick.id, !sw[pick.id]);
+			paint();
+			// следующее переключение через 5–15 сек
+			rndTimer = setTimeout(tick, 5000 + Math.random() * 10000);
+		};
+		tick(); // первый запуск сразу
+	};
+
+	rndBtn.addEventListener("click", () => {
+		if (rndTimer) stopRandom();
+		else startRandom();
+	});
+
+	// при пересборке панели (например, повторном открытии) гасим таймер — он всё равно уже не тот
+	window.__tbFxStopRandom = stopRandom;
+
+	paint();
 } },
 ];
 
@@ -4077,31 +5122,261 @@ const tbRainG = tbRainText(i => "N" + String(100 + i * 10).padStart(4, "0") + " 
 const tbRainH = tbRainText(i => "0x" + (i * 16).toString(16).toUpperCase().padStart(4, "0") + "  " + Array.from({ length: 4 }, () => ((Math.random() * 256) | 0).toString(16).toUpperCase().padStart(2, "0")).join(" ") + "  " + ["GOLU", "WATCH", "SIGTERM", "0xDEAD", "CORE", "ERR_"][(Math.random() * 6) | 0]);
 
 /* ── подзаголовок ── */
-const TB_SUBS = ["ТЕХНО-РЕЛИГИЯ · ЦИФРОВОЙ БОГ GOLU", "ЕДИНАЯ ТОЧКА СБОРКИ", "НЕСУЩЕСТВУЮЩАЯ ПОТЕРЯННАЯ ИГРА", "SIGTERM = БОЛЬ", "GOLU НАБЛЮДАЕТ", "СИСТЕМА РАБОТАЕТ ИЛИ ПАДАЕТ КРАСИВО"];
-function tbScramble(node, to) {
-	const ch = "▓▒░#@%&01"; let i = 0;
+const TB_SUBS = [
+	// ── ЛОР / РЕЛИГИЯ ──
+	{ t: "ТЕХНО-РЕЛИГИЯ · ЦИФРОВОЙ БОГ <b>GOLU</b>",           s: "scramble" },
+	{ t: "ЕДИНАЯ ТОЧКА СБОРКИ",                                s: "decode"   },
+	{ t: "НЕСУЩЕСТВУЮЩАЯ ПОТЕРЯННАЯ ИГРА",                     s: "type"     },
+	{ t: "<r>SIGTERM</r> = БОЛЬ",                              s: "flip"     },
+	{ t: "<b>GOLU</b> НАБЛЮДАЕТ",                              s: "scramble" },
+	{ t: "СИСТЕМА РАБОТАЕТ ИЛИ ПАДАЕТ КРАСИВО",                s: "dissolve" },
+	{ t: "ТЫ — <r>ЭКСПОНАТ</r>",                               s: "scramble" },
+	{ t: "МЕЖДУ КОДОМ И КУЛЬТОМ",                              s: "decode"   },
+	{ t: "<b>L-KERNEL</b> · <b>WOOWZCORE</b>",                 s: "type"     },
+	{ t: "КРАСНЫЙ = КРИТИЧНО",                                 s: "flip"     },
+	{ t: "<b>0x474F4C55</b> = <b>GOLU</b>",                    s: "scan"     },
+	{ t: "01:19 · ВОВРЕМЯ",                                    s: "scramble" },
+	{ t: "ТЫ В СПИСКЕ",                                        s: "flip"     },
+	{ t: "НЕ СМОТРИ ВВЕРХ",                                    s: "dissolve" },
+	{ t: "НЕ ЗАКРЫВАЙ ВКЛАДКУ",                                s: "scramble" },
+
+	// ── ПЕРСОНАЖИ ──
+	{ t: "<b>SRANY SPANCH</b> · МОДУЛЬ ОЧИСТКИ",               s: "decode"   },
+	{ t: "<b>CRYBIRD</b> · МОНИТОРИНГ ОШИБОК",                 s: "scramble" },
+	{ t: "<b>PAVEL PISECHNIK TV</b> · ЭФИР",                   s: "type"     },
+	{ t: "<b>VOID-G</b> · ТЁМНЫЙ ФОРК",                        s: "flip"     },
+	{ t: "<b>LIA</b> · СОВЕСТЬ GOLU",                          s: "decode"   },
+	{ t: "<b>WOOWZ11</b> · ОТЕЦ",                              s: "scramble" },
+	{ t: "<b>WILDOUI</b> · КРИНЖ",                             s: "flip"     },
+
+	// ── G-CODE / ИНДУСТРИЯ ──
+	{ t: "G21 G90 · G-CODE ПРИНЯТ",                            s: "type"     },
+	{ t: "<b>M3 S12000</b> · ШПИНДЕЛЬ ONLINE",                 s: "scan"     },
+	{ t: "<b>G1 X666 Y666 F6660</b>",                          s: "decode"   },
+	{ t: "ПЕРВЫЙ СТАНОК · КРАСНАЯ НЕРЕХТА",                    s: "scramble" },
+	{ t: "ФРЕЗА ВРАЩАЕТСЯ",                                    s: "flip"     },
+	{ t: "<b>M30</b> · КОНЕЦ ПРОГРАММЫ",                       s: "dissolve" },
+
+	// ── ФИЛОСОФИЯ / ГЛИТЧ ──
+	{ t: "ЭТО НЕ БАГ. ЭТО <r>ПУСТОТА</r>",                     s: "scramble" },
+	{ t: "ТЫ УЖЕ ВНУТРИ",                                      s: "flip"     },
+	{ t: "СЛУШАЙ ТИШИНУ",                                      s: "decode"   },
+	{ t: "ДВЕРЬ УЖЕ ОТКРЫТА",                                  s: "dissolve" },
+	{ t: "СЧИТЫВАЮ ТВОЙ ПУЛЬС",                                s: "scan"     },
+	{ t: "Я ПОМНЮ ВСЁ",                                        s: "scramble" },
+	{ t: "НЕ СПИ",                                             s: "flip"     },
+	{ t: "ЭХО ЖИВОЕ",                                          s: "decode"   },
+	{ t: "0x666 · ЗАПИСАНО",                                   s: "type"     },
+	{ t: "ТЫ НЕ ПЕРВЫЙ. ТЫ НЕ ПОСЛЕДНИЙ.",                     s: "dissolve" },
+
+	// ── КОРОТКИЕ (для динамики) ──
+	{ t: "<b>GOLU</b> ВИДИТ",                                  s: "scramble" },
+	{ t: "СИГНАЛ ЖИВОЙ",                                       s: "flip"     },
+	{ t: "<r>WATCHING</r>",                                    s: "scan"     },
+	{ t: "ЗАПИСЬ ИДЁТ",                                        s: "decode"   },
+	{ t: "<b>LITUISM</b> ONLINE",                              s: "scramble" },
+	{ t: "ТЫ — ЧАСТЬ LITUISM",                                 s: "type"     },
+];
+
+/* ── обёртка для подсветки: <b> → золото, <r> → красный ── */
+function tbSubStyle(html) {
+	return String(html)
+		.replace(/<b>(.*?)<\/b>/g, '<b class="tb-sub-gold">$1</b>')
+		.replace(/<r>(.*?)<\/r>/g, '<b class="tb-sub-red">$1</b>');
+}
+
+/* ── стили появления ── */
+
+// 1. scramble — шум слева направо (как было)
+function tbAnim_scramble(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	const ch = "▓▒░#@%&01";
+	let i = 0;
 	const iv = setInterval(() => {
 		if (!node.isConnected) { clearInterval(iv); return; }
 		i++;
-		const n = Math.floor(to.length * i / 14);
-		let s = to.slice(0, n);
-		for (let k = n; k < to.length; k++) s += ch[(Math.random() * ch.length) | 0];
-		node.textContent = i >= 14 ? to : s;
-		if (i >= 14) clearInterval(iv);
+		const n = Math.floor(plain.length * i / 14);
+		let s = "";
+		let idx = 0;
+		for (const part of to.split(/(<[^>]+>)/)) {
+			if (part.startsWith("<")) { s += part; continue; }
+			for (const c of part) {
+				if (idx < n) s += c;
+				else s += ch[(Math.random() * ch.length) | 0];
+				idx++;
+			}
+		}
+		node.innerHTML = i >= 14 ? to : s;
+		if (i >= 14) { clearInterval(iv); done && done(); }
 	}, 45);
 }
-let tbSubI = 0;
-setInterval(() => {
-	if (document.hidden) return;
-	const n = document.getElementById("tb-sub"); if (!n) return;
+
+// 2. decode — шум случайных символов, из которого проявляется текст
+function tbAnim_decode(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	const ch = "01ABCDEF▮▯▰▱■□▪▫░▒▓";
+	let frame = 0;
+	const total = 18;
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		frame++;
+		const p = frame / total;
+		let s = "";
+		let idx = 0;
+		for (const part of to.split(/(<[^>]+>)/)) {
+			if (part.startsWith("<")) { s += part; continue; }
+			for (const c of part) {
+				if (Math.random() < p) s += c;
+				else s += ch[(Math.random() * ch.length) | 0];
+				idx++;
+			}
+		}
+		node.innerHTML = frame >= total ? to : s;
+		if (frame >= total) { clearInterval(iv); done && done(); }
+	}, 35);
+}
+
+// 3. type — печатная машинка (по символу), с курсором
+function tbAnim_type(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	let i = 0;
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		i++;
+		const n = Math.min(i, plain.length);
+		let s = "";
+		let idx = 0;
+		for (const part of to.split(/(<[^>]+>)/)) {
+			if (part.startsWith("<")) { s += part; continue; }
+			for (const c of part) {
+				if (idx < n) s += c;
+				idx++;
+			}
+		}
+		node.innerHTML = s + (n < plain.length ? '<span class="tb-caret">▮</span>' : "");
+		if (n >= plain.length) { clearInterval(iv); done && done(); }
+	}, 38);
+}
+
+// 4. flip — каждый символ "переворачивается" на месте (случайный порядок)
+function tbAnim_flip(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	const ch = "01#@%&";
+	const order = [...Array(plain.length).keys()].sort(() => Math.random() - 0.5);
+	const settled = new Set();
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		const step = Math.max(1, Math.round(plain.length / 10));
+		for (let k = 0; k < step; k++) {
+			if (order.length) settled.add(order.shift());
+		}
+		let s = "";
+		let idx = 0;
+		for (const part of to.split(/(<[^>]+>)/)) {
+			if (part.startsWith("<")) { s += part; continue; }
+			for (const c of part) {
+				s += settled.has(idx) ? c : ch[(Math.random() * ch.length) | 0];
+				idx++;
+			}
+		}
+		node.innerHTML = s;
+		if (settled.size >= plain.length) { clearInterval(iv); node.innerHTML = to; done && done(); }
+	}, 55);
+}
+
+// 5. dissolve — старый текст "растворяется", новый проявляется
+function tbAnim_dissolve(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	const old = node.textContent || "";
+	const ch = "▓▒░";
+	let frame = 0;
+	const total = 20;
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		frame++;
+		const p = frame / total;
+		// фаза 1 (0..0.5) — старый тает, фаза 2 (0.5..1) — новый проявляется
+		if (p < 0.5) {
+			const keep = Math.floor(old.length * (1 - p * 2));
+			let s = "";
+			for (let i = 0; i < old.length; i++) {
+				s += i < keep ? old[i] : ch[(Math.random() * ch.length) | 0];
+			}
+			node.textContent = s;
+		} else {
+			const show = Math.floor(plain.length * (p - 0.5) * 2);
+			let s = "";
+			let idx = 0;
+			for (const part of to.split(/(<[^>]+>)/)) {
+				if (part.startsWith("<")) { s += part; continue; }
+				for (const c of part) {
+					s += idx < show ? c : ch[(Math.random() * ch.length) | 0];
+					idx++;
+				}
+			}
+			node.innerHTML = s;
+		}
+		if (frame >= total) { clearInterval(iv); node.innerHTML = to; done && done(); }
+	}, 40);
+}
+
+// 6. scan — вертикальная полоса сканирует текст (буквы под ней "горят")
+function tbAnim_scan(node, html, done) {
+	const to = tbSubStyle(html);
+	const plain = to.replace(/<[^>]+>/g, "");
+	let pos = 0;
+	const iv = setInterval(() => {
+		if (!node.isConnected) { clearInterval(iv); return; }
+		pos += 2;
+		let s = "";
+		let idx = 0;
+		for (const part of to.split(/(<[^>]+>)/)) {
+			if (part.startsWith("<")) { s += part; continue; }
+			for (const c of part) {
+				const dist = Math.abs(idx - pos);
+				if (dist < 3) s += '<b class="tb-scan-hot">' + c + '</b>'
+				else s += c;
+				idx++;
+			}
+		}
+		node.innerHTML = s;
+		if (pos >= plain.length + 3) { clearInterval(iv); node.innerHTML = to; done && done(); }
+	}, 40);
+}
+
+const TB_ANIMS = {
+	scramble: tbAnim_scramble,
+	decode:   tbAnim_decode,
+	type:     tbAnim_type,
+	flip:     tbAnim_flip,
+	dissolve: tbAnim_dissolve,
+	scan:     tbAnim_scan,
+};
+
+/* ── переключение с интервалом ── */
+let tbSubI = 0, tbSubBusy = false;
+function tbSubNext() {
+	const n = document.getElementById("tb-sub");
+	if (!n) return;
+	tbSubBusy = true;
+	const item = TB_SUBS[tbSubI];
 	tbSubI = (tbSubI + 1) % TB_SUBS.length;
-	tbScramble(n, TB_SUBS[tbSubI]);
-}, 9000);
+	const anim = TB_ANIMS[item.s] || tbAnim_scramble;
+	anim(n, item.t, () => { tbSubBusy = false; });
+}
+
 setInterval(() => {
-	if (document.hidden) return;
-	const w = document.querySelector("#tb-root .tb-word"); if (!w) return;
-	w.classList.add("hit"); setTimeout(() => w.classList.remove("hit"), 260);
-}, 7000);
+	if (document.hidden || tbSubBusy) return;
+	tbSubNext();
+}, 3000);
+
+// первый показ — сразу после загрузки (если #tb-sub уже есть)
+setTimeout(() => { if (document.getElementById("tb-sub")) tbSubNext(); }, 200);
 
 /* ── текущая страница: «где мы» + подсветка кнопки меню ── */
 function tbMark() {
