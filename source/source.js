@@ -63,6 +63,8 @@ const __A_IDK = " (я не помню точно)"
 // ----------------------------------------------------------------------
 
 // ADD_AI("ERROR.png", )
+
+ADD_AI("skrepkawhoisat.png", 47)
 ADD_AI("happyfamily.png", 86)
 ADD_AI("pavelsmile4fullsize.png", 58)
 ADD_AI("pisechnikfullsizemultiply4.png", 47)
@@ -746,7 +748,7 @@ WoowzsiteSourceCorruptedMinecraft = AddFullnessToTable([
 
 WoowzsiteLituism = AddTableToTable(AddTableToTable(AddFullnessToTable([
 	"bg","left-right","space","title","title_hover","title_text","title_text_hover","fotter","sponge","sponge_photo","bg2","crybird","bg3","bg4","bg5","bg6","bg7","bg8","bg9",
-	"bg10","bg11","prev","bg12"
+	"bg10","bg11","prev","bg12","bg13"
 ],"Lituism/",".png"),
 AddFullnessToTable([
 	"crybird-theme"

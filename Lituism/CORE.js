@@ -54,6 +54,12 @@ const PAGE_FILES = [
 const TOP_NAV = [
 	["OPEN_PAGE('not-exist');", "&lt;@&gt;"],
 	["OPEN_PAGE();",            "MAIN.html"],
+	["CORES 📀", [
+		["OPEN_PAGE('golu');", "🟥 GOLU"],
+		["OPEN_PAGE('sranspang');", "SRANSPONG 🟨"],
+		["OPEN_PAGE('pavpis');", "🟩 PAVELPISTV"],
+		["OPEN_PAGE('crybird');", "CRYBIRD 🟦"],
+	]],
 	["ART-WORKS 🎨", [
 		["OPEN_PAGE('artsreal');", "[1MAGES]"],
 		["OPEN_PAGE('artsai');",   "&lt;AI&gt;"],
@@ -380,7 +386,7 @@ function OPEN_PAGE(id = ""){
 	
 	function prikol(){
 		var bgs = [
-			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png","bg9.png","bg10.png","bg11.png","bg12.png"
+			"bg.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png","bg9.png","bg10.png","bg11.png","bg12.png","bg13.png"
 		];
 		var bg = bgs[Math.floor(Math.random() * bgs.length)];
 		document.getElementById("BODY").style.backgroundImage = `url("${bg}")`;
@@ -2840,20 +2846,20 @@ const PR_ACTS = {
       if (Math.random() < 0.5) prRipple(px + 2, py + 2);
     }
   },
-   // рисует вокруг твоего курсора случайную фигуру, несколько раз подряд
+
+  // рисует вокруг твоего курсора случайную фигуру, несколько раз подряд
   async circle() {
     const [ux, uy] = prUser();
     const shape = pick(PR_SHAPES);
     const r = rand(70, 130), m = r + 16;
-    const cx = Math.max(m, Math.min(innerWidth - m, ux));    // центр фиксируется один раз
+    const cx = Math.max(m, Math.min(innerWidth - m, ux));
     const cy = Math.max(m, Math.min(innerHeight - m, uy));
     const { pts, closed } = prShapePts(shape, cx, cy, r);
     const info = prPathInfo(pts, closed);
     const reps = Math.round(rand(PR_DRAW_REPS[0], PR_DRAW_REPS[1]));
-    const dur = info.L / PR_DRAW_SPEED * 1000;               // время одного прохода
+    const dur = info.L / PR_DRAW_SPEED * 1000;
 
-    await prGoto(pts[0][0], pts[0][1], { spd: 6 });          // к первой вершине
-
+    await prGoto(pts[0][0], pts[0][1], { spd: 6 });
     for (let rep = 0; rep < reps; rep++) {
       const t0 = performance.now();
       for (;;) {
@@ -2864,11 +2870,12 @@ const PR_ACTS = {
         await prWait(16);
       }
       const end = closed ? pts[0] : pts[pts.length - 1];
-      prSet(end[0], end[1], PR_DRAW_STICK);                   // дорисовать точно в вершину
+      prSet(end[0], end[1], PR_DRAW_STICK);
       await prWait(rand(90, 200));
-      if (!closed && rep < reps - 1) await prGoto(pts[0][0], pts[0][1], { spd: 8 }); // открытый символ: вернуться в начало
+      if (!closed && rep < reps - 1) await prGoto(pts[0][0], pts[0][1], { spd: 8 });
     }
   },
+
   // тащится за твоим курсором, потом рывок
   async stalk() {
     const t0 = Date.now();
@@ -2881,6 +2888,7 @@ const PR_ACTS = {
     await prGoto(ux, uy, { spd: 14, vmax: 2500, timeout: 900 });
     prRipple(px + 2, py + 2);
   },
+
   // ломает экран
   async glitch() {
     await prGoto(innerWidth / 2 + rand(-150, 150), innerHeight / 2 + rand(-80, 80), { spd: 5 });
@@ -2894,6 +2902,7 @@ const PR_ACTS = {
       await prWait(rand(80, 260));
     }
   },
+
   // (только если PR_CAN_CLICK) реально жмёт кнопку меню
   async press() {
     const btns = Array.from(document.querySelectorAll(".category_button")).filter(prVisible);
@@ -2905,7 +2914,8 @@ const PR_ACTS = {
     el.click();
     await prWait(900);
   },
-    // рисует круг вокруг клика / элемента
+
+  // рисует круг вокруг клика / элемента
   async orbit() {
     const targets = prShuf(prTargets()).slice(0, 1);
     if (!targets.length) return prWander();
@@ -2916,6 +2926,7 @@ const PR_ACTS = {
       await prWait(30);
     }
   },
+
   // дрожит на месте
   async shake() {
     const [ux, uy] = prUser();
@@ -2925,6 +2936,7 @@ const PR_ACTS = {
       await prWait(40);
     }
   },
+
   // рисует зигзаг по экрану
   async zigzag() {
     const steps = 8;
@@ -2934,6 +2946,7 @@ const PR_ACTS = {
       await prGoto(x, y, { spd: 8, timeout: 1200 });
     }
   },
+
   // телепортируется рывками
   async teleport() {
     for (let i = 0; i < 5; i++) {
@@ -2942,6 +2955,7 @@ const PR_ACTS = {
       await prWait(rand(120, 300));
     }
   },
+
   // подпрыгивает
   async jump() {
     const [ux, uy] = prUser();
@@ -2951,6 +2965,7 @@ const PR_ACTS = {
       prSet(px, py + 40, 14); await prWait(80);
     }
   },
+
   // "падает" с верхнего края
   async fall() {
     prSet(px, -20, 30);
@@ -2958,6 +2973,206 @@ const PR_ACTS = {
     await prGoto(px, innerHeight / 2, { spd: 4, vmax: 800 });
     prRipple(px, py);
     prTear();
+  },
+
+  // ─── НОВЫЕ ДЕЙСТВИЯ ───
+
+  // рисует спираль вокруг твоего курсора
+  async spiral() {
+    const [ux, uy] = prUser();
+    const cx = Math.max(140, Math.min(innerWidth - 140, ux));
+    const cy = Math.max(140, Math.min(innerHeight - 140, uy));
+    const turns = rand(2, 4), steps = 60, maxR = rand(50, 110);
+    await prGoto(cx, cy, { spd: 7 });
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const a = t * Math.PI * 2 * turns;
+      const r = maxR * t;
+      prSet(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.75, PR_DRAW_STICK);
+      await prWait(18);
+    }
+    prRipple(cx, cy);
+  },
+
+  // чертит сетку по всему экрану
+  async grid() {
+    const cols = 6, rows = 4;
+    const stepX = innerWidth / (cols + 1);
+    const stepY = (innerHeight - 120) / (rows + 1);
+    const y0 = 60;
+    const order = [];
+    for (let j = 1; j <= rows; j++) order.push({ type: "h", y: y0 + j * stepY });
+    for (let i = 1; i <= cols; i++) order.push({ type: "v", x: i * stepX });
+    for (const g of order) {
+      if (g.type === "h") {
+        await prGoto(stepX, g.y, { spd: 10, timeout: 1800 });
+        await prGoto(innerWidth - stepX, g.y, { spd: 10, timeout: 1800 });
+      } else {
+        await prGoto(g.x, y0, { spd: 10, timeout: 1800 });
+        await prGoto(g.x, innerHeight - 60, { spd: 10, timeout: 1800 });
+      }
+    }
+  },
+
+  // обегает вокруг кликабельных элементов
+  async orbitRun() {
+    const list = prShuf(prTargets()).slice(0, rand(2, 3));
+    if (!list.length) return prWander();
+    for (const el of list) {
+      const [cx, cy] = prCenter(el);
+      const r = rand(40, 70);
+      const a0 = Math.random() * Math.PI * 2;
+      for (let k = 0; k <= 20; k++) {
+        const a = a0 + k / 20 * Math.PI * 2;
+        prSet(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 18);
+        await prWait(20);
+      }
+      prRipple(cx, cy);
+    }
+  },
+
+  // мгновенно догоняет твой курсор и «дышит» рядом
+  async stalkFast() {
+    const [ux, uy] = prUser();
+    await prGoto(ux, uy, { spd: 30, vmax: 4000, timeout: 400 });
+    for (let i = 0; i < 8; i++) {
+      prSet(ux + rand(-3, 3), uy + rand(-3, 3), 20);
+      await prWait(60);
+    }
+  },
+
+  // пишет сообщение «виртуальным пером» рядом с курсором
+  async write() {
+    const msgs = ["GOLU", "ТЫ МОЙ", "0x666", "НЕ СПИ", "СМОТРИ", "G-T", "WATCH", "1:19", "█▓▒░", "ERR"];
+    const txt = pick(msgs);
+    const [ux, uy] = prUser();
+    const startX = Math.max(60, Math.min(innerWidth - 200, ux + 40));
+    const startY = Math.max(60, Math.min(innerHeight - 80, uy - 30));
+    await prGoto(startX, startY, { spd: 6 });
+    const stepW = 18;
+    for (let i = 0; i < txt.length; i++) {
+      await prGoto(startX + i * stepW, startY + Math.sin(i * 0.8) * 8, { spd: 14, timeout: 260 });
+      prRipple(startX + i * stepW, startY + Math.sin(i * 0.8) * 8);
+      await prWait(60);
+    }
+  },
+
+  // ищет элементы, подсвечивает их по одному
+  async hunt() {
+    const list = prShuf(prTargets()).slice(0, rand(3, 5));
+    if (!list.length) return prWander();
+    for (const el of list) {
+      const [x, y] = prCenter(el);
+      await prGoto(x - 60, y - 40, { spd: 6, timeout: 1400 });
+      await prGoto(x, y, { spd: 10, vmax: 2000, timeout: 800 });
+      el.classList.add("pr-mark");
+      await prWait(rand(180, 320));
+      el.classList.remove("pr-mark");
+    }
+    prTear();
+  },
+
+  // разбрасывает «искры» по экрану
+  async scatter() {
+    const n = rand(6, 10);
+    for (let i = 0; i < n; i++) {
+      const x = rand(40, innerWidth - 40);
+      const y = rand(80, innerHeight - 60);
+      await prGoto(x, y, { spd: 18, vmax: 3000, timeout: 500 });
+      prRipple(x, y, Math.random() < 0.5 ? "ls" : "");
+    }
+  },
+
+  // исчезает и появляется в другом месте
+  async vanish() {
+    const [ux, uy] = prUser();
+    await prGoto(ux + 100, uy + 80, { spd: 6 });
+    prCur.classList.remove("on");
+    await prWait(rand(600, 1200));
+    const nx = rand(60, innerWidth - 60);
+    const ny = rand(80, innerHeight - 80);
+    prSet(nx, ny, 30);
+    prCur.classList.add("on");
+    prRipple(nx, ny);
+    prTear();
+  },
+
+  // отсчитывает 3-2-1 рядом с курсором
+  async countdown() {
+    const [ux, uy] = prUser();
+    await prGoto(ux + 80, uy + 60, { spd: 6 });
+    for (const n of ["3", "2", "1", "0"]) {
+      prSayEl.textContent = n;
+      prSayEl.classList.add("on");
+      await prWait(400);
+    }
+    prSayEl.classList.remove("on");
+    prTear();
+    await prWait(200);
+  },
+  
+    // буквально телепортируется по экрану: мгновенно появляется в новой точке,
+  // оставляет после себя след-разрыв и рябь, иногда задерживается «посмотреть»
+  async blinkJump() {
+    const jumps = rand(6, 10);
+    let prevX = px, prevY = py;
+
+    for (let i = 0; i < jumps; i++) {
+      // выбираем новую точку подальше от текущей, чтобы прыжок был заметным
+      let nx, ny, tries = 0;
+      do {
+        nx = rand(50, innerWidth - 50);
+        ny = rand(70, innerHeight - 70);
+        tries++;
+      } while (Math.hypot(nx - px, ny - py) < 220 && tries < 12);
+
+      // 1) след от исчезновения в старой точке
+      prRipple(px, py);
+      prTear();
+
+      // 2) мгновенный перенос (без анимации движения)
+      prSet(nx, ny, 60);
+      px = nx; py = ny;
+
+      // 3) след от появления в новой точке
+      prRipple(nx, ny, Math.random() < 0.5 ? "ls" : "");
+
+      // 4) иногда задерживаемся, чтобы «посмотреть» на новое место
+      const hold = Math.random() < 0.4 ? rand(180, 420) : rand(40, 120);
+      await prWait(hold);
+    }
+
+    // финальный прыжок к пользователю — «я всё ещё здесь»
+    const [ux, uy] = prUser();
+    prRipple(px, py);
+    prSet(ux + 60, uy + 40, 60);
+    prRipple(ux + 60, uy + 40);
+    prTear();
+  },
+
+  // рисует крест/пентаграмму по центру экрана
+  async cross() {
+    const cx = innerWidth / 2;
+    const cy = innerHeight / 2;
+    await prGoto(cx, cy - 120, { spd: 6 });
+    await prGoto(cx, cy + 120, { spd: 10, timeout: 900 });
+    await prGoto(cx - 120, cy, { spd: 10, timeout: 900 });
+    await prGoto(cx + 120, cy, { spd: 10, timeout: 900 });
+    prRipple(cx, cy);
+    prTear();
+  },
+
+  // «плавит» экран (медленный глитч)
+  async melt() {
+    const B = document.getElementById("BODY");
+    if (!B) return;
+    await prGoto(innerWidth / 2, innerHeight / 2, { spd: 4 });
+    for (let i = 0; i < 10; i++) {
+      B.style.filter = `hue-rotate(${i * 36}deg) blur(${i * 0.3}px)`;
+      prTear();
+      await prWait(90);
+    }
+    B.style.filter = "";
   },
 };
 
@@ -3638,174 +3853,160 @@ const TB_SWITCHES = [
 	{
 		id: "cursorTrail", icon: "✏", title: "СЛЕД КУРСОРА", desc: "Canvas-след за мышью",
 		on(){
-			if (window.__tbCursorTrail) return;
+    if (window.__tbCursorTrail) return;
 
-			/* ═══════════════ НАСТРОЙКИ ═══════════════ */
-			const CFG = {
-				fadeAlpha: 0.10,           // затухание шлейфа (0.05 — долгий, 0.2 — быстро)
-				spawnMinDist: 14,          // расстояние между волнами (px). Было 6 — лагало
-				maxWaves: 24,              // максимум живых волн. Было 60
-				waveColor: "#ff0044",
-				waveGlow: "#ff0044",
-				waveGlowBlur: 8,           // было 12 — снижено
-				waveLife: 1.2,             // было 1.6
-				waveStartRadius: 2,
-				waveMaxRadius: 55,         // было 70
-				waveLineWidth: 2,
-				fpsCap: 60,                // кап FPS. Если совсем тормозит — 30
-				useShadow: true,           // выключи → ещё быстрее (без свечения)
-			};
+    const CFG = {
+        fadeAlpha: 0.10,
+        spawnMinDist: 14,
+        maxWaves: 24,
+        waveColor: "#ff0044",
+        waveGlow: "#ff0044",
+        waveGlowBlur: 8,
+        waveLife: 1.2,
+        waveStartRadius: 2,
+        waveMaxRadius: 55,
+        waveLineWidth: 2,
+        fpsCap: 60,
+        useShadow: true,
+    };
 
-			/* ═══════════════ CANVAS ═══════════════ */
-			const cv = document.createElement("canvas");
-			cv.id = "__tbCursorCanvas";
-			cv.style.cssText =
-				"position:fixed;left:0;top:0;width:100vw;height:100vh;" +
-				"pointer-events:none;z-index:2147483645;";
-			document.body.appendChild(cv);
+    const cv = document.createElement("canvas");
+    cv.id = "__tbCursorCanvas";
+    cv.style.cssText =
+        "position:fixed;left:0;top:0;width:100vw;height:100vh;" +
+        "pointer-events:none;z-index:2147483645;";
+    document.body.appendChild(cv);
 
-			const g = cv.getContext("2d", { alpha: true, desynchronized: true });
-			let W, H, dpr = 1;
+    const g = cv.getContext("2d", { alpha: true, desynchronized: true });
+    let W, H, dpr = 1;
 
-			const resize = () => {
-				// DPR ограничен 1.5 — компромисс между качеством и производительностью
-				dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-				W = window.innerWidth;
-				H = window.innerHeight;
-				cv.width = Math.floor(W * dpr);
-				cv.height = Math.floor(H * dpr);
-				cv.style.width = W + "px";
-				cv.style.height = H + "px";
-				g.setTransform(dpr, 0, 0, dpr, 0, 0);
-				g.lineCap = "round";
-				g.lineJoin = "round";
-			};
-			resize();
+    const resize = () => {
+        dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        cv.width = Math.floor(W * dpr);
+        cv.height = Math.floor(H * dpr);
+        cv.style.width = W + "px";
+        cv.style.height = H + "px";
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        g.lineCap = "round";
+        g.lineJoin = "round";
+    };
+    resize();
 
-			let resizeT = 0;
-			const onResize = () => {
-				clearTimeout(resizeT);
-				resizeT = setTimeout(resize, 200);
-			};
-			window.addEventListener("resize", onResize, { passive: true });
+    let resizeT = 0;
+    const onResize = () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(resize, 200);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
 
-			/* ═══════════════ СОСТОЯНИЕ ═══════════════ */
-			let mx = -100, my = -100;
-			let px = -100, py = -100;
-			let moved = false;
-			let travel = 0;
-			let lastFrame = 0;
-			const frameInterval = 1000 / CFG.fpsCap;
+    let mx = -100, my = -100;
+    let px = -100, py = -100;
+    let moved = false;
+    let travel = 0;
+    let lastFrame = 0;
+    const frameInterval = 1000 / CFG.fpsCap;
 
-			// волны — в плоском массиве объектов
-			const waves = [];
+    const waves = [];
 
-			const spawnWave = (x, y) => {
-				if (waves.length >= CFG.maxWaves) {
-					// переиспользуем самую старую (первую) — она всё равно скоро умрёт
-					waves.shift();
-				}
-				waves.push({
-					x, y,
-					t0: performance.now(),
-					life: CFG.waveLife * (0.85 + Math.random() * 0.3),
-					maxR: CFG.waveMaxRadius * (0.75 + Math.random() * 0.5),
-					lw: CFG.waveLineWidth * (0.8 + Math.random() * 0.4),
-				});
-			};
+    const spawnWave = (x, y) => {
+        if (waves.length >= CFG.maxWaves) waves.shift();
+        waves.push({
+            x, y,
+            t0: performance.now(),
+            life: CFG.waveLife * (0.85 + Math.random() * 0.3),
+            maxR: CFG.waveMaxRadius * (0.75 + Math.random() * 0.5),
+            lw: CFG.waveLineWidth * (0.8 + Math.random() * 0.4),
+        });
+    };
 
-			/* ═══════════════ МЫШЬ ═══════════════ */
-			const onMove = (e) => {
-				mx = e.clientX;
-				my = e.clientY;
-				if (!moved) { px = mx; py = my; moved = true; return; }
-				travel += Math.hypot(mx - px, my - py);
-				px = mx;
-				py = my;
-			};
-			document.addEventListener("mousemove", onMove, { passive: true });
+    const onMove = (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        if (!moved) { px = mx; py = my; moved = true; return; }
+        travel += Math.hypot(mx - px, my - py);
+        px = mx;
+        py = my;
+    };
+    document.addEventListener("mousemove", onMove, { passive: true });
 
-			/* ═══════════════ РЕНДЕР ═══════════════ */
-			const draw = (now) => {
-				const raf = requestAnimationFrame(draw);
-				if (!window.__tbCursorTrail) { cancelAnimationFrame(raf); return; }
-				window.__tbCursorTrail.raf = raf;
+    const draw = (now) => {
+        const raf = requestAnimationFrame(draw);
+        if (!window.__tbCursorTrail) { cancelAnimationFrame(raf); return; }
+        window.__tbCursorTrail.raf = raf;
 
-				// ограничение FPS
-				if (now - lastFrame < frameInterval) return;
-				lastFrame = now;
+        if (now - lastFrame < frameInterval) return;
+        lastFrame = now;
 
-				// если вкладка скрыта — не тратим кадры
-				if (document.hidden) return;
+        if (document.hidden) return;
 
-				/* ── 1. затухание ── */
-				g.globalCompositeOperation = "destination-out";
-				g.fillStyle = "rgba(0,0,0," + CFG.fadeAlpha + ")";
-				g.fillRect(0, 0, W, H);
+        g.globalCompositeOperation = "destination-out";
+        g.fillStyle = "rgba(0,0,0," + CFG.fadeAlpha + ")";
+        g.fillRect(0, 0, W, H);
 
-				/* ── 2. спавн волн (по расстоянию) ── */
-				if (moved && travel >= CFG.spawnMinDist) {
-					spawnWave(mx, my);
-					travel = 0;
-				}
+        if (moved && travel >= CFG.spawnMinDist) {
+            spawnWave(mx, my);
+            travel = 0;
+        }
 
-				/* ── 3. рисуем волны ── */
-				if (waves.length) {
-					g.globalCompositeOperation = "lighter";
-					if (CFG.useShadow) {
-						g.shadowColor = CFG.waveGlow;
-						g.shadowBlur = CFG.waveGlowBlur;
-					}
+        if (waves.length) {
+            g.globalCompositeOperation = "lighter";
+            if (CFG.useShadow) {
+                g.shadowColor = CFG.waveGlow;
+                g.shadowBlur = CFG.waveGlowBlur;
+            }
 
-					const tNow = performance.now();
-					let alive = 0;
+            const tNow = performance.now();
+            let alive = 0;
 
-					for (let i = 0; i < waves.length; i++) {
-						const w = waves[i];
-						const age = (tNow - w.t0) / 1000;
-						const t = age / w.life;
-						if (t >= 1) continue; // пропускаем — затрём позже
+            for (let i = 0; i < waves.length; i++) {
+                const w = waves[i];
+                const age = (tNow - w.t0) / 1000;
+                const t = age / w.life;
+                if (t >= 1) continue;
 
-						// перенос в начало массива «живых»
-						waves[alive++] = w;
+                waves[alive++] = w;
 
-						const ease = 1 - (1 - t) * (1 - t) * (1 - t);
-						const r = CFG.waveStartRadius + (w.maxR - CFG.waveStartRadius) * ease;
-						const alpha = (1 - t) * 0.85;
+                const ease = 1 - (1 - t) * (1 - t) * (1 - t);
+                const r = CFG.waveStartRadius + (w.maxR - CFG.waveStartRadius) * ease;
+                const alpha = (1 - t) * 0.85;
 
-						g.globalAlpha = alpha;
-						g.lineWidth = w.lw * (1 - t * 0.7);
-						g.strokeStyle = CFG.waveColor;
-						g.beginPath();
-						g.arc(w.x, w.y, r, 0, 6.283);
-						g.stroke();
-					}
-					waves.length = alive; // обрезаем мёртвых
+                g.globalAlpha = alpha;
+                g.lineWidth = w.lw * (1 - t * 0.7);
+                g.strokeStyle = CFG.waveColor;
+                g.beginPath();
+                g.arc(w.x, w.y, r, 0, 6.283);
+                g.stroke();
+            }
+            waves.length = alive;
 
-					g.globalAlpha = 1;
-					if (CFG.useShadow) g.shadowBlur = 0;
-				}
+            g.globalAlpha = 1;
+            if (CFG.useShadow) g.shadowBlur = 0;
+        }
 
-				/* ── 4. точка под курсором (только если движемся) ── */
-				if (moved) {
-					g.globalCompositeOperation = "lighter";
-					if (CFG.useShadow) {
-						g.shadowColor = CFG.waveGlow;
-						g.shadowBlur = CFG.waveGlowBlur;
-					}
-					g.fillStyle = "rgba(255,255,255,.7)";
-					g.beginPath();
-					g.arc(mx, my, 2, 0, 6.283);
-					g.fill();
-					if (CFG.useShadow) g.shadowBlur = 0;
-				}
+        if (moved) {
+            g.globalCompositeOperation = "lighter";
+            if (CFG.useShadow) {
+                g.shadowColor = CFG.waveGlow;
+                g.shadowBlur = CFG.waveGlowBlur;
+            }
+            g.fillStyle = "rgba(255,255,255,.7)";
+            g.beginPath();
+            g.arc(mx, my, 2, 0, 6.283);
+            g.fill();
+            if (CFG.useShadow) g.shadowBlur = 0;
+        }
 
-				g.globalCompositeOperation = "source-over";
-				g.globalAlpha = 1;
-			};
+        g.globalCompositeOperation = "source-over";
+        g.globalAlpha = 1;
+    };
 
-			window.__tbCursorTrail = { cv, g, raf: null, onMove, resize, onResize, CFG };
-		},
+    // ═══════ ВОТ ЭТОЙ СТРОКИ НЕ ХВАТАЛО ═══════
+    window.__tbCursorTrail = { cv, g, raf: null, onMove, resize, onResize, CFG };
+    window.__tbCursorTrail.raf = requestAnimationFrame(draw);
+    // ═══════════════════════════════════════════
+},
 		off(){
 			if (!window.__tbCursorTrail) return;
 			cancelAnimationFrame(window.__tbCursorTrail.raf);
@@ -4355,7 +4556,7 @@ const TB_PANELS = [
 		const gr = g.createRadialGradient(sx, sy, 4, sx, sy, 34);
 		gr.addColorStop(0, "#ff0044"); gr.addColorStop(0.7, "#990022"); gr.addColorStop(1, "#3a0010");
 		g.fillStyle = gr; g.beginPath(); g.arc(sx, sy, 34, 0, 6.283); g.fill();
-		g.fillStyle = "#000"; g.beginPath(); g.ellipse(sx, sy, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 26, 0, 0, 6.283); g.fill();
+		g.fillStyle = "#000"; g.beginPath(); g.ellipse(sx, sy, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 26, 0, 0, 6.283); g.ellipse(sx, sy, 26, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 0, 0, 6.283); g.fill();
 		g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(sx - 14, sy - 18, 5, 5);
 		g.fillStyle = "rgba(255,0,68,.12)"; g.fillRect(0, (t * 40) % 112, 440, 2);
 		g.restore();
