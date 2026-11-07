@@ -203,6 +203,8 @@ site_content{
 	border-right: 5px ridge	#990000;
 	
 	box-shadow: 0 0 32px #990000;
+	
+	z-index: 1;
 }
 
 .category_button{
@@ -251,8 +253,29 @@ a:active{
 	text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,1);
 }
 
-title_img{ pointer-events: unset; display: inline-block; background-image: url("title.png"); background-size: cover; width: 125px; height: 125px; z-index: 1; cursor: url("../source/lit_cur_notallow.cur"), auto; }
-title_img:hover{ background-image: url("title_hover.png"); }
+title_img{
+    pointer-events: unset;
+    display: inline-block;
+    background-image: url("title.png");
+    background-size: cover;
+    width: 125px;
+    height: 125px;
+    z-index: 1;
+    cursor: url("../source/lit_cur_notallow.cur"), auto;
+
+    animation: title_pulse 2.4s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+}
+
+@keyframes title_pulse{
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+}
+
+title_img:hover{
+    background-image: url("title_hover.png");
+}
 
 title_text{ pointer-events: unset; display: inline-block; background-image: url("title_text.png"); background-size: cover; width: 365px; height: 125px; }
 title_text:hover{ background-image: url("title_text_hover.png"); }

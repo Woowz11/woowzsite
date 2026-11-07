@@ -49,6 +49,8 @@ const PAGE_FILES = [
 	"PAGE_videos.js",
 	"PAGE_alchemy.js",
 	"PAGE_typing.js",
+	"PAGE_litris.js",
+	"PAGE_clicker.js",
 ];
 
 const TOP_NAV = [
@@ -68,6 +70,8 @@ const TOP_NAV = [
 	["GAMES 🎮", [
 		["OPEN_PAGE('alchemy');", "⚗ ALCHEMY ⚗"],
 		["OPEN_PAGE('typing');", "⌨ TYPE ⌨"],
+		["OPEN_PAGE('litris');", "🧱 LITRIS 🧱"],
+		["OPEN_PAGE('clicker');", "🧱 CLICKER 🧱"],
 		["OPEN_PAGE('trash');", "👾 GOLUWorld 👾"],
 	]],
 	["OPEN_PAGE('database');",  "DATABASE 🔩"],
@@ -1613,7 +1617,7 @@ const UI_CSS = `
 /* ═══ ШАПКА ═══ */
 #golu-header {
   position: fixed; top: 0; left: 0; right: 0; height: var(--gh);
-  z-index: 999990; display: flex; align-items: center; gap: 18px; padding: 0 14px;
+  z-index: 1000; display: flex; align-items: center; gap: 18px; padding: 0 14px;
   background: linear-gradient(180deg, rgba(22,0,0,.97), rgba(8,0,0,.9));
   border-bottom: 1px solid #5a0000;
   box-shadow: 0 2px 14px rgba(255,0,0,.25);
@@ -1640,7 +1644,7 @@ const UI_CSS = `
 /* ═══ ПОДВАЛ ═══ */
 #golu-footer {
   position: fixed; bottom: 0; left: 0; right: 0; height: var(--gf);
-  z-index: 999990; display: flex; align-items: stretch;
+  z-index: 1000; display: flex; align-items: stretch;
   background: rgba(6,0,0,.95); border-top: 1px solid #5a0000;
   box-shadow: 0 -2px 14px rgba(255,0,0,.25);
   font: 13px/1 'Courier New', monospace; user-select: none;
@@ -4526,44 +4530,529 @@ const TB_MODES = ["SINE", "SQUARE", "SAW", "NOISE", "GOLU"];
 
 const TB_PANELS = [
 { id: "eye", icon: "👁", title: "ГЛАЗ", make(el, api) {
-	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud">ГЛАЗ · ТЫЧКОВ: <b data-r="p">0</b></div>';
-	const cv = el.querySelector("canvas"), g = cv.getContext("2d"), pr = el.querySelector('[data-r="p"]');
-	let pokes = api.get("pokes", 0), ix = 0, iy = 0, blink = 0, nextB = 2, hurt = 0;
-	pr.textContent = pokes;
-	cv.addEventListener("click", () => {
-		pokes++; api.set("pokes", pokes); pr.textContent = pokes; hurt = 0.6;
-		if (pokes % 10 === 0) { api.say("ТЫ МЕНЯ РАЗБУДИЛ"); try { if (window.GOLU_VISIT) window.GOLU_VISIT(); } catch (e) {} }
-	});
-	const shape = (cx, cy, hh) => {
-		g.beginPath(); g.moveTo(80, cy);
-		g.quadraticCurveTo(cx, cy - hh * 2, 360, cy);
-		g.quadraticCurveTo(cx, cy + hh * 2, 80, cy);
-		g.closePath();
-	};
-	api.frame((dt, t) => {
-		const p = api.pos(cv), cx = 220, cy = 56;
-		const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(1, d / 180), k = Math.min(1, dt * 12);
-		ix += (dx / d * m * 30 - ix) * k; iy += (dy / d * m * 13 - iy) * k;
-		nextB -= dt; if (nextB < 0) { blink = 0.16; nextB = 2 + Math.random() * 4; }
-		if (blink > 0) blink -= dt;
-		hurt = Math.max(0, hurt - dt);
-		const hh = 46 * (blink > 0 ? 0.1 : 1);
-		g.fillStyle = "#030105"; g.fillRect(0, 0, 440, 112);
-		shape(cx, cy, hh);
-		g.save(); g.clip();
-		g.fillStyle = hurt > 0 ? "#2a0a10" : "#150810"; g.fillRect(0, 0, 440, 112);
-		const sx = cx + ix + (hurt > 0 ? (Math.random() - 0.5) * 6 : 0), sy = cy + iy;
-		const gr = g.createRadialGradient(sx, sy, 4, sx, sy, 34);
-		gr.addColorStop(0, "#ff0044"); gr.addColorStop(0.7, "#990022"); gr.addColorStop(1, "#3a0010");
-		g.fillStyle = gr; g.beginPath(); g.arc(sx, sy, 34, 0, 6.283); g.fill();
-		g.fillStyle = "#000"; g.beginPath(); g.ellipse(sx, sy, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 26, 0, 0, 6.283); g.ellipse(sx, sy, 26, hurt > 0 ? 3 : 6 + Math.sin(t * 2) * 1.5, 0, 0, 6.283); g.fill();
-		g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(sx - 14, sy - 18, 5, 5);
-		g.fillStyle = "rgba(255,0,68,.12)"; g.fillRect(0, (t * 40) % 112, 440, 2);
-		g.restore();
-		shape(cx, cy, hh);
-		g.strokeStyle = "#d4af37"; g.lineWidth = 2; g.stroke();
-	}, { fps: 30 });
-} },
+    el.innerHTML = `
+        <canvas width="440" height="112"></canvas>
+        <div class="tb-hud">ГЛАЗ · ТЫЧКОВ: <b data-r="p">0</b> · <span data-r="st">WATCHING</span> · <b data-r="bpm">72</b> BPM</div>
+        <div class="tb-eye-flash" data-r="flash" style="position:absolute;inset:0;background:#ff0044;opacity:0;pointer-events:none;mix-blend-mode:screen;transition:opacity .1s"></div>
+    `;
+
+    const cv = el.querySelector("canvas");
+    const g  = cv.getContext("2d");
+    const pr = el.querySelector('[data-r="p"]');
+    const st = el.querySelector('[data-r="st"]');
+    const bp = el.querySelector('[data-r="bpm"]');
+    const flash = el.querySelector('[data-r="flash"]');
+
+    const W = cv.width, H = cv.height;
+    const CX = W / 2, CY = H / 2;
+    const EYE_W = 170;   // полуширина глаза (острее)
+    const EYE_H = 44;    // полувысота
+
+    let pokes = api.get("pokes", 0);
+    pr.textContent = pokes;
+
+    // ── состояние ──
+    let blink = 0;
+    let nextBlinkIn = 2 + Math.random() * 3;
+    let hurt = 0;
+    let wake = 0, wakeHold = 0;
+    let pupilR = 16, pupilTargetR = 16;
+    let irisAng = 0;
+    let lookX = CX, lookY = CY;
+    let targetX = CX, targetY = CY;
+    let twitchX = 0, twitchY = 0;
+    let twitchIn = 0.5;
+    let bpm = 72;
+    let lastBpmTick = 0;
+    let mood = "WATCHING";
+    let moodTimer = 0;
+    let flashTimer = 0;
+    let lastMX = -1, lastMY = -1;   // последняя известная позиция мыши (может быть вне canvas)
+    let mouseInsideCanvas = false;
+
+    // ── кровь ──
+    let bloodDrops = [];   // капли внутри/снаружи глаза
+    let bloodSplatter = 0; // заливка склеры (0..1) после клика
+    // ── байты ──
+    let bytes = [];        // {x, y, vx, vy, life, hex}
+
+    // ── трещины на веке ──
+    let cracks = [];       // {x, y, angle, len, life}
+    function addCrack(x, y) {
+        const n = 2 + (Math.random() * 3 | 0);
+        for (let i = 0; i < n; i++) {
+            cracks.push({
+                x, y,
+                angle: -Math.PI / 2 + (Math.random() - 0.5) * 1.2,
+                len: 6 + Math.random() * 14,
+                life: 1,
+                seed: Math.random()
+            });
+        }
+    }
+
+    // ── слежение за мышью ВЕЗДЕ на странице ──
+    const onMove = (e) => { lastMX = e.clientX; lastMY = e.clientY; };
+    const onLeave = () => { mouseInsideCanvas = false; };
+    document.addEventListener("mousemove", onMove, { passive: true });
+    cv.addEventListener("pointerenter", () => { mouseInsideCanvas = true; });
+    cv.addEventListener("pointerleave", onLeave);
+    // сохраняем обработчик, чтобы отключить при смене панели (панель живёт в DOM)
+    cv._cleanup = () => document.removeEventListener("mousemove", onMove);
+
+    // ── клики ──
+    cv.addEventListener("click", (e) => {
+        pokes++; api.set("pokes", pokes); pr.textContent = pokes;
+        hurt = 0.6;
+        pupilTargetR = 8;
+        flashTimer = 0.12;
+        bloodSplatter = 1;
+
+        // ── всплеск крови: из точки клика (или из центра) ──
+        const r = cv.getBoundingClientRect();
+        const cx = e.clientX - r.left;
+        const cy = e.clientY - r.top;
+        const n = 18 + (Math.random() * 14 | 0);
+        for (let i = 0; i < n; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const sp = 1.5 + Math.random() * 4;
+            bloodDrops.push({
+                x: cx, y: cy,
+                vx: Math.cos(a) * sp,
+                vy: Math.sin(a) * sp - 1.5,
+                r: 1.5 + Math.random() * 3,
+                life: 1,
+                inside: true
+            });
+        }
+
+        // ── всплеск байтов: 8-14 hex-значений ──
+        const hexes = ["0xFF","0x47","0xDE","0xAD","0xBE","0xEF","0x00","0x13","0x66","0xE4","0x04","0x7E","0xL1","0x05","0x99","0xC0","0xDE"];
+        const bn = 8 + (Math.random() * 7 | 0);
+        for (let i = 0; i < bn; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const sp = 2 + Math.random() * 5;
+            bytes.push({
+                x: cx, y: cy,
+                vx: Math.cos(a) * sp,
+                vy: Math.sin(a) * sp - 2.5,
+                life: 1,
+                hex: hexes[(Math.random() * hexes.length) | 0],
+                rot: (Math.random() - 0.5) * 0.8
+            });
+        }
+
+        // ── вехи ──
+        if (pokes === 10) {
+            wake = 1; wakeHold = 5;
+            mood = "AWAKENED"; moodTimer = 5;
+            api.say("★ ПРОБУЖДЕНИЕ ★");
+            try { if (window.GOLU_VISIT) window.GOLU_VISIT(); } catch (err) {}
+            el.animate([
+                { transform: "translate(0,0)" },
+                { transform: "translate(-3px,2px)" },
+                { transform: "translate(3px,-2px)" },
+                { transform: "translate(0,0)" }
+            ], { duration: 380 });
+        } else if (pokes === 25) { api.say("ОН ЗАМЕТИЛ"); mood = "SUSPICIOUS"; moodTimer = 4; }
+        else if (pokes === 50) { api.say("ХВАТИТ СМОТРЕТЬ"); mood = "ANGRY"; moodTimer = 4; }
+        else if (pokes === 100) { api.say("ТЫ — ЭКСПОНАТ"); mood = "AWAKENED"; moodTimer = 8; wake = 1; wakeHold = 8; }
+        else if (pokes % 10 === 0) api.say("ТЫЧОК №" + pokes);
+
+        if (pokes % 3 === 0) addCrack(CX + (Math.random() - 0.5) * 100, CY - EYE_H - 2);
+    });
+
+    // ── форма глаза: ОСТРАЯ (две дуги с острыми углами) ──
+    function eyePath(rx, ry) {
+        g.beginPath();
+        // верхнее веко — с острым углом
+        g.moveTo(CX - rx, CY);
+        g.quadraticCurveTo(CX - rx * 0.4, CY - ry * 1.15, CX, CY - ry);
+        g.quadraticCurveTo(CX + rx * 0.4, CY - ry * 1.15, CX + rx, CY);
+        // нижнее веко — с острым углом
+        g.quadraticCurveTo(CX + rx * 0.4, CY + ry * 0.85, CX, CY + ry * 0.9);
+        g.quadraticCurveTo(CX - rx * 0.4, CY + ry * 0.85, CX - rx, CY);
+        g.closePath();
+    }
+
+    // ── шипы по верхнему и нижнему веку ──
+    function drawSpikes(t, closeAmt) {
+        g.strokeStyle = `rgba(212,175,55,${0.5 + wake * 0.3})`;
+        g.lineWidth = 1;
+        const n = 18;
+        for (let i = 0; i <= n; i++) {
+            const u = i / n;            // 0..1
+            const x = CX - EYE_W + u * EYE_W * 2;
+            // высота века в этой точке (аппроксимация)
+            const yTop = CY - EYE_H * (1 - Math.pow(u * 2 - 1, 2)) * 1.1 + 4;
+            const yBot = CY + EYE_H * 0.9 * (1 - Math.pow(u * 2 - 1, 2)) - 2;
+            const len = 3 + Math.sin(i * 1.7 + t * 1.5) * 1.5 + (i % 3) * 0.5;
+
+            // верхние шипы
+            g.beginPath();
+            g.moveTo(x, yTop);
+            g.lineTo(x + (Math.random() - 0.5) * 1.5, yTop - len);
+            g.stroke();
+            // нижние шипы
+            g.beginPath();
+            g.moveTo(x, yBot);
+            g.lineTo(x + (Math.random() - 0.5) * 1.5, yBot + len * 0.7);
+            g.stroke();
+        }
+    }
+
+    // ── страшный зрачок: рваная щель + гексагон ──
+    function drawPupil(lx, ly, pr, t, awakened) {
+        if (awakened) {
+            // ── крест-прицел ──
+            g.fillStyle = "#000";
+            g.beginPath();
+            g.rect(lx - 2, ly - 16, 4, 32);
+            g.rect(lx - 16, ly - 2, 32, 4);
+            g.fill();
+            g.strokeStyle = `rgba(255,0,68,${0.6 + Math.sin(t * 4) * 0.3})`;
+            g.lineWidth = 1;
+            g.beginPath();
+            g.arc(lx, ly, 5, 0, Math.PI * 2);
+            g.stroke();
+            return;
+        }
+        // ── рваная вертикальная щель ──
+        g.fillStyle = "#000";
+        g.beginPath();
+        const segs = 12;
+        // левая сторона щели
+        for (let i = 0; i <= segs; i++) {
+            const v = i / segs;
+            const y = ly - pr * 1.4 + v * pr * 2.8;
+            const w = pr * 0.55 * Math.sin(v * Math.PI) + (i % 2 ? 1.5 : -1.5) * (i > 0 && i < segs ? 1 : 0);
+            if (i === 0) g.moveTo(lx - w, y);
+            else g.lineTo(lx - w, y);
+        }
+        // правая сторона (в обратном порядке)
+        for (let i = segs; i >= 0; i--) {
+            const v = i / segs;
+            const y = ly - pr * 1.4 + v * pr * 2.8;
+            const w = pr * 0.55 * Math.sin(v * Math.PI) + (i % 2 ? 1.5 : -1.5) * (i > 0 && i < segs ? 1 : 0);
+            g.lineTo(lx + w, y);
+        }
+        g.closePath();
+        g.fill();
+
+        // ── гексагон внутри ──
+        g.strokeStyle = `rgba(255,0,68,${0.4 + Math.sin(t * 3) * 0.3})`;
+        g.lineWidth = 1;
+        g.beginPath();
+        const hr = pr * 0.4;
+        for (let i = 0; i < 6; i++) {
+            const a = i / 6 * Math.PI * 2 - Math.PI / 2;
+            const x = lx + Math.cos(a) * hr;
+            const y = ly + Math.sin(a) * hr * 0.7;
+            i ? g.lineTo(x, y) : g.moveTo(x, y);
+        }
+        g.closePath();
+        g.stroke();
+
+        // ── блик ──
+        g.fillStyle = "rgba(255,255,255,0.75)";
+        g.beginPath();
+        g.arc(lx - 6, ly - pr * 0.6, 2, 0, Math.PI * 2);
+        g.fill();
+    }
+
+    // ── кровь ──
+    function drawBlood() {
+        for (let i = bloodDrops.length - 1; i >= 0; i--) {
+            const d = bloodDrops[i];
+            d.x += d.vx; d.y += d.vy;
+            d.vy += 0.12;
+            d.vx *= 0.985;
+            d.life -= 0.012;
+            if (d.life <= 0) { bloodDrops.splice(i, 1); continue; }
+            const a = Math.min(1, d.life * 1.4);
+            g.fillStyle = `rgba(180,0,30,${a})`;
+            g.beginPath();
+            g.ellipse(d.x, d.y, d.r * 0.7, d.r * 1.2, 0, 0, Math.PI * 2);
+            g.fill();
+            // хвост капли
+            if (d.vy > 0.5) {
+                g.strokeStyle = `rgba(140,0,20,${a * 0.6})`;
+                g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(d.x, d.y - d.r * 2.2);
+                g.lineTo(d.x, d.y);
+                g.stroke();
+            }
+        }
+    }
+
+    // ── байты ──
+    function drawBytes() {
+        g.font = "9px 'Courier New', monospace";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        for (let i = bytes.length - 1; i >= 0; i--) {
+            const b = bytes[i];
+            b.x += b.vx; b.y += b.vy;
+            b.vy += 0.08;
+            b.life -= 0.018;
+            if (b.life <= 0) { bytes.splice(i, 1); continue; }
+            const a = Math.min(1, b.life * 1.5);
+            g.save();
+            g.translate(b.x, b.y);
+            g.rotate(b.rot * (1 - b.life));
+            g.fillStyle = `rgba(255,${120 + Math.random() * 60 | 0},${140 + Math.random() * 60 | 0},${a})`;
+            g.shadowColor = "rgba(255,0,68,0.7)";
+            g.shadowBlur = 4;
+            g.fillText(b.hex, 0, 0);
+            g.restore();
+        }
+        g.shadowBlur = 0;
+        g.textAlign = "start";
+        g.textBaseline = "alphabetic";
+    }
+
+    // ── трещины ──
+    function drawCracks() {
+        for (let i = cracks.length - 1; i >= 0; i--) {
+            const c = cracks[i];
+            c.life -= 0.004;
+            if (c.life <= 0) { cracks.splice(i, 1); continue; }
+            g.strokeStyle = `rgba(255,${60 + c.seed * 40 | 0},80,${c.life * 0.7})`;
+            g.lineWidth = 1;
+            g.beginPath();
+            g.moveTo(c.x, c.y);
+            const ex = c.x + Math.cos(c.angle) * c.len;
+            const ey = c.y + Math.sin(c.angle) * c.len;
+            g.lineTo(ex, ey);
+            g.stroke();
+        }
+    }
+
+    // ── главный рендер ──
+    function drawEye(t, closeAmt) {
+        // фон
+        g.fillStyle = "#030105";
+        g.fillRect(0, 0, W, H);
+
+        // фоновое свечение
+        const bgGrad = g.createRadialGradient(CX, CY, 10, CX, CY, 220);
+        bgGrad.addColorStop(0, `rgba(122,0,34,${0.08 + wake * 0.12})`);
+        bgGrad.addColorStop(1, "rgba(3,1,5,0)");
+        g.fillStyle = bgGrad;
+        g.fillRect(0, 0, W, H);
+
+        const rx = EYE_W * (1 + closeAmt * 0.05);
+        const ry = EYE_H * (1 - closeAmt * 0.92);
+
+        // ── клип глаза ──
+        g.save();
+        eyePath(rx, Math.max(2, ry));
+        g.clip();
+
+        // склера
+        const scleraGrad = g.createRadialGradient(lookX, lookY, 5, CX, CY, rx);
+        scleraGrad.addColorStop(0, "#2a0a14");
+        scleraGrad.addColorStop(0.7, "#150810");
+        scleraGrad.addColorStop(1, "#0a0206");
+        g.fillStyle = scleraGrad;
+        g.fillRect(0, 0, W, H);
+
+        // заливка кровью после клика
+        if (bloodSplatter > 0.01) {
+            g.fillStyle = `rgba(140,0,20,${bloodSplatter * 0.35})`;
+            g.fillRect(0, 0, W, H);
+        }
+
+        // ── радужка ──
+        irisAng += 0.004;
+        const irisR = 34 + Math.sin(t * 0.7) * 1.5;
+        const awakened = wake > 0.5 || mood === "AWAKENED" || mood === "ANGRY";
+        const irisColor = mood === "ANGRY" || awakened
+            ? { inner: "#ff1a1a", outer: "#5a0016" }
+            : { inner: "#990022", outer: "#3a0010" };
+
+        const irisGrad = g.createRadialGradient(lookX, lookY, 2, lookX, lookY, irisR);
+        irisGrad.addColorStop(0, irisColor.inner);
+        irisGrad.addColorStop(0.55, irisColor.outer);
+        irisGrad.addColorStop(1, "#1a0006");
+        g.fillStyle = irisGrad;
+        g.beginPath();
+        g.arc(lookX, lookY, irisR, 0, Math.PI * 2);
+        g.fill();
+
+        // прожилки радужки
+        g.save();
+        g.translate(lookX, lookY);
+        g.rotate(irisAng);
+        for (let i = 0; i < 32; i++) {
+            const a = (i / 32) * Math.PI * 2;
+            const r0 = 8 + Math.sin(i * 7.3 + t * 0.5) * 1.5;
+            const r1 = irisR - 2;
+            g.strokeStyle = `rgba(${awakened ? "255,100,140" : "255,40,90"},${0.15 + (i % 3) * 0.1})`;
+            g.lineWidth = i % 4 === 0 ? 1.2 : 0.6;
+            g.beginPath();
+            g.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+            g.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+            g.stroke();
+        }
+        g.restore();
+
+        // кольцо
+        g.strokeStyle = `rgba(255,60,100,${0.6 + Math.sin(t * 2) * 0.2})`;
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.arc(lookX, lookY, irisR - 1, 0, Math.PI * 2);
+        g.stroke();
+
+        // glow
+        g.save();
+        g.globalCompositeOperation = "lighter";
+        const glowGrad = g.createRadialGradient(lookX, lookY, irisR - 4, lookX, lookY, irisR + 10);
+        glowGrad.addColorStop(0, `rgba(255,0,68,${0.3 + wake * 0.4})`);
+        glowGrad.addColorStop(1, "rgba(255,0,68,0)");
+        g.fillStyle = glowGrad;
+        g.beginPath();
+        g.arc(lookX, lookY, irisR + 10, 0, Math.PI * 2);
+        g.fill();
+        g.restore();
+
+        // ── зрачок ──
+        drawPupil(lookX, lookY, pupilR, t, awakened);
+
+        // scanline
+        g.fillStyle = `rgba(255,0,68,${0.06 + wake * 0.04})`;
+        for (let y = 0; y < H; y += 4) {
+            g.fillRect(0, (y + (t * 20) % 4) | 0, W, 1);
+        }
+
+        // hurt
+        if (hurt > 0.01) {
+            g.fillStyle = `rgba(255,0,68,${hurt * 0.35})`;
+            g.fillRect(0, 0, W, H);
+        }
+
+        g.restore();
+
+        // ── контур глаза (острый) ──
+        eyePath(rx, Math.max(2, ry));
+        g.strokeStyle = `rgba(212,175,55,${0.7 + Math.sin(t * 1.5) * 0.2})`;
+        g.lineWidth = 2;
+        g.stroke();
+
+        // ── шипы ──
+        if (closeAmt < 0.5) drawSpikes(t, closeAmt);
+
+        // ── трещины на веке ──
+        drawCracks();
+    }
+
+    // ── главный цикл ──
+    api.frame((dt, t) => {
+        const rect = cv.getBoundingClientRect();
+
+        // ── цель зрачка ──
+        if (mouseInsideCanvas && lastMX >= 0) {
+            // мышь над canvas: точное следование
+            targetX = CX + (lastMX - rect.left - CX) * 0.6;
+            targetY = CY + (lastMY - rect.top - CY) * 0.6;
+        } else if (lastMX >= 0) {
+            // мышь ГДЕ-ТО на странице (возможно далеко): смотрим по направлению
+            const dx = lastMX - (rect.left + CX);
+            const dy = lastMY - (rect.top + CY);
+            const d = Math.hypot(dx, dy) || 1;
+            // угол на цель, зрачок упирается в край глаза
+            const reachX = Math.max(-EYE_W * 0.7, Math.min(EYE_W * 0.7, dx / d * EYE_W * 0.75));
+            const reachY = Math.max(-EYE_H * 0.55, Math.min(EYE_H * 0.55, dy / d * EYE_H * 0.6));
+            targetX = CX + reachX;
+            targetY = CY + reachY;
+        } else {
+            targetX = CX + Math.sin(t * 0.3) * 40;
+            targetY = CY + Math.cos(t * 0.4) * 15;
+        }
+
+        // пружина
+        lookX += (targetX - lookX) * Math.min(1, dt * 7);
+        lookY += (targetY - lookY) * Math.min(1, dt * 7);
+
+        // микро-саккады
+        twitchIn -= dt;
+        if (twitchIn <= 0) {
+            twitchX = (Math.random() - 0.5) * 3;
+            twitchY = (Math.random() - 0.5) * 2;
+            twitchIn = 0.4 + Math.random() * 1.2;
+        }
+        lookX += twitchX * 0.3;
+        lookY += twitchY * 0.3;
+
+        // моргание
+        nextBlinkIn -= dt;
+        if (nextBlinkIn <= 0 && blink <= 0) {
+            blink = 1;
+            nextBlinkIn = 2.5 + Math.random() * 4;
+            if (mood === "TIRED") nextBlinkIn = 1 + Math.random() * 1.5;
+            if (wake > 0.5) nextBlinkIn = 0.5 + Math.random() * 1.2;
+        }
+        if (blink > 0) { blink -= dt * 2.8; if (blink < 0) blink = 0; }
+        const closeAmt = blink > 0 ? Math.sin(blink * Math.PI) : 0;
+
+        // зрачок: расширение
+        if (mouseInsideCanvas && lastMX >= 0) {
+            pupilTargetR = 12 + (1 - Math.min(1, Math.hypot(lastMX - rect.left - CX, lastMY - rect.top - CY) / 150)) * 5;
+        } else {
+            pupilTargetR = 14;
+        }
+        if (wake > 0.5) pupilTargetR += 3;
+        pupilR += (pupilTargetR - pupilR) * Math.min(1, dt * 5);
+        if (wake > 0) { pupilR += wake * 2.5; wake = Math.max(0, wake - dt * 0.15); }
+
+        // hurt
+        if (hurt > 0) hurt = Math.max(0, hurt - dt * 1.5);
+        // заливка кровью медленно сходит
+        if (bloodSplatter > 0) bloodSplatter = Math.max(0, bloodSplatter - dt * 0.5);
+
+        // настроение
+        moodTimer -= dt;
+        if (moodTimer <= 0 && mood !== "AWAKENED" && mood !== "ANGRY") {
+            mood = Math.random() < 0.2 ? "SUSPICIOUS" : "WATCHING";
+            moodTimer = 2 + Math.random() * 4;
+        }
+        if (mood === "AWAKENED" && moodTimer <= 0) { mood = "WATCHING"; moodTimer = 5; }
+        if (mood === "ANGRY" && moodTimer <= 0) { mood = "WATCHING"; moodTimer = 5; }
+        if (st.textContent !== mood) st.textContent = mood;
+
+        // bpm
+        lastBpmTick += dt;
+        if (lastBpmTick > 60 / bpm) {
+            lastBpmTick = 0;
+            if (Math.random() < 0.02) bpm = 60 + (Math.random() * 40 | 0);
+            if (mood === "ANGRY") bpm = 110 + (Math.random() * 20 | 0);
+        }
+        if (Math.abs(parseInt(bp.textContent) - bpm) > 1) bp.textContent = bpm;
+
+        // рендер
+        drawEye(t, closeAmt);
+        drawBlood();
+        drawBytes();
+
+        // flash
+        if (flashTimer > 0) {
+            flashTimer -= dt;
+            flash.style.opacity = Math.max(0, flashTimer * 2).toFixed(2);
+        } else flash.style.opacity = "0";
+
+        // микро-тряска
+        if (hurt > 0.05) {
+            const ox = (Math.random() - 0.5) * hurt * 8;
+            const oy = (Math.random() - 0.5) * hurt * 8;
+            cv.style.transform = `translate(${ox}px,${oy}px)`;
+        } else cv.style.transform = "";
+    }, { fps: 30 });
+
+    // cleanup при переключении вкладки
+    const oldMake = el.dataset.eyeInited;
+    el.dataset.eyeInited = "1";
+}},
 
 { id: "scope", icon: "〰", title: "СИГНАЛ", make(el, api) {
 	el.innerHTML = '<canvas width="440" height="112"></canvas><div class="tb-hud"><b data-r="m">SINE</b> · <span data-r="f">0</span> Hz · клик = режим</div>';
@@ -6195,7 +6684,7 @@ const CC_IMG_ALPHA  = 0.75;         // максимальная непрозра
 	/* фон на всю высоту <site>, листается вместе со страницей */
 	.cc-bg{
 		position:absolute; left:0; right:0; top:0; bottom:0;
-		z-index:-1; pointer-events:none; overflow:hidden;
+		z-index:0; pointer-events:none; overflow:hidden;
 		background:rgba(3,0,2,${CC_DIM_MID});
 	}
 	/* боковые блоки: градиент тёмный у края страницы → прозрачный к центру, лежит под кодом */
@@ -6313,7 +6802,6 @@ const CC_IMG_ALPHA  = 0.75;         // максимальная непрозра
 		const cs = getComputedStyle(site);
 		if(cs.display === "inline") site.style.display = "block";
 		if(cs.position === "static") site.style.position = "relative";
-		site.style.isolation = "isolate";           // z-index:-1 остаётся внутри <site>
 		const bg = document.createElement("div");
 		bg.className = "cc-bg";
 		bg.innerHTML = '<div class="cc-side cc-L"><div class="cc-cols"></div></div>'

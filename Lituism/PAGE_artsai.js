@@ -164,6 +164,15 @@ REGISTER_PAGE("artsai", "A.I. 🖼", function(){
 				letter-spacing: 4px;
 			}
 		}
+		
+		.ai-card-rate.unrated {
+			color: #6a4a55;
+			font-weight: 400;
+			font-size: 0.8rem;
+			letter-spacing: 2px;
+			text-shadow: none;
+			font-style: italic;
+		}
 		</style>
 
 		<div class="ai-gallery-wrap">
@@ -221,10 +230,19 @@ REGISTER_PAGE("artsai", "A.I. 🖼", function(){
 
 				if (currentSort === 'default') {
 					items = shuffle(items);
-				} else if (currentSort === 'rate-desc') {
-					items.sort((a, b) => (b.RATE || 0) - (a.RATE || 0));
-				} else if (currentSort === 'rate-asc') {
-					items.sort((a, b) => (a.RATE || 0) - (b.RATE || 0));
+				} else if (currentSort === 'rate-desc' || currentSort === 'rate-asc') {
+					const dir = currentSort === 'rate-desc' ? -1 : 1;
+					items.sort((a, b) => {
+						const ra = Number(a.RATE);
+						const rb = Number(b.RATE);
+						const aUnrated = !Number.isFinite(ra) || ra < 0;
+						const bUnrated = !Number.isFinite(rb) || rb < 0;
+						// «не оценён» всегда в конце, независимо от направления
+						if (aUnrated && bUnrated) return 0;
+						if (aUnrated) return 1;
+						if (bUnrated) return -1;
+						return dir * (ra - rb);
+					});
 				}
 
 				if (counter) {
@@ -243,13 +261,20 @@ REGISTER_PAGE("artsai", "A.I. 🖼", function(){
 
 					const fileName = getFileName(item.SOURCE);
 
+					const rate = Number(item.RATE);
+					const isUnrated = !Number.isFinite(rate) || rate < 0;
+
+					const rateHtml = isUnrated
+						? `<div class="ai-card-rate unrated">✖ БЕЗ ОЦЕНКИ</div>`
+						: `<div class="ai-card-rate">⭐ ${rate}<span>/100</span></div>`;
+
 					html += `
 					<div class="ai-card" data-url="${item.SOURCE}">
 						<div class="ai-card-img-wrap">
 							<img src="${item.SOURCE}" alt="AI Artifact" loading="lazy" onerror="this.src='https://woowz11.github.io/woowzsite/source/error-image.png'">
 						</div>
 						<div class="ai-card-info">
-							<div class="ai-card-rate">⭐ ${item.RATE || 0}<span>/100</span></div>
+							${rateHtml}
 							<div class="ai-card-size">☣ ${fileName} · L O A D I N G . . .</div>
 						</div>
 					</div>

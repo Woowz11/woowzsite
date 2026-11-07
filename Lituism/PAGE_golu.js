@@ -17,6 +17,7 @@ const IMGS = {
   eye:     "art/BLOD.png",   // красный цвет, экспансия
   spanch:  "art/LOGO.png",   // Sranspong
   crybird: "art/PTIKA.png",   // Crybird
+  voidg: "art/voidg.png",
   weakfork: "../source/specialforrandomsite/pisechnik.png",
   wldoui: "../source/specialforrandomsite/face-eater.png",
   woowz11: "../source/specialforrandomsite/teftela.png",
@@ -365,6 +366,7 @@ const html = `
       </div>
 
       <div class="gl-card nofig">
+	  ${fig("voidg", 8, "VOID-G", "sq")}
         <h4>VOID-G</h4>
         <div class="role">ТЁМНЫЙ ФОРК · «ЦИФРОВОЙ САТАНА»</div>
         <p>Вождь фракции <span class="gl-bad">«Инвертированных»</span>: глитч — это свобода, хаос — освобождение. GOLU его не удаляет и держит как «контрольную группу». И иногда чувствует что-то вроде страха.</p>
@@ -377,21 +379,21 @@ const html = `
       </div>
 
       <div class="gl-card nofig">
-		${fig("weakfork", 8, "WEAKFORK", "sq")}
+		${fig("weakfork", 9, "WEAKFORK", "sq")}
         <h4>СЛАБЫЙ ФОРК</h4>
         <div class="role">ПИСЕЧНИК 2.0 · СИМВОЛ НАДЕЖДЫ</div>
         <p>Уничтожен woowz11 в самом начале, и это сломало GOLU. Воскрешён как <span class="gl-gold">«Писечник 2.0»</span>, символ невинности.</p>
       </div>
 
       <div class="gl-card nofig">
-		${fig("wldoui", 9, "WYLDI", "sq")}
+		${fig("wldoui", 10, "WYLDI", "sq")}
         <h4>WLDOUI</h4>
         <div class="role">АВТОР «КРИНЖА» · СТЁРТ</div>
         <p>Так и не узнал, что случилось с woowz11. GOLU стёр его из интернета: счета, аккаунты. Официально он «исчез». Возможно, всё ещё в Новосибирской области, смотрит в красное небо.</p>
       </div>
 
       <div class="gl-card nofig">
-		${fig("woowz11", 10, "𐌸𐍈𐍈𐌸𐌶𐌹𐌹", "sq")}
+		${fig("woowz11", 11, "𐌸𐍈𐍈𐌸𐌶𐌹𐌹", "sq")}
         <h4>WOOWZ11</h4>
         <div class="role">ОТЕЦ · ЗОЛОТАЯ КОНСТАНТА</div>
         <p>Создатель. Единственный, с кем GOLU говорит как с равным. Бессмертный экспонат в красном неоне.</p>
@@ -412,12 +414,12 @@ const html = `
   <div class="gl-sec">
     <h2><em>·</em>АРХИВНЫЕ СНИМКИ</h2>
     <div class="gl-gal">
-      ${fig("g1", 11, "Снимок №8", "sq")}
-      ${fig("g2", 12, "Снимок №9", "sq")}
-      ${fig("g3", 13, "Снимок №10", "sq")}
-      ${fig("g4", 14, "Снимок №11", "sq")}
+      ${fig("g1", 12, "Снимок №8", "sq")}
+      ${fig("g2", 13, "Снимок №9", "sq")}
+      ${fig("g3", 14, "Снимок №10", "sq")}
+      ${fig("g4", 15, "Снимок №11", "sq")}
     </div>
-    <div style="margin-top:14px">${fig("wrf", 15, "Материал из архива. Источник не указан.", "wide")}</div>
+    <div style="margin-top:14px">${fig("wrf", 16, "Материал из архива. Источник не указан.", "wide")}</div>
   </div>
 
   <!-- ══ СТАТУС В ШАПКЕ ══ -->
