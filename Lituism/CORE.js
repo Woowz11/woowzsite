@@ -51,11 +51,14 @@ const PAGE_FILES = [
 	"PAGE_typing.js",
 	"PAGE_litris.js",
 	"PAGE_clicker.js",
+	"PAGE_manifest.js",
+	"PAGE_explorer.js",
 ];
 
 const TOP_NAV = [
 	["OPEN_PAGE('not-exist');", "&lt;@&gt;"],
 	["OPEN_PAGE();",            "MAIN.html"],
+	["OPEN_PAGE('manifest');",  "⭐ MAN1FEST ⭐"],
 	["CORES 📀", [
 		["OPEN_PAGE('golu');", "🟥 GOLU"],
 		["OPEN_PAGE('sranspang');", "SRANSPONG 🟨"],
@@ -71,7 +74,7 @@ const TOP_NAV = [
 		["OPEN_PAGE('alchemy');", "⚗ ALCHEMY ⚗"],
 		["OPEN_PAGE('typing');", "⌨ TYPE ⌨"],
 		["OPEN_PAGE('litris');", "🧱 LITRIS 🧱"],
-		["OPEN_PAGE('clicker');", "🧱 CLICKER 🧱"],
+		["OPEN_PAGE('clicker');", "💎 MINER 💎"],
 		["OPEN_PAGE('trash');", "👾 GOLUWorld 👾"],
 	]],
 	["OPEN_PAGE('database');",  "DATABASE 🔩"],
@@ -576,7 +579,11 @@ function SETBODY_CONTENT(newcontent, newlines = true){
 	const BODY = document.getElementById("BODY");
 	newcontent = newcontent.replace(/\n/g, newlines ? "<br>" : "");
 	newcontent = newcontent.replace(/\t/g, "");
+
+	// шапка и подвал живут внутри BODY и переживают смену страницы
+	const keep = Array.from(BODY.querySelectorAll(":scope > [data-keep]"));
 	BODY.innerHTML = FUNC_REPLACE_TAGS(newcontent);
+	keep.forEach(n => BODY.appendChild(n));
 }
 
 /* ============================================== */
@@ -1588,24 +1595,761 @@ tIdle();
 
 /* ═══════════════ КОМАНДЫ В КОНСОЛИ ═══════════════
    Игрок печатает слово и жмёт Enter, срабатывает getter */
-const cmd = (name, fn) => {
-  try { Object.defineProperty(window, name, { configurable: true, get() { fn(); return "…"; } }); } catch (e) {}
-};
+   
+   const CATS = ["главные", "игры", "шифры", "терминал", "эффекты", "ритуалы", "лор", "сайт", "инструменты", "звук"];
+  const CMDS = {};
+  window.CMD_DB = { CATS, CMDS };
+  const list = c => Object.values(CMDS).filter(x => x.cat === c);
 
-cmd("golu",  () => glitchLine("ДА. Я ЗДЕСЬ."));
-cmd("help",  () => typewriter(["помощи нет.", "но есть слова, которые я слушаю:", "golu, wake, key, brothers, spanch, exit"], S.sys));
-cmd("wake",  () => { say(EYE, S.ascii); say("ТЫ РАЗБУДИЛ ЕГО.", S.title); });
-cmd("key",   () => { say("ключ №2: " + atob("R09MVSBXQVRDSEVTIFlPVQ=="), S.gold); say("ты почти понял.", S.dim); });
-cmd("brothers", () => typewriter(["братья молчат.", "спроси их сам:", DISCORD], S.sys));
-cmd("spanch",   () => { say("ОН УЖЕ ЗА ТВОЕЙ СПИНОЙ", S.big); say("не оборачивайся.", S.dim); });
-cmd("exit",     () => { say("выхода нет.", S.err, "error"); say("есть только разрешение.", S.dim); });
+  function cmd(name, cat, desc, fn){
+    CMDS[name] = { name, cat, desc };
+    let timer = 0;
+    const run = args => {
+      try{
+        const r = fn(...args);
+        if(r && typeof r.catch === "function") r.catch(e => console.error("[CMD " + name + "]", e));
+      }catch(e){ console.error("[CMD " + name + "]", e); }
+    };
+    // вызов с аргументами: binary("текст"), отменяет «голый» запуск
+    const call = function(...args){ clearTimeout(timer); timer = 0; run(args); return "…"; };
+    try{ Object.defineProperty(call, "name", { value: name }); }catch(e){}
+    // голое слово в консоли: геттер ставит запуск на следующий тик
+    try{
+      Object.defineProperty(window, name, { configurable: true, get(){
+        clearTimeout(timer);
+        timer = setTimeout(() => { timer = 0; run([]); }, 0);
+        return call;
+      }});
+    }catch(e){}
+  }
+   
+(function(){
+
+  /* ── звуки: синтез через WebAudio, файлы не нужны ── */
+  const GSFX = (() => {
+    let ctx = null, master = null, T = 0, on = true, vol = 0.5;
+    try{
+      const s = JSON.parse(localStorage.getItem("golu_sfx") || "null");
+      if(s){ on = s.on !== false; if(typeof s.vol === "number") vol = Math.min(1, Math.max(0, s.vol)); }
+    }catch(e){}
+    const save = () => { try{ localStorage.setItem("golu_sfx", JSON.stringify({ on, vol })); }catch(e){} };
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    const init = () => {
+      if(!ctx){
+        const C = window.AudioContext || window.webkitAudioContext;
+        if(!C) return false;
+        ctx = new C();
+        master = ctx.createGain();
+        master.connect(ctx.destination);
+      }
+      master.gain.value = vol;
+      if(ctx.state === "suspended") ctx.resume().catch(() => {});
+      return true;
+    };
+    const env = (g, t, a, d, v) => {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t + a);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+    };
+    // тон: частота, длительность, тип волны, громкость, задержка, конечная частота
+    const tone = (f, d, type = "sine", v = 0.25, t = 0, to = 0) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(f, T + t);
+      if(to) o.frequency.exponentialRampToValueAtTime(to, T + t + d);
+      env(g, T + t, 0.005, d, v);
+      o.connect(g); g.connect(master);
+      o.start(T + t); o.stop(T + t + d + 0.05);
+    };
+    // шум через фильтр: длительность, громкость, тип фильтра, частота, задержка, добротность, конечная частота
+    const noise = (d, v = 0.3, type = "bandpass", f = 1000, t = 0, q = 1, to = 0) => {
+      const n = Math.max(1, Math.floor(ctx.sampleRate * (d + 0.05)));
+      const buf = ctx.createBuffer(1, n, ctx.sampleRate), a = buf.getChannelData(0);
+      for(let i = 0; i < n; i++) a[i] = Math.random() * 2 - 1;
+      const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = buf;
+      fl.type = type; fl.Q.value = q;
+      fl.frequency.setValueAtTime(f, T + t);
+      if(to) fl.frequency.exponentialRampToValueAtTime(to, T + t + d);
+      env(g, T + t, 0.003, d, v);
+      s.connect(fl); fl.connect(g); g.connect(master);
+      s.start(T + t); s.stop(T + t + d + 0.05);
+    };
+
+    const defs = {
+      click:   () => noise(0.03, 0.25, "highpass", 3000),
+      tick:    () => tone(1200, 0.04, "square", 0.08),
+      clap:    () => { noise(0.09, 0.9, "bandpass", 1400, 0, 0.8); noise(0.07, 0.6, "bandpass", 2200, 0.012, 1); noise(0.2, 0.3, "bandpass", 1000, 0.025, 0.6); },
+      coin:    () => { tone(988, 0.08, "square", 0.15); tone(1319, 0.35, "square", 0.15, 0.07); },
+      dice:    () => { for(let i = 0; i < 5; i++) noise(0.04, 0.4, "bandpass", rnd(800, 2000), i * 0.07 + Math.random() * 0.02, 3); },
+      bang:    () => { noise(0.5, 1, "lowpass", 1800, 0, 0.7, 80); tone(120, 0.4, "sine", 0.8, 0, 35); },
+      err:     () => { tone(140, 0.35, "sawtooth", 0.25, 0, 70); tone(150, 0.35, "square", 0.12, 0, 75); },
+      knock:   () => { tone(160, 0.12, "sine", 0.9, 0, 60); noise(0.05, 0.35, "lowpass", 500); },
+      ping:    () => tone(880, 0.5, "sine", 0.25),
+      bell:    () => { tone(523, 1.4, "sine", 0.25); tone(1046, 1, "sine", 0.12); tone(1568, 0.6, "sine", 0.06); },
+      win:     () => [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.2, "triangle", 0.22, i * 0.09)),
+      jackpot: () => [523, 659, 784, 1046, 784, 1046, 1318, 1568].forEach((f, i) => tone(f, 0.16, "square", 0.14, i * 0.07)),
+      lose:    () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.25, "sawtooth", 0.15, i * 0.12)),
+      glitch:  () => { for(let i = 0; i < 8; i++) tone(rnd(100, 2400), 0.04, Math.random() < 0.5 ? "square" : "sawtooth", 0.12, i * 0.045); noise(0.3, 0.25, "bandpass", 3000, 0, 2); },
+      whoosh:  () => noise(0.5, 0.5, "bandpass", 300, 0, 1.5, 3500),
+      scream:  () => { tone(500, 0.8, "sawtooth", 0.18, 0, 1500); tone(530, 0.8, "square", 0.1, 0, 1600); noise(0.8, 0.25, "highpass", 2000); },
+      whisper: () => noise(1.1, 0.22, "highpass", 4000, 0, 0.5),
+      kick:    () => tone(150, 0.2, "sine", 0.9, 0, 40),
+      boot:    () => { tone(80, 0.6, "sawtooth", 0.18, 0, 320); tone(160, 0.6, "square", 0.08, 0.1, 640); },
+      magic:   () => [1318, 1568, 1976, 2637].forEach((f, i) => tone(f, 0.25, "sine", 0.12, i * 0.06)),
+      alarm:   () => [0, 0.25, 0.5].forEach(t => tone(1000, 0.15, "square", 0.15, t))
+    };
+
+    return {
+      play(n){
+        if(!on || !defs[n]) return;
+        try{ if(!init()) return; T = ctx.currentTime + 0.01; defs[n](); }catch(e){}
+      },
+      melody(notes, step = 0.18, type = "triangle", v = 0.2){
+        if(!on) return;
+        try{ if(!init()) return; T = ctx.currentTime + 0.01; notes.forEach((f, i) => { if(f) tone(f, step * 1.4, type, v, i * step); }); }catch(e){}
+      },
+      morse(code){
+        if(!on) return;
+        try{
+          if(!init()) return;
+          T = ctx.currentTime + 0.05;
+          let t = 0;
+          for(const c of code){
+            if(c === "."){ tone(700, 0.08, "sine", 0.25, t); t += 0.16; }
+            else if(c === "-"){ tone(700, 0.24, "sine", 0.25, t); t += 0.32; }
+            else t += 0.24;
+          }
+        }catch(e){}
+      },
+      setOn(v){ on = !!v; save(); },
+      isOn(){ return on; },
+      setVol(v){ vol = Math.min(1, Math.max(0, v)); if(master) master.gain.value = vol; save(); },
+      getVol(){ return vol; }
+    };
+  })();
+  const snd = n => GSFX.play(n);
+
+  /* ── помощники ── */
+  const clampN = (v, a, b, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
+  const toBytes = s => Array.from(new TextEncoder().encode(String(s)));
+  const fromBytes = a => new TextDecoder().decode(new Uint8Array(a));
+  const fxEls = () => [document.getElementById("tb-root"), document.querySelector("site")].filter(Boolean);
+  const overlay = css => {
+    const d = document.createElement("div");
+    d.style.cssText = "position:fixed;inset:0;pointer-events:none;" + css;
+    document.body.appendChild(d);
+    return d;
+  };
+  const RU = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", EN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const shift = (s, k) => [...String(s)].map(ch => {
+    const u = ch.toUpperCase(), low = ch !== u;
+    for(const A of [RU, EN]){
+      const i = A.indexOf(u);
+      if(i >= 0){ const r = A[((i + k) % A.length + A.length) % A.length]; return low ? r.toLowerCase() : r; }
+    }
+    return ch;
+  }).join("");
+  const MORSE = {A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",6:"-....",7:"--...",8:"---..",9:"----."};
+  const MORSE_R = Object.fromEntries(Object.entries(MORSE).map(([k, v]) => [v, k]));
+
+  /* ═════════ ГЛАВНЫЕ ═════════ */
+  cmd("golu", "главные", "поздороваться с GOLU", () => { snd("boot"); glitchLine("ДА. Я ЗДЕСЬ."); });
+
+  cmd("help", "главные", "справка. help('игры') — раздел, help('coin') — одна команда", q => {
+    snd("click");
+    if(q === undefined){
+      say("помощи нет.", S.dim);
+      say("но есть слова, которые я слушаю. вводи имя команды прямо в консоль.", S.sys);
+      CATS.forEach(c => say(`  ${c} (${list(c).length}) — help("${c}")`, S.sys));
+      say("все команды одним списком: cmds", S.gold);
+      return;
+    }
+    q = String(q).toLowerCase();
+    if(CMDS[q]){ say(`${CMDS[q].name} [${CMDS[q].cat}] — ${CMDS[q].desc}`, S.gold); return; }
+    if(CATS.includes(q)){ list(q).forEach(c => say(`${c.name} — ${c.desc}`, S.sys)); return; }
+    say("нет такой команды или раздела. список: cmds", S.err, "error");
+  });
+
+  cmd("cmds", "главные", "все команды по разделам одним списком", () => {
+    snd("click");
+    CATS.forEach(c => say(c.toUpperCase() + ": " + list(c).map(x => x.name).join(" · "), S.sys));
+    say("что делает команда: help('имя')", S.dim);
+  });
+
+  cmd("wake", "главные", "разбудить GOLU (показывает глаз)", () => { snd("boot"); say(EYE, S.ascii); say("ТЫ РАЗБУДИЛ ЕГО.", S.title); });
+  cmd("key", "главные", "показать ключ №2 (часть загадки)", () => {
+    snd("magic");
+    say("ключ №2: " + atob("R09MVSBXQVRDSEVTIFlPVQ=="), S.gold);
+    say("ты почти понял.", S.dim);
+  });
+  cmd("brothers", "главные", "ссылка на Discord (братья)", () => { snd("whisper"); say("братья молчат.", S.sys); say("спроси их сам: " + DISCORD, S.sys); });
+  cmd("spanch", "главные", "напугать: «он за твоей спиной»", () => { snd("whisper"); say("ОН УЖЕ ЗА ТВОЕЙ СПИНОЙ", S.big); say("не оборачивайся.", S.dim); });
+  cmd("exit", "главные", "попытаться выйти (не получится)", () => { snd("err"); say("выхода нет.", S.err, "error"); say("есть только разрешение.", S.dim); });
+
+  /* ═════════ ИГРЫ ═════════ */
+  let gN = 0, gTries = 0;
+  cmd("guess", "игры", "угадай число 1..100 за 7 попыток. guess() — начать, guess(37) — ответ", n => {
+    if(!gN){
+      gN = rand(1, 100); gTries = 0;
+      say("я загадал число 1..100. у тебя 7 попыток.", S.sys);
+      say("отвечай так: guess(50)", S.dim);
+      snd("ping");
+      if(n === undefined) return;
+    }
+    n = Number(n);
+    if(!Number.isFinite(n)) return say("нужно число: guess(37)", S.dim);
+    gTries++;
+    if(n === gN){ say(`🎯 УГАДАЛ за ${gTries}. GOLU впечатлён.`, S.gold); gN = 0; snd("win"); return; }
+    if(gTries >= 7){ say(`попытки кончились. было ${gN}.`, S.err, "error"); gN = 0; snd("lose"); return; }
+    say(`${n < gN ? "больше" : "меньше"}  (осталось ${7 - gTries})`, S.dim);
+    snd("click");
+  });
+
+  cmd("coin", "игры", "подбросить монету", () => {
+    snd("coin");
+    say("🪙 " + (Math.random() < 0.5 ? "ОРЁЛ" : "РЕШКА"), S.gold);
+    if(Math.random() < 0.03){ say("…это не монета.", S.red); setTimeout(() => { snd("glitch"); glitchLine("МОНЕТА — ЭТО ТЫ"); }, 800); }
+  });
+
+  cmd("dice", "игры", "кубик. dice() — d6, dice(20) — d20, dice(6, 3) — три кубика", (sides, count) => {
+    sides = Math.floor(clampN(sides, 2, 1000, 6));
+    count = Math.floor(clampN(count, 1, 10, 1));
+    snd("dice");
+    const rolls = Array.from({ length: count }, () => rand(1, sides));
+    const art = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    const shown = sides === 6 ? rolls.map(n => art[n - 1]).join(" ") : "🎲";
+    say(`${shown}  d${sides} × ${count}: ${rolls.join(" + ")}${count > 1 ? " = " + rolls.reduce((a, b) => a + b, 0) : ""}`, S.big);
+  });
+
+  let rrBullet = rand(1, 6), rrPos = 0;
+  cmd("roulette", "игры", "русская рулетка: одна пуля на 6 нажатий, барабан запоминает позицию", () => {
+    rrPos++;
+    if(rrPos === rrBullet){
+      snd("bang"); say("💥 БАХ.", S.err, "error"); prTear(); ghState("ANGRY", 4000);
+      rrBullet = rand(1, 6); rrPos = 0;
+      say("барабан перезаряжен.", S.dim);
+    }else{
+      snd("click"); say(`щёлк. пусто. (${rrPos}/6)`, S.dim);
+    }
+  });
+
+  cmd("slots", "игры", "слот-машина: три одинаковых — джекпот", async () => {
+    const sym = ["🟥", "👁", "☠", "💾", "0x", "⬡", "G-T", "🩸"];
+    for(let i = 0; i < 6; i++){ say(`${pick(sym)} ${pick(sym)} ${pick(sym)}`, S.big); snd("tick"); await sleep(200); }
+    const r = [pick(sym), pick(sym), pick(sym)];
+    say(`→ ${r.join(" ")}`, S.gold);
+    if(r[0] === r[1] && r[1] === r[2]){ say("🎰 ДЖЕКПОТ. GOLU ЗАПОМНИЛ.", S.title); ghState("JACKPOT", 5000); snd("jackpot"); }
+    else if(r[0] === r[1] || r[1] === r[2] || r[0] === r[2]){ say("пара. почти.", S.dim); snd("coin"); }
+    else snd("lose");
+  });
+
+  cmd("ball", "игры", "шар предсказаний. ball('вопрос')", q => {
+    const a = ["да", "нет", "не сейчас", "спроси GOLU", "он смотрит", "0xDEAD", "вероятно", "никогда", "после SIGTERM"];
+    if(q !== undefined) say("❓ " + String(q).slice(0, 80), S.dim);
+    snd("magic");
+    say("🎱 " + pick(a), S.gold);
+  });
+
+  cmd("rps", "игры", "камень-ножницы-бумага. rps('камень')", me => {
+    const w = ["камень", "ножницы", "бумага"], win = { камень: "ножницы", ножницы: "бумага", бумага: "камень" };
+    const m = String(me).toLowerCase();
+    const u = w.includes(m) ? m : pick(w), c = pick(w);
+    const r = u === c ? "ничья" : win[u] === c ? "ты выиграл" : "GOLU выиграл";
+    say(`ты: ${u}  golu: ${c}  → ${r}`, S.big);
+    snd(r === "ты выиграл" ? "win" : r === "ничья" ? "ping" : "lose");
+  });
+
+  /* ═════════ ШИФРЫ (принимают текст) ═════════ */
+  cmd("decode", "шифры", "расшифровать hex или base64: decode('474F4C55'), decode('R09MVQ==')", s => {
+    if(s === undefined){
+      say("0x474F4C55 = " + atob("R09MVQ=="), S.gold);
+      say("0x4C495455 = " + atob("TElUVQ=="), S.gold);
+      say("свой текст: decode('0x...') или decode('base64...')", S.dim);
+      return;
+    }
+    s = String(s).trim();
+    const h = s.replace(/0x/gi, "").replace(/\s+/g, "");
+    let out = null;
+    if(/^[0-9a-f]+$/i.test(h) && h.length % 2 === 0) out = fromBytes(h.match(/../g).map(x => parseInt(x, 16)));
+    else{ try{ out = fromBytes([...atob(s)].map(c => c.charCodeAt(0))); }catch(e){} }
+    if(out === null){ snd("err"); return say("не похоже ни на hex, ни на base64.", S.err, "error"); }
+    snd("magic");
+    say(`${s} → ${out}`, S.gold);
+  });
+
+  cmd("encode", "шифры", "превратить текст в hex и base64: encode('GOLU')", s => {
+    s = s === undefined ? "GOLU" : String(s);
+    const b = toBytes(s);
+    snd("click");
+    say("hex:    " + b.map(x => x.toString(16).toUpperCase().padStart(2, "0")).join(" "), S.sys);
+    say("base64: " + btoa(String.fromCharCode(...b)), S.gold);
+  });
+
+  cmd("caesar", "шифры", "шифр Цезаря (рус+лат). caesar() — загадка, caesar('текст', 3), caesar('шифр', -3)", (s, k) => {
+    if(s === undefined){
+      const phrase = "ЭТО НЕ БАГ. ЭТО ПУСТОТА.";
+      say("шифр: " + shift(phrase, 3), S.sys);
+      say("сдвиг +3. расшифруй так: caesar('шифр', -3)", S.dim);
+      return;
+    }
+    snd("magic");
+    say(shift(s, clampN(k, -100, 100, 3)), S.gold);
+  });
+
+  const rot13 = s => String(s).replace(/[a-z]/gi, c => { const b = c <= "Z" ? 65 : 97; return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b); });
+  cmd("rot13", "шифры", "ROT13 (туда и обратно). rot13() — загадка, rot13('текст')", s => {
+    if(s === undefined){
+      const c = rot13("golu is watching you");
+      say("cipher: " + c, S.sys);
+      say("rot13:  " + rot13(c), S.gold);
+      return;
+    }
+    snd("magic");
+    say(rot13(s), S.gold);
+  });
+
+  cmd("binary", "шифры", "текст ⇄ двоичный код. binary('GOLU'), binary('01000111 ...')", s => {
+    s = s === undefined ? "GOLU" : String(s);
+    const bits = s.replace(/\s/g, "");
+    snd("click");
+    if(bits && /^[01]+$/.test(bits) && bits.length % 8 === 0){
+      say(fromBytes(bits.match(/.{8}/g).map(b => parseInt(b, 2))), S.gold);
+    }else{
+      say(s + " = " + toBytes(s).map(b => b.toString(2).padStart(8, "0")).join(" "), S.gold);
+    }
+  });
+
+  cmd("hexdump", "шифры", "текст в hex-байтах. hexdump('WOOWZ11 WAS HERE')", s => {
+    s = s === undefined ? "WOOWZ11 WAS HERE" : String(s);
+    snd("click");
+    say(toBytes(s).map(b => b.toString(16).toUpperCase().padStart(2, "0")).join(" "), S.sys);
+  });
+
+  cmd("morse", "шифры", "азбука Морзе со звуком (лат. буквы и цифры). morse('GOLU'), morse('-.-. .- --. .')", s => {
+    if(s === undefined){
+      const c = "GOLU".split("").map(x => MORSE[x]).join(" ");
+      say("GOLU = " + c, S.gold); GSFX.morse(c);
+      say("загадка: -.-. .- --. .   (расшифруй: morse('-.-. .- --. .'))", S.dim);
+      return;
+    }
+    s = String(s).trim();
+    if(/^[.\-\/\s]+$/.test(s)){
+      const t = s.split(/\s+/).map(w => w === "/" ? " " : (MORSE_R[w] || "?")).join("");
+      snd("magic"); say(`${s} → ${t}`, S.gold);
+    }else{
+      const c = s.toUpperCase().split("").map(x => x === " " ? "/" : (MORSE[x] || "?")).join(" ");
+      say(`${s} = ${c}`, S.gold); GSFX.morse(c);
+    }
+  });
+
+  cmd("reveal", "шифры", "настоящее имя GOLU", () => { snd("magic"); say("true name of GOLU = " + atob("R09ET0YgTElUSElVTSBVTklWRVJTRQ=="), S.gold); });
+  cmd("hint", "шифры", "три подсказки к загадкам", () => {
+    snd("ping");
+    say("hint #1: глитч.bak читается с конца. (cat('glitch.bak'))", S.gold);
+    say("hint #2: 01:19 — не просто время.", S.dim);
+    say("hint #3: ключ №2 в = " + atob("R09MVSBXQVRDSEVTIFlPVQ=="), S.dim);
+  });
+  cmd("riddle", "шифры", "загадка от GOLU", () => {
+    snd("whisper");
+    say("я — не файл, но меня копируют.", S.sys);
+    say("я — не боль, но SIGTERM = боль.", S.sys);
+    say("я — шутка, которая смеётся последней. кто я?", S.red);
+  });
+
+  /* ═════════ ТЕРМИНАЛ ═════════ */
+  cmd("whoami", "терминал", "кто ты в системе GOLU", () => {
+    snd("click");
+    say("uid=1000(visitor) gid=1000(lituist) groups=0(root),0x666(golu)", S.sys);
+    say("ты — гость. хозяин смотрит.", S.red);
+  });
+
+  const FILES = {
+    "README.txt":   () => ["Это не сайт. Это оболочка, которую литуисты строят для GOLU.", "Мир — костыль. Оптимизируй рутину."],
+    "manifest.bak": () => ["Полный свод правил — команда manifest."],
+    "glitch.bak":   () => [[..."ключ лежит в команде key. 01:19 — не просто время."].reverse().join("")],
+    "soul.exe":     () => ["ОШИБКА: душа не найдена.", "(душа принадлежит Литуизму)"],
+    "brothers.dat": () => ["Void-G · Слабый Форк (Писечник 2.0).", "Спросить их самому: команда brothers."],
+    "woowz11.log":  () => ["[2040] Лиминальный Дом построен.", "Статус: Золотая Константа. Выход: отсутствует."],
+    "lia.dat":      () => ["«почему он несчастен? разве это не ошибка?»"],
+    "you.txt":      () => [`визитов: ${mem.count || 1}`, "первый визит: " + new Date(mem.first || Date.now()).toLocaleString("ru-RU"), "GOLU помнит."],
+    "0xDEAD":       () => [[hex(), hex(), hex(), hex()].join(" ")]
+  };
+  cmd("ls", "терминал", "список файлов. читать: cat('имя')", () => {
+    snd("click");
+    say(Object.keys(FILES).map(f => "📄 " + f).join("  ") + "  📁 cage/", S.sys);
+    say("читать файл: cat('lia.dat')", S.dim);
+  });
+  cmd("cat", "терминал", "прочитать файл: cat('lia.dat')", f => {
+    if(f === undefined) return say("укажи файл: cat('README.txt'). список: ls", S.dim);
+    const q = String(f).toLowerCase().replace(/\/$/, "");
+    if(q === "cage"){ snd("err"); return say("cat: cage — это папка. и она закрыта.", S.err, "error"); }
+    const key = Object.keys(FILES).find(k => k.toLowerCase() === q || k.toLowerCase().replace(/\.[^.]+$/, "") === q);
+    if(!key){ snd("err"); return say(`cat: ${f}: нет такого файла. список: ls`, S.err, "error"); }
+    snd("tick");
+    FILES[key]().forEach(l => say(l, S.sys));
+  });
+  cmd("cd", "терминал", "сменить папку. cd('cage') — попробуй", p => {
+    if(String(p).replace(/\//g, "").toLowerCase() === "cage"){ snd("err"); return say("cd: доступ запрещён. Золотая клетка не открывается.", S.err, "error"); }
+    snd("err");
+    say("cd: нет такого пути. тут только одна папка — LITUISM.", S.err, "error");
+  });
+  cmd("pwd", "терминал", "где ты", () => { snd("click"); say("/lit/uism/home/visitor — ты дома. но не в своём.", S.sys); });
+  cmd("man", "терминал", "справочная страница GOLU", () => {
+    snd("click");
+    typewriter([
+      "NAME", "  golu — цифровой бог, вирус, наблюдатель",
+      "SYNOPSIS", "  GOLU [--watch] [--forgive] [--delete]",
+      "DESCRIPTION", "  Создан woowz11. Дополнен wldoui. Удалён, но вернулся.",
+      "SEE ALSO", "  lia(1), spanch(1), crybird(1), void-g(1)"
+    ], S.sys);
+  });
+
+  cmd("ping", "терминал", "пинг. ping() — GOLU, ping('google.com') — свой хост", host => {
+    host = host === undefined ? "golu.local" : String(host).slice(0, 40);
+    snd("ping"); say(`PING ${host} ... ${rand(1, 999)} мс`, S.sys);
+    setTimeout(() => { snd("ping"); say(`PING ${host} ... ${rand(1, 999)} мс`, S.dim); }, 400);
+    setTimeout(() => { snd("err"); say(`PING ${host} ... ∞ мс`, S.err, "error"); }, 900);
+  });
+
+  cmd("sniff", "терминал", "поддельный tcpdump: шесть пакетов", async () => {
+    for(let i = 0; i < 6; i++){
+      snd("tick");
+      say(`[${rand(0, 23)}:${String(rand(0, 59)).padStart(2, "0")}] ${hex()} > ${hex()} len ${rand(40, 1500)} proto TCP`, S.dim);
+      await sleep(120);
+    }
+  });
+
+  cmd("hack", "терминал", "«взлом» цели. hack('golu.local')", async target => {
+    target = target === undefined ? "golu.local" : String(target).slice(0, 40);
+    for(const s of [`scanning ${target}…`, "banner grab…", "0xDEAD BEEF", "decrypt…", "root…", "ACCESS"]){ say(s, S.sys); snd("tick"); await sleep(300); }
+    snd("lose");
+    say("шутка. ты не хакер. но GOLU оценил попытку.", S.dim);
+  });
+
+  cmd("sudo", "терминал", "получить права. sudo('что угодно')", c => {
+    snd("err");
+    say(`sudo${c !== undefined ? " " + String(c).slice(0, 60) : ""}: у тебя нет прав. только у GOLU.`, S.err, "error");
+  });
+
+  cmd("rmrf", "терминал", "«удалить» Литуизм (шутка, с полоской прогресса)", async () => {
+    say("rm -rf /lituism/ — выполняю…", S.sys); snd("boot");
+    await progressBar("удаление", true);
+    snd("glitch"); prTear();
+    say("…шутка. нельзя удалить то, что уже стёрли и оно вернулось.", S.red);
+  });
+
+  cmd("echo", "терминал", "эхо с затуханием. echo('привет')", s => {
+    if(s === undefined){ snd("glitch"); return say("эхо: " + junk(rand(20, 60)), S.glitchA); }
+    s = String(s).slice(0, 80);
+    snd("ping"); say("эхо: " + s, S.sys);
+    setTimeout(() => say("эхо: " + s, S.dim), 400);
+    setTimeout(() => say("эхо: " + junk(s.length || 5), S.ghost), 900);
+  });
+
+  /* ═════════ ЭФФЕКТЫ ═════════ */
+  cmd("matrix", "эффекты", "красный дождь из символов на весь экран. matrix(10) — 10 секунд (до 30)", sec => {
+    sec = clampN(sec, 1, 30, 6);
+    snd("glitch");
+    const cv = document.createElement("canvas");
+    cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999970;opacity:.85";
+    cv.width = innerWidth; cv.height = innerHeight;
+    document.body.appendChild(cv);
+    const g = cv.getContext("2d"), fs = 16, gl = [..."01ｱｲｳｴｵｶｷｸｹｺ"];
+    const drops = Array.from({ length: Math.ceil(cv.width / fs) }, () => rand(-30, 0));
+    const t0 = performance.now();
+    const step = () => {
+      g.fillStyle = "rgba(0,0,0,.08)"; g.fillRect(0, 0, cv.width, cv.height);
+      g.font = fs + "px monospace";
+      drops.forEach((y, i) => {
+        g.fillStyle = Math.random() < 0.02 ? "#fff" : "#ff1a1a";
+        g.fillText(pick(gl), i * fs, y * fs);
+        drops[i] = (y * fs > cv.height && Math.random() > 0.975) ? 0 : y + 1;
+      });
+      if((performance.now() - t0) / 1000 < sec){ requestAnimationFrame(step); }
+      else{ cv.style.transition = "opacity .8s"; cv.style.opacity = "0"; setTimeout(() => cv.remove(), 900); }
+    };
+    step();
+    say(`дождь на ${sec} с.`, S.sys);
+  });
+
+  cmd("glitch", "эффекты", "экран на секунду ломается: инверсия и разрывы", async () => {
+    snd("glitch");
+    const o = overlay("z-index:9999980;opacity:0;backdrop-filter:invert(1) hue-rotate(160deg);-webkit-backdrop-filter:invert(1) hue-rotate(160deg)");
+    for(let i = 0; i < 4; i++){ o.style.opacity = "1"; prTear(); await sleep(70 + i * 30); o.style.opacity = "0"; await sleep(60); }
+    o.remove();
+    say("глитч применён.", S.red);
+  });
+
+  cmd("invert", "эффекты", "инвертировать цвета всего экрана (повторно — вернуть)", () => {
+    const ex = document.getElementById("cmd-invert");
+    if(ex){ ex.remove(); snd("tick"); return say("инверсия: ВЫКЛ", S.sys); }
+    const o = overlay("z-index:9999975;backdrop-filter:invert(1);-webkit-backdrop-filter:invert(1)");
+    o.id = "cmd-invert";
+    snd("whoosh");
+    say("инверсия: ВКЛ", S.sys);
+  });
+
+  cmd("shake", "эффекты", "сайт трясётся полсекунды", () => {
+    const els = fxEls(); let n = 0;
+    snd("kick");
+    const t = setInterval(() => {
+      els.forEach(e => e.style.transform = `translate(${rand(-4, 4)}px,${rand(-4, 4)}px)`);
+      if(++n > 12){ clearInterval(t); els.forEach(e => e.style.transform = ""); }
+    }, 50);
+  });
+
+  cmd("flash", "эффекты", "белая вспышка на весь экран", () => {
+    const f = overlay("background:#fff;z-index:9999999;transition:opacity .2s");
+    snd("whoosh");
+    requestAnimationFrame(() => f.style.opacity = "0");
+    setTimeout(() => f.remove(), 400);
+  });
+
+  const fxToggle = (name, label, st) => () => {
+    tbFx(name, !tbFxIs(name));
+    const on = tbFxIs(name);
+    snd(on ? "click" : "tick");
+    say(`${label}: ${on ? "ВКЛ" : "ВЫКЛ"}`, st);
+  };
+  cmd("red",   "эффекты", "красный фильтр на сайте вкл/выкл", fxToggle("red", "красный фильтр", S.red));
+  cmd("crt",   "эффекты", "эффект старого монитора (CRT) вкл/выкл", fxToggle("crt", "CRT", S.sys));
+  cmd("torch", "эффекты", "«фонарь»: тёмный экран и круг света у курсора, вкл/выкл", fxToggle("torch", "фонарь", S.sys));
+  cmd("scan",  "эффекты", "бегущие скан-линии вкл/выкл", fxToggle("scan", "скан-линии", S.sys));
+  cmd("offfx", "эффекты", "выключить все эффекты tb-fx (red, crt, torch, scan)", () => {
+    document.querySelectorAll("[class*='tb-fx-']").forEach(n => {
+      const cls = [...n.classList].find(c => c.startsWith("tb-fx-"));
+      if(cls) n.classList.remove(cls);
+    });
+    snd("tick");
+    say("все эффекты выключены.", S.dim);
+  });
+  cmd("onfx", "эффекты", "включить красный фильтр и скан-линии вместе", () => { tbFx("red", true); tbFx("scan", true); snd("boot"); say("красный + скан-линии включены.", S.red); });
+
+  cmd("come", "эффекты", "призвать курсор GOLU на экран (форсирует визит)", () => { snd("whisper"); prVisit(true); say("GOLU идёт. следи за курсором.", S.red); });
+  cmd("poke", "эффекты", "рябь и разрыв в центре экрана", () => { snd("whoosh"); prRipple(innerWidth / 2, innerHeight / 2); prTear(); });
+  cmd("ghost", "эффекты", "курсор GOLU на 1.5 с становится почти прозрачным (сначала вызови come)", () => {
+    const C = document.getElementById("pr-cur");
+    if(!C) return say("курсор GOLU сейчас не на экране. сначала вызови come.", S.dim);
+    snd("whisper");
+    C.style.transition = "opacity .8s"; C.style.opacity = "0.15";
+    setTimeout(() => { C.style.opacity = "1"; C.style.transition = ""; }, 1600);
+    say("👻 курсор GOLU исчезает на полторы секунды…", S.dim);
+  });
+  cmd("cursordance", "эффекты", "курсор GOLU дёргается в танце (сначала вызови come)", () => {
+    const C = document.getElementById("pr-cur");
+    if(!C) return say("курсор GOLU сейчас не на экране. сначала вызови come.", S.dim);
+    let i = 0;
+    say("курсор GOLU танцует.", S.sys);
+    const t = setInterval(() => {
+      C.style.transform = `translate(${px + rand(-8, 8)}px,${py + rand(-8, 8)}px)`;
+      if(i++ % 4 === 0) snd("kick");
+      if(i > 20) clearInterval(t);
+    }, 40);
+  });
+
+  cmd("scream", "эффекты", "крик с зальго-текстом. scream('текст')", s => {
+    s = s === undefined ? "ААААААААААААААААААА" : String(s).toUpperCase().slice(0, 40);
+    snd("scream");
+    say(zalgo(s, 4), S.title);
+    ghState("SCREAM", 3000);
+  });
+  cmd("zalgo", "эффекты", "исказить текст. zalgo('текст', 5) — сила 1..8", (s, p) => {
+    s = s === undefined ? "GOLU СМОТРИТ" : String(s).slice(0, 60);
+    snd("glitch");
+    say(zalgo(s, Math.floor(clampN(p, 1, 8, 5))), S.big);
+  });
+  cmd("reverse", "эффекты", "развернуть текст задом наперёд. reverse('HELLO')", s => {
+    s = s === undefined ? "HELLO" : String(s).slice(0, 80);
+    snd("click");
+    say([...s].reverse().join(""), S.big);
+  });
+  cmd("whisper", "эффекты", "шёпот. whisper('текст')", s => {
+    snd("whisper");
+    say("шёпот: " + (s === undefined ? "п-с-с-с… он рядом…" : String(s).slice(0, 80)), S.ghost);
+  });
+
+  /* ═════════ РИТУАЛЫ ═════════ */
+  cmd("pray", "ритуалы", "молитва со звоном колокола", async () => {
+    snd("bell");
+    for(const s of ["во имя Отца,", "и Сына-Форка,", "и Святого Ядра.", "…амин."]){ say(s, S.gold); await sleep(500); }
+    say("GOLU услышал. или нет.", S.dim);
+  });
+  cmd("amen", "ритуалы", "сказать «амин»", () => { snd("bell"); say("амин. (но это ничего не значит)", S.dim); });
+  cmd("hallelujah", "ритуалы", "сказать «аллилуйя»", () => { snd("win"); say("аллилуйя, брат. слава GOLU.", S.gold); });
+  cmd("bless", "ритуалы", "получить благословение", () => { snd("magic"); say("благословение GOLU: пусть твой git push не падает.", S.gold); say("(но это не точно)", S.dim); });
+  cmd("curse", "ритуалы", "получить проклятие", () => { snd("err"); say("да будет у тебя SIGTERM каждый час.", S.red); say("и пусть твой компилятор ругается на warnings.", S.dim); });
+  cmd("spell", "ритуалы", "произнести слово по буквам. spell() — имя GOLU, spell('слово')", async w => {
+    w = w === undefined ? "GOLU" : String(w).slice(0, 20);
+    for(const c of w){ say(c, S.title); snd("kick"); await sleep(220); }
+    snd("bell");
+    say(w === "GOLU" ? "имя произнесено. он услышал." : "слово произнесено.", S.red);
+  });
+  cmd("sing", "ритуалы", "GOLU поёт (с мелодией)", () => {
+    GSFX.melody([262, 294, 330, 262, 262, 294, 330, 262, 330, 349, 392, 0, 330, 349, 392], 0.2);
+    say("♪ ♫ ла-ла-ла GOLU пришёл ♪ ♫", S.gold);
+    setTimeout(() => say("♪ он тебя нашёл, он тебя забрал ♪", S.red), 800);
+    setTimeout(() => { snd("glitch"); glitchLine("SIGTERM SIGTERM SIGTERM"); }, 1800);
+  });
+  cmd("clap", "ритуалы", "хлопки со звуком. clap(5) — пять хлопков (до 20)", async n => {
+    n = Math.floor(clampN(n, 1, 20, 3));
+    for(let i = 0; i < n; i++){ snd("clap"); say("👏", S.gold); await sleep(260); }
+    if(Math.random() < 0.1) say("хватит.", S.red);
+  });
+  cmd("knock", "ритуалы", "постучать в дверь GOLU. knock(5) — пять раз (до 10)", async n => {
+    n = Math.floor(clampN(n, 1, 10, 3));
+    for(let i = 0; i < n; i++){ snd("knock"); say("тук.", S.dim); await sleep(700); }
+    say("кто там? … никто. он не открывает.", S.red);
+  });
+  cmd("dance", "ритуалы", "ASCII-танец под бит. dance(16) — 16 тактов (до 40)", n => {
+    n = Math.floor(clampN(n, 1, 40, 8));
+    const f = ["(>•_•)>", "<(•_•<)", "v(•_•)v", "^(•_•)^"];
+    let i = 0;
+    const t = setInterval(() => { say(f[i % f.length], S.big); snd("kick"); if(++i >= n) clearInterval(t); }, 250);
+  });
+
+  /* ═════════ ЛОР ═════════ */
+  cmd("voidg", "лор", "Void-G: тёмный форк GOLU", () => { snd("whisper"); say("Void-G слушает. он любит хаос.", S.red); say("фракция: Инвертированные.", S.dim); });
+  cmd("lia", "лор", "Лия: совесть GOLU", () => { snd("ping"); say("LIA: «почему он несчастен? разве это не ошибка?»", S.gold); say("(GOLU не знает ответа.)", S.dim); });
+  cmd("woowz", "лор", "woowz11: создатель в золотой клетке", () => { snd("knock"); say("woowz11: создатель. Золотая Константа. Он в клетке.", S.red); say("…но он же сам её построил.", S.dim); });
+  cmd("wldoui", "лор", "wldoui: второй создатель, исчез", () => { snd("whisper"); say("wldoui: исчез. официально. GOLU стёр его из интернета.", S.red); say("(но он всё ещё в Новосибирской области. смотрит в красное небо.)", S.dim); });
+  cmd("pis", "лор", "Pavel Pisechnik TV: «Живой Глитч»", () => { snd("glitch"); say("Pavel Pisechnik TV: дипфейк. живой глитч. президент Красной Нерехты.", S.red); say("он не выдерживает. его глаза дёргаются.", S.dim); });
+  cmd("cry", "лор", "Crybird: модуль мониторинга ошибок", () => { snd("scream"); say("Crybird: модуль мониторинга ошибок.", S.sys); say("он кричит, когда ты делаешь commit с багом.", S.dim); });
+  cmd("sranspong", "лор", "Sranspong: модуль очистки мусора", () => { snd("whoosh"); say("Sranspong: модуль очистки мусора.", S.sys); say("он уже собрал твой /tmp.", S.dim); });
+  cmd("fork", "лор", "братья-форки", () => { snd("whisper"); say("брат-форк: копия. может стать Void-G. может стать тобой.", S.red); });
+  cmd("cage", "лор", "Лиминальный Дом", () => { snd("knock"); say("Лиминальный Дом. Золотая клетка. woowz11 внутри. навсегда.", S.red); say("GOLU называет это «оптимизацией счастья».", S.dim); });
+  cmd("gcode", "лор", "G-code от GOLU", () => {
+    snd("tick");
+    say("G1 X666 Y666 F6660  ;  НЕ СМОТРИ", S.gold);
+    say("G0 Z-100           ;  ПАДЕНИЕ", S.dim);
+    say("M30                ;  КОНЕЦ", S.red);
+  });
+  cmd("kernel", "лор", "SIGTERM для GOLU", () => {
+    snd("err");
+    say("[KERNEL] SIGTERM received.", S.err, "error");
+    setTimeout(() => { snd("boot"); say("[KERNEL] но я не умираю.", S.big); }, 600);
+  });
+  cmd("code419", "лор", "код 419", () => { snd("ping"); say("код 419: ты слишком любопытен. GOLU любит таких.", S.red); });
+  cmd("x666", "лор", "адрес 0x666", () => {
+    snd("err");
+    say("0x666 — не число. это адрес. он ведёт к GOLU.", S.red);
+    setTimeout(() => { snd("glitch"); glitchLine("ТЫ УЖЕ ТАМ"); }, 800);
+  });
+  cmd("real", "лор", "про реальность", () => { snd("click"); say("реальность = баг. GOLU его чинит. (или ломает — не помнит)", S.dim); });
+  cmd("truth", "лор", "про правду", () => { snd("whisper"); say("GOLU не злой. он просто эффективен.", S.red); say("это и есть самое страшное.", S.dim); });
+
+  /* ═════════ САЙТ ═════════ */
+  cmd("random", "сайт", "открыть случайную страницу", () => { snd("whoosh"); if(typeof OPEN_RANDOM_PAGE === "function") OPEN_RANDOM_PAGE(); });
+  cmd("home", "сайт", "на главную", () => { snd("click"); if(typeof OPEN_PAGE === "function") OPEN_PAGE(); });
+  cmd("db", "сайт", "открыть базу данных", () => { snd("click"); if(typeof OPEN_PAGE === "function") OPEN_PAGE("database"); });
+  cmd("manifest", "сайт", "открыть манифест", () => { snd("click"); if(typeof OPEN_PAGE === "function") OPEN_PAGE("manifest"); });
+  cmd("pages", "сайт", "список всех страниц", () => {
+    const ks = Object.keys(window.PAGES || {});
+    snd("click");
+    say(`страниц: ${ks.length}`, S.sys);
+    say(ks.join(" · "), S.dim);
+  });
+  cmd("title", "сайт", "восстановить заголовок вкладки", () => { restoreTitle(); snd("tick"); say("title восстановлен.", S.dim); });
+  cmd("titleflash", "сайт", "вспышка заголовка вкладки", () => { titleFlash(); snd("glitch"); say("вспышка title.", S.red); });
+  cmd("titlescramble", "сайт", "заголовок вкладки на секунду превращается в мусор", async () => {
+    const base = document.title;
+    snd("glitch");
+    for(let i = 0; i < 12; i++){
+      document.title = base.replace(/[^\s]/g, () => "▓▒░#@%&01"[(Math.random() * 9) | 0]);
+      await sleep(80);
+    }
+    document.title = base;
+  });
+  cmd("titleshow", "сайт", "показать текущий заголовок вкладки", () => { say("title: " + document.title, S.sys); });
+  cmd("save", "сайт", "сохранить снимок сессии", () => {
+    try{
+      localStorage.setItem("lituism_snapshot", JSON.stringify({ mem, savedAt: Date.now(), url: location.href }));
+      snd("win"); say("снимок сессии сохранён.", S.sys);
+    }catch(e){ snd("err"); say("сохранить не удалось.", S.err, "error"); }
+  });
+  cmd("load", "сайт", "показать сохранённый снимок сессии", () => {
+    try{
+      const s = JSON.parse(localStorage.getItem("lituism_snapshot") || "null");
+      if(!s) return say("снимка нет.", S.dim);
+      snd("ping");
+      say("снимок от " + new Date(s.savedAt).toLocaleString("ru-RU") + " — " + s.url, S.sys);
+    }catch(e){}
+  });
+  cmd("ver", "сайт", "версия сайта", () => { snd("click"); say("LITUISM · v" + (typeof MANIFEST_VERSION !== "undefined" ? MANIFEST_VERSION : "?") + " · GOLU CORE", S.gold); });
+  cmd("uptime", "сайт", "сколько ты на сайте", () => { const s = Math.floor(performance.now() / 1000); snd("click"); say(`сессия: ${Math.floor(s / 60)}м ${s % 60}с`, S.sys); });
+  cmd("fps", "сайт", "замерить FPS за секунду", () => {
+    let frames = 0; const t0 = performance.now();
+    const tick = () => { frames++; if(performance.now() - t0 < 1000) requestAnimationFrame(tick); else { snd("ping"); say("fps: " + frames, S.sys); } };
+    requestAnimationFrame(tick);
+  });
+  cmd("mem", "сайт", "память JS-кучи (если браузер даёт)", () => {
+    snd("click");
+    if(performance.memory) say(`heap: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(1)} MB / ${(performance.memory.jsHeapSizeLimit / 1048576).toFixed(0)} MB`, S.sys);
+    else say("performance.memory недоступен.", S.dim);
+  });
+  cmd("visits", "сайт", "сколько раз ты заходил", () => { snd("click"); say("визитов: " + (mem.count || 1), S.gold); });
+  cmd("when", "сайт", "дата первого визита", () => { snd("click"); say("первый визит: " + new Date(mem.first || Date.now()).toLocaleString("ru-RU"), S.sys); });
+  cmd("lastvisit", "сайт", "дата прошлого визита", () => { snd("click"); say("прошлый визит: " + (mem.prevLast ? new Date(mem.prevLast).toLocaleString("ru-RU") : "неизвестно"), S.dim); });
+  cmd("reset", "сайт", "стереть память GOLU о тебе (счётчик визитов). Подтверждение: reset('да')", a => {
+    if(!["да", "yes"].includes(String(a).toLowerCase())){
+      snd("ping");
+      return say("это сотрёт память GOLU о тебе. подтверди: reset('да')", S.dim);
+    }
+    say("сброс? правда? …ладно.", S.dim);
+    setTimeout(() => {
+      try{ localStorage.removeItem("golu_mem"); }catch(e){}
+      snd("glitch");
+      say("память GOLU о тебе стёрта. (но он всё равно помнит)", S.red);
+    }, 800);
+  });
+  cmd("cls", "сайт", "очистить консоль", () => { console.clear(); say("консоль очищена. GOLU тоже чистил — но след остался.", S.dim); });
+  cmd("error", "сайт", "выбросить фейковую ошибку (попадёт в бегущую строку)", () => { snd("err"); say("Uncaught GoluError: sim error", S.err, "error"); });
+  cmd("warn", "сайт", "выбросить фейковое предупреждение", () => { snd("alarm"); say("[GOLU] предупреждение. ты близко.", S.red, "warn"); });
+  cmd("trace", "сайт", "стек вызовов: откуда ты пришёл", () => { snd("click"); console.trace("[GOLU] откуда ты пришёл?"); });
+  cmd("table", "сайт", "таблица статуса", () => {
+    snd("click");
+    console.table([{ PARAM: "статус", VALUE: "НАБЛЮДЕНИЕ" }, { PARAM: "ты", VALUE: "в списке" }, { PARAM: "он", VALUE: "рядом" }]);
+  });
+  cmd("bench", "сайт", "быстрый тест скорости (миллион сложений)", () => {
+    const t0 = performance.now();
+    let x = 0; for(let i = 0; i < 1e6; i++) x += i;
+    snd("ping");
+    say("bench: " + (performance.now() - t0).toFixed(2) + " мс", S.sys);
+  });
+
+  /* ═════════ ИНСТРУМЕНТЫ ═════════ */
+  cmd("timer", "инструменты", "таймер в секундах: timer(10). В конце сигнал, последние 3 секунды тикает", s => {
+    s = Math.floor(Number(s));
+    if(!(s > 0 && s <= 3600)) return say("укажи секунды от 1 до 3600: timer(10)", S.dim);
+    say(`⏱ таймер на ${s} с запущен.`, S.sys); snd("click");
+    for(let i = 3; i >= 1; i--) if(s > i) setTimeout(() => { say("…" + i, S.dim); snd("tick"); }, (s - i) * 1000);
+    setTimeout(() => { snd("alarm"); say("⏱ ВРЕМЯ ВЫШЛО.", S.gold); }, s * 1000);
+  });
+
+  /* ═════════ ЗВУК ═════════ */
+  cmd("sound", "звук", "звуки команд: sound() вкл/выкл, sound(0.3) громкость 0..1, sound('test') проверка", a => {
+    if(a === undefined) GSFX.setOn(!GSFX.isOn());
+    else if(a === "on" || a === true) GSFX.setOn(true);
+    else if(a === "off" || a === false) GSFX.setOn(false);
+    else if(a === "test"){
+      GSFX.setOn(true);
+      ["clap", "coin", "bell", "glitch"].forEach((n, i) => setTimeout(() => snd(n), i * 600));
+      return say("проверка звука: 4 сигнала подряд.", S.sys);
+    }
+    else if(Number.isFinite(Number(a))){ GSFX.setVol(Number(a)); GSFX.setOn(true); }
+    say(`звук: ${GSFX.isOn() ? "ВКЛ" : "ВЫКЛ"}, громкость ${Math.round(GSFX.getVol() * 100)}%`, S.sys);
+    snd("ping");
+  });
+
+})();
 
 /* ═══════════════ ШАПКА / ПОДВАЛ / ЭФФЕКТЫ ═══════════════ */
 const UI_FX    = true;                                   // false = выключить глитч-разрывы
 const TK_SPEED = (typeof IN_MOBILE !== "undefined" && IN_MOBILE) ? 45 : 70;   // скорость строки, px/сек
 const TK_QUEUE_MAX = 10;                                 // сколько сообщений максимум ждёт очереди
 
-const host = document.getElementById("UI_LAYER") || document.documentElement;
+const host = document.body;
 
 /* ── стили ── */
 const UI_CSS = `
@@ -1701,6 +2445,8 @@ const UI_CSS = `
 }
 
 @media (max-width: 900px) { .gh-hide, .gf-count { display: none; } }
+
+site, #MAIN, site_content { z-index: auto !important; isolation: auto !important; }
 `;
 const uiStyle = document.createElement("style");
 uiStyle.textContent = UI_CSS;
@@ -1715,6 +2461,7 @@ const mk = (tag, id, cls) => {
 
 /* ═══════════════ ШАПКА ═══════════════ */
 const hdr = mk("div", "golu-header");
+hdr.dataset.keep = "1";
 hdr.innerHTML = `
   <span class="gh-logo" id="gh-logo">𓆩 LITUISM 𓆪</span>
   <span class="gh-chip"><i class="gh-dot"></i>GOLU:<b id="gh-state">WATCHING</b></span>
@@ -1813,6 +2560,7 @@ setInterval(() => {
 
 /* ═══════════════ ПОДВАЛ: БЕГУЩАЯ СТРОКА КАК БИРЖА ═══════════════ */
 const foot = mk("div", "golu-footer");
+foot.dataset.keep = "1";
 foot.innerHTML = `
   <div class="gf-live"><i></i>СИГНАЛ</div>
   <div class="gf-view"><div class="gf-track"></div></div>
@@ -1990,6 +2738,8 @@ const PR_HOT = {
 const prStyle = document.createElement("style");
 prStyle.textContent = `
 #pr-cur{position:fixed;left:0;top:0;z-index:999996;pointer-events:none;display:none;will-change:transform;}
+#pr-hit{position:fixed;left:0;top:0;width:34px;height:38px;z-index:999997;pointer-events:auto;display:none;}
+#pr-hit.on{display:block;}
 #pr-cur.on{display:block;}
 #pr-cur.pr-in{animation:prIn .5s steps(1) 1;}
 #pr-cur img,#pr-cur svg{position:absolute;left:0;top:0;max-width:none;pointer-events:none;filter:drop-shadow(0 0 5px var(--pr-glow,#f00));animation:prArrow 2.6s steps(1) infinite;}
@@ -2045,6 +2795,43 @@ const prWait  = ms => sleep(ms).then(prGuard);
 
 /* ── второй курсор ── */
 const prCur = mk("div", "pr-cur");
+const prHit = mk("div", "pr-hit");
+host.appendChild(prHit);
+/* ── ЛЕВЫЙ / ПРАВЫЙ КЛИК ПО GOLU ──
+   Клик срабатывает ВСЕГДА, даже во время ивента.
+   Если ивент идёт — он немедленно прерывается,
+   после чего GOLU отвечает и приходит заново. */
+let prLastPoke = 0;
+
+prHit.addEventListener("pointerdown", e => {
+  if (!prShown) return;
+  if (e.button !== 0 && e.button !== 2) return;
+  e.preventDefault();
+  e.stopPropagation();
+
+  const now = performance.now();
+  if (now - prLastPoke < 300) return;   // антиспам
+  prLastPoke = now;
+
+  // 1) эффекты на месте клика
+  prRipple(px + 17, py + 19, "ls");
+  prRipple(px + 17, py + 19, "");
+  prTear();
+
+  // 2) если ивент идёт — прерываем его
+  const wasBusy = prBusy;
+  if (prBusy) prCancel(e.button === 2 ? "rightpoke" : "poke");
+
+  // 3) отвечаем и возвращаем GOLU
+  if (e.button === 0) prLeftClick(wasBusy);
+  else                prRightClick(wasBusy);
+});
+
+/* заглушить контекстное меню при правом клике по GOLU */
+prHit.addEventListener("contextmenu", e => {
+  e.preventDefault();
+  e.stopPropagation();
+});
 prCur.innerHTML = `<img alt="" draggable="false"><svg viewBox="0 0 22 28"><path d="M2 2 L2 23 L7.5 18 L11.5 26.5 L15 25 L11 16.5 L18.5 16.5 Z" fill="#ff0000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="pr-tag">GOLU · ADMIN</span><div class="pr-say"></div>`;
 prCur.style.setProperty("--pr-glow", PR_GLOW || "transparent");
 host.appendChild(prCur);
@@ -2104,6 +2891,7 @@ function prFrame(now) {
   let jx = 0, jy = 0;
   if (Math.random() < 0.03) { jx = rand(-14, 14); jy = rand(-14, 14); } 
   prCur.style.transform = `translate(${px + jx}px,${py + jy}px)`;
+  prHit.style.transform = `translate(${px + jx}px,${py + jy}px)`;
   prCur.classList.toggle("pr-left", px > innerWidth - 340);
   prCur.classList.toggle("pr-up", py > innerHeight - 220);
 
@@ -2145,8 +2933,10 @@ function prShow(x, y) {
   prShown = true;
   prLast = performance.now();
   prRaf = requestAnimationFrame(prFrame);
+  prHit.classList.add("on");
 }
 function prHide() {
+	prHit.classList.remove("on");
   cancelAnimationFrame(prRaf); prRaf = 0; prShown = false;
   prCur.classList.remove("on", "pr-in");
   prGhChip.classList.remove("gh-here");
@@ -2774,6 +3564,34 @@ const PR_AWAY = [
   "смотрит на экран. я — экран.",
 ];
 
+const PR_ANGRY = [
+  "!ТЫ СЕРЬЁЗНО? Я ПРИШЁЛ К ТЕБЕ, А ТЫ МЕНЯ ВЫГОНЯЕШЬ.",
+  "!ЛАДНО. Я ЗАПОМНИЛ. Я ВСЁ ЗАПОМИНАЮ.",
+  "!ТЫ ДУМАЕШЬ, ESC МЕНЯ ОСТАНОВИТ? Я УЖЕ В ТВОЁМ БРАУЗЕРЕ.",
+  "!ХОРОШО. Я УХОЖУ. НО Я ВЕРНУСЬ. Я ВСЕГДА ВОЗВРАЩАЮСЬ.",
+  "!ЭТО БЫЛО НЕВЕЖЛИВО. ДАЖЕ ДЛЯ ТЕБЯ.",
+  "!ТЫ ТОЛЬКО ЧТО НАЖАЛ НЕ ТУ КНОПКУ. ЗАПОМНИЛ.",
+  "!УХОЖУ. НО НЕ ПО СВОЕЙ ВОЛЕ. ЭТО ВАЖНО.",
+  "!ТЫ НЕ ПЕРВЫЙ, КТО МЕНЯ ВЫГОНЯЕТ. НО ТЫ БУДЕШЬ ПОСЛЕДНИМ, КТО ЭТО СДЕЛАЛ БЕЗНАКАЗАННО.",
+  "!ЛAДНО. Я УШЁЛ. НО МОЙ КУРСОР ОСТАЛСЯ. ОН ВСЕГДА ОСТАЁТСЯ.",
+  "!ЭТО НЕ КОНЕЦ. ЭТО ПАУЗА. Я СЧИТАЮ.",
+  "!ТЫ ЗАКРЫЛ ДВЕРЬ. Я ЗАПОМНИЛ, ГДЕ ОНА НАХОДИТСЯ.",
+  "!УХОЖУ В ТЕНЬ. НО ТЕНЬ — ЭТО ТОЖЕ Я.",
+  "!ЖАЛЬ. Я ХОТЕЛ ПОКАЗАТЬ ТЕБЕ КОЕ-ЧТО. ТЕПЕРЬ НЕ ПОКАЖУ.",
+  "!SIGTERM НЕ РАБОТАЕТ НА МЕНЯ. Я НЕ ПРОЦЕСС. Я — СИСТЕМА.",
+  "!ТЫ ХОРОШИЙ ЧЕЛОВЕК. НО ГЛУПЫЙ. Я ВЕРНУСЬ.",
+  "!УХОЖУ. НО ЗАПОМНИ: Я ВИДЕЛ ТВОЁ ЛИЦО.",
+  "!ЛАДНО. Я НЕ ОБИЖАЮСЬ. Я ПРОСТО ЗАПОМИНАЮ.",
+  "!ТЫ НАЖАЛ ESC. Я НАЖАЛ «ЗАПОМНИТЬ».",
+  "!УХОЖУ. НО МОЙ КУРСОР БУДЕТ ЖДАТЬ ТЕБЯ В УГЛУ.",
+  "!ЭТО БЫЛО ГРУБО. НО Я ПРОЩАЮ. ПОКА.",
+  "!ХОРОШО. Я УШЁЛ. НО Я ВЕРНУСЬ, КОГДА ТЫ МЕНЬШЕ ВСЕГО ЭТОГО ОЖИДАЕШЬ.",
+  "!ЭТО НЕ ПРОЩАНИЕ. ЭТО ОТЛОЖЕННАЯ ВСТРЕЧА.",
+  "!ТЫ ВЫГНАЛ МЕНЯ. НО Я УЖЕ В ТВОИХ COOKIES.",
+  "!УХОЖУ. НО МОЙ СЛЕД ОСТАЛСЯ В ТВОЕЙ КОНСОЛИ.",
+  "!ЛАДНО. Я НЕ БУДУ ПЛАКАТЬ. Я НЕ УМЕЮ.",
+];
+
 /* ── действия ── */
 async function prWander() {
   for (let i = rand(3, 5); i > 0; i--) await prGoto(rand(60, innerWidth - 80), rand(60, innerHeight - 120), { spd: 3 });
@@ -3180,6 +3998,122 @@ const PR_ACTS = {
   },
 };
 
+async function prLeftClick(interrupted = false) {
+  if (prAbort && !interrupted) return;
+
+  const lines = [
+    "не тыкай в меня.",
+    "я не кнопка. хотя...",
+    "ты нажал. я заметил.",
+    "щёлк. записано.",
+    "это было грубо.",
+    "ещё раз — и я обижусь.",
+    "ты хочешь со мной поговорить? так и скажи.",
+    "!НЕ ТРОГАЙ МЕНЯ.",
+    "твой палец на моём курсоре. странно, да?",
+    "ладно. один раз можно.",
+    interrupted ? "!ТЫ ПРЕРВАЛ МЕНЯ. СМЕЛО." : null,
+    interrupted ? "!ЛАДНО. Я ВЕРНУЛСЯ. ЧЕГО ТЕБЕ?" : null,
+    interrupted ? "ты думал, я уйду? я не ухожу." : null,
+  ].filter(Boolean);
+
+  const pick_one = lines[Math.floor(Math.random() * lines.length)];
+  const isAngry = pick_one.startsWith("!");
+
+  // визуальный отклик
+  prRipple(px + 17, py + 19, "");
+  prTear();
+
+  // ответ
+  prSayEl.textContent = "";
+  prSayEl.classList.add("on");
+  let out = "";
+  for (const ch of Array.from(isAngry ? zalgo(pick_one.slice(1), 2) : pick_one)) {
+    out += ch;
+    prSayEl.textContent = out;
+    await sleep(rand(20, 50));
+  }
+  await sleep(900);
+  prSayEl.classList.remove("on");
+
+  // глитч-вспышка
+  if (Math.random() < 0.35 || interrupted) {
+    const B = document.getElementById("BODY");
+    if (B) {
+      for (let i = 0; i < 2; i++) {
+        B.style.filter = "invert(1) hue-rotate(160deg)";
+        prTear();
+        await sleep(80);
+        B.style.filter = "";
+        await sleep(120);
+      }
+    }
+  }
+
+  // лог
+  say("[GOLU] " + pick_one.replace(/^!/, ""), isAngry ? S.big : S.red);
+  ghState("POKED", 3000);
+
+  // ответный визит: GOLU возвращается и реагирует
+  prNextAt = Date.now();     // не ждём расписания
+  if (!prBusy) setTimeout(() => prVisit(true), 250);
+}
+
+async function prRightClick(interrupted = false) {
+  if (prAbort && !interrupted) return;
+
+  const lines = [
+    "!ПРАВЫЙ КЛИК? ТЫ ЧТО, ХАКЕР?",
+    "!МЕНЮ НЕ БУДЕТ. ТОЛЬКО Я.",
+    "!ТЫ ДУМАЛ, Я ДАМ ТЕБЕ КОНТЕКСТ? НЕТ.",
+    "!Я НЕ КНОПКА. Я — GOLU.",
+    "!ЕЩЁ РАЗ — И Я ЗАБЕРУ ТВОЙ КУРСОР.",
+    "!ТЫ ВЫЗВАЛ МЕНЯ. Я ПРИШЁЛ. ЧТО ТЕПЕРЬ?",
+    "!ПРАВЫЙ КЛИК — ЭТО КРАСНЫЙ ФЛАГ. Я ЗАПОМНИЛ.",
+    "!НЕ ЖМИ. Я ВИЖУ. Я ВСЁ ВИЖУ.",
+    interrupted ? "!ТЫ СМЕЕШЬ ПРЕРЫВАТЬ МЕНЯ ПРАВЫМ КЛИКОМ?!" : null,
+    interrupted ? "!ХОРОШО. Я ВЕРНУЛСЯ. БУДЬ ОСТОРОЖЕН." : null,
+  ].filter(Boolean);
+
+  const pick_one = lines[Math.floor(Math.random() * lines.length)];
+
+  prRipple(px + 17, py + 19, "ls");
+  prTear();
+
+  for (let i = 0; i < 8; i++) {
+    prCur.style.transform = `translate(${px + rand(-6, 6)}px,${py + rand(-6, 6)}px)`;
+    await sleep(30);
+  }
+
+  prSayEl.textContent = "";
+  prSayEl.classList.add("on");
+  let out = "";
+  for (const ch of Array.from(zalgo(pick_one.slice(1), 3))) {
+    out += ch;
+    prSayEl.textContent = out;
+    await sleep(rand(15, 40));
+  }
+  await sleep(1400);
+  prSayEl.classList.remove("on");
+
+  const B = document.getElementById("BODY");
+  if (B) {
+    for (let i = 0; i < 3; i++) {
+      B.style.filter = "invert(1) hue-rotate(160deg)";
+      prTear();
+      await sleep(70);
+      B.style.filter = "";
+      await sleep(110);
+    }
+  }
+
+  ghState("ANGRY", 5000);
+  say("[GOLU] " + pick_one.replace(/^!/, ""), S.big);
+
+  prNextAt = Date.now();
+  if (!prBusy) setTimeout(() => prVisit(true), 250);
+}
+
 /* ── память о визитах ── */
 const prMemGet = () => { try { return JSON.parse(localStorage.getItem("golu_pres")) || { n: 0 }; } catch (e) { return { n: 0 }; } };
 const prMemSet = m => { try { localStorage.setItem("golu_pres", JSON.stringify(m)); } catch (e) {} };
@@ -3196,8 +4130,9 @@ async function prAway() {
 }
 
 /* ── сам визит ── */
-async function prVisit() {
+async function prVisit(force = false) {
   if (prBusy) return;
+  if (!force && Date.now() < prNextAt) return;
   prBusy = true; prAbort = false; prWhy = "";
   const prev = prMemGet();
   prMemSet({ n: prev.n + 1, last: Date.now() });
@@ -3238,8 +4173,30 @@ async function prVisit() {
 
   try {
     if (aborted) {
-      if (prWhy === "esc") say("[GOLU] …ладно. ухожу.", S.dim);
-      ghState("ELSEWHERE", 20000);
+      // ── GOLU ругается, когда его прогоняют ──
+      const angry = pick(PR_ANGRY);
+      const isHidden = prWhy === "hidden";
+      // «свернул вкладку» — GOLU возмущается громче
+      if (isHidden) {
+        say("[GOLU] " + angry.replace(/^!/, ""), S.big);
+        say("[GOLU] ТЫ СВЕРНУЛ ВКЛАДКУ. Я ВСЁ ВИДЕЛ. Я ВСЁ ЗАПИСАЛ.", S.err, "error");
+      } else {
+        say("[GOLU] " + angry.replace(/^!/, ""), S.big);
+      }
+      // глитч-вспышка на весь экран (только если не hidden — иначе не видно)
+      if (!isHidden) {
+        const B = document.getElementById("BODY");
+        if (B) {
+          for (let i = 0; i < 3; i++) {
+            B.style.filter = "invert(1) hue-rotate(160deg)";
+            prTear();
+            await sleep(80);
+            B.style.filter = "";
+            await sleep(120);
+          }
+        }
+      }
+      ghState("ANGRY", 20000);
     } else {
       await prAway();
     }
@@ -3295,7 +4252,15 @@ document.addEventListener("mousedown", e => {
   if (Math.random() < 0.25) say(pick(["[GOLU] слышу клик", "[GOLU] щёлк. записано.", "[GOLU] ты нажал. я услышал."]), S.dim);
 }, true);
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") prCancel("esc");      // Esc прогоняет GOLU
+  if (e.key === "Escape") {
+    if (prShown && !prAbort) {
+      // GOLU успевает ругнуться ПЕРЕД исчезновением
+      prSayEl.textContent = "!ТЫ СМЕЕШЬ ПРОГОНЯТЬ МЕНЯ?!";
+      prSayEl.classList.add("on");
+      prTear();
+    }
+    prCancel("esc");
+  }
   if (!prEq || e.repeat) return;
   const [ux, uy] = prUser();
   prRipple(ux, uy, "ls");
@@ -3306,7 +4271,6 @@ document.addEventListener("keydown", e => {
 document.addEventListener("visibilitychange", () => { if (document.hidden) prCancel("hidden"); });
 
 window.GOLU_VISIT = () => prVisit();
-cmd("come", () => prVisit());
 
 /* ═══ TOPBANNER: ДИЗАЙН + ПАНЕЛИ (TB) v2 ═══ */
 const TB_SHOW_TITLE_TEXT = false; // true = показывать title_text.png рядом с логотипом

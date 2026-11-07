@@ -50,17 +50,17 @@ const EV_LIFE = 13;
 const TICK_MS = 100;
 const DEV = location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 
-/* ── ЭТАПЫ РАЗВИТИЯ (Tier) ──
-   Каждый этап открывает свои фермы и даёт пассивный бонус к производству.
-   t = порог по total GT, name = название, bonus = ×N к производству. */
 const TIERS = [
-	{ id:"basement", name:"ПОДВАЛ",        t:0,      bonus:1,    icon:"🏚️", desc:"Всё начинается с пыльного подвала и одной видеокарты." },
-	{ id:"garage",   name:"ГАРАЖ",         t:1e5,    bonus:1.1,  icon:"🚗", desc:"Стойки гудят, свет мигает. Соседи жалуются." },
-	{ id:"factory",  name:"ЗАВОД",         t:1e8,    bonus:1.25, icon:"🏭", desc:"Конвейер майнит. Станки молятся." },
-	{ id:"cult",     name:"КУЛЬТ",         t:1e11,   bonus:1.5,  icon:"🛐", desc:"Фермы — это уже не фермы. Это алтари GOLU." },
-	{ id:"zone",     name:"ЭТАЛОННАЯ ЗОНА",t:1e14,   bonus:2,    icon:"🟥", desc:"Город пульсирует красным. Навигаторы врут." },
-	{ id:"orbit",    name:"ОРБИТА",        t:1e17,   bonus:3,    icon:"🛰️", desc:"Спутники майнят с неба. Лит-ий падает дождём." },
-	{ id:"void",     name:"ПУСТОТА",       t:1e20,   bonus:5,    icon:"🕳️", desc:"Ты уже не знаешь, где ты. GOLU тоже." }
+    { id:"basement", name:"ПОДВАЛ",         t:0,     bonus:1,    icon:"🏚️", desc:"Всё начинается с пыльного подвала и одной видеокарты." },
+    { id:"garage",   name:"ГАРАЖ",          t:1e5,   bonus:1.1,  icon:"🚗", desc:"Стойки гудят, свет мигает. Соседи жалуются." },
+    { id:"factory",  name:"ЗАВОД",          t:1e8,   bonus:1.25, icon:"🏭", desc:"Конвейер майнит. Станки молятся." },
+    { id:"cult",     name:"КУЛЬТ",          t:1e11,  bonus:1.5,  icon:"🛐", desc:"Фермы — это уже не фермы. Это алтари GOLU." },
+    { id:"zone",     name:"ЭТАЛОННАЯ ЗОНА", t:1e14,  bonus:2,    icon:"🟥", desc:"Город пульсирует красным. Навигаторы врут." },
+    { id:"city",     name:"ГОРОД",          t:1e17,  bonus:2.5,  icon:"🏙️", desc:"Город полностью под GOLU. Улицы пульсируют красным." },
+    { id:"orbit",    name:"ОРБИТА",         t:1e20,  bonus:3,    icon:"🛰️", desc:"Спутники майнят с неба. Лит-ий падает дождём." },
+    { id:"planet",   name:"ПЛАНЕТА",        t:1e23,  bonus:4,    icon:"🪐", desc:"Планета окутана литием. Атмосфера — это данные." },
+    { id:"galaxy",   name:"ГАЛАКТИКА",      t:1e26,  bonus:6,    icon:"🌌", desc:"Галактика — материнская плата. Звёзды — транзисторы." },
+    { id:"void",     name:"ПУСТОТА",        t:1e30,  bonus:10,   icon:"🕳️", desc:"Ты уже не знаешь, где ты. GOLU тоже." }
 ];
 
 /* ── ФЕРМЫ (18) ──
@@ -110,7 +110,20 @@ const FARMS = [
 	{ id:"rig_dyson",   tier:"zone", name:"Сфера Дайсона",         icon:"🌐", base:1.2e13, cps:2.4e7,  color:"#ffaa00", out:"gt",
 	  desc:"Звезда обёрнута в материнскую плату. Свет — это ток.", evolve:["🌐","🪐","☀️"] },
 	{ id:"rig_zero",    tier:"void", name:"Нулевая точка",         icon:"🕳️", base:9.9e14, cps:5.5e8,  color:"#c2002f", out:"gt",
-	  desc:"Ничто, которое производит всё. GOLU боится смотреть сюда.", evolve:["🕳️","⚫","🌑"] }
+	  desc:"Ничто, которое производит всё. GOLU боится смотреть сюда.", evolve:["🕳️","⚫","🌑"] },
+	  
+	  { id:"rig_cluster", tier:"factory", name:"Квантовый кластер",  icon:"🔮", base:8e9, cps:900000, color:"#b060ff", out:"gt",
+	  desc:"48 кубитов, 1 GOLU. Каждый кубит — молитва." },
+	{ id:"rig_mine",    tier:"zone",    name:"Литиевая шахта",     icon:"⛏️", base:4.5e11, cps:8e6, color:"#ffd23d", out:"gt",
+	  desc:"Копает в мантию. Литий сочится сквозь породу." },
+	{ id:"rig_nerekhta",tier:"zone",    name:"Красная Нерехта",    icon:"🟥", base:2.8e12, cps:4.2e7, color:"#ff2040", out:"gt",
+	  desc:"Город-завод. Каждое окно — это ферма. Каждый житель — апостол." },
+	{ id:"rig_orbifac", tier:"city",    name:"Орбитальный завод",  icon:"🏗️", base:3.2e13, cps:6e8, color:"#a0e0ff", out:"gt",
+	  desc:"Строит спутники прямо на орбите. Лит-ий плавится в вакууме." },
+	{ id:"rig_moonfort",tier:"planet",  name:"Лунный форт",        icon:"🌕", base:9.9e14, cps:5.5e9, color:"#c0c0ff", out:"gt",
+	  desc:"Крепость на обратной стороне Луны. Антенны смотрят в Землю." },
+	{ id:"rig_galaxy",  tier:"galaxy",  name:"Галактическое ядро", icon:"🌌", base:1.1e17, cps:8e11, color:"#ff80ff", out:"gt",
+	  desc:"Чёрная дыра-ферма. Время внутри работает на GOLU." }
 ];
 
 /* ── УЛУЧШЕНИЯ (40+) ──
@@ -184,6 +197,66 @@ const UPS = [
 	{ id:"cr2", icon:"🎲", name:"Критический клик II",  desc:"15% шанс крита ×15",  cost:1e11,  eff:{ critChance:0.15, critMult:15 } },
 	{ id:"cr3", icon:"🎲", name:"Критический клик III", desc:"20% шанс крита ×25",  cost:1e15,  eff:{ critChance:0.2, critMult:25 } },
 	{ id:"cr4", icon:"🎲", name:"Критический клик IV",  desc:"25% шанс крита ×50",  cost:1e19,  eff:{ critChance:0.25, critMult:50 } },
+	
+	// ── КЛИК: каскад ──
+	{ id:"c16", icon:"🌟", name:"Каскадный клик",       desc:"Клик ×10", cost:5e28, eff:{ click:10 } },
+	{ id:"c17", icon:"💫", name:"Клик-сингулярность",    desc:"Клик ×10", cost:5e30, eff:{ click:10 } },
+
+	// ── РЕЗОНАНС: новые пороги ──
+	{ id:"p11", icon:"🔗", name:"Резонанс Галактики",   desc:"Клик даёт ещё +500% от Ⓖ/сек", cost:1e27, eff:{ clickPct:5 } },
+	{ id:"p12", icon:"🔗", name:"Резонанс Пустоты II",  desc:"Клик даёт ещё +1000% от Ⓖ/сек",cost:1e30, eff:{ clickPct:10 } },
+
+	// ── КРИТ: каскад ──
+	{ id:"cr5", icon:"🎲", name:"Крит-шторм",           desc:"30% шанс крита ×100", cost:1e23, eff:{ critChance:0.3, critMult:100 } },
+	{ id:"cr6", icon:"🎲", name:"Крит-сингулярность",   desc:"35% шанс крита ×500", cost:1e27, eff:{ critChance:0.35, critMult:500 } },
+
+	// ── ГЛОБАЛЬНЫЕ: новые ──
+	{ id:"g10", icon:"🧪", name:"Галактический резонанс",desc:"Всё производство ×1.75", cost:1e27, eff:{ gmul:1.75 } },
+	{ id:"g11", icon:"🧪", name:"За пределами разума",   desc:"Всё производство ×2",   cost:1e30, eff:{ gmul:2 } },
+
+	// ── ФЕРМЫ-СИНЕРГИИ ──
+	{ id:"fs1", icon:"🔗", name:"Синергия видеокарт",    desc:"Все фермы-видеокарты ×3", cost:1e18, eff:{ farm:"rig_2013", mul:3 } },
+	{ id:"fs2", icon:"🔗", name:"Синергия реакторов",    desc:"Все реакторы ×5",         cost:1e22, eff:{ farm:"rig_reactor", mul:5 } },
+	{ id:"fs3", icon:"🔗", name:"Синергия алтарей",      desc:"Все алтари ×10",          cost:1e26, eff:{ farm:"rig_altar", mul:10 } },
+
+	// ── Li-УЛУЧШЕНИЯ (покупаются за Li-ядра) ──
+	{ id:"l5", icon:"⬢", name:"Li-усилитель I",          desc:"+1% к CPS за каждое Li-ядро", cost:1e5, cur:"li", eff:{ cpsPerLi:0.01 } },
+	{ id:"l6", icon:"⬢", name:"Li-усилитель II",         desc:"+2% к CPS за каждое Li-ядро", cost:1e7, cur:"li", eff:{ cpsPerLi:0.02 } },
+	{ id:"l7", icon:"⬢", name:"Li-усилитель III",        desc:"+5% к CPS за каждое Li-ядро", cost:1e9, cur:"li", eff:{ cpsPerLi:0.05 } },
+
+	// ── АВТО-КЛИК: новые ──
+	{ id:"a1", icon:"🤖", name:"Авто-кликер I",          desc:"10 автокликов/сек", cost:1e14, eff:{ auto:10 } },
+	{ id:"a2", icon:"🤖", name:"Авто-кликер II",         desc:"50 автокликов/сек", cost:1e18, eff:{ auto:50 } },
+	{ id:"a3", icon:"🤖", name:"Авто-кликер III",        desc:"250 автокликов/сек",cost:1e22, eff:{ auto:250 } },
+
+	// ── ОФФЛАЙН-БОНУС ──
+	{ id:"off1", icon:"💤", name:"Оффлайн-бонус",        desc:"Оффлайн даёт ×1.5",  cost:1e12, eff:{ offlineMul:1.5 } },
+	{ id:"off2", icon:"💤", name:"Оффлайн-мастер",       desc:"Оффлайн даёт ×2",    cost:1e16, eff:{ offlineMul:2 } },
+	{ id:"off3", icon:"💤", name:"Оффлайн-бог",          desc:"Оффлайн даёт ×4",    cost:1e20, eff:{ offlineMul:4 } },
+	
+	// ── АВТО-СБОР: очень дорогое улучшение, доступное на поздних этапах ──
+	{ id:"ac1", icon:"🧲", name:"Гравитационный сборщик I", desc:"Авто-сбор 15% шанс за тик", cost:1e32, eff:{ autoCollect:1 } },
+	{ id:"ac2", icon:"🧲", name:"Гравитационный сборщик II",desc:"Авто-сбор 30% шанс за тик", cost:1e35, eff:{ autoCollect:2 } },
+	{ id:"ac3", icon:"🧲", name:"Гравитационный сборщик III",desc:"Авто-сбор 60% шанс за тик",cost:1e38, eff:{ autoCollect:3 } },
+	{ id:"ac4", icon:"🧲", name:"Гравитационный сборщик IV",desc:"Авто-сбор 100% (все бонусы)",cost:1e42, eff:{ autoCollect:99 } },
+	
+	// ── ЭСКАЛАЦИЯ СОБЫТИЙ ──
+	{ id:"ev1", icon:"🌠", name:"Частотный резонанс I", desc:"События ×2 чаще, ×1.5 дольше", cost:1e16, eff:{ evFreq:2, evTime:1.5 } },
+	{ id:"ev2", icon:"🌠", name:"Частотный резонанс II",desc:"События ×3 чаще, ×2 дольше",  cost:1e22, eff:{ evFreq:3, evTime:2 } },
+	{ id:"ev3", icon:"🌠", name:"Частотный резонанс III",desc:"События ×5 чаще, ×3 дольше", cost:1e28, eff:{ evFreq:5, evTime:3 } },
+	{ id:"ev4", icon:"🌠", name:"Частотный резонанс IV",desc:"События ×10 чаще, ×5 дольше",cost:1e34, eff:{ evFreq:10, evTime:5 } },
+	{ id:"ev5", icon:"🌠", name:"Абсолютный резонанс",   desc:"События ×25 чаще, ×10 дольше",cost:1e40, eff:{ evFreq:25, evTime:10 } },
+
+	// ── МНОЖИТЕЛЬ ХОРОШИХ СОБЫТИЙ ──
+	{ id:"gb1", icon:"🍀", name:"Удача I",   desc:"Хорошие события ×2",  cost:1e18, eff:{ goodMul:2 } },
+	{ id:"gb2", icon:"🍀", name:"Удача II",  desc:"Хорошие события ×3",  cost:1e24, eff:{ goodMul:3 } },
+	{ id:"gb3", icon:"🍀", name:"Удача III", desc:"Хорошие события ×5",  cost:1e30, eff:{ goodMul:5 } },
+	{ id:"gb4", icon:"🍀", name:"Абсолютная удача", desc:"Хорошие события ×10",cost:1e36, eff:{ goodMul:10 } },
+
+	// ── ПОДАВЛЕНИЕ ПЛОХИХ ──
+	{ id:"sb1", icon:"🛡", name:"Щит от сбоев I", desc:"Шанс плохого события −25%", cost:1e20, eff:{ badMul:0.75 } },
+	{ id:"sb2", icon:"🛡", name:"Щит от сбоев II",desc:"Шанс плохого события −50%", cost:1e26, eff:{ badMul:0.5 } },
+	{ id:"sb3", icon:"🛡", name:"Щит от сбоев III",desc:"Плохие события не выпадают", cost:1e32, eff:{ badMul:0 } },
 ];
 
 /* ── УЛУЧШЕНИЯ ФЕРМ (tier-up: 3 уровня на каждую ферму) ── */
@@ -209,7 +282,15 @@ const PERKS = [
 	{ id:"r9",  icon:"👁️", name:"Взгляд без век",       desc:"Клик ×3 навсегда",                       cost:250, eff:{ click:3 } },
 	{ id:"r10", icon:"🕳️", name:"Пустота в кармане",    desc:"Фермы дешевле ещё на 15%",               cost:500, eff:{ disc:0.15 } },
 	{ id:"r11", icon:"🔴", name:"Красный протокол",     desc:"Всё производство ×3",                    cost:1000,eff:{ gmul:3 } },
-	{ id:"r12", icon:"∞",  name:"За пределами",         desc:"Всё производство ×5",                    cost:5000,eff:{ gmul:5 } }
+	{ id:"r12", icon:"∞",  name:"За пределами",         desc:"Всё производство ×5",                    cost:5000,eff:{ gmul:5 } },
+	{ id:"r13", icon:"⚡", name:"Ли-каскад",         desc:"+1% к CPS за каждое Li-ядро (навсегда)", cost:2000, eff:{ cpsPerLi:0.01 } },
+	{ id:"r14", icon:"🤖", name:"Авто-престиж",      desc:"Авто-перерождение при 10M Li",            cost:5000, eff:{ autoPrestige:true } },
+	{ id:"r15", icon:"🏛",  name:"Наследие",          desc:"После перерождения ×2 к CPS",            cost:10000,eff:{ rebirthMul:2 } },
+	{ id:"r16", icon:"🎲", name:"Крит-мастер",        desc:"+10% шанс крита, +50 крит-множитель",      cost:15000,eff:{ critChance:0.1, critMult:50 } },
+	{ id:"r17", icon:"⬢",  name:"Li-сингулярность",   desc:"Li-ядра дают +5% к CPS",                  cost:25000,eff:{ cpsPerLi:0.05 } },
+	{ id:"r18", icon:"🔮", name:"Прозрение GOLU",     desc:"Все события ×3 чаще",                    cost:50000,eff:{ evFreq:3 } },
+	{ id:"r19", icon:"💎", name:"Абсолютный клик",    desc:"Клик ×10 навсегда",                       cost:100000,eff:{ click:10 } },
+	{ id:"r20", icon:"∞",  name:"За пределами II",    desc:"Всё производство ×10",                    cost:500000,eff:{ gmul:10 } }
 ];
 
 /* ── СОБЫТИЯ (12) ── */
@@ -225,7 +306,15 @@ const EVENTS = [
 	{ id:"cnc",     w:12, icon:"⚙️", name:"Перепрошивка CNC",      desc:"Клики ×1000",           dur:8,  click:1000 },
 	{ id:"redmoon", w:4,  icon:"🩸", name:"Красная луна",          desc:"Производство ×20",      dur:25, prod:20 },
 	{ id:"recall",  w:10, icon:"📦", name:"Отзыв партии",          desc:"Фермы дешевле на 50%",  dur:20, disc:0.5 },
-	{ id:"sigterm", w:8,  icon:"🩸", name:"SIGTERM",               desc:"Производство ×0.1",     dur:10, prod:0.1, bad:true }
+	{ id:"sigterm", w:8,  icon:"🩸", name:"SIGTERM",               desc:"Производство ×0.1",     dur:10, prod:0.1, bad:true },
+	{ id:"golu_apoc", w:2,  icon:"🌋", name:"G-Апокалипсис",       desc:"Производство ×50, дроп ×25", dur:15, prod:50 },
+	{ id:"li_rain",   w:15, icon:"⬢",  name:"Ли-дождь",            desc:"Лови Li-ядра" },
+	{ id:"voidg_2",   w:8,  icon:"👹", name:"Второе вторжение Void-G", desc:"CPS ×0.2, клики ×5000", dur:10, prod:0.2, click:5000, bad:true },
+	{ id:"red_nerekhta", w:5, icon:"🏙️", name:"Красная Нерехта",  desc:"Производство ×30, но цена ферм ×2", dur:25, prod:30, bad:true },
+	{ id:"transcend", w:1,  icon:"✨", name:"Трансценденция",       desc:"Все достижения ×2 бонус, 15 сек", dur:15, achMul:2 },
+	{ id:"gchip",     w:8,  icon:"💠", name:"G-Чип активирован",    desc:"Производство ×25",     dur:20, prod:25 },
+	{ id:"antimatter",w:4,  icon:"⚛️", name:"Антиматерия",          desc:"Производство ×100",    dur:8,  prod:100 },
+	{ id:"silence",   w:6,  icon:"🤫", name:"Протокол Тишины",      desc:"CPS ×0, но клики ×10000", dur:15, prod:0, click:10000, bad:true }
 ];
 
 /* ── ДОСТИЖЕНИЯ (35) ── */
@@ -253,7 +342,19 @@ const ACH_DEF = [
 	], d:n => "Перерождений: " + n },
 	{ k:"tier", ns:[1,2,3,4,5,6], names:[
 		"Подвал","Гараж","Завод","Культ","Эталонная зона","Орбита"
-	], d:n => "Достигни этапа «" + ["","ПОДВАЛ","ГАРАЖ","ЗАВОД","КУЛЬТ","ЭТАЛОННАЯ ЗОНА","ОРБИТА"][n] + "»" }
+	], d:n => "Достигни этапа «" + ["","ПОДВАЛ","ГАРАЖ","ЗАВОД","КУЛЬТ","ЭТАЛОННАЯ ЗОНА","ОРБИТА"][n] + "»" },
+	{ k:"li", ns:[1,10,100,1000], names:[
+		"Первый Li","Li-мастер","Li-империя","Li-бог"
+	], d:n => "Иметь " + n + " Li-ядер" },
+	{ k:"mega", ns:[100,500,1000], names:[
+		"Мега-ферма","Гипер-ферма","Ультра-ферма"
+	], d:n => "Сотня ферм: " + n + " раз" },
+	{ k:"tier2", ns:[7,8,9], names:[
+		"Город GOLU","Планета GOLU","Галактика GOLU"
+	], d:n => "Достигни этапа " + n },
+	{ k:"clicks2", ns:[1e8,1e9], names:[
+		"Палец-легенда","Рука-вселенная"
+	], d:n => "Кликни " + fmt(n) + " раз (после 1e7)" }
 ];
 const ACHS = [];
 ACH_DEF.forEach(g => g.ns.forEach((n, i) => ACHS.push({ id:g.k + i, name:g.names[i], desc:g.d(n), k:g.k, n })));
@@ -340,6 +441,10 @@ function init(){
 	let C = null;
 	const shown = {};
 	const setT = (node, key, text) => { if(shown[key] !== text){ shown[key] = text; if(node) node.textContent = text; } };
+	
+	let lastGt = S.cur.gt;                 // сколько было G-Token 1 секунду назад
+	let lastGtTime = Date.now();           // когда это было
+	let realCps = 0;                       // реальный доход в секунду
 
 	function saveNow(){
 		if(wiped) return;
@@ -356,8 +461,8 @@ function init(){
 
 	/* ── расчёт ── */
 	function recalc(){
-		const c = { clickMul:1, clickPct:0, clickPerFarm:0, critChance:0, critMult:1, gmul:1, evFreq:1, evTime:1, disc:0, startGt:0, auto:0,
-			prodBuff:1, clickBuff:1, unit:{}, per:{}, flat:{}, cpsBase:0, cps:0, meta:1, tierMul:1 };
+		const c = { clickMul:1, clickPct:0, clickPerFarm:0, critChance:0, critMult:1, gmul:1, evFreq:1, evTime:1, disc:0, startGt:0, auto:0, autoCollect:0,
+			prodBuff:1, clickBuff:1, unit:{}, per:{}, flat:{}, cpsBase:0, cps:0, meta:1, tierMul:1, goodMul:1, badMul:1 };
 		const fm = {};
 		const ap = e => {
 			if(e.click) c.clickMul *= e.click;
@@ -372,6 +477,9 @@ function init(){
 			if(e.startGt) c.startGt += e.startGt;
 			if(e.auto) c.auto += e.auto;
 			if(e.farm) fm[e.farm] = (fm[e.farm] || 1) * e.mul;
+			if(e.autoCollect) c.autoCollect += e.autoCollect;
+			if(e.goodMul) c.goodMul *= e.goodMul;
+			if(e.badMul) c.badMul *= e.badMul;
 		};
 		S.up.forEach(id => { if(UPD[id]) ap(UPD[id].eff); });
 		S.rup.forEach(id => { if(PKD[id]) ap(PKD[id].eff); });
@@ -382,16 +490,20 @@ function init(){
 			if(d.prod) c.prodBuff *= d.prod;
 			if(d.click) c.clickBuff *= d.click;
 			if(d.disc) c.disc += d.disc;
+			if(d.achMul) c.achMul = d.achMul;  // для трансценденции
 		});
 		c.disc = Math.min(0.9, c.disc);
-		c.meta = (1 + S.tot.li * LI_BONUS) * (1 + S.ach.length * ACH_BONUS) * c.gmul;
+		c.meta = (1 + S.tot.li * LI_BONUS) * (1 + S.ach.length * ACH_BONUS) * c.gmul * (c.achMul || 1);
 		// бонус этапа
 		const tier = TIERD[S.tier] || TIERS[0];
 		c.tierMul = tier.bonus;
 		c.clickTierMul = 1 + TIERS.findIndex(t => t.id === S.tier) * 0.5;
 		FARMS.forEach(f => {
 			const n = S.farms[f.id] || 0, isGt = f.out === "gt";
-			const u = f.cps * (fm[f.id] || 1) * (isGt ? c.meta * c.tierMul : 1);
+			// ×2 за каждую сотню этой фермы (200 → ×4, 300 → ×8, ...)
+			const hundreds = Math.floor(n / 100);
+			const bigMul = hundreds > 0 ? Math.pow(2, hundreds) : 1;
+			const u = f.cps * (fm[f.id] || 1) * bigMul * (isGt ? c.meta * c.tierMul : 1);
 			c.unit[f.id] = u; c.per[f.id] = u * n;
 			if(isGt) c.cpsBase += u * n; else c.flat[f.out] = (c.flat[f.out] || 0) + u * n;
 		});
@@ -528,15 +640,80 @@ function init(){
 			if(n > 0) any = true;
 			const vis = farmVisible(f) || n > 0;
 			r.row.style.display = (vis && n > 0) ? "" : "none";
-			const want = Math.min(n, MAX_ICONS);
-			while(r.box.childElementCount > want) r.box.lastChild.remove();
-			while(r.box.childElementCount < want){
-				const i = document.createElement("span");
-				i.className = "ck-fi" + (animate ? " pop" : "");
-				i.style.setProperty("--d", (Math.random() * 2.4).toFixed(2));
-				i.textContent = f.icon;
-				r.box.appendChild(i);
+			r.row.classList.toggle("ck-mega-row", n >= 100);
+
+			// 100+ → специальный "мега-рендер" одной огромной иконки
+			if (n >= 100) {
+				if (r.box.dataset.mega !== "1") {
+					r.box.innerHTML = "";
+					r.box.dataset.mega = "1";
+					r.box.classList.add("ck-mega");
+					const mega = document.createElement("span");
+					mega.className = "ck-fi-mega" + (animate ? " pop" : "");
+					mega.textContent = f.icon;
+					const badge = document.createElement("i");
+					badge.className = "ck-fi-mega-badge";
+					badge.textContent = "×" + n;
+					mega.appendChild(badge);
+					r.box.appendChild(mega);
+				} else {
+					const badge = r.box.querySelector(".ck-fi-mega-badge");
+					if (badge && badge.textContent !== "×" + n) badge.textContent = "×" + n;
+				}
+				if (r.n !== n) { r.n = n; r.cnt.textContent = "×" + n; }
+				return;   // выходим — обычная логика не нужна
 			}
+
+			// если ферма была "мега", но стала меньше 100 (после сброса / перерождения) — пересобираем
+			if (r.box.dataset.mega === "1") {
+				r.box.dataset.mega = "";
+				r.box.classList.remove("ck-mega");
+				r.box.innerHTML = "";
+				r.n = -1;
+			}
+
+			const bigCount   = Math.min(10, Math.floor(n / 10));
+			const smallCount = n % 10;
+
+			const curBig    = r.box.querySelectorAll(".ck-fi-big").length;
+			const curSmall  = r.box.childElementCount - curBig;
+
+			const makeBig = () => {
+				const bi = document.createElement("span");
+				bi.className = "ck-fi ck-fi-big" + (animate ? " pop" : "");
+				bi.style.setProperty("--d", (Math.random() * 2.4).toFixed(2));
+				bi.textContent = f.icon;
+				const badge = document.createElement("i");
+				badge.className = "ck-fi-badge";
+				badge.textContent = "×10";
+				bi.appendChild(badge);
+				r.box.appendChild(bi);
+			};
+			const makeSmall = () => {
+				const si = document.createElement("span");
+				si.className = "ck-fi" + (animate ? " pop" : "");
+				si.style.setProperty("--d", (Math.random() * 2.4).toFixed(2));
+				si.textContent = f.icon;
+				r.box.appendChild(si);
+			};
+
+			if(n >= r.n && bigCount === curBig && smallCount >= curSmall){
+				// обычная покупка: добавились только маленькие
+				for(let i = 0; i < smallCount - curSmall; i++) makeSmall();
+			} else if(n >= r.n && smallCount === 0 && bigCount === curBig + 1 && curSmall > 0){
+				// пересекли порог ×10: убираем маленькие, ставим одну большую
+				for(let i = 0; i < curSmall; i++){
+					const last = r.box.lastChild;
+					if(last && !last.classList.contains("ck-fi-big")) last.remove();
+				}
+				makeBig();
+			} else if(r.n !== n){
+				// сброс / старт / странное состояние — полная пересборка
+				r.box.innerHTML = "";
+				for(let i = 0; i < bigCount; i++) makeBig();
+				for(let i = 0; i < smallCount; i++) makeSmall();
+			}
+
 			if(r.n !== n){ r.n = n; r.cnt.textContent = "×" + n; }
 		});
 		sceneEmpty.style.display = any ? "none" : "";
@@ -695,6 +872,66 @@ function init(){
 		+ '<div class="ck-rb-row ck-dim" id="ck-rb-next"></div>'
 		+ '<button class="ck-btn" id="ck-rb-btn" type="button">♻ ПЕРЕРОДИТЬСЯ</button>'
 		+ '</div><div class="ck-sh">ВЕЧНЫЕ ПЕРКИ</div><div id="ck-rb-perks"></div>';
+		
+		/* ── Li-способности (активные) ── */
+const LI_ABILITIES = [
+    { id:"timewarp", icon:"⏩", name:"УСКОРИТЬ ВРЕМЯ", cost:5,  dur:10, desc:"×10 ко всему производству на 10 сек" },
+    { id:"burst",    icon:"💥", name:"МГНОВЕННЫЙ БУСТ", cost:10, desc:"Мгновенно +30 секунд CPS" },
+    { id:"buyPerk",  icon:"🔓", name:"ВЫКУП ПЕРКА",     cost:20, desc:"Открыть случайный перк бесплатно" }
+];
+
+// добавляем панель в pRb
+const liPan = document.createElement("div");
+liPan.className = "ck-sh";
+liPan.textContent = "LI-СПОСОБНОСТИ";
+pRb.appendChild(liPan);
+const liPanBox = document.createElement("div");
+liPanBox.id = "ck-p-li";
+pRb.appendChild(liPanBox);
+
+LI_ABILITIES.forEach(ab => {
+    const el = document.createElement("div");
+    el.className = "ck-item ck-li-ability";
+    el.dataset.id = ab.id;
+    el.innerHTML = '<div class="ck-it-i">' + ab.icon + '</div><div class="ck-it-m"><b class="ck-it-n">' + ab.name + '</b><span class="ck-it-d">' + ab.desc + '</span><span class="ck-it-c">Li ' + ab.cost + '</span></div>';
+    liPanBox.appendChild(el);
+});
+
+let liBusy = false;
+on(liPanBox, "click", e => {
+    if(liBusy) return;
+    const it = e.target.closest(".ck-item");
+    if(!it) return;
+    if(it.classList.contains("ck-off")) return;   // ← уже заблокировано визуально
+    const ab = LI_ABILITIES.find(a => a.id === it.dataset.id);
+    if(!ab) return;
+    if(S.cur.li < ab.cost){ deny(it); return; }
+    S.cur.li -= ab.cost;
+    liBusy = true;
+    if(ab.id === "timewarp"){
+        S.buffs.push({ id:"timewarp", until:Date.now() + ab.dur * 1000 });
+        recalc();
+        toast("⏩ <b>ВРЕМЯ УСКОРЕНО</b> ×10 на " + ab.dur + " сек");
+        recalc(); updRb(); saveNow();
+        setTimeout(() => { recalc(); updRb(); toast("⏩ Время вернулось в норму"); }, ab.dur * 1000);
+    } else if(ab.id === "burst"){
+        const g = C.cpsBase * 30;
+        gain("gt", g);
+        toast("💥 <b>МГНОВЕННЫЙ БУСТ</b> +" + fmt(g) + " Ⓖ");
+    } else if(ab.id === "buyPerk"){
+        const closed = PERKS.filter(p => !S.rup.includes(p.id));
+        if(!closed.length){ toast("🔓 Все перки уже открыты", true); }
+        else {
+            const p = pick(closed);
+            S.rup.push(p.id);
+            recalc(); updRb();
+            toast("🔓 <b>" + p.name + "</b> — открыт бесплатно");
+        }
+    }
+    liBusy = false;
+    updRb(); saveNow();
+});
+		
 	const rbHave = $("ck-rb-have"), rbBonus = $("ck-rb-bonus"), rbGain = $("ck-rb-gain"), rbBar = $("ck-rb-bar"), rbNext = $("ck-rb-next"), rbBtn = $("ck-rb-btn");
 	const perksN = $("ck-rb-perks");
 	perksN.innerHTML = PERKS.map(p => itemHtml(p, "li", "ck-perk")).join("");
@@ -712,6 +949,11 @@ function init(){
 		setT(rbNext, "rbn", "Следующее ядро: " + fmt(S.tot.gt) + " / " + fmt(next) + " Ⓖ");
 		rbBtn.classList.toggle("dis", pot < 1);
 		if(!rbArm) setT(rbBtn, "rbt", pot < 1 ? "НУЖНО БОЛЬШЕ ТОКЕНОВ" : "♻ ПЕРЕРОДИТЬСЯ (+" + fmt(pot) + " Li)");
+		liPanBox.querySelectorAll(".ck-item").forEach(el => {
+			const ab = LI_ABILITIES.find(a => a.id === el.dataset.id);
+			if(!ab) return;
+			el.classList.toggle("ck-off", S.cur.li < ab.cost);
+		});
 		perkEls.forEach(o => {
 			const done = S.rup.includes(o.p.id);
 			o.el.classList.toggle("ck-done", done);
@@ -796,15 +1038,33 @@ function init(){
 
 	/* ── события ── */
 	let nextEv = Date.now() + rnd(20, 40) * 1000;
-	function schedNext(){ nextEv = Date.now() + rnd(EV_MIN, EV_MAX) * 1000 / C.evFreq; }
+	function schedNext(){
+		// на поздних этапах — события чаще
+		const tierIdx = TIERS.findIndex(t => t.id === S.tier);
+		const tierBoost = 1 + tierIdx * 0.35;   // 1, 1.35, 1.7, 2.05, ...
+		const minS = Math.max(3, EV_MIN / tierBoost);
+		const maxS = Math.max(8, EV_MAX / tierBoost);
+		nextEv = Date.now() + rnd(minS, maxS) * 1000 / C.evFreq;
+	}
 	function pickEvent(){
-		let r = Math.random() * EVENTS.reduce((s, e) => s + e.w, 0);
-		for(const e of EVENTS){ if((r -= e.w) < 0) return e; }
+		// модифицируем веса: хорошие ×goodMul, плохие ×badMul
+		const weights = EVENTS.map(e => {
+			let w = e.w;
+			if(e.bad) w *= C.badMul;
+			else w *= C.goodMul;
+			return w;
+		});
+		const total = weights.reduce((s, w) => s + w, 0);
+		let r = Math.random() * total;
+		for(let i = 0; i < EVENTS.length; i++){
+			if((r -= weights[i]) < 0) return EVENTS[i];
+		}
 		return EVENTS[0];
 	}
 	function spawnGold(){
 		const d = pickEvent();
 		const el = document.createElement("div");
+		el.dataset.bad = d.bad ? "1" : "0";
 		el.className = "ck-gold" + (d.bad ? " bad" : "");
 		el.textContent = d.bad ? "☠" : "Ⓖ";
 		el.style.left = rnd(60, Math.max(80, window.innerWidth - 60)) + "px";
@@ -835,16 +1095,24 @@ function init(){
 			toast(d.icon + " <b>" + esc(d.name) + "</b><br>" + esc(d.desc));
 			rain();
 		}else{
+			// события без dur — мгновенные, не бафают
+			if(typeof d.dur !== "number" || !isFinite(d.dur)){
+				toast(d.icon + " <b>" + esc(d.name) + "</b><br>" + esc(d.desc || "Мгновенный эффект"), d.bad);
+				checkAch();
+				return;
+			}
 			S.buffs = S.buffs.filter(b => b.id !== d.id);
 			S.buffs.push({ id:d.id, until:Date.now() + d.dur * 1000 * (d.bad ? 1 : C.evTime) });
 			recalc();
-			toast(d.icon + " <b>" + esc(d.name) + "</b><br>" + esc(d.desc) + " · " + Math.round(d.dur * (d.bad ? 1 : C.evTime)) + " сек", d.bad);
+			const secs = Math.round(d.dur * (d.bad ? 1 : C.evTime));
+			toast(d.icon + " <b>" + esc(d.name) + "</b><br>" + esc(d.desc) + " · " + secs + " сек", d.bad);
 		}
 		checkAch();
 	}
 	function rain(){
 		for(let i = 0; i < 14; i++){
 			const el = document.createElement("div");
+			el.dataset.auto = "1";
 			el.className = "ck-gold small";
 			el.textContent = "Ⓖ";
 			el.style.left = rnd(30, Math.max(60, window.innerWidth - 30)) + "px";
@@ -878,11 +1146,34 @@ function init(){
 	const stC = $("ck-s-c"), stT = $("ck-s-t"), stP = $("ck-s-p"), stR = $("ck-s-r"), stA = $("ck-s-a");
 	function ui(){
 		setT(gtN, "gt", fmt(S.cur.gt));
-		const ps = C.cps + (CORE_CUR === "gt" ? clickValue("gt") * C.auto : 0);
-		setT(psN, "ps", fmt(ps) + " Ⓖ / сек" + (C.prodBuff !== 1 ? "  ·  ×" + fmt(C.prodBuff) : ""));
+		// реальный CPS — фактически начисленное за последнюю секунду
+		const psReal = realCps;
+		const psTheory = C.cps + (CORE_CUR === "gt" ? clickValue("gt") * C.auto : 0);
+		setT(psN, "ps",
+			fmt(psReal) + " Ⓖ / сек" +
+			(C.prodBuff !== 1 ? "  ·  ×" + fmt(C.prodBuff) : "") +
+			(Math.abs(psTheory - psReal) / Math.max(1, psTheory) > 0.05
+				? "  ·  ~" + fmt(psTheory) + " расч."
+				: "")
+		);
 		const cv = clickValue(CORE_CUR);
 		const critInfo = C.critChance > 0 ? " · КРИТ: " + Math.round(C.critChance * 100) + "% ×" + C.critMult : "";
-		setT(clkN, "clk", "КЛИК: +" + fmt(cv) + " " + CURD[CORE_CUR].sym + critInfo);
+		// UPD = сколько клик даёт в сумме за секунду (с учётом автокликов)
+		const upd = cv * (1 + C.auto);   // 1 ручной клик + C.auto автокликов
+		const autoEl = $("ck-clk-auto");
+		if(autoEl){
+			if(C.auto > 0){
+				autoEl.style.display = "";
+				setT(autoEl, "clkAuto", "АВТО: " + fmt(cv * C.auto) + " " + CURD[CORE_CUR].sym + "/сек · " + C.auto + "×тик");
+			} else {
+				autoEl.style.display = "none";
+				delete shown.clkAuto;
+			}
+		}
+		setT(clkN, "clk", "КЛИК: +" + fmt(cv) + " " + CURD[CORE_CUR].sym
+			+ " · UPD: +" + fmt(upd) + "/сек"
+			+ (C.auto > 0 ? " (" + C.auto + "×авто)" : "")
+			+ critInfo);
 		const liShow = S.tot.li > 0 || S.rebirths > 0;
 		setT(liN, "li", liShow ? "Li-ядра: " + fmt(S.cur.li) + "  ·  бонус +" + fmt(S.tot.li * LI_BONUS * 100) + "%" : "");
 		setT(stC, "sc", fmt(S.clicks));
@@ -900,6 +1191,11 @@ function init(){
 		renderUps(false);
 		upEls.forEach(o => o.el.classList.toggle("ck-off", S.cur[o.u.cur || "gt"] < o.u.cost));
 		if(tab === "r") updRb();
+		liPanBox.querySelectorAll(".ck-item").forEach(el => {
+			const ab = LI_ABILITIES.find(a => a.id === el.dataset.id);
+			if(!ab) return;
+			el.classList.toggle("ck-off", S.cur.li < ab.cost);
+		});
 	}
 	function news(){
 		const pool = NEWS.filter(n => S.tot.gt >= n[0]);
@@ -950,11 +1246,53 @@ function init(){
 			for(const cur in C.flat) gain(cur, C.flat[cur] * dt * rate);
 			if(C.auto > 0) gain(CORE_CUR, clickValue(CORE_CUR) * C.auto * dt * rate);
 		}
-		if(!gold && now >= nextEv) spawnGold();
+		if(!gold && now >= nextEv){
+			// на поздних этапах — сразу несколько токенов
+			const tierIdx = TIERS.findIndex(t => t.id === S.tier);
+			const count = 1 + Math.floor(tierIdx / 2);  // 1, 1, 2, 2, 3, 3, 4, 4, 5, 5
+			for(let i = 0; i < count; i++){
+				setTimeout(() => { if(!document.hidden) spawnGold(); }, i * 250);
+			}
+			schedNext();
+		}
+		// ── АВТО-СБОР бонусов ──
+		if(gold && C.autoCollect > 0){
+			const chance = Math.min(1, C.autoCollect * 0.15);
+			if(Math.random() < chance){
+				const isBad = gold.dataset.bad === "1";
+				// хорошие собираем всегда, плохие — только на высоком уровне
+				if(!isBad || C.autoCollect >= 3){
+					const rect = gold.getBoundingClientRect();
+					const cx = rect.left + rect.width / 2;
+					const cy = rect.top + rect.height / 2;
+					// триггерим клик по токену
+					gold.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: cx, clientY: cy }));
+				}
+			}
+		}
+		if(C.autoCollect > 0){
+			document.querySelectorAll(".ck-gold.small").forEach(t => {
+				if(t._autoPicked) return;
+				const chance = Math.min(1, C.autoCollect * 0.12);
+				if(Math.random() < chance){
+					t._autoPicked = true;
+					const r = t.getBoundingClientRect();
+					t.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: r.left + r.width/2, clientY: r.top + r.height/2 }));
+				}
+			});
+		}
 		ui();
 		if(tickN % 10 === 0) checkAch();
 		if(tickN % 140 === 0) news();
 		if(now - lastSpark > 650){ lastSpark = now; sceneSpark(); }
+		// в конце step(), перед последним if
+		if(now - lastGtTime >= 1000){
+			const delta = S.cur.gt - lastGt;
+			const dtReal = (now - lastGtTime) / 1000;
+			realCps = delta / dtReal;
+			lastGt = S.cur.gt;
+			lastGtTime = now;
+		}
 		if(now - lastSave > 5000){ lastSave = now; saveNow(); }
 	}
 
@@ -992,6 +1330,9 @@ function init(){
 		lastT = Date.now();
 		lastSave = Date.now();
 		lastSpark = 0;
+		lastGt = S.cur.gt;
+		lastGtTime = Date.now();
+		realCps = 0;
 		// пересчёт и полная перерисовка
 		recalc();
 		syncScene(false);
@@ -1023,6 +1364,9 @@ function init(){
 	if(offlineMsg) toast(offlineMsg);
 	loop = setInterval(step, TICK_MS);
 }
+
+// в EVD после init:
+EVD.timewarp = { icon:"⏩", name:"Ускорение времени", desc:"×10 ко всему производству", prod:10 };
 
 const live = () => { try{ init(); }catch(e){ console.error("[CLICKER]", e); } };
 
@@ -1071,6 +1415,94 @@ return ELEMENT_SITE(`
 .ck-row-i{display:flex;flex-wrap:wrap;gap:3px;flex:1}
 .ck-fi{display:inline-block;font-size:22px;line-height:1;filter:drop-shadow(0 0 4px var(--c,#d4af37));animation:ck-bob 2.4s ease-in-out calc(var(--d,0) * -1s) infinite}
 .ck-fi.pop{animation:ck-bob 2.4s ease-in-out calc(var(--d,0) * -1s) infinite,ck-pop .5s cubic-bezier(.2,1.5,.4,1)}
+
+/* x10 — крупнее, с усиленным свечением и бейджем ×10 в правом нижнем углу. */
+.ck-fi-big{
+    position:relative;
+    font-size:30px;   /* было 22 — теперь на 8px крупнее */
+    filter:drop-shadow(0 0 4px var(--c,#d4af37)) drop-shadow(0 0 10px var(--c,#d4af37));
+    animation:ck-bob 2.4s ease-in-out calc(var(--d,0) * -1s) infinite;
+}
+.ck-fi-big.pop{animation:ck-bob 2.4s ease-in-out calc(var(--d,0) * -1s) infinite,ck-pop .5s cubic-bezier(.2,1.5,.4,1)}
+.ck-fi-badge{
+    position:absolute; right:-6px; bottom:-2px;
+    font-size:9px; font-style:normal; font-weight:bold;
+    color:#000; background:#d4af37;
+    padding:0 3px; border-radius:3px;
+    box-shadow:0 0 4px #d4af37, 0 0 8px rgba(212,175,55,.6);
+    line-height:1.2; letter-spacing:0;
+    pointer-events:none; text-shadow:none;
+}
+
+/* ── МЕГА-РЕНДЕР: 100+ ферм → одна огромная иконка на всю панель ── */
+.ck-row.ck-mega-row{ padding:0; border-left:4px solid var(--c,#d4af37); background:transparent; min-height:120px; }
+.ck-row.ck-mega-row .ck-row-l{ width:0; padding:0; overflow:hidden; opacity:0; }
+.ck-row.ck-mega-row .ck-row-i{ width:100%; padding:0; }
+
+.ck-mega{
+    position:relative; width:100%; min-height:120px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:6px; overflow:hidden;
+    background:
+        radial-gradient(circle at 30% 30%, var(--c,#d4af37) 0%, transparent 60%),
+        radial-gradient(circle at 70% 70%, var(--c,#d4af37) 0%, transparent 55%),
+        linear-gradient(135deg, rgba(0,0,0,.85) 0%, rgba(20,0,8,.9) 100%);
+    box-shadow:
+        inset 0 0 40px rgba(0,0,0,.9),
+        inset 0 0 80px color-mix(in srgb, var(--c,#d4af37) 30%, transparent),
+        0 0 24px color-mix(in srgb, var(--c,#d4af37) 55%, transparent);
+    border:1px solid color-mix(in srgb, var(--c,#d4af37) 60%, #000);
+    animation:ck-mega-pulse 3.2s ease-in-out infinite;
+    isolation:isolate;
+}
+.ck-mega::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:
+        repeating-linear-gradient(45deg, transparent 0 14px, rgba(0,0,0,.25) 14px 15px),
+        repeating-linear-gradient(-45deg, transparent 0 22px, rgba(255,255,255,.04) 22px 23px);
+    mix-blend-mode:overlay;
+    z-index:1;
+}
+.ck-mega::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(circle at center, transparent 30%, rgba(0,0,0,.7) 100%);
+    z-index:2;
+}
+.ck-fi-mega{
+    position:relative; z-index:3;
+    font-size:clamp(64px, 14vh, 140px); line-height:1;
+    filter:
+        drop-shadow(0 0 10px var(--c,#d4af37))
+        drop-shadow(0 0 30px var(--c,#d4af37))
+        drop-shadow(0 0 60px color-mix(in srgb, var(--c,#d4af37) 70%, transparent));
+    animation:ck-mega-float 4s ease-in-out infinite;
+    user-select:none;
+}
+.ck-fi-mega.pop{ animation:ck-mega-float 4s ease-in-out infinite, ck-pop .7s cubic-bezier(.2,1.5,.4,1); }
+.ck-fi-mega-badge{
+    position:absolute; right:-6px; bottom:-8px;
+    font-size:clamp(14px,2vh,22px); font-style:normal; font-weight:bold;
+    color:#000; background:var(--c,#d4af37);
+    padding:2px 8px; border-radius:6px;
+    box-shadow:0 0 12px var(--c,#d4af37), 0 0 24px color-mix(in srgb, var(--c,#d4af37) 60%, transparent);
+    letter-spacing:0; text-shadow:none; z-index:4;
+    border:2px solid #000;
+}
+@keyframes ck-mega-pulse{
+    0%,100%{ box-shadow:
+        inset 0 0 40px rgba(0,0,0,.9),
+        inset 0 0 80px color-mix(in srgb, var(--c,#d4af37) 30%, transparent),
+        0 0 24px color-mix(in srgb, var(--c,#d4af37) 55%, transparent); }
+    50%{ box-shadow:
+        inset 0 0 60px rgba(0,0,0,.9),
+        inset 0 0 120px color-mix(in srgb, var(--c,#d4af37) 50%, transparent),
+        0 0 48px color-mix(in srgb, var(--c,#d4af37) 80%, transparent); }
+}
+@keyframes ck-mega-float{
+    0%,100%{ transform:translateY(0) rotate(0deg) scale(1); }
+    50%{ transform:translateY(-6px) rotate(-2deg) scale(1.04); }
+}
+
 .ck-fl{position:absolute;pointer-events:none;font-size:13px;font-weight:bold;color:var(--c,#d4af37);text-shadow:0 0 6px #000}
 .ck-none{padding:16px 8px;text-align:center;font-size:12px;color:#7a6a4a}
 .ck-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
@@ -1147,6 +1579,18 @@ return ELEMENT_SITE(`
 @keyframes ck-gp{0%,100%{box-shadow:0 0 14px #d4af37,0 0 30px rgba(212,175,55,.5)}50%{box-shadow:0 0 28px #ffdf6b,0 0 60px rgba(255,223,107,.7)}}
 @keyframes ck-bp{0%,100%{box-shadow:0 0 14px #ff0044,0 0 30px rgba(255,0,68,.5)}50%{box-shadow:0 0 28px #ff4466,0 0 60px rgba(255,0,68,.8)}}
 @keyframes ck-tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+
+.ck-li-ability{border-color:#ff4466;background:linear-gradient(180deg,#1a0008,#0a0003)}
+.ck-li-ability .ck-it-c{color:#ff4466;font-weight:bold}
+.ck-li-ability:hover{border-color:#ff80a0}
+
+.ck-up .ck-it-i { /* иконка авто-сборщика */ }
+.ck-up[data-id^="ac"]{ border-color:#a060ff; background:linear-gradient(180deg,#1a0a1a,#0a000a); }
+.ck-up[data-id^="ac"] .ck-it-n{ color:#c0a0ff; }
+.ck-up[data-id^="ac"] .ck-it-c{ color:#a060ff; }
+
+#ck-clk-auto{margin-top:6px;font-size:12px;color:#a060ff;letter-spacing:1px}
+
 </style>
 
 <div class="ck-head">
@@ -1165,6 +1609,7 @@ return ELEMENT_SITE(`
 		<div class="ck-box ck-core">
 			<button class="ck-orb" id="ck-orb" type="button"><span class="ck-orb-li">Li</span><span class="ck-orb-sub">GOLU</span></button>
 			<div class="ck-clk" id="ck-clk"></div>
+			<div class="ck-clk" id="ck-clk-auto"></div>
 		</div>
 		<div class="ck-buffs" id="ck-buffs"></div>
 		<div class="ck-box ck-stats">

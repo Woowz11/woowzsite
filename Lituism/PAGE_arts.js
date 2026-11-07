@@ -232,6 +232,51 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 		<h1 id="lith-title">|lith arts - ЗАЛ ОКА|</h1>
 		<hr>
 		<div id="ART_GRID">${GetAllLithiumArts()}</div>
+		<hr style="border-color:#7a0022;margin:40px 0 10px;">
+
+<div id="CMD_TRASH" style="
+  margin: 30px 10px 60px;
+  padding: 14px;
+  background: #0a0004;
+  border: 1px solid #7a0022;
+  box-shadow: inset 0 0 40px rgba(255,0,68,.15);
+  font-family: 'Courier New', monospace;
+  color: #8a6a72;
+  font-size: 11px;
+  line-height: 1.3;
+  columns: 3 180px;
+  column-gap: 14px;
+  column-rule: 1px dashed #3a1020;
+">
+  <div style="column-span:all;text-align:center;color:#7a0022;letter-spacing:6px;font-size:14px;margin-bottom:10px;text-shadow:0 0 6px #ff0044;">
+    [ СПИСОК КОМАНД (МУСОР) ]
+  </div>
+  <div style="column-span:all;text-align:center;color:#3a1020;font-size:10px;letter-spacing:2px;margin-bottom:12px;">
+    не отсортировано · не проверено · не моё дело
+  </div>
+
+</div>
+
+<style>
+  #CMD_TRASH .ct-cmd {
+    color: #7a0022;
+    font-weight: bold;
+    cursor: crosshair;
+    text-shadow: 0 0 4px #ff0044;
+    white-space: nowrap;
+  }
+  #CMD_TRASH .ct-cmd:hover {
+    color: #fff;
+    text-shadow: 0 0 12px #ff0044, 0 0 22px #d4af37;
+    background: rgba(255,0,68,.12);
+    padding: 0 2px;
+  }
+  #CMD_TRASH .ct-desc {
+    color: #3a1020;
+    font-style: italic;
+    font-size: 10px;
+  }
+</style>
 		`,
 		function(){ 
 			var bg = document.getElementById("MAIN");
@@ -242,11 +287,84 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 				bg.style.textShadow = `0 0 5px black, 0 0 10px currentColor, 0 0 20px currentColor`;
 			}
 			// даём DOM отрисоваться, затем инициализируем
-			setTimeout(function(){ initLithGallery(0); }, 0);
+			setTimeout(function(){ initLithGallery(0); fillCmdList(0); }, 0);
 		},
 		false
 	);
 });
+
+/* ══════════════ СПИСОК КОМАНД ИЗ cmd (CMD_DB) ══════════════ */
+function fillCmdList(attempt){
+	attempt = attempt || 0;
+	const box = document.getElementById("CMD_TRASH");
+	if (!box) return;
+
+	// данные из нового cmd(): window.CMD_DB = { CATS, CMDS }
+	const DB = window.CMD_DB;
+	if (!DB || !DB.CMDS || !Object.keys(DB.CMDS).length) {
+		if (attempt < 40) return setTimeout(function(){ fillCmdList(attempt + 1); }, 100);
+		console.warn("[LITH] CMD_DB пуст: команды не зарегистрированы");
+		return;
+	}
+
+	// сносим то, что могло остаться от предыдущей отрисовки
+	box.querySelectorAll(".ct-gen").forEach(function(n){ n.remove(); });
+
+	const cats = DB.CATS && DB.CATS.length ? DB.CATS : Object.keys(
+		Object.values(DB.CMDS).reduce(function(acc, c){ acc[c.cat || "прочее"] = 1; return acc; }, {})
+	);
+
+	cats.forEach(function(sec){
+		const items = Object.values(DB.CMDS).filter(function(c){ return (c.cat || "прочее") === sec; });
+		if (!items.length) return;
+
+		// заголовок раздела
+		const h = document.createElement("div");
+		h.className = "ct-gen";
+		h.style.cssText = "column-span:all;text-align:center;color:#7a0022;letter-spacing:4px;font-size:12px;margin:14px 0 8px;text-shadow:0 0 6px #ff0044;";
+		h.textContent = "── " + String(sec).toUpperCase() + " · " + items.length + " ──";
+		box.appendChild(h);
+
+		// команды раздела
+		items.forEach(function(c){
+			const row = document.createElement("div");
+			row.className = "ct-gen";
+			row.style.cssText = "break-inside:avoid;margin-bottom:4px;";
+
+			const n = document.createElement("span");
+			n.className = "ct-cmd";
+			n.dataset.cmd = c.name;
+			n.textContent = c.name;
+
+			const d = document.createElement("span");
+			d.className = "ct-desc";
+			d.textContent = " — " + (c.desc || "");
+
+			row.appendChild(n);
+			row.appendChild(d);
+			box.appendChild(row);
+		});
+	});
+
+	// клик по имени = вызвать команду
+	if (box.dataset.bound !== "1") {
+		box.dataset.bound = "1";
+		box.addEventListener("click", function(e){
+			const t = e.target.closest ? e.target.closest(".ct-cmd") : null;
+			if (!t) return;
+			const name = t.dataset.cmd;
+			try {
+				const f = window[name];
+				if (typeof f === "function") f();        // штатный вызов
+				else if (f && typeof f.get === "function") f; // fallback: голый getter
+			} catch (err) {
+				console.error("[CMD " + name + "]", err);
+			}
+			const msg = document.getElementById("lith-msg");
+			if (msg) msg.textContent = "▶ " + name + " — вывод в консоли (F12)";
+		});
+	}
+}
 
 /* ══════════════ ЛОГИКА ЗАЛА ОКА ══════════════ */
 function initLithGallery(attempt){
