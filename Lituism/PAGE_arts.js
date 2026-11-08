@@ -150,7 +150,6 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 		#lith-hud {
 			position: sticky;
 			top: 0;
-			z-index: 100;
 			display: flex;
 			flex-wrap: wrap;
 			gap: 8px;
@@ -237,16 +236,16 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 <div id="CMD_TRASH" style="
   margin: 30px 10px 60px;
   padding: 14px;
-  background: #0a0004;
-  border: 1px solid #7a0022;
-  box-shadow: inset 0 0 40px rgba(255,0,68,.15);
+  background: #12000a;
+  border: 1px solid #a00030;
+  box-shadow: inset 0 0 40px rgba(255,0,68,.18), 0 0 20px rgba(255,0,68,.12);
   font-family: 'Courier New', monospace;
   color: #8a6a72;
   font-size: 11px;
   line-height: 1.3;
   columns: 3 180px;
   column-gap: 14px;
-  column-rule: 1px dashed #3a1020;
+  column-rule: 1px dashed #7a0022;
 ">
   <div style="column-span:all;text-align:center;color:#7a0022;letter-spacing:6px;font-size:14px;margin-bottom:10px;text-shadow:0 0 6px #ff0044;">
     [ СПИСОК КОМАНД (МУСОР) ]
@@ -258,27 +257,48 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 </div>
 
 <style>
-  #CMD_TRASH .ct-cmd {
-    color: #7a0022;
-    font-weight: bold;
-    cursor: crosshair;
-    text-shadow: 0 0 4px #ff0044;
-    white-space: nowrap;
+  #CMD_TRASH {
+    background: #12000a;
+    border: 1px solid #a00030;
+    box-shadow: inset 0 0 40px rgba(255,0,68,.18), 0 0 20px rgba(255,0,68,.15);
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #e8d9b0;
   }
-  #CMD_TRASH .ct-cmd:hover {
-    color: #fff;
-    text-shadow: 0 0 12px #ff0044, 0 0 22px #d4af37;
-    background: rgba(255,0,68,.12);
-    padding: 0 2px;
-  }
+	#CMD_TRASH .ct-cmd {
+		color: #ffd966;
+		font-weight: bold;
+		cursor: crosshair;
+		text-shadow: 0 0 6px rgba(255,0,68,.65), 0 0 1px #000;
+		white-space: nowrap;
+		letter-spacing: .5px;
+		padding: 0 3px;       /* ← всегда, а не только на hover */
+		margin: 0 -3px;       /* ← компенсируем, чтобы не двигать соседей */
+		border-radius: 2px;
+		transition: color .12s, background .12s;
+	}
+	#CMD_TRASH .ct-cmd:hover {
+		color: #fff;
+		text-shadow: 0 0 12px #ff0044, 0 0 22px #d4af37;
+		background: rgba(255,0,68,.22);
+	}
   #CMD_TRASH .ct-desc {
-    color: #3a1020;
+    color: #c9a24a;
     font-style: italic;
-    font-size: 10px;
+    font-size: 11px;
+  }
+  /* заголовки секций */
+  #CMD_TRASH .ct-gen[style*="column-span"] {
+    color: #ff6a8a !important;
+    text-shadow: 0 0 8px rgba(255,0,68,.6) !important;
+    font-size: 13px !important;
+    letter-spacing: 5px !important;
+    border-bottom: 1px dashed #7a0022;
+    padding-bottom: 4px;
   }
 </style>
 		`,
-		function(){ 
+		function(){
 			var bg = document.getElementById("MAIN");
 			if (bg) {
 				bg.style.backgroundColor = "rgb(50,0,0)";
@@ -286,10 +306,14 @@ REGISTER_PAGE("arts", "reject 🚫", function(){
 				bg.style.color = "red";
 				bg.style.textShadow = `0 0 5px black, 0 0 10px currentColor, 0 0 20px currentColor`;
 			}
-			// даём DOM отрисоваться, затем инициализируем
+			// инициализация ПРИ КАЖДОМ открытии, не только при сборке
 			setTimeout(function(){ initLithGallery(0); fillCmdList(0); }, 0);
 		},
-		false
+		false,
+		function(){
+			// runafteropen — вызывается при каждом OPEN_PAGE("arts")
+			setTimeout(function(){ initLithGallery(0); fillCmdList(0); }, 0);
+		}
 	);
 });
 
@@ -346,7 +370,6 @@ function fillCmdList(attempt){
 		});
 	});
 
-	// клик по имени = вызвать команду
 	if (box.dataset.bound !== "1") {
 		box.dataset.bound = "1";
 		box.addEventListener("click", function(e){
@@ -355,8 +378,8 @@ function fillCmdList(attempt){
 			const name = t.dataset.cmd;
 			try {
 				const f = window[name];
-				if (typeof f === "function") f();        // штатный вызов
-				else if (f && typeof f.get === "function") f; // fallback: голый getter
+				if (typeof f === "function") f();
+				else if (f && typeof f.get === "function") f;
 			} catch (err) {
 				console.error("[CMD " + name + "]", err);
 			}
@@ -366,7 +389,6 @@ function fillCmdList(attempt){
 	}
 }
 
-/* ══════════════ ЛОГИКА ЗАЛА ОКА ══════════════ */
 function initLithGallery(attempt){
 	attempt = attempt || 0;
 
@@ -438,9 +460,7 @@ function initLithGallery(attempt){
 	}
 
 	function fullClick(card){
-		// 1) если ещё не сканирован — сканируем
 		if (card.dataset.state === "unscanned") unlockScan(card);
-		// 2) если заражён — оптимизируем и даём токен
 		if (card.dataset.infected === "1") {
 			card.dataset.infected = "0";
 			infected = Math.max(0, infected - 1);
@@ -459,58 +479,62 @@ function initLithGallery(attempt){
 			say("Заражение удалено. GOLU получил данные.");
 			return;
 		}
-		// 3) иначе — просто вердикт
 		const v = VERDICTS[Math.floor(Math.random() * VERDICTS.length)];
 		toast(v.t + " · " + v.m, 2200);
 		say(v.m);
 	}
 
+	const abort = new AbortController();
+	const sig = abort.signal;
+
 	// ── загрузка контента и обработчики ──
 	const cards = GRID.querySelectorAll(".art-item");
 	cards.forEach(function(card){
-		card.dataset.state = "unscanned";
-		const type = card.dataset.type;
-		const src  = card.dataset.src;
-		let el = null;
+		// если карточка уже инициализирована в этой сессии — не дублируем content
+		if (!card.dataset.contentAdded) {
+			card.dataset.contentAdded = "1";
+			card.dataset.state = "unscanned";
+			const type = card.dataset.type;
+			const src  = card.dataset.src;
+			let el = null;
 
-		if (type === "img") {
-			el = document.createElement("img");
-			el.src = src;
-			el.className = "art-img";
-			el.draggable = false;
-			el.style.imageRendering = "auto"; // не пикселизировать фото
-			el.onerror = function(){ el.style.display = "none"; };
-		} else if (type === "video") {
-			el = document.createElement("video");
-			el.src = src;
-			el.controls = true;
-			el.className = "art-img";
-			el.muted = true;
-			el.draggable = false;
-			el.onerror = function(){ el.style.display = "none"; };
-		} else if (type === "audio") {
-			el = document.createElement("audio");
-			el.src = src;
-			el.controls = true;
-			el.className = "art-audio";
-			el.onerror = function(){ el.style.display = "none"; };
-		} else {
-			el = document.createElement("div");
-			el.textContent = src;
-			el.style.cssText = "font:9px monospace;color:#7a0022;word-break:break-all;padding:4px;";
+			if (type === "img") {
+				el = document.createElement("img");
+				el.src = src;
+				el.className = "art-img";
+				el.draggable = false;
+				el.style.imageRendering = "auto";
+				el.onerror = function(){ el.style.display = "none"; };
+			} else if (type === "video") {
+				el = document.createElement("video");
+				el.src = src;
+				el.controls = true;
+				el.className = "art-img";
+				el.muted = true;
+				el.draggable = false;
+				el.onerror = function(){ el.style.display = "none"; };
+			} else if (type === "audio") {
+				el = document.createElement("audio");
+				el.src = src;
+				el.controls = true;
+				el.className = "art-audio";
+				el.onerror = function(){ el.style.display = "none"; };
+			} else {
+				el = document.createElement("div");
+				el.textContent = src;
+				el.style.cssText = "font:9px monospace;color:#7a0022;word-break:break-all;padding:4px;";
+			}
+			if (el) card.appendChild(el);
 		}
-		if (el) card.appendChild(el);
 
-		// HOVER: сканирует (для десктопа)
 		card.addEventListener("mouseenter", function(){
 			if (card.dataset.state === "unscanned") unlockScan(card);
-		});
+		}, { signal: sig });
 
-		// CLICK: всегда даёт результат (работает и на тач-устройствах)
 		card.addEventListener("click", function(e){
 			if (e.target.tagName === "VIDEO" || e.target.tagName === "AUDIO") return;
 			fullClick(card);
-		});
+		}, { signal: sig });
 	});
 
 	// ── глитч-протокол ──
@@ -533,7 +557,7 @@ function initLithGallery(attempt){
 				toast("Протокол завершён · +" + n + " G-Token", 2200);
 				say("GOLU принял жертву. Артефакты сожжены в Цифровом Горниле.");
 			}, 2100);
-		});
+		}, { signal: sig });
 	}
 
 	// ── Konami ──
@@ -560,14 +584,17 @@ function initLithGallery(attempt){
 			pos = (k === CODE[0]) ? 1 : 0;
 		}
 	};
-	document.addEventListener("keydown", keyHandler);
+	document.addEventListener("keydown", keyHandler, { signal: sig });
 
 	// ── очистка при уходе со страницы ──
 	window.__lithClean = function(){
-		document.removeEventListener("keydown", keyHandler);
+		abort.abort();
 		document.querySelectorAll("#lith-toast").forEach(function(t){ t.remove(); });
 		document.body.classList.remove("lith-glitch");
 		const g = document.getElementById("ART_GRID");
 		if (g) g.dataset.inited = "0";
+		// сбрасываем content-added, чтобы при перезаходе контент не задублировался
+		// (но сами DOM-узлы остаются в карточках, так что дубля не будет — contentAdded защищает)
+		window.__lithClean = null;
 	};
 }

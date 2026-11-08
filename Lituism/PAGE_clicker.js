@@ -1,4 +1,4 @@
-REGISTER_PAGE("clicker","Майнер", function(){
+REGISTER_PAGE("clicker","⛏ MINER.exe", function(){
 
 /* ═══════════════════════════════════════════════════════════
    G-MINER v2 · кликер Lituism

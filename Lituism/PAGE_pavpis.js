@@ -31,7 +31,6 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 				transparent 1px,
 				transparent 3px);
 			pointer-events:none;
-			z-index:5;
 			mix-blend-mode:screen;
 			animation:pishScan 0.4s linear infinite;
 		}
@@ -42,8 +41,6 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 			position:absolute;
 			inset:0;
 			pointer-events:none;
-			z-index:6;
-			background:radial-gradient(ellipse at center, transparent 55%, #000 100%);
 		}
 
 		.pish-topbar{
@@ -54,7 +51,6 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 			border-bottom:2px solid var(--red);
 			padding:8px 16px;
 			position:relative;
-			z-index:10;
 		}
 		.pish-live{
 			display:flex;
@@ -87,7 +83,6 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 			background:#000;
 			border-bottom:3px solid var(--red);
 			overflow:hidden;
-			z-index:7;
 		}
 		.pish-player img{
 			width:100%;
@@ -134,7 +129,6 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 			cursor:pointer;
 			transition:all 0.2s ease;
 			animation:pishPulse 1.5s infinite;
-			z-index:9;
 			white-space:nowrap;
 			text-transform:uppercase;
 			text-shadow:0 0 8px #ff0033, 0 0 16px #ff0033;
@@ -539,7 +533,7 @@ REGISTER_PAGE("pavpis", "PISEHNIK.TV", function(){
 					<div class="pish-sub">📺 PavelPisechnik-TV & GOLU · прямая трансляция из Lithium Universe (r/woowzcore)</div>
 				</div>
 				
-				<div id="pishYouTubeWrap" style="display:none;position:absolute;inset:0;z-index:9;background:#000;">
+				<div id="pishYouTubeWrap" style="display:none;position:absolute;inset:0;;background:#000;">
 					<iframe id="pishYouTubeFrame"
 						width="100%" height="100%"
 						src=""

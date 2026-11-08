@@ -1,4 +1,4 @@
-REGISTER_PAGE("litris", "ЛИТРИС", function(){
+REGISTER_PAGE("litris", "... LIT-RIS ...", function(){
 
 const SAVE_KEY = "lt_save_v1";
 const COLS = 10;

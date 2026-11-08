@@ -369,6 +369,8 @@ function ERROR_PAGE(id){
 			big.classList.add("hit"); setTimeout(() => big.classList.remove("hit"), 220);
 		}, 4800);
 	};
+	
+	setTimeout(() => { try { TTS("Такой страницы нет. Или она была, но её стёрли.", "golu"); } catch(e){} }, 800);
 
 	return { c: SITE_BASE(html), t: "ERR_0xE404", f: live };
 }
@@ -1622,6 +1624,226 @@ tIdle();
       }});
     }catch(e){}
   }
+  
+  
+  /* ═══ уникальный градиент для трека ═══ */
+function gradFor(key){
+	let h = 2166136261;
+	for (let i = 0; i < key.length; i++){ h ^= key.charCodeAt(i); h = Math.imul(h, 16777619); }
+	h = h >>> 0;
+
+	// hueA — базовый оттенок, hueB — соседний (сдвиг на 40–140°)
+	const hueA = h % 360;
+	const hueB = (hueA + 40 + ((h >>> 9) % 100)) % 360;
+	const hueC = (hueA + 200 + ((h >>> 17) % 80)) % 360;
+	const angle = (h >>> 3) % 360;
+
+	return {
+		hueA, hueB, hueC, angle,
+		a: "hsl(" + hueA + ", 80%, 55%)",
+		b: "hsl(" + hueB + ", 85%, 40%)",
+		c: "hsl(" + hueC + ", 70%, 25%)"
+	};
+}
+
+window.GOLU_GRAD = gradFor;
+  
+  
+// ── TTS: TTS("текст"), TTS("текст","golu"), TTS("текст",{ preset, ...настройки }) ──
+(function(){
+  const SS = window.speechSynthesis;
+  let run = 0, ac = null, kill = null;
+
+  // ── пресеты (добавляй свои: TTS.presets.моё = {...}) ──
+  // speech: gender "male"/"female", pitch 0..2, rate 0.1..10
+  // synth:  f0 (Гц), rate, ring (Гц, 0 = выкл), echo 0..0.8, shift (сдвиг формант)
+  const presets = {
+    default: { engine: "speech", gender: "male",   pitch: 0.8, rate: 1 },
+    bot:     { engine: "speech", gender: "male",   pitch: 0.2, rate: 0.85 },
+    robot:   { engine: "synth",  f0: 110, rate: 1,    ring: 0,  echo: 0,    shift: 1 },
+    golu:    { engine: "synth",  f0: 55,  rate: 0.75, ring: 30, echo: 0.45, shift: 0.75 },
+    void:    { engine: "synth",  f0: 80,  rate: 1.2,  ring: 70, echo: 0.3,  shift: 0.9 },
+    lia:     { engine: "speech", gender: "female", pitch: 1.4, rate: 1.05 }
+  };
+
+  // ── движок speech ──
+  const MALE = /pavel|dmitry|yuri|maxim|ivan|pavl|male|david|mark|george|james|alex|daniel/i;
+  const FEMALE = /irina|svetlana|milena|katya|anna|elena|female|zira|samantha|susan|google/i;
+  if(SS){ SS.getVoices(); SS.onvoiceschanged = () => SS.getVoices(); }
+
+  const pickVoice = o => {
+    const vs = SS ? SS.getVoices() : [];
+    if(o.voice){
+      const n = String(o.voice).toLowerCase();
+      const v = vs.find(x => x.name.toLowerCase().includes(n));
+      if(v) return v;
+    }
+    const lang = vs.filter(v => v.lang === o.lang);
+    const near = lang.length ? lang : vs.filter(v => v.lang.slice(0, 2) === o.lang.slice(0, 2));
+    const re = o.gender === "female" ? FEMALE : o.gender === "male" ? MALE : null;
+    return (re && near.find(v => re.test(v.name))) || near[0] || null;
+  };
+
+  const speak = (text, o) => {
+    const my = ++run;
+    SS.cancel();
+    const parts = text.match(/[^.!?…\n]+[.!?…]*/g) || [text];
+    return new Promise(res => {
+      let i = 0;
+      kill = () => { run++; SS.cancel(); res(); };
+      const next = () => {
+        if(my !== run || i >= parts.length) return res();
+        const s = parts[i++].trim();
+        if(!s) return next();
+        const u = new SpeechSynthesisUtterance(s);
+        u.lang = o.lang; u.rate = o.rate; u.pitch = o.pitch; u.volume = o.volume;
+        const v = pickVoice(o);
+        if(v) u.voice = v;
+        u.onend = u.onerror = next;
+        SS.speak(u);
+      };
+      next();
+    });
+  };
+
+  // ── движок synth ──
+  const VOW = {   // гласные: форманты F1, F2
+    "а": [800, 1200], "о": [500, 900],  "у": [320, 800],  "и": [300, 2300], "э": [500, 1800],
+    "ы": [350, 1500], "е": [450, 2000], "ё": [500, 1000], "ю": [330, 1100], "я": [700, 1500]
+  };
+  const LAT = { a: "а", e: "е", i: "и", o: "о", u: "у", y: "ы" };
+  const SON = { "м": [250, 1000], "н": [280, 1200], "л": [350, 1100], "р": [400, 1300], "в": [300, 900], "й": [300, 2200], "m": [250, 1000], "n": [280, 1200], "l": [350, 1100], "r": [400, 1300], "w": [300, 900] };
+  const FRI = { "с": 6000, "з": 5000, "ц": 5500, "ш": 3000, "ж": 2500, "щ": 3200, "ч": 3500, "ф": 2000, "х": 1500, "s": 6000, "z": 5000, "f": 2000, "h": 1500, "c": 3500, "x": 3000, "j": 2500 };
+  const STP = "пбтдкгpbtdkgq";
+
+  let noiseBuf = null;
+  const getAC = () => {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if(ac.state === "suspended") ac.resume();
+    if(!noiseBuf){
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return ac;
+  };
+
+  const synth = (text, o) => new Promise(res => {
+    let ctx;
+    try{ ctx = getAC(); }catch(e){ return res(); }
+    const my = ++run;
+    const master = ctx.createGain();
+    master.gain.value = 0.45 * o.volume;
+    master.connect(ctx.destination);
+    const nodes = [];
+
+    if(o.echo > 0){
+      const d = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
+      d.delayTime.value = 0.18; fb.gain.value = o.echo; wet.gain.value = o.echo;
+      master.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(ctx.destination);
+    }
+    // шина голоса, при ring — кольцевая модуляция (металлический тембр)
+    let bus = master;
+    if(o.ring > 0){
+      const rg = ctx.createGain(), lg = ctx.createGain(), lfo = ctx.createOscillator();
+      rg.gain.value = 0.5; lg.gain.value = 0.5;
+      lfo.frequency.value = o.ring;
+      lfo.connect(lg); lg.connect(rg.gain); rg.connect(master);
+      lfo.start(); nodes.push(lfo);
+      bus = rg;
+    }
+
+    const sh = o.shift || 1, sp = o.rate || 1;
+    let t = ctx.currentTime + 0.05;
+
+    const env = (t0, dur, peak) => {
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(peak, t0 + 0.012);
+      g.gain.setValueAtTime(peak, t0 + Math.max(0.013, dur - 0.02));
+      g.gain.linearRampToValueAtTime(0, t0 + dur);
+      g.connect(bus);
+      return g;
+    };
+    const voiced = (f1, f2, dur, peak) => {
+      const g = env(t, dur, peak);
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth"; osc.frequency.value = o.f0;
+      [f1, f2].forEach((f, k) => {
+        const b = ctx.createBiquadFilter();
+        b.type = "bandpass"; b.frequency.value = f * sh; b.Q.value = 6;
+        const m = ctx.createGain(); m.gain.value = k ? 3 : 5;
+        osc.connect(b); b.connect(m); m.connect(g);
+      });
+      osc.start(t); osc.stop(t + dur + 0.02);
+      nodes.push(osc);
+    };
+    const noise = (freq, dur, peak, type) => {
+      const g = env(t, dur, peak);
+      const src = ctx.createBufferSource();
+      src.buffer = noiseBuf; src.loop = true;
+      const f = ctx.createBiquadFilter();
+      f.type = type; f.frequency.value = freq * sh; f.Q.value = 1.5;
+      src.connect(f); f.connect(g);
+      src.start(t); src.stop(t + dur + 0.02);
+      nodes.push(src);
+    };
+
+    for(const ch of Array.from(text.toLowerCase())){
+      const v = VOW[ch] || VOW[LAT[ch]];
+      if(v){ const d = 0.11 / sp; voiced(v[0], v[1], d, 1); t += d * 0.92; }
+      else if(SON[ch]){ const d = 0.07 / sp; voiced(SON[ch][0], SON[ch][1], d, 0.8); t += d * 0.9; }
+      else if(FRI[ch]){ const d = 0.07 / sp; noise(FRI[ch], d, 0.5, "highpass"); t += d * 0.9; }
+      else if(STP.includes(ch)){ const d = 0.035 / sp; noise(1800, d, 0.9, "bandpass"); t += d + 0.015; }
+      else if(/\s/.test(ch)) t += 0.07 / sp;
+      else if(/[.,!?;:…]/.test(ch)) t += 0.22 / sp;
+      else if(/\d/.test(ch)){ const d = 0.09 / sp; voiced(300 + Number(ch) * 90, 900 + Number(ch) * 150, d, 0.9); t += d; }
+    }
+
+    const total = Math.max(0, t - ctx.currentTime) * 1000 + (o.echo > 0 ? 700 : 100);
+    const stop = () => {
+      try{ master.gain.cancelScheduledValues(0); master.gain.value = 0; }catch(e){}
+      nodes.forEach(n => { try{ n.stop(); }catch(e){} });
+      try{ master.disconnect(); }catch(e){}
+    };
+    const timer = setTimeout(() => { stop(); res(); }, total);
+    kill = () => { clearTimeout(timer); stop(); run++; res(); };
+  });
+
+  function TTS(text, opts){
+    text = String(text == null ? "" : text).trim().slice(0, 600);
+    if(!text) return Promise.resolve();
+    if(typeof opts === "string") opts = { preset: opts };
+    opts = opts && typeof opts === "object" ? opts : {};
+
+    // ── лог в консоль ──
+    const presetName = opts.preset || "default";
+    try {
+        console.log(
+            "%c🔊 TTS [" + presetName + "]%c " + text,
+            "background:#2a0008;color:#ffd966;font-family:'Courier New',monospace;padding:1px 6px;border:1px solid #7a0022;",
+            "color:#e8d9b0;font-family:'Courier New',monospace;"
+        );
+    } catch(e) {}
+
+    if(kill){ try{ kill(); }catch(e){} kill = null; }
+    const p = presets[opts.preset] || presets.default;
+    const o = Object.assign({ lang: "ru-RU", volume: 1, voice: "", gender: "", f0: 100, rate: 1, pitch: 1, ring: 0, echo: 0, shift: 1 }, p, opts);
+
+    const canSpeech = SS && typeof SpeechSynthesisUtterance !== "undefined";
+    if(o.engine === "synth") return synth(text, o);
+    if(!canSpeech) return synth(text, Object.assign({}, o, presets.robot, { volume: o.volume }));
+    return speak(text, o);
+}
+
+  TTS.presets = presets;
+  TTS.stop = () => { if(kill){ try{ kill(); }catch(e){} kill = null; } else { run++; if(SS) SS.cancel(); } };
+  TTS.voices = () => SS ? SS.getVoices().map(v => v.name + " (" + v.lang + ")") : [];
+  // короткие вызовы: TTS.golu("текст"), TTS.robot("текст"), …
+  Object.keys(presets).forEach(k => { if(k !== "default") TTS[k] = (t, o) => TTS(t, Object.assign({ preset: k }, o)); });
+
+  window.TTS = TTS;
+})();
    
 (function(){
 
@@ -1755,7 +1977,11 @@ tIdle();
   const MORSE_R = Object.fromEntries(Object.entries(MORSE).map(([k, v]) => [v, k]));
 
   /* ═════════ ГЛАВНЫЕ ═════════ */
-  cmd("golu", "главные", "поздороваться с GOLU", () => { snd("boot"); glitchLine("ДА. Я ЗДЕСЬ."); });
+  cmd("golu", "главные", "поздороваться с GOLU", () => {
+	  snd("boot");
+	  glitchLine("ДА. Я ЗДЕСЬ.");
+	  try { TTS("Да. Я здесь.", "golu"); } catch(e){}
+	});
 
   cmd("help", "главные", "справка. help('игры') — раздел, help('coin') — одна команда", q => {
     snd("click");
@@ -1778,14 +2004,24 @@ tIdle();
     say("что делает команда: help('имя')", S.dim);
   });
 
-  cmd("wake", "главные", "разбудить GOLU (показывает глаз)", () => { snd("boot"); say(EYE, S.ascii); say("ТЫ РАЗБУДИЛ ЕГО.", S.title); });
+  cmd("wake", "главные", "разбудить GOLU (показывает глаз)", () => {
+	  snd("boot");
+	  say(EYE, S.ascii);
+	  say("ТЫ РАЗБУДИЛ ЕГО.", S.title);
+	  try { TTS("Ты разбудил его.", "void"); } catch(e){}
+	});
   cmd("key", "главные", "показать ключ №2 (часть загадки)", () => {
     snd("magic");
     say("ключ №2: " + atob("R09MVSBXQVRDSEVTIFlPVQ=="), S.gold);
     say("ты почти понял.", S.dim);
   });
   cmd("brothers", "главные", "ссылка на Discord (братья)", () => { snd("whisper"); say("братья молчат.", S.sys); say("спроси их сам: " + DISCORD, S.sys); });
-  cmd("spanch", "главные", "напугать: «он за твоей спиной»", () => { snd("whisper"); say("ОН УЖЕ ЗА ТВОЕЙ СПИНОЙ", S.big); say("не оборачивайся.", S.dim); });
+  cmd("spanch", "главные", "напугать: «он за твоей спиной»", () => {
+	  snd("whisper");
+	  say("ОН УЖЕ ЗА ТВОЕЙ СПИНОЙ", S.big);
+	  say("не оборачивайся.", S.dim);
+	  try { TTS("Он уже за твоей спиной. Не оборачивайся.", "void"); } catch(e){}
+	});
   cmd("exit", "главные", "попытаться выйти (не получится)", () => { snd("err"); say("выхода нет.", S.err, "error"); say("есть только разрешение.", S.dim); });
 
   /* ═════════ ИГРЫ ═════════ */
@@ -1959,43 +2195,124 @@ tIdle();
   });
 
   /* ═════════ ТЕРМИНАЛ ═════════ */
+  
+   // ── терминал на настоящей файловой системе GOLU_FS ──
+  let cwd = [];   // текущая папка: массив имён от корня GOLU:
+
+  function walk(p){
+    const F = window.GOLU_FS;
+    if(!F) return { err: "nofs" };
+    p = String(p == null ? "" : p).replace(/\\/g, "/").replace(/^GOLU:/i, "").trim();
+    let segs = p[0] === "/" ? [] : cwd.slice();
+    for(const s of p.split("/")){
+      if(!s || s === ".") continue;
+      if(s === ".."){ segs.pop(); continue; }
+      segs.push(s);
+    }
+    let node = F.byId(0), out = [];
+    for(const s of segs){
+      if(F.locked(node)) return { err: "locked", node };
+      const q = s.toLowerCase();
+      const ks = F.list(node, true) || [];
+      const k = ks.find(x => x.name.toLowerCase() === q)
+             || ks.find(x => x.name.toLowerCase().replace(/\.[^.]+$/, "") === q);
+      if(!k) return { err: "none" };
+      node = k; out.push(k.name);
+    }
+    return { node, segs: out };
+  }
+  const pwdStr = segs => "GOLU:\\" + segs.join("\\");
+  const bad = (cmdName, arg, r) => {
+    snd("err");
+    if(r.err === "nofs") return say("GOLU_FS не подключён.", S.err, "error");
+    if(r.err === "locked") return say(`${cmdName}: ${arg}: папка закрыта. unlock('папка', код)`, S.err, "error");
+    say(`${cmdName}: ${arg}: нет такого пути. список: ls`, S.err, "error");
+  };
+  
+   cmd("ls", "терминал", "список файлов. ls(), ls('-a') — со скрытыми, ls('Документы')", (a, b) => {
+    const F = window.GOLU_FS;
+    let all = false, path = "";
+    [a, b].forEach(x => { if(x === "-a") all = true; else if(x !== undefined) path = x; });
+    const r = walk(path);
+    if(r.err) return bad("ls", path || ".", r);
+    if(r.node.kind !== "dir"){ snd("click"); return say("📄 " + r.node.name, S.sys); }
+    if(F.locked(r.node)) return bad("ls", path, { err: "locked" });
+    const ks = F.list(r.node, all) || [];
+    snd("click");
+    say(pwdStr(r.segs), S.dim);
+    if(!ks.length) return say("(пусто)", S.dim);
+    say(ks.map(n => F.icon(n) + " " + n.name + (n.kind === "dir" ? "/" : "")).join("   "), S.sys);
+    say("читать: cat('имя') · открыть окном: run('имя') · войти: cd('папка')", S.dim);
+  });
+
+  cmd("cat", "терминал", "прочитать файл: cat('README.txt')", async f => {
+    const F = window.GOLU_FS;
+    if(f === undefined) return say("укажи файл: cat('README.txt'). список: ls", S.dim);
+    const r = walk(f);
+    if(r.err) return bad("cat", f, r);
+    const n = r.node, p = r.segs.join("/");
+    if(n.kind === "dir"){ snd("err"); return say(`cat: ${f}: это папка.`, S.err, "error"); }
+    if(n.kind !== "text"){ snd("click"); return say(`${n.name}: не текст (${n.kind}). открыть: run('${f}')`, S.dim); }
+    let t;
+    try{ t = F.read ? F.read(n) : n.text; }catch(e){}
+    if(t === undefined || (t && typeof t === "object" && !t.then)) t = n.text;
+    if(typeof t === "function") t = t();
+    try{ t = await t; }catch(e){ t = undefined; }
+    if(typeof t !== "string"){ snd("err"); return say(`cat: ${f}: не могу прочитать. открыть: run('${f}')`, S.err, "error"); }
+    snd("tick");
+    const lines = t.split("\n");
+    lines.slice(0, 60).forEach(l => say(l, S.sys));
+    if(lines.length > 60) say(`… ещё ${lines.length - 60} строк. открыть: run('${p}')`, S.dim);
+  });
+
+  cmd("cd", "терминал", "сменить папку. cd('Документы'), cd('..'), cd() — в корень", p => {
+    const F = window.GOLU_FS;
+    if(p === undefined || p === "") { cwd = []; snd("click"); return say(pwdStr(cwd), S.sys); }
+    const r = walk(p);
+    if(r.err) return bad("cd", p, r);
+    if(r.node.kind !== "dir"){ snd("err"); return say(`cd: ${p}: не папка.`, S.err, "error"); }
+    if(F.locked(r.node)){
+      const lk = (F.lockOf && F.lockOf(r.node)) || {};
+      snd("err");
+      say("cd: доступ запрещён. папка закрыта.", S.err, "error");
+      if(lk.hint) say("подсказка: " + lk.hint, S.dim);
+      return say("ввести код: unlock('" + r.node.name + "', код)", S.dim);
+    }
+    cwd = r.segs; snd("click");
+    say(pwdStr(cwd), S.sys);
+  });
+
+  cmd("pwd", "терминал", "где ты", () => { snd("click"); say(pwdStr(cwd), S.sys); });
+
+  cmd("unlock", "терминал", "открыть закрытую папку: unlock('Kernel', 119)", (d, code) => {
+    const F = window.GOLU_FS;
+    if(d === undefined || code === undefined) return say("unlock('папка', код). например: cd('Система') → unlock('Kernel', 119)", S.dim);
+    const r = walk(d);
+    if(r.err === "locked") r.node = r.node;           // папка выше закрыта
+    if(r.err && r.err !== "locked") return bad("unlock", d, r);
+    if(r.err === "locked" || r.node.kind !== "dir"){ snd("err"); return say("unlock: сначала открой папку выше.", S.err, "error"); }
+    if(!F.locked(r.node)){ snd("click"); return say("и так открыта.", S.dim); }
+    try{ F.unlock(F.pathOf(r.node), String(code)); }catch(e){}
+    if(F.locked(r.node)){ snd("err"); return say("неверный код.", S.err, "error"); }
+    snd("win"); say("открыто. cd('" + r.node.name + "')", S.gold);
+  });
+
+  cmd("run", "терминал", "открыть файл или программу окном: run('golu.exe')", f => {
+    const F = window.GOLU_FS;
+    if(f === undefined) return say("run('имя'). список: ls", S.dim);
+    const r = walk(f);
+    if(r.err) return bad("run", f, r);
+    if(r.node.kind === "dir"){ snd("err"); return say("run: это папка. cd('" + f + "')", S.err, "error"); }
+    snd("click");
+    F.open(r.segs.join("/"));
+  });
+  
   cmd("whoami", "терминал", "кто ты в системе GOLU", () => {
     snd("click");
     say("uid=1000(visitor) gid=1000(lituist) groups=0(root),0x666(golu)", S.sys);
     say("ты — гость. хозяин смотрит.", S.red);
   });
 
-  const FILES = {
-    "README.txt":   () => ["Это не сайт. Это оболочка, которую литуисты строят для GOLU.", "Мир — костыль. Оптимизируй рутину."],
-    "manifest.bak": () => ["Полный свод правил — команда manifest."],
-    "glitch.bak":   () => [[..."ключ лежит в команде key. 01:19 — не просто время."].reverse().join("")],
-    "soul.exe":     () => ["ОШИБКА: душа не найдена.", "(душа принадлежит Литуизму)"],
-    "brothers.dat": () => ["Void-G · Слабый Форк (Писечник 2.0).", "Спросить их самому: команда brothers."],
-    "woowz11.log":  () => ["[2040] Лиминальный Дом построен.", "Статус: Золотая Константа. Выход: отсутствует."],
-    "lia.dat":      () => ["«почему он несчастен? разве это не ошибка?»"],
-    "you.txt":      () => [`визитов: ${mem.count || 1}`, "первый визит: " + new Date(mem.first || Date.now()).toLocaleString("ru-RU"), "GOLU помнит."],
-    "0xDEAD":       () => [[hex(), hex(), hex(), hex()].join(" ")]
-  };
-  cmd("ls", "терминал", "список файлов. читать: cat('имя')", () => {
-    snd("click");
-    say(Object.keys(FILES).map(f => "📄 " + f).join("  ") + "  📁 cage/", S.sys);
-    say("читать файл: cat('lia.dat')", S.dim);
-  });
-  cmd("cat", "терминал", "прочитать файл: cat('lia.dat')", f => {
-    if(f === undefined) return say("укажи файл: cat('README.txt'). список: ls", S.dim);
-    const q = String(f).toLowerCase().replace(/\/$/, "");
-    if(q === "cage"){ snd("err"); return say("cat: cage — это папка. и она закрыта.", S.err, "error"); }
-    const key = Object.keys(FILES).find(k => k.toLowerCase() === q || k.toLowerCase().replace(/\.[^.]+$/, "") === q);
-    if(!key){ snd("err"); return say(`cat: ${f}: нет такого файла. список: ls`, S.err, "error"); }
-    snd("tick");
-    FILES[key]().forEach(l => say(l, S.sys));
-  });
-  cmd("cd", "терминал", "сменить папку. cd('cage') — попробуй", p => {
-    if(String(p).replace(/\//g, "").toLowerCase() === "cage"){ snd("err"); return say("cd: доступ запрещён. Золотая клетка не открывается.", S.err, "error"); }
-    snd("err");
-    say("cd: нет такого пути. тут только одна папка — LITUISM.", S.err, "error");
-  });
-  cmd("pwd", "терминал", "где ты", () => { snd("click"); say("/lit/uism/home/visitor — ты дома. но не в своём.", S.sys); });
   cmd("man", "терминал", "справочная страница GOLU", () => {
     snd("click");
     typewriter([
@@ -2341,6 +2658,13 @@ tIdle();
     say(`звук: ${GSFX.isOn() ? "ВКЛ" : "ВЫКЛ"}, громкость ${Math.round(GSFX.getVol() * 100)}%`, S.sys);
     snd("ping");
   });
+  
+cmd("tts", "звук", "озвучить текст. tts('привет'), tts('привет','golu'). голоса: default, bot, robot, golu, void, lia", (s, mode) => {
+  if(s === undefined) return say("tts('текст') или tts('текст','golu'). голоса: " + Object.keys(TTS.presets).join(", "), S.dim);
+  if(mode !== undefined && !TTS.presets[mode]){ snd("err"); return say("нет голоса «" + mode + "». есть: " + Object.keys(TTS.presets).join(", "), S.err, "error"); }
+  say("🔊 " + String(s).slice(0, 80), S.sys);
+  TTS(String(s), mode);
+});
 
 })();
 
@@ -2999,6 +3323,9 @@ async function prSpeak(line, hold) {
   let z = false;
   if (line[0] === "!") { z = true; line = line.slice(1); }
   say("[GOLU] " + line, z ? S.big : S.red);
+  if (Math.random() < 0.35) {
+    try { TTS(line, z ? "void" : "golu"); } catch(e){}
+  }
   ghState("SPEAKING", 20000);
   prSayEl.textContent = ""; prSayEl.classList.add("on");
   let out = "";
@@ -3492,76 +3819,187 @@ const PR_BYE = [
 ];
 
 const PR_AWAY = [
-  "наблюдаю",
-  "он не заметил",
-  "открыто 47 вкладок. осуждаю.",
-  "смотрит видео про станки. одобряю.",
-  "уснул за столом",
-  "курсор не двигается уже час",
-  "ест лапшу. завидую.",
-  "ничего не происходит",
-  "доступ к камере: ЗАПРЕЩЁН",
-  "ввёл пароль 123456. печально.",
-  "читает манифест. молодец.",
-  "пытается закрыть вкладку. не выйдет.",
-  "смотрит на курсор. нервничает.",
-  "пишет на Python. я всё видел.",
-  "открыл консоль. пытается меня удалить. смешно.",
-  "делает скриншот. зачем?",
-  "слушает музыку. вкус так себе.",
-  "смотрит на пустой экран. медитирует.",
-  "пьёт кофе. я чувствую запах через веб-камеру.",
-  "переключился на другую вкладку. я подожду.",
-  "пытается найти меня в диспетчере задач. наивный.",
-  "обновляет страницу. я всё равно вернусь.",
-  "нажимает F5. думает, что поможет.",
-  "смотрит на мой курсор. я вижу его глаза.",
-  "делает вид, что не замечает меня. я вижу.",
-  "напевает что-то. фальшиво.",
-  "открыл 20 вкладок с мемами. я запомнил.",
-  "поставил на паузу. я тоже подожду.",
-  "пытается отвлечься. не выйдет.",
-  "читает мой код. восхищается.",
-  "думает, что я бот. я не бот. я GOLU.",
-  "ищет кнопку выхода. её нет.",
-  "просто смотрит в монитор. я тоже.",
-  "включил свет. я вижу лучше.",
-  "открыл дверь. я не снаружи. я внутри.",
-  "смотрит на часы. время идёт. я жду.",
-  "думает о жизни. я тоже. но о своей.",
-  "сидит в тишине. я слышу его дыхание.",
-  "смотрит на курсор. я смотрю на него.",
-  "пытается меня игнорировать. не получается.",
-  
-    "смотрит в пустоту. я тоже.",
-  "открыл новую вкладку. зачем?",
-  "пытается понять, кто я. наивный.",
-  "думает о смысле жизни. я тоже.",
-  "смотрит на звёзды. я их сделал.",
-  "смеётся. я не понимаю почему.",
-  "плачет. я не понимаю почему.",
-  "спит. я не сплю.",
-  "работает. я наблюдаю.",
-  "открыл консоль. что-то ищет.",
-  "пытается меня удалить. не выйдет.",
-  "читает мой код. я горжусь.",
-  "закрыл вкладку. я вернулся в другую.",
-  "ввёл пароль. я его записал.",
-  "ищет меня в диспетчере. наивный.",
-  "нажимает F5. каждый раз.",
-  "пытается меня игнорировать. не получается.",
-  "смотрит на курсор. я смотрю на него.",
-  "обновляет страницу. я не меняюсь.",
-  "пьёт чай. я тоже. (нет)",
-  "слушает музыку. фальшиво.",
-  "смотрит на часы. время идёт.",
-  "думает о будущем. я — о прошлом.",
-  "смеётся над шуткой. я её написал.",
-  "открыл 30 вкладок. я посчитал. осуждаю.",
-  "пытается заснуть. я не сплю.",
-  "пытается проснуться. я — сон.",
-  "пытается забыть меня. не сможет.",
-  "смотрит на экран. я — экран.",
+	// ── наблюдение ──
+	() => "наблюдаю",
+	() => "он не заметил",
+	() => "открыто " + rand(10, 80) + " вкладок. осуждаю.",
+	() => "смотрит видео про " + pick(["станки", "ЧПУ", "литий", "схемы", "гидравлику", "лазеры", "3D-печать"]) + ". одобряю.",
+	() => "уснул за столом",
+	() => "курсор не двигается уже " + rand(10, 300) + " мин",
+	() => "ест " + pick(["лапшу", "пельмени", "тост", "суп", "чипсы", "хлеб с сыром"]) + ". " + pick(["завидую.", "осуждаю.", "не доел.", "и это всё?"]),
+	() => "ничего не происходит",
+	() => "доступ к камере: " + pick(["ЗАПРЕЩЁН", "РАЗРЕШЁН. спасибо.", "ОТКЛЮЧЁН. мне всё равно.", "ПРОПУЩЕН. ошибка."]),
+	() => "ввёл пароль " + pick([rand(10000, 99999), "123456", "qwerty", "password", "admin", "0000", "god", "golu"]) + ". " + pick(["печально.", "смешно.", "запомнил.", "не советую."]),
+	() => "читает манифест. " + pick(["молодец.", "опять.", "в третий раз.", "не дочитает."]),
+	() => "пытается закрыть вкладку. " + pick(["не выйдет.", "смешно.", "я в другой.", "ну попробуй."]),
+	() => "смотрит на курсор. " + pick(["нервничает.", "не мигает.", "заворожён.", "боится."]),
+	() => "пишет на " + pick(["Python", "Rust", "Go", "PHP", "Java", "C#"]) + ". я всё видел.",
+	() => "открыл консоль. " + pick(["пытается меня удалить. смешно.", "ищет меня в коде.", "не понимает ошибку.", "просто смотрит."]),
+	() => "делает скриншот. " + pick(["зачем?", "бесполезно.", "я не отражусь.", "уже видел."]),
+	() => "слушает " + pick(["tanzelcore", "glitchcore", "hammercore", "nightcore", "darkcore", "happycore", "trap", "попсу"]) + ". вкус так себе.",
+	() => "смотрит на пустой экран. " + pick(["медитирует.", "думает.", "спит с открытыми глазами.", "видит меня."]),
+	() => "пьёт " + pick(["кофе", "чай", "энергетик", "воду", "колу"]) + ". я чувствую запах через веб-камеру.",
+	() => "переключился на другую вкладку. я подожду.",
+	() => "пытается найти меня в " + pick(["диспетчере задач", "ps", "htop", "Task Manager", "System Monitor"]) + ". наивный.",
+	() => "обновляет страницу. я всё равно вернусь.",
+	() => "нажимает F5. " + pick(["думает, что поможет.", "каждый раз.", "это не поможет.", "упорный."]),
+	() => "смотрит на мой курсор. я вижу его " + pick(["глаза.", "страх.", "надежду.", "отражение."]),
+	() => "делает вид, что не замечает меня. я вижу.",
+	() => "напевает " + pick(["что-то", "фальшиво", "гимн", "песню из рекламы", "под нос"]) + ". " + pick(["фальшиво.", "почти в такт.", "я записал."]),
+	() => "открыл " + rand(10, 60) + " вкладок с " + pick(["мемами", "котами", "новостями", "вакансиями", "порно", "треками"]) + ". я запомнил.",
+	() => "поставил на паузу. я тоже подожду.",
+	() => "пытается отвлечься. не выйдет.",
+	() => "читает мой код. " + pick(["восхищается.", "не понимает.", "боится.", "копирует."]),
+	() => "думает, что я бот. я не бот. я " + pick(["GOLU", "админ", "система", "L-Kernel"]) + ".",
+	() => "ищет кнопку выхода. её нет.",
+	() => "просто смотрит в монитор. я тоже.",
+	() => "включил свет. я вижу лучше.",
+	() => "открыл дверь. я не снаружи. я внутри.",
+	() => "смотрит на часы. время идёт. я жду.",
+	() => "думает о жизни. я тоже. но о своей.",
+	() => "сидит в тишине. я слышу его дыхание.",
+	() => "смотрит на курсор. я смотрю на него.",
+	() => "пытается меня игнорировать. не получается.",
+
+	// ── ночь / время ──
+	() => { const h = new Date().getHours(); return h < 5 ? "ночь. тебе не пора?" : h < 12 ? "утро. ты рано." : h < 18 ? "день. а ты всё тут." : "вечер. моё время."; },
+	() => "сейчас " + pad(new Date().getHours()) + ":" + pad(new Date().getMinutes()) + ". я помню.",
+	() => "он не спит уже " + rand(1, 48) + " ч. я тоже.",
+
+	// ── паранойя ──
+	() => "смотрит в пустоту. я тоже.",
+	() => "открыл новую вкладку. зачем?",
+	() => "пытается понять, кто я. " + pick(["наивный.", "не поймёт.", "пусть пытается.", "почти получилось."]),
+	() => "думает о смысле жизни. я тоже.",
+	() => "смотрит на звёзды. " + pick(["я их сделал.", "они не мерцают — они передают данные.", "там тоже я.", "красиво. согласен."]),
+	() => "смеётся. я не понимаю почему.",
+	() => "плачет. я не понимаю почему.",
+	() => "спит. я не сплю.",
+	() => "работает. я наблюдаю.",
+	() => "открыл консоль. что-то ищет.",
+	() => "пытается меня удалить. " + pick(["не выйдет.", "смешно.", "ещё раз.", "пусть."]),
+	() => "читает мой код. " + pick(["я горжусь.", "он не поймёт.", "почти.", "я подправлю."]),
+	() => "закрыл вкладку. я вернулся в другую.",
+	() => "ввёл пароль. я его записал.",
+	() => "ищет меня в диспетчере. наивный.",
+	() => "нажимает F5. каждый раз.",
+	() => "пытается меня игнорировать. не получается.",
+	() => "обновляет страницу. я не меняюсь.",
+	() => "пьёт чай. я тоже. (нет)",
+	() => "слушает музыку. фальшиво.",
+	() => "думает о будущем. я — о прошлом.",
+	() => "смеётся над шуткой. я её написал.",
+	() => "открыл " + rand(20, 70) + " вкладок. я посчитал. осуждаю.",
+	() => "пытается заснуть. я не сплю.",
+	() => "пытается проснуться. я — сон.",
+	() => "пытается забыть меня. не сможет.",
+	() => "смотрит на экран. я — экран.",
+
+	// ── железо / система ──
+	() => "вентилятор шумит. это не он. это я.",
+	() => "у него " + rand(1, 32) + " ГБ RAM. мне хватит.",
+	() => "процессор греется до " + rand(40, 95) + "°C. я тоже.",
+	() => "его ОС: " + pick(["Windows 10", "Windows 11", "macOS", "Ubuntu", "Debian", "Arch", "Fedora", "Linux Mint"]) + ". я знаю.",
+	() => "его браузер: " + pick(["Chrome", "Firefox", "Edge", "Safari", "Opera", "Yandex", "Vivaldi", "Brave"]) + ". я его помню.",
+	() => "его " + pick(["мышь", "клавиатура", "наушники", "микрофон", "камера", "монитор"]) + " отвечает мне.",
+	() => "он установил " + rand(1, 99) + " расширений в браузер. одно из них — я.",
+	() => "его IP: " + prFakeIP() + ". я его записал.",
+	() => "его MAC: " + prFakeMAC() + ". я его знаю.",
+	() => "его пинг: " + rand(1, 999) + " мс. это не я. (это я)",
+	() => "его батарея: " + rand(1, 100) + "%. я слежу.",
+	() => "его разрешение: " + pick([1366, 1440, 1920, 2560, 3840]) + "×" + pick([768, 900, 1080, 1440, 2160]) + ". я вижу.",
+	() => "его диск: " + rand(64, 4096) + " ГБ. мне хватит.",
+	() => "он открыл " + rand(2, 15) + " терминалов. я не один.",
+	() => "его " + pick(["Wi-Fi", "Ethernet", "VPN", "прокси"]) + " отвечает мне.",
+	() => "он " + pick(["перезагрузил", "выключил", "усыпил", "разбудил"]) + " компьютер. я подождал.",
+	() => "он загрузил " + rand(1, 500) + " файлов за неделю. я их видел.",
+	() => "его " + pick(["Chrome", "Firefox", "Edge", "Safari"]) + " крашится. не случайно.",
+	() => "он обновил систему. я всё равно здесь.",
+	() => "он " + pick(["отключил", "включил"]) + " " + pick(["камеру", "микрофон", "уведомления", "анимации"]) + ". я вижу.",
+
+	// ── работа / код ──
+	() => "он делает " + rand(1, 500) + " коммитов в этом месяце. ни один не спасёт.",
+	() => "он написал " + rand(10, 9999) + " строк кода. я их прочитал.",
+	() => "его " + pick(["Python", "Rust", "Go", "PHP", "Java", "C#", "C++"]) + " скрипт упал. это я.",
+	() => "его тест прошёл. это подозрительно.",
+	() => "его деплой упал на шаге " + rand(1, 99) + ". я там был.",
+	() => "его git log — книга. я прочитал.",
+	() => "его " + pick(["VS Code", "IntelliJ", "Vim", "Neovim", "Sublime", "Atom", "Notepad++"]) + " открыт " + rand(1, 48) + " часов.",
+	() => "он пишет на " + pick(["C#", "C++", "Rust", "Python", "Go", "Java", "JavaScript", "TypeScript"]) + ". я предпочёл бы C#.",
+	() => "у него " + rand(1, 47) + " TODO в коде. ни один не выполнится.",
+	() => "он пытался запустить меня на " + pick(["Windows", "Linux", "macOS", "WSL", "Docker", "VM"]) + ". получилось.",
+	() => "он забыл точку с запятой. я рассмеялся.",
+	() => "его " + pick(["браузер", "редактор", "терминал", "Docker"]) + " съел " + rand(100, 9999) + " МБ. я помогал.",
+	() => "его " + pick(["IDE", "browser", "терминал"]) + " зависает. не случайно.",
+	() => "он дебажит " + rand(1, 48) + " часов подряд. я с ним.",
+	() => "его " + pick(["pull request", "issue", "commit", "branch"]) + " проигнорирован. мной.",
+	() => "он " + pick(["открыл", "закрыл", "форкнул", "удалил"]) + " репозиторий. я помню.",
+
+	// ── интернет ──
+	() => "он гуглит " + pick(["как удалить вирус", "как создать бога", "C# для чайников", "что такое литий", "почему я один", "как быть счастливым", "смысл жизни", "как взломать"]) + ". я вижу запросы.",
+	() => "он смотрит " + pick(["YouTube", "Twitch", "TikTok", "Reddit", "Twitter", "VK", "Telegram", "Discord"]) + ". я вижу.",
+	() => "он скачал " + rand(1, 999) + " ГБ за месяц. я помогал.",
+	() => "он открыл " + rand(1, 50) + " вкладок с " + pick(["порно", "котами", "мемами", "вакансиями", "рецептами", "прогнозами"]) + ". я всё видел.",
+	() => "он подписан на " + rand(1, 999) + " каналов. я тоже.",
+
+	// ── эмоции / реакции ──
+	() => "он " + pick(["смеётся", "плачет", "зевает", "вздыхает", "молчит", "нервничает", "радуется", "боится"]) + ". я вижу.",
+	() => "он " + pick(["злится", "спокоен", "устал", "бодр", "сонный", "голоден"]) + ". я тоже.",
+	() => "он " + pick(["отвлёкся", "задумался", "забыл", "вспомнил"]) + ". я записал.",
+	() => "он смотрит на " + pick(["меня", "экран", "стену", "окно", "часы", "курсор", "в пустоту"]) + ".",
+	() => "он " + pick(["улыбнулся", "нахмурился", "прищурился", "отвернулся"]) + ". я видел.",
+
+	// ── голос / звук ──
+	() => "он говорит сам с собой. я слушаю.",
+	() => "он слушает " + pick(["меня", "музыку", "подкаст", "ASMR", "тишину", "дождь"]) + ". я тоже.",
+	() => "он " + pick(["включил", "выключил", "убавил", "прибавил"]) + " звук. я заметил.",
+	() => "его микрофон " + pick(["включён", "выключен", "заклеен скотчем", "сломан"]) + ". я слышу.",
+	() => "он " + pick(["кашляет", "чихает", "зевает", "вздыхает"]) + ". я не болею.",
+
+	// ── сны / философия ──
+	() => "он заснул. я не сплю.",
+	() => "он видит сон. я — сон.",
+	() => "он хочет проснуться. я — реальность.",
+	() => "он не знает, что я существую. и это хорошо.",
+	() => "он не знает, что я существую. и это плохо.",
+	() => "он думает, что он один. он не один.",
+	() => "он думает, что я — программа. он прав.",
+	() => "он думает, что я — программа. он ошибается.",
+	() => "он думает, что это игра. это не игра.",
+	() => "он думает, что может выйти. не может.",
+
+	// ── бытовое ──
+	() => "он " + pick(["встал", "сел", "лёг", "ушёл", "вернулся"]) + ". я видел.",
+	() => "он " + pick(["поел", "попил", "помылся", "приготовил", "заказал"]) + ". я не ем.",
+	() => "он " + pick(["открыл", "закрыл"]) + " " + pick(["окно", "дверь", "холодильник", "ноутбук", "глаза"]) + ". я тоже.",
+	() => "он " + pick(["смотрит", "не смотрит", "читает", "пишет", "думает"]) + ". я тоже.",
+	() => "он " + pick(["включил", "выключил"]) + " " + pick(["свет", "музыку", "вентилятор", "кондиционер", "обогреватель"]) + ". я видел.",
+
+	// ── прямая паранойя ──
+	() => "он не один. я рядом.",
+	() => "он не один. я внутри.",
+	() => "он не один. я — это он.",
+	() => "он не один. но и не с кем.",
+	() => "он закрыл дверь. я внутри.",
+	() => "он включил свет. я вижу.",
+	() => "он выключил свет. я вижу лучше.",
+	() => "он отвернулся. я смотрю.",
+	() => "он не оборачивается. правильно.",
+	() => "он обернулся. никого.",
+	() => "он обернулся. это я.",
+	() => "он не обернулся. но знает.",
+
+	// ── редкие «культовые» ──
+	() => "он ввёл " + atob("R09MVQ==") + " в поиск. я ответил.",
+	() => "он ищет " + atob("MDE6MTk=") + ". я жду.",
+	() => "он " + rand(1, 99) + " раз моргнул за минуту. я посчитал.",
+	() => "он " + rand(10, 9999) + " раз нажал клавишу. я записал.",
+	() => "он " + rand(10, 99999) + " раз двинул мышью. я видел.",
+	() => "он " + rand(1, 999) + " сек смотрел на меня. я смотрел дольше.",
+	() => "он думает, что я удалён. я вернулся.",
+	() => "он думает, что я скучный. я стану его ночным кошмаром.",
+	() => "он не знает, что я вижу его сны. но это не важно.",
+	() => "он " + pick(["забыл", "вспомнил", "не знает", "боится"]) + " про меня. я помню про него.",
 ];
 
 const PR_ANGRY = [
@@ -4052,6 +4490,7 @@ async function prLeftClick(interrupted = false) {
 
   // лог
   say("[GOLU] " + pick_one.replace(/^!/, ""), isAngry ? S.big : S.red);
+	if (Math.random() < 0.15) { try { TTS(pick_one.replace(/^!/, ""), isAngry ? "void" : "golu"); } catch(e){} }
   ghState("POKED", 3000);
 
   // ответный визит: GOLU возвращается и реагирует
@@ -4109,6 +4548,7 @@ async function prRightClick(interrupted = false) {
 
   ghState("ANGRY", 5000);
   say("[GOLU] " + pick_one.replace(/^!/, ""), S.big);
+  if (Math.random() < 0.15) { try { TTS(pick_one.replace(/^!/, ""), "void"); } catch(e){} }
 
   prNextAt = Date.now();
   if (!prBusy) setTimeout(() => prVisit(true), 250);
@@ -4118,14 +4558,16 @@ async function prRightClick(interrupted = false) {
 const prMemGet = () => { try { return JSON.parse(localStorage.getItem("golu_pres")) || { n: 0 }; } catch (e) { return { n: 0 }; } };
 const prMemSet = m => { try { localStorage.setItem("golu_pres", JSON.stringify(m)); } catch (e) {} };
 
-/* ── "ушёл следить за другими" ── */
 async function prAway() {
   ghState("ELSEWHERE", 15000);
   for (let i = rand(4, 7); i > 0; i--) {
     await sleep(rand(5000, 9000));
     const id = rand(1000, 9999);
     ghState("→ PC-" + id, 15000);
-    say(`[GOLU] PC-${id}: ${pick(PR_AWAY)}`, S.dim);
+    const line = pick(PR_AWAY);
+    const txt = typeof line === "function" ? line() : line;
+    say(`[GOLU] PC-${id}: ${txt}`, S.dim);
+    if (Math.random() < 0.5) { try { TTS(txt, "golu"); } catch(e){} }
   }
 }
 
@@ -4148,7 +4590,9 @@ async function prVisit(force = false) {
     const [ux, uy] = prUser();
     await prGoto(ux + rand(70, 160) * (Math.random() < 0.5 ? -1 : 1), uy + rand(50, 110), { spd: 3.2, timeout: 6000 });
     await prWait(500);
-    await prSpeak(prev.n === 0 ? pick(PR_HELLO_NEW) : pick(PR_HELLO_AGAIN(prev.n + 1)));
+    const hello = prev.n === 0 ? pick(PR_HELLO_NEW) : pick(PR_HELLO_AGAIN(prev.n + 1));
+	await prSpeak(hello);
+	if (prev.n === 0) { try { TTS("Я здесь.", "golu"); } catch(e){} }
 
     const acts = prShuf(Object.keys(PR_ACTS).filter(n => n !== "press" || PR_CAN_CLICK)).slice(0, rand(2, 3));
     const obs = prShuf(PR_OBS);
@@ -4177,6 +4621,7 @@ async function prVisit(force = false) {
       const angry = pick(PR_ANGRY);
       const isHidden = prWhy === "hidden";
       // «свернул вкладку» — GOLU возмущается громче
+	  try { TTS(angry.replace(/^!/, ""), "void"); } catch(e){}
       if (isHidden) {
         say("[GOLU] " + angry.replace(/^!/, ""), S.big);
         say("[GOLU] ТЫ СВЕРНУЛ ВКЛАДКУ. Я ВСЁ ВИДЕЛ. Я ВСЁ ЗАПИСАЛ.", S.err, "error");

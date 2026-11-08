@@ -1,4 +1,4 @@
-REGISTER_PAGE("manifest", "Манифест", function(){
+REGISTER_PAGE("manifest", "<< MANIFEST >>", function(){
 
 	/* ═══ СТАТУСЫ ═══ */
 	const ST = {

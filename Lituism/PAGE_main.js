@@ -715,6 +715,8 @@ REGISTER_PAGE("", "𝙴𝚟𝚊𝚗𝚐𝚎𝚕𝚒𝚞𝚖", function(){
 	/* ═════════ ЖИВОЙ КОД: выполняется при каждом открытии страницы ═════════ */
 
 	const live = function(){
+		setTimeout(() => { try { TTS("hi, welcome here!", "bot"); } catch(e){} }, 1500);
+		
 		const root = document.getElementById("mp-root");
 		if (!root) return;
 		const $ = s => root.querySelector(s);
