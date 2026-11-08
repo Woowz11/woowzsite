@@ -205,6 +205,55 @@ REGISTER_PAGE("explorer", "📁 EXPlore-.rer", function(){
 			F.erase(n);
 			sel = null; render();
 		}
+		/* ── можно ли скачать файл ── */
+function canDownload(n){
+	if(!n || n.kind === "dir" || n.kind === "app" || n.kind === "link") return false;
+	// есть src — реальный файл
+	if(n.src) return true;
+	// текст — сохраним как .txt
+	if(n.kind === "text") return true;
+	// bin с текстом — сохраним как .bin
+	if(n.kind === "bin" && (n.msg != null || n.text != null)) return true;
+	return false;
+}
+
+/* ── скачать файл ── */
+function downloadNode(n){
+	if(!canDownload(n)) return;
+
+	// 1) если есть src — качаем по ссылке
+	if(n.src){
+		const a = document.createElement("a");
+		a.href = n.src;
+		a.download = n.name;         // имя по умолчанию; браузер может проигнорировать для cross-origin
+		a.rel = "noopener";
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		flash("⬇ скачивание: " + n.name);
+		return;
+	}
+
+	// 2) текст или bin с текстом — делаем blob
+	let content = "", type = "application/octet-stream";
+	if(n.kind === "text"){
+		content = typeof n.text === "function" ? String(n.text()) : String(n.text || "");
+		type = "text/plain;charset=utf-8";
+	}else if(n.kind === "bin"){
+		content = n.msg != null ? String(n.msg) : (n.text != null ? String(n.text) : "");
+	}
+
+	const blob = new Blob([content], { type });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = n.name || "file.bin";
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
+	setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+	flash("⬇ скачано: " + (n.name || "file.bin"));
+}
 		
 		/* ═══ мини-винил для аудио-файла в Проводнике ═══ */
 /* ═══ мини-винил для аудио-файла в Проводнике ═══ */
@@ -300,6 +349,7 @@ function audioIcon(n){
 			if(n.keep) h += row("Защита", "не удаляется");
 			if(n.desc) h += '<div class="ex-desc">' + esc(n.desc) + '</div>';
 			if(sel) h += '<button class="ex-b" data-a="open">' + (sel.kind === "app" || sel.kind === "link" ? "▶ ЗАПУСТИТЬ" : "ОТКРЫТЬ") + '</button>';
+			if(sel && canDownload(sel)) h += '<button class="ex-b" data-a="download">⬇ СКАЧАТЬ</button>';
 			if(sel && sel.parent && sel.parent.trash) h += '<button class="ex-b danger" data-a="del">УДАЛИТЬ</button>';
 			infoEl.innerHTML = h;
 		}
@@ -376,6 +426,7 @@ function audioIcon(n){
 			else if(a === "view"){ S.view = S.view === "list" ? "grid" : "list"; persist(); render(); }
 			else if(a === "hidden"){ S.hidden = !S.hidden; persist(); sel = null; render(); flash(S.hidden ? "Скрытые файлы: показаны" : "Скрытые файлы: спрятаны"); }
 			else if(a === "open" && sel) openNode(sel);
+			else if(a === "download" && sel) downloadNode(sel);
 			else if(a === "del") del(sel);
 			else if(a === "empty"){
 				cwd.kids.slice().forEach(function(k){ if(!k.keep) del(k); });

@@ -53,6 +53,7 @@ const PAGE_FILES = [
 	"PAGE_clicker.js",
 	"PAGE_manifest.js",
 	"PAGE_explorer.js",
+	"PAGE_world.js",
 ];
 
 const TOP_NAV = [
