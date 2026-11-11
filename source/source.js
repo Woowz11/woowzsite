@@ -64,6 +64,7 @@ const __A_IDK = " (я не помню точно)"
 
 // ADD_AI("ERROR.png", -1)
 
+ADD_AI("pavel_putin.png", -1)
 ADD_AI("idk.png", -1)
 ADD_AI("pavelfan_death.png", -1)
 ADD_AI("pavelfan_blackhole.png", -1)

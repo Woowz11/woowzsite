@@ -1811,21 +1811,26 @@ window.GOLU_GRAD = gradFor;
     kill = () => { clearTimeout(timer); stop(); run++; res(); };
   });
 
-  function TTS(text, opts){
+function TTS(text, opts){
     text = String(text == null ? "" : text).trim().slice(0, 600);
     if(!text) return Promise.resolve();
     if(typeof opts === "string") opts = { preset: opts };
     opts = opts && typeof opts === "object" ? opts : {};
 
-    // ── лог в консоль ──
+    // ── лог в консоль (всегда, но при муте — с 🔇 и без звука) ──
     const presetName = opts.preset || "default";
+    const muted = !!window.__GOLU_MUTE;
+    const icon  = muted ? "🔇" : "🔊";
     try {
         console.log(
-            "%c🔊 TTS [" + presetName + "]%c " + text,
+            "%c" + icon + " TTS [" + presetName + "]%c " + text,
             "background:#2a0008;color:#ffd966;font-family:'Courier New',monospace;padding:1px 6px;border:1px solid #7a0022;",
             "color:#e8d9b0;font-family:'Courier New',monospace;"
         );
     } catch(e) {}
+
+    // при муте — только лог, без звука
+    if(muted) return Promise.resolve();
 
     if(kill){ try{ kill(); }catch(e){} kill = null; }
     const p = presets[opts.preset] || presets.default;
@@ -4576,6 +4581,7 @@ async function prAway() {
 async function prVisit(force = false) {
   if (prBusy) return;
   if (!force && Date.now() < prNextAt) return;
+  if (window.__GOLU_NO_SPAWN && !force) return;
   prBusy = true; prAbort = false; prWhy = "";
   const prev = prMemGet();
   prMemSet({ n: prev.n + 1, last: Date.now() });
@@ -4658,7 +4664,7 @@ prGhChip.title = "клик — позвать GOLU";
 prGhChip.addEventListener("click", () => {
   if (prBusy) return;
   say("[GOLU] ты позвал меня.", S.red, "warn");
-  prVisit();
+  prVisit(true);
 });
 const prTimerEl = PR_TIMER ? mk("span", null, "gh-next") : null;
 if (prTimerEl) prGhChip.appendChild(prTimerEl);
@@ -4673,6 +4679,7 @@ setInterval(() => {
   }
   if (!PR_ON || prBusy || document.hidden || left > 0 || prMX === null) return;
   if (PR_MOBILE_OFF && typeof IN_MOBILE !== "undefined" && IN_MOBILE) return;
+  if (window.__GOLU_NO_SPAWN) return;    // ← вот это
   prVisit();
 }, 500);
 
@@ -4716,7 +4723,7 @@ document.addEventListener("keydown", e => {
 // свернул вкладку: GOLU исчезает
 document.addEventListener("visibilitychange", () => { if (document.hidden) prCancel("hidden"); });
 
-window.GOLU_VISIT = () => prVisit();
+window.GOLU_VISIT = () => prVisit(true);
 
 /* ═══ TOPBANNER: ДИЗАЙН + ПАНЕЛИ (TB) v2 ═══ */
 const TB_SHOW_TITLE_TEXT = false; // true = показывать title_text.png рядом с логотипом
@@ -5192,6 +5199,34 @@ const TB_SWITCHES = [
 	{ id: "noise",   icon: "🌩", title: "ШУМ",           desc: "Случайные помехи на экране" },
 	{ id: "zoom",    icon: "🔍", title: "ЗУМ",           desc: "Лёгкий зум страницы" },
 	{ id: "red",     icon: "🩸", title: "КРАСНЫЙ",       desc: "Красный фильтр поверх" },
+	{
+  id: "goluMute", icon: "🔇", title: "МУТ TTS", desc: "Без TTS и без его комментариев",
+  on(){
+    window.__GOLU_MUTE = true;
+    tbSet("golu_mute", true);
+    try { TTS.stop && TTS.stop(); } catch(e){}
+  },
+  off(){
+    window.__GOLU_MUTE = false;
+    tbSet("golu_mute", false);
+  },
+},
+{
+  id: "goluNoSpawn", icon: "👻", title: "БЕЗ КУРСОРА GOLU", desc: "GOLU не придёт...",
+  on(){
+    window.__GOLU_NO_SPAWN = true;
+    tbSet("golu_no_spawn", true);
+    // если сейчас на экране — убрать
+    try { prCancel("nos"); } catch(e){}
+    try { prHide(); } catch(e){}
+  },
+  off(){
+    window.__GOLU_NO_SPAWN = false;
+    tbSet("golu_no_spawn", false);
+    // перепланировать визит через обычный интервал
+    try { prNextAt = Date.now() + rand(PR_GAP[0], PR_GAP[1]); } catch(e){}
+  },
+},
 	{ id: "green", icon: "☣", title: "ТОКСИН", desc: "Зелёный hue + пузырьки",
 	on(){
 		if (document.getElementById("__tbBubbles")) return;
@@ -5716,6 +5751,8 @@ function tbFx(id, on) {
 		} catch (e) { console.warn("[FX restore]", k, e); }
 	}
 }
+window.__GOLU_MUTE = !!tbGet("golu_mute", false);
+window.__GOLU_NO_SPAWN = !!tbGet("golu_no_spawn", false);
 
 /* ── G-TOKEN: состояние (v2) — живёт вне панели, фермы капают в фоне ── */
 const TB_MINER = Object.assign({

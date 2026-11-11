@@ -134,34 +134,78 @@ REGISTER_PAGE("videos", "VIDΞOS", function(){
 		if (window.__vdK) { window.removeEventListener("keydown", window.__vdK); window.__vdK = null; }
 	};
 
-	window.VD_PLAY = function(k, i){
-		const it = LISTS[k] && LISTS[k][i]; if (!it) return;
-		const id = yid(it.url);
-		if (!id) return;
-		window.VD_CLOSE();
-		const seen = seenRd(); seen[id] = 1; seenWr(seen);
-		const card = document.querySelector('.vd-card[data-id="' + id + '"]'); if (card) card.classList.add("seen");
-		stats();
+/* ── модалка видео: prev / next + больший плеер ── */
+window.__vdCur = { k: "v", i: 0 };
 
-		const o = document.createElement("div");
-		o.id = "vd-modal";
-		o.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px;font-family:'Courier New',monospace;";
-		const box = k === "s"
-			? "height:min(76vh,860px);aspect-ratio:9/16;max-width:92vw;"
-			: "width:min(92vw,calc(70vh * 16 / 9),1200px);aspect-ratio:16/9;";
-		const bs = "background:#12060c;border:1px solid #7a0022;color:#e8d9b0;font:12px 'Courier New',monospace;letter-spacing:.1em;padding:8px 14px;border-radius:0;box-shadow:none;cursor:pointer;";
-		o.innerHTML =
-			'<div style="color:#d4af37;letter-spacing:.15em;font-size:13px;text-align:center;max-width:92vw;">' + esc(it.title) + '</div>' +
-			'<iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0" style="' + box + 'border:1px solid #d4af37;box-shadow:0 0 40px rgba(255,0,68,.45);background:#000;" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
-			'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">' +
-			'<button style="' + bs + '" onclick="window.open(\'' + watchUrl(k, id) + '\',\'_blank\',\'noopener\')">↗ НА YOUTUBE</button>' +
-			'<button style="' + bs + '" onclick="VD_CLOSE()">✕ ЗАКРЫТЬ (Esc)</button></div>' +
-			'<div style="color:#6a4a55;font-size:11px;letter-spacing:.1em;">не играет? открой на YouTube: встроенный плеер не работает с file://</div>';
-		o.addEventListener("click", e => { if (e.target === o) window.VD_CLOSE(); });
-		document.documentElement.appendChild(o);
-		window.__vdK = e => { if (e.key === "Escape") window.VD_CLOSE(); };
-		window.addEventListener("keydown", window.__vdK);
+window.VD_PLAY = function(k, i){
+	const list = LISTS[k];
+	if (!list) return;
+	let it = list[i];
+	if (!it) return;
+
+	// если модалка уже открыта — просто переключаем контент, не пересоздаём DOM
+	const existing = document.getElementById("vd-modal");
+	const isReuse = existing && window.__vdCur.k === k;
+
+	window.VD_CLOSE();   // снимает keydown-хэндлер
+	const seen = seenRd();
+	const id = yid(it.url);
+	if (id) { seen[id] = 1; seenWr(seen); }
+	const card = document.querySelector('.vd-card[data-id="' + (id || "") + '"]'); if (card) card.classList.add("seen");
+	stats();
+
+	const o = document.createElement("div");
+	o.id = "vd-modal";
+	o.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:8px;font-family:'Courier New',monospace;";
+
+	// большой плеер: 16:9 для видео, 9:16 для shorts
+	const box = k === "s"
+		? "height:min(84vh,1000px);aspect-ratio:9/16;max-width:96vw;"
+		: "width:min(96vw,calc(84vh * 16 / 9),1600px);aspect-ratio:16/9;";
+
+	const bs = "background:#12060c;border:1px solid #7a0022;color:#e8d9b0;font:13px 'Courier New',monospace;letter-spacing:.12em;padding:10px 16px;border-radius:0;box-shadow:none;cursor:pointer;white-space:nowrap;";
+	const bsPrev = "background:#12060c;border:1px solid #7a0022;color:#d4af37;font:bold 20px 'Courier New',monospace;width:56px;height:56px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex:none;";
+	const bsNext = bsPrev;
+
+	const prevBtn = '<button style="' + bsPrev + '" title="Предыдущее (←)" onclick="VD_NAV(-1)">◀</button>';
+	const nextBtn = '<button style="' + bsNext + '" title="Следующее (→)" onclick="VD_NAV(1)">▶</button>';
+
+	o.innerHTML =
+		'<div style="color:#d4af37;letter-spacing:.12em;font-size:13px;text-align:center;max-width:96vw;line-height:1.3;min-height:18px;">' + esc(it.title) + '</div>' +
+		'<div style="display:flex;align-items:center;justify-content:center;gap:12px;max-width:96vw;">' +
+			prevBtn +
+			'<iframe src="https://www.youtube-nocookie.com/embed/' + (id || "") + '?autoplay=1&rel=0" style="' + box + 'border:1px solid #d4af37;box-shadow:0 0 50px rgba(255,0,68,.5);background:#000;flex:none;" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
+			nextBtn +
+		'</div>' +
+		'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;">' +
+		'<button style="' + bs + '" onclick="window.open(\'' + watchUrl(k, id) + '\',\'_blank\',\'noopener\')">↗ НА YOUTUBE</button>' +
+		'<button style="' + bs + '" onclick="VD_CLOSE()">✕ ЗАКРЫТЬ (Esc)</button>' +
+		'<span style="color:#6a4a55;font-size:11px;letter-spacing:.08em;align-self:center;">← → листать · Esc закрыть</span>' +
+		'</div>';
+	o.addEventListener("click", e => { if (e.target === o) window.VD_CLOSE(); });
+	document.documentElement.appendChild(o);
+
+	window.__vdCur = { k: k, i: i };
+
+	window.__vdK = e => {
+		if (e.key === "Escape") window.VD_CLOSE();
+		else if (e.key === "ArrowLeft")  { e.preventDefault(); window.VD_NAV(-1); }
+		else if (e.key === "ArrowRight") { e.preventDefault(); window.VD_NAV(1);  }
 	};
+	window.addEventListener("keydown", window.__vdK);
+};
+
+/* листать вперёд/назад внутри текущей вкладки (видео или shorts) */
+window.VD_NAV = function(dir){
+	const cur = window.__vdCur || { k: "v", i: 0 };
+	const list = LISTS[cur.k];
+	if (!list || !list.length) return;
+	let i = cur.i + dir;
+	// по кругу
+	if (i < 0) i = list.length - 1;
+	if (i >= list.length) i = 0;
+	window.VD_PLAY(cur.k, i);
+};
 
 	window.VD_RANDOM = function(){
 		const root = document.getElementById("vd-root"); if (!root) return;
