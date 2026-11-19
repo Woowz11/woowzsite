@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>woowz-os</title>
+</head>
+<body>
+	<div id="wiki"></div>
+
+	<script src="woowiki.js"></script>
+	<script src="woowiki_standard.js"></script>
+	<script src="mods/code.js"></script>
+	<script src="mods/preview.js"></script>
+	<script src="mods/reading.js"></script>
+	<script src="mods/recent.js"></script>
+	<script src="mods/hotkeys.js"></script>
+
+	<script>
+	const CY_FONT = "ui-monospace, \"Cascadia Mono\", Consolas, \"DejaVu Sans Mono\", monospace";
+
+	const CY_THEMES = {
+		matrix : { Bg: "#030a05", Panel: "#07140b", Fg: "#b6f5c4", Muted: "#5f8f6e", Link: "#39ff7a", Missing: "#ff4d6d", Border: "#14502b", Accent: "#39ff7a", Code: "#0a1f10", Glow: "#39ff7a" },
+		amber  : { Bg: "#120a02", Panel: "#1d1105", Fg: "#ffd9a0", Muted: "#a37a3f", Link: "#ffb000", Missing: "#ff6b4a", Border: "#5a3a0a", Accent: "#ffb000", Code: "#271806", Glow: "#ffb000" },
+		paper  : { Bg: "#e9e4d4", Panel: "#f6f2e4", Fg: "#1f1d18", Muted: "#6d675a", Link: "#9b1c1c", Missing: "#c2410c", Border: "#2b2a25", Accent: "#9b1c1c", Code: "#e2dcc8", Glow: "transparent" }
+	};
+
+	const CY_PALETTES = {
+		matrix : { Comment: "#3f7a52", String: "#ffe66d", Number: "#ff9f6b", Keyword: "#39ff7a", Type: "#7df9ff", Const: "#ff9f6b", Fn: "#b6f5c4", Builtin: "#7df9ff", Meta: "#c792ea", Tag: "#39ff7a", Attr: "#7df9ff", Heading: "#39ff7a", Link: "#7df9ff", Regex: "#ff9f6b", Strong: "#b6f5c4", Em: "#b6f5c4" },
+		amber  : { Comment: "#8a6a35", String: "#fff1a8", Number: "#ff8a4a", Keyword: "#ffb000", Type: "#ffd36b", Const: "#ff8a4a", Fn: "#ffd9a0", Builtin: "#ffd36b", Meta: "#ff9fb2", Tag: "#ffb000", Attr: "#ffd36b", Heading: "#ffb000", Link: "#ffd36b", Regex: "#ff8a4a", Strong: "#ffd9a0", Em: "#ffd9a0" },
+		paper  : { Comment: "#8a8573", String: "#1d6b3a", Number: "#a14a00", Keyword: "#9b1c1c", Type: "#1c4f9b", Const: "#a14a00", Fn: "#1f1d18", Builtin: "#1c4f9b", Meta: "#6b2c91", Tag: "#9b1c1c", Attr: "#1c4f9b", Heading: "#9b1c1c", Link: "#1c4f9b", Regex: "#a14a00", Strong: "#1f1d18", Em: "#1f1d18" }
+	};
+
+	const CY_KINDS = {
+		note   : "INFO",
+		tip    : "TIP",
+		warn   : "WARN",
+		danger : "FAIL"
+	};
+
+	const CY_BADGE_COLORS = [ "gray", "blue", "green", "red", "yellow", "purple", "orange" ];
+
+	const CY_ICONS = {
+		ok: "✔", no: "✘", warn: "⚠", star: "★", heart: "♥", bolt: "⚡", gear: "⚙", flag: "⚑", clock: "⏱", bug: "🐞", fire: "🔥", arrow: "→"
+	};
+
+	const CY_USERS = {
+		woowz : { Role: "главный инженер", Text: "Строит станцию и пишет вики." },
+		root  : { Role: "бортовой компьютер", Text: "Отвечает всегда, шутит редко." },
+		guest : { Role: "стажёр", Text: "Пока ничего не сломал." }
+	};
+
+	const CY_BOOT_LINES = [
+		"WOOWIKI BIOS v2.0.0",
+		"cpu .......................... ok",
+		"memory ....................... ok",
+		"mounting pages ............... ok",
+		"loading theme ................ ok",
+		"starting woowz-os",
+		"",
+		"click or press any key"
+	];
+
+	const CY_BAR_CELLS = 24;
+	const CY_CHART_CELLS = 30;
+
+	const CY_CSS = `
+	.cy{ min-height:100vh; color:var(--ww-fg); background:var(--ww-bg); font-family:var(--ww-font); font-size:15px; line-height:1.6; }
+	.cy *{ scrollbar-color:var(--ww-accent) var(--ww-bg); }
+	.cy ::selection{ color:var(--ww-bg); background:var(--ww-accent); }
+	.cy li::marker{ color:var(--ww-accent); }
+	.cy hr{ border:0; border-top:1px dashed var(--ww-border); }
+	.cy a{ color:var(--ww-link); text-decoration:none; }
+	.cy a:hover{ color:var(--ww-bg); background:var(--ww-link); }
+	.cy a[data-ww-page]::before{ content:"["; }
+	.cy a[data-ww-page]::after{ content:"]"; }
+	.cy .ww-missing{ color:var(--ww-missing); text-decoration:line-through; }
+	.cy .ww-error{ padding:4px 10px; color:var(--ww-missing); border:1px dashed var(--ww-missing); }
+
+	.cy input, .cy textarea, .cy select{ color:var(--ww-fg); background:var(--ww-bg); border:1px solid var(--ww-border); border-radius:0; font:inherit; }
+	.cy input:focus, .cy textarea:focus{ border-color:var(--ww-accent); outline:1px solid var(--ww-accent); }
+	.cy .ww-button{ color:var(--ww-accent); background:transparent; border:1px solid var(--ww-accent); border-radius:0; font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase; text-shadow:0 0 8px var(--ww-glow); cursor:pointer; }
+	.cy .ww-button:hover{ color:var(--ww-bg); background:var(--ww-accent); text-shadow:none; }
+
+	.cy .ww-header{ position:sticky; top:0; z-index:750; display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin:0; max-width:none; padding:8px 16px; background:var(--ww-panel); border:0; border-bottom:1px solid var(--ww-accent); border-radius:0; box-shadow:0 6px 24px -12px var(--ww-glow); }
+	.cy .ww-brand{ color:var(--ww-fg); font-size:16px; font-weight:700; white-space:nowrap; }
+	.cy .ww-brand:hover{ color:var(--ww-fg); background:none; }
+	.cy .cy-b-user{ color:var(--ww-accent); text-shadow:0 0 8px var(--ww-glow); }
+	.cy .cy-b-path{ color:var(--ww-link); }
+	.cy .cy-cursor{ display:inline-block; width:.6em; height:1.1em; margin-left:4px; vertical-align:text-bottom; background:var(--ww-accent); animation:cy-blink 1s steps(1) infinite; }
+	@keyframes cy-blink{ 50%{ opacity:0; } }
+
+	.cy .ww-body{ display:grid; grid-template-columns:260px minmax(0, 1fr); gap:20px; align-items:start; box-sizing:border-box; width:100%; max-width:var(--ww-width); margin:0 auto; padding:20px 16px; }
+	.cy .ww-side{ grid-column:1; grid-row:1; position:sticky; top:64px; box-sizing:border-box; max-height:calc(100vh - 84px); padding:0 0 8px; overflow:auto; font-size:13px; background:var(--ww-panel); border:1px solid var(--ww-border); border-radius:0; }
+	.cy .ww-side h2, .cy .ww-side h3, .cy .ww-side h4{ margin:0 0 6px; padding:4px 12px; color:var(--ww-bg); font-size:12px; letter-spacing:.12em; text-transform:uppercase; background:var(--ww-accent); border:0; text-shadow:none; }
+	.cy .ww-side ul{ margin:0 0 8px; padding:0 12px; list-style:none; }
+	.cy .ww-side li::before{ content:"> "; color:var(--ww-muted); }
+	.cy .ww-side a::before, .cy .ww-side a::after{ content:none; }
+	.cy .cy-ls{ margin:0; padding:0 12px; list-style:none; }
+
+	.cy .ww-article{ grid-column:2; grid-row:1; box-sizing:border-box; min-width:0; padding:0 28px 28px; background:var(--ww-panel); border:1px solid var(--ww-border); border-radius:0; box-shadow:0 0 28px -10px var(--ww-glow); }
+	.cy .ww-article::before{ content:attr(data-cy-name); display:block; margin:0 -28px 20px; padding:5px 14px; color:var(--ww-bg); font-size:12px; letter-spacing:.12em; text-transform:uppercase; background:var(--ww-accent); }
+	.cy .ww-article h1{ margin:.8em 0 .6em; color:var(--ww-accent); font-size:1.7em; letter-spacing:.06em; text-transform:uppercase; text-shadow:0 0 10px var(--ww-glow); border-bottom:1px dashed var(--ww-border); }
+	.cy .ww-article h2{ margin:1.6em 0 .6em; font-size:1.25em; border-bottom:1px dashed var(--ww-border); }
+	.cy .ww-article h3{ margin:1.3em 0 .5em; font-size:1.05em; }
+	.cy .ww-article h1::before{ content:"# "; }
+	.cy .ww-article h2::before{ content:"## "; color:var(--ww-accent); }
+	.cy .ww-article h3::before{ content:"### "; color:var(--ww-accent); }
+	.cy .ww-article :not(pre) > code{ padding:0 .35em; background:var(--ww-code); border:1px solid var(--ww-border); border-radius:0; }
+	.cy .ww-article pre{ background:var(--ww-code); border:1px solid var(--ww-border); border-radius:0; }
+
+	.cy .ww-article table{ width:100%; border-collapse:collapse; }
+	.cy .ww-article th{ padding:6px 10px; color:var(--ww-accent); font-size:.85em; letter-spacing:.08em; text-transform:uppercase; background:transparent; border:0; border-bottom:2px solid var(--ww-accent); }
+	.cy .ww-article td{ padding:6px 10px; border:0; border-bottom:1px dashed var(--ww-border); }
+
+	.cy .ww-footer{ margin:0; padding:10px 16px 28px; color:var(--ww-muted); font-size:12px; text-align:center; border-top:1px solid var(--ww-border); }
+
+	.cy .cy-log{ --cy-k:var(--ww-accent); margin:14px 0; padding:8px 14px; background:var(--ww-code); border-left:4px solid var(--cy-k); }
+	.cy .cy-tip{ --cy-k:#2fb36b; }
+	.cy .cy-warn{ --cy-k:#d99a00; }
+	.cy .cy-danger{ --cy-k:var(--ww-missing); }
+	.cy .cy-log-head{ color:var(--cy-k); font-weight:700; letter-spacing:.06em; }
+	.cy .cy-log-body > :first-child{ margin-top:4px; }
+	.cy .cy-log-body > :last-child{ margin-bottom:0; }
+
+	.cy .cy-win{ margin:18px 0; background:var(--ww-bg); border:1px solid var(--ww-accent); box-shadow:6px 6px 0 var(--ww-border); }
+	.cy .cy-win-bar{ display:flex; justify-content:space-between; padding:3px 10px; color:var(--ww-bg); font-size:12px; letter-spacing:.08em; background:var(--ww-accent); }
+	.cy .cy-win-body{ padding:6px 16px; }
+
+	.cy .cy-term{ margin:18px 0; color:#b6f5c4; background:#000; border:1px solid var(--ww-border); }
+	.cy .cy-term-bar{ display:flex; align-items:center; gap:6px; padding:5px 10px; color:#888; font-size:12px; background:#1a1a1a; }
+	.cy .cy-term-bar i{ width:10px; height:10px; border-radius:50%; background:#444; }
+	.cy .cy-term-bar i:nth-child(1){ background:#ff5f56; }
+	.cy .cy-term-bar i:nth-child(2){ background:#ffbd2e; }
+	.cy .cy-term-bar i:nth-child(3){ background:#27c93f; }
+	.cy .cy-term-bar span{ margin-left:8px; }
+	.cy .cy-term-body{ padding:10px 14px; font-size:14px; }
+	.cy .cy-term-line{ min-height:1.6em; white-space:pre-wrap; }
+	.cy .cy-term-line.cy-hidden{ visibility:hidden; }
+	.cy .cy-term-line:not(.cy-cmd){ color:#9fb9a7; }
+	.cy .cy-ps{ margin-right:.6em; color:#39ff7a; }
+
+	.cy .ww-article .cy-ascii{ margin:16px 0; padding:0; overflow:auto; color:var(--ww-accent); font-size:14px; line-height:1.15; text-shadow:0 0 8px var(--ww-glow); background:none; border:0; }
+
+	.cy .ww-article .cy-spec{ float:right; width:auto; min-width:260px; max-width:40%; margin:0 0 14px 22px; background:var(--ww-bg); border:1px solid var(--ww-accent); }
+	.cy .cy-spec caption{ caption-side:top; padding:3px 10px; color:var(--ww-bg); font-size:12px; letter-spacing:.1em; text-transform:uppercase; background:var(--ww-accent); }
+	.cy .ww-article .cy-spec th{ color:var(--ww-muted); font-size:1em; letter-spacing:0; text-transform:none; border-bottom:1px dashed var(--ww-border); }
+
+	.cy .cy-quote{ margin:18px 0; padding:4px 18px; color:var(--ww-muted); border-left:2px solid var(--ww-muted); }
+	.cy .cy-quote footer{ color:var(--ww-accent); font-size:13px; }
+
+	.cy .cy-bar{ white-space:nowrap; }
+	.cy .cy-bar-label{ color:var(--ww-muted); }
+	.cy .cy-bar-fill{ color:var(--ww-accent); }
+	.cy .cy-bar-rest{ color:var(--ww-border); }
+	.cy .ww-article .cy-chart{ margin:14px 0; padding:10px 14px; overflow:auto; background:var(--ww-code); border:1px solid var(--ww-border); }
+
+	.cy .cy-tag{ --cy-c:var(--ww-accent); display:inline-block; padding:0 .55em; color:var(--cy-c); font-size:.85em; letter-spacing:.04em; border:1px solid var(--cy-c); }
+	.cy .cy-tag-icon{ margin-right:.4em; }
+	.cy .cy-c-gray{ --cy-c:#8a8a8a; }
+	.cy .cy-c-blue{ --cy-c:#4c8dff; }
+	.cy .cy-c-green{ --cy-c:#2fb36b; }
+	.cy .cy-c-red{ --cy-c:#e5484d; }
+	.cy .cy-c-yellow{ --cy-c:#d99a00; }
+	.cy .cy-c-purple{ --cy-c:#a06bff; }
+	.cy .cy-c-orange{ --cy-c:#f07a28; }
+
+	.cy .cy-mention{ color:var(--ww-accent); border-bottom:1px dotted var(--ww-accent); cursor:help; }
+	.cy .ww-article .cy-tree{ margin:14px 0; line-height:1.4; background:var(--ww-code); border:1px solid var(--ww-border); }
+	.cy .cy-tree a::before, .cy .cy-tree a::after{ content:none; }
+	.cy .cy-dim{ color:var(--ww-muted); }
+
+	.cy .cy-scan{ position:fixed; inset:0; z-index:800; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, .22) 1px, transparent 1px, transparent 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .45) 100%); }
+	.cy:not(.cy-crt) .cy-scan, .cy[data-cy-theme="paper"] .cy-scan{ display:none; }
+	.cy .cy-hud{ position:fixed; left:12px; bottom:8px; z-index:760; color:var(--ww-muted); font-size:11px; pointer-events:none; }
+
+	.cy .cy-boot{ position:fixed; inset:0; z-index:2000; display:flex; flex-direction:column; justify-content:flex-end; box-sizing:border-box; padding:32px; color:#39ff7a; font:14px/1.5 ui-monospace, Consolas, monospace; white-space:pre; background:#000; cursor:pointer; transition:opacity .4s; }
+	.cy .cy-boot.cy-boot-out{ opacity:0; }
+
+	@media (max-width:900px){
+		.cy .ww-body{ grid-template-columns:minmax(0, 1fr); }
+		.cy .ww-side{ grid-column:1; grid-row:auto; position:static; max-height:none; }
+		.cy .ww-article{ grid-column:1; grid-row:auto; }
+		.cy .ww-article .cy-spec{ float:none; max-width:none; margin:0 0 14px; }
+	}
+	`
+	// ----------------------------------------------------------------------
+	class Cyber{
+
+		/// Раскрывает текст страницы: блок <<< ... >>> становится исходником и живым результатом, § это обратная кавычка, ¤ это доллар.
+		static Expand(Text){
+			try{
+				const Blocks = Text.replace(/^<<<\n([\s\S]*?)\n>>>$/gm, function(Whole, Source){
+					return `::::::code lang=md\n${Source}\n::::::\n\n${Source}`;
+				});
+				return Blocks.replace(/§/g, function(){ return "`"; }).replace(/¤/g, function(){ return "$"; });
+			}catch(e){
+				throw new ExceptionWW(`Cyber.Expand: не удалось раскрыть текст страницы, длина = ${Text.length}!`, e);
+			}
+		}
+
+		static GetBody(Ctx){
+			if(Ctx.Body === undefined || Ctx.Body === null){ return ""; }
+			return Ctx.Body;
+		}
+
+		static ReadText(Props, Ctx){
+			const Body = Cyber.GetBody(Ctx);
+			if(Body !== ""){ return Body; }
+			if(Props.List.length > 0){ return Props.List[0]; }
+			return "";
+		}
+
+		static FormatSize(Count){
+			if(Count < 1024){ return `${Count} B`; }
+			return `${(Count / 1024).toFixed(1)} K`;
+		}
+
+		/// Полоска из блоков: Value из Max, всего Cells клеток.
+		static BarHtml(Value, Max, Cells){
+			const Full = Math.round(Math.min(1, Math.max(0, Value / Max)) * Cells);
+			return `<span class="cy-bar-fill">${"█".repeat(Full)}</span><span class="cy-bar-rest">${"░".repeat(Cells - Full)}</span>`;
+		}
+
+		// ----------------------------------------------------------------------
+
+		/// Возвращает Render для элемента-лога: [ INFO ] Заголовок и текст под ним.
+		static MakeLogRender(Kind, Label){
+			return function(Props, Ctx){
+				try{
+					const Title = Props.Title !== undefined ? Props.Title : "";
+					const Head  = Title === "" ? `[ ${Label} ]` : `[ ${Label} ] ${Woowiki.Esc(Title)}`;
+					return `<div class="cy-log cy-${Kind}"><div class="cy-log-head">${Head}</div><div class="cy-log-body">${Ctx.Md(Cyber.ReadText(Props, Ctx))}</div></div>`;
+				}catch(e){
+					throw new ExceptionWW(`Cyber.MakeLogRender: элемент ${Kind} упал, Props = ${Woowiki.Dump(Props)}!`, e);
+				}
+			}
+		}
+
+		static RenderQuote(Props, Ctx){
+			try{
+				const Parts = [];
+				if(Props.Author !== undefined){ Parts.push(Woowiki.Esc(Props.Author)); }
+				if(Props.Source !== undefined){ Parts.push(`<cite>${Woowiki.Esc(Props.Source)}</cite>`); }
+				const Foot = Parts.length === 0 ? "" : `<footer>// ${Parts.join(", ")}</footer>`;
+				return `<blockquote class="cy-quote">${Ctx.Md(Cyber.ReadText(Props, Ctx))}${Foot}</blockquote>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderQuote: quote упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderBadge(Props, Ctx){
+			try{
+				const Text = Props.List.length > 0 ? Props.List[0] : "";
+				let ClassName = "cy-tag";
+				let Style     = "";
+				let Icon      = "";
+				if(Props.Color !== undefined){
+					if(CY_BADGE_COLORS.indexOf(Props.Color) !== -1){
+						ClassName = `cy-tag cy-c-${Props.Color}`;
+					}else if(CSS.supports("color", Props.Color)){
+						Style = ` style="--cy-c:${Woowiki.Esc(Props.Color)}"`;
+					}else{
+						throw new ExceptionWW(`Цвет ${Woowiki.Dump(Props.Color)} не понятен, ждём имя из списка или любой CSS-цвет!`, null);
+					}
+				}
+				if(Props.Icon !== undefined){
+					const Symbol = CY_ICONS[Props.Icon] !== undefined ? CY_ICONS[Props.Icon] : Props.Icon;
+					Icon = `<span class="cy-tag-icon">${Woowiki.Esc(Symbol)}</span>`;
+				}
+				return `<span class="${ClassName}"${Style}>${Icon}${Woowiki.Esc(Text)}</span>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderBadge: badge упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderProgress(Props, Ctx){
+			try{
+				let Raw = Props.Value;
+				if(Raw === undefined){ Raw = Props.List.length > 0 ? Props.List[0] : ""; }
+				let Label = Props.Label;
+				if(Label === undefined){ Label = Props.List.length > 1 ? Props.List[1] : ""; }
+				const Max   = Props.Max !== undefined ? Number(Props.Max) : 100;
+				const Value = Number(Raw);
+				if(Raw === ""){ throw new ExceptionWW("Не задано значение, ждём {{progress 70 \"Подпись\"}}!", null); }
+				if(Number.isNaN(Value)){ throw new ExceptionWW(`Значение ${Woowiki.Dump(Raw)} не число!`, null); }
+				if(!(Max > 0)){ throw new ExceptionWW(`Max = ${Woowiki.Dump(Props.Max)}, ждём число больше нуля!`, null); }
+				const Percent = Math.round(Math.min(1, Math.max(0, Value / Max)) * 100);
+				const Name    = Label === "" ? "" : `<span class="cy-bar-label">${Woowiki.Esc(Label)}</span> `;
+				return `<span class="cy-bar">${Name}[${Cyber.BarHtml(Percent, 100, CY_BAR_CELLS)}] ${Percent}%</span>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderProgress: progress упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderChart(Props, Ctx){
+			try{
+				const Lines = Cyber.GetBody(Ctx).split("\n");
+				const Rows  = [];
+				let Longest = 0;
+				let Top     = 0;
+				for(let i = 0; i < Lines.length; i++){
+					const Line = Lines[i].trim();
+					if(Line === ""){ continue; }
+					const Cut = Line.lastIndexOf(":");
+					if(Cut === -1){ throw new ExceptionWW(`В строке ${i + 1} нет двоеточия: ${Woowiki.Dump(Line)}, ждём «метка: число»!`, null); }
+					const Label = Line.slice(0, Cut).trim();
+					const Value = Number(Line.slice(Cut + 1));
+					if(Number.isNaN(Value)){ throw new ExceptionWW(`В строке ${i + 1} после двоеточия не число: ${Woowiki.Dump(Line)}!`, null); }
+					Rows.push({ Label: Label, Value: Value });
+					Longest = Math.max(Longest, Label.length);
+					Top     = Math.max(Top, Value);
+				}
+				if(Rows.length === 0){ throw new ExceptionWW("Диаграмма пустая, нужна хотя бы одна строка «метка: число»!", null); }
+				const Max  = Props.Max !== undefined ? Number(Props.Max) : Top;
+				const Unit = Props.Unit !== undefined ? Props.Unit : "";
+				if(!(Max > 0)){ throw new ExceptionWW(`Максимум ${Woowiki.Dump(Max)}, ждём число больше нуля!`, null); }
+
+				const Out = [];
+				for(let i = 0; i < Rows.length; i++){
+					const Row = Rows[i];
+					Out.push(`${Woowiki.Esc(Row.Label.padEnd(Longest))} │${Cyber.BarHtml(Row.Value, Max, CY_CHART_CELLS)}│ ${Row.Value}${Woowiki.Esc(Unit)}`);
+				}
+				return `<pre class="cy-chart">${Out.join("\n")}</pre>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderChart: chart упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderInfobox(Props, Ctx){
+			try{
+				const Lines = Cyber.GetBody(Ctx).split("\n");
+				const Rows  = [];
+				for(let i = 0; i < Lines.length; i++){
+					const Line = Lines[i].trim();
+					if(Line === ""){ continue; }
+					const Cut = Line.indexOf("|");
+					if(Cut === -1){
+						Rows.push(`<tr><td align="left" colspan="2">${Ctx.Inline(Line)}</td></tr>`);
+						continue;
+					}
+					Rows.push(`<tr><th align="left">${Woowiki.Esc(Line.slice(0, Cut).trim())}</th><td align="left">${Ctx.Inline(Line.slice(Cut + 1).trim())}</td></tr>`);
+				}
+				const Caption = Props.Title !== undefined ? `<caption>${Woowiki.Esc(Props.Title)}</caption>` : "";
+				return `<table class="cy-spec">${Caption}${Rows.join("")}</table>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderInfobox: infobox упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderWindow(Props, Ctx){
+			try{
+				const Title = Props.Title !== undefined ? Props.Title : "window";
+				return `<div class="cy-win"><div class="cy-win-bar"><span>${Woowiki.Esc(Title)}</span><span>[_][□][x]</span></div><div class="cy-win-body">${Ctx.Md(Cyber.ReadText(Props, Ctx))}</div></div>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderWindow: window упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderTerminal(Props, Ctx){
+			try{
+				const Lines = Cyber.GetBody(Ctx).split("\n");
+				const Rows  = [];
+				for(let i = 0; i < Lines.length; i++){
+					const Line = Lines[i].trimEnd();
+					if(Line.trim() === ""){ continue; }
+					if(Line.startsWith("$ ")){
+						Rows.push(`<div class="cy-term-line cy-cmd"><span class="cy-ps">$</span><span class="cy-t">${Woowiki.Esc(Line.slice(2))}</span></div>`);
+					}else{
+						Rows.push(`<div class="cy-term-line"><span class="cy-t">${Woowiki.Esc(Line)}</span></div>`);
+					}
+				}
+				const Title = Props.Title !== undefined ? Props.Title : "terminal";
+				return `<div class="cy-term"><div class="cy-term-bar"><i></i><i></i><i></i><span>${Woowiki.Esc(Title)}</span></div><div class="cy-term-body">${Rows.join("")}</div></div>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderTerminal: terminal упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderAscii(Props, Ctx){
+			try{
+				return `<pre class="cy-ascii">${Woowiki.Esc(Cyber.GetBody(Ctx))}</pre>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderAscii: ascii упал, Props = ${Woowiki.Dump(Props)}!`, e);
+			}
+		}
+
+		static RenderMention(Match){
+			try{
+				const Name = Woowiki.Esc(Match[1]);
+				return `<span class="cy-mention" data-cy-user="${Name}">@${Name}</span>`;
+			}catch(e){
+				throw new ExceptionWW(`Cyber.RenderMention: упоминание упало, Match = ${Woowiki.Dump(Match)}!`, e);
+			}
+		}
+
+		// ----------------------------------------------------------------------
+
+		static PlayTerminal(Term){
+			const Lines = Term.querySelectorAll(".cy-term-line");
+			const Texts = [];
+			for(let i = 0; i < Lines.length; i++){
+				const Span = Lines[i].querySelector(".cy-t");
+				Texts.push(Span.textContent);
+				Span.textContent = "";
+				Lines[i].classList.add("cy-hidden");
+			}
+			let Line = 0;
+			let Char = 0;
+			const Step = function(){
+				if(!Term.isConnected){ return; }
+				if(Line >= Lines.length){ return; }
+				const Row  = Lines[Line];
+				const Span = Row.querySelector(".cy-t");
+				Row.classList.remove("cy-hidden");
+				if(!Row.classList.contains("cy-cmd")){
+					Span.textContent = Texts[Line];
+					Line++;
+					setTimeout(Step, 140);
+					return;
+				}
+				Char++;
+				Span.textContent = Texts[Line].slice(0, Char);
+				if(Char >= Texts[Line].length){
+					Line++;
+					Char = 0;
+					setTimeout(Step, 320);
+					return;
+				}
+				setTimeout(Step, 35);
+			}
+			Step();
+		}
+
+		static Upgrade(Target){
+			const Terms = Target.querySelectorAll(".cy-term:not([data-cy-played])");
+			for(let i = 0; i < Terms.length; i++){
+				if(!Terms[i].isConnected){ continue; }
+				Terms[i].dataset.cyPlayed = "1";
+				Cyber.PlayTerminal(Terms[i]);
+			}
+		}
+
+		static DrawBrand(Wiki, Id){
+			const Path = Id === Wiki.Options.Start ? "~" : `~/${Id}`;
+			Wiki.Dom.Brand.innerHTML = `<span class="cy-b-user">woowz</span>@wiki:<span class="cy-b-path">${Woowiki.Esc(Path)}</span>$<span class="cy-cursor"></span>`;
+		}
+
+		static StartHud(Wiki, Hud){
+			const Begin = Date.now();
+			const Tick = function(){
+				const Seconds = Math.floor((Date.now() - Begin) / 1000);
+				Hud.textContent = `up ${Seconds}s | ${new Date().toLocaleTimeString("ru-RU")} | ${Wiki.Theme}`;
+			}
+			Tick();
+			setInterval(Tick, 1000);
+		}
+
+		static Boot(Wiki){
+			try{
+				if(sessionStorage.getItem("cy-booted") !== null){ return; }
+				sessionStorage.setItem("cy-booted", "1");
+			}catch(e){
+				return;
+			}
+			const Box = Woowiki.Make("div", "cy-boot", Wiki.Root);
+			let Done  = false;
+			let Index = 0;
+			let Timer = 0;
+			const Finish = function(){
+				if(Done){ return; }
+				Done = true;
+				clearInterval(Timer);
+				document.removeEventListener("keydown", Finish);
+				Box.classList.add("cy-boot-out");
+				setTimeout(function(){ Box.remove(); }, 450);
+			}
+			Timer = setInterval(function(){
+				if(Index >= CY_BOOT_LINES.length){
+					clearInterval(Timer);
+					setTimeout(Finish, 700);
+					return;
+				}
+				Box.textContent += `${CY_BOOT_LINES[Index]}\n`;
+				Index++;
+			}, 140);
+			Box.addEventListener("click", Finish);
+			document.addEventListener("keydown", Finish);
+		}
+
+		static BuildTree(Wiki){
+			const Groups = Object.create(null);
+			const Ids    = Wiki.SortedIds();
+			for(let i = 0; i < Ids.length; i++){
+				const Page  = Wiki.Pages[Ids[i]];
+				const Group = Page.Tags.length > 0 ? Page.Tags[0] : "untagged";
+				if(Groups[Group] === undefined){ Groups[Group] = []; }
+				Groups[Group].push(Ids[i]);
+			}
+			const Names = Object.keys(Groups).sort();
+			const Lines = [ "~/" ];
+			for(let g = 0; g < Names.length; g++){
+				const IsLastGroup = g === Names.length - 1;
+				const Branch      = IsLastGroup ? "    " : "│   ";
+				const Items       = Groups[Names[g]];
+				Lines.push(`${IsLastGroup ? "└── " : "├── "}${Woowiki.Esc(Names[g])}/`);
+				for(let p = 0; p < Items.length; p++){
+					const Page = Wiki.Pages[Items[p]];
+					const Mark = p === Items.length - 1 ? "└── " : "├── ";
+					Lines.push(`${Branch}${Mark}${Wiki.PageLink(Items[p], Page.Title)} <span class="cy-dim">${Cyber.FormatSize(Page.Content.length)}</span>`);
+				}
+			}
+			return Lines.join("\n");
+		}
+
+		// ----------------------------------------------------------------------
+
+		static InstallThemes(Wiki){
+			try{
+				const Names = Object.keys(CY_THEMES);
+				for(let i = 0; i < Names.length; i++){
+					const Vars = Object.assign({ Font: CY_FONT, Width: "1400px", Radius: "0px" }, CY_THEMES[Names[i]]);
+					Wiki.AddTheme(Names[i], Vars);
+				}
+				if(Wiki.Code !== undefined){
+					for(let i = 0; i < Names.length; i++){
+						Wiki.Code.Palettes[Names[i]] = CY_PALETTES[Names[i]];
+					}
+				}
+				Wiki.SetTheme(Wiki.Themes[Wiki.Theme] === undefined ? "matrix" : Wiki.Theme);
+				Wiki.Root.dataset.cyTheme = Wiki.Theme;
+			}catch(e){
+				throw new ExceptionWW("Cyber.InstallThemes: не удалось поставить темы!", e);
+			}
+		}
+
+		static InstallElements(Wiki){
+			try{
+				const Kinds = Object.keys(CY_KINDS);
+				for(let i = 0; i < Kinds.length; i++){
+					Wiki.AddElement(Kinds[i], Cyber.MakeLogRender(Kinds[i], CY_KINDS[Kinds[i]]));
+				}
+				Wiki.AddElement("quote",    Cyber.RenderQuote);
+				Wiki.AddElement("badge",    Cyber.RenderBadge);
+				Wiki.AddElement("progress", Cyber.RenderProgress);
+				Wiki.AddElement("chart",    Cyber.RenderChart);
+				Wiki.AddElement("infobox",  Cyber.RenderInfobox);
+				Wiki.AddElement("window",   Cyber.RenderWindow);
+				Wiki.AddElement("terminal", Cyber.RenderTerminal);
+				Wiki.AddElement("ascii",    Cyber.RenderAscii);
+				Wiki.AddInline(/(?<![\w@])@([a-z][a-z0-9_]{1,20})\b/g, Cyber.RenderMention);
+				delete Wiki.Elements.vimeo;
+				delete Wiki.Elements.map;
+			}catch(e){
+				throw new ExceptionWW("Cyber.InstallElements: не удалось поставить элементы!", e);
+			}
+		}
+
+		static InstallChrome(Wiki){
+			try{
+				Wiki.Root.classList.add("cy");
+				Woowiki.Make("div", "cy-scan", Wiki.Root);
+				const Hud = Woowiki.Make("div", "cy-hud", Wiki.Root);
+				let Started = false;
+
+				Wiki.On("PageAfter", function(Data){
+					Data.Article.dataset.cyName = Wiki.Pages[Data.Id] !== undefined ? `${Data.Id}.md` : Data.Id;
+					Cyber.DrawBrand(Wiki, Data.Id);
+					Cyber.Upgrade(Data.Article);
+					if(Started){ return; }
+					Started = true;
+					Wiki.Root.classList.toggle("cy-crt", Wiki.__StorageGet("cy-crt") !== "0");
+					Cyber.StartHud(Wiki, Hud);
+					Cyber.Boot(Wiki);
+				});
+				Wiki.On("Render", function(Data){
+					Cyber.Upgrade(Data.Target);
+				});
+				Wiki.On("Theme", function(Data){
+					Wiki.Root.dataset.cyTheme = Data.Name;
+				});
+
+				Wiki.AddButton({ Id: "palette", Order: 90, Label: "◐ палитра", Title: "Следующая палитра", OnClick: function(Wiki){
+					const Names = Object.keys(CY_THEMES);
+					let Next = 0;
+					for(let i = 0; i < Names.length; i++){
+						if(Names[i] === Wiki.Theme){ Next = (i + 1) % Names.length; }
+					}
+					Wiki.SetTheme(Names[Next]);
+				}});
+				Wiki.AddButton({ Id: "crt", Order: 91, Label: "CRT", Title: "Линии и виньетка", OnClick: function(Wiki){
+					const IsOn = !Wiki.Root.classList.contains("cy-crt");
+					Wiki.Root.classList.toggle("cy-crt", IsOn);
+					Wiki.__StorageSet("cy-crt", IsOn ? "1" : "0");
+				}});
+
+				Wiki.AddPanel({ Id: "files", Title: "~/pages", Order: 10, Render: function(Wiki){
+					const Ids  = Wiki.SortedIds();
+					const Rows = [];
+					for(let i = 0; i < Ids.length; i++){
+						Rows.push(`<li>${Wiki.PageLink(Ids[i], Wiki.Pages[Ids[i]].Title)}</li>`);
+					}
+					return `<ul class="cy-ls">${Rows.join("")}</ul>`;
+				}});
+				Wiki.AddPanel({ Id: "sys", Title: "system", Order: 40, Render: function(Wiki){
+					return `<ul class="cy-ls"><li>pages: ${Wiki.SortedIds().length}</li><li>theme: ${Woowiki.Esc(Wiki.Theme)}</li><li><a href="${Woowiki.Href("special:tree")}">tree</a></li><li><a href="${Woowiki.Href("special:all")}">ls -a</a></li></ul>`;
+				}});
+			}catch(e){
+				throw new ExceptionWW("Cyber.InstallChrome: не удалось поставить каркас!", e);
+			}
+		}
+
+		static InstallSpecials(Wiki){
+			try{
+				Wiki.AddSpecial("tree", "tree", function(Arg, Wiki){
+					try{
+						const Box = Woowiki.Make("div", "cy-tree-box");
+						Box.innerHTML = `<pre class="cy-tree">${Cyber.BuildTree(Wiki)}</pre>`;
+						return Box;
+					}catch(e){
+						throw new ExceptionWW(`cyber: спецстраница tree упала, Arg = ${Woowiki.Dump(Arg)}!`, e);
+					}
+				});
+			}catch(e){
+				throw new ExceptionWW("Cyber.InstallSpecials: не удалось поставить спецстраницы!", e);
+			}
+		}
+
+		static InstallPopups(Wiki){
+			try{
+				if(Wiki.Popups === undefined){ return; }
+				Wiki.Popups.Add("[data-cy-user]", function(Anchor, Wiki){
+					const Name = Anchor.dataset.cyUser;
+					const User = CY_USERS[Name];
+					if(User === undefined){ return `<b>@${Woowiki.Esc(Name)}</b><br><span class="cy-dim">нет такого пользователя</span>`; }
+					return `<b>@${Woowiki.Esc(Name)}</b><br>${User.Role}<br><span class="cy-dim">${User.Text}</span>`;
+				});
+			}catch(e){
+				throw new ExceptionWW("Cyber.InstallPopups: не удалось поставить окна!", e);
+			}
+		}
+
+		static Install(Wiki){
+			try{
+				Cyber.InstallThemes(Wiki);
+				Cyber.InstallElements(Wiki);
+				Cyber.InstallChrome(Wiki);
+				Cyber.InstallSpecials(Wiki);
+				Cyber.InstallPopups(Wiki);
+				Wiki.AddCss(CY_CSS, "cyber");
+			}catch(e){
+				throw new ExceptionWW("Cyber.Install: мод cyber не установился!", e);
+			}
+		}
+	}
+	Woowiki.AddMod("cyber", Cyber.Install);
+	// ----------------------------------------------------------------------
+	const CY_PAGES = {
+
+		home: {
+			Title : "Главная",
+			Tags  : [ "справка" ],
+			Content: Cyber.Expand(String.raw`
+:::ascii
+╦ ╦╔═╗╔═╗╦ ╦╦╦╔═╦
+║║║║ ║║ ║║║║║╠╩╗║
+╚╩╝╚═╝╚═╝╚╩╝╩╩ ╩╩
+:::
+
+{{badge "2.0.0" color=green icon=ok}} {{badge "CRT" color=orange icon=bolt}} {{badge "тот же движок" color=blue}}
+
+:::infobox title="system"
+ОС | woowz-os 0.1
+Ядро | [[about|Woowiki 2.0.0]]
+Админ | @woowz
+Файлы | cyber.html + движок
+:::
+
+:::terminal title="boot.log"
+$ woowiki --version
+woowiki 2.0.0 (base + standard)
+$ ls pages
+home  about  elements  themes  howto  crew  station
+$ cat welcome.txt
+Страницы такие же, как в обычной вики. Внешний вид другой.
+:::
+
+Это **вторая тестовая вики**. Она показывает, как полностью сменить облик вики, не трогая сам движок: весь код оформления лежит в одном моде в этом же файле.
+
+## Куда идти
+
+- [[about]]: что именно заменено и добавлено;
+- [[elements]]: все элементы в новом виде;
+- [[themes]]: палитры и подсветка кода;
+- [[howto]]: как сделать так же;
+- [[station]] и [[crew]]: обычные статьи, чтобы было что читать.
+
+:::tip title="Попробуй"
+Кнопки «◐ палитра» и «CRT» справа сверху. Клавиша {{kbd T}} тоже листает палитры. Страница [дерево](#/special:tree) собрана своим модом.
+:::
+`)
+		},
+
+		about: {
+			Title : "О системе",
+			Tags  : [ "справка" ],
+			Content: Cyber.Expand(String.raw`
+Весь вид этой вики задаёт мод §cyber§, который лежит прямо в §cyber.html§. Файлы §woowiki.js§ и §woowiki_standard.js§ не менялись.
+
+## Что заменено
+
+| Было (стандарт) | Стало |
+|---|---|
+| note, tip, warn, danger | строки лога [ INFO ] |
+| infobox | таблица-спецификация |
+| quote | цитата со строкой «// автор» |
+| badge | рамка с цветом и значком |
+| progress | полоса из блоков |
+| chart | диаграмма из символов |
+| темы light, dark, sepia | matrix, amber, paper |
+| панели «Страницы» и «Теги» | «~/pages» и «system» |
+| шапка с названием | строка терминала |
+
+## Что добавлено
+
+| Что | Где смотреть |
+|---|---|
+| window, terminal, ascii | [[elements]] |
+| упоминание @woowz с карточкой | [[crew]] |
+| страница tree | [дерево](#/special:tree) |
+| заставка загрузки | один раз за сессию |
+| кнопки палитры и CRT | справа сверху |
+
+## Что убрано
+
+Элементы §vimeo§ и §map§ удалены, потому что в терминале им не место. Отключены стандартные моды §std-themes§ и §std-panels§: вместо них свои темы и панели.
+
+## Что осталось стандартным
+
+Поиск, окна при наведении, вкладки, аккордеон, хронология, цвета, клавиши. Они не переписаны: их красят CSS-переменные выбранной темы.
+
+:::note title="Вывод"
+Чтобы вики выглядела иначе, не нужно форкать движок: хватает мода, CSS-переменных и перекрытия нескольких элементов.
+:::
+`)
+		},
+
+		elements: {
+			Title : "Элементы",
+			Tags  : [ "справка", "демо" ],
+			Content: Cyber.Expand(String.raw`
+Ниже сырой текст и сразу под ним результат.
+
+## Логи
+<<<
+:::note
+Обычное сообщение.
+:::
+
+:::tip title="Совет"
+Заголовок задаётся аргументом.
+:::
+
+:::warn title="Температура"
+Реактор греется.
+:::
+
+:::danger title="Сбой"
+Связь потеряна.
+:::
+>>>
+
+## Окно
+<<<
+:::window title="readme.txt"
+Внутри окна работает **markdown** и [[home|ссылки]].
+:::
+>>>
+
+## Терминал
+
+Строки с «$» печатаются по буквам, остальные появляются целиком.
+
+<<<
+:::terminal title="scan.sh"
+$ scan --deep
+найдено 3 устройства
+$ echo готово
+готово
+:::
+>>>
+
+## Спецификация
+<<<
+:::infobox title="Модуль 7"
+Назначение | жилой отсек
+Экипаж | [[crew|3 человека]]
+Статус | в строю
+:::
+>>>
+
+{{clear}}
+
+## Полоски и диаграмма
+<<<
+{{progress 70 "Реактор"}}
+
+{{progress 25 "Щиты"}}
+
+{{progress value=12 max=48 label="Кислород, часы"}}
+
+:::chart unit=" %" max=100
+Реактор: 70
+Щиты: 25
+Связь: 90
+:::
+>>>
+
+## Бейджи
+<<<
+{{badge "новое" color=green icon=star}} {{badge "осторожно" color=red icon=warn}} {{badge "свой цвет" color="#a06bff"}} {{badge "без цвета"}}
+>>>
+
+## Упоминания и цитата
+
+Наведи курсор на упоминание: окно с карточкой сделано своим правилом для popup.
+
+<<<
+Позвонил @woowz, ответил @root, а @nobody не нашёлся.
+
+:::quote author=root source="bridge.log"
+Всё под контролем.
+:::
+>>>
+
+## Стандартные элементы в новой коже
+
+Они не переписаны, но подхватили цвета темы.
+
+<<<
+:::tabs
+@@ Первая
+Текст первой вкладки.
+@@ Вторая
+Текст второй вкладки.
+:::
+
+:::accordion exclusive=true open=true
+@@ Раздел А
+Раскрывается один раздел за раз.
+@@ Раздел Б
+Второй раздел.
+:::
+
+{{kbd Ctrl+Shift+P}} {{kbd LMB}} {{kbd pad:A}}
+
+{{color "rgb(255 0 0 / 40%)" "красный на шахматке"}}
+>>>
+`)
+		},
+
+		themes: {
+			Title : "Палитры",
+			Tags  : [ "справка" ],
+			Content: Cyber.Expand(String.raw`
+Три палитры: **matrix**, **amber** и **paper**. Переключаются кнопкой «◐ палитра» или клавишей {{kbd T}}. Выбор запоминается.
+
+:::code lang=js title="Тема это словарь"
+Wiki.AddTheme("matrix", {
+	Bg: "#030a05", Panel: "#07140b", Fg: "#b6f5c4",
+	Accent: "#39ff7a", Border: "#14502b",
+	Font: "ui-monospace, Consolas, monospace",
+	Glow: "#39ff7a"
+});
+:::
+
+Ключ §Glow§ не из стандартного набора: ключи превращаются в CSS-переменные, поэтому в стилях доступна §var(--ww-glow)§. Для палитры paper свечение прозрачное, и линии ЭЛТ в ней отключены.
+
+## Подсветка кода
+
+Мод §code.js§ красит код по палитре текущей темы. Для своих тем палитры добавляются так:
+
+:::code lang=js
+Wiki.Code.Palettes.matrix = { Keyword: "#39ff7a", String: "#ffe66d" };
+:::
+
+Пример, который меняет цвета вместе с темой:
+
+:::code lang=cs title="Hello.cs" lines=true
+namespace Demo;
+
+public struct Hello{
+	public static void Main(){
+		Console.WriteLine("Привет, мир!");
+	}
+}
+:::
+`)
+		},
+
+		howto: {
+			Title : "Как сделать так же",
+			Tags  : [ "справка" ],
+			Content: Cyber.Expand(String.raw`
+Всё держится на нескольких вызовах. Каждый пример ниже взят из этого файла.
+
+## 1. Свой префикс для стилей
+
+Мод вешает на корень класс §cy§, а все правила пишет как §.cy .ww-header§ и так далее. Два класса побеждают один из базового CSS, и перебивать через §!important§ не нужно.
+
+## 2. Заменить элемент
+
+:::code lang=js
+Wiki.AddElement("note", function(Props, Ctx){
+	return §<div class="my-note">¤{Ctx.Md(Ctx.Body)}</div>§;
+});
+:::
+
+## 3. Добавить элемент
+
+:::code lang=js
+Wiki.AddElement("ascii", function(Props, Ctx){
+	return §<pre>¤{Woowiki.Esc(Ctx.Body)}</pre>§;
+});
+:::
+
+## 4. Строчный элемент по регулярке
+
+:::code lang=js
+Wiki.AddInline(/@([a-z]+)/g, function(Match){
+	return §<b>@¤{Match[1]}</b>§;
+});
+:::
+
+## 5. Своя страница
+
+:::code lang=js
+Wiki.AddSpecial("tree", "tree", function(Arg, Wiki){
+	const Box = Woowiki.Make("div", "my-tree");
+	Box.innerHTML = "...";
+	return Box;
+});
+:::
+
+## 6. Панель, кнопка, окно
+
+:::code lang=js
+Wiki.AddPanel({ Id: "sys", Title: "system", Order: 40, Render: function(Wiki){ return "..."; } });
+Wiki.AddButton({ Id: "crt", Order: 91, Label: "CRT", OnClick: function(Wiki){ ... } });
+Wiki.Popups.Add("[data-cy-user]", function(Anchor, Wiki){ return "..."; });
+:::
+
+## 7. Убрать лишнее
+
+:::code lang=js
+delete Wiki.Elements.vimeo;
+const Wiki = new Woowiki({ SkipMods: [ "std-themes", "std-panels" ] });
+:::
+
+:::warn title="Порядок"
+Мод должен подключаться после стандарта, иначе стандарт перезапишет его элементы.
+:::
+
+Готовые моды описаны на страницах обычной вики, а это ещё один пример того, что можно сделать. Вернуться: [[home]].
+`)
+		},
+
+		crew: {
+			Title : "Экипаж",
+			Tags  : [ "станция" ],
+			Content: Cyber.Expand(String.raw`
+Экипаж станции [[station|«Нулевой»]].
+
+| Позывной | Должность | Смена |
+|---|---|---|
+| @woowz | главный инженер | ночь |
+| @root | бортовой компьютер | всегда |
+| @guest | стажёр | день |
+
+Наведи курсор на позывной: появится карточка.
+
+:::quote author=root source="bridge.log"
+Экипаж в полном составе. Жалоб нет.
+:::
+
+:::note title="Для проверок"
+Страница ссылается на [[station]], а [[station]] ссылается сюда: так работают окна при наведении на обычные ссылки.
+:::
+`)
+		},
+
+		station: {
+			Title : "Станция «Нулевой»",
+			Tags  : [ "станция" ],
+			Content: Cyber.Expand(String.raw`
+:::infobox title="Станция"
+Название | Нулевой
+Модулей | 7
+Экипаж | [[crew|три человека]]
+Орбита | низкая
+:::
+
+**«Нулевой»** вымышленная орбитальная станция. Статья нужна, чтобы в вики было что искать, листать и связывать ссылками.
+
+## Системы
+
+:::chart unit=" %" max=100
+Реактор: 70
+Щиты: 25
+Связь: 90
+Кислород: 60
+:::
+
+## Хронология
+
+Ветка рисуется стандартным элементом, но цвета ей дала тема.
+
+:::timeline
+2041 | Закладка станции
+2043 | Первый экипаж
+repair from main | 2044 | Аварийный ремонт
+main | 2045 | Расширение модулей
+repair into main | 2046 | Ремонт завершён
+:::
+
+:::warn title="Внимание"
+Все данные выдуманы.
+:::
+`)
+		}
+	};
+	// ----------------------------------------------------------------------
+	const Wiki = new Woowiki({
+		Title              : "woowz-os",
+		Start              : "home",
+		Pages              : CY_PAGES,
+		Footer             : "woowz-os 0.1 · Woowiki 2.0.0",
+		SkipMods           : [ "std-themes", "std-panels" ],
+		ExternalLinksBlank : true,
+		CodeLines          : true
+	});
+	Wiki.Start();
+	</script>
+</body>
+</html>

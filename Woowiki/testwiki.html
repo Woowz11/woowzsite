@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Тестовая вики</title>
+</head>
+<body>
+	<div id="wiki"></div>
+
+	<script src="woowiki.js"></script>
+	<script src="woowiki_standard.js"></script>
+	<script src="mods/code.js"></script>
+	<script src="mods/preview.js"></script>
+	<script src="mods/dice.js"></script>
+	<script src="mods/reading.js"></script>
+	<script src="mods/outline.js"></script>
+	<script src="mods/recent.js"></script>
+	<script src="mods/stats.js"></script>
+	<script src="mods/hotkeys.js"></script>
+	<script src="mods/fontsize.js"></script>
+
+	<script src="pages/tools.js"></script>
+	<script src="pages/guide.js"></script>
+	<script src="pages/world.js"></script>
+	<script src="pages/lab.js"></script>
+
+	<script>
+		const PAGES = {};
+		Object.assign(PAGES, WIKI_GUIDE, WIKI_WORLD, WIKI_LAB);
+
+		const Wiki = new Woowiki({
+			Title              : "Тестовая вики",
+			Start              : "home",
+			Theme              : "light",
+			Pages              : PAGES,
+			Footer             : "Тестовая вики на Woowiki 2.0.0",
+			IframeHosts        : [ "example.com", "youtube.com", "codepen.io" ],
+			ExternalLinksBlank : true,
+			CodeLines          : true,
+			Templates          : [ "templates" ]
+		});
+		Wiki.Start();
+	</script>
+</body>
+</html>
