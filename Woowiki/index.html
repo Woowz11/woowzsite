@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Woowiki</title>
+</head>
+<body>
+	<div id="wiki"></div>
+	<script src="woowiki.js"></script>
+	<script src="woowiki_standard.js"></script>
+	<script src="mods/code.js"></script>
+	<script src="mods/preview.js"></script>
+	<script src="test_pages.js"></script>
+	<script>
+		const Wiki = new Woowiki({
+			Title : "Woowiki",
+			Start : "home",
+			Pages : {
+				home     : { Title: "Главная",      Tags: ["демо"],           Content: "Добро пожаловать!\n\nВсе возможности смотри на странице [[elements|Все элементы]]." },
+				elements : { Title: "Все элементы", Tags: ["демо", "справка"], Content: TEST_PAGES.Demo() },
+				snippet  : { Title: "Фрагмент",     Tags: ["демо"],           Content: "Это **фрагмент**, вставленный через include из другой страницы." }
+			},
+			IframeHosts: [ "youtube.com", "codepen.io", "example.com" ],
+			ExternalLinksBlank: true,
+			CodeLines: true
+		});
+		Wiki.Start();
+	</script>
+</body>
+</html>
